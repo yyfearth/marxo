@@ -192,7 +192,8 @@ jsPlumb.ready ->
     dropOptions: hoverClass: 'hover'
     anchor: ['LeftMiddle', 'BottomCenter']
 
-  root = $ '#demo'
+  root = $ '<div id="demo"></div>'
+  $(document.body).append root
 
   data.nodes.forEach (node) ->
     # add to dom
@@ -252,4 +253,4 @@ jsPlumb.ready ->
     return
 
 # chrome fix
-document.querySelector('#demo').onselectstart = -> false
+document.body.onselectstart = -> false
