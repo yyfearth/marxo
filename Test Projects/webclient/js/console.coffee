@@ -10,9 +10,8 @@ FRAMES = ['home', 'project', 'workflow', 'calendar', 'content', 'report', 'confi
 
 class ConsoleView extends Backbone.View
   el: '#main'
-  frames:
-    {}
   initialize: ->
+    @frames = {}
     FRAMES.forEach (n) =>
       @frames[n] = @createFrame n
       return
@@ -77,17 +76,6 @@ class IFrameView extends FrameView
     @doc = @el.contentDocument
     @window = @el.contentWindow
     @
-#  loadStyle: (name) ->
-#    css = @doc.createElement 'link'
-#    css.setAttribute 'rel', 'stylesheet'
-#    css.setAttribute 'href', "css/#{name}.css"
-#    @doc.head.appendChild css
-#    return
-#  loadScript: (name) ->
-#    js = @doc.createElement 'script'
-#    js.setAttribute 'src', "js/#{name}.js"
-#    @doc.body.appendChild js
-#    return
 
 class WorkflowIFrameView extends IFrameView
   initialize: (options = {}) ->

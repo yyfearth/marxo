@@ -30,10 +30,9 @@
 
     ConsoleView.prototype.el = '#main';
 
-    ConsoleView.prototype.frames = {};
-
     ConsoleView.prototype.initialize = function() {
       var _this = this;
+      this.frames = {};
       FRAMES.forEach(function(n) {
         _this.frames[n] = _this.createFrame(n);
       });
