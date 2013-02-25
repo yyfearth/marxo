@@ -148,7 +148,6 @@ do procData = ->
       grid[level + 1] = nextLevel
       traval level + 1
     return
-
   return # end of proc data
 
 jsPlumb.ready ->

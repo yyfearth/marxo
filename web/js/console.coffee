@@ -224,7 +224,6 @@ class Action extends Entity
 class Router extends Backbone.Router
   frames: FRAMES
   constructor: (options) ->
-    @console = options.console
     @route '', 'home', =>
       @navigate 'home', replace: true
       @show 'home'
@@ -234,6 +233,7 @@ class Router extends Backbone.Router
     return
 
   show: (frame, name) ->
+    throw 'console is not binded' unless @console?
     console.log 'route', frame, name or ''
     if frame isnt @current
       @current = frame
@@ -255,17 +255,18 @@ class Router extends Backbone.Router
   report: (name) ->
     return
 
-window.app = app = {}
+window.app = app =
+  console: new ConsoleView
+  signin: new SignInView
+  router: new Router
 
-app.console = new ConsoleView
-app.signin = new SignInView
 app.signin.on 'success', ->
   @hide()
   app.console.$el.show()
   return
-app.signin.trigger 'success'
 # fake
+app.signin.trigger 'success'
 
-app.router = new Router console: app.console
+app.router.console = app.console
 
 Backbone.history.start()
