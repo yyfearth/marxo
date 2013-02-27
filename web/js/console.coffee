@@ -118,18 +118,6 @@ class SignInView extends Backbone.View
     , @delay
     @
 
-
-class WorkflowView extends Backbone.View
-
-class NodeView extends Backbone.View
-  tagName: 'div'
-  className: 'node'
-  render: ->
-    this.el.innerHTML = @model.escape 'name'
-    @
-
-class LinkView extends Backbone.View
-
 class Entity extends Backbone.Model
   idAttribute: '_id'
   set: (attrs) ->
@@ -142,6 +130,8 @@ class Entity extends Backbone.Model
       'name max len is 10'
     else
       return
+
+# TODO: include workflow models when need
 
 class Tenants extends Backbone.Collection
   model: Tenant
@@ -162,64 +152,9 @@ class Publichers extends Backbone.Collection
 
 class Participant extends User
 
-
 class Publicher extends User
 
 class Evalutator extends User # TODO: howto save them
-
-
-class SharedWorkflows extends Backbone.Collection
-  model: SharedWorkflow
-  url: '/shared/workflows'
-
-class TenantWorkflows extends Backbone.Collection
-  model: TenantWorkflow
-  url: -> @tenant.url() + '/workflows'
-
-class Workflow extends Entity
-
-class SharedWorkflow extends Workflow
-
-class TenantWorkflow extends Workflow
-
-class SharedNodes extends Backbone.Collection
-  model: SharedNode
-  url: '/shared/nodes'
-
-class TenantNodes extends Backbone.Collection
-  model: TenantNode
-  url: -> @workflow.url() + '/nodes'
-
-class Node extends Entity
-
-class SharedNode extends Node
-
-class TenantNode extends Node
-
-class SharedLinks extends Backbone.Collection
-  model: SharedLink
-  url: '/shared/links'
-
-class TenantLinks extends Backbone.Collection
-  model: TenantLink
-  url: -> @workflow.url() + '/links'
-
-class Link extends Entity
-
-class SharedLink extends Link
-
-class TenantLink extends Link
-
-class SharedLinks extends Backbone.Collection
-  model: Action
-  url: '/shared/actions'
-
-class TenantLinks extends Backbone.Collection
-  model: Action
-  url: -> @node.url() + '/actions'
-
-class Action extends Entity
-
 
 class Router extends Backbone.Router
   frames: FRAMES

@@ -64,9 +64,9 @@ createLink = (sourceId, targetId) ->
   toNode = data.nodes.index[targetId]
   # create link
   link = {uuid, fromNode, toNode}
-    # id: 
-    # from: 
-    # to: 
+  # id:
+  # from:
+  # to:
   data.links.push link
   fromNode.toLinks.push link
   toNode.fromLinks.push link
@@ -125,7 +125,8 @@ do procData = ->
       endNodes.push node
     return
 
-  grid = window.grid = [startNodes.concat(lonelyNodes)] # vertical
+  grid = window.grid = [startNodes.concat(lonelyNodes)]
+  # vertical
   grid.spanX = 350
   grid.spanY = 150
   grid.vertical = false
@@ -148,7 +149,8 @@ do procData = ->
       grid[level + 1] = nextLevel
       traval level + 1
     return
-  return # end of proc data
+  return
+# end of proc data
 
 jsPlumb.ready ->
   jsPlumb.importDefaults
@@ -188,7 +190,8 @@ jsPlumb.ready ->
       lineWidth: 2
     maxConnections: -1
   targetEndpoint =
-    dropOptions: hoverClass: 'hover'
+    dropOptions:
+      hoverClass: 'hover'
     anchor: ['LeftMiddle', 'BottomCenter']
 
   root = $ '<div id="demo"></div>'
@@ -202,8 +205,10 @@ jsPlumb.ready ->
     root.append el
     jsPlumb.draggable el
     # add endpoints
-    node.srcEndpoint = jsPlumb.addEndpoint el, sourceEndpoint, parameters: node: node
-    jsPlumb.makeTarget el, targetEndpoint, parameters: node: node
+    node.srcEndpoint = jsPlumb.addEndpoint el, sourceEndpoint, parameters:
+      node: node
+    jsPlumb.makeTarget el, targetEndpoint, parameters:
+      node: node
     return
 
   jsPlumb.bind 'jsPlumbConnection', (info) ->
@@ -223,7 +228,8 @@ jsPlumb.ready ->
     deleteLink info.connection.getParameter 'link'
     node = data.nodes.index[info.sourceId]
     jsPlumb.deleteEndpoint node.srcEndpoint
-    node.srcEndpoint = jsPlumb.addEndpoint node.el, sourceEndpoint, parameters: node: node
+    node.srcEndpoint = jsPlumb.addEndpoint node.el, sourceEndpoint, parameters:
+      node: node
     return
 
   jsPlumb.bind 'beforeDrop', (info) ->
@@ -243,7 +249,8 @@ jsPlumb.ready ->
     jsPlumb.connect
       source: link.fromNode.srcEndpoint
       target: link.toNode.el
-      parameters: link: link
+      parameters:
+        link: link
     return
 
   jsPlumb.bind 'dblclick', (conn)->
@@ -253,3 +260,114 @@ jsPlumb.ready ->
 
 # chrome fix
 document.body.onselectstart = -> false
+
+# backbone & bootstrap
+
+class WorkflowView extends Backbone.View
+  tagName: 'div'
+  className: 'workflow'
+  initialize: ->
+
+
+class NodeView extends Backbone.View
+  tagName: 'div'
+  className: 'node'
+  sourceEndpointStyle:
+    isSource: true
+    uniqueEndpoint: true
+    anchor: 'RightMiddle'
+    paintStyle:
+      fillStyle: '#225588'
+      radius: 7
+    connector: [
+      'Flowchart'
+      stub: [40, 60]
+      gap: 10
+    ]
+    connectorStyle:
+      strokeStyle: '#346789'
+      lineWidth: 2
+    maxConnections: -1
+  targetEndpointStyle:
+    dropOptions:
+      hoverClass: 'hover'
+    anchor: ['LeftMiddle', 'BottomCenter']
+  render: ->
+    @el.innerHTML = @model.escape 'name'
+    @
+
+class LinkView extends Backbone.View
+
+class Entity extends Backbone.Model
+  idAttribute: '_id'
+  set: (attrs) ->
+    @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
+    super attrs
+  validate: (attrs) ->
+    unless attrs.name and attrs.id
+      'id and name are required'
+    else if attrs.name.length > 10
+      'name max len is 10'
+    else
+      return
+
+class Tenant extends Entity
+  idAttribute: '_name'
+
+class SharedWorkflows extends Backbone.Collection
+  model: SharedWorkflow
+  url: '/shared/workflows'
+
+class TenantWorkflows extends Backbone.Collection
+  model: TenantWorkflow
+  url: -> @tenant.url() + '/workflows'
+
+class Workflow extends Entity
+
+class SharedWorkflow extends Workflow
+
+class TenantWorkflow extends Workflow
+
+class SharedNodes extends Backbone.Collection
+  model: SharedNode
+  url: '/shared/nodes'
+
+class TenantNodes extends Backbone.Collection
+  model: TenantNode
+  url: -> @workflow.url() + '/nodes'
+
+class Node extends Entity
+
+class SharedNode extends Node
+
+class TenantNode extends Node
+
+class SharedLinks extends Backbone.Collection
+  model: SharedLink
+  url: '/shared/links'
+
+class TenantLinks extends Backbone.Collection
+  model: TenantLink
+  url: -> @workflow.url() + '/links'
+
+class Link extends Entity
+
+class SharedLink extends Link
+
+class TenantLink extends Link
+
+class SharedLinks extends Backbone.Collection
+  model: Action
+  url: '/shared/actions'
+
+class TenantLinks extends Backbone.Collection
+  model: Action
+  url: -> @node.url() + '/actions'
+
+class Action extends Entity
+
+# EP
+jsPlumb.ready ->
+  app = window.app ?= {}
+  app.workflow = new WorkflowView el: document.body
+  return
