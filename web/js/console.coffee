@@ -66,13 +66,16 @@ class IFrameView extends FrameView
     return
   render: -> unless @doc?
     console.log 'render', @name
-    styles = (@styles.map (css) -> "<link rel='stylesheet' type='text/css' href='css/#{css}.css'/>").join '\n'
+    body = find("##{@name}_content")?.innerHTML or ''
+    styles = (@styles.map (css) -> "<link rel='stylesheet' href='css/#{css}.css' media='screen'/>").join '\n'
     scripts = (@scripts.map (js) -> "<script src='js/#{js}.js'></s" + "cript>").join '\n'
-    html = "<!DOCTYPE html><html><base href=\"#{location.href}\"/><head lang=\"en\"><meta charset=\"utf-8\"/>#{styles}</head><body>#{scripts}</body></html>"
-    if 'srcdoc' of @el
-      @el.srcdoc = html
-    else
-      @el.src = "data:text/html;charset=utf-8," + encodeURI html
+    html = "<!DOCTYPE html><html><base href=\"#{location.href}\"/><head lang=\"en\"><meta charset=\"utf-8\"/>#{styles}</head><body>#{body}\n#{scripts}</body></html>"
+    #    if 'srcdoc' of @el
+    #      @el.srcdoc = html
+    #    else
+    #      @el.src = "data:text/html;charset=utf-8," + encodeURI html
+    # TODO: remove it
+    @el.src = "data:text/html;charset=utf-8," + encodeURI html
     @doc = @el.contentDocument
     @window = @el.contentWindow
     @

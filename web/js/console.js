@@ -128,21 +128,18 @@
     };
 
     IFrameView.prototype.render = function() {
-      var html, scripts, styles;
+      var body, html, scripts, styles, _ref;
       if (this.doc == null) {
         console.log('render', this.name);
+        body = ((_ref = find("#" + this.name + "_content")) != null ? _ref.innerHTML : void 0) || '';
         styles = (this.styles.map(function(css) {
-          return "<link rel='stylesheet' type='text/css' href='css/" + css + ".css'/>";
+          return "<link rel='stylesheet' href='css/" + css + ".css' media='screen'/>";
         })).join('\n');
         scripts = (this.scripts.map(function(js) {
           return ("<script src='js/" + js + ".js'></s") + "cript>";
         })).join('\n');
-        html = "<!DOCTYPE html><html><base href=\"" + location.href + "\"/><head lang=\"en\"><meta charset=\"utf-8\"/>" + styles + "</head><body>" + scripts + "</body></html>";
-        if ('srcdoc' in this.el) {
-          this.el.srcdoc = html;
-        } else {
-          this.el.src = "data:text/html;charset=utf-8," + encodeURI(html);
-        }
+        html = "<!DOCTYPE html><html><base href=\"" + location.href + "\"/><head lang=\"en\"><meta charset=\"utf-8\"/>" + styles + "</head><body>" + body + "\n" + scripts + "</body></html>";
+        this.el.src = "data:text/html;charset=utf-8," + encodeURI(html);
         this.doc = this.el.contentDocument;
         this.window = this.el.contentWindow;
         return this;
