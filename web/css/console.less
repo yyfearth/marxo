@@ -1,11 +1,15 @@
 body {
   padding: 44px 0px;
 }
+
 .transition {
-  -webkit-transition: opacity 0.5s ease-in-out;
-  -moz-transition: opacity 0.5s ease-in-out;
-  transition: opacity 0.5s ease-in-out;
+  -webkit-transition: opacity .5s ease-in-out;
+  -moz-transition: opacity .5s ease-in-out;
+  transition: opacity .5s ease-in-out;
 }
+
+// Signin
+
 #signin.mask {
   position: fixed;
   top: 0px;
@@ -14,6 +18,7 @@ body {
   right: 0px;
   background: #f5f5f5;
 }
+
 .form-signin {
   position: absolute;
   width: 300px;
@@ -26,14 +31,16 @@ body {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
-  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 }
+
 .form-signin .form-signin-heading,
 .form-signin .checkbox {
   margin-bottom: 10px;
 }
+
 .form-signin input[type="text"],
 .form-signin input[type="password"] {
   font-size: 16px;
@@ -41,10 +48,14 @@ body {
   margin-bottom: 15px;
   padding: 7px 9px;
 }
+
+// console
+
 .frame {
   display: none;
   padding-top: 20px;
 }
+
 iframe.frame {
   padding: 0px;
   position: absolute;
@@ -52,18 +63,25 @@ iframe.frame {
   min-height: 300px;
   background: #fff;
 }
+
 .frame.active {
   display: block;
 }
+
 .sidebar-nav {
   padding: 9px 0;
 }
+
 footer {
   padding: 1px 20px;
 }
+
+// Navbar
+
 #navbar {
   box-shadow: 0px 0px 15px #333;
 }
+
 #avatar {
   width: 20px;
   height: 20px;
@@ -73,13 +91,19 @@ footer {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
-#navbar ul.nav li.dropdown:hover ul.dropdown-menu {
-  display: block;
-}
-#navbar li.dropdown .caret {
-  border-top-color: #999;
-  border-bottom-color: #999;
-}
-#navbar .dropdown-menu {
-  margin-top: 0px;
+
+#navbar { // Hover Dropdown
+
+  ul.nav li.dropdown:hover ul.dropdown-menu {
+    display: block;
+  }
+
+  li.dropdown .caret {
+    border-top-color: #999;
+    border-bottom-color: #999;
+  }
+
+  .dropdown-menu {
+    margin-top: 0px;
+  }
 }
