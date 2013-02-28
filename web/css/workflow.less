@@ -37,6 +37,13 @@
   padding: 0.5em 1em;
   margin: 10px;
   font-size: 0.9em;
+
+  &:hover {
+    box-shadow: 2px 2px 19px #444;
+    -webkit-box-shadow: 2px 2px 19px #444;
+    -moz-box-shadow: 2px 2px 19px #444;
+    opacity: 0.6;
+  }
 }
 
 .workflow {
@@ -52,13 +59,6 @@
     z-index: 20;
     position: absolute;
     padding: 0.5em 1em;
-
-    &:hover {
-      box-shadow: 2px 2px 19px #444;
-      -webkit-box-shadow: 2px 2px 19px #444;
-      -moz-box-shadow: 2px 2px 19px #444;
-      opacity: 0.6;
-    }
 
     &.active {
       border: 1px dotted green;
