@@ -168,9 +168,21 @@
     })(0);
   })();
 
-  jsPlumb.ready(function() {
-    var root, sourceEndpoint, targetEndpoint;
-    jsPlumb.importDefaults({
+  jsPlumb.ready(function() {});
+
+  WorkflowView = (function(_super) {
+
+    __extends(WorkflowView, _super);
+
+    function WorkflowView() {
+      WorkflowView.__super__.constructor.apply(this, arguments);
+    }
+
+    WorkflowView.prototype.tagName = 'div';
+
+    WorkflowView.prototype.className = 'workflow';
+
+    WorkflowView.prototype.jsPlumbDefaults = {
       Endpoint: [
         'Dot', {
           radius: 3
@@ -197,128 +209,18 @@
           }
         ]
       ]
-    });
-    sourceEndpoint = {
-      isSource: true,
-      uniqueEndpoint: true,
-      anchor: 'RightMiddle',
-      paintStyle: {
-        fillStyle: '#225588',
-        radius: 7
-      },
-      connector: [
-        'Flowchart', {
-          stub: [40, 60],
-          gap: 10
-        }
-      ],
-      connectorStyle: {
-        strokeStyle: '#346789',
-        lineWidth: 2
-      },
-      maxConnections: -1
     };
-    targetEndpoint = {
-      dropOptions: {
-        hoverClass: 'hover'
-      },
-      anchor: ['LeftMiddle', 'BottomCenter']
+
+    WorkflowView.prototype.initialize = function() {
+      jsPlumb.importDefaults(this.jsPlumbDefaults);
     };
-    root = $('<div id="demo"></div>');
-    $(document.body).append(root);
-    data.nodes.forEach(function(node) {
-      var el;
-      el = node.el = $("<div class=\"node\" id=\"" + node.uuid + "\"><strong>" + node.name + "</strong></div>");
-      el.css({
-        top: node.y,
-        left: node.x
-      });
-      root.append(el);
-      jsPlumb.draggable(el);
-      node.srcEndpoint = jsPlumb.addEndpoint(el, sourceEndpoint, {
-        parameters: {
-          node: node
-        }
-      });
-      jsPlumb.makeTarget(el, targetEndpoint, {
-        parameters: {
-          node: node
-        }
-      });
-    });
-    jsPlumb.bind('jsPlumbConnection', function(info) {
-      var conn, label, link;
-      conn = info.connection;
-      link = conn.getParameter('link');
-      label = conn.getOverlay('label');
-      if (link == null) {
-        conn.setParameter('link', createLink(info.sourceId, info.targetId));
-        label.hide();
-      } else if (link.name != null) {
-        label.setLabel(link.name);
-      } else {
-        label.hide();
-      }
-    });
-    jsPlumb.bind('jsPlumbConnectionDetached', function(info) {
-      var node;
-      deleteLink(info.connection.getParameter('link'));
-      node = data.nodes.index[info.sourceId];
-      jsPlumb.deleteEndpoint(node.srcEndpoint);
-      node.srcEndpoint = jsPlumb.addEndpoint(node.el, sourceEndpoint, {
-        parameters: {
-          node: node
-        }
-      });
-    });
-    jsPlumb.bind('beforeDrop', function(info) {
-      var newlink, oldLink, uuid;
-      uuid = info.sourceId + '-' + info.targetId;
-      newlink = data.links.index[uuid];
-      oldLink = info.connection.getParameter('link');
-      if (newlink != null) {
-        console.log('link exists', uuid);
+
+    WorkflowView.prototype.render = function() {
+      this.el.onselectstart = function() {
         return false;
-      } else {
-        if (oldLink != null) {
-          deleteLink(oldLink);
-        }
-        return true;
-      }
-    });
-    data.links.forEach(function(link) {
-      jsPlumb.connect({
-        source: link.fromNode.srcEndpoint,
-        target: link.toNode.el,
-        parameters: {
-          link: link
-        }
-      });
-    });
-    return jsPlumb.bind('dblclick', function(conn) {
-      if (confirm('Delete connection from ' + conn.sourceId + ' to ' + conn.targetId + '?')) {
-        jsPlumb.detach(conn);
-      }
-    });
-  });
-
-  document.body.onselectstart = function() {
-    return false;
-  };
-
-  WorkflowView = (function(_super) {
-
-    __extends(WorkflowView, _super);
-
-    function WorkflowView() {
-      WorkflowView.__super__.constructor.apply(this, arguments);
-    }
-
-    WorkflowView.prototype.tagName = 'div';
-
-    WorkflowView.prototype.className = 'workflow';
-
-    WorkflowView.prototype.initialize = function() {};
+      };
+      return this;
+    };
 
     return WorkflowView;
 
@@ -687,10 +589,16 @@
   })(Entity);
 
   jsPlumb.ready(function() {
-    var app, _ref;
+    var app, tenant, _ref;
+    if (!sessionStorage.tenant) {
+      alert('login required');
+      return;
+    }
+    tenant = new Tenant(JSON.parse(sessionStorage.tenant));
+    console.log(tenant);
     app = (_ref = window.app) != null ? _ref : window.app = {};
     app.workflow = new WorkflowView({
-      el: document.body
+      el: '#workflow_editor'
     });
   });
 

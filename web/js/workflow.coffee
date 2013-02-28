@@ -153,7 +153,116 @@ do procData = ->
 # end of proc data
 
 jsPlumb.ready ->
-  jsPlumb.importDefaults
+#  jsPlumb.importDefaults
+#    Endpoint: ['Dot', radius: 3]
+#    ConnectionsDetachable: true
+#    ReattachConnections: true
+#    HoverPaintStyle:
+#      strokeStyle: '#42a62c'
+#      lineWidth: 2
+#    ConnectionOverlays: [
+#      [ 'Arrow',
+#        location: 1
+#        id: 'arrow'
+#      ]
+#      [ 'Label',
+#        location: 0.5
+#        label: 'new link'
+#        id: 'label'
+#        cssClass: 'aLabel'
+#      ]
+#    ]
+#
+#  sourceEndpoint =
+#    isSource: true
+#    uniqueEndpoint: true
+#    anchor: 'RightMiddle'
+#    paintStyle:
+#      fillStyle: '#225588'
+#      radius: 7
+#    connector: [
+#      'Flowchart'
+#      stub: [40, 60]
+#      gap: 10
+#    ]
+#    connectorStyle:
+#      strokeStyle: '#346789'
+#      lineWidth: 2
+#    maxConnections: -1
+#  targetEndpoint =
+#    dropOptions:
+#      hoverClass: 'hover'
+#    anchor: ['LeftMiddle', 'BottomCenter']
+#
+#  root = $ '.workflow'
+#
+#  data.nodes.forEach (node) ->
+#    # add to dom
+#    el = node.el = $ "<div class=\"node\" id=\"#{node.uuid}\"><strong>#{node.name}</strong></div>"
+#    # el.append '<div class="ep"></div>'
+#    el.css top: node.y, left: node.x
+#    root.append el
+#    jsPlumb.draggable el
+#    # add endpoints
+#    node.srcEndpoint = jsPlumb.addEndpoint el, sourceEndpoint, parameters:
+#      node: node
+#    jsPlumb.makeTarget el, targetEndpoint, parameters:
+#      node: node
+#    return
+#
+#  jsPlumb.bind 'jsPlumbConnection', (info) ->
+#    conn = info.connection
+#    link = conn.getParameter 'link'
+#    label = conn.getOverlay 'label'
+#    if not link?
+#      conn.setParameter 'link', createLink info.sourceId, info.targetId
+#      label.hide()
+#    else if link.name?
+#      label.setLabel link.name
+#    else
+#      label.hide()
+#    return
+#
+#  jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
+#    deleteLink info.connection.getParameter 'link'
+#    node = data.nodes.index[info.sourceId]
+#    jsPlumb.deleteEndpoint node.srcEndpoint
+#    node.srcEndpoint = jsPlumb.addEndpoint node.el, sourceEndpoint, parameters:
+#      node: node
+#    return
+#
+#  jsPlumb.bind 'beforeDrop', (info) ->
+#    uuid = info.sourceId + '-' + info.targetId
+#    newlink = data.links.index[uuid]
+#    oldLink = info.connection.getParameter 'link'
+#    if newlink?
+#      console.log 'link exists', uuid
+#      # alert 'link exists' if oldLink?
+#      false # cancel if link exists
+#    else
+#      deleteLink oldLink if oldLink?
+#      true
+#
+#  # connect nodes by links
+#  data.links.forEach (link) ->
+#    jsPlumb.connect
+#      source: link.fromNode.srcEndpoint
+#      target: link.toNode.el
+#      parameters:
+#        link: link
+#    return
+#
+#  jsPlumb.bind 'dblclick', (conn)->
+#    if confirm('Delete connection from ' + conn.sourceId + ' to ' + conn.targetId + '?')
+#      jsPlumb.detach conn
+#    return
+
+# backbone & bootstrap
+
+class WorkflowView extends Backbone.View
+  tagName: 'div'
+  className: 'workflow'
+  jsPlumbDefaults:
     Endpoint: ['Dot', radius: 3]
     ConnectionsDetachable: true
     ReattachConnections: true
@@ -172,101 +281,12 @@ jsPlumb.ready ->
         cssClass: 'aLabel'
       ]
     ]
-
-  sourceEndpoint =
-    isSource: true
-    uniqueEndpoint: true
-    anchor: 'RightMiddle'
-    paintStyle:
-      fillStyle: '#225588'
-      radius: 7
-    connector: [
-      'Flowchart'
-      stub: [40, 60]
-      gap: 10
-    ]
-    connectorStyle:
-      strokeStyle: '#346789'
-      lineWidth: 2
-    maxConnections: -1
-  targetEndpoint =
-    dropOptions:
-      hoverClass: 'hover'
-    anchor: ['LeftMiddle', 'BottomCenter']
-
-  root = $ '<div id="demo"></div>'
-  $(document.body).append root
-
-  data.nodes.forEach (node) ->
-    # add to dom
-    el = node.el = $ "<div class=\"node\" id=\"#{node.uuid}\"><strong>#{node.name}</strong></div>"
-    # el.append '<div class="ep"></div>'
-    el.css top: node.y, left: node.x
-    root.append el
-    jsPlumb.draggable el
-    # add endpoints
-    node.srcEndpoint = jsPlumb.addEndpoint el, sourceEndpoint, parameters:
-      node: node
-    jsPlumb.makeTarget el, targetEndpoint, parameters:
-      node: node
-    return
-
-  jsPlumb.bind 'jsPlumbConnection', (info) ->
-    conn = info.connection
-    link = conn.getParameter 'link'
-    label = conn.getOverlay 'label'
-    if not link?
-      conn.setParameter 'link', createLink info.sourceId, info.targetId
-      label.hide()
-    else if link.name?
-      label.setLabel link.name
-    else
-      label.hide()
-    return
-
-  jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
-    deleteLink info.connection.getParameter 'link'
-    node = data.nodes.index[info.sourceId]
-    jsPlumb.deleteEndpoint node.srcEndpoint
-    node.srcEndpoint = jsPlumb.addEndpoint node.el, sourceEndpoint, parameters:
-      node: node
-    return
-
-  jsPlumb.bind 'beforeDrop', (info) ->
-    uuid = info.sourceId + '-' + info.targetId
-    newlink = data.links.index[uuid]
-    oldLink = info.connection.getParameter 'link'
-    if newlink?
-      console.log 'link exists', uuid
-      # alert 'link exists' if oldLink?
-      false # cancel if link exists
-    else
-      deleteLink oldLink if oldLink?
-      true
-
-  # connect nodes by links
-  data.links.forEach (link) ->
-    jsPlumb.connect
-      source: link.fromNode.srcEndpoint
-      target: link.toNode.el
-      parameters:
-        link: link
-    return
-
-  jsPlumb.bind 'dblclick', (conn)->
-    if confirm('Delete connection from ' + conn.sourceId + ' to ' + conn.targetId + '?')
-      jsPlumb.detach conn
-    return
-
-# chrome fix
-document.body.onselectstart = -> false
-
-# backbone & bootstrap
-
-class WorkflowView extends Backbone.View
-  tagName: 'div'
-  className: 'workflow'
   initialize: ->
+    jsPlumb.importDefaults @jsPlumbDefaults
+    return
+  render: ->
+    @el.onselectstart = -> false
+    @
 
 
 class NodeView extends Backbone.View
@@ -368,6 +388,11 @@ class Action extends Entity
 
 # EP
 jsPlumb.ready ->
+  unless sessionStorage.tenant
+    alert 'login required'
+    return
+  tenant = new Tenant JSON.parse sessionStorage.tenant
+  console.log tenant
   app = window.app ?= {}
-  app.workflow = new WorkflowView el: document.body
+  app.workflow = new WorkflowView el: '#workflow_editor'
   return
