@@ -1,9 +1,5 @@
 package test;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.WriteResult;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -21,30 +17,30 @@ public class Servlet extends HttpServlet {
 		System.out.println("doPost");
 	}
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-		String addParameter = request.getParameter("add");
-		String cleanParameter = request.getParameter("clean");
-
-		try {
-			ServletOutputStream servletOutputStream = response.getOutputStream();
-			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(servletOutputStream);
-			outputStreamWriter.write("doGet");
-
-			MongoConnector mongoConnector = MongoConnector.getConnectedConnector();
-
-			DBCollection dbCollection = mongoConnector.getDb().getCollection("test");
-
-			if (addParameter != null) {
-				long numCollections = dbCollection.count();
-				WriteResult writeResult = dbCollection.insert(new BasicDBObject("Count", numCollections + 1));
-				System.out.println("writeResult.getError() = " + writeResult.getError());
-			} else if (cleanParameter != null) {
-				dbCollection.drop();
-			}
-
-			response.sendRedirect("/");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+//		String addParameter = request.getParameter("add");
+//		String cleanParameter = request.getParameter("clean");
+//
+//		try {
+//			ServletOutputStream servletOutputStream = response.getOutputStream();
+//			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(servletOutputStream);
+//			outputStreamWriter.write("doGet");
+//
+//			MongoDbConnector mongoDb = MongoDbConnector.getConnectedDb();
+//
+//			DBCollection dbCollection = mongoDb.getDb().getCollection("test");
+//
+//			if (addParameter != null) {
+//				long numCollections = dbCollection.count();
+//				WriteResult writeResult = dbCollection.insert(new BasicDBObject("Count", numCollections + 1));
+//				System.out.println("writeResult.getError() = " + writeResult.getError());
+//			} else if (cleanParameter != null) {
+//				dbCollection.drop();
+//			}
+//
+//			response.sendRedirect("/");
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 }

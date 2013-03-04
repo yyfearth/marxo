@@ -1,4 +1,4 @@
-<%@ page import="test.MongoConnector" %>
+<%@ page import="marxo.data.MongoDbConnector" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="com.mongodb.*" %>
@@ -19,14 +19,14 @@
 
     </p>
     <%
-        MongoConnector mongoConnector = MongoConnector.getConnectedConnector();
-        MongoClient mongoClient = mongoConnector.getMongoClient();
-        DB db = mongoConnector.getDb();
+        MongoDbConnector mongoDbConnector = MongoDbConnector.getConnectedDb();
+        MongoClient mongoClient = mongoDbConnector.getMongoClient();
+        DB db = mongoDbConnector.getDb();
     %>
     <p>MongoDB version: <%=mongoClient.getVersion()%>
     </p>
     <%
-        out.write("Connected to the mongodb, using '" + db.getName() + "'<br>");
+        out.write("Connected to the data, using '" + db.getName() + "'<br>");
 
         Set<String> colls = db.getCollectionNames();
     %>
