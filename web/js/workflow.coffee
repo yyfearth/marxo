@@ -64,9 +64,9 @@ createLink = (sourceId, targetId) ->
   toNode = data.nodes.index[targetId]
   # create link
   link = {uuid, fromNode, toNode}
-    # id: 
-    # from: 
-    # to: 
+  # id:
+  # from:
+  # to:
   data.links.push link
   fromNode.toLinks.push link
   toNode.fromLinks.push link
@@ -125,7 +125,8 @@ do procData = ->
       endNodes.push node
     return
 
-  grid = window.grid = [startNodes.concat(lonelyNodes)] # vertical
+  grid = window.grid = [startNodes.concat(lonelyNodes)]
+  # vertical
   grid.spanX = 350
   grid.spanY = 150
   grid.vertical = false
@@ -148,109 +149,206 @@ do procData = ->
       grid[level + 1] = nextLevel
       traval level + 1
     return
+  return
+# end of proc data
 
-  return # end of proc data
+#jsPlumb.ready ->
+#  jsPlumb.importDefaults
+#    Endpoint: ['Dot', radius: 3]
+#    ConnectionsDetachable: true
+#    ReattachConnections: true
+#    HoverPaintStyle:
+#      strokeStyle: '#42a62c'
+#      lineWidth: 2
+#    ConnectionOverlays: [
+#      [ 'Arrow',
+#        location: 1
+#        id: 'arrow'
+#      ]
+#      [ 'Label',
+#        location: 0.5
+#        label: 'new link'
+#        id: 'label'
+#        cssClass: 'aLabel'
+#      ]
+#    ]
+#
+#  sourceEndpoint =
+#    isSource: true
+#    uniqueEndpoint: true
+#    anchor: 'RightMiddle'
+#    paintStyle:
+#      fillStyle: '#225588'
+#      radius: 7
+#    connector: [
+#      'Flowchart'
+#      stub: [40, 60]
+#      gap: 10
+#    ]
+#    connectorStyle:
+#      strokeStyle: '#346789'
+#      lineWidth: 2
+#    maxConnections: -1
+#  targetEndpoint =
+#    dropOptions:
+#      hoverClass: 'hover'
+#    anchor: ['LeftMiddle', 'BottomCenter']
+#
+#  root = $ '.workflow'
+#
+#  data.nodes.forEach (node) ->
+#    # add to dom
+#    el = node.el = $ "<div class=\"node\" id=\"#{node.uuid}\"><strong>#{node.name}</strong></div>"
+#    # el.append '<div class="ep"></div>'
+#    el.css top: node.y, left: node.x
+#    root.append el
+#    jsPlumb.draggable el
+#    # add endpoints
+#    node.srcEndpoint = jsPlumb.addEndpoint el, sourceEndpoint, parameters:
+#      node: node
+#    jsPlumb.makeTarget el, targetEndpoint, parameters:
+#      node: node
+#    return
+#
+#  jsPlumb.bind 'jsPlumbConnection', (info) ->
+#    conn = info.connection
+#    link = conn.getParameter 'link'
+#    label = conn.getOverlay 'label'
+#    if not link?
+#      conn.setParameter 'link', createLink info.sourceId, info.targetId
+#      label.hide()
+#    else if link.name?
+#      label.setLabel link.name
+#    else
+#      label.hide()
+#    return
+#
+#  jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
+#    deleteLink info.connection.getParameter 'link'
+#    node = data.nodes.index[info.sourceId]
+#    jsPlumb.deleteEndpoint node.srcEndpoint
+#    node.srcEndpoint = jsPlumb.addEndpoint node.el, sourceEndpoint, parameters:
+#      node: node
+#    return
+#
+#  jsPlumb.bind 'beforeDrop', (info) ->
+#    uuid = info.sourceId + '-' + info.targetId
+#    newlink = data.links.index[uuid]
+#    oldLink = info.connection.getParameter 'link'
+#    if newlink?
+#      console.log 'link exists', uuid
+#      # alert 'link exists' if oldLink?
+#      false # cancel if link exists
+#    else
+#      deleteLink oldLink if oldLink?
+#      true
+#
+#  # connect nodes by links
+#  data.links.forEach (link) ->
+#    jsPlumb.connect
+#      source: link.fromNode.srcEndpoint
+#      target: link.toNode.el
+#      parameters:
+#        link: link
+#    return
+#
+#  jsPlumb.bind 'dblclick', (conn)->
+#    if confirm('Delete connection from ' + conn.sourceId + ' to ' + conn.targetId + '?')
+#      jsPlumb.detach conn
+#    return
 
-jsPlumb.ready ->
-  jsPlumb.importDefaults
-    Endpoint: ['Dot', radius: 3]
-    ConnectionsDetachable: true
-    ReattachConnections: true
-    HoverPaintStyle:
-      strokeStyle: '#42a62c'
-      lineWidth: 2
-    ConnectionOverlays: [
-      [ 'Arrow',
-        location: 1
-        id: 'arrow'
+# backbone & bootstrap
+
+define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui.custom.min', 'lib/jquery.jsPlumb.min'],
+({
+ find
+ FrameView
+ }, {
+ Tenant
+ SharedWorkflows
+ TenantWorkflows
+ Workflow
+ SharedWorkflow
+ TenantWorkflow
+ SharedNodes
+ TenantNodes
+ Node
+ SharedNode
+ TenantNode
+ SharedLinks
+ TenantLinks
+ Link
+ SharedLink
+ TenantLink
+ SharedActions
+ TenantActions
+ Action
+ }) ->
+  class WorkflowFrameView extends FrameView
+    initialize: (options) ->
+      super options
+      @view = new WorkflowView el: find '#workflow_view', @el
+      return
+    render: ->
+      @view.render()
+      return
+
+
+  class WorkflowView extends Backbone.View
+    jsPlumbDefaults:
+      Endpoint: ['Dot', radius: 3]
+      ConnectionsDetachable: true
+      ReattachConnections: true
+      HoverPaintStyle:
+        strokeStyle: '#42a62c'
+        lineWidth: 2
+      ConnectionOverlays: [
+        [ 'Arrow',
+          location: 1
+          id: 'arrow'
+        ]
+        [ 'Label',
+          location: 0.5
+          label: 'new link'
+          id: 'label'
+          cssClass: 'aLabel'
+        ]
       ]
-      [ 'Label',
-        location: 0.5
-        label: 'new link'
-        id: 'label'
-        cssClass: 'aLabel'
+    initialize: ->
+      jsPlumb.importDefaults @jsPlumbDefaults
+      return
+    render: ->
+      @el.onselectstart = -> false
+      @
+
+
+  class NodeView extends Backbone.View
+    tagName: 'div'
+    className: 'node'
+    sourceEndpointStyle:
+      isSource: true
+      uniqueEndpoint: true
+      anchor: 'RightMiddle'
+      paintStyle:
+        fillStyle: '#225588'
+        radius: 7
+      connector: [
+        'Flowchart'
+        stub: [40, 60]
+        gap: 10
       ]
-    ]
+      connectorStyle:
+        strokeStyle: '#346789'
+        lineWidth: 2
+      maxConnections: -1
+    targetEndpointStyle:
+      dropOptions:
+        hoverClass: 'hover'
+      anchor: ['LeftMiddle', 'BottomCenter']
+    render: ->
+      @el.innerHTML = @model.escape 'name'
+      @
 
-  sourceEndpoint =
-    isSource: true
-    uniqueEndpoint: true
-    anchor: 'RightMiddle'
-    paintStyle:
-      fillStyle: '#225588'
-      radius: 7
-    connector: [
-      'Flowchart'
-      stub: [40, 60]
-      gap: 10
-    ]
-    connectorStyle:
-      strokeStyle: '#346789'
-      lineWidth: 2
-    maxConnections: -1
-  targetEndpoint =
-    dropOptions: hoverClass: 'hover'
-    anchor: ['LeftMiddle', 'BottomCenter']
+  class LinkView extends Backbone.View
 
-  root = $ '<div id="demo"></div>'
-  $(document.body).append root
-
-  data.nodes.forEach (node) ->
-    # add to dom
-    el = node.el = $ "<div class=\"node\" id=\"#{node.uuid}\"><strong>#{node.name}</strong></div>"
-    # el.append '<div class="ep"></div>'
-    el.css top: node.y, left: node.x
-    root.append el
-    jsPlumb.draggable el
-    # add endpoints
-    node.srcEndpoint = jsPlumb.addEndpoint el, sourceEndpoint, parameters: node: node
-    jsPlumb.makeTarget el, targetEndpoint, parameters: node: node
-    return
-
-  jsPlumb.bind 'jsPlumbConnection', (info) ->
-    conn = info.connection
-    link = conn.getParameter 'link'
-    label = conn.getOverlay 'label'
-    if not link?
-      conn.setParameter 'link', createLink info.sourceId, info.targetId
-      label.hide()
-    else if link.name?
-      label.setLabel link.name
-    else
-      label.hide()
-    return
-
-  jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
-    deleteLink info.connection.getParameter 'link'
-    node = data.nodes.index[info.sourceId]
-    jsPlumb.deleteEndpoint node.srcEndpoint
-    node.srcEndpoint = jsPlumb.addEndpoint node.el, sourceEndpoint, parameters: node: node
-    return
-
-  jsPlumb.bind 'beforeDrop', (info) ->
-    uuid = info.sourceId + '-' + info.targetId
-    newlink = data.links.index[uuid]
-    oldLink = info.connection.getParameter 'link'
-    if newlink?
-      console.log 'link exists', uuid
-      # alert 'link exists' if oldLink?
-      false # cancel if link exists
-    else
-      deleteLink oldLink if oldLink?
-      true
-
-  # connect nodes by links
-  data.links.forEach (link) ->
-    jsPlumb.connect
-      source: link.fromNode.srcEndpoint
-      target: link.toNode.el
-      parameters: link: link
-    return
-
-  jsPlumb.bind 'dblclick', (conn)->
-    if confirm('Delete connection from ' + conn.sourceId + ' to ' + conn.targetId + '?')
-      jsPlumb.detach conn
-    return
-
-# chrome fix
-document.body.onselectstart = -> false
+  WorkflowFrameView
