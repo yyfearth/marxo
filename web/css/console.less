@@ -1,11 +1,11 @@
-
 @import 'bootstrap';
-
 @import 'workflow';
 @import 'calendar';
 
-body {
-  padding: 44px 0px;
+html, body {
+  padding: 0px;
+  margin: 0px;
+  height: 100%;
 }
 
 .transition {
@@ -16,90 +16,76 @@ body {
 
 // Signin
 
-#signin.mask {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  bottom: 0px;
-  right: 0px;
-  background: #f5f5f5;
-}
+#signin {
 
-.form-signin {
-  position: absolute;
-  width: 300px;
-  top: 50%;
-  left: 50%;
-  padding: 19px 29px 29px;
-  margin: -150px;
-  background-color: #fff;
-  border: 1px solid #e5e5e5;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-  -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-}
+  &.mask {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    background: #f5f5f5;
+  }
 
-.form-signin .form-signin-heading,
-.form-signin .checkbox {
-  margin-bottom: 10px;
-}
+  .form-signin {
+    position: absolute;
+    width: 300px;
+    top: 50%;
+    left: 50%;
+    padding: 19px 29px 29px;
+    margin: -150px;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+    -moz-box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
 
-.form-signin input[type="text"],
-.form-signin input[type="password"] {
-  font-size: 16px;
-  height: auto;
-  margin-bottom: 15px;
-  padding: 7px 9px;
+    .form-signin-heading,
+    .checkbox {
+      margin-bottom: 10px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      font-size: 16px;
+      height: auto;
+      margin-bottom: 15px;
+      padding: 7px 9px;
+    }
+  }
 }
 
 // Console
 
-.frame {
-  display: none;
-  padding-top: 20px;
-}
-
-iframe.frame {
-  padding: 0px;
+#main {
   position: absolute;
   width: 100%;
-  min-height: 300px;
-  background: #fff;
-}
-
-.frame.active {
-  display: block;
-}
-
-.sidebar-nav {
-  padding: 9px 0;
-}
-
-footer {
-  padding: 1px 20px;
+  height: 100%;
 }
 
 // Navbar
 
 #navbar {
-  box-shadow: 0px 0px 15px #333;
-}
+  box-shadow: 0px 0px 15px #aaa;
 
-#avatar {
-  width: 20px;
-  height: 20px;
-  float: left;
-  margin: auto 5px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-}
+  .nav {
+    margin: 0px;
+  }
 
-#navbar { // Hover Dropdown
+  #avatar {
+    width: 20px;
+    height: 20px;
+    float: left;
+    margin: auto 5px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+  }
 
+// Hover Dropdown
   ul.nav li.dropdown:hover ul.dropdown-menu {
     display: block;
   }
@@ -114,3 +100,50 @@ footer {
   }
 }
 
+#frames {
+  position: absolute;
+  top: 41px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+
+  .frame {
+    position: absolute;
+    top: 15px;
+    bottom: 15px;
+    left: 15px;
+    right: 15px;
+    padding: 0px;
+    margin: 0px;
+
+    .frame-inner, .sidebar, .workspace, .sidebar .well {
+      position: relative;
+      height: 100%;
+      padding: 0px;
+      margin: 0px;
+    }
+
+    .sidebar-list {
+      overflow: scroll;
+      overflow-x: hidden;
+      height: 75%;
+    }
+
+    .sidebar-bottom {
+      position: absolute;
+      height: 25%;
+      bottom: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
+  footer {
+    padding: 1px 20px;
+  }
+}

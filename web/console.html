@@ -1,0 +1,138 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8"/>
+    <title>Console Layout</title>
+    <link href="css/console.css" rel="stylesheet" media="screen"/>
+    <style type="text/css">
+            /* for test */
+        #signin {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="signin" class="mask transition">
+    <div class="container">
+        <form class="form-signin">
+            <h2 class="form-signin-heading">Please sign in</h2>
+            <input type="text" class="input-block-level" placeholder="Email"/>
+            <input type="password" class="input-block-level" placeholder="Password"/>
+            <label class="checkbox">
+                <input type="checkbox" value="remember-me"/> Remember me
+            </label>
+            <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+        </form>
+    </div>
+</div>
+
+<div id="main">
+
+    <div id="navbar" class="navbar navbar-static-top">
+        <div class="navbar-inner container-fluid">
+            <a class="brand" href="#">Logo</a>
+
+            <ul class="nav pull-right">
+                <li class="dropdown">
+                    <a href="#profile"><img id="avatar" src="img/earth.png"/> <span id="username">Wilson</span>
+                        <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#profile">Profile</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#signout">Sign Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="nav">
+
+                <li><a href="#home">Home</a></li>
+
+                <li class="dropdown">
+                    <a href="#project">Project <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#project/wiz">New Project Wizard</a></li>
+                        <li><a href="#project/new">Create new Project</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#project/mgr">Manage Projects</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#workflow">Workflow <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#workflow/new">Create new Workflow</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#workflow/mgr">Manage Workflows</a></li>
+                    </ul>
+                </li>
+                <li><a href="#content">Content</a></li>
+                <li><a href="#calendar">Calendar</a></li>
+                <li><a href="#report">Report</a></li>
+                <li><a href="#config">Configuration</a></li>
+
+            </ul>
+        </div>
+    </div>
+
+    <div id="frames">
+        <div id="home" class="frame container-fluid">Home</div>
+        <div id="project" class="frame container-fluid">Project</div>
+        <div id="calendar" class="frame container-fluid">
+            <div class="row-fluid frame-inner">
+                <div class="span2 sidebar">
+                    <div class="well">
+                        <ul class="sidebar-list nav">
+                            <li class="nav-header">Tasks</li>
+                            <li><a href="#" class="task">Empty</a></li>
+                        </ul>
+                        <ul class="sidebar-bottom nav nav-list">
+                            <li class="divider"></li>
+                            <li class="nav-header">Tips</li>
+                            <li class="tips">...</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="span10 workspace">
+                    <div id="calendar_view"></div>
+                </div>
+            </div>
+        </div>
+        <div id="workflow" class="frame container-fluid">
+            <div class="row-fluid frame-inner">
+                <div class="span2 sidebar">
+                    <div class="well">
+                        <ul id="node_list" class="sidebar-list nav">
+                            <li class="nav-header">Common Nodes</li>
+                            <li><a href="#" class="node">Empty Node</a></li>
+                            <li><a href="#" class="node">Node 2</a></li>
+                            <li><a href="#" class="node">Node 3</a></li>
+                            <li><a href="#" class="node">Node 4</a></li>
+                            <li class="nav-header">Used Nodes</li>
+                            <li class="nav-header">Shared Nodes</li>
+                        </ul>
+                        <ul class="sidebar-bottom nav nav-list">
+                            <li class="divider"></li>
+                            <li class="nav-header">Tips</li>
+                            <li class="tips">Click a Node above or Drag a Node from Sidebar to Workflow Editor to Add a
+                                new Node.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="span10 workspace">
+                    <div id="workflow_view"></div>
+                </div>
+            </div>
+        </div>
+        <div id="content" class="frame container-fluid">Content</div>
+        <div id="report" class="frame container-fluid">Report</div>
+        <div id="config" class="frame container-fluid">Config</div>
+        <div id="profile" class="frame container-fluid">Profile</div>
+    </div>
+
+    <script data-main="js/main" src="js/lib/require.js"></script>
+
+</div>
+</body>
+</html>
