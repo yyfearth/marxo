@@ -5207,27 +5207,6 @@ a.badge:focus {
 .affix {
   position: fixed;
 }
-.frame-body {
-  position: absolute;
-  padding: 20px;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
-}
-.frame-body .row-fluid {
-  height: 100%;
-}
-.frame-body .row-fluid > div {
-  height: 100%;
-}
-.frame-body .row-fluid .sidebar {
-  padding: 0px;
-  height: 100%;
-}
-.frame-body .row-fluid .sidebar :first-child .nav-header {
-  margin-top: 1em;
-}
 .node {
   border: 1px solid #346789;
   box-shadow: 2px 2px 19px #aaa;
@@ -5943,6 +5922,9 @@ body {
   overflow: scroll;
   overflow-x: hidden;
   height: 75%;
+}
+#frames .frame .sidebar-list .nav-header {
+  margin-top: .5em;
 }
 #frames .frame .sidebar-bottom {
   position: absolute;
