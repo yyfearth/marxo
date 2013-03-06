@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>test</groupId>
-    <artifactId>CloudFoundrySample</artifactId>
+    <groupId>org.marxo</groupId>
+    <artifactId>marxo</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <repositories>
@@ -25,15 +25,21 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>3.2.1.RELEASE</version>
+        </dependency>
+
+        <!-- Data -->
+        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>2.10.1</version>
         </dependency>
-
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>3.2.1.RELEASE</version>
+            <groupId>com.github.jmkgreen.morphia</groupId>
+            <artifactId>morphia</artifactId>
+            <version>1.2.2</version>
         </dependency>
 
         <!-- JSON Library -->
@@ -46,6 +52,11 @@
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.1.4</version>
         </dependency>
 
         <!-- Jersey 1.17 on JAX-RS -->
@@ -65,6 +76,12 @@
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>20030203.000129</version>
+        </dependency>
+        <!-- If you must need a time library to manipulate basic time functionality in a language, you know why the language starts to disgust people. -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.1</version>
         </dependency>
 
         <!-- Testing -->

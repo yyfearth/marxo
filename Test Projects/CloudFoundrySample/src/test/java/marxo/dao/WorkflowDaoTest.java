@@ -2,16 +2,17 @@ package marxo.dao;
 
 import junit.framework.Assert;
 import marxo.Bean.Workflow;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class WorkflowDaoTest {
 	WorkflowDao workflowDao;
 	Workflow workflow;
 
-	@BeforeMethod
+	@BeforeClass
 	public void setUp() {
 		workflowDao = new WorkflowDao();
+		workflowDao.removeAll();
 	}
 
 	@Test(groups = {"create"})

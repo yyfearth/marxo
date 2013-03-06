@@ -18,7 +18,8 @@ public class WorkflowDao implements IDao<Workflow> {
 		DBCollection collection = db.getCollection("workflows");
 
 		WriteResult writeResult = collection.insert(obj);
-		System.out.println(writeResult);
+
+		mongoClient.close();
 
 		return writeResult.getError() == null;
 	}
@@ -36,6 +37,8 @@ public class WorkflowDao implements IDao<Workflow> {
 		} catch (MongoException e) {
 			e.printStackTrace();
 			return null;
+		} finally {
+			mongoClient.close();
 		}
 	}
 
@@ -62,5 +65,23 @@ public class WorkflowDao implements IDao<Workflow> {
 	@Override
 	public Workflow[] find(BasicDBObject query) {
 		return new Workflow[0];
+	}
+
+	@Override
+	public boolean removeAll() {
+		MongoClient mongoClient = MongoDbConnector.getMongoClient();
+		DB db = mongoClient.getDB("marxo");
+		DBCollection collection = db.getCollection("workflows");
+
+		try {
+			collection.drop();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			mongoClient.close();
+		}
+
+		return false;
 	}
 }

@@ -5,7 +5,6 @@ import marxo.Bean.Workflow;
 import marxo.data.MongoDbConnector;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class is used to generator example data for development.
@@ -22,28 +21,6 @@ public class DataGenerator {
 		}
 
 		ArrayList<Workflow> workflows = new ArrayList<Workflow>();
-//		Workflow[] workflows = new Workflow[]{
-//				new Workflow("Jacob"),
-//				new Workflow("Mason"),
-//				new Workflow("William"),
-//				new Workflow("Jayden"),
-//				new Workflow("Noah"),
-//				new Workflow("Michael"),
-//				new Workflow("Ethan"),
-//				new Workflow("Alexander"),
-//				new Workflow("Aiden"),
-//				new Workflow("Daniel"),
-//				new Workflow("Sophia"),
-//				new Workflow("Isabella"),
-//				new Workflow("Emma"),
-//				new Workflow("Olivia"),
-//				new Workflow("Ava"),
-//				new Workflow("Emily"),
-//				new Workflow("Abigail"),
-//				new Workflow("Madison"),
-//				new Workflow("Mia"),
-//				new Workflow("Chloe"),
-//		};
 
 		for (int i = 0; i < 10; i++) {
 			Workflow w = new Workflow();
@@ -52,13 +29,7 @@ public class DataGenerator {
 			workflows.add(w);
 		}
 
-		List<DBObject> list = new ArrayList<DBObject>();
-
-		for (Workflow w : workflows) {
-			list.add((DBObject) w);
-		}
-
-		WriteResult writeResult = dbCollection.insert(list);
+		WriteResult writeResult = dbCollection.insert(TypeTool.<Workflow, DBObject>convert(workflows));
 		mongoClient.close();
 
 		System.out.println("WriteResult: " + writeResult);

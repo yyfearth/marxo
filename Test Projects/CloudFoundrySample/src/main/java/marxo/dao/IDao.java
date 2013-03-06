@@ -19,4 +19,6 @@ public interface IDao<T extends DBObject> {
 	public T findOne(UUID id);
 
 	public T[] find(BasicDBObject query);
+
+	boolean removeAll();
 }

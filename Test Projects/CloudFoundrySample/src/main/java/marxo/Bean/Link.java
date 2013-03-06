@@ -1,4 +1,7 @@
 package marxo.Bean;
 
-public class Link {
+import java.util.UUID;
+
+public class Link extends SharedLink {
+	UUID templateId;
 }
