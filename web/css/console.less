@@ -137,6 +137,12 @@ html, body {
       text-overflow: ellipsis;
     }
 
+    .workspace {
+      margin-left: 15px;
+      overflow: scroll;
+      overflow-x: hidden;
+    }
+
     display: none;
     &.active {
       display: block;
@@ -145,5 +151,14 @@ html, body {
 
   footer {
     padding: 1px 20px;
+  }
+}
+
+#calendar {
+  .workspace {
+    text-align: center;
+    #calendar_view {
+      display: inline-block;
+    }
   }
 }

@@ -5806,13 +5806,8 @@ table.fc-border-separate {
 
   _overflow: hidden;
 }
-#wrap {
-  width: 1100px;
-  margin: 0 auto;
-}
 #external-events {
   float: left;
-  width: 150px;
   padding: 0 10px;
   border: 1px solid #ccc;
   background: #eee;
@@ -5956,9 +5951,20 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+#frames .frame .workspace {
+  margin-left: 15px;
+  overflow: scroll;
+  overflow-x: hidden;
+}
 #frames .frame.active {
   display: block;
 }
 #frames footer {
   padding: 1px 20px;
+}
+#calendar .workspace {
+  text-align: center;
+}
+#calendar .workspace #calendar_view {
+  display: inline-block;
 }
