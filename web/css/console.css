@@ -5919,7 +5919,7 @@ body {
   margin: 0px;
 }
 #frames .frame .sidebar-list {
-  overflow: scroll;
+  overflow: auto;
   overflow-x: hidden;
   height: 75%;
 }
@@ -5937,8 +5937,7 @@ body {
 }
 #frames .frame .workspace {
   margin-left: 15px;
-  overflow: scroll;
-  overflow-x: hidden;
+  overflow: auto;
 }
 #frames .frame.active {
   display: block;
