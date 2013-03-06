@@ -152,7 +152,7 @@ do procData = ->
   return
 # end of proc data
 
-jsPlumb.ready ->
+#jsPlumb.ready ->
 #  jsPlumb.importDefaults
 #    Endpoint: ['Dot', radius: 3]
 #    ConnectionsDetachable: true
@@ -259,140 +259,96 @@ jsPlumb.ready ->
 
 # backbone & bootstrap
 
-class WorkflowView extends Backbone.View
-  tagName: 'div'
-  className: 'workflow'
-  jsPlumbDefaults:
-    Endpoint: ['Dot', radius: 3]
-    ConnectionsDetachable: true
-    ReattachConnections: true
-    HoverPaintStyle:
-      strokeStyle: '#42a62c'
-      lineWidth: 2
-    ConnectionOverlays: [
-      [ 'Arrow',
-        location: 1
-        id: 'arrow'
-      ]
-      [ 'Label',
-        location: 0.5
-        label: 'new link'
-        id: 'label'
-        cssClass: 'aLabel'
-      ]
-    ]
-  initialize: ->
-    jsPlumb.importDefaults @jsPlumbDefaults
-    return
-  render: ->
-    @el.onselectstart = -> false
-    @
-
-
-class NodeView extends Backbone.View
-  tagName: 'div'
-  className: 'node'
-  sourceEndpointStyle:
-    isSource: true
-    uniqueEndpoint: true
-    anchor: 'RightMiddle'
-    paintStyle:
-      fillStyle: '#225588'
-      radius: 7
-    connector: [
-      'Flowchart'
-      stub: [40, 60]
-      gap: 10
-    ]
-    connectorStyle:
-      strokeStyle: '#346789'
-      lineWidth: 2
-    maxConnections: -1
-  targetEndpointStyle:
-    dropOptions:
-      hoverClass: 'hover'
-    anchor: ['LeftMiddle', 'BottomCenter']
-  render: ->
-    @el.innerHTML = @model.escape 'name'
-    @
-
-class LinkView extends Backbone.View
-
-class Entity extends Backbone.Model
-  idAttribute: '_id'
-  set: (attrs) ->
-    @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
-    super attrs
-  validate: (attrs) ->
-    unless attrs.name and attrs.id
-      'id and name are required'
-    else if attrs.name.length > 10
-      'name max len is 10'
-    else
+define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui.custom.min', 'lib/jquery.jsPlumb.min'],
+({
+ find
+ FrameView
+ }, {
+ Tenant
+ SharedWorkflows
+ TenantWorkflows
+ Workflow
+ SharedWorkflow
+ TenantWorkflow
+ SharedNodes
+ TenantNodes
+ Node
+ SharedNode
+ TenantNode
+ SharedLinks
+ TenantLinks
+ Link
+ SharedLink
+ TenantLink
+ SharedActions
+ TenantActions
+ Action
+ }) ->
+  class WorkflowFrameView extends FrameView
+    initialize: (options) ->
+      super options
+      @view = new WorkflowView el: find '#workflow_view', @el
+      return
+    render: ->
+      @view.render()
       return
 
-class Tenant extends Entity
-  idAttribute: '_name'
 
-class SharedWorkflows extends Backbone.Collection
-  model: SharedWorkflow
-  url: '/shared/workflows'
+  class WorkflowView extends Backbone.View
+    jsPlumbDefaults:
+      Endpoint: ['Dot', radius: 3]
+      ConnectionsDetachable: true
+      ReattachConnections: true
+      HoverPaintStyle:
+        strokeStyle: '#42a62c'
+        lineWidth: 2
+      ConnectionOverlays: [
+        [ 'Arrow',
+          location: 1
+          id: 'arrow'
+        ]
+        [ 'Label',
+          location: 0.5
+          label: 'new link'
+          id: 'label'
+          cssClass: 'aLabel'
+        ]
+      ]
+    initialize: ->
+      jsPlumb.importDefaults @jsPlumbDefaults
+      return
+    render: ->
+      @el.onselectstart = -> false
+      @
 
-class TenantWorkflows extends Backbone.Collection
-  model: TenantWorkflow
-  url: -> @tenant.url() + '/workflows'
 
-class Workflow extends Entity
+  class NodeView extends Backbone.View
+    tagName: 'div'
+    className: 'node'
+    sourceEndpointStyle:
+      isSource: true
+      uniqueEndpoint: true
+      anchor: 'RightMiddle'
+      paintStyle:
+        fillStyle: '#225588'
+        radius: 7
+      connector: [
+        'Flowchart'
+        stub: [40, 60]
+        gap: 10
+      ]
+      connectorStyle:
+        strokeStyle: '#346789'
+        lineWidth: 2
+      maxConnections: -1
+    targetEndpointStyle:
+      dropOptions:
+        hoverClass: 'hover'
+      anchor: ['LeftMiddle', 'BottomCenter']
+    render: ->
+      @el.innerHTML = @model.escape 'name'
+      @
 
-class SharedWorkflow extends Workflow
+  class LinkView extends Backbone.View
 
-class TenantWorkflow extends Workflow
-
-class SharedNodes extends Backbone.Collection
-  model: SharedNode
-  url: '/shared/nodes'
-
-class TenantNodes extends Backbone.Collection
-  model: TenantNode
-  url: -> @workflow.url() + '/nodes'
-
-class Node extends Entity
-
-class SharedNode extends Node
-
-class TenantNode extends Node
-
-class SharedLinks extends Backbone.Collection
-  model: SharedLink
-  url: '/shared/links'
-
-class TenantLinks extends Backbone.Collection
-  model: TenantLink
-  url: -> @workflow.url() + '/links'
-
-class Link extends Entity
-
-class SharedLink extends Link
-
-class TenantLink extends Link
-
-class SharedLinks extends Backbone.Collection
-  model: Action
-  url: '/shared/actions'
-
-class TenantLinks extends Backbone.Collection
-  model: Action
-  url: -> @node.url() + '/actions'
-
-class Action extends Entity
-
-# EP
-jsPlumb.ready ->
-  unless sessionStorage.tenant
-    alert 'login required'
-    return
-  tenant = new Tenant JSON.parse sessionStorage.tenant
-  console.log tenant
-  app = window.app ?= {}
-  app.workflow = new WorkflowView el: '#workflow_editor'
-  return
+  WorkflowFrameView

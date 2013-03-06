@@ -31,10 +31,17 @@
         var _this = this;
         this.frames = {};
         findAll('.frame', this.el).forEach(function(frame) {
-          _this.frames[frame.id] = new FrameView({
+          var navEl;
+          navEl = find("#navbar a[href=\"#" + frame.id + "\"]");
+          _this.frames[frame.id] = {
             id: frame.id,
-            el: frame
-          });
+            el: frame,
+            navEl: navEl != null ? navEl.parentElement : void 0
+          };
+        });
+        this.frames.home = new FrameView(this.frames.home);
+        ['project', 'content', 'report', 'config', 'profile'].forEach(function(n) {
+          return _this.frames[n] = new FrameView(_this.frames[n]);
         });
         this.fixStyles();
       };
@@ -50,10 +57,17 @@
       };
 
       ConsoleView.prototype.showFrame = function(frame) {
-        var _ref, _ref1;
+        var _ref, _ref1,
+          _this = this;
         frame = this.frames[frame];
         if (frame == null) {
           return;
+        }
+        if (!(frame instanceof FrameView)) {
+          require([frame.id], function(TheFrameView) {
+            frame = _this.frames[frame.id] = new TheFrameView(frame);
+            frame.render();
+          });
         }
         if (!frame.el.classList.contains('active')) {
           if ((_ref = find('#main .frame.active')) != null) {
@@ -64,7 +78,6 @@
           }
           frame.el.classList.add('active');
           frame.navEl.classList.add('active');
-          frame.render();
         }
       };
 
@@ -81,8 +94,7 @@
 
       FrameView.prototype.initialize = function(options) {
         var _ref;
-        this.navEl = (_ref = find("#navbar a[href=\"#" + this.id + "\"]")) != null ? _ref.parentElement : void 0;
-        return this;
+        this.navEl = options.navEl || ((_ref = find("#navbar a[href=\"#" + this.id + "\"]")) != null ? _ref.parentElement : void 0);
       };
 
       return FrameView;
@@ -118,7 +130,6 @@
         setTimeout(function() {
           _this.$el.hide();
         }, this.delay);
-        return this;
       };
 
       return SignInView;

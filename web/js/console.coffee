@@ -12,8 +12,17 @@ define 'console', ['lib/common'], ->
     initialize: ->
       @frames = {}
       findAll('.frame', @el).forEach (frame) =>
-        @frames[frame.id] = new FrameView id: frame.id, el: frame
+        navEl = find "#navbar a[href=\"##{frame.id}\"]"
+        @frames[frame.id] = id: frame.id, el: frame, navEl: navEl?.parentElement
         return
+      @frames.home = new FrameView @frames.home
+      [ # for debug only
+        'project'
+        'content'
+        'report'
+        'config'
+        'profile'
+      ].forEach (n) => @frames[n] = new FrameView @frames[n]
       @fixStyles()
       return
     fixStyles: ->
@@ -26,18 +35,22 @@ define 'console', ['lib/common'], ->
     showFrame: (frame) ->
       frame = @frames[frame]
       return unless frame?
+      unless frame instanceof FrameView
+        require [frame.id], (TheFrameView) =>
+          frame = @frames[frame.id] = new TheFrameView frame
+          frame.render()
+          return
       unless frame.el.classList.contains 'active'
         find('#main .frame.active')?.classList.remove 'active'
         find('#navbar li.active')?.classList.remove 'active'
         frame.el.classList.add 'active'
         frame.navEl.classList.add 'active'
-        frame.render()
       return
 
   class FrameView extends Backbone.View
     initialize: (options) ->
-      @navEl = (find "#navbar a[href=\"##{@id}\"]")?.parentElement
-      @
+      @navEl = options.navEl or (find "#navbar a[href=\"##{@id}\"]")?.parentElement
+      return
 
   class SignInView extends Backbone.View
     el: '#signin'
@@ -53,7 +66,7 @@ define 'console', ['lib/common'], ->
         @$el.hide();
         return
       , @delay
-      @
+      return
 
   class Entity extends Backbone.Model
     idAttribute: '_id'
@@ -136,7 +149,7 @@ define 'console', ['lib/common'], ->
     report: (name) ->
       return
 
-  return {
+  { # exports
   find
   findAll
   ConsoleView
