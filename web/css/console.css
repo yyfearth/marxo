@@ -5931,6 +5931,8 @@ body {
   height: 25%;
   bottom: 10px;
   overflow: hidden;
+  left: 0px;
+  right: 0px;
   text-overflow: ellipsis;
 }
 #frames .frame .workspace {
