@@ -15,8 +15,8 @@ define 'console', ['lib/common'], ->
         navEl = find "#navbar a[href=\"##{frame.id}\"]"
         @frames[frame.id] = id: frame.id, el: frame, navEl: navEl?.parentElement
         return
-      @frames.home = new FrameView @frames.home
       [ # for debug only
+        'home'
         'project'
         'content'
         'report'

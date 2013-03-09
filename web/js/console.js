@@ -39,8 +39,7 @@
             navEl: navEl != null ? navEl.parentElement : void 0
           };
         });
-        this.frames.home = new FrameView(this.frames.home);
-        ['project', 'content', 'report', 'config', 'profile'].forEach(function(n) {
+        ['home', 'project', 'content', 'report', 'config', 'profile'].forEach(function(n) {
           return _this.frames[n] = new FrameView(_this.frames[n]);
         });
         this.fixStyles();
