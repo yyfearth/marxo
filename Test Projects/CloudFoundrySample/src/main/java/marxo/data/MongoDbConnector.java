@@ -1,6 +1,5 @@
-package test;
+package marxo.data;
 
-import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import org.json.simple.JSONArray;
@@ -9,56 +8,40 @@ import org.json.simple.JSONValue;
 
 import java.net.UnknownHostException;
 
-public class MongoConnector {
-	public MongoClient getMongoClient() {
-		return mongoClient;
-	}
-
-	private MongoClient mongoClient;
-
-	public DB getDb() {
-		return db;
-	}
-
-	private DB db;
-
-	public boolean isConnected() {
-		return isConnected;
-	}
-
-	private boolean isConnected = false;
-
-	public static MongoConnector getConnectedConnector() {
-		MongoConnector mongoConnector = new MongoConnector();
-		mongoConnector.connect();
-		return mongoConnector;
-	}
-
-	public boolean connect() {
+public class MongoDbConnector {
+	/**
+	 * Get a connected mongo client.
+	 *
+	 * @return the connected client
+	 */
+	public static MongoClient getMongoClient() {
+		/**
+		 * In order to read the connection credential from a virtualized environment such as Cloud Foundry or AppFog, the program needs to read specific parameters from the environment.
+		 * @see http://docs.cloudfoundry.com/services/mysql/mysql.html#the-vcapservices-environment-variable
+		 */
 		String serviceJson = System.getenv("VCAP_SERVICES");
+		MongoClient mongoClient = null;
 
 		try {
 			if (serviceJson == null) {
 				mongoClient = new MongoClient("localhost", 27017);
-				db = mongoClient.getDB("db");
 			} else {
 				System.out.println("System.getenv(\"VCAP_SERVICES\"):\n" + serviceJson);
 
 				JSONObject services = (JSONObject) JSONValue.parse(serviceJson);
-				JSONArray mongoServices = (JSONArray) services.get("mongodb-2.0");
+				JSONArray mongoServices = (JSONArray) services.get("data-2.0");
 				JSONObject mongoService = (JSONObject) mongoServices.get(0);
 				JSONObject credential = (JSONObject) mongoService.get("credentials");
 				String url = (String) credential.get("url");
 				String dbName = (String) credential.get("db");
 
 				mongoClient = new MongoClient(new MongoClientURI(url));
-				db = mongoClient.getDB(dbName);
 			}
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
-			return isConnected = false;
+			return null;
 		}
 
-		return isConnected = true;
+		return mongoClient;
 	}
 }
