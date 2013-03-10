@@ -50,6 +50,7 @@ define 'console', ['lib/common'], ->
         find('#navbar li.active')?.classList.remove 'active'
         frame.el.classList.add 'active'
         frame.navEl.classList.add 'active'
+        $(window).resize()
       return
     signout: ->
       # TODO: sign out
@@ -85,6 +86,13 @@ define 'console', ['lib/common'], ->
       @instance
     events:
       'submit form': 'submit'
+    initialize: ->
+      # auto sign in
+      if (sessionStorage.user)
+        @signedIn()
+      else
+        @show()
+      return
     submit: -> # fake
       console.log 'sign in'
       @signedIn()
@@ -96,7 +104,7 @@ define 'console', ['lib/common'], ->
       @hide()
       ConsoleView.get().show()
       # Router.get().navigate 'home'
-      location.hash = ''
+      location.hash = '' if /signin/i.test location.hash
       return
     delay: 500
     show: ->
