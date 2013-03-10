@@ -1,75 +1,120 @@
 package marxo.Bean;
 
-import com.mongodb.ReflectionDBObject;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.github.jmkgreen.morphia.annotations.Id;
+import org.bson.types.ObjectId;
 
+import java.util.Date;
 import java.util.UUID;
 
-public class Workflow extends ReflectionDBObject {
-	public UUID getId() {
-		return id;
+public class Workflow {
+	public ObjectId get_id() {
+		return _id;
 	}
 
-	public void setId(UUID id) {
-		if (id == null) {
-			return;
-		} else {
-			this.id = id;
-		}
+	public void set_id(ObjectId _id) {
+		this._id = _id;
 	}
-
-	UUID id = UUID.randomUUID();
 
 	public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
-		if (name == null) {
-			this.name = "";
-		} else {
-			this.name = name;
-		}
-	}
-
-	String name = "";
-
-	public boolean getIsMocked() {
-		return isMocked;
-	}
-
-	public void setIsMocked(boolean mocked) {
-		isMocked = mocked;
-	}
-
-	boolean isMocked = false;
-
-	public Workflow() {
-	}
-
-	public Workflow(String name) {
-		this();
 		this.name = name;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof Workflow)) return false;
-
-		Workflow workflow = (Workflow) o;
-
-		if (isMocked != workflow.isMocked) return false;
-		if (!id.equals(workflow.id)) return false;
-		if (!name.equals(workflow.name)) return false;
-
-		return true;
+	public UUID[] getNodeIds() {
+		return nodeIds;
 	}
 
-	@Override
-	public int hashCode() {
-		int result = id.hashCode();
-		result = 31 * result + name.hashCode();
-		result = 31 * result + (isMocked ? 1 : 0);
-		return result;
+	public void setNodeIds(UUID[] nodeIds) {
+		this.nodeIds = nodeIds;
+	}
+
+	public UUID[] getLinkIds() {
+		return linkIds;
+	}
+
+	public void setLinkIds(UUID[] linkIds) {
+		this.linkIds = linkIds;
+	}
+
+	public UUID getTenantId() {
+		return tenantId;
+	}
+
+	public void setTenantId(UUID tenantId) {
+		this.tenantId = tenantId;
+	}
+
+	public WorkflowType getType() {
+		return type;
+	}
+
+	public void setType(WorkflowType type) {
+		this.type = type;
+	}
+
+	public WorkflowStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(WorkflowStatus status) {
+		this.status = status;
+	}
+
+	public UUID getCreatedByUserId() {
+		return createdByUserId;
+	}
+
+	public void setCreatedByUserId(UUID createdByUserId) {
+		this.createdByUserId = createdByUserId;
+	}
+
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public UUID getModifiedByUserId() {
+		return modifiedByUserId;
+	}
+
+	public void setModifiedByUserId(UUID modifiedByUserId) {
+		this.modifiedByUserId = modifiedByUserId;
+	}
+
+	public Date getModifiedDate() {
+		return modifiedDate;
+	}
+
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
+
+	@Id
+	@JsonIgnore
+	ObjectId _id;
+	String name;
+	UUID[] nodeIds;
+	UUID[] linkIds;
+	UUID tenantId;
+	WorkflowType type = WorkflowType.None;
+	WorkflowStatus status = WorkflowStatus.None;
+	UUID createdByUserId;
+	Date createdDate;
+	UUID modifiedByUserId;
+	Date modifiedDate;
+
+	public Workflow() {
+		this(new ObjectId());
+	}
+
+	public Workflow(ObjectId _id) {
+		this._id = _id;
 	}
 }

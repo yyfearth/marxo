@@ -1,5 +1,7 @@
 package marxo.data;
 
+import com.github.jmkgreen.morphia.Datastore;
+import com.github.jmkgreen.morphia.Morphia;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import org.json.simple.JSONArray;
@@ -7,24 +9,39 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import java.net.UnknownHostException;
+import java.util.List;
 
+/**
+ * According to <a href="http://docs.mongodb.org/ecosystem/tutorial/getting-started-with-java-driver/">official document</a>, MongoClient class is new since 2.10.0.
+ */
 public class MongoDbConnector {
+	static MongoClient mongoClient = null;
+
 	/**
-	 * Get a connected mongo client.
+	 * Get a connected mongo client as singleton.
 	 *
 	 * @return the connected client
 	 */
 	public static MongoClient getMongoClient() {
+		if (mongoClient != null) {
+			return mongoClient;
+		}
+
 		/**
 		 * In order to read the connection credential from a virtualized environment such as Cloud Foundry or AppFog, the program needs to read specific parameters from the environment.
 		 * @see http://docs.cloudfoundry.com/services/mysql/mysql.html#the-vcapservices-environment-variable
 		 */
 		String serviceJson = System.getenv("VCAP_SERVICES");
-		MongoClient mongoClient = null;
+		MongoClientURI uri = null;
 
 		try {
 			if (serviceJson == null) {
 				mongoClient = new MongoClient("localhost", 27017);
+
+				List<String> nameList = mongoClient.getDatabaseNames ();
+				for (String name : nameList) {
+					System.out.println("Name: " + name);
+				}
 			} else {
 				System.out.println("System.getenv(\"VCAP_SERVICES\"):\n" + serviceJson);
 
@@ -43,5 +60,19 @@ public class MongoDbConnector {
 		}
 
 		return mongoClient;
+	}
+
+	static Datastore datastore = null;
+
+	public static Datastore getDatastore() {
+		return getDatastore("marxo");
+	}
+
+	public static Datastore getDatastore(String databaseName) {
+		if (datastore != null) {
+			return datastore;
+		}
+
+		return datastore = new Morphia().createDatastore(getMongoClient(), databaseName);
 	}
 }

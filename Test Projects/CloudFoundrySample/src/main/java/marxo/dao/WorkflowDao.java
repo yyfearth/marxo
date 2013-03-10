@@ -1,5 +1,7 @@
 package marxo.dao;
 
+import com.github.jmkgreen.morphia.Datastore;
+import com.github.jmkgreen.morphia.Key;
 import com.mongodb.*;
 import marxo.Bean.Workflow;
 import marxo.data.MongoDbConnector;
@@ -7,39 +9,52 @@ import marxo.data.MongoDbConnector;
 import java.util.UUID;
 
 public class WorkflowDao implements IDao<Workflow> {
+	Datastore datastore;
 
 	public WorkflowDao() {
+		datastore = MongoDbConnector.getDatastore();
 	}
 
 	@Override
-	public boolean create(Workflow obj) {
-		MongoClient mongoClient = MongoDbConnector.getMongoClient();
-		DB db = mongoClient.getDB("marxo");
-		DBCollection collection = db.getCollection("workflows");
+	public boolean create(Workflow workflow) {
+//		MongoClient mongoClient = MongoDbConnector.getMongoClient();
+//		DB db = mongoClient.getDB("marxo");
+//		DBCollection collection = db.getCollection("workflows");
+//
+//		WriteResult writeResult = collection.insert(workflow);
+//
+//		mongoClient.close();
+//
+//		return writeResult.getError() == null;
+		Key<Workflow> key = datastore.save(workflow);
 
-		WriteResult writeResult = collection.insert(obj);
+		if (key == null) {
+			System.out.println("key == null");
+			return false;
+		}
 
-		mongoClient.close();
-
-		return writeResult.getError() == null;
+		return true;
 	}
 
 	@Override
 	public Workflow read(UUID id) {
-		MongoClient mongoClient = MongoDbConnector.getMongoClient();
-		DB db = mongoClient.getDB("marxo");
-		DBCollection collection = db.getCollection("workflows");
+//		MongoClient mongoClient = MongoDbConnector.getMongoClient();
+//		DB db = mongoClient.getDB("marxo");
+//		DBCollection collection = db.getCollection("workflows");
+//
+//		try {
+//			Workflow workflow = (Workflow) collection.findOne(new BasicDBObject("id", id));
+//
+//			return workflow;
+//		} catch (MongoException e) {
+//			e.printStackTrace();
+//			return null;
+//		} finally {
+//			mongoClient.close();
+//		}
 
-		try {
-			Workflow workflow = (Workflow) collection.findOne(new BasicDBObject("id", id));
-
-			return workflow;
-		} catch (MongoException e) {
-			e.printStackTrace();
-			return null;
-		} finally {
-			mongoClient.close();
-		}
+//		datastore.
+		return null;
 	}
 
 	@Override

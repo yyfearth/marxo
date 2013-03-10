@@ -1,27 +1,36 @@
 package marxo.restlet;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.jmkgreen.morphia.Datastore;
 import marxo.Bean.Project;
+import marxo.data.JsonParser;
+import marxo.data.MongoDbConnector;
 import org.apache.commons.lang.StringUtils;
+import org.bson.types.ObjectId;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import java.util.UUID;
+import java.io.IOException;
 
 @Path("/projects/{projectId}")
 public class ProjectRestlet {
 	@GET
 	public String getProject(@PathParam("projectId") String projectId) {
-		Gson gson = new Gson();
+		ObjectMapper objectMapper = JsonParser.getObjectMapper();
 
 		if (StringUtils.isEmpty(projectId)) {
-			return gson.toJson(new Object());
+			return "{}";
 		}
 
-		Project project = new Project();
-		project.id = UUID.fromString(projectId);
+		Datastore datastore = MongoDbConnector.getDatastore();
+		Project project = datastore.find(Project.class, "_id", new ObjectId(projectId)).get();
 
-		return gson.toJson(project);
+		try {
+			return objectMapper.writeValueAsString(project);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

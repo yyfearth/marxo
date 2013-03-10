@@ -19,9 +19,8 @@
 
     </p>
     <%
-        MongoDbConnector mongoDbConnector = MongoDbConnector.getConnectedDb();
-        MongoClient mongoClient = mongoDbConnector.getMongoClient();
-        DB db = mongoDbConnector.getDb();
+        MongoClient mongoClient = MongoDbConnector.getMongoClient();
+        DB db = mongoClient.getDB("test");
     %>
     <p>MongoDB version: <%=mongoClient.getVersion()%>
     </p>

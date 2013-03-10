@@ -1,18 +1,17 @@
 package marxo.dao;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 
 import java.util.UUID;
 
-public interface IDao<T extends DBObject> {
-	public boolean create(T obj);
+public interface IDao<T> {
+	public boolean create(T entity);
 
 	public T read(UUID id);
 
-	public boolean update(T obj);
+	public boolean update(T entity);
 
-	public boolean createOrUpdate(T obj);
+	public boolean createOrUpdate(T entity);
 
 	public boolean delete(UUID id);
 
