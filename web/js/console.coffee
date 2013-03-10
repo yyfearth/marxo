@@ -95,7 +95,8 @@ define 'console', ['lib/common'], ->
       @trigger 'success', user
       @hide()
       ConsoleView.get().show()
-      Router.get().navigate 'home'
+      # Router.get().navigate 'home'
+      location.hash = ''
       return
     delay: 500
     show: ->

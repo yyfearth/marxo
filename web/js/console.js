@@ -166,7 +166,7 @@
         this.trigger('success', user);
         this.hide();
         ConsoleView.get().show();
-        Router.get().navigate('home');
+        location.hash = '';
       };
 
       SignInView.prototype.delay = 500;
