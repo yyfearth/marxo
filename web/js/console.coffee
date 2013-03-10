@@ -9,6 +9,10 @@ define 'console', ['lib/common'], ->
 
   class ConsoleView extends Backbone.View
     el: '#main'
+    @get: -> # singleton
+      unless @instance?
+        @instance = new @
+      @instance
     initialize: ->
       @frames = {}
       findAll('.frame', @el).forEach (frame) =>
@@ -29,7 +33,8 @@ define 'console', ['lib/common'], ->
       navContainer = find '#navbar', @el
       framesContainer = find '#frames', @el
       do window.onresize = =>
-        framesContainer.style.top = navContainer.clientHeight + 'px'
+        h = navContainer.clientHeight or 41
+        framesContainer.style.top = h + 'px'
         return
       return
     showFrame: (frame) ->
@@ -46,6 +51,26 @@ define 'console', ['lib/common'], ->
         frame.el.classList.add 'active'
         frame.navEl.classList.add 'active'
       return
+    signout: ->
+      # TODO: sign out
+      delete sessionStorage.user
+      SignInView.get().show()
+      @hide()
+      @trigger 'signout'
+      return
+
+    show: ->
+      @el.style.visibility = 'visible'
+      @el.classList.add 'active'
+      @el.style.opacity = 1
+      return
+    hide: ->
+      @el.classList.remove 'active'
+      setTimeout =>
+        @el.style.visibility = 'hidden'
+        return
+      , SignInView::delay
+      return
 
   class FrameView extends Backbone.View
     initialize: (options) ->
@@ -54,16 +79,39 @@ define 'console', ['lib/common'], ->
 
   class SignInView extends Backbone.View
     el: '#signin'
-    delay: 500
+    @get: -> # singleton
+      unless @instance?
+        @instance = new @
+      @instance
     events:
       'submit form': 'submit'
     submit: -> # fake
-      @trigger 'success', id: 'test', name: 'test'
+      console.log 'sign in'
+      @signedIn()
       false
-    hide: ->
-      @$el.css 'opacity', 0
+    signedIn: -> # debug only
+      user = id: 'test', name: 'test'
+      sessionStorage.user = JSON.stringify user
+      @trigger 'success', user
+      @hide()
+      ConsoleView.get().show()
+      Router.get().navigate 'home'
+      return
+    delay: 500
+    show: ->
+      @el.style.opacity = 0
+      @el.style.display = 'block'
       setTimeout =>
-        @$el.hide();
+        @el.classList.add 'active'
+        @el.style.opacity = 1
+        return
+      , 1
+      return
+    hide: ->
+      @el.classList.remove 'active'
+      @el.style.opacity = 0
+      setTimeout =>
+        @el.style.display = 'none'
         return
       , @delay
       return
@@ -107,6 +155,10 @@ define 'console', ['lib/common'], ->
   class Evalutator extends User # TODO: howto save them
 
   class Router extends Backbone.Router
+    @get: -> # singleton
+      unless @instance?
+        @instance = new @
+      @instance
     frames: [
       'home'
       'project'
@@ -124,14 +176,18 @@ define 'console', ['lib/common'], ->
       @frames.forEach (frame) =>
         @route frame + '(/:name)', frame, (name) => @show frame, name
         return
+      @route 'signin', 'signin', => return
+      @route 'signout', 'signout'
       return
 
     show: (frame, name) ->
-      throw 'console is not binded' unless @console?
+      unless sessionStorage.user
+        @navigate 'signin', replace: true
+        return
       console.log 'route', frame, name or ''
       if frame isnt @current
         @current = frame
-        @console?.showFrame frame
+        ConsoleView.get()?.showFrame frame
       handler = @[frame]
       handler.call @, name if handler?
       return
@@ -147,6 +203,12 @@ define 'console', ['lib/common'], ->
     content: (name) ->
       return
     report: (name) ->
+      return
+
+    signout: ->
+      console.log 'sign out'
+      ConsoleView.get().signout()
+      @navigate 'signin', replace: true
       return
 
   { # exports

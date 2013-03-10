@@ -17,6 +17,7 @@ html, body {
 // Signin
 
 #signin {
+  z-index: 1000;
 
   &.mask {
     position: fixed;
@@ -48,7 +49,7 @@ html, body {
       margin-bottom: 10px;
     }
 
-    input[type="text"],
+    input[type="email"],
     input[type="password"] {
       font-size: 16px;
       height: auto;
@@ -64,6 +65,7 @@ html, body {
   position: absolute;
   width: 100%;
   height: 100%;
+  visibility: hidden;
 }
 
 // Navbar

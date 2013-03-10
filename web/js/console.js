@@ -27,6 +27,13 @@
 
       ConsoleView.prototype.el = '#main';
 
+      ConsoleView.get = function() {
+        if (this.instance == null) {
+          this.instance = new this;
+        }
+        return this.instance;
+      };
+
       ConsoleView.prototype.initialize = function() {
         var _this = this;
         this.frames = {};
@@ -51,7 +58,9 @@
         navContainer = find('#navbar', this.el);
         framesContainer = find('#frames', this.el);
         (window.onresize = function() {
-          framesContainer.style.top = navContainer.clientHeight + 'px';
+          var h;
+          h = navContainer.clientHeight || 41;
+          framesContainer.style.top = h + 'px';
         })();
       };
 
@@ -78,6 +87,27 @@
           frame.el.classList.add('active');
           frame.navEl.classList.add('active');
         }
+      };
+
+      ConsoleView.prototype.signout = function() {
+        delete sessionStorage.user;
+        SignInView.get().show();
+        this.hide();
+        this.trigger('signout');
+      };
+
+      ConsoleView.prototype.show = function() {
+        this.el.style.visibility = 'visible';
+        this.el.classList.add('active');
+        this.el.style.opacity = 1;
+      };
+
+      ConsoleView.prototype.hide = function() {
+        var _this = this;
+        this.el.classList.remove('active');
+        setTimeout(function() {
+          _this.el.style.visibility = 'hidden';
+        }, SignInView.prototype.delay);
       };
 
       return ConsoleView;
@@ -109,25 +139,54 @@
 
       SignInView.prototype.el = '#signin';
 
-      SignInView.prototype.delay = 500;
+      SignInView.get = function() {
+        if (this.instance == null) {
+          this.instance = new this;
+        }
+        return this.instance;
+      };
 
       SignInView.prototype.events = {
         'submit form': 'submit'
       };
 
       SignInView.prototype.submit = function() {
-        this.trigger('success', {
+        console.log('sign in');
+        this.signedIn();
+        return false;
+      };
+
+      SignInView.prototype.signedIn = function() {
+        var user;
+        user = {
           id: 'test',
           name: 'test'
-        });
-        return false;
+        };
+        sessionStorage.user = JSON.stringify(user);
+        this.trigger('success', user);
+        this.hide();
+        ConsoleView.get().show();
+        Router.get().navigate('home');
+      };
+
+      SignInView.prototype.delay = 500;
+
+      SignInView.prototype.show = function() {
+        var _this = this;
+        this.el.style.opacity = 0;
+        this.el.style.display = 'block';
+        setTimeout(function() {
+          _this.el.classList.add('active');
+          _this.el.style.opacity = 1;
+        }, 1);
       };
 
       SignInView.prototype.hide = function() {
         var _this = this;
-        this.$el.css('opacity', 0);
+        this.el.classList.remove('active');
+        this.el.style.opacity = 0;
         setTimeout(function() {
-          _this.$el.hide();
+          _this.el.style.display = 'none';
         }, this.delay);
       };
 
@@ -272,6 +331,13 @@
 
       __extends(Router, _super);
 
+      Router.get = function() {
+        if (this.instance == null) {
+          this.instance = new this;
+        }
+        return this.instance;
+      };
+
       Router.prototype.frames = ['home', 'project', 'workflow', 'calendar', 'content', 'report', 'config', 'profile'];
 
       function Router(options) {
@@ -287,18 +353,23 @@
             return _this.show(frame, name);
           });
         });
+        this.route('signin', 'signin', function() {});
+        this.route('signout', 'signout');
         return;
       }
 
       Router.prototype.show = function(frame, name) {
         var handler, _ref;
-        if (this.console == null) {
-          throw 'console is not binded';
+        if (!sessionStorage.user) {
+          this.navigate('signin', {
+            replace: true
+          });
+          return;
         }
         console.log('route', frame, name || '');
         if (frame !== this.current) {
           this.current = frame;
-          if ((_ref = this.console) != null) {
+          if ((_ref = ConsoleView.get()) != null) {
             _ref.showFrame(frame);
           }
         }
@@ -319,6 +390,14 @@
       Router.prototype.content = function(name) {};
 
       Router.prototype.report = function(name) {};
+
+      Router.prototype.signout = function() {
+        console.log('sign out');
+        ConsoleView.get().signout();
+        this.navigate('signin', {
+          replace: true
+        });
+      };
 
       return Router;
 
