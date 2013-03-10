@@ -23,7 +23,7 @@ public class MongoDbConnector {
 	 * @return the connected client
 	 */
 	public static MongoClient getMongoClient() {
-		if (mongoClient != null) {
+		if (mongoClient !=null) {
 			return mongoClient;
 		}
 

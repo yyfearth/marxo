@@ -1,6 +1,7 @@
 package marxo.Bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.jmkgreen.morphia.annotations.Id;
 import org.bson.types.ObjectId;
 
@@ -105,7 +106,9 @@ public class Workflow {
 	UUID tenantId;
 	WorkflowType type = WorkflowType.None;
 	WorkflowStatus status = WorkflowStatus.None;
+    @JsonProperty("createdBy")
 	UUID createdByUserId;
+    @JsonProperty("created")
 	Date createdDate;
 	UUID modifiedByUserId;
 	Date modifiedDate;

@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import java.io.IOException;
@@ -33,4 +34,9 @@ public class ProjectRestlet {
 			return null;
 		}
 	}
+
+    @POST
+    public String setProject(@PathParam("projectId") String projectId, Project project) {
+        return null;
+    }
 }
