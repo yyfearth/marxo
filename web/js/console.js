@@ -86,6 +86,7 @@
           }
           frame.el.classList.add('active');
           frame.navEl.classList.add('active');
+          $(window).resize();
         }
       };
 
@@ -150,6 +151,14 @@
         'submit form': 'submit'
       };
 
+      SignInView.prototype.initialize = function() {
+        if (sessionStorage.user) {
+          this.signedIn();
+        } else {
+          this.show();
+        }
+      };
+
       SignInView.prototype.submit = function() {
         console.log('sign in');
         this.signedIn();
@@ -166,7 +175,9 @@
         this.trigger('success', user);
         this.hide();
         ConsoleView.get().show();
-        location.hash = '';
+        if (/signin/i.test(location.hash)) {
+          location.hash = '';
+        }
       };
 
       SignInView.prototype.delay = 500;

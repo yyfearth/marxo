@@ -118,7 +118,7 @@ html, body {
     padding: 0px;
     margin: 0px;
 
-    .frame-inner, .sidebar, .workspace, .sidebar .well {
+    .inner-frame, .sidebar, .workspace, .sidebar .well {
       position: relative;
       height: 100%;
       padding: 0px;
@@ -147,6 +147,17 @@ html, body {
     .workspace {
       margin-left: 15px;
       overflow: auto;
+
+      // dropdown menu fix
+      .pull-right .dropdown-menu:after {
+        left: auto;
+        right: 13px;
+      }
+
+      .pull-right .dropdown-menu {
+        left: auto;
+        right: 0;
+      }
     }
 
     display: none;

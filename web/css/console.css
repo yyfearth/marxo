@@ -5913,7 +5913,7 @@ body {
   margin: 0px;
   display: none;
 }
-#frames .frame .frame-inner,
+#frames .frame .inner-frame,
 #frames .frame .sidebar,
 #frames .frame .workspace,
 #frames .frame .sidebar .well {
@@ -5942,6 +5942,14 @@ body {
 #frames .frame .workspace {
   margin-left: 15px;
   overflow: auto;
+}
+#frames .frame .workspace .pull-right .dropdown-menu:after {
+  left: auto;
+  right: 13px;
+}
+#frames .frame .workspace .pull-right .dropdown-menu {
+  left: auto;
+  right: 0;
 }
 #frames .frame.active {
   display: block;
