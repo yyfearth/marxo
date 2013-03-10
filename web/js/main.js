@@ -5,16 +5,10 @@
     var ConsoleView, Router, SignInView, app;
     ConsoleView = _arg.ConsoleView, SignInView = _arg.SignInView, Router = _arg.Router;
     window.app = app = {
-      console: new ConsoleView,
-      signin: new SignInView,
-      router: new Router
+      console: ConsoleView.get(),
+      signin: SignInView.get(),
+      router: Router.get()
     };
-    app.signin.on('success', function() {
-      this.hide();
-      app.console.$el.show();
-    });
-    app.signin.trigger('success');
-    app.router.console = app.console;
     Backbone.history.start();
   });
 

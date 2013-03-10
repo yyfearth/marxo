@@ -32,3 +32,8 @@ Icon
 
 # Source Map
 *.map
+
+########## Java ##########
+# Project output
+out
+target
