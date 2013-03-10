@@ -28,6 +28,11 @@ Icon
 .Spotlight-V100
 .Trashes
 
+########## Project ##########
+
+# Source Map
+*.map
+
 ########## Java ##########
 # Project output
 out
