@@ -1,21 +1,12 @@
 package marxo.Bean;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.jmkgreen.morphia.annotations.Id;
-import org.bson.types.ObjectId;
+import com.github.jmkgreen.morphia.annotations.Entity;
 
-import java.util.Date;
+import java.util.Arrays;
 import java.util.UUID;
 
-public class Workflow {
-	public ObjectId get_id() {
-		return _id;
-	}
-
-	public void set_id(ObjectId _id) {
-		this._id = _id;
-	}
+@Entity(value = "workflows", noClassnameStored = true)
+public class Workflow extends BasicEntity {
 
 	public String getName() {
 		return name;
@@ -65,59 +56,38 @@ public class Workflow {
 		this.status = status;
 	}
 
-	public UUID getCreatedByUserId() {
-		return createdByUserId;
-	}
-
-	public void setCreatedByUserId(UUID createdByUserId) {
-		this.createdByUserId = createdByUserId;
-	}
-
-	public Date getCreatedDate() {
-		return createdDate;
-	}
-
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
-
-	public UUID getModifiedByUserId() {
-		return modifiedByUserId;
-	}
-
-	public void setModifiedByUserId(UUID modifiedByUserId) {
-		this.modifiedByUserId = modifiedByUserId;
-	}
-
-	public Date getModifiedDate() {
-		return modifiedDate;
-	}
-
-	public void setModifiedDate(Date modifiedDate) {
-		this.modifiedDate = modifiedDate;
-	}
-
-	@Id
-	@JsonIgnore
-	ObjectId _id;
 	String name;
 	UUID[] nodeIds;
 	UUID[] linkIds;
 	UUID tenantId;
 	WorkflowType type = WorkflowType.None;
 	WorkflowStatus status = WorkflowStatus.None;
-    @JsonProperty("createdBy")
-	UUID createdByUserId;
-    @JsonProperty("created")
-	Date createdDate;
-	UUID modifiedByUserId;
-	Date modifiedDate;
 
-	public Workflow() {
-		this(new ObjectId());
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Workflow)) return false;
+
+		Workflow workflow = (Workflow) o;
+
+		if (!Arrays.equals(linkIds, workflow.linkIds)) return false;
+		if (name != null ? !name.equals(workflow.name) : workflow.name != null) return false;
+		if (!Arrays.equals(nodeIds, workflow.nodeIds)) return false;
+		if (status != workflow.status) return false;
+		if (tenantId != null ? !tenantId.equals(workflow.tenantId) : workflow.tenantId != null) return false;
+		if (type != workflow.type) return false;
+
+		return true;
 	}
 
-	public Workflow(ObjectId _id) {
-		this._id = _id;
+	@Override
+	public int hashCode() {
+		int result = name != null ? name.hashCode() : 0;
+		result = 31 * result + (nodeIds != null ? Arrays.hashCode(nodeIds) : 0);
+		result = 31 * result + (linkIds != null ? Arrays.hashCode(linkIds) : 0);
+		result = 31 * result + (tenantId != null ? tenantId.hashCode() : 0);
+		result = 31 * result + (type != null ? type.hashCode() : 0);
+		result = 31 * result + (status != null ? status.hashCode() : 0);
+		return result;
 	}
 }

@@ -62,6 +62,19 @@ public class MongoDbConnector {
 		return mongoClient;
 	}
 
+	public static void destoryMongoClient() {
+		if (mongoClient == null) {
+			return;
+		}
+
+		mongoClient.close();
+		mongoClient = null;
+
+		if (datastore != null) {
+			datastore = null;
+		}
+	}
+
 	static Datastore datastore = null;
 
 	public static Datastore getDatastore() {

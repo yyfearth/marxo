@@ -1,11 +1,28 @@
 package marxo.Bean;
 
-import java.util.List;
+import com.github.jmkgreen.morphia.annotations.Entity;
+
 import java.util.UUID;
 
-public class SharedNode {
-	UUID id;
+@Entity(value = "nodes")
+public class SharedNode extends BasicEntity {
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public UUID getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setWorkflowId(UUID workflowId) {
+		this.workflowId = workflowId;
+	}
+
 	String name;
 	UUID workflowId;
-	List<SharedAction> sharedActions;
+//	List<SharedAction> sharedActions;
 }

@@ -18,7 +18,7 @@ import java.io.IOException;
 public class ProjectRestlet {
 	@GET
 	public String getProject(@PathParam("projectId") String projectId) {
-		ObjectMapper objectMapper = JsonParser.getObjectMapper();
+		ObjectMapper objectMapper = JsonParser.getMapper();
 
 		if (StringUtils.isEmpty(projectId)) {
 			return "{}";

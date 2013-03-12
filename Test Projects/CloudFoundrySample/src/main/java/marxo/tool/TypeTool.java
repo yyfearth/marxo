@@ -6,7 +6,7 @@ import java.util.List;
 public class TypeTool {
 	/**
 	 * Convert a list of object to another list of objects which is the type of base class of the original.
-	 * Fuck Java!
+	 * Fuck Java and its type erasure!
 	 *
 	 * @param list the original list
 	 * @param <T1> the type being converted from
@@ -21,5 +21,9 @@ public class TypeTool {
 		}
 
 		return newList;
+	}
+
+	public static <T> Class<T> getType(T obj) {
+		return (Class<T>) obj.getClass();
 	}
 }

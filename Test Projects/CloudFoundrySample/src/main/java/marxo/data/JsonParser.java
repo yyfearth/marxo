@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonParser {
-	static ObjectMapper objectMapper = new ObjectMapper();
+	static ObjectMapper objectMapper;
 
 	static {
 		objectMapper = new ObjectMapper();
@@ -19,7 +19,7 @@ public class JsonParser {
 		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 	}
 
-	public static ObjectMapper getObjectMapper() {
+	public static ObjectMapper getMapper() {
 		return objectMapper;
 	}
 }
