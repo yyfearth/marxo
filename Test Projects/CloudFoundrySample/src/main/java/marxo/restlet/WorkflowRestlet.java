@@ -21,7 +21,11 @@ public class WorkflowRestlet {
 		}
 
 		WorkflowDao workflowDao = new WorkflowDao();
-		workflowDao.get()
+		Workflow workflow = workflowDao.get(new ObjectId(workflowId));
+
+		if (workflow == null) {
+
+		}
 	}
 
 	@POST

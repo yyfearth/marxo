@@ -8,7 +8,7 @@ import org.bson.types.ObjectId;
 public class WorkflowDao extends BasicDAO<Workflow, ObjectId> {
 	static Class<Workflow> type = Workflow.class;
 
-	protected WorkflowDao() {
+	public WorkflowDao() {
 		super(MongoDbConnector.getDatastore());
 	}
 }
