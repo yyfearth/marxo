@@ -1,7 +1,7 @@
 package marxo.dao;
 
 import com.github.jmkgreen.morphia.dao.BasicDAO;
-import marxo.Bean.Workflow;
+import marxo.bean.Workflow;
 import marxo.data.MongoDbConnector;
 import org.bson.types.ObjectId;
 

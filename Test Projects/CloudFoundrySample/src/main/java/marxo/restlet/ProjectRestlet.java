@@ -2,7 +2,7 @@ package marxo.restlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jmkgreen.morphia.Datastore;
-import marxo.Bean.Project;
+import marxo.bean.Project;
 import marxo.data.JsonParser;
 import marxo.data.MongoDbConnector;
 import org.apache.commons.lang.StringUtils;

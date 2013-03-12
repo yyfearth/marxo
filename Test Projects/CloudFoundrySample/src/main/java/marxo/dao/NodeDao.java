@@ -1,7 +1,7 @@
 package marxo.dao;
 
 import com.github.jmkgreen.morphia.dao.BasicDAO;
-import marxo.Bean.SharedNode;
+import marxo.bean.SharedNode;
 import marxo.data.MongoDbConnector;
 
 import java.util.UUID;

@@ -4,8 +4,8 @@ import com.github.jmkgreen.morphia.Datastore;
 import com.github.jmkgreen.morphia.Key;
 import com.github.jmkgreen.morphia.query.Query;
 import com.mongodb.WriteResult;
-import marxo.Bean.BasicEntity;
-import marxo.Bean.Workflow;
+import marxo.bean.BasicEntity;
+import marxo.bean.Workflow;
 import marxo.data.MongoDbConnector;
 
 import java.lang.reflect.Array;

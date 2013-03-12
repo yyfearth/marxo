@@ -3,7 +3,7 @@
 //import com.fasterxml.jackson.core.JsonGenerationException;
 //import com.fasterxml.jackson.databind.JsonMappingException;
 //import junit.framework.Assert;
-//import marxo.Bean.Project;
+//import marxo.bean.Project;
 //import marxo.data.JsonParser;
 //import marxo.restlet.ProjectRestlet;
 //import marxo.tool.DataGenerator;

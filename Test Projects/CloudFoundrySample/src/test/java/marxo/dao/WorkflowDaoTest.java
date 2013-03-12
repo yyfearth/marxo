@@ -1,7 +1,7 @@
 package marxo.dao;
 
 import junit.framework.Assert;
-import marxo.Bean.Workflow;
+import marxo.bean.Workflow;
 import marxo.data.JsonParser;
 import marxo.tool.DataGenerator;
 import org.testng.annotations.BeforeClass;

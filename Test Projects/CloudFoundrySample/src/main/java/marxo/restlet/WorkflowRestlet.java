@@ -1,7 +1,7 @@
 package marxo.restlet;
 
 import com.google.gson.Gson;
-import marxo.Bean.Workflow;
+import marxo.bean.Workflow;
 import marxo.dao.WorkflowDao;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
