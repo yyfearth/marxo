@@ -4,9 +4,6 @@ import com.github.jmkgreen.morphia.Datastore;
 import com.github.jmkgreen.morphia.Morphia;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import java.net.UnknownHostException;
 import java.util.List;
@@ -23,7 +20,7 @@ public class MongoDbConnector {
 	 * @return the connected client
 	 */
 	public static MongoClient getMongoClient() {
-		if (mongoClient !=null) {
+		if (mongoClient != null) {
 			return mongoClient;
 		}
 
@@ -38,21 +35,21 @@ public class MongoDbConnector {
 			if (serviceJson == null) {
 				mongoClient = new MongoClient("localhost", 27017);
 
-				List<String> nameList = mongoClient.getDatabaseNames ();
+				List<String> nameList = mongoClient.getDatabaseNames();
 				for (String name : nameList) {
 					System.out.println("Name: " + name);
 				}
 			} else {
 				System.out.println("System.getenv(\"VCAP_SERVICES\"):\n" + serviceJson);
 
-				JSONObject services = (JSONObject) JSONValue.parse(serviceJson);
-				JSONArray mongoServices = (JSONArray) services.get("data-2.0");
-				JSONObject mongoService = (JSONObject) mongoServices.get(0);
-				JSONObject credential = (JSONObject) mongoService.get("credentials");
-				String url = (String) credential.get("url");
-				String dbName = (String) credential.get("db");
+//				JSONObject services = (JSONObject) JSONValue.parse(serviceJson);
+//				JSONArray mongoServices = (JSONArray) services.get("data-2.0");
+//				JSONObject mongoService = (JSONObject) mongoServices.get(0);
+//				JSONObject credential = (JSONObject) mongoService.get("credentials");
+//				String url = (String) credential.get("url");
+//				String dbName = (String) credential.get("db");
 
-				mongoClient = new MongoClient(new MongoClientURI(url));
+//				mongoClient = new MongoClient(new MongoClientURI(url));
 			}
 		} catch (UnknownHostException e) {
 			e.printStackTrace();

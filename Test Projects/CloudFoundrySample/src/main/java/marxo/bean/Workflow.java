@@ -57,8 +57,8 @@ public class Workflow extends BasicEntity {
 	}
 
 	String name;
-	UUID[] nodeIds;
-	UUID[] linkIds;
+	UUID[] nodeIds = new UUID[0];
+	UUID[] linkIds = new UUID[0];
 	UUID tenantId;
 	WorkflowType type = WorkflowType.None;
 	WorkflowStatus status = WorkflowStatus.None;

@@ -83,12 +83,12 @@ public abstract class BasicEntity {
 	}
 
 	@JsonProperty("modifiedBy")
-	public String getJsonmodifiedByUserId() {
+	public String getJsonModifiedByUserId() {
 		return (modifiedByUserId == null) ? null : modifiedByUserId.toString();
 	}
 
 	@JsonProperty("modifiedBy")
-	public void setJsonmodifiedByUserId(String modifiedByUserId) {
+	public void setJsonModifiedByUserId(String modifiedByUserId) {
 		this.modifiedByUserId = new ObjectId(modifiedByUserId);
 	}
 }
