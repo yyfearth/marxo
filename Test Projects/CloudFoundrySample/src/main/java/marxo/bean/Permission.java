@@ -1,4 +1,4 @@
-package marxo.Bean;
+package marxo.bean;
 
 import java.util.UUID;
 
