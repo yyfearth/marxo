@@ -1,8 +1,11 @@
 package marxo.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.jmkgreen.morphia.annotations.Entity;
+import org.bson.types.ObjectId;
 
-import java.util.UUID;
+import java.util.List;
 
 @Entity(value = "nodes")
 public class SharedNode extends BasicEntity {
@@ -14,15 +17,26 @@ public class SharedNode extends BasicEntity {
 		this.name = name;
 	}
 
-	public UUID getWorkflowId() {
+	public ObjectId getWorkflowId() {
 		return workflowId;
 	}
 
-	public void setWorkflowId(UUID workflowId) {
+	public void setWorkflowId(ObjectId workflowId) {
 		this.workflowId = workflowId;
 	}
 
 	String name;
-	UUID workflowId;
-//	List<SharedAction> sharedActions;
+	@JsonIgnore
+	ObjectId workflowId;
+	List<SharedAction> sharedActions;
+
+	@JsonProperty("workflowId")
+	public String getJsonWorkflowId() {
+		return (workflowId == null) ? null : workflowId.toString();
+	}
+
+	@JsonProperty("workflowId")
+	public void setJsonWorkflowId(String workflowId) {
+		this.workflowId = (workflowId == null) ? null : new ObjectId(workflowId);
+	}
 }
