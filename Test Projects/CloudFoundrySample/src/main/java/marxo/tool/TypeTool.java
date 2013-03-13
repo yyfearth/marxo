@@ -1,5 +1,7 @@
 package marxo.tool;
 
+import org.bson.types.ObjectId;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,5 +27,25 @@ public class TypeTool {
 
 	public static <T> Class<T> getType(T obj) {
 		return (Class<T>) obj.getClass();
+	}
+
+	public static ObjectId[] stringsToObjectIds(String[] strings) {
+		ObjectId[] objectIds = new ObjectId[strings.length];
+
+		for (int i = 0; i < strings.length; i++) {
+			objectIds[i] = new ObjectId(strings[i]);
+		}
+
+		return objectIds;
+	}
+
+	public static String[] objectIdsToStrings(ObjectId[] objectIds) {
+		String[] strings = new String[objectIds.length];
+
+		for (int i = 0; i < objectIds.length; i++) {
+			strings[i] = objectIds[i].toString();
+		}
+
+		return strings;
 	}
 }

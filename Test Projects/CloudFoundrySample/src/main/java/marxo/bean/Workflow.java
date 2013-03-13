@@ -1,9 +1,12 @@
 package marxo.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.jmkgreen.morphia.annotations.Entity;
+import marxo.tool.TypeTool;
+import org.bson.types.ObjectId;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 @Entity(value = "workflows", noClassnameStored = true)
 public class Workflow extends BasicEntity {
@@ -16,27 +19,27 @@ public class Workflow extends BasicEntity {
 		this.name = name;
 	}
 
-	public UUID[] getNodeIds() {
+	public ObjectId[] getNodeIds() {
 		return nodeIds;
 	}
 
-	public void setNodeIds(UUID[] nodeIds) {
+	public void setNodeIds(ObjectId[] nodeIds) {
 		this.nodeIds = nodeIds;
 	}
 
-	public UUID[] getLinkIds() {
+	public ObjectId[] getLinkIds() {
 		return linkIds;
 	}
 
-	public void setLinkIds(UUID[] linkIds) {
+	public void setLinkIds(ObjectId[] linkIds) {
 		this.linkIds = linkIds;
 	}
 
-	public UUID getTenantId() {
+	public ObjectId getTenantId() {
 		return tenantId;
 	}
 
-	public void setTenantId(UUID tenantId) {
+	public void setTenantId(ObjectId tenantId) {
 		this.tenantId = tenantId;
 	}
 
@@ -57,11 +60,39 @@ public class Workflow extends BasicEntity {
 	}
 
 	String name;
-	UUID[] nodeIds = new UUID[0];
-	UUID[] linkIds = new UUID[0];
-	UUID tenantId;
+	@JsonIgnore
+	ObjectId[] nodeIds = new ObjectId[0];
+	@JsonIgnore
+	ObjectId[] linkIds = new ObjectId[0];
+	@JsonIgnore
+	ObjectId tenantId;
 	WorkflowType type = WorkflowType.None;
 	WorkflowStatus status = WorkflowStatus.None;
+
+	public String[] getJsonNodeIds() {
+		return TypeTool.objectIdsToStrings(nodeIds);
+	}
+
+	public void setJsonNodeIds(String[] nodeIds) {
+		this.nodeIds = TypeTool.stringsToObjectIds(nodeIds);
+	}
+
+	@JsonProperty("linkIds")
+	public String[] getJsonLinkIds() {
+		return TypeTool.objectIdsToStrings(linkIds);
+	}
+
+	public void setJsonLinkIds(String[] linkIds) {
+		this.linkIds = TypeTool.stringsToObjectIds(linkIds);
+	}
+
+	public String getJsonTenantId() {
+		return (tenantId == null) ? null : tenantId.toString();
+	}
+
+	public void setJsonTenantId(String tenantId) {
+		this.tenantId = (tenantId == null) ? null : new ObjectId(tenantId);
+	}
 
 	@Override
 	public boolean equals(Object o) {
