@@ -51,15 +51,15 @@ public abstract class BasicEntity {
 
 	@Id
 	@JsonIgnore
-	ObjectId id = new ObjectId();
+	ObjectId id;
 	@JsonIgnore
 	ObjectId createdByUserId;
 	@JsonProperty("created")
-	Date createdDate = new Date();
+	Date createdDate;
 	@JsonIgnore
 	ObjectId modifiedByUserId;
 	@JsonProperty("modified")
-	Date modifiedDate = new Date();
+	Date modifiedDate;
 
 	////////// For JSON output
 	@JsonProperty("id")
@@ -90,5 +90,14 @@ public abstract class BasicEntity {
 	@JsonProperty("modifiedBy")
 	public void setJsonModifiedByUserId(String modifiedByUserId) {
 		this.modifiedByUserId = new ObjectId(modifiedByUserId);
+	}
+
+	@JsonProperty("objectType")
+	public String getObjectType() {
+		return this.getClass().getSimpleName().toLowerCase();
+	}
+
+	public void setRandomId() {
+		this.id = new ObjectId();
 	}
 }

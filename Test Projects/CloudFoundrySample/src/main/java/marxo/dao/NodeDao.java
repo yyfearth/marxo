@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class NodeDao extends BasicDAO<SharedNode, UUID> {
 
-	protected NodeDao() {
+	public NodeDao() {
 		super(MongoDbConnector.getDatastore());
 	}
 }
