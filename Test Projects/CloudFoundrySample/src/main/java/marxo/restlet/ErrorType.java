@@ -4,5 +4,6 @@ public enum ErrorType {
 	Unknown,
 	EntityNotFound,
 	InvalidRequest,
+	IdNotProperlyFormatted,
 }
 

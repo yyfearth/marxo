@@ -1,9 +1,9 @@
 package marxo.restlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.WriteResult;
 import marxo.bean.Workflow;
 import marxo.dao.WorkflowDao;
-import marxo.tool.DataGenerator;
 import org.bson.types.ObjectId;
 
 import javax.ws.rs.*;
@@ -11,87 +11,106 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 // Todo: refactoring error response.
-@Path("/workflows")
+@Path("workflows")
 public class WorkflowRestlet {
+	WorkflowDao workflowDao = new WorkflowDao();
 
 	@POST
+	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response postWorkflow() throws URISyntaxException {
-		Workflow workflow = new Workflow();
-		workflow.setName(DataGenerator.getRandomProjectName());
+	public Response postWorkflow(Workflow workflow) {
+		if (workflow.getTenantId() == null) {
+			throw new ErrorWebApplicationException(ErrorType.InvalidRequest, "No tenant id");
+		}
+
+		workflow.setId(new ObjectId());
+		Date now = new Date();
+		workflow.setCreatedDate(now);
+		workflow.setModifiedDate(now);
 
 		try {
-			WorkflowDao workflowDao = new WorkflowDao();
 			workflowDao.save(workflow);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Response.serverError().entity(new ErrorJson(ErrorType.Unknown)).build();
+			throw new ErrorWebApplicationException(ErrorType.Unknown, "Unable to save the workflow");
 		}
 
-		return Response.created(new URI("/" + workflow.getId())).build();
+		String path = "/" + workflow.getId();
+
+		try {
+			return Response.created(new URI(path)).entity(workflow).build();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new ErrorWebApplicationException(ErrorType.Unknown, "Unable to construct the URI: " + path);
+		}
 	}
 
 	@GET
-	@Path("/{workflowId}")
+	@Path("{workflowId}")
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response getWorkflow(@PathParam("workflowId") String workflowId) throws JsonProcessingException {
 		if (ObjectId.isValid(workflowId) == false) {
-			return Response.status(Response.Status.NOT_FOUND).entity(new ErrorJson(ErrorType.InvalidRequest)).build();
+			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
 		}
 
-		WorkflowDao workflowDao = new WorkflowDao();
 		Workflow workflow = workflowDao.get(new ObjectId(workflowId));
 
 		if (workflow == null) {
-			return Response.status(Response.Status.NOT_FOUND).entity(new ErrorJson(ErrorType.EntityNotFound)).build();
+			throw new ErrorWebApplicationException(ErrorType.EntityNotFound);
 		}
 
 		return Response.ok(workflow).build();
 	}
 
 	@PUT
-	@Path("/{workflowId}")
+	@Path("{workflowId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response puttWorkflow(@PathParam("workflowId") String workflowId, Workflow newWorkflow) {
+	public Response putWorkflow(@PathParam("workflowId") String workflowId, Workflow newWorkflow) {
 		if (ObjectId.isValid(workflowId) == false) {
-			return Response.status(Response.Status.NOT_FOUND).entity(new ErrorJson(ErrorType.InvalidRequest)).build();
+			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
 		}
 
-		WorkflowDao workflowDao = new WorkflowDao();
-		String errorMessage = workflowDao.deleteById(new ObjectId(workflowId)).getError();
+		System.out.println("Does exist? " + workflowDao.exists("id", workflowId));
 
-		if (errorMessage != null) {
-			System.out.println(errorMessage);
-			return Response.serverError().entity(new ErrorJson(ErrorType.Unknown)).build();
+		WriteResult writeResult = workflowDao.deleteById(new ObjectId(workflowId));
+
+		System.out.println("getN: " + writeResult.getN());
+
+		if (writeResult.getError() != null) {
+			System.out.println(writeResult.getError());
+			throw new ErrorWebApplicationException(ErrorType.Unknown);
 		}
 
 		try {
+			if (newWorkflow.getId() == null) {
+				newWorkflow.setJsonId(workflowId);
+			}
+
 			workflowDao.save(newWorkflow);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return Response.serverError().entity(new ErrorJson(ErrorType.Unknown)).build();
+			throw new ErrorWebApplicationException(ErrorType.Unknown);
 		}
 
-		return Response.ok().build();
+		return Response.ok().entity(newWorkflow).build();
 	}
 
 	@DELETE
-	@Path("/{workflowId}")
+	@Path("{workflowId}")
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response deleteWorkflow(@PathParam("workflowId") String workflowId) {
 		if (ObjectId.isValid(workflowId) == false) {
-			return Response.status(Response.Status.NOT_FOUND).entity(new ErrorJson(ErrorType.InvalidRequest)).build();
+			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
 		}
 
-		WorkflowDao workflowDao = new WorkflowDao();
 		String errorMessage = workflowDao.deleteById(new ObjectId(workflowId)).getError();
 
 		if (errorMessage != null) {
-			System.out.println(errorMessage);
-			return Response.serverError().entity(new ErrorJson(ErrorType.Unknown)).build();
+			throw new ErrorWebApplicationException(ErrorType.Unknown);
 		}
 
 		return Response.ok().build();

@@ -11,9 +11,7 @@ public class ErrorJsonTest {
 		ErrorType[] errorTypes = ErrorType.values();
 
 		for (ErrorType errorType : errorTypes) {
-			ErrorJson errorJson = new ErrorJson(errorType);
-
-			assert errorJson.error.description != null;
+			ErrorJson errorJson = new ErrorJson(errorType, null);
 
 			String json = JsonParser.getMapper().writeValueAsString(errorJson);
 			System.out.println(json);
