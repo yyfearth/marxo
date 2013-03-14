@@ -32,6 +32,8 @@ Icon
 
 # Source Map
 *.map
+# Temp Ignore Compiled JS
+web/js/*.js
 
 ########## Java ##########
 # Project output
