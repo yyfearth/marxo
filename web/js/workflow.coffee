@@ -259,7 +259,7 @@ do procData = ->
 
 # backbone & bootstrap
 
-define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui.custom.min', 'lib/jquery.jsPlumb.min'],
+define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
  find
  FrameView

@@ -35,6 +35,10 @@ Icon
 # Temp Ignore Compiled JS
 web/js/*.js
 
+########## NodeJS ##########
+
+node_modules
+
 ########## Java ##########
 # Project output
 out
