@@ -1,12 +1,11 @@
 package marxo.dao;
 
 import com.github.jmkgreen.morphia.dao.BasicDAO;
-import marxo.bean.SharedNode;
+import marxo.bean.Node;
 import marxo.data.MongoDbConnector;
+import org.bson.types.ObjectId;
 
-import java.util.UUID;
-
-public class NodeDao extends BasicDAO<SharedNode, UUID> {
+public class NodeDao extends BasicDAO<Node, ObjectId> {
 
 	public NodeDao() {
 		super(MongoDbConnector.getDatastore());

@@ -1,7 +1,9 @@
 package marxo.tool;
 
+import marxo.bean.BasicEntity;
 import org.bson.types.ObjectId;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,5 +49,36 @@ public class TypeTool {
 		}
 
 		return strings;
+	}
+
+	public static <T extends BasicEntity> T[] toEntities(Class<T> targetClass, List<ObjectId> idList) {
+		try {
+			@SuppressWarnings("unchecked")
+			T[] entities = (T[]) Array.newInstance(targetClass, idList.size());
+
+			for (int i = 0; i < entities.length; i++) {
+				T entity = targetClass.newInstance();
+				entity.setId(idList.get(i));
+				entities[i] = entity;
+			}
+
+			return entities;
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public static List<ObjectId> toIdList(BasicEntity[] entities) {
+		List<ObjectId> idList = new ArrayList<ObjectId>();
+
+		for (int i = 0; i < entities.length; i++) {
+			idList.add(i, entities[i].getId());
+		}
+
+		return idList;
 	}
 }

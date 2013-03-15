@@ -1,10 +1,65 @@
 package marxo.bean;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.jmkgreen.morphia.annotations.Entity;
+import marxo.tool.TypeTool;
+import org.bson.types.ObjectId;
 
-import java.util.UUID;
+import java.util.List;
 
 @Entity(value = "nodes")
-public class Node extends SharedNode {
-	UUID templateId;
+public class Node extends BasicEntity {
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public ObjectId getWorkflowId() {
+		return workflowId;
+	}
+
+	public void setWorkflowId(ObjectId workflowId) {
+		this.workflowId = workflowId;
+	}
+
+	public List<ObjectId> getActionIds() {
+		return actionIds;
+	}
+
+	public void setActionIds(List<ObjectId> actionIds) {
+		this.actionIds = actionIds;
+	}
+
+	String name;
+	@JsonIgnore
+	ObjectId workflowId;
+	@JsonIgnore
+	List<ObjectId> actionIds;
+
+	@JsonProperty("workflow")
+	public Workflow getWorkflow() {
+		return new Workflow() {{
+			id = workflowId;
+		}};
+	}
+
+	@JsonProperty("workflow")
+	public void setWorkflow(Workflow workflow) {
+		workflowId = workflow.id;
+	}
+
+	@JsonProperty("entities")
+	public Action[] getActions() {
+		return TypeTool.toEntities(Action.class, actionIds);
+	}
+
+	@JsonProperty("entities")
+	public void setActions(Action[] actions) {
+		this.actionIds = TypeTool.toIdList(actions);
+	}
+
 }

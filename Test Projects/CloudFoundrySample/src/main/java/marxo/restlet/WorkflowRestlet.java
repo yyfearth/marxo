@@ -13,7 +13,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
-// Todo: refactoring error response.
 @Path("workflows")
 public class WorkflowRestlet {
 	WorkflowDao workflowDao = new WorkflowDao();

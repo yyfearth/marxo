@@ -94,10 +94,6 @@ public abstract class BasicEntity {
 
 	@JsonProperty("objectType")
 	public String getObjectType() {
-		return this.getClass().getSimpleName().toLowerCase();
-	}
-
-	public void setRandomId() {
-		this.id = new ObjectId();
+		return getClass().getSimpleName();
 	}
 }
