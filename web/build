@@ -4,12 +4,12 @@ BASEDIR=$(cd "$(dirname "$(which $0)")" && pwd)
 EXT=.coffee
 cd $BASEDIR/js >/dev/null
 echo Compiling ...
-$BASEDIR/node_modules/coffee-script/bin/coffee -cm *$EXT
+$BASEDIR/node_modules/.bin/coffee -cm *$EXT
 for src in *$EXT
 do
 	name=$(basename -s $EXT $src)
 	echo Minify $name ...
-	$BASEDIR/node_modules/uglify-js/bin/uglifyjs $name.js -o $name.js --source-map $name.map --in-source-map $name.map
+	$BASEDIR/node_modules/.bin/uglifyjs $name.js -o $name.js --source-map $name.map --in-source-map $name.map
 done
 echo done
 cd - >/dev/null
