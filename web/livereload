@@ -1,5 +1,5 @@
 #!/bin/bash
 BASEDIR=$(cd "$(dirname "$(which $0)")" && pwd)
 cd $BASEDIR/js >/dev/null
-cake build
+cake watch
 cd - >/dev/null
