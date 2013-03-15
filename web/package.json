@@ -1,0 +1,15 @@
+{
+	"name": "marxo-web-console",
+	"description": "The web console of the marxo project",
+	"author": "Wilson Young",
+	"version": "0.1.0",
+	"engines": {
+		"node": ">=0.8.0"
+	},
+	"devDependencies": {
+		"livereload": "latest",
+		"coffee-script": ">=1.6.1",
+		"uglify-js": "~2.2",
+		"less": "latest"
+	}
+}

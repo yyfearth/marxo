@@ -1,0 +1,130 @@
+fs = require 'fs'
+path = require 'path'
+# util = require 'util'
+livereload = require 'livereload'
+CoffeeScript = require 'coffee-script'
+UglifyJS = require 'uglify-js'
+less = require 'less'
+
+_tmpdir = process.env.TMPDIR or process.env.TMP or process.env.TEMP or '/tmp/'
+_tmpdir += '/' unless /[\/\\]$/.test _tmpdir
+
+coffee_dir = __dirname + '/js/'
+less_file = __dirname + '/css/console.less'
+
+read = (file) -> fs.readFileSync file, encoding: 'utf8'
+
+_write = (file, data) -> fs.writeFileSync file, data, encoding: 'utf8'
+
+
+write = (file, data) ->
+  console.log 'Write:', file
+  _write file, data
+
+coffee = (file) ->
+  console.log 'Compile:', file
+  compiled = CoffeeScript.compile read(file),
+    filename: file
+    sourceMap: true
+
+  code: compiled.js
+  map: compiled.v3SourceMap
+
+uglify = (basename, code, map) ->
+  console.log 'Uglify:', basename
+  mapfile = basename + '.map'
+  tmpmap = _tmpdir + mapfile
+  _write tmpmap, map
+  result = UglifyJS.minify code,
+    fromString: true
+    inSourceMap: tmpmap
+    outSourceMap: mapfile
+  fs.unlink tmpmap, (err) -> console.error err if err
+  result
+
+build_less = (file, callback, min) ->
+  console.log 'Compile:', file
+  data = read file
+  output = file.replace /less$/, 'css'
+  min = !!min
+
+  parser = new less.Parser
+    paths: path.dirname file
+    filename: file
+    optimization: 1
+    rootpath: ''
+    relativeUrls: false
+    color: true
+    strictImports: false
+    relativeUrls: false
+
+  parser.parse data, (err, tree) ->
+    if err
+      console.error 'compile less error: ', err
+    else
+      try
+        css = tree.toCSS
+          compress: min # options.compress
+          yuicompress: min # options.yuicompress
+
+        write output, css
+        callback? output
+      catch e
+        console.error 'compile less error: ', e
+    return
+  output
+
+build_coffee = (file, min) ->
+  basename = path.basename file, '.coffee'
+  dirname = (path.dirname file) + '/'
+  jsfile = dirname + basename + '.js'
+  result = coffee file
+  result = uglify basename, result.code, result.map if min
+  write jsfile, result.code
+  write dirname + basename + '.map', result.map
+  jsfile
+
+task 'build', 'compile and minify all coffee and less', ->
+  build_less less_file
+  fs.readdir coffee_dir, (err, files) ->
+    if err
+      console.error err
+      return
+    files.forEach (f) -> if f[-7..] is '.coffee'
+      process.nextTick ->
+        build_coffee coffee_dir + f
+        console.log 'Compiled:', f
+    return
+  return
+
+task 'clean', 'clean all compiled js and map files', ->
+  console.log 'Clean:', coffee_dir
+  fs.readdir coffee_dir, (err, files) ->
+    if err
+      console.error err
+      return
+    files.forEach (f) -> if /\.(?:js|map)$/.test f
+      console.log 'Remove:', f
+      fs.unlink coffee_dir + f, (err) -> console.error err if err
+    return
+
+task 'watch', 'run livereload', ->
+  server = livereload.createServer debug: 1
+  server.config.exts = [
+    'coffee'
+    'less'
+  ]
+  _refresh = server.refresh
+  server.refresh = (file) ->
+    console.log 'Updated:', file
+    if file[-7..] is '.coffee'
+      file = build_coffee file
+      _refresh.call server, file
+    else if file[-5..] is '.less'
+      build_less less_file, (file) ->
+        _refresh.call server, file
+    return
+
+  server.watch __dirname + '/js'
+  server.watch __dirname + '/css'
+  return
