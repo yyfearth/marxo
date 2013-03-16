@@ -4,6 +4,8 @@ import com.mongodb.WriteResult;
 import marxo.bean.Node;
 import marxo.bean.TenantNode;
 import marxo.dao.NodeDao;
+import marxo.restlet.exception.EntityNotFoundException;
+import marxo.restlet.exception.UnknownException;
 import org.bson.types.ObjectId;
 
 import javax.ws.rs.*;
@@ -18,8 +20,8 @@ public class NodeRestlet {
 	NodeDao nodeDao = new NodeDao();
 
 	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response postNode(TenantNode tenantNode) {
 		if (tenantNode == null) {
 			tenantNode = new TenantNode();
@@ -34,7 +36,7 @@ public class NodeRestlet {
 			nodeDao.save(tenantNode);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ErrorWebApplicationException(ErrorType.UNKNOWN, "Unable to save the tenantNode");
+			throw new UnknownException("Unable to save the tenantNode");
 		}
 
 		String path = "/" + tenantNode.getId();
@@ -43,36 +45,32 @@ public class NodeRestlet {
 			return Response.created(new URI(path)).entity(tenantNode).build();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-			throw new ErrorWebApplicationException(ErrorType.UNKNOWN, "Unable to construct the URI: " + path);
+			throw new UnknownException("Unable to construct the URI: " + path);
 		}
 	}
 
 	@GET
-	@Path("{nodeId:[\\da-fA-F]{24}}")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{nodeId:" + PatternLibrary.ID_PATTERN_STRING + "}")
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response getNode(@PathParam("nodeId") String nodeId) {
 //		if (ObjectId.isValid(nodeId) == false) {
-//			throw new ErrorWebApplicationException(ErrorType.ID_NOT_PROPERLY_FORMATTED);
+//			throw new RestletException(ErrorType.IdNotProperlyFormatted);
 //		}
 
 		Node node = nodeDao.get(new ObjectId(nodeId));
 
 		if (node == null) {
-			throw new ErrorWebApplicationException(ErrorType.ENTITY_NOT_FOUND);
+			throw new EntityNotFoundException();
 		}
 
 		return Response.ok(node).build();
 	}
 
 	@PUT
-	@Path("{nodeId}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{nodeId:" + PatternLibrary.ID_PATTERN_STRING + "}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response putNode(@PathParam("nodeId") String nodeId, TenantNode newTenantNode) {
-		if (ObjectId.isValid(nodeId) == false) {
-			throw new ErrorWebApplicationException(ErrorType.ID_NOT_PROPERLY_FORMATTED);
-		}
-
 		System.out.println("Does exist? " + nodeDao.exists("id", nodeId));
 
 		WriteResult writeResult = nodeDao.deleteById(new ObjectId(nodeId));
@@ -81,7 +79,7 @@ public class NodeRestlet {
 
 		if (writeResult.getError() != null) {
 			System.out.println(writeResult.getError());
-			throw new ErrorWebApplicationException(ErrorType.UNKNOWN);
+			throw new UnknownException("The database didn't accept the query.");
 		}
 
 		try {
@@ -92,24 +90,20 @@ public class NodeRestlet {
 			nodeDao.save(newTenantNode);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ErrorWebApplicationException(ErrorType.UNKNOWN);
+			throw new UnknownException("Cannot save the entity.");
 		}
 
 		return Response.ok(newTenantNode).build();
 	}
 
 	@DELETE
-	@Path("{nodeId}")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{nodeId:" + PatternLibrary.ID_PATTERN_STRING + "}")
+	@Produces({MediaType.APPLICATION_JSON})
 	public Response deleteNode(@PathParam("nodeId") String nodeId) {
-		if (ObjectId.isValid(nodeId) == false) {
-			throw new ErrorWebApplicationException(ErrorType.ID_NOT_PROPERLY_FORMATTED);
-		}
-
 		String errorMessage = nodeDao.deleteById(new ObjectId(nodeId)).getError();
 
 		if (errorMessage != null) {
-			throw new ErrorWebApplicationException(ErrorType.UNKNOWN);
+			throw new UnknownException("Cannot delete the entity.");
 		}
 
 		return Response.ok().build();
