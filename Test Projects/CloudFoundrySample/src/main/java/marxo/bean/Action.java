@@ -1,4 +1,4 @@
 package marxo.bean;
 
-public class Action {
+public class Action extends BasicEntity {
 }

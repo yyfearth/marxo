@@ -13,19 +13,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 
-// Todo: refactoring error response.
 @Path("workflows")
 public class WorkflowRestlet {
 	WorkflowDao workflowDao = new WorkflowDao();
 
 	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response postWorkflow(Workflow workflow) {
-		if (workflow.getTenantId() == null) {
-			throw new ErrorWebApplicationException(ErrorType.InvalidRequest, "No tenant id");
-		}
-
 		workflow.setId(new ObjectId());
 		Date now = new Date();
 		workflow.setCreatedDate(now);
@@ -50,7 +45,7 @@ public class WorkflowRestlet {
 
 	@GET
 	@Path("{workflowId}")
-	@Produces({MediaType.APPLICATION_JSON})
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getWorkflow(@PathParam("workflowId") String workflowId) throws JsonProcessingException {
 		if (ObjectId.isValid(workflowId) == false) {
 			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
@@ -67,8 +62,8 @@ public class WorkflowRestlet {
 
 	@PUT
 	@Path("{workflowId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response putWorkflow(@PathParam("workflowId") String workflowId, Workflow newWorkflow) {
 		if (ObjectId.isValid(workflowId) == false) {
 			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
@@ -101,7 +96,7 @@ public class WorkflowRestlet {
 
 	@DELETE
 	@Path("{workflowId}")
-	@Produces({MediaType.APPLICATION_JSON})
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteWorkflow(@PathParam("workflowId") String workflowId) {
 		if (ObjectId.isValid(workflowId) == false) {
 			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);

@@ -6,11 +6,12 @@ import com.github.jmkgreen.morphia.annotations.Entity;
 import marxo.tool.TypeTool;
 import org.bson.types.ObjectId;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity(value = "workflows", noClassnameStored = true)
-public class Workflow extends BasicEntity {
+public class Workflow extends BasicEntity<Workflow> {
 
 	public String getName() {
 		return name;
@@ -20,20 +21,20 @@ public class Workflow extends BasicEntity {
 		this.name = name;
 	}
 
-	public ObjectId[] getNodeIds() {
-		return nodeIds;
+	public List<ObjectId> getLinkIdList() {
+		return linkIdList;
 	}
 
-	public void setNodeIds(ObjectId[] nodeIds) {
-		this.nodeIds = nodeIds;
+	public void setLinkIdList(List<ObjectId> linkIdList) {
+		this.linkIdList = linkIdList;
 	}
 
-	public ObjectId[] getLinkIds() {
-		return linkIds;
+	public List<ObjectId> getNodeIdList() {
+		return nodeIdList;
 	}
 
-	public void setLinkIds(ObjectId[] linkIds) {
-		this.linkIds = linkIds;
+	public void setNodeIdList(List<ObjectId> nodeIdList) {
+		this.nodeIdList = nodeIdList;
 	}
 
 	public ObjectId getTenantId() {
@@ -62,32 +63,32 @@ public class Workflow extends BasicEntity {
 
 	String name;
 	@JsonIgnore
-	ObjectId[] nodeIds = null;
+	List<ObjectId> nodeIdList = null;
 	@JsonIgnore
-	ObjectId[] linkIds = null;
+	List<ObjectId> linkIdList = null;
 	@JsonIgnore
 	ObjectId tenantId;
 	WorkflowType type = null;
 	WorkflowStatus status = null;
 
-	@JsonProperty("nodeIds")
-	public String[] getJsonNodeIds() {
-		return TypeTool.objectIdsToStrings(nodeIds);
+	@JsonProperty("nodeIdList")
+	public Node[] getJsonNodes() {
+		return TypeTool.toEntities(Node.class, nodeIdList);
 	}
 
-	@JsonProperty("nodeIds")
-	public void setJsonNodeIds(String[] nodeIds) {
-		this.nodeIds = TypeTool.stringsToObjectIds(nodeIds);
+	@JsonProperty("nodeIdList")
+	public void setJsonNodes(Node[] nodes) {
+		nodeIdList = (nodes == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(nodes);
 	}
 
-	@JsonProperty("linkIds")
-	public String[] getJsonLinkIds() {
-		return TypeTool.objectIdsToStrings(linkIds);
+	@JsonProperty("linkIdList")
+	public Link[] getJsonLinks() {
+		return TypeTool.toEntities(Link.class, linkIdList);
 	}
 
-	@JsonProperty("linkIds")
-	public void setJsonLinkIds(String[] linkIds) {
-		this.linkIds = TypeTool.stringsToObjectIds(linkIds);
+	@JsonProperty("linkIdList")
+	public void setJsonLinks(Link[] links) {
+		linkIdList = (links == null) ? new ArrayList<ObjectId>() : TypeTool.toIdList(links);
 	}
 
 	@JsonProperty("tenantId")
@@ -100,34 +101,6 @@ public class Workflow extends BasicEntity {
 		this.tenantId = (tenantId == null) ? null : new ObjectId(tenantId);
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (!(o instanceof Workflow)) return false;
-
-		Workflow workflow = (Workflow) o;
-
-		if (!Arrays.equals(linkIds, workflow.linkIds)) return false;
-		if (name != null ? !name.equals(workflow.name) : workflow.name != null) return false;
-		if (!Arrays.equals(nodeIds, workflow.nodeIds)) return false;
-		if (status != workflow.status) return false;
-		if (tenantId != null ? !tenantId.equals(workflow.tenantId) : workflow.tenantId != null) return false;
-		if (type != workflow.type) return false;
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = name != null ? name.hashCode() : 0;
-		result = 31 * result + (nodeIds != null ? Arrays.hashCode(nodeIds) : 0);
-		result = 31 * result + (linkIds != null ? Arrays.hashCode(linkIds) : 0);
-		result = 31 * result + (tenantId != null ? tenantId.hashCode() : 0);
-		result = 31 * result + (type != null ? type.hashCode() : 0);
-		result = 31 * result + (status != null ? status.hashCode() : 0);
-		return result;
-	}
-
 	public static Workflow getNew() {
 		Workflow workflow = new Workflow();
 		workflow.id = new ObjectId();
@@ -137,21 +110,10 @@ public class Workflow extends BasicEntity {
 		workflow.type = WorkflowType.None;
 		workflow.status = WorkflowStatus.None;
 
-		workflow.nodeIds = new ObjectId[0];
-		workflow.linkIds = new ObjectId[0];
+		workflow.nodeIdList = new ArrayList<ObjectId>();
+		workflow.linkIdList = new ArrayList<ObjectId>();
 
 		return workflow;
 	}
 
-//	public boolean validateAndFix() {
-//		if (id == null) {
-//			id = new ObjectId();
-//		}
-//
-//		if (createdDate == null) {
-//
-//			createdDate = new Date();
-//			modifiedDate = new Date();
-//		}
-//	}
 }

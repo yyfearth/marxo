@@ -1,6 +1,7 @@
 package marxo.restlet;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.jmkgreen.morphia.annotations.Embedded;
 
 import javax.ws.rs.core.Response;
@@ -45,7 +46,9 @@ public class ErrorJson {
 
 	@Embedded
 	public class Error {
+		@JsonProperty("type")
 		ErrorType type = ErrorType.Unknown;
+		@JsonProperty("description")
 		String description;
 
 		Error(ErrorType type, String description) {
