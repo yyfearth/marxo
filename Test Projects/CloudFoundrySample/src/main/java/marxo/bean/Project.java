@@ -110,8 +110,8 @@ public class Project {
 	public UUID tenantId;
 	public UUID workflowId;
 	String contextKey;
-	ProjectType type = ProjectType.None;
-	ProjectStatus status = ProjectStatus.None;
+	ProjectType type = ProjectType.NONE;
+	ProjectStatus status = ProjectStatus.NONE;
 	public UUID createdByUserId;
 	public UUID modifiedUserId;
 	public Date createdDate = new Date();

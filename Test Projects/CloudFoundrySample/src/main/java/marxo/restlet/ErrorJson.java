@@ -11,18 +11,18 @@ public class ErrorJson {
 
 	@JsonIgnore
 	public final static HashMap<ErrorType, ErrorValueContainer> errorMap = new HashMap<ErrorType, ErrorValueContainer>() {{
-		put(ErrorType.Unknown, new ErrorValueContainer() {{
+		put(ErrorType.UNKNOWN, new ErrorValueContainer() {{
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			message = "Call 911!";
 		}});
-		put(ErrorType.EntityNotFound, new ErrorValueContainer() {{
+		put(ErrorType.ENTITY_NOT_FOUND, new ErrorValueContainer() {{
 			status = Response.Status.NOT_FOUND;
 			message = "The requested entity is not found.";
 		}});
-		put(ErrorType.InvalidRequest, new ErrorValueContainer() {{
+		put(ErrorType.INVALID_REQUEST, new ErrorValueContainer() {{
 			status = Response.Status.BAD_REQUEST;
 		}});
-		put(ErrorType.IdNotProperlyFormatted, new ErrorValueContainer() {{
+		put(ErrorType.ID_NOT_PROPERLY_FORMATTED, new ErrorValueContainer() {{
 			status = Response.Status.BAD_REQUEST;
 			message = "ID is not properly formatted.";
 		}});
@@ -47,7 +47,7 @@ public class ErrorJson {
 	@Embedded
 	public class Error {
 		@JsonProperty("type")
-		ErrorType type = ErrorType.Unknown;
+		ErrorType type = ErrorType.UNKNOWN;
 		@JsonProperty("description")
 		String description;
 

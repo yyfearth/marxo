@@ -1,9 +1,8 @@
 package marxo.restlet;
 
 public enum ErrorType {
-	Unknown,
-	EntityNotFound,
-	InvalidRequest,
-	IdNotProperlyFormatted,
+	UNKNOWN,
+	ENTITY_NOT_FOUND,
+	INVALID_REQUEST,
+	ID_NOT_PROPERLY_FORMATTED,
 }
-

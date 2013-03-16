@@ -110,13 +110,12 @@ public class Workflow extends BasicEntity<Workflow> {
 		workflow.createdDate = new Date();
 		workflow.modifiedDate = new Date();
 
-		workflow.type = WorkflowType.None;
-		workflow.status = WorkflowStatus.None;
+		workflow.type = WorkflowType.NONE;
+		workflow.status = WorkflowStatus.NONE;
 
 		workflow.nodeIdList = new ArrayList<ObjectId>();
 		workflow.linkIdList = new ArrayList<ObjectId>();
 
 		return workflow;
 	}
-
 }
