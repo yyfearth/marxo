@@ -33,7 +33,7 @@ public class WorkflowRestlet {
 			throw new ErrorWebApplicationException(ErrorType.UNKNOWN, "Unable to save the workflow");
 		}
 
-		String path = "/" + workflow.getId();
+		String path = workflow.getId().toString();
 
 		try {
 			return Response.created(new URI(path)).entity(workflow).build();
