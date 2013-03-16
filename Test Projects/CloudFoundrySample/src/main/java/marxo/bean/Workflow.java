@@ -2,6 +2,7 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import marxo.tool.TypeTool;
 import org.bson.types.ObjectId;
@@ -11,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 
 @Entity(value = "workflows", noClassnameStored = true)
+@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links",
+		"created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Workflow extends BasicEntity<Workflow> {
 
 	public String getName() {
