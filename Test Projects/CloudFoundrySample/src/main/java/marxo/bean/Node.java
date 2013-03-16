@@ -6,10 +6,11 @@ import com.github.jmkgreen.morphia.annotations.Entity;
 import marxo.tool.TypeTool;
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(value = "nodes")
-public class Node extends BasicEntity {
+public class Node extends BasicEntity<Node> {
 	public String getName() {
 		return name;
 	}
@@ -42,24 +43,24 @@ public class Node extends BasicEntity {
 
 	@JsonProperty("workflow")
 	public Workflow getWorkflow() {
-		return new Workflow() {{
+		return (workflowId == null) ? null : new Workflow() {{
 			id = workflowId;
 		}};
 	}
 
 	@JsonProperty("workflow")
 	public void setWorkflow(Workflow workflow) {
-		workflowId = workflow.id;
+		workflowId = (workflow == null) ? null : workflow.id;
 	}
 
-	@JsonProperty("entities")
+	@JsonProperty("actions")
 	public Action[] getActions() {
 		return TypeTool.toEntities(Action.class, actionIds);
 	}
 
-	@JsonProperty("entities")
+	@JsonProperty("actions")
 	public void setActions(Action[] actions) {
-		this.actionIds = TypeTool.toIdList(actions);
+		this.actionIds = (actions == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(actions);
 	}
 
 }

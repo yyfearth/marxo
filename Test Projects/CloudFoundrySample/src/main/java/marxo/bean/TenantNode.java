@@ -20,13 +20,13 @@ public class TenantNode extends Node {
 
 	@JsonProperty("template")
 	public Node getTemplate() {
-		return new Node() {{
+		return (templateId == null) ? null : new Node() {{
 			id = templateId;
 		}};
 	}
 
 	@JsonProperty("template")
 	public void setTemplate(Node template) {
-		templateId = template.id;
+		templateId = (template == null) ? null : template.id;
 	}
 }

@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity(value = "workflows", noClassnameStored = true)
-public class Workflow extends BasicEntity {
+public class Workflow extends BasicEntity<Workflow> {
 
 	public String getName() {
 		return name;
@@ -78,7 +78,7 @@ public class Workflow extends BasicEntity {
 
 	@JsonProperty("nodeIdList")
 	public void setJsonNodes(Node[] nodes) {
-		nodeIdList = TypeTool.toIdList(nodes);
+		nodeIdList = (nodes == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(nodes);
 	}
 
 	@JsonProperty("linkIdList")
@@ -88,7 +88,7 @@ public class Workflow extends BasicEntity {
 
 	@JsonProperty("linkIdList")
 	public void setJsonLinks(Link[] links) {
-		linkIdList = TypeTool.toIdList(links);
+		linkIdList = (links == null) ? new ArrayList<ObjectId>() : TypeTool.toIdList(links);
 	}
 
 	@JsonProperty("tenantId")
@@ -115,6 +115,5 @@ public class Workflow extends BasicEntity {
 
 		return workflow;
 	}
-
 
 }
