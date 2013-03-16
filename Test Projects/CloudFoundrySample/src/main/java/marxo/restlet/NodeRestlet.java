@@ -18,8 +18,8 @@ public class NodeRestlet {
 	NodeDao nodeDao = new NodeDao();
 
 	@POST
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response postNode(TenantNode tenantNode) {
 		if (tenantNode == null) {
 			tenantNode = new TenantNode();
@@ -49,7 +49,7 @@ public class NodeRestlet {
 
 	@GET
 	@Path("{nodeId:[\\da-fA-F]{24}}")
-	@Produces({MediaType.APPLICATION_JSON})
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response getNode(@PathParam("nodeId") String nodeId) {
 //		if (ObjectId.isValid(nodeId) == false) {
 //			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
@@ -66,8 +66,8 @@ public class NodeRestlet {
 
 	@PUT
 	@Path("{nodeId}")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response putNode(@PathParam("nodeId") String nodeId, TenantNode newTenantNode) {
 		if (ObjectId.isValid(nodeId) == false) {
 			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
@@ -100,7 +100,7 @@ public class NodeRestlet {
 
 	@DELETE
 	@Path("{nodeId}")
-	@Produces({MediaType.APPLICATION_JSON})
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteNode(@PathParam("nodeId") String nodeId) {
 		if (ObjectId.isValid(nodeId) == false) {
 			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
