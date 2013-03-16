@@ -1,6 +1,5 @@
 package marxo.restlet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.WriteResult;
 import marxo.bean.Node;
 import marxo.bean.TenantNode;
@@ -22,8 +21,8 @@ public class NodeRestlet {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response postNode(TenantNode tenantNode) {
-		if (tenantNode.getTemplateId() == null) {
-			throw new ErrorWebApplicationException(ErrorType.InvalidRequest, "No template id");
+		if (tenantNode == null) {
+			tenantNode = new TenantNode();
 		}
 
 		tenantNode.setId(new ObjectId());
@@ -49,12 +48,12 @@ public class NodeRestlet {
 	}
 
 	@GET
-	@Path("{nodeId}")
+	@Path("{nodeId:[\\da-fA-F]{24}}")
 	@Produces({MediaType.APPLICATION_JSON})
-	public Response getNode(@PathParam("nodeId") String nodeId) throws JsonProcessingException {
-		if (ObjectId.isValid(nodeId) == false) {
-			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
-		}
+	public Response getNode(@PathParam("nodeId") String nodeId) {
+//		if (ObjectId.isValid(nodeId) == false) {
+//			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
+//		}
 
 		Node node = nodeDao.get(new ObjectId(nodeId));
 

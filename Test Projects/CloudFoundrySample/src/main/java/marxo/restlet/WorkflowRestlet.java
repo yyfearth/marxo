@@ -21,10 +21,6 @@ public class WorkflowRestlet {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public Response postWorkflow(Workflow workflow) {
-		if (workflow.getTenantId() == null) {
-			throw new ErrorWebApplicationException(ErrorType.InvalidRequest, "No tenant id");
-		}
-
 		workflow.setId(new ObjectId());
 		Date now = new Date();
 		workflow.setCreatedDate(now);
