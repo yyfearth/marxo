@@ -24,6 +24,22 @@ public class Workflow extends BasicEntity<Workflow> {
 		this.name = name;
 	}
 
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public List<ObjectId> getLinkIdList() {
 		return linkIdList;
 	}
@@ -64,32 +80,34 @@ public class Workflow extends BasicEntity<Workflow> {
 		this.status = status;
 	}
 
-	String name;
+	String name, title;
+	@JsonProperty("desc")
+	String description;
+	WorkflowType type = null;
+	WorkflowStatus status = null;
+	@JsonIgnore
+	ObjectId tenantId;
 	@JsonIgnore
 	List<ObjectId> nodeIdList = null;
 	@JsonIgnore
 	List<ObjectId> linkIdList = null;
-	@JsonIgnore
-	ObjectId tenantId;
-	WorkflowType type = null;
-	WorkflowStatus status = null;
 
-	@JsonProperty("nodeIdList")
+	@JsonProperty("nodes")
 	public Node[] getJsonNodes() {
 		return TypeTool.toEntities(Node.class, nodeIdList);
 	}
 
-	@JsonProperty("nodeIdList")
+	@JsonProperty("nodes")
 	public void setJsonNodes(Node[] nodes) {
 		nodeIdList = (nodes == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(nodes);
 	}
 
-	@JsonProperty("linkIdList")
+	@JsonProperty("links")
 	public Link[] getJsonLinks() {
 		return TypeTool.toEntities(Link.class, linkIdList);
 	}
 
-	@JsonProperty("linkIdList")
+	@JsonProperty("links")
 	public void setJsonLinks(Link[] links) {
 		linkIdList = (links == null) ? new ArrayList<ObjectId>() : TypeTool.toIdList(links);
 	}
