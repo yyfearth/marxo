@@ -7,7 +7,7 @@ import org.bson.types.ObjectId;
 
 import java.util.Date;
 
-public abstract class BasicEntity {
+public abstract class BasicEntity<T> {
 
 	public ObjectId getId() {
 		return id;
@@ -64,7 +64,7 @@ public abstract class BasicEntity {
 	////////// For JSON output
 	@JsonProperty("id")
 	public String getJsonId() {
-		return id.toString();
+		return (id == null) ? null : id.toString();
 	}
 
 	@JsonProperty("id")
@@ -94,6 +94,12 @@ public abstract class BasicEntity {
 
 	@JsonProperty("objectType")
 	public String getObjectType() {
-		return getClass().getSimpleName();
+		Class<?> clazz = getClass();
+
+		if (clazz.isAnonymousClass()) {
+			clazz = clazz.getSuperclass();
+		}
+
+		return clazz.getSimpleName();
 	}
 }
