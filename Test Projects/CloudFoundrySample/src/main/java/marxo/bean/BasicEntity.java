@@ -102,4 +102,11 @@ public abstract class BasicEntity<T> {
 
 		return clazz.getSimpleName();
 	}
+
+	@JsonProperty("objectType")
+	public void setObjectType(String ignored) {
+		// add for avoid unrecognized field error
+		// but ignore the input value
+	}
+
 }

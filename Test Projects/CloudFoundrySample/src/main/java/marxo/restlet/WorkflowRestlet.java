@@ -30,16 +30,16 @@ public class WorkflowRestlet {
 			workflowDao.save(workflow);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ErrorWebApplicationException(ErrorType.Unknown, "Unable to save the workflow");
+			throw new ErrorWebApplicationException(ErrorType.UNKNOWN, "Unable to save the workflow");
 		}
 
-		String path = "/" + workflow.getId();
+		String path = workflow.getId().toString();
 
 		try {
 			return Response.created(new URI(path)).entity(workflow).build();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
-			throw new ErrorWebApplicationException(ErrorType.Unknown, "Unable to construct the URI: " + path);
+			throw new ErrorWebApplicationException(ErrorType.UNKNOWN, "Unable to construct the URI: " + path);
 		}
 	}
 
@@ -48,13 +48,13 @@ public class WorkflowRestlet {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getWorkflow(@PathParam("workflowId") String workflowId) throws JsonProcessingException {
 		if (ObjectId.isValid(workflowId) == false) {
-			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
+			throw new ErrorWebApplicationException(ErrorType.ID_NOT_PROPERLY_FORMATTED);
 		}
 
 		Workflow workflow = workflowDao.get(new ObjectId(workflowId));
 
 		if (workflow == null) {
-			throw new ErrorWebApplicationException(ErrorType.EntityNotFound);
+			throw new ErrorWebApplicationException(ErrorType.ENTITY_NOT_FOUND);
 		}
 
 		return Response.ok(workflow).build();
@@ -66,7 +66,7 @@ public class WorkflowRestlet {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response putWorkflow(@PathParam("workflowId") String workflowId, Workflow newWorkflow) {
 		if (ObjectId.isValid(workflowId) == false) {
-			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
+			throw new ErrorWebApplicationException(ErrorType.ID_NOT_PROPERLY_FORMATTED);
 		}
 
 		System.out.println("Does exist? " + workflowDao.exists("id", workflowId));
@@ -77,7 +77,7 @@ public class WorkflowRestlet {
 
 		if (writeResult.getError() != null) {
 			System.out.println(writeResult.getError());
-			throw new ErrorWebApplicationException(ErrorType.Unknown);
+			throw new ErrorWebApplicationException(ErrorType.UNKNOWN);
 		}
 
 		try {
@@ -88,7 +88,7 @@ public class WorkflowRestlet {
 			workflowDao.save(newWorkflow);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new ErrorWebApplicationException(ErrorType.Unknown);
+			throw new ErrorWebApplicationException(ErrorType.UNKNOWN);
 		}
 
 		return Response.ok().entity(newWorkflow).build();
@@ -99,13 +99,13 @@ public class WorkflowRestlet {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response deleteWorkflow(@PathParam("workflowId") String workflowId) {
 		if (ObjectId.isValid(workflowId) == false) {
-			throw new ErrorWebApplicationException(ErrorType.IdNotProperlyFormatted);
+			throw new ErrorWebApplicationException(ErrorType.ID_NOT_PROPERLY_FORMATTED);
 		}
 
 		String errorMessage = workflowDao.deleteById(new ObjectId(workflowId)).getError();
 
 		if (errorMessage != null) {
-			throw new ErrorWebApplicationException(ErrorType.Unknown);
+			throw new ErrorWebApplicationException(ErrorType.UNKNOWN);
 		}
 
 		return Response.ok().build();
