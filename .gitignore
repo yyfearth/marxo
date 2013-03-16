@@ -32,6 +32,12 @@ Icon
 
 # Source Map
 *.map
+# Temp Ignore Compiled JS
+web/js/*.js
+
+########## NodeJS ##########
+
+node_modules
 
 ########## Java ##########
 # Project output
