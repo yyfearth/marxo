@@ -1,7 +1,7 @@
 package marxo.bean;
 
-import java.util.UUID;
+import org.bson.types.ObjectId;
 
 public class TenantLink extends Link {
-	UUID templateId;
+	ObjectId templateId;
 }
