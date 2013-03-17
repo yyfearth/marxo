@@ -10,8 +10,9 @@ import javax.ws.rs.ext.Provider;
 public class JsonWebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
 	@Override
 	public Response toResponse(WebApplicationException e) {
+		e.printStackTrace();
 		Response response = e.getResponse();
-		ErrorJson errorJson = new ErrorJson("EntityNotFound", null);
+		ErrorJson errorJson = new ErrorJson(e.getClass().getSimpleName(), e.getMessage());
 		return Response.status(response.getStatus()).entity(errorJson).type(MediaType.APPLICATION_JSON).build();
 	}
 }
