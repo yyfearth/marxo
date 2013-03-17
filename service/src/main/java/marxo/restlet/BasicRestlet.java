@@ -107,6 +107,12 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 		}
 
 		try {
+			Date now = new Date();
+			if (entity.getCreatedDate() == null) {
+				entity.setCreatedDate(now);
+			}
+			entity.setModifiedDate(now);
+
 			if (entity.getId() == null) {
 				entity.setJsonId(id);
 			}
