@@ -12,9 +12,8 @@ import java.util.Date;
 import java.util.List;
 
 @Entity(value = "workflows", noClassnameStored = true)
-@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links",
-		"created", "createdBy", "modified", "modifiedBy", "objectType"})
-public class Workflow extends BasicEntity<Workflow> {
+@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links", "created", "createdBy", "modified", "modifiedBy", "objectType"})
+public class Workflow extends BasicEntity {
 
 	public String getName() {
 		return name;
