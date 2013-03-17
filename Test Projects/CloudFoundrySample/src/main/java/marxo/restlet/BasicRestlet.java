@@ -12,7 +12,6 @@ import org.bson.types.ObjectId;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -28,18 +27,19 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 
 	protected D dao;
 
-	public BasicRestlet() {
-		Class<D> clazz = (Class<D>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
-
-		try {
-			//noinspection unchecked
-			this.dao = (D) D.getInstance(clazz);
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		}
-	}
+// TODO: try better implementation, it just does not work!
+//	public BasicRestlet() {
+//		Class<D> clazz = (Class<D>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
+//
+//		try {
+//			//noinspection unchecked
+//			this.dao = (D) D.getInstance(clazz);
+//		} catch (InstantiationException e) {
+//			e.printStackTrace();
+//		} catch (IllegalAccessException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
