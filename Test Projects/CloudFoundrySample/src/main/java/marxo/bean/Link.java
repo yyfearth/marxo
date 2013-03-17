@@ -12,22 +12,6 @@ import java.util.List;
 @JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNode", "nextNode", "condition", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Link extends BasicEntity {
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -76,7 +60,6 @@ public class Link extends BasicEntity {
 		this.condition = condition;
 	}
 
-	String name, title;
 	@JsonProperty("desc")
 	String description;
 	@JsonIgnore
