@@ -2,6 +2,7 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.github.jmkgreen.morphia.annotations.Entity;
 import marxo.tool.TypeTool;
 import org.bson.types.ObjectId;
@@ -9,14 +10,32 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(value = "nodes")
+@Entity(value = "nodes", noClassnameStored = true)
+@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "actions", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Node extends BasicEntity {
+
 	public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public ObjectId getWorkflowId() {
@@ -35,23 +54,12 @@ public class Node extends BasicEntity {
 		this.actionIds = actionIds;
 	}
 
-	String name;
-	@JsonIgnore
+	String name, title;
+	@JsonProperty("desc")
+	String description;
 	ObjectId workflowId;
 	@JsonIgnore
 	List<ObjectId> actionIds;
-
-	@JsonProperty("workflow")
-	public Workflow getWorkflow() {
-		return (workflowId == null) ? null : new Workflow() {{
-			id = workflowId;
-		}};
-	}
-
-	@JsonProperty("workflow")
-	public void setWorkflow(Workflow workflow) {
-		workflowId = (workflow == null) ? null : workflow.id;
-	}
 
 	@JsonProperty("actions")
 	public Action[] getActions() {
