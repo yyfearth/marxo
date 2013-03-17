@@ -40,6 +40,7 @@ define 'console', ['lib/common'], ->
     showFrame: (frame) ->
       frame = @frames[frame]
       return unless frame?
+      console.log 'frame', frame
       unless frame instanceof FrameView
         require [frame.id], (TheFrameView) =>
           frame = @frames[frame.id] = new TheFrameView frame

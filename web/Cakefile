@@ -27,7 +27,8 @@ coffee = (file) ->
     filename: file
     sourceMap: true
 
-  code: compiled.js
+  basename = path.basename file, '.coffee'
+  code: compiled.js + "\n//@ sourceMappingURL=#{basename}.map\n"
   map: compiled.v3SourceMap
 
 uglify = (basename, code, map) ->

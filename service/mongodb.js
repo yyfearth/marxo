@@ -27,7 +27,7 @@ db.workflows.insert({
     	ObjectId("507f81413d070321728fde21"),
     	ObjectId("507f81413d070321728fde22"),
     	ObjectId("507f81413d070321728fde23"),
-    	ObjectId("507f81413d070321728fde24"),
+    	ObjectId("507f81413d070321728fde24")
     ]
 });
 
