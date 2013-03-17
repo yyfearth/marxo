@@ -11,7 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(value = "nodes", noClassnameStored = true)
-@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "actions", "created", "createdBy", "modified", "modifiedBy", "objectType"})
+@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "actions",
+		"type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Node extends BasicEntity {
 
 	public String getName() {
@@ -57,6 +58,7 @@ public class Node extends BasicEntity {
 	String name, title;
 	@JsonProperty("desc")
 	String description;
+	@JsonIgnore
 	ObjectId workflowId;
 	@JsonIgnore
 	List<ObjectId> actionIds;
@@ -69,6 +71,16 @@ public class Node extends BasicEntity {
 	@JsonProperty("actions")
 	public void setActions(Action[] actions) {
 		this.actionIds = (actions == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(actions);
+	}
+
+	@JsonProperty("workflowId")
+	public String getJsonWorkflowId() {
+		return workflowId == null ? null : workflowId.toString();
+	}
+
+	@JsonProperty("workflowId")
+	public void setJsonWorkflowId(String workflowId) {
+		this.workflowId = (workflowId == null) ? null : new ObjectId(workflowId);
 	}
 
 }

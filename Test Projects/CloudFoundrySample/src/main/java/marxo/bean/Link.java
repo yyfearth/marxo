@@ -9,8 +9,8 @@ import org.bson.types.ObjectId;
 import java.util.List;
 
 @Entity(value = "links", noClassnameStored = true)
-@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status",
-		"prevNode", "nextNode", "condition", "created", "createdBy", "modified", "modifiedBy", "objectType"})
+@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNode", "nextNode", "condition",
+		"type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Link extends BasicEntity {
 
 	public String getName() {
@@ -80,6 +80,7 @@ public class Link extends BasicEntity {
 	String name, title;
 	@JsonProperty("desc")
 	String description;
+	@JsonIgnore
 	ObjectId workflowId;
 	@JsonIgnore
 	List<ObjectId> actionIds;
@@ -111,5 +112,15 @@ public class Link extends BasicEntity {
 
 	public void setNextNode(Node nextNode) {
 		this.nextNodeId = (nextNode == null) ? null : nextNode.id;
+	}
+
+	@JsonProperty("workflowId")
+	public String getJsonWorkflowId() {
+		return workflowId == null ? null : workflowId.toString();
+	}
+
+	@JsonProperty("workflowId")
+	public void setJsonWorkflowId(String workflowId) {
+		this.workflowId = (workflowId == null) ? null : new ObjectId(workflowId);
 	}
 }
