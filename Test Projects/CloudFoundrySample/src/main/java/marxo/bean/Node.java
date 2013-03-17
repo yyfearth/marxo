@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(value = "nodes")
-public class Node extends BasicEntity<Node> {
+public class Node extends BasicEntity {
 	public String getName() {
 		return name;
 	}
