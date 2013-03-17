@@ -7,4 +7,7 @@ import javax.ws.rs.Path;
 
 @Path("workflows")
 public class WorkflowRestlet extends BasicRestlet<Workflow, WorkflowDao> {
+
+	public WorkflowRestlet() throws IllegalAccessException, InstantiationException {
+	}
 }

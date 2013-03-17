@@ -1,6 +1,5 @@
 package marxo.restlet.exception;
 
-import marxo.restlet.RestletException;
 import org.apache.commons.lang.StringUtils;
 
 import javax.ws.rs.core.Response;
