@@ -8,9 +8,8 @@ import org.bson.types.ObjectId;
 
 import java.util.List;
 
-@Entity(value = "links", noClassnameStored = true)
-@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNode", "nextNode", "condition",
-		"type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
+@Entity(value = "links")
+@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNode", "nextNode", "condition", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Link extends BasicEntity {
 
 	public String getName() {

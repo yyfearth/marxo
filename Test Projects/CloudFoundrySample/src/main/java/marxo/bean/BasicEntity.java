@@ -25,6 +25,22 @@ public abstract class BasicEntity {
 		this.createdByUserId = createdByUserId;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
 	public Date getCreatedDate() {
 		return createdDate;
 	}
@@ -52,6 +68,8 @@ public abstract class BasicEntity {
 	@Id
 	@JsonIgnore
 	ObjectId id;
+	String name;
+	String title;
 	@JsonIgnore
 	ObjectId createdByUserId;
 	@JsonProperty("created")

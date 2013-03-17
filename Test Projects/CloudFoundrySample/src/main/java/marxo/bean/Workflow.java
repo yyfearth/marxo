@@ -15,22 +15,6 @@ import java.util.List;
 @JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Workflow extends BasicEntity {
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
 	public String getDescription() {
 		return description;
 	}
@@ -79,7 +63,6 @@ public class Workflow extends BasicEntity {
 		this.status = status;
 	}
 
-	String name, title;
 	@JsonProperty("desc")
 	String description;
 	WorkflowType type = null;

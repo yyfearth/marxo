@@ -10,26 +10,9 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(value = "nodes", noClassnameStored = true)
-@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "actions",
-		"type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
+@Entity(value = "nodes")
+@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "actions", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Node extends BasicEntity {
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
 
 	public String getDescription() {
 		return description;
@@ -55,7 +38,6 @@ public class Node extends BasicEntity {
 		this.actionIds = actionIds;
 	}
 
-	String name, title;
 	@JsonProperty("desc")
 	String description;
 	@JsonIgnore
