@@ -1,4 +1,4 @@
-package marxo.restlet;
+package marxo.restlet.exception;
 
 import marxo.restlet.exception.ErrorJson;
 
