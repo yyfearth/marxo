@@ -7,7 +7,7 @@ import javax.ws.rs.Path;
 
 @Path("nodes")
 public class NodeRestlet extends BasicRestlet<Node, NodeDao> {
-	public NodeRestlet(){
-		setDao(new NodeDao());
+
+	public NodeRestlet() throws IllegalAccessException, InstantiationException {
 	}
 }

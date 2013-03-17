@@ -12,10 +12,13 @@ import org.bson.types.ObjectId;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @param <T> Entity type
@@ -25,21 +28,21 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 
 	public static final String ID_PATH = "{id:" + PatternLibrary.ID_PATTERN_STRING + "}";
 
+	protected static Map<String, BasicDao> daoMap = new HashMap<String, BasicDao>();
 	protected D dao;
 
-// TODO: try better implementation, it just does not work!
-//	public BasicRestlet() {
-//		Class<D> clazz = (Class<D>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
-//
-//		try {
-//			//noinspection unchecked
-//			this.dao = (D) D.getInstance(clazz);
-//		} catch (InstantiationException e) {
-//			e.printStackTrace();
-//		} catch (IllegalAccessException e) {
-//			e.printStackTrace();
-//		}
-//	}
+	@SuppressWarnings("unchecked")
+	protected BasicRestlet() throws IllegalAccessException, InstantiationException {
+		Class<D> clazz = (Class<D>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
+		D dao = (D) daoMap.get(clazz.getSimpleName());
+
+		if (dao == null) {
+			dao = clazz.newInstance();
+			daoMap.put(clazz.getSimpleName(), dao);
+		}
+
+		this.dao = dao;
+	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -71,19 +74,6 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 		QueryResults<T> entities = dao.find();
 		return entities.asList();
 	}
-
-	// @HEAD
-	// @Path(ID_PATH)
-	// @Produces(MediaType.APPLICATION_JSON)
-	// public Response check(@PathParam("id") String id) throws JsonProcessingException {
-	// 	T entity = dao.get(new ObjectId(id));
-
-	// 	if (entity == null) {
-	// 		throw new EntityNotFoundException();
-	// 	}
-
-	// 	return Response.ok().build();
-	// }
 
 	@GET
 	@Path(ID_PATH)
@@ -140,14 +130,6 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 			throw new UnknownException("Unable to delete the entity");
 		}
 
-		// no return will be 204 (No Content) if success
-	}
-
-	public D getDao() {
-		return dao;
-	}
-
-	public void setDao(D dao) {
-		this.dao = dao;
+		// no return will be 204 (No Content) if succeed
 	}
 }
