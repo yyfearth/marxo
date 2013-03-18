@@ -21,13 +21,13 @@ write = (file, data) ->
   console.log 'Write:', file
   _write file, data
 
-coffee = (file) ->
+coffee = (file, basename) ->
   console.log 'Compile:', file
   compiled = CoffeeScript.compile read(file),
     filename: file
+    sourceFiles: [basename + '.coffee']
     sourceMap: true
 
-  basename = path.basename file, '.coffee'
   code: compiled.js + "\n//@ sourceMappingURL=#{basename}.map\n"
   map: compiled.v3SourceMap
 
@@ -79,7 +79,7 @@ build_coffee = (file, min) ->
   basename = path.basename file, '.coffee'
   dirname = (path.dirname file) + '/'
   jsfile = dirname + basename + '.js'
-  result = coffee file
+  result = coffee file, basename
   result = uglify basename, result.code, result.map if min
   write jsfile, result.code
   write dirname + basename + '.map', result.map
