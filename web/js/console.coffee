@@ -1,4 +1,4 @@
-define 'console', ['lib/common'], ->
+define 'console', ['lib/common'], (async) ->
   find = (selector, parent) ->
     parent ?= document
     parent.querySelector selector
@@ -40,6 +40,7 @@ define 'console', ['lib/common'], ->
     showFrame: (frame) ->
       frame = @frames[frame]
       return unless frame?
+      console.log 'frame', frame
       unless frame instanceof FrameView
         require [frame.id], (TheFrameView) =>
           frame = @frames[frame.id] = new TheFrameView frame
@@ -126,15 +127,14 @@ define 'console', ['lib/common'], ->
       return
 
   class Entity extends Backbone.Model
-    idAttribute: '_id'
     set: (attrs) ->
-      @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
+      #      @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
       super attrs
     validate: (attrs) ->
       unless attrs.name and attrs.id
         'id and name are required'
-      else if attrs.name.length > 10
-        'name max len is 10'
+      else unless /\w{,10}/.test attrs.name
+        'name max len is 10 and must be consist of alphabetic char or _'
       else
         return
 
@@ -145,7 +145,8 @@ define 'console', ['lib/common'], ->
     url: '/'
 
   class Tenant extends Entity
-    idAttribute: '_name'
+    url: -> ROOT + '/' + @name + '/profile'
+  #    idAttribute: '_name'
 
   class User extends Entity
 
@@ -221,6 +222,7 @@ define 'console', ['lib/common'], ->
       return
 
   { # exports
+  async
   find
   findAll
   ConsoleView

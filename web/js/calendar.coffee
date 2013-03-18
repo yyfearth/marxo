@@ -1,4 +1,4 @@
-define 'calendar', ['console', 'lib/jquery-ui.custom.min', 'lib/fullcalendar.min'], ({find, FrameView}) ->
+define 'calendar', ['console', 'lib/jquery-ui', 'lib/fullcalendar'], ({find, FrameView}) ->
   class CalendarFrameView extends FrameView
     initialize: (options) ->
       super options
