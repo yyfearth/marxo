@@ -1,28 +1,28 @@
-define 'workflow_models', ['console'], ({Entity}) ->
-  #  class Tenant extends Entity
-  #
-  #  class SharedWorkflows extends Backbone.Collection
-  #    model: SharedWorkflow
-  #    url: '/shared/workflows'
-  class TenantWorkflows extends Backbone.Collection
-    model: TenantWorkflow
-    url: '/workflows'
-  # url: -> @tenant.url() + '/workflows'
+define 'workflow_models', ['console'], ({Entity, Tenant}) ->
+  ROOT = '/api'
 
   class Workflow extends Entity
 
   #  class SharedWorkflow extends Workflow
 
   class TenantWorkflow extends Workflow
+    urlRoot: ROOT + '/workflows'
+    initialize: ->
+      @nodes = new TenantNodes @get 'nodes'
+      @links = new TenantLinks @get 'links'
+      return
+
+  #  class SharedWorkflows extends Backbone.Collection
+  #    model: SharedWorkflow
+  #    url: ROOT + '/shared/workflows'
+  class TenantWorkflows extends Backbone.Collection
+    model: TenantWorkflow
+    url: ROOT + '/workflows'
+  # url: -> @tenant.url() + '/workflows'
 
   #  class SharedNodes extends Backbone.Collection
   #    model: SharedNode
-  #    url: '/shared/nodes'
-
-  class TenantNodes extends Backbone.Collection
-    model: TenantNode
-    url: '/nodes'
-  #    url: -> @workflow.url() + '/nodes'
+  #    url: ROOT + '/shared/nodes'
 
   class Node extends Entity
 
@@ -32,12 +32,12 @@ define 'workflow_models', ['console'], ({Entity}) ->
 
   #  class SharedLinks extends Backbone.Collection
   #    model: SharedLink
-  #    url: '/shared/links'
+  #    url: ROOT + '/shared/links'
 
-  class TenantLinks extends Backbone.Collection
-    model: TenantLink
-    url: '/links'
-  #    url: -> @workflow.url() + '/links'
+  class TenantNodes extends Backbone.Collection
+    model: TenantNode
+    url: ROOT + '/nodes'
+  #    url: -> @workflow.url() + '/nodes'
 
   class Link extends Entity
 
@@ -45,9 +45,14 @@ define 'workflow_models', ['console'], ({Entity}) ->
 
   class TenantLink extends Link
 
+  class TenantLinks extends Backbone.Collection
+    model: TenantLink
+    url: ROOT + '/links'
+  #    url: -> @workflow.url() + '/links'
+
   #  class SharedActions extends Backbone.Collection
   #    model: Action
-  #    url: '/shared/actions'
+  #    url: ROOT + '/shared/actions'
 
   #  class TenantActions extends Backbone.Collection
   #    model: Action
@@ -56,23 +61,33 @@ define 'workflow_models', ['console'], ({Entity}) ->
   #  class Action extends Entity
 
   { # exports
-  Tenant
-  SharedWorkflows
+  #  Tenant
+  #  SharedWorkflows
+  #  TenantWorkflows
+  #  Workflow
+  #  SharedWorkflow
+  #  TenantWorkflow
+  #  SharedNodes
+  #  TenantNodes
+  #  Node
+  #  SharedNode
+  #  TenantNode
+  #  SharedLinks
+  #  TenantLinks
+  #  Link
+  #  SharedLink
+  #  TenantLink
+  #  SharedActions
+  #  TenantActions
+  #  Action
+
   TenantWorkflows
   Workflow
-  SharedWorkflow
   TenantWorkflow
-  SharedNodes
   TenantNodes
   Node
-  SharedNode
   TenantNode
-  SharedLinks
   TenantLinks
   Link
-  SharedLink
   TenantLink
-  SharedActions
-  TenantActions
-  Action
   }

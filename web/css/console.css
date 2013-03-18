@@ -4774,33 +4774,37 @@ a.badge:focus {
   -moz-box-shadow: 2px 2px 19px #444;
   opacity: 0.6;
 }
-.workflow {
-  height: 300px;
-  margin: 10px;
-  position: relative;
-  overflow: scroll;
+#workflow_view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0px;
+  bottom: 100px;
+  overflow: auto;
 }
-.workflow .node {
+#workflow_view .node {
   min-width: 5em;
   height: 5em;
   line-height: 5em;
   z-index: 20;
   position: absolute;
   padding: 0.5em 1em;
+  cursor: pointer;
+  margin: 0;
 }
-.workflow .node.active {
+#workflow_view .node.active {
   border: 1px dotted green;
 }
-.workflow .node.hover {
+#workflow_view .node.hover {
   border: 1px dotted red;
 }
-.workflow ._jsPlumb_connector {
+#workflow_view ._jsPlumb_connector {
   z-index: 4;
 }
-.workflow ._jsPlumb_endpoint {
+#workflow_view ._jsPlumb_endpoint {
   z-index: 21;
 }
-.workflow .aLabel {
+#workflow_view .aLabel {
   background-color: white;
   padding: 0.4em;
   font: 12px sans-serif;
