@@ -9,7 +9,7 @@ import org.bson.types.ObjectId;
 import java.util.List;
 
 @Entity(value = "links")
-@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNode", "nextNode", "condition", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
+@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNodeId", "nextNodeId", "condition", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Link extends BasicEntity {
 
 	public String getDescription() {
@@ -74,26 +74,24 @@ public class Link extends BasicEntity {
 	Condition condition;
 	// TODO: embedded condition, hide it for now
 
-	@JsonProperty("prevNode")
-	public Node getPreviousNode() {
-		return (previousNodeId == null) ? null : new Node() {{
-			id = previousNodeId;
-		}};
+	@JsonProperty("prevNodeId")
+	public String getJsonPreviousNodeId() {
+		return previousNodeId == null ? null : previousNodeId.toString();
 	}
 
-	@JsonProperty("prevNode")
-	public void setPreviousNode(Node previousNode) {
-		this.previousNodeId = (previousNode == null) ? null : previousNode.id;
+	@JsonProperty("prevNodeId")
+	public void setJsonPreviousNodeId(String previousNodeId) {
+		this.previousNodeId = (previousNodeId == null) ? null : new ObjectId(previousNodeId);
 	}
 
-	public Node getNextNode() {
-		return (nextNodeId == null) ? null : new Node() {{
-			id = nextNodeId;
-		}};
+	@JsonProperty("nextNodeId")
+	public String getJsonNextNodeId() {
+		return nextNodeId == null ? null : nextNodeId.toString();
 	}
 
-	public void setNextNode(Node nextNode) {
-		this.nextNodeId = (nextNode == null) ? null : nextNode.id;
+	@JsonProperty("nextNodeId")
+	public void setJsonNextNodeId(String nextNodeId) {
+		this.nextNodeId = (nextNodeId == null) ? null : new ObjectId(nextNodeId);
 	}
 
 	@JsonProperty("workflowId")
