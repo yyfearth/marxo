@@ -1,6 +1,7 @@
-package marxo.restlet;
+package marxo.restlet.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import marxo.data.JsonParser;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;

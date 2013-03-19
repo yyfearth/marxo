@@ -25,7 +25,8 @@ import java.util.List;
  */
 public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>> {
 
-	public static final String ID_PATH = "{id:" + PatternLibrary.ID_PATTERN_STRING + "}";
+	public static final String ID_PATTERN_STRING = "[\\da-fA-F]{24}";
+	public static final String ID_PATH = "{id:" + ID_PATTERN_STRING + "}";
 
 	// @Context ServletContext context;
 	@Context
