@@ -29,21 +29,7 @@
 #
 #do procData = ->
 #  nodeIndex = data.nodes.index = {}
-#  linkIndex = data.links.index = {}
-#  startNodes = data.nodes.starts = []
-#  endNodes = data.nodes.ends = []
-#  lonelyNodes = data.nodes.alones = []
-#
-#  data.nodes.forEach (node) ->
-#    # gen uuid
-#    uuid = node.uuid = node.name.toLowerCase().replace /\W/g, '_'
-#    # add to index by uuid and id
-#    nodeIndex[uuid] = nodeIndex[node.id] = node
-#    # add links
-#    node.toLinks = []
-#    node.fromLinks = []
-#    return
-#
+
 #  data.links.forEach (link) ->
 #    # link from node
 #    link.fromNode = nodeIndex[link.from]
@@ -56,16 +42,7 @@
 #    # add to index
 #    linkIndex[link.id] = linkIndex[link.uuid] = link
 #    return
-#
-#  data.nodes.forEach (node) -> # get start, end, alone nodes
-#    if node.fromLinks.length is node.toLinks.length is 0
-#      lonelyNodes.push node
-#    else if node.fromLinks.length is 0
-#      startNodes.push node
-#    else if node.toLinks.length is 0
-#      endNodes.push node
-#    return
-#
+
 #  grid = window.grid = [startNodes.concat(lonelyNodes)]
 #  # vertical
 #  grid.spanX = 350
@@ -84,7 +61,7 @@
 #        node.x = level * grid.spanX
 #        node.y = i * grid.spanY
 #      node.toLinks?.forEach (link) ->
-#        nextLevel.push link.toNode
+#        nextLevel.push link.toNode unless link.toNode.x?
 #      return
 #    if nextLevel.length
 #      grid[level + 1] = nextLevel
@@ -147,13 +124,10 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
  # Action
 
  TenantWorkflows
- Workflow
  TenantWorkflow
  TenantNodes
- Node
  TenantNode
  TenantLinks
- Link
  TenantLink
  }) ->
   class WorkflowFrameView extends FrameView
@@ -194,7 +168,7 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
         link = conn.getParameter 'model'
         label = conn.getOverlay 'label'
         if not link?
-          #          conn.setParameter 'link', createLink info.sourceId, info.targetId
+          # conn.setParameter 'link', createLink info.sourceId, info.targetId
           label.hide()
         else if link.has 'title'
           label.setLabel link.get 'title'
@@ -213,8 +187,11 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
             console.error err
             return
           console.log 'workflow', wf
+          # pre-process nodes and links
           wf.nodes.forEach (node) ->
             node.workflow = wf
+            node.inLinks = []
+            node.outLinks = []
             return
           wf.links.forEach (link) ->
             link.workflow = wf
@@ -222,6 +199,22 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
             link.nextNode = wf.nodes.get link.get 'nextNodeId'
             unless link.prevNode and link.nextNode
               console.error 'link', link.name or link.id, 'is broken, prev/next node missing'
+            link.prevNode.outLinks.push link
+            link.nextNode.inLinks.push link
+            return
+          nodes = wf.nodes
+          nodes.lonely = []
+          nodes.start = []
+          nodes.end = []
+          nodes.forEach (node) ->
+            if node.inLinks.length is node.outLinks.length is 0
+              nodes.lonely.push node
+            else if node.inLinks.length is 0
+              nodes.start.push node
+            else if node.outLinks.length is 0
+              nodes.end.push node
+            return
+          # TODO: workflow validation
           callback.call @, wf
         return
       return
@@ -243,6 +236,8 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
         jsPlumb.connect
           source: link.prevNode.view.srcEndpoint
           target: link.nextNode.view.el
+          parameters:
+            model: link
         return
       @
 
