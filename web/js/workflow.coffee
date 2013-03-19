@@ -27,56 +27,6 @@
 #  idx = array.indexOf item
 #  array.splice idx, 1 if idx isnt -1
 #
-#do procData = ->
-#  nodeIndex = data.nodes.index = {}
-
-#  data.links.forEach (link) ->
-#    # link from node
-#    link.fromNode = nodeIndex[link.from]
-#    link.fromNode.toLinks.push link
-#    # link to node
-#    link.toNode = nodeIndex[link.to]
-#    link.toNode.fromLinks.push link
-#    # creat uuid
-#    link.uuid = link.fromNode.uuid + '-' + link.toNode.uuid
-#    # add to index
-#    linkIndex[link.id] = linkIndex[link.uuid] = link
-#    return
-
-#  grid = window.grid = [startNodes.concat(lonelyNodes)]
-#  # vertical
-#  grid.spanX = 350
-#  grid.spanY = 150
-#  grid.vertical = false
-#
-#  do traval = (level = 0) ->
-#    nextLevel = []
-#    grid[level]?.forEach (node, i) ->
-#      node.gridX = i
-#      node.gridY = level
-#      if grid.vertical
-#        node.x = i * grid.spanX
-#        node.y = level * grid.spanY
-#      else
-#        node.x = level * grid.spanX
-#        node.y = i * grid.spanY
-#      node.toLinks?.forEach (link) ->
-#        nextLevel.push link.toNode unless link.toNode.x?
-#      return
-#    if nextLevel.length
-#      grid[level + 1] = nextLevel
-#      traval level + 1
-#    return
-#  return
-## end of proc data
-
-#  jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
-#    deleteLink info.connection.getParameter 'link'
-#    node = data.nodes.index[info.sourceId]
-#    jsPlumb.deleteEndpoint node.srcEndpoint
-#    node.srcEndpoint = jsPlumb.addEndpoint node.el, sourceEndpoint, parameters:
-#      node: node
-#    return
 #
 #  jsPlumb.bind 'beforeDrop', (info) ->
 #    uuid = info.sourceId + '-' + info.targetId
@@ -159,6 +109,11 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
           cssClass: 'aLabel'
         ]
       ]
+    gridDefaults:
+      padding: 15
+      spanX: 300
+      spanY: 150
+      vertical: false
     initialize: ->
       jsPlumb.importDefaults @jsPlumbDefaults
       @_loadModel()
@@ -168,15 +123,21 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       # link label
       jsPlumb.bind 'jsPlumbConnection', (info) ->
         conn = info.connection
-        link = conn.getParameter 'model'
+        link = conn.getParameter 'link'
         label = conn.getOverlay 'label'
-        if not link?
+        unless link?
           # conn.setParameter 'link', createLink info.sourceId, info.targetId
           label.hide()
         else if link.has 'title'
           label.setLabel link.get 'title'
         else
           label.hide()
+        return
+      jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
+        conn = info.connection
+        link = conn.getParameter 'link'
+        # deleteLink info.connection.getParameter 'link'
+        link.prevNode.view.buildSrcEndpoint()
         return
       return
     _loadModel: (callback = @render) ->
@@ -217,9 +178,38 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
             else if node.outLinks.length is 0
               nodes.end.push node
             return
+          @_sortNodeViews nodes
           # TODO: workflow validation
           callback.call @, wf
         return
+      return
+    _sortNodeViews: (nodes) ->
+      grid = @grid = [nodes.start.concat nodes.lonely]
+      {vertical, padding, spanX, spanY} = @gridDefaults
+
+      do traval = (level = 0) ->
+        nextLevel = []
+        grid[level]?.forEach (node, i) ->
+          node.gridX = i
+          node.gridY = level
+          if vertical
+            node.x = i * spanX
+            node.y = level * spanY
+          else
+            node.x = level * spanX
+            node.y = i * spanY
+          node.x += padding
+          node.y += padding
+          node.outLinks?.forEach (link) ->
+            nextLevel.push link.nextNode unless link.nextNode.gridX?
+            return
+          return
+        if nextLevel.length
+          grid[level + 1] = nextLevel
+          traval level + 1
+        return
+
+      console.log 'grid', grid
       return
     render: ->
       console.log 'render wf'
@@ -240,7 +230,7 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
           source: link.prevNode.view.srcEndpoint
           target: link.nextNode.view.el
           parameters:
-            model: link
+            link: link
         return
       @
 
@@ -253,7 +243,7 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       anchor: 'RightMiddle'
       paintStyle:
         fillStyle: '#225588'
-        radius: 7
+        radius: 9
       connector: [
         'Flowchart'
         stub: [40, 60]
@@ -271,6 +261,9 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
     targetEndpointStyle:
       isTarget: true
       anchor: ['LeftMiddle', 'BottomCenter']
+      paintStyle:
+        fillStyle: '#225588'
+        radius: 5
       dropOptions:
         hoverClass: 'hover'
         activeClass: 'active'
@@ -280,31 +273,26 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       return
     render: ->
       console.log 'render node'
-      # el.css top: node.y, left: node.x
       name = @el.id = @model.get 'name'
       @el.innerHTML = @model.escape 'title'
+      @el.style.left = @model.x + 'px'
+      @el.style.top = @model.y + 'px'
       jsPlumb.draggable @$el
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
-      @srcEndpoint = jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
-        model: @model
-        view: @
+      @buildSrcEndpoint()
       jsPlumb.makeTarget @$el, @targetEndpointStyle, parameters:
         node: @model
         view: @
       @
+    buildSrcEndpoint: ->
+      jsPlumb.deleteEndpoint @srcEndpoint if @srcEndpoint?
+      @srcEndpoint = jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
+        model: @model
+        view: @
+
 
   #  class LinkView extends Backbone.View
-
-  #  workflows = new TenantWorkflows
-  #  workflows.fetch success: ->
-  #  workflow = workflows.get '51447afb4728cb2036cf9ca1'
-  #  console.log 'workflow', workflow
-  #  async.parallel [
-  #    (callback) -> workflow.nodes.fetch success: callback, error: callback
-  #    (callback) -> workflow.links.fetch success: callback, error: callback
-  #  ], (err) ->
-  #    console.log 'workflow', workflow
 
   WorkflowFrameView
 
