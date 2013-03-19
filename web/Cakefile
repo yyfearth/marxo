@@ -46,7 +46,11 @@ build_less = (file, callback, min) ->
   console.log 'Compile:', file
   data = read file
   output = file.replace /less$/, 'css'
-  min = !!min
+  if min? and typeof callback is 'function'
+    min = !!min
+  else
+    min = !!callback
+    callback = null
 
   parser = new less.Parser
     paths: path.dirname file
@@ -65,7 +69,8 @@ build_less = (file, callback, min) ->
       try
         css = tree.toCSS
           compress: min # options.compress
-          yuicompress: min # options.yuicompress
+          yuicompress: min
+        # options.yuicompress
 
         write output, css
         callback? output
@@ -124,6 +129,7 @@ task 'watch', 'run livereload', ->
   ]
   _refresh = server.refresh
   server.refresh = (file) ->
+    console.log '[', (new Date).toISOString(), ']'
     console.log 'Updated:', file
     if file[-7..] is '.coffee'
       file = build_coffee file
