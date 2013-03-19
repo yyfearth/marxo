@@ -6,9 +6,12 @@ import marxo.bean.BasicEntity;
 import marxo.dao.BasicDao;
 import marxo.restlet.exception.EntityNotFoundException;
 import marxo.restlet.exception.UnknownException;
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -23,6 +26,10 @@ import java.util.List;
 public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>> {
 
 	public static final String ID_PATH = "{id:" + PatternLibrary.ID_PATTERN_STRING + "}";
+
+	// @Context ServletContext context;
+	@Context
+	HttpServletRequest request;
 
 	protected D dao;
 
@@ -118,6 +125,31 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 		}
 
 		// no return will be 204 (No Content) if succeed
+	}
+
+	// to get parameter in url
+	public String getParameter(String paramName){
+		return request.getParameter(paramName);
+	}
+
+	// to get boolean parameter in url
+	public boolean hasFlag(String paramName) {
+		return hasFlag(paramName, false);
+	}
+
+	// to get boolean parameter in url
+	public boolean hasFlag(String paramName, boolean defVal) {
+		if (request == null) {
+			return defVal;
+		}
+		String reqParam = getParameter(paramName);
+		if (StringUtils.isEmpty(reqParam)) {
+			return defVal;
+		} else if (!defVal) { // default false
+			return reqParam.matches("(?i)true|yes|on|1");
+		} else { // default true
+			return !reqParam.matches("(?i)false|no|off|0");
+		}
 	}
 
 	public D getDao() {
