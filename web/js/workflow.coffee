@@ -138,12 +138,15 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
 
   class WorkflowView extends Backbone.View
     jsPlumbDefaults:
+      DragOptions:
+        zIndex: 2000
       Endpoint: ['Dot', radius: 3]
       ConnectionsDetachable: true
       ReattachConnections: true
       HoverPaintStyle:
         strokeStyle: '#42a62c'
         lineWidth: 2
+        zIndex: 2000
       ConnectionOverlays: [
         [ 'Arrow',
           location: 1
@@ -259,11 +262,18 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       connectorStyle:
         strokeStyle: '#346789'
         lineWidth: 2
+        outlineColor: '#fff'
+        outlineWidth: 1
+      connectorHoverStyle:
+        strokeStyle: '#42a62c'
+        outlineWidth: 2
       maxConnections: -1
     targetEndpointStyle:
+      isTarget: true
       anchor: ['LeftMiddle', 'BottomCenter']
       dropOptions:
         hoverClass: 'hover'
+        activeClass: 'active'
     initialize: (options) ->
       @parent = options.parent
       @parentEl = @parent.el

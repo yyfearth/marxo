@@ -46,13 +46,16 @@
     }
 
     &.hover {
-      border: 1px dotted red;
+      border: 1px dotted blue;
     }
 
   }
 
   ._jsPlumb_connector {
     z-index: 4;
+    &:hover {
+      z-index: 10;
+    }
   }
 
   ._jsPlumb_endpoint {

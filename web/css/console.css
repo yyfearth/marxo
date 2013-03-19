@@ -4796,10 +4796,13 @@ a.badge:focus {
   border: 1px dotted green;
 }
 #workflow_view .node.hover {
-  border: 1px dotted red;
+  border: 1px dotted blue;
 }
 #workflow_view ._jsPlumb_connector {
   z-index: 4;
+}
+#workflow_view ._jsPlumb_connector:hover {
+  z-index: 10;
 }
 #workflow_view ._jsPlumb_endpoint {
   z-index: 21;
