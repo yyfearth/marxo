@@ -1,4 +1,4 @@
-package marxo.data;
+package marxo.restlet;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;

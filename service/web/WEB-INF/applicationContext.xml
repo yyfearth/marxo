@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- DAOs -->
+    <bean id="workflowDao" class="marxo.dao.WorkflowDao"/>
+    <bean id="nodeDao" class="marxo.dao.NodeDao"/>
+    <bean id="linkDao" class="marxo.dao.LinkDao"/>
+    <!-- Restlets -->
+    <bean id="workflowRestlet" class="marxo.restlet.WorkflowRestlet">
+        <property name="dao" ref="workflowDao"/>
+    </bean>
+    <bean id="nodeRestlet" class="marxo.restlet.NodeRestlet">
+        <property name="dao" ref="nodeDao"/>
+    </bean>
+    <bean id="linkRestlet" class="marxo.restlet.LinkRestlet">
+        <property name="dao" ref="linkDao"/>
+    </bean>
+</beans>

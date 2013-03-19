@@ -12,13 +12,10 @@ import org.bson.types.ObjectId;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @param <T> Entity type
@@ -28,21 +25,7 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 
 	public static final String ID_PATH = "{id:" + PatternLibrary.ID_PATTERN_STRING + "}";
 
-	protected static Map<String, BasicDao> daoMap = new HashMap<String, BasicDao>();
 	protected D dao;
-
-	@SuppressWarnings("unchecked")
-	protected BasicRestlet() throws IllegalAccessException, InstantiationException {
-		Class<D> clazz = (Class<D>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
-		D dao = (D) daoMap.get(clazz.getSimpleName());
-
-		if (dao == null) {
-			dao = clazz.newInstance();
-			daoMap.put(clazz.getSimpleName(), dao);
-		}
-
-		this.dao = dao;
-	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -137,5 +120,13 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 		}
 
 		// no return will be 204 (No Content) if succeed
+	}
+
+	public D getDao() {
+		return dao;
+	}
+
+	public void setDao(D dao) {
+		this.dao = dao;
 	}
 }

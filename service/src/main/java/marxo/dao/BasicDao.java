@@ -8,7 +8,8 @@ import org.bson.types.ObjectId;
  * @param <E> Entity type
  */
 public class BasicDao<E> extends BasicDAO<E, ObjectId> {
-	protected BasicDao() {
+
+	public BasicDao() {
 		super(MongoDbConnector.getDatastore());
 	}
 }
