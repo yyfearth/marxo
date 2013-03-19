@@ -20,10 +20,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @param <T> Entity type
+ * @param <E> Entity type
  * @param <D> DAO type
  */
-public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>> {
+public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>> implements Restlet {
 
 	public static final String ID_PATTERN_STRING = "[\\da-fA-F]{24}";
 	public static final String ID_PATH = "{id:" + ID_PATTERN_STRING + "}";
@@ -37,7 +37,7 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response create(T entity) {
+	public Response create(E entity) {
 		entity.setId(new ObjectId());
 		Date now = new Date();
 		entity.setCreatedDate(now);
@@ -60,15 +60,15 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<T> findAll() throws JsonProcessingException {
+	public List<E> findAll() throws JsonProcessingException {
 		return dao.findAll();
 	}
 
 	@GET
 	@Path(ID_PATH)
 	@Produces(MediaType.APPLICATION_JSON)
-	public T get(@PathParam("id") String id) throws JsonProcessingException {
-		T entity = dao.get(new ObjectId(id));
+	public E get(@PathParam("id") String id) throws JsonProcessingException {
+		E entity = dao.get(new ObjectId(id));
 
 		if (entity == null) {
 			throw new EntityNotFoundException();
@@ -81,7 +81,7 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 	@Path(ID_PATH)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public T set(@PathParam("id") String id, T entity) {
+	public E set(@PathParam("id") String id, E entity) {
 		ObjectId objectId = new ObjectId(id);
 
 		System.out.println("Does exist? " + dao.exists("id", objectId));
