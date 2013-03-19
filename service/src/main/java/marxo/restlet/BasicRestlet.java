@@ -1,7 +1,6 @@
 package marxo.restlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.jmkgreen.morphia.query.QueryResults;
 import com.mongodb.WriteResult;
 import marxo.bean.BasicEntity;
 import marxo.dao.BasicDao;
@@ -53,9 +52,8 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<T> find() throws JsonProcessingException {
-		QueryResults<T> entities = dao.find();
-		return entities.asList();
+	public List<T> findAll() throws JsonProcessingException {
+		return dao.findAll();
 	}
 
 	@GET
