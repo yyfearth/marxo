@@ -3,6 +3,7 @@ package marxo.restlet.filter;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerResponse;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
+import org.apache.commons.lang.StringUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -17,7 +18,7 @@ public class ResponseCorsFilter implements ContainerResponseFilter {
 
 		String reqHead = req.getHeaderValue("Access-Control-Request-Headers");
 
-		if (null != reqHead && !reqHead.equals(null)) {
+		if (StringUtils.isNotEmpty(reqHead)) {
 			headers.add("Access-Control-Allow-Headers", reqHead);
 		}
 
