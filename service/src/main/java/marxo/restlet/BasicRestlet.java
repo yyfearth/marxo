@@ -1,53 +1,43 @@
 package marxo.restlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.jmkgreen.morphia.query.QueryResults;
 import com.mongodb.WriteResult;
 import marxo.bean.BasicEntity;
 import marxo.dao.BasicDao;
 import marxo.restlet.exception.EntityNotFoundException;
 import marxo.restlet.exception.UnknownException;
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * @param <T> Entity type
+ * @param <E> Entity type
  * @param <D> DAO type
  */
-public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>> {
+public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>> implements Restlet {
 
-	public static final String ID_PATH = "{id:" + PatternLibrary.ID_PATTERN_STRING + "}";
+	public static final String ID_PATTERN_STRING = "[\\da-fA-F]{24}";
+	public static final String ID_PATH = "{id:" + ID_PATTERN_STRING + "}";
 
-	protected static Map<String, BasicDao> daoMap = new HashMap<String, BasicDao>();
+	// @Context ServletContext context;
+	@Context
+	HttpServletRequest request;
+
 	protected D dao;
-
-	@SuppressWarnings("unchecked")
-	protected BasicRestlet() throws IllegalAccessException, InstantiationException {
-		Class<D> clazz = (Class<D>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
-		D dao = (D) daoMap.get(clazz.getSimpleName());
-
-		if (dao == null) {
-			dao = clazz.newInstance();
-			daoMap.put(clazz.getSimpleName(), dao);
-		}
-
-		this.dao = dao;
-	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response create(T entity) {
+	public Response create(E entity) {
 		entity.setId(new ObjectId());
 		Date now = new Date();
 		entity.setCreatedDate(now);
@@ -70,16 +60,15 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<T> find() throws JsonProcessingException {
-		QueryResults<T> entities = dao.find();
-		return entities.asList();
+	public List<E> findAll() throws JsonProcessingException {
+		return dao.findAll();
 	}
 
 	@GET
 	@Path(ID_PATH)
 	@Produces(MediaType.APPLICATION_JSON)
-	public T get(@PathParam("id") String id) throws JsonProcessingException {
-		T entity = dao.get(new ObjectId(id));
+	public E get(@PathParam("id") String id) throws JsonProcessingException {
+		E entity = dao.get(new ObjectId(id));
 
 		if (entity == null) {
 			throw new EntityNotFoundException();
@@ -92,7 +81,7 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 	@Path(ID_PATH)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public T set(@PathParam("id") String id, T entity) {
+	public E set(@PathParam("id") String id, E entity) {
 		ObjectId objectId = new ObjectId(id);
 
 		System.out.println("Does exist? " + dao.exists("id", objectId));
@@ -137,5 +126,38 @@ public abstract class BasicRestlet<T extends BasicEntity, D extends BasicDao<T>>
 		}
 
 		// no return will be 204 (No Content) if succeed
+	}
+
+	// to get parameter in url
+	public String getParameter(String paramName){
+		return request.getParameter(paramName);
+	}
+
+	// to get boolean parameter in url
+	public boolean hasFlag(String paramName) {
+		return hasFlag(paramName, false);
+	}
+
+	// to get boolean parameter in url
+	public boolean hasFlag(String paramName, boolean defVal) {
+		if (request == null) {
+			return defVal;
+		}
+		String reqParam = getParameter(paramName);
+		if (StringUtils.isEmpty(reqParam)) {
+			return defVal;
+		} else if (!defVal) { // default false
+			return reqParam.matches("(?i)true|yes|on|1");
+		} else { // default true
+			return !reqParam.matches("(?i)false|no|off|0");
+		}
+	}
+
+	public D getDao() {
+		return dao;
+	}
+
+	public void setDao(D dao) {
+		this.dao = dao;
 	}
 }
