@@ -1,27 +1,30 @@
 package marxo.data;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jmkgreen.morphia.Datastore;
 import com.github.jmkgreen.morphia.Morphia;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.List;
 
 /**
  * According to <a href="http://docs.mongodb.org/ecosystem/tutorial/getting-started-with-java-driver/">official document</a>, MongoClient class is new since 2.10.0.
  */
 public class MongoDbConnector {
-	static MongoClient mongoClient = null;
+	static MongoClientURI uri;
 
 	/**
 	 * Get a connected mongo client as singleton.
 	 *
 	 * @return the connected client
 	 */
-	public static MongoClient getMongoClient() {
-		if (mongoClient != null) {
-			return mongoClient;
+	public static MongoClientURI getMongoUri() {
+		if (uri != null) {
+			return uri;
 		}
 
 		/**
@@ -29,33 +32,45 @@ public class MongoDbConnector {
 		 * @see http://docs.cloudfoundry.com/services/mysql/mysql.html#the-vcapservices-environment-variable
 		 */
 		String serviceJson = System.getenv("VCAP_SERVICES");
-		MongoClientURI uri = null;
 
 		try {
 			if (serviceJson == null) {
-				mongoClient = new MongoClient("localhost", 27017);
-
-				List<String> nameList = mongoClient.getDatabaseNames();
-				for (String name : nameList) {
-					System.out.println("Name: " + name);
-				}
+				uri = new MongoClientURI("mongodb://localhost:27017/marxo");
 			} else {
 				System.out.println("System.getenv(\"VCAP_SERVICES\"):\n" + serviceJson);
+				// mongodb://08b9893e-6ba2-43f1-8832-00089d89853d:24278a9c-92aa-4947-b7c1-ef9c6db73d4d@172.30.48.67:25273/db
 
-//				JSONObject services = (JSONObject) JSONValue.parse(serviceJson);
-//				JSONArray mongoServices = (JSONArray) services.get("data-2.0");
-//				JSONObject mongoService = (JSONObject) mongoServices.get(0);
-//				JSONObject credential = (JSONObject) mongoService.get("credentials");
-//				String url = (String) credential.get("url");
-//				String dbName = (String) credential.get("db");
+				ObjectMapper m = new ObjectMapper();
+				JsonNode rootNode = m.readTree(serviceJson);
+				JsonNode credential = rootNode.get("mongodb-2.0").get(0).get("credentials");
+				String url = credential.get("url").asText();
+				System.out.println("Got DB URL: " + url);
 
-//				mongoClient = new MongoClient(new MongoClientURI(url));
+				uri = new MongoClientURI(url);
 			}
-		} catch (UnknownHostException e) {
+		} catch (JsonProcessingException e) {
 			e.printStackTrace();
-			return null;
+			uri = null;
+		} catch (IOException e) {
+			e.printStackTrace();
+			uri = null;
 		}
 
+		return uri;
+	}
+
+	static MongoClient mongoClient = null;
+
+	public static MongoClient getMongoClient() {
+		if (mongoClient != null) {
+			return mongoClient;
+		}
+		try {
+			mongoClient = new MongoClient(getMongoUri());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+			mongoClient = null;
+		}
 		return mongoClient;
 	}
 
@@ -75,14 +90,10 @@ public class MongoDbConnector {
 	static Datastore datastore = null;
 
 	public static Datastore getDatastore() {
-		return getDatastore("marxo");
-	}
-
-	public static Datastore getDatastore(String databaseName) {
 		if (datastore != null) {
 			return datastore;
 		}
 
-		return datastore = new Morphia().createDatastore(getMongoClient(), databaseName);
+		return datastore = new Morphia().createDatastore(getMongoClient(), uri.getDatabase());
 	}
 }
