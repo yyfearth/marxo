@@ -4753,9 +4753,9 @@ a.badge:focus {
 }
 .node {
   border: 1px solid #346789;
-  box-shadow: 2px 2px 19px #aaa;
-  -webkit-box-shadow: 2px 2px 19px #aaa;
-  -moz-box-shadow: 2px 2px 19px #aaa;
+  -webkit-box-shadow: 2px 2px 13px #aaa;
+  -moz-box-shadow: 2px 2px 13px #aaa;
+  box-shadow: 2px 2px 13px #aaa;
   -moz-border-radius: 0.5em;
   border-radius: 0.5em;
   opacity: 0.8;
@@ -4769,17 +4769,17 @@ a.badge:focus {
   font-size: 0.9em;
 }
 .node:hover {
-  box-shadow: 2px 2px 19px #444;
-  -webkit-box-shadow: 2px 2px 19px #444;
-  -moz-box-shadow: 2px 2px 19px #444;
+  -webkit-box-shadow: 2px 2px 13px #444;
+  -moz-box-shadow: 2px 2px 13px #444;
+  box-shadow: 2px 2px 13px #444;
   opacity: 0.6;
 }
 #workflow_view {
   position: absolute;
   top: 0;
   left: 0;
-  right: 0px;
-  bottom: 100px;
+  right: 0;
+  bottom: 0;
   overflow: auto;
 }
 #workflow_view .node {
@@ -4796,13 +4796,20 @@ a.badge:focus {
   border: 1px dotted green;
 }
 #workflow_view .node.hover {
-  border: 1px dotted red;
+  border: 1px dotted blue;
+}
+#workflow_view .node.jsPlumb_dragged {
+  cursor: move;
 }
 #workflow_view ._jsPlumb_connector {
   z-index: 4;
 }
+#workflow_view ._jsPlumb_connector:hover {
+  z-index: 10;
+}
 #workflow_view ._jsPlumb_endpoint {
   z-index: 21;
+  cursor: move;
 }
 #workflow_view .aLabel {
   background-color: white;
