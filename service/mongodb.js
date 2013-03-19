@@ -27,7 +27,7 @@ db.workflows.insert({
     	ObjectId("507f81413d070321728fde21"),
     	ObjectId("507f81413d070321728fde22"),
     	ObjectId("507f81413d070321728fde23"),
-    	ObjectId("507f81413d070321728fde24"),
+    	ObjectId("507f81413d070321728fde24")
     ]
 });
 
@@ -93,6 +93,7 @@ db.links.insert({
 db.links.insert({
 	"_id": ObjectId("507f81413d070321728fde22"),
 	"workflowId": ObjectId("51447afb4728cb2036cf9ca1"),
+    "name": "post_req_to_submit_design",
 	"previousNodeId": ObjectId("507f81413d070321728fde12"),
 	"nextNodeId": ObjectId("507f81413d070321728fde13")
 });
