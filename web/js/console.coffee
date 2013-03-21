@@ -8,7 +8,14 @@ define 'console', ['lib/common'], (async) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
 
-  class ConsoleView extends Backbone.View
+  class View extends Backbone.View
+    initialize: (options) ->
+      if options?.parent
+        @parent = options.parent
+        @parentEl = @parent.el
+      return
+
+  class ConsoleView extends View
     el: '#main'
     @get: -> # singleton
       unless @instance?
@@ -18,7 +25,11 @@ define 'console', ['lib/common'], (async) ->
       @frames = {}
       findAll('.frame', @el).forEach (frame) =>
         navEl = find "#navbar a[href=\"##{frame.id}\"]"
-        @frames[frame.id] = id: frame.id, el: frame, navEl: navEl?.parentElement
+        @frames[frame.id] =
+          id: frame.id
+          el: frame
+          parent: @
+          navEl: navEl?.parentElement
         return
       [ # for debug only
         'home'
@@ -75,12 +86,13 @@ define 'console', ['lib/common'], (async) ->
       , SignInView::delay
       return
 
-  class FrameView extends Backbone.View
+  class FrameView extends View
     initialize: (options) ->
+      super options
       @navEl = options.navEl or (find "#navbar a[href=\"##{@id}\"]")?.parentElement
       return
 
-  class SignInView extends Backbone.View
+  class SignInView extends View
     el: '#signin'
     @get: -> # singleton
       unless @instance?
@@ -88,7 +100,8 @@ define 'console', ['lib/common'], (async) ->
       @instance
     events:
       'submit form': 'submit'
-    initialize: ->
+    initialize: (options) ->
+      super options
       # auto sign in
       if (sessionStorage.user)
         @signedIn()
@@ -226,6 +239,7 @@ define 'console', ['lib/common'], (async) ->
   async
   find
   findAll
+  View
   ConsoleView
   FrameView
   SignInView
