@@ -71,15 +71,11 @@ build_coffee = (file, map, min) ->
   write jsfile, result.code
   jsfile
 
-build_less = (file, callback, min) ->
+build_less = (file, min, callback) ->
   console.log 'Compile:', file
   data = read file
   output = file.replace /less$/, 'css'
-  if min? and typeof callback is 'function'
-    min = !!min
-  else
-    min = !!callback
-    callback = null
+  min = !!min
 
   parser = new less.Parser
     paths: path.dirname file
@@ -153,6 +149,20 @@ copy = (dir = out_dir) ->
     return
   return
 
+build_deploy = (callback) ->
+  build_less less_file, true, ->
+    fs.readdir coffee_dir, (err, files) ->
+      if err
+        console.error err
+        return
+      files.forEach (f) -> if f[-7..] is '.coffee'
+        build_coffee coffee_dir + f, null, true
+        console.log 'Compiled:', f
+      callback?()
+      return
+    return
+  return
+
 watch = (port = 35729) ->
   server = livereload.createServer debug: 1, port: port
   server.config.exts = [
@@ -167,7 +177,7 @@ watch = (port = 35729) ->
       file = build_coffee file, true
       _refresh.call server, file
     else if file[-5..] is '.less'
-      build_less less_file, (file) ->
+      build_less less_file, false, (file) ->
         _refresh.call server, file
     return
 
@@ -236,9 +246,16 @@ task 'debug', 'Start a simple server with livereload', ->
   simple_server null, null, true
   return
 
-task 'build:out', 'compile and minify all coffee and less for output', ->
-  build_all false, true
+task 'deploy', 'build for deploy and copy to deploy dir', ->
+  build_deploy copy
+  return
+
+task 'deploy:copy', 'only copy files to deploy dir without recompile', ->
   copy()
+  return
+
+task 'build:deploy', 'compile and minify all coffee and less for deploy', ->
+  build_deploy null
   return
 
 task 'build:min', 'compile and minify all coffee and less', ->
