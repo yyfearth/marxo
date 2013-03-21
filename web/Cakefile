@@ -59,15 +59,19 @@ build_coffee = (file, map, min) ->
   basename = path.basename file, '.coffee'
   dirname = (path.dirname file) + '/'
   jsfile = dirname + basename + '.js'
-  result = coffee file, basename, map
-  result = uglify basename, result.code, result.map if min
+  try
+    result = coffee file, basename, map
+    result = uglify basename, result.code, result.map if min
+  catch e
+    console.error 'compile coffee error', file, e
+    return
   if map
     write dirname + basename + '.map', result.map
     result.code += "\n/*\n//@ sourceMappingURL=#{basename}.map\n*/\n"
   write jsfile, result.code
   jsfile
 
-build_less = (file, callback, min = true) ->
+build_less = (file, callback, min) ->
   console.log 'Compile:', file
   data = read file
   output = file.replace /less$/, 'css'
