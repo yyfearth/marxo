@@ -1,3 +1,4 @@
+"use strict"
 define 'workflow_models', ['console'], ({Entity, Tenant}) ->
   ROOT = '/api'
 

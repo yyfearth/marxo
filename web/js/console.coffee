@@ -1,3 +1,4 @@
+"use strict"
 define 'console', ['lib/common'], (async) ->
   find = (selector, parent) ->
     parent ?= document

@@ -1,3 +1,4 @@
+"use strict"
 #createLink = (sourceId, targetId) ->
 #  uuid = sourceId + '-' + targetId
 #  console.log 'create link', uuid
@@ -44,8 +45,6 @@
 #    if confirm('Delete connection from ' + conn.sourceId + ' to ' + conn.targetId + '?')
 #      jsPlumb.detach conn
 #    return
-
-# backbone & bootstrap
 
 define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
@@ -211,6 +210,14 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
 
       console.log 'grid', grid
       return
+    addNode: (node) ->
+      @
+    removeNode: (node) ->
+      @
+    addLink: (link) ->
+      @
+    removeLink: (link) ->
+      @
     render: ->
       console.log 'render wf'
       @el.onselectstart = -> false
