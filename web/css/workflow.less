@@ -55,19 +55,26 @@
 
   }
 
-  ._jsPlumb_connector {
+  .link {
     z-index: 4;
-    &:hover {
+    cursor: pointer;
+    &.hover, &:hover {
       z-index: 10;
     }
   }
 
-  ._jsPlumb_endpoint {
+  .endpoint {
     z-index: 21;
     cursor: move;
+    &:after {
+      position: absolute;
+      visibility: hidden;
+      content: ' ';
+      padding: 30px;
+    }
   }
 
-  .aLabel {
+  .link-label {
     background-color: white;
     padding: 0.4em;
     font: 12px sans-serif;
@@ -75,6 +82,7 @@
     z-index: 21;
     border: 1px dotted gray;
     opacity: 0.8;
+    cursor: pointer;
   }
 
 }

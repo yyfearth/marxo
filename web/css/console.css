@@ -4801,17 +4801,25 @@ a.badge:focus {
 #workflow_view .node.jsPlumb_dragged {
   cursor: move;
 }
-#workflow_view ._jsPlumb_connector {
+#workflow_view .link {
   z-index: 4;
+  cursor: pointer;
 }
-#workflow_view ._jsPlumb_connector:hover {
+#workflow_view .link.hover,
+#workflow_view .link:hover {
   z-index: 10;
 }
-#workflow_view ._jsPlumb_endpoint {
+#workflow_view .endpoint {
   z-index: 21;
   cursor: move;
 }
-#workflow_view .aLabel {
+#workflow_view .endpoint:after {
+  position: absolute;
+  visibility: hidden;
+  content: ' ';
+  padding: 30px;
+}
+#workflow_view .link-label {
   background-color: white;
   padding: 0.4em;
   font: 12px sans-serif;
@@ -4819,6 +4827,7 @@ a.badge:focus {
   z-index: 21;
   border: 1px dotted gray;
   opacity: 0.8;
+  cursor: pointer;
 }
 /*
  * FullCalendar v1.5.4 Stylesheet
