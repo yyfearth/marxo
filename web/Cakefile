@@ -212,7 +212,11 @@ simple_server = (root = __dirname, port = 8088, livereload) ->
       #     resp.end()
       # else
       mimeType = mime[extname] ? mime.txt
-      resp.writeHead 200, 'Content-Type': mimeType
+      resp.writeHead 200,
+        'Content-Type': mimeType
+        'Cache-Control': 'no-cache'
+        'Pragma': 'no-cache'
+        'Expires': -1
       fileStream = fs.createReadStream filename
       fileStream.pipe resp
       console.log 'served', mimeType, 'file', uri
