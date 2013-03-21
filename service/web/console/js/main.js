@@ -1,1 +1,1 @@
-(function(){require(["console"],function(t){var e,n,i,o;e=t.ConsoleView,i=t.SignInView,n=t.Router,window.app=o={console:e.get(),signin:i.get(),router:n.get()},Backbone.history.start()})}).call(this);
+(function(){"use strict";require(["console"],function(t){var e,n,i,r;e=t.ConsoleView,i=t.SignInView,n=t.Router,window.app=r={console:e.get(),signin:i.get(),router:n.get()},Backbone.history.start()})}).call(this);
