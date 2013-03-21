@@ -1,6 +1,7 @@
 fs = require 'fs'
 path = require 'path'
-# util = require 'util'
+http = require "http"
+url = require "url"
 livereload = require 'livereload'
 CoffeeScript = require 'coffee-script'
 UglifyJS = require 'uglify-js'
@@ -11,6 +12,7 @@ _tmpdir += '/' unless /[\/\\]$/.test _tmpdir
 
 coffee_dir = __dirname + '/js/'
 less_file = __dirname + '/css/console.less'
+out_dir = __dirname + '/out/'
 
 read = (file) -> fs.readFileSync file, encoding: 'utf8'
 
@@ -23,29 +25,49 @@ write = (file, data) ->
   console.log 'Write:', file
   _write file, data
 
-coffee = (file, basename) ->
+coffee = (file, basename, map) ->
   console.log 'Compile:', file
   compiled = CoffeeScript.compile read(file),
     filename: file
+    generatedFile: basename + '.js'
     sourceFiles: [basename + '.coffee']
-    sourceMap: true
-
-  code: compiled.js + "\n//@ sourceMappingURL=#{basename}.map\n"
-  map: compiled.v3SourceMap
+    sourceMap: map = !!map
+    header: false
+  if map
+    code: compiled.js
+    map: compiled.v3SourceMap
+  else
+    code: compiled
 
 uglify = (basename, code, map) ->
   console.log 'Uglify:', basename
-  mapfile = basename + '.map'
-  tmpmap = _tmpdir + mapfile
-  _write tmpmap, map
-  result = UglifyJS.minify code,
-    fromString: true
-    inSourceMap: tmpmap
-    outSourceMap: mapfile
-  fs.unlink tmpmap, (err) -> console.error err if err
+  if map
+    mapfile = basename + '.map'
+    tmpmap = _tmpdir + mapfile
+    _write tmpmap, map
+    result = UglifyJS.minify code,
+      fromString: true
+      inSourceMap: tmpmap
+      outSourceMap: basename + '.js'
+      sourceRoot: ''
+    fs.unlink tmpmap, (err) -> console.error err if err
+  else
+    result = UglifyJS.minify code, fromString: true
   result
 
-build_less = (file, callback, min) ->
+build_coffee = (file, map, min) ->
+  basename = path.basename file, '.coffee'
+  dirname = (path.dirname file) + '/'
+  jsfile = dirname + basename + '.js'
+  result = coffee file, basename, map
+  result = uglify basename, result.code, result.map if min
+  if map
+    write dirname + basename + '.map', result.map
+    result.code += "\n/*\n//@ sourceMappingURL=#{basename}.map\n*/\n"
+  write jsfile, result.code
+  jsfile
+
+build_less = (file, callback, min = true) ->
   console.log 'Compile:', file
   data = read file
   output = file.replace /less$/, 'css'
@@ -74,7 +96,6 @@ build_less = (file, callback, min) ->
           compress: min # options.compress
           yuicompress: min
         # options.yuicompress
-
         write output, css
         callback? output
       catch e
@@ -82,17 +103,7 @@ build_less = (file, callback, min) ->
     return
   output
 
-build_coffee = (file, min) ->
-  basename = path.basename file, '.coffee'
-  dirname = (path.dirname file) + '/'
-  jsfile = dirname + basename + '.js'
-  result = coffee file, basename
-  result = uglify basename, result.code, result.map if min
-  write jsfile, result.code
-  write dirname + basename + '.map', result.map
-  jsfile
-
-build_all = (min) ->
+build_all = (map = true, min) ->
   build_less less_file, min
   fs.readdir coffee_dir, (err, files) ->
     if err
@@ -100,13 +111,130 @@ build_all = (min) ->
       return
     files.forEach (f) -> if f[-7..] is '.coffee'
       process.nextTick ->
-        build_coffee coffee_dir + f, min
+        build_coffee coffee_dir + f, map, min
         console.log 'Compiled:', f
     return
   return
 
+_copy = (source, target, cb) ->
+  _cb = false
+  done = (err) -> unless _cb
+    cb? err
+    _cb = true
+  rd = fs.createReadStream source
+  rd.on "error", (err) -> done err
+  wr = fs.createWriteStream target
+  wr.on "error", (err) -> done err
+  if cb? then wr.on "close", (ex) -> done()
+  rd.pipe wr
+  return
+
+copy = (dir = out_dir) ->
+  [
+    'js/main.js'
+    'js/console.js'
+    'js/workflow_models.js'
+    'js/workflow.js'
+    'js/calendar.js'
+    'css/console.css'
+  ].forEach (file) ->
+    in_file = path.join __dirname, file
+    out_file = path.join out_dir, file
+    _copy in_file, out_file, (err) ->
+      if err
+        console.error 'copy file', file, 'error', err
+      else
+        console.log 'copied file', file
+      return
+    return
+  return
+
+watch = (port = 35729) ->
+  server = livereload.createServer debug: 1, port: port
+  server.config.exts = [
+    'coffee'
+    'less'
+  ]
+  _refresh = server.refresh
+  server.refresh = (file) ->
+    console.log '[', (new Date).toISOString(), ']'
+    console.log 'Updated:', file
+    if file[-7..] is '.coffee'
+      file = build_coffee file, true
+      _refresh.call server, file
+    else if file[-5..] is '.less'
+      build_less less_file, (file) ->
+        _refresh.call server, file
+    return
+
+  server.watch __dirname + '/js'
+  server.watch __dirname + '/css'
+  return
+
+mime =
+  txt: 'text/plain'
+  html: 'text/html'
+  jpg: 'image/jpeg'
+  png: 'image/png'
+  js: 'application/javascript'
+  css: 'text/css'
+  map: 'text/plain'
+  coffee: 'text/coffeescript'
+#livereload_js = '\n<script src="http://localhost:35729/livereload.js?snipver=1"><\/script>\n'
+_exists = fs.exists ? path.exists
+simple_server = (root = __dirname, port = 8088, livereload) ->
+  http.createServer((req, resp) ->
+    uri = url.parse(req.url).pathname
+    filename = path.join root, uri
+    extname = path.extname(filename)?.slice 1
+    _exists filename, (exists) ->
+      unless exists
+        resp.writeHead 404, 'Content-Type': 'text/plain'
+        resp.write '404 Not Found\n'
+        resp.end()
+        return
+      if fs.statSync(filename).isDirectory()
+        filename += '/index.html'
+        extname = 'html'
+      # if livereload and extname is 'html'
+      #   fs.readFile filename, 'utf8', (err, file) ->
+      #     if err
+      #       resp.writeHead 500, 'Content-Type': 'text/plain'
+      #       resp.write err + '\n'
+      #       resp.end()
+      #       return
+      #     if /<\/body>/i.test file
+      #       file = file.replace /<\/body>/i, livereload_js + '</body>'
+      #     else
+      #       file += livereload_js
+      #     resp.writeHead 200, mime.html
+      #     resp.write file
+      #     resp.end()
+      # else
+      mimeType = mime[extname] ? mime.txt
+      resp.writeHead 200, 'Content-Type': mimeType
+      fileStream = fs.createReadStream filename
+      fileStream.pipe resp
+      console.log 'served', mimeType, 'file', uri
+      return
+    return
+  ).listen Number port
+  console.log "Static file server running at http://localhost:#{port}/"
+  watch() if livereload
+  console.log 'Press CTRL + C to shutdown'
+  return
+
+task 'debug', 'Start a simple server with livereload', ->
+  simple_server null, null, true
+  return
+
+task 'build:out', 'compile and minify all coffee and less for output', ->
+  build_all false, true
+  copy()
+  return
+
 task 'build:min', 'compile and minify all coffee and less', ->
-  build_all true
+  build_all null, true
   return
 
 task 'build', 'compile and minify all coffee and less', ->
@@ -124,24 +252,4 @@ task 'clean', 'clean all compiled js and map files', ->
       fs.unlink coffee_dir + f, (err) -> console.error err if err
     return
 
-task 'watch', 'run livereload', ->
-  server = livereload.createServer debug: 1
-  server.config.exts = [
-    'coffee'
-    'less'
-  ]
-  _refresh = server.refresh
-  server.refresh = (file) ->
-    console.log '[', (new Date).toISOString(), ']'
-    console.log 'Updated:', file
-    if file[-7..] is '.coffee'
-      file = build_coffee file
-      _refresh.call server, file
-    else if file[-5..] is '.less'
-      build_less less_file, (file) ->
-        _refresh.call server, file
-    return
-
-  server.watch __dirname + '/js'
-  server.watch __dirname + '/css'
-  return
+task 'watch', 'run livereload', -> watch()

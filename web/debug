@@ -1,5 +1,6 @@
 #!/bin/bash
 BASEDIR=$(cd "$(dirname "$(which $0)")" && pwd)
 cd $BASEDIR/js >/dev/null
-cake watch
+open 'http://localhost:8088/'
+cake debug
 cd - >/dev/null
