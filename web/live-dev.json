@@ -1,0 +1,9 @@
+{
+	"exts": ["coffee", "less", "html"],
+	"mapping": {
+		"css/bootstrap.less": "css/console.less",
+		"css/calendar.less": "css/console.less",
+		"css/fullcalendar.less": "css/console.less",
+		"css/workflow.less": "css/console.less"
+	}
+}

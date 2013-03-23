@@ -7,9 +7,6 @@
 		"node": ">=0.8.0"
 	},
 	"devDependencies": {
-		"livereload": "latest",
-		"coffee-script": ">=1.6.1",
-		"uglify-js": "~2.2",
-		"less": "latest"
+		"live-dev": "latest"
 	}
 }
