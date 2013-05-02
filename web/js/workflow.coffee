@@ -48,43 +48,74 @@
 
 define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
- async
- find
- View
- FrameView
- }, {
- # Tenant
- # SharedWorkflows
- # TenantWorkflows
- # Workflow
- # SharedWorkflow
- # TenantWorkflow
- # SharedNodes
- # TenantNodes
- # Node
- # SharedNode
- # TenantNode
- # SharedLinks
- # TenantLinks
- # Link
- # SharedLink
- # TenantLink
- # SharedActions
- # TenantActions
- # Action
+async
+find
+View
+FrameView
+}, {
+# Tenant
+# SharedWorkflows
+# TenantWorkflows
+# Workflow
+# SharedWorkflow
+# TenantWorkflow
+# SharedNodes
+# TenantNodes
+# Node
+# SharedNode
+# TenantNode
+# SharedLinks
+# TenantLinks
+# Link
+# SharedLink
+# TenantLink
+# SharedActions
+# TenantActions
+# Action
 
- TenantWorkflows
- TenantWorkflow
- TenantNodes
- TenantNode
- TenantLinks
- TenantLink
- }) ->
+TenantWorkflows
+TenantWorkflow
+TenantNodes
+TenantNode
+TenantLinks
+TenantLink
+}) ->
   class WorkflowFrameView extends FrameView
     initialize: (options) ->
       super options
-      @view = new WorkflowView parent: @, el: find '#workflow_view', @el
+      @view = new WorkflowView
+        parent: @
+        el: find('#workflow_view', @el)
+        nodeEditor: new NodeEditor
+          parent: @, el: find('#node_editor', @el)
+        linkEditor: new LinkEditor
+          parent: @, el: find('#link_editor', @el)
       return
+
+  # TODO: move to console
+  class ModalDialogView extends View
+    initialize: (options) ->
+      super options
+      @$el.modal
+        show: false
+        backdrop: 'static'
+      return
+    show: (show = true) ->
+      @$el.modal if show then 'show' else 'hide'
+      @
+    hide: (hide = true) ->
+      @show not hide
+
+  class NodeEditor extends ModalDialogView
+    initialize: (options) ->
+      super options
+      return
+
+  class LinkEditor extends ModalDialogView
+    initialize: (options) ->
+      super options
+      return
+
 
   class WorkflowView extends View
     jsPlumbDefaults:
@@ -122,6 +153,8 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       vertical: false
     initialize: (options) ->
       super options
+      @nodeEditor = options.nodeEditor
+      @linkEditor = options.linkEditor
       jsPlumb.importDefaults @jsPlumbDefaults
       @_loadModel()
       return
@@ -143,22 +176,42 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
         link.prevNode.view.buildSrcEndpoint()
         return
       wf = @
+      _hidePopover = -> if wf._popped
+        if wf._popped._delay
+          wf._popped._delay = clearTimeout wf._popped._delay
+        else
+          $(wf._popped).popover 'hide'
+        return
       _togglePopover = ->
-        $(wf._popped).popover 'hide' if wf._popped
         if wf._popped isnt @ and not @_hidding
-          $(@).popover 'show'
+          @._delay = setTimeout =>
+            $(@).popover 'show' if wf._popped = @
+            @._delay = null
+          , 100
           wf._popped = @
         else
+          _hidePopover()
           wf._popped = null
         return
-      jsPlumb.bind 'click', (conn) ->
-        label = conn.getOverlay 'label'
+      # link click
+      jsPlumb.bind 'click', (e) ->
+        label = e.getOverlay 'label'
         _togglePopover.call label.canvas
         return
+      # link dblclick
+      jsPlumb.bind 'dblclick', (e) ->
+        console.log 'show link'
+        wf.linkEditor.show()
+        return
+      # node click
       @$el.on 'click', '.node', _togglePopover
+      @$el.on 'dblclick', '.node', (e) ->
+        console.log 'show node'
+        wf.nodeEditor.show()
+        return
       @$el.on 'mousedown', (e) ->
         if wf._popped and not wf.$el.find('.popover').has(e.target).length
-          $(wf._popped).popover 'hide'
+          _hidePopover()
           org_popped = wf._popped
           wf._popped = null
           org_popped._hidding = true
@@ -171,8 +224,14 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       wf = @model = new TenantWorkflow id: '51447afb4728cb2036cf9ca1'
       wf.fetch success: =>
         async.parallel [
-          (callback) -> wf.nodes.fetch success: ((c) -> callback null, c), error: -> callback 'fetch nodes failed'
-          (callback) -> wf.links.fetch success: ((c) -> callback null, c), error: -> callback 'fetch links failed'
+          (callback) ->
+            wf.nodes.fetch success: ((c) ->
+              callback null, c), error: ->
+              callback 'fetch nodes failed'
+          (callback) ->
+            wf.links.fetch success: ((c) ->
+              callback null, c), error: ->
+              callback 'fetch links failed'
         ], (err) =>
           if err
             console.error err
@@ -248,7 +307,8 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       @
     render: ->
       console.log 'render wf'
-      @el.onselectstart = -> false
+      @el.onselectstart = ->
+        false
       wf = @model
       throw 'workflow not loaded' unless wf?
       # must bind before render nodes/links
