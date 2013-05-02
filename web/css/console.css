@@ -4751,6 +4751,165 @@ a.badge:focus {
 .affix {
   position: fixed;
 }
+.animate-spin {
+  -moz-animation: spin 2s infinite linear;
+  -o-animation: spin 2s infinite linear;
+  -webkit-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+  display: inline-block;
+}
+@-moz-keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -moz-transform: rotate(359deg);
+    -o-transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@-webkit-keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -moz-transform: rotate(359deg);
+    -o-transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@-ms-keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -moz-transform: rotate(359deg);
+    -o-transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -moz-transform: rotate(359deg);
+    -o-transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@font-face {
+  font-family: 'marxo-font-icon';
+  src: url('../font/marxo-font-icon.eot?71393237');
+  src: url('../font/marxo-font-icon.eot?71393237#iefix') format('embedded-opentype'), url('../font/marxo-font-icon.woff?71393237') format('woff'), url('../font/marxo-font-icon.ttf?71393237') format('truetype'), url('../font/marxo-font-icon.svg?71393237#marxo-font-icon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+[class^="icon-"]:before,
+[class*=" icon-"]:before {
+  font-family: "marxo-font-icon";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  opacity: .8;
+  /* For safety - reset parent styles, that can break glyph codes*/
+
+  font-variant: normal;
+  text-transform: none;
+  /* fix buttons height, for twitter bootstrap */
+
+  line-height: 1em;
+  /* Animation center compensation - magrins should be symmetric */
+
+  /* remove if not needed */
+
+  margin-left: .2em;
+  /* you can be more comfortable with increased icons size */
+
+  /* font-size: 120%; */
+
+  /* Uncomment for 3D effect */
+
+  text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3);
+}
+.icon-plus:before {
+  content: '\2b';
+}
+.icon-minus:before {
+  content: '\2d';
+}
+.icon-heart:before {
+  content: '\2665';
+}
+.icon-cog:before {
+  content: '\2699';
+}
+.icon-mail:before {
+  content: '\2709';
+}
+.icon-pencil:before {
+  content: '\270e';
+}
+.icon-ok:before {
+  content: '\2713';
+}
+.icon-close:before {
+  content: '\2715';
+}
+.icon-user-add:before {
+  content: '\e700';
+}
+.icon-down-open:before {
+  content: '\e75c';
+}
+.icon-left-open:before {
+  content: '\e75d';
+}
+.icon-right-open:before {
+  content: '\e75e';
+}
+.icon-up-open:before {
+  content: '\e75f';
+}
+.icon-refresh:before {
+  content: '\e760';
+}
+.icon-spin:before {
+  content: '\e834';
+}
+.icon-wizard:before {
+  content: '\f0d0';
+}
+.icon-user:before {
+  content: '👤';
+}
+.icon-users:before {
+  content: '👥';
+}
+.icon-search:before {
+  content: '🔍';
+}
 .node {
   border: 1px solid #346789;
   -webkit-box-shadow: 2px 2px 13px #aaa;
@@ -5422,21 +5581,13 @@ body {
   background: -ms-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
 }
-.box .box-header h2 {
+.box .box-header h4 {
   font-size: 15px;
-  margin: 0;
   width: auto;
   clear: none;
   float: left;
   line-height: 25px;
-}
-.box .box-header h3 {
-  font-size: 13px;
   margin: 0;
-  width: auto;
-  clear: none;
-  float: left;
-  line-height: 25px;
 }
 .box .box-header h2 > i {
   margin-top: 1px;
@@ -5444,26 +5595,24 @@ body {
 .box .box-icon {
   float: right;
 }
-.box .box-icon a {
+.box .box-icon .btn-round {
+  display: inline-block;
+  width: 27px;
+  height: 27px;
+  border-radius: 40px;
+  line-height: 18px;
+  vertical-align: middle;
+  font-size: 14px;
   clear: none;
   float: left;
-  margin: 0 2px;
-  height: 18px;
-  width: 5px;
-  margin-top: -1px;
+  margin: -1px 2px 1px 2px;
+  text-align: center;
 }
-.box .box-icon a i {
-  margin-left: -4.5px;
+.box .box-icon .btn-round .icon {
+  margin-left: -9px;
 }
 .box .box-content {
   padding: 10px;
-}
-.btn-round {
-  border-radius: 40px;
-  -webkit-border-radius: 40px;
-  -moz-border-radius: 40px;
-  font-size: 12px;
-  padding-top: 4px;
 }
 #signin {
   z-index: 1000;
