@@ -139,14 +139,16 @@ public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>>
 	}
 
 	// to get boolean parameter in url
-	public boolean hasFlag(String paramName, boolean defVal) {
+	public boolean hasFlag(String paramName, boolean defaultValue) {
 		if (request == null) {
-			return defVal;
+			return defaultValue;
 		}
+
 		String reqParam = getParameter(paramName);
+
 		if (StringUtils.isEmpty(reqParam)) {
-			return defVal;
-		} else if (!defVal) { // default false
+			return defaultValue;
+		} else if (!defaultValue) { // default false
 			return reqParam.matches("(?i)true|yes|on|1");
 		} else { // default true
 			return !reqParam.matches("(?i)false|no|off|0");
