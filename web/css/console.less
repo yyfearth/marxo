@@ -213,14 +213,16 @@ html, body {
       overflow: auto;
 
       // dropdown menu fix
-      .pull-right .dropdown-menu:after {
-        left: auto;
-        right: 13px;
-      }
-
-      .pull-right .dropdown-menu {
-        left: auto;
-        right: 0;
+      .pull-right {
+        .dropdown-menu {
+          left: auto;
+          right: 0;
+          
+          &:after {
+            left: auto;
+            right: 13px;
+          }
+        }
       }
     }
 
