@@ -2,7 +2,7 @@ fs = require 'fs'
 path = require 'path'
 http = require "http"
 url = require "url"
-livereload = require 'livereload'
+# livereload = require 'livereload'
 CoffeeScript = require 'coffee-script'
 UglifyJS = require 'uglify-js'
 less = require 'less'
@@ -163,88 +163,88 @@ build_deploy = (callback) ->
     return
   return
 
-watch = (port = 35729) ->
-  server = livereload.createServer debug: 1, port: port
-  server.config.exts = [
-    'coffee'
-    'less'
-  ]
-  _refresh = server.refresh
-  server.refresh = (file) ->
-    console.log '[', (new Date).toISOString(), ']'
-    console.log 'Updated:', file
-    if file[-7..] is '.coffee'
-      file = build_coffee file, true
-      _refresh.call server, file
-    else if file[-5..] is '.less'
-      build_less less_file, false, (file) ->
-        _refresh.call server, file
-    return
+# watch = (port = 35729) ->
+#   server = livereload.createServer debug: 1, port: port
+#   server.config.exts = [
+#     'coffee'
+#     'less'
+#   ]
+#   _refresh = server.refresh
+#   server.refresh = (file) ->
+#     console.log '[', (new Date).toISOString(), ']'
+#     console.log 'Updated:', file
+#     if file[-7..] is '.coffee'
+#       file = build_coffee file, true
+#       _refresh.call server, file
+#     else if file[-5..] is '.less'
+#       build_less less_file, false, (file) ->
+#         _refresh.call server, file
+#     return
 
-  server.watch __dirname + '/js'
-  server.watch __dirname + '/css'
-  return
+#   server.watch __dirname + '/js'
+#   server.watch __dirname + '/css'
+#   return
 
-mime =
-  txt: 'text/plain'
-  html: 'text/html'
-  jpg: 'image/jpeg'
-  png: 'image/png'
-  js: 'application/javascript'
-  css: 'text/css'
-  map: 'text/plain'
-  coffee: 'text/coffeescript'
-#livereload_js = '\n<script src="http://localhost:35729/livereload.js?snipver=1"><\/script>\n'
-_exists = fs.exists ? path.exists
-simple_server = (root = __dirname, port = 8088, livereload) ->
-  http.createServer((req, resp) ->
-    uri = url.parse(req.url).pathname
-    filename = path.join root, uri
-    extname = path.extname(filename)?.slice 1
-    _exists filename, (exists) ->
-      unless exists
-        resp.writeHead 404, 'Content-Type': 'text/plain'
-        resp.write '404 Not Found\n'
-        resp.end()
-        return
-      if fs.statSync(filename).isDirectory()
-        filename += '/index.html'
-        extname = 'html'
-      # if livereload and extname is 'html'
-      #   fs.readFile filename, 'utf8', (err, file) ->
-      #     if err
-      #       resp.writeHead 500, 'Content-Type': 'text/plain'
-      #       resp.write err + '\n'
-      #       resp.end()
-      #       return
-      #     if /<\/body>/i.test file
-      #       file = file.replace /<\/body>/i, livereload_js + '</body>'
-      #     else
-      #       file += livereload_js
-      #     resp.writeHead 200, mime.html
-      #     resp.write file
-      #     resp.end()
-      # else
-      mimeType = mime[extname] ? mime.txt
-      resp.writeHead 200,
-        'Content-Type': mimeType
-        'Cache-Control': 'no-cache'
-        'Pragma': 'no-cache'
-        'Expires': -1
-      fileStream = fs.createReadStream filename
-      fileStream.pipe resp
-      console.log 'served', mimeType, 'file', uri
-      return
-    return
-  ).listen Number port
-  console.log "Static file server running at http://localhost:#{port}/"
-  watch() if livereload
-  console.log 'Press CTRL + C to shutdown'
-  return
+# mime =
+#   txt: 'text/plain'
+#   html: 'text/html'
+#   jpg: 'image/jpeg'
+#   png: 'image/png'
+#   js: 'application/javascript'
+#   css: 'text/css'
+#   map: 'text/plain'
+#   coffee: 'text/coffeescript'
+# #livereload_js = '\n<script src="http://localhost:35729/livereload.js?snipver=1"><\/script>\n'
+# _exists = fs.exists ? path.exists
+# simple_server = (root = __dirname, port = 8088, livereload) ->
+#   http.createServer((req, resp) ->
+#     uri = url.parse(req.url).pathname
+#     filename = path.join root, uri
+#     extname = path.extname(filename)?.slice 1
+#     _exists filename, (exists) ->
+#       unless exists
+#         resp.writeHead 404, 'Content-Type': 'text/plain'
+#         resp.write '404 Not Found\n'
+#         resp.end()
+#         return
+#       if fs.statSync(filename).isDirectory()
+#         filename += '/index.html'
+#         extname = 'html'
+#       # if livereload and extname is 'html'
+#       #   fs.readFile filename, 'utf8', (err, file) ->
+#       #     if err
+#       #       resp.writeHead 500, 'Content-Type': 'text/plain'
+#       #       resp.write err + '\n'
+#       #       resp.end()
+#       #       return
+#       #     if /<\/body>/i.test file
+#       #       file = file.replace /<\/body>/i, livereload_js + '</body>'
+#       #     else
+#       #       file += livereload_js
+#       #     resp.writeHead 200, mime.html
+#       #     resp.write file
+#       #     resp.end()
+#       # else
+#       mimeType = mime[extname] ? mime.txt
+#       resp.writeHead 200,
+#         'Content-Type': mimeType
+#         'Cache-Control': 'no-cache'
+#         'Pragma': 'no-cache'
+#         'Expires': -1
+#       fileStream = fs.createReadStream filename
+#       fileStream.pipe resp
+#       console.log 'served', mimeType, 'file', uri
+#       return
+#     return
+#   ).listen Number port
+#   console.log "Static file server running at http://localhost:#{port}/"
+#   watch() if livereload
+#   console.log 'Press CTRL + C to shutdown'
+#   return
 
-task 'debug', 'Start a simple server with livereload', ->
-  simple_server null, null, true
-  return
+# task 'debug', 'Start a simple server with livereload', ->
+#   simple_server null, null, true
+#   return
 
 task 'deploy', 'build for deploy and copy to deploy dir', ->
   build_deploy copy
