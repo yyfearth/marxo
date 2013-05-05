@@ -46,58 +46,94 @@
 #      jsPlumb.detach conn
 #    return
 
-# backbone & bootstrap
-
 define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
- async
- find
- FrameView
- }, {
- # Tenant
- # SharedWorkflows
- # TenantWorkflows
- # Workflow
- # SharedWorkflow
- # TenantWorkflow
- # SharedNodes
- # TenantNodes
- # Node
- # SharedNode
- # TenantNode
- # SharedLinks
- # TenantLinks
- # Link
- # SharedLink
- # TenantLink
- # SharedActions
- # TenantActions
- # Action
+async
+find
+View
+FrameView
+}, {
+# Tenant
+# SharedWorkflows
+# TenantWorkflows
+# Workflow
+# SharedWorkflow
+# TenantWorkflow
+# SharedNodes
+# TenantNodes
+# Node
+# SharedNode
+# TenantNode
+# SharedLinks
+# TenantLinks
+# Link
+# SharedLink
+# TenantLink
+# SharedActions
+# TenantActions
+# Action
 
- TenantWorkflows
- TenantWorkflow
- TenantNodes
- TenantNode
- TenantLinks
- TenantLink
- }) ->
+TenantWorkflows
+TenantWorkflow
+TenantNodes
+TenantNode
+TenantLinks
+TenantLink
+}) ->
   class WorkflowFrameView extends FrameView
     initialize: (options) ->
       super options
-      @view = new WorkflowView el: find '#workflow_view', @el
+      @view = new WorkflowView
+        parent: @
+        el: find('#workflow_view', @el)
+        nodeEditor: new NodeEditor
+          parent: @, el: find('#node_editor', @el)
+        linkEditor: new LinkEditor
+          parent: @, el: find('#link_editor', @el)
       return
 
-  class WorkflowView extends Backbone.View
+  # TODO: move to console
+  class ModalDialogView extends View
+    initialize: (options) ->
+      super options
+      @$el.modal
+        show: false
+        backdrop: 'static'
+      return
+    show: (show = true) ->
+      @$el.modal if show then 'show' else 'hide'
+      @
+    hide: (hide = true) ->
+      @show not hide
+
+  class NodeEditor extends ModalDialogView
+    initialize: (options) ->
+      super options
+      return
+
+  class LinkEditor extends ModalDialogView
+    initialize: (options) ->
+      super options
+      return
+
+
+  class WorkflowView extends View
     jsPlumbDefaults:
       DragOptions:
         zIndex: 2000
-      Endpoint: ['Dot', radius: 3]
+      Endpoint: ['Dot', radius: 3, cssClass: 'endpoint']
       ConnectionsDetachable: true
       ReattachConnections: true
       HoverPaintStyle:
         strokeStyle: '#42a62c'
         lineWidth: 2
         zIndex: 2000
+      Connector: [
+        'Flowchart'
+        stub: [40, 60]
+        gap: 10
+        cssClass: 'link'
+      ]
       ConnectionOverlays: [
         [ 'Arrow',
           location: 1
@@ -107,18 +143,20 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
           location: 0.5
           label: 'new link'
           id: 'label'
-          cssClass: 'aLabel'
+          cssClass: 'link-label'
         ]
       ]
     gridDefaults:
-      padding: 15
+      padding: 30
       spanX: 300
       spanY: 150
       vertical: false
-    initialize: ->
+    initialize: (options) ->
+      super options
+      @nodeEditor = options.nodeEditor
+      @linkEditor = options.linkEditor
       jsPlumb.importDefaults @jsPlumbDefaults
       @_loadModel()
-      @_bind()
       return
     _bind: ->
       # link label
@@ -126,13 +164,10 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
         conn = info.connection
         link = conn.getParameter 'link'
         label = conn.getOverlay 'label'
-        unless link?
+        if not link?
           # conn.setParameter 'link', createLink info.sourceId, info.targetId
-          label.hide()
         else if link.has 'title'
           label.setLabel link.get 'title'
-        else
-          label.hide()
         return
       jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
         conn = info.connection
@@ -140,13 +175,63 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
         # deleteLink info.connection.getParameter 'link'
         link.prevNode.view.buildSrcEndpoint()
         return
+      wf = @
+      _hidePopover = -> if wf._popped
+        if wf._popped._delay
+          wf._popped._delay = clearTimeout wf._popped._delay
+        else
+          $(wf._popped).popover 'hide'
+        return
+      _togglePopover = ->
+        if wf._popped isnt @ and not @_hidding
+          @._delay = setTimeout =>
+            $(@).popover 'show' if wf._popped = @
+            @._delay = null
+          , 100
+          wf._popped = @
+        else
+          _hidePopover()
+          wf._popped = null
+        return
+      # link click
+      jsPlumb.bind 'click', (e) ->
+        label = e.getOverlay 'label'
+        _togglePopover.call label.canvas
+        return
+      # link dblclick
+      jsPlumb.bind 'dblclick', (e) ->
+        console.log 'show link'
+        wf.linkEditor.show()
+        return
+      # node click
+      @$el.on 'click', '.node', _togglePopover
+      @$el.on 'dblclick', '.node', (e) ->
+        console.log 'show node'
+        wf.nodeEditor.show()
+        return
+      @$el.on 'mousedown', (e) ->
+        if wf._popped and not wf.$el.find('.popover').has(e.target).length
+          _hidePopover()
+          org_popped = wf._popped
+          wf._popped = null
+          org_popped._hidding = true
+          setTimeout ->
+            delete org_popped._hidding
+          , 300
+        return
       return
     _loadModel: (callback = @render) ->
       wf = @model = new TenantWorkflow id: '51447afb4728cb2036cf9ca1'
       wf.fetch success: =>
         async.parallel [
-          (callback) -> wf.nodes.fetch success: ((c) -> callback null, c), error: -> callback 'fetch nodes failed'
-          (callback) -> wf.links.fetch success: ((c) -> callback null, c), error: -> callback 'fetch links failed'
+          (callback) ->
+            wf.nodes.fetch success: ((c) ->
+              callback null, c), error: ->
+              callback 'fetch nodes failed'
+          (callback) ->
+            wf.links.fetch success: ((c) ->
+              callback null, c), error: ->
+              callback 'fetch links failed'
         ], (err) =>
           if err
             console.error err
@@ -212,11 +297,22 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
 
       console.log 'grid', grid
       return
+    addNode: (node) ->
+      @
+    removeNode: (node) ->
+      @
+    addLink: (link) ->
+      @
+    removeLink: (link) ->
+      @
     render: ->
       console.log 'render wf'
-      @el.onselectstart = -> false
+      @el.onselectstart = ->
+        false
       wf = @model
       throw 'workflow not loaded' unless wf?
+      # must bind before render nodes/links
+      @_bind()
       # build nodes
       wf.nodes.forEach (node) =>
         view = node.view = new NodeView model: node, parent: @
@@ -225,17 +321,11 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
         return
       # build links
       wf.links.forEach (link) =>
-        # view = link.view = new LinkView model: link
-        # link.view = view
-        jsPlumb.connect
-          source: link.prevNode.view.srcEndpoint
-          target: link.nextNode.view.el
-          parameters:
-            link: link
-        return
+        view = link.view = new LinkView model: link, parent: @
+        view.render()
       @
 
-  class NodeView extends Backbone.View
+  class NodeView extends View
     tagName: 'div'
     className: 'node'
     sourceEndpointStyle:
@@ -245,11 +335,6 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       paintStyle:
         fillStyle: '#225588'
         radius: 9
-      connector: [
-        'Flowchart'
-        stub: [40, 60]
-        gap: 10
-      ]
       connectorStyle:
         strokeStyle: '#346789'
         lineWidth: 2
@@ -268,32 +353,58 @@ define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-j
       dropOptions:
         hoverClass: 'hover'
         activeClass: 'active'
-    initialize: (options) ->
-      @parent = options.parent
-      @parentEl = @parent.el
-      return
     render: ->
-      console.log 'render node'
-      name = @el.id = @model.get 'name'
-      @el.innerHTML = @model.escape 'title'
-      @el.style.left = @model.x + 'px'
-      @el.style.top = @model.y + 'px'
+      node = @model
+      name = @el.id = node.get 'name'
+      @el.innerHTML = node.escape 'title'
+      @el.title = node.get 'title'
+      @el.style.left = node.x + 'px'
+      @el.style.top = node.y + 'px'
       jsPlumb.draggable @$el
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
       @buildSrcEndpoint()
       jsPlumb.makeTarget @$el, @targetEndpointStyle, parameters:
-        node: @model
+        node: node
         view: @
+      @$el.popover
+        container: @parentEl
+        trigger: 'manual'
+        placement: 'bottom'
       @
     buildSrcEndpoint: ->
       jsPlumb.deleteEndpoint @srcEndpoint if @srcEndpoint?
       @srcEndpoint = jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
         model: @model
         view: @
+      @
 
-
-  #  class LinkView extends Backbone.View
+  class LinkView extends View
+    render: ->
+      link = @model
+      conn = @conn = jsPlumb.connect
+        source: link.prevNode.view.srcEndpoint
+        target: link.nextNode.view.el
+        cssClass: 'link'
+        hoverClass: 'hover'
+        parameters:
+          link: link
+          view: @
+      @setElement conn.canvas
+      @label = conn.getOverlay 'label'
+      @labelEl = @label.canvas
+      title = link.get 'title'
+      label$el = $(@labelEl)
+      # _desc = "#{link.prevNode.get 'title'} to #{link.nextNode.get 'title'}"
+      if title
+        @labelEl.title = 'Link: ' + title
+      else
+        label$el.css 'visibility', 'hidden'
+        @labelEl.title = 'Link'
+      label$el.popover
+        container: @parentEl
+        trigger: 'manual'
+        placement: 'bottom'
+      @
 
   WorkflowFrameView
-
