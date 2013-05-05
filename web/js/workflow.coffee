@@ -1,3 +1,4 @@
+"use strict"
 #createLink = (sourceId, targetId) ->
 #  uuid = sourceId + '-' + targetId
 #  console.log 'create link', uuid
