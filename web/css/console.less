@@ -173,6 +173,13 @@ html, body {
   left: 0px;
   right: 0px;
 
+  .frame, .inner-frame {
+    display: none;
+    &.active {
+      display: block;
+    }
+  }
+
   .frame {
     position: absolute;
     top: 15px;
@@ -224,11 +231,6 @@ html, body {
           }
         }
       }
-    }
-
-    display: none;
-    &.active {
-      display: block;
     }
   }
 

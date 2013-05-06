@@ -22,7 +22,7 @@ define 'console', ['lib/common'], (async) ->
         @instance = new @
       @instance
     initialize: ->
-      @frames = {}
+      @frames = ({})
       findAll('.frame', @el).forEach (frame) =>
         navEl = find "#navbar a[href=\"##{frame.id}\"]"
         @frames[frame.id] =
@@ -38,7 +38,8 @@ define 'console', ['lib/common'], (async) ->
         'report'
         'config'
         'profile'
-      ].forEach (n) => @frames[n] = new FrameView @frames[n]
+      ].forEach (n) =>
+        @frames[n] = new FrameView @frames[n]
       @fixStyles()
       return
     fixStyles: ->
@@ -49,14 +50,17 @@ define 'console', ['lib/common'], (async) ->
         framesContainer.style.top = h + 'px'
         return
       return
-    showFrame: (frame) ->
+    showFrame: (frame, name) ->
       frame = @frames[frame]
       return unless frame?
       console.log 'frame', frame
-      unless frame instanceof FrameView
+      if frame instanceof FrameView
+        frame.open? name
+      else
         require [frame.id], (TheFrameView) =>
           frame = @frames[frame.id] = new TheFrameView frame
           frame.render()
+          frame.open? name
           return
       unless frame.el.classList.contains 'active'
         find('#main .frame.active')?.classList.remove 'active'
@@ -86,11 +90,34 @@ define 'console', ['lib/common'], (async) ->
       , SignInView::delay
       return
 
+  class InnerFrameView extends View
+    initialize: (options) ->
+      super options
+      return
+
   class FrameView extends View
     initialize: (options) ->
       super options
       @navEl = options.navEl or (find "#navbar a[href=\"##{@id}\"]")?.parentElement
+      @innerFrames = ({})
+      findAll('.inner-frame', @el).forEach (el) =>
+        name = el.dataset.name
+        if name # name should be editor, manager, ...
+          #console.log 'find inner frame', name, el
+          view = new InnerFrameView el: el, parent: @el
+          @[name] = @innerFrames[name] = view
       return
+    show: (frameName) ->
+      innerFrame = @innerFrames[frameName]
+      if innerFrame?
+        unless innerFrame.el.classList.contains 'active'
+          console.log 'switch inner-frame', frameName
+          find('.inner-frame.active', @el)?.classList.remove 'active'
+          innerFrame.el.classList.add 'active'
+      else
+        console.warn 'inner frame cannot find', frameName
+      return
+  #open: (name) -> # should be override
 
   class SignInView extends View
     el: '#signin'
@@ -159,7 +186,8 @@ define 'console', ['lib/common'], (async) ->
     url: '/'
 
   class Tenant extends Entity
-    url: -> ROOT + '/' + @name + '/profile'
+    url: ->
+      ROOT + '/' + @name + '/profile'
   #    idAttribute: '_name'
 
   class User extends Entity
@@ -170,7 +198,8 @@ define 'console', ['lib/common'], (async) ->
 
   class Publichers extends Backbone.Collection
     model: Publicher
-    url: -> @tenant.url() + '/users'
+    url: ->
+      @tenant.url() + '/users'
 
   class Participant extends User
 
@@ -194,11 +223,13 @@ define 'console', ['lib/common'], (async) ->
       'profile'
     ]
     constructor: (options) ->
+      super options
       @route '', 'home', =>
         @navigate 'home', replace: true
         @show 'home'
       @frames.forEach (frame) =>
-        @route frame + '(/:name)', frame, (name) => @show frame, name
+        @route frame + '(/:name)', frame, (name) =>
+          @show frame, name
         return
       @route 'signin', 'signin', => return
       @route 'signout', 'signout'
@@ -209,25 +240,23 @@ define 'console', ['lib/common'], (async) ->
         @navigate 'signin', replace: true
         return
       console.log 'route', frame, name or ''
-      if frame isnt @current
-        @current = frame
-        ConsoleView.get()?.showFrame frame
+      ConsoleView.get()?.showFrame frame, name
       handler = @[frame]
       handler.call @, name if handler?
       return
 
-    home: ->
-      return
-    project: (name) ->
-      return
-    workflow: (name) ->
-      return
-    calendar: (name) ->
-      return
-    content: (name) ->
-      return
-    report: (name) ->
-      return
+    #home: -> return
+#    project: (name) ->
+#      if name is 'new'
+#        console.log 'show project create'
+#      else if name is 'mgr'
+#        console.log 'show project mgr'
+#      else if name
+#        console.log 'show project viewr?/editor? for', name
+#      return
+    #calendar: (name) -> return
+    #content: (name) -> return
+    #report: (name) -> return
 
     signout: ->
       console.log 'sign out'

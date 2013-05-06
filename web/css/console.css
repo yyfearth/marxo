@@ -5837,6 +5837,14 @@ body {
   left: 0px;
   right: 0px;
 }
+#frames .frame,
+#frames .inner-frame {
+  display: none;
+}
+#frames .frame.active,
+#frames .inner-frame.active {
+  display: block;
+}
 #frames .frame {
   position: absolute;
   top: 15px;
@@ -5845,7 +5853,6 @@ body {
   right: 15px;
   padding: 0px;
   margin: 0px;
-  display: none;
 }
 #frames .frame .inner-frame,
 #frames .frame .sidebar,
@@ -5877,16 +5884,13 @@ body {
   margin-left: 15px;
   overflow: auto;
 }
-#frames .frame .workspace .pull-right .dropdown-menu:after {
-  left: auto;
-  right: 13px;
-}
 #frames .frame .workspace .pull-right .dropdown-menu {
   left: auto;
   right: 0;
 }
-#frames .frame.active {
-  display: block;
+#frames .frame .workspace .pull-right .dropdown-menu:after {
+  left: auto;
+  right: 13px;
 }
 #frames footer {
   padding: 1px 20px;
