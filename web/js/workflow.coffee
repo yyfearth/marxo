@@ -91,6 +91,21 @@ TenantLink
         linkEditor: new LinkEditor
           parent: @, el: find('#link_editor', @el)
       return
+    open: (name) ->
+      if name is 'new'
+        console.log 'show workflow editor with create mode'
+        @show 'manager'
+        # DOTO: show create new model
+      else if name is 'mgr'
+        console.log 'show workflow mgr'
+        @show 'manager'
+      else if name
+        console.log 'show workflow editor for', name
+        @show 'editor'
+        @view.load name
+      # '51447afb4728cb2036cf9ca1'
+      # else show the activeInnerFrame
+      return
 
   # TODO: move to console
   class ModalDialogView extends View
@@ -156,7 +171,7 @@ TenantLink
       @nodeEditor = options.nodeEditor
       @linkEditor = options.linkEditor
       jsPlumb.importDefaults @jsPlumbDefaults
-      @_loadModel()
+      @render()
       return
     _bind: ->
       # link label
@@ -220,8 +235,19 @@ TenantLink
           , 300
         return
       return
-    _loadModel: (callback = @render) ->
-      wf = @model = new TenantWorkflow id: '51447afb4728cb2036cf9ca1'
+    load: (id, callback) ->
+      # clear
+      @el.innerHTML = ''
+      @_loadModel id, (err, wf) =>
+        if err or not wf
+          # TODO: show error
+          return
+        @_renderModel wf
+        callback? wf
+        return
+      @
+    _loadModel: (id, callback) ->
+      wf = @model = new TenantWorkflow id: id
       wf.fetch success: =>
         async.parallel [
           (callback) ->
@@ -235,6 +261,7 @@ TenantLink
         ], (err) =>
           if err
             console.error err
+            callback err
             return
           console.log 'workflow', wf
           # pre-process nodes and links
@@ -266,7 +293,7 @@ TenantLink
             return
           @_sortNodeViews nodes
           # TODO: workflow validation
-          callback.call @, wf
+          callback null, wf
         return
       return
     _sortNodeViews: (nodes) ->
@@ -297,18 +324,8 @@ TenantLink
 
       console.log 'grid', grid
       return
-    addNode: (node) ->
-      @
-    removeNode: (node) ->
-      @
-    addLink: (link) ->
-      @
-    removeLink: (link) ->
-      @
-    render: ->
-      console.log 'render wf'
-      @el.onselectstart = ->
-        false
+    _renderModel: (wf) ->
+      console.log 'render wf', wf
       wf = @model
       throw 'workflow not loaded' unless wf?
       # must bind before render nodes/links
@@ -323,6 +340,18 @@ TenantLink
       wf.links.forEach (link) =>
         view = link.view = new LinkView model: link, parent: @
         view.render()
+      return
+    addNode: (node) ->
+      @
+    removeNode: (node) ->
+      @
+    addLink: (link) ->
+      @
+    removeLink: (link) ->
+      @
+    render: ->
+      @el.onselectstart = ->
+        false
       @
 
   class NodeView extends View
