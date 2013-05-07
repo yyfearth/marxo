@@ -35,7 +35,6 @@ define 'console', ['lib/common'], (async) ->
       [ # for debug only
         'home'
         'content'
-        'report'
         'profile'
       ].forEach (n) =>
         @frames[n] = new FrameView @frames[n]
