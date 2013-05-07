@@ -136,6 +136,9 @@ copy = (dir = out_dir) ->
     'js/workflow_models.js'
     'js/workflow.js'
     'js/calendar.js'
+    'js/project.js'
+    'js/report.js'
+    'js/config.js'
     'css/console.css'
   ].forEach (file) ->
     in_file = path.join __dirname, file
