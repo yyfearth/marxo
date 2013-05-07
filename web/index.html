@@ -63,7 +63,14 @@
 			<li><a href="#content">Content</a></li>
 			<li><a href="#calendar">Calendar</a></li>
 			<li><a href="#report">Report</a></li>
-			<li><a href="#config">Configuration</a></li>
+			<li class="dropdown">
+				<a href="#config">Configuration <b class="caret"></b></a>
+				<ul class="dropdown-menu">
+					<li><a href="#config/tenant">Tenant Profile</a></li>
+					<li class="divider"></li>
+					<li><a href="#config/users">Manage Members</a></li>
+				</ul>
+			</li>
 
 		</ul>
 	</div>
@@ -115,12 +122,13 @@
 	</div>
 </div>
 <div id="project" class="frame container-fluid">
-	<div data-name="viewer" class="row-fluid inner-frame">Project Viewer</div>
-	<div data-name="manager" class="active row-fluid inner-frame">Project Manager</div>
+	<div id="project_creator" name="creator" class="row-fluid inner-frame">Project Creater</div>
+	<div id="project_viewer" name="viewer" class="row-fluid inner-frame">Project Viewer</div>
+	<div id="project_manager" name="manager" class="active row-fluid inner-frame">Project Manager</div>
 </div>
 
 <div id="workflow" class="frame container-fluid">
-	<div id="workflow_editor" class="row-fluid inner-frame">
+	<div id="workflow_editor" name="editor" class="row-fluid inner-frame">
 		<div class="span2 sidebar">
 			<div class="well">
 				<ul id="node_list" class="sidebar-list nav">
@@ -241,7 +249,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="workflow_manager" class="active row-fluid inner-frame">
+	<div id="workflow_manager" name="manager" class="active row-fluid inner-frame">
 		Workflow Manager
 		<a href="#workflow/51447afb4728cb2036cf9ca1">Demo Workflow</a>
 	</div>
@@ -446,7 +454,7 @@
 			</div>
 		</div>
 		<div class="span10 workspace">
-			<div data-name="tenant" class="inner-frame active">
+			<div id="tenant_profile" name="profile" class="inner-frame active">
 				<form class="form-horizontal">
 					<div class="control-group">
 						<label class="control-label" for="tenant_id">ID</label>
@@ -519,7 +527,7 @@
 					</div>
 				</form>
 			</div>
-			<div data-name="users" class="inner-frame active">Member List (support filter)</div>
+			<div id="user_manager" name="manager" class="inner-frame">Member List (support filter)</div>
 		</div>
 	</div>
 </div>

@@ -38,27 +38,22 @@ TenantLinks
 TenantLink
 }) ->
   class WorkflowFrameView extends FrameView
-  #initialize: (options) ->
-  #  super options
-  #  return
-    _initInnerFrames: -> # override default
-      @editor = new WorkflowEditorView el: '#workflow_editor', parent: @el
-      @manager = new WorkflowManagerView el: '#workflow_manager', parent: @el
-      @innerFrames =
-        editor: @editor
-        manager: @manager
+    initialize: (options) ->
+      super options
+      @editor = new WorkflowEditorView el: '#workflow_editor', parent: @
+      @manager = new WorkflowManagerView el: '#workflow_manager', parent: @
       return
     open: (name) ->
       if name is 'new'
         console.log 'show workflow editor with create mode'
-        @show 'manager'
+        @switchTo @manager
         # DOTO: show create new model
       else if name is 'mgr'
         console.log 'show workflow mgr'
-        @show 'manager'
+        @switchTo @manager
       else if name
         console.log 'show workflow editor for', name
-        @show 'editor'
+        @switchTo @editor
         @editor.load name
       return
 
@@ -66,14 +61,11 @@ TenantLink
     initialize: (options) ->
       super options
       @view = new WorkflowView
-        parent: @
         el: find('#workflow_view', @el)
         nodeEditor: new NodeEditorView
-          parent: @
         linkEditor: new LinkEditorView
-          parent: @
       @nodeList = new NodeListView
-        parent: @, el: find('#node_list', @el)
+        el: find('#node_list', @el)
         workflowView: @view
       return
     load: (id) ->

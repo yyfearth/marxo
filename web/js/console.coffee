@@ -34,10 +34,8 @@ define 'console', ['lib/common'], (async) ->
         return
       [ # for debug only
         'home'
-        'project' # TODO: use ProjectFrameView
         'content'
         'report'
-        'config'
         'profile'
       ].forEach (n) =>
         @frames[n] = new FrameView @frames[n]
@@ -100,27 +98,17 @@ define 'console', ['lib/common'], (async) ->
     initialize: (options) ->
       super options
       @navEl = options.navEl or (find "#navbar a[href=\"##{@id}\"]")?.parentElement
-      @_initInnerFrames()
       return
-    _initInnerFrames: ->
-      @innerFrames = ({})
-      findAll('.inner-frame', @el).forEach (el) =>
-        name = el.dataset.name
-        if name # name should be editor, manager, ...
-          #console.log 'find inner frame', name, el
-          view = new InnerFrameView el: el, parent: @el
-          @[name] = @innerFrames[name] = view
-      return
-    show: (frameName) ->
-      innerFrame = @innerFrames[frameName]
-      if innerFrame?
-        unless innerFrame.el.classList.contains 'active'
-          console.log 'switch inner-frame', frameName
-          find('.inner-frame.active', @el)?.classList.remove 'active'
-          innerFrame.el.classList.add 'active'
-        unless innerFrame.rendered
-          innerFrame.render()
-          innerFrame.rendered = true
+    switchTo: (innerframe) ->
+      innerframe = @[innerframe] if typeof innerframe is 'string'
+      if innerframe and innerframe instanceof InnerFrameView
+        unless innerframe.el.classList.contains 'active'
+          console.log 'switch inner-frame', innerframe.el?.id
+          find('.inner-frame.active[name]', @el)?.classList.remove 'active'
+          innerframe.el.classList.add 'active'
+        unless innerframe.rendered
+          innerframe.render()
+          innerframe.rendered = true
       else
         console.warn 'inner frame cannot find', frameName
       return
