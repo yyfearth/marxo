@@ -52,5 +52,8 @@ options =
   onAnimationComplete: ->
     console.log 'hi'
 
-context = document.getElementById('chart2').getContext('2d')
-chart = new Chart(context).Line(data, options)
+element = document.getElementById('chart2')
+
+if element
+  context = element.getContext('2d')
+  chart = new Chart(context).Line(data, options)
