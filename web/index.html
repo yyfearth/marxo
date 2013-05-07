@@ -92,9 +92,11 @@
 					<div class="well">
 						<h2>Project 1</h2>
 
-						<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+						<p>
+							Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
 							commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-							Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+							Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+						</p>
 
 						<p><a class="btn" href="#">View details &raquo;</a></p>
 					</div>
@@ -103,9 +105,11 @@
 					<div class="well">
 						<h2>Project 2</h2>
 
-						<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+						<p>
+							Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
 							commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-							Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
+							Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+						</p>
 
 						<p><a class="btn" href="#">View details &raquo;</a></p>
 					</div>
@@ -114,6 +118,7 @@
 		</div>
 	</div>
 </div>
+
 <div id="project" class="frame container-fluid">
 	<div data-name="viewer" class="row-fluid inner-frame">Project Viewer</div>
 	<div data-name="manager" class="active row-fluid inner-frame">Project Manager</div>
@@ -209,8 +214,52 @@
 		</div>
 	</div>
 	<div data-name="manager" class="active row-fluid inner-frame">
-		Workflow Manager
-		<a href="#workflow/51447afb4728cb2036cf9ca1">Demo Workflow</a>
+		<table class="table table-striped table-hover">
+			<thead>
+			<tr>
+				<th>
+					<input type="checkbox" name="select_all"/>
+				</th>
+				<th>
+					#
+				</th>
+				<th>
+					Name
+				</th>
+				<th>
+					Status
+				</th>
+				<th>
+					Date created
+				</th>
+				<th>
+					Date modified
+				</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<th>
+					<input type="checkbox" data-index="0"/>
+				</th>
+				<td>
+					1
+				</td>
+				<td>
+					Facebook advertisement
+				</td>
+				<td>
+					Idle
+				</td>
+				<td>
+					2013-05-06
+				</td>
+				<td>
+					2013-05-06
+				</td>
+			</tr>
+			</tbody>
+		</table>
 	</div>
 </div>
 
@@ -392,6 +441,7 @@
 		</div>
 	</div>
 </div>
+
 <div id="config" class="frame container-fluid">
 	<div class="active row-fluid inner-frame">
 		<div class="span2 sidebar">
@@ -490,8 +540,10 @@
 		</div>
 	</div>
 </div>
+
 <div id="profile" class="frame container-fluid">Profile</div>
 </div>
+
 </div>
 
 <script data-main="js/main" src="js/lib/require.js"></script>

@@ -1,4 +1,5 @@
 "use strict"
+
 define 'calendar', ['console', 'lib/jquery-ui', 'lib/fullcalendar'], ({find, FrameView}) ->
   class CalendarFrameView extends FrameView
     initialize: (options) ->
