@@ -25,7 +25,7 @@
 
 <div id="navbar" class="navbar navbar-static-top">
 	<div class="navbar-inner container-fluid">
-		<a class="brand" href="#">Logo</a>
+		<a class="brand" href="#">MARXO</a>
 
 		<ul class="nav pull-right">
 			<li class="dropdown">
@@ -123,20 +123,17 @@
 	<div id="workflow_editor" data-name="editor" class="row-fluid inner-frame">
 		<div class="span2 sidebar">
 			<div class="well">
-				<ul class="sidebar-list nav">
+				<ul id="node_list" class="sidebar-list nav">
 					<li class="nav-header">Common Nodes</li>
-					<li><a href="#" class="node">Empty Node</a></li>
-					<li><a href="#" class="node">Node 2</a></li>
-					<li><a href="#" class="node">Node 3</a></li>
-					<li><a href="#" class="node">Node 4</a></li>
+					<li><a href="#node:new" class="node">Empty Node</a></li>
 					<li class="nav-header">Used Nodes</li>
 					<li class="nav-header">Shared Nodes</li>
 				</ul>
 				<ul class="sidebar-bottom nav nav-list">
 					<li class="divider"></li>
 					<li class="nav-header">Tips</li>
-					<li class="tips">Click a Node above or Drag a Node from Sidebar to
-						Workflow Editor to Add a new Node.
+					<li class="tips">Click a Node above <!--or Drag a Node from Sidebar to
+						Workflow Editor--> to Add a new Node.
 					</li>
 				</ul>
 			</div>
@@ -150,33 +147,61 @@
 				<h3 id="node_editor_title">Node Editor</h3>
 			</div>
 			<div class="modal-body">
-				<fieldset>
-					<label class="control-label" for="node_name">Name</label>
-					<input type="text" id="node_name" placeholder="Node Name"/>
-				</fieldset>
-				<fieldset>
-					<legand>Actions</legand>
-					<div id="actions">
-						<div class="box">
-							<div class="box-header well">
-								<h4>Introduction</h4>
+				<div class="sidebar well">
+					<ul id="action_list" class="sidebar-list nav nav-list">
+						<li class="nav-header">Common Action</li>
+						<li><a href="#action:new">New Action</a></li>
+					</ul>
+					<ul class="sidebar-bottom nav nav-list">
+						<li class="divider"></li>
+						<li class="nav-header">Tips</li>
+						<li class="tips">Click a item above to add a Action to the list in the right.</li>
+					</ul>
+				</div>
+				<form class="form-horizontal">
+					<div class="control-group">
+						<label class="control-label" for="node_title">Title</label>
 
-								<div class="box-icon">
-									<button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i>
-									</button>
-									<button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
-								</div>
-							</div>
-							<div class="box-content">
-								content
-							</div>
+						<div class="controls">
+							<input type="text" id="node_title" name="title" placeholder="Node Name"/>
 						</div>
 					</div>
-				</fieldset>
+					<div class="control-group">
+						<label class="control-label" for="node_name">Name</label>
+
+						<div class="controls">
+							<input type="text" id="node_name" name="name" placeholder="node_name"/>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label" for="node_desc">Description</label>
+
+						<div class="controls">
+							<textarea id="node_desc" name="desc" class="input-xlarge" rows="1"
+									  placeholder="Description"></textarea>
+						</div>
+					</div>
+				</form>
+				<div id="actions" class="well">
+					<div class="box">
+						<div class="box-header well">
+							<h4>Introduction</h4>
+
+							<div class="box-icon">
+								<button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i>
+								</button>
+								<button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+							</div>
+						</div>
+						<div class="box-content">
+							content
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="modal-footer">
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-				<button id="save_node" class="btn btn-primary">Save</button>
+				<button data-action="save" class="btn btn-primary">Save</button>
 			</div>
 		</div>
 		<div id="link_editor" class="modal hide fade" aria-labelledby="link_editor_title" aria-hidden="true">
@@ -187,24 +212,32 @@
 			<div class="modal-body">
 				<form class="form-horizontal">
 					<div class="control-group">
+						<label class="control-label" for="link_title">Title</label>
+
+						<div class="controls">
+							<input type="text" id="link_title" name="title" placeholder="Node Name"/>
+						</div>
+					</div>
+					<div class="control-group">
 						<label class="control-label" for="link_name">Name</label>
 
 						<div class="controls">
-							<input type="text" id="link_name" placeholder="Link Name"/>
+							<input type="text" id="link_name" name="name" placeholder="link_name"/>
 						</div>
 					</div>
 					<div class="control-group">
 						<label class="control-label" for="link_desc">Description</label>
 
 						<div class="controls">
-							<textarea id="link_desc" cols="30" rows="3" placeholder="Description"></textarea>
+							<textarea id="link_desc" name="desc" cols="30" rows="3"
+									  placeholder="Description"></textarea>
 						</div>
 					</div>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-				<button id="save_link" class="btn btn-primary">Save</button>
+				<button data-action="save" class="btn btn-primary">Save</button>
 			</div>
 		</div>
 	</div>

@@ -10,6 +10,7 @@ define 'console', ['lib/common'], (async) ->
 
   class View extends Backbone.View
     initialize: (options) ->
+      @el.view = @
       if options?.parent
         @parent = options.parent
         @parentEl = @parent.el
@@ -33,7 +34,7 @@ define 'console', ['lib/common'], (async) ->
         return
       [ # for debug only
         'home'
-        'project'
+        'project' # TODO: use ProjectFrameView
         'content'
         'report'
         'config'

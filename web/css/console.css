@@ -5136,8 +5136,56 @@ a.badge:focus {
   cursor: pointer;
 }
 #node_editor {
-  width: 80%;
-  margin-left: -40%;
+  position: fixed;
+  top: 5%;
+  bottom: 5%;
+  left: 5%;
+  width: 90%;
+  margin: 0;
+}
+#node_editor .modal-body {
+  max-height: none;
+  max-width: none;
+  position: absolute;
+  top: 50px;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+}
+#node_editor .modal-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+#node_editor .sidebar {
+  float: left;
+  width: 175px;
+}
+#node_editor form.form-horizontal {
+  display: block;
+  margin-bottom: 0;
+}
+#node_editor form.form-horizontal .control-group {
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: 10px;
+}
+#node_editor form.form-horizontal .control-label {
+  width: 80px;
+}
+#node_editor form.form-horizontal .controls {
+  margin-left: 90px;
+}
+#node_editor #actions {
+  position: absolute;
+  top: 100px;
+  left: 200px;
+  right: 10px;
+  bottom: 13px;
+  padding: 0;
+  margin-bottom: 0;
+  overflow-y: auto;
 }
 /*
  * FullCalendar v1.5.4 Stylesheet
@@ -5704,7 +5752,7 @@ body {
 .box {
   border: 1px solid #DEDEDE;
   border-radius: 3px;
-  margin-top: 10px;
+  margin: 10px;
   margin-bottom: 10px;
   -webkit-box-shadow: 0 0 10px rgba(189, 189, 189, 0.4);
   -moz-box-shadow: 0 0 10px rgba(189, 189, 189, 0.4);
@@ -5803,6 +5851,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
+  min-width: 700px;
   visibility: hidden;
 }
 #navbar {
@@ -5881,7 +5930,7 @@ body {
   text-overflow: ellipsis;
 }
 #frames .frame .workspace {
-  margin-left: 15px;
+  margin-left: 13px;
   overflow: auto;
 }
 #frames .frame .workspace .pull-right .dropdown-menu {
