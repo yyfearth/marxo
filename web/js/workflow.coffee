@@ -1,55 +1,10 @@
 "use strict"
-#createLink = (sourceId, targetId) ->
-#  uuid = sourceId + '-' + targetId
-#  console.log 'create link', uuid
-#  fromNode = data.nodes.index[sourceId]
-#  toNode = data.nodes.index[targetId]
-#  # create link
-#  link = {uuid, fromNode, toNode}
-#  # id:
-#  # from:
-#  # to:
-#  data.links.push link
-#  fromNode.toLinks.push link
-#  toNode.fromLinks.push link
-#  data.links.index[uuid] = link
-#  link
-#
-#deleteLink = (link) ->
-#  console.log 'delete link', link.uuid
-#  delete data.links.index[link.id]
-#  delete data.links.index[link.uuid]
-#  removeFromArray data.links, link
-#  removeFromArray link.fromNode.toLinks, link
-#  removeFromArray link.toNode.fromLinks, link
-#  return
-#
-#removeFromArray = (array, item) ->
-#  idx = array.indexOf item
-#  array.splice idx, 1 if idx isnt -1
-#
-#
-#  jsPlumb.bind 'beforeDrop', (info) ->
-#    uuid = info.sourceId + '-' + info.targetId
-#    newlink = data.links.index[uuid]
-#    oldLink = info.connection.getParameter 'link'
-#    if newlink?
-#      console.log 'link exists', uuid
-#      # alert 'link exists' if oldLink?
-#      false # cancel if link exists
-#    else
-#      deleteLink oldLink if oldLink?
-#      true
-
-#  jsPlumb.bind 'dblclick', (conn)->
-#    if confirm('Delete connection from ' + conn.sourceId + ' to ' + conn.targetId + '?')
-#      jsPlumb.detach conn
-#    return
 
 define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
 async
 find
+findAll
 View
 FrameView
 }, {
@@ -77,6 +32,7 @@ TenantWorkflows
 TenantWorkflow
 TenantNodes
 TenantNode
+Node
 TenantLinks
 TenantLink
 }) ->
@@ -86,10 +42,13 @@ TenantLink
       @view = new WorkflowView
         parent: @
         el: find('#workflow_view', @el)
-        nodeEditor: new NodeEditor
-          parent: @, el: find('#node_editor', @el)
-        linkEditor: new LinkEditor
-          parent: @, el: find('#link_editor', @el)
+        nodeEditor: new NodeEditorView
+          parent: @
+        linkEditor: new LinkEditorView
+          parent: @
+      @nodeList = new NodeListView
+        parent: @, el: find('#node_list', @el)
+        workflowView: @view
       return
     open: (name) ->
       if name is 'new'
@@ -106,6 +65,45 @@ TenantLink
       # '51447afb4728cb2036cf9ca1'
       # else show the activeInnerFrame
       return
+    render: ->
+      @nodeList.render()
+      return
+
+  class NodeListView extends View
+    initialize: (options) ->
+      super options
+      @workflowView = options.workflowView
+      @el.onclick = (e) =>
+        el = e.target
+        if el.tagName is 'A' and el.dataset.node
+          e.preventDefault()
+          @workflowView.addNode el.dataset.node
+          false
+        return
+    render: ->
+      @el.innerHTML = ''
+      items = document.createDocumentFragment()
+      items.appendChild @renderHeader 'Common Nodes'
+      items.appendChild @renderItem 'common', new Node id: 'new', name: 'Empty Node'
+      #items.appendChild @renderHeader 'Used Nodes'
+      items.appendChild @renderHeader 'Shared Nodes'
+      @el.appendChild items
+      @
+    renderHeader: (text) ->
+      li = document.createElement 'li'
+      li.className = 'nav-header'
+      li.innerHTML = text
+      li
+    renderItem: (listName, node) ->
+      li = document.createElement 'li'
+      a = document.createElement 'a'
+      a.className = 'node'
+      a.href = '#node:' + node.id
+      a.dataset.list = listName
+      a.dataset.node = node.id
+      a.innerHTML = node.get 'name'
+      li.appendChild a
+      li
 
   # TODO: move to console
   class ModalDialogView extends View
@@ -114,22 +112,87 @@ TenantLink
       @$el.modal
         show: false
         backdrop: 'static'
+      @$el.on 'hidden', @callback.bind @
+      # init action button
+      findAll('button[data-action]', @el).forEach (btn) =>
+        action = @[btn.dataset.action]
+        if typeof action is 'function'
+          btn.onclick = action.bind @
+        else
+          console.warn 'unknow action', btn.dataset.action, btn
       return
-    show: (show = true) ->
-      @$el.modal if show then 'show' else 'hide'
+    popup: (data, callback) ->
+      @data = data
+      @_callback = callback
+      @show true
+    callback: (action = 'cancel') ->
+      return unless @_callback?
+      @_callback? action, @data
+      @reset()
+      return
+    reset: ->
+      @data = null
+      @_callback = null
+      @
+    #action: -> # should be customized, e.g. ok, save, export
+    #  @callback 'action_name'
+    #  @hide true
+    cencel: ->
+      @hide true
+    show: (@shown = true) ->
+      @$el.modal if @shown then 'show' else 'hide'
       @
     hide: (hide = true) ->
       @show not hide
 
-  class NodeEditor extends ModalDialogView
+  class EditorView extends ModalDialogView
     initialize: (options) ->
       super options
+      @form = find 'form', @el
+      return
+    popup: (data, callback) ->
+      super data, callback
+      @fill data
+      @
+    fill: (data) ->
+      @_attributes = ({})
+      for name, value of data.attributes
+        input = @form[name]
+        if input?.name is name and input.value?
+          input.value = value
+          @_attributes[name] = value
+      @
+    save: -> # should be customized, e.g. ok, save, export
+      if @_attributes?
+        for name, value of @_attributes
+          input = @form[name]
+          @_attributes[name] = input.value if input.value isnt value
+          @data.set @_attributes
+      @callback 'save'
+      @hide true
+
+  class NodeEditorView extends EditorView
+    el: '#node_editor'
+    initialize: (options) ->
+      super options
+      @actionsEl = find '#actions', @el
+      _fixStyle = @_fixStyle.bind @
+      $(window).resize _fixStyle
+      $(@el).on 'shown', _fixStyle
+      return
+    _fixStyle: ->
+      @actionsEl.style.top = 20 + $(@form).height() + 'px'
       return
 
-  class LinkEditor extends ModalDialogView
+  class LinkEditorView extends EditorView
+    el: '#link_editor'
     initialize: (options) ->
       super options
       return
+    popup: (data, callback) ->
+      super data, callback
+
+      @
 
 
   class WorkflowView extends View
@@ -174,7 +237,19 @@ TenantLink
       @render()
       return
     _bind: ->
+      view = @
       # link label
+      #  jsPlumb.bind 'beforeDrop', (info) ->
+      #    uuid = info.sourceId + '-' + info.targetId
+      #    newlink = data.links.index[uuid]
+      #    oldLink = info.connection.getParameter 'link'
+      #    if newlink?
+      #      console.log 'link exists', uuid
+      #      # alert 'link exists' if oldLink?
+      #      false # cancel if link exists
+      #    else
+      #      deleteLink oldLink if oldLink?
+      #      true
       jsPlumb.bind 'jsPlumbConnection', (info) ->
         conn = info.connection
         link = conn.getParameter 'link'
@@ -190,45 +265,43 @@ TenantLink
         # deleteLink info.connection.getParameter 'link'
         link.prevNode.view.buildSrcEndpoint()
         return
-      wf = @
-      _hidePopover = -> if wf._popped
-        if wf._popped._delay
-          wf._popped._delay = clearTimeout wf._popped._delay
+      _hidePopover = -> if view._popped
+        if view._popped._delay
+          view._popped._delay = clearTimeout view._popped._delay
         else
-          $(wf._popped).popover 'hide'
+          $(view._popped).popover 'hide'
         return
       _togglePopover = ->
-        if wf._popped isnt @ and not @_hidding
+        if view._popped isnt @ and not @_hidding
           @._delay = setTimeout =>
-            $(@).popover 'show' if wf._popped = @
+            $(@).popover 'show' if view._popped = @
             @._delay = null
           , 100
-          wf._popped = @
+          view._popped = @
         else
           _hidePopover()
-          wf._popped = null
+          view._popped = null
         return
       # link click
-      jsPlumb.bind 'click', (e) ->
-        label = e.getOverlay 'label'
+      jsPlumb.bind 'click', (conn) ->
+        label = conn.getOverlay 'label'
         _togglePopover.call label.canvas
         return
       # link dblclick
-      jsPlumb.bind 'dblclick', (e) ->
-        console.log 'show link'
-        wf.linkEditor.show()
+      jsPlumb.bind 'dblclick', (conn) ->
+        view.editLink conn.getParameter 'link'
         return
       # node click
       @$el.on 'click', '.node', _togglePopover
-      @$el.on 'dblclick', '.node', (e) ->
-        console.log 'show node'
-        wf.nodeEditor.show()
+      # node dblclick
+      @$el.on 'dblclick', '.node', ->
+        view.editNode @node
         return
       @$el.on 'mousedown', (e) ->
-        if wf._popped and not wf.$el.find('.popover').has(e.target).length
+        if view._popped and not view.$el.find('.popover').has(e.target).length
           _hidePopover()
-          org_popped = wf._popped
-          wf._popped = null
+          org_popped = view._popped
+          view._popped = null
           org_popped._hidding = true
           setTimeout ->
             delete org_popped._hidding
@@ -332,20 +405,60 @@ TenantLink
       @_bind()
       # build nodes
       wf.nodes.forEach (node) =>
-        view = node.view = new NodeView model: node, parent: @
-        view.render()
-        @el.appendChild view.el
+        @_addNode node
         return
       # build links
       wf.links.forEach (link) =>
-        view = link.view = new LinkView model: link, parent: @
-        view.render()
+        @_addLink link
+        return
       return
-    addNode: (node) ->
+    addNode: (node = 'emtpy') ->
+      if node is 'new' or node is 'empty'
+        console.log 'add a empty node'
+        return @createNode()
+      if typeof node is 'string'
+        console.log 'add node by id', node
+        # TODO: add node by id
+      else unless node instanceof Node
+        console.error 'add a invalid node', node
+        throw 'add a invalid node'
+      console.log 'add node', node
+      @_addNode node
+      @
+    _addNode: (node) ->
+      view = node.view = new NodeView model: node, parent: @
+      view.render()
+      @el.appendChild view.el
+      return
+    createNode: ->
+      @nodeEditor.popup (new TenantNode), (action, node) =>
+        if action is 'save'
+          @_addNode node
+        else # canceled
+          console.log 'canceled create node'
+      @
+    editNode: (node) ->
+      @nodeEditor.popup node, (action, node) =>
+        if action is 'save'
+          node.view.update node
+          console.log 'saved node', node
+        else # canceled
+          console.log 'canceled edit node'
       @
     removeNode: (node) ->
       @
     addLink: (link) ->
+      @
+    _addLink: (link) ->
+      view = link.view = new LinkView model: link, parent: @
+      view.render()
+      return
+    editLink: (link) ->
+      @linkEditor.popup link, (action, link) =>
+        if action is 'save'
+          console.log 'saved link', link
+        else # canceled
+          console.log 'canceled edit link'
       @
     removeLink: (link) ->
       @
@@ -383,12 +496,9 @@ TenantLink
         hoverClass: 'hover'
         activeClass: 'active'
     render: ->
-      node = @model
+      node = @el.node = @model
       name = @el.id = node.get 'name'
-      @el.innerHTML = node.escape 'title'
-      @el.title = node.get 'title'
-      @el.style.left = node.x + 'px'
-      @el.style.top = node.y + 'px'
+      @_renderModel node
       jsPlumb.draggable @$el
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
@@ -396,11 +506,24 @@ TenantLink
       jsPlumb.makeTarget @$el, @targetEndpointStyle, parameters:
         node: node
         view: @
+
+    update: (node = @model) ->
+      @$el.popover 'destroy'
+      @_renderModel node
+      jsPlumb.repaint @el.id
+      @
+
+    _renderModel: (node = @model) ->
+      @el.innerHTML = node.escape 'title'
+      title = @el.title = node.get 'title'
+      @el.style.left = node.x + 'px'
+      @el.style.top = node.y + 'px'
       @$el.popover
         container: @parentEl
         trigger: 'manual'
         placement: 'bottom'
-      @
+        title: title
+      return
     buildSrcEndpoint: ->
       jsPlumb.deleteEndpoint @srcEndpoint if @srcEndpoint?
       @srcEndpoint = jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:

@@ -88,6 +88,58 @@
 }
 
 #node_editor {
-  width: 80%;
-  margin-left: -40%;
+  position: fixed;
+  top: 5%;
+  bottom: 5%;
+  left: 5%;
+  width: 90%;
+  margin: 0;
+
+  .modal-body {
+    max-height: none;
+    max-width: none;
+    position: absolute;
+    top: 50px;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+  }
+  .modal-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .sidebar {
+    float: left;
+    width: 175px;
+  }
+
+  form.form-horizontal {
+    display: block;
+    margin-bottom: 0;
+    .control-group {
+      display: inline-block;
+      vertical-align: top;
+      margin-bottom: 10px;
+    }
+    .control-label {
+      width: 80px;
+    }
+    .controls {
+      margin-left: 90px;
+    }
+  }
+
+  #actions {
+    position: absolute;
+    top: 100px;
+    left: 200px;
+    right: 10px;
+    bottom: 13px;
+    padding: 0;
+    margin-bottom: 0;
+    overflow-y: auto;
+  }
 }
