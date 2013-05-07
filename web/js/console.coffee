@@ -1,4 +1,5 @@
 "use strict"
+
 define 'console', ['lib/common'], (async) ->
   find = (selector, parent) ->
     parent ?= document
@@ -199,6 +200,9 @@ define 'console', ['lib/common'], (async) ->
         return
       , @delay
       return
+
+  class WorkflowManagerView extends InnerFrameView
+
 
   class Entity extends Backbone.Model
     set: (attrs) ->

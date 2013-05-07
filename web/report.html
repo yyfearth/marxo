@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="css/bootstrap.css"/>
+	<style type="text/css">
+		.container-fluid {
+			margin: 0 auto;
+			width: 50%;
+		}
+	</style>
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row-fluid">
+		<div>
+			<ul class="nav nav-tabs">
+				<li class="active">
+					<a href="">
+						Product Design
+						Report Detail
+					</a>
+				</li>
+				<li>
+					<a href="">Evaluated Result</a>
+				</li>
+				<li>
+					<a href="">Evaluated Charts</a>
+				</li>
+				<li>
+					<a href="">Feedback Collection</a>
+				</li>
+				<li>
+					<a href="">Submitted Files</a>
+				</li>
+			</ul>
+		</div>
+		<div class="span12">
+			<div>
+				<h1>Pie Chart</h1>
+				<canvas id="chart1" width="800" height="400"></canvas>
+			</div>
+			<div>
+				<h1>Line Chart</h1>
+				<canvas id="chart2" width="800" height="400"></canvas>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="js/lib/d3.min.js"></script>
+<script type="text/javascript" src="js/lib/crossfilter.min.js"></script>
+<script type="text/javascript" src="js/lib/dc.min.js"></script>
+<script type="text/javascript" src="js/workflow_manager.js"></script>
+</body>
+</html>
