@@ -7,6 +7,8 @@ find
 findAll
 View
 FrameView
+InnerFrameView
+ModalDialogView
 }, {
 # Tenant
 # SharedWorkflows
@@ -27,7 +29,6 @@ FrameView
 # SharedActions
 # TenantActions
 # Action
-
 TenantWorkflows
 TenantWorkflow
 TenantNodes
@@ -37,6 +38,31 @@ TenantLinks
 TenantLink
 }) ->
   class WorkflowFrameView extends FrameView
+  #initialize: (options) ->
+  #  super options
+  #  return
+    _initInnerFrames: -> # override default
+      @editor = new WorkflowEditorView el: '#workflow_editor', parent: @el
+      @manager = new WorkflowManagerView el: '#workflow_manager', parent: @el
+      @innerFrames =
+        editor: @editor
+        manager: @manager
+      return
+    open: (name) ->
+      if name is 'new'
+        console.log 'show workflow editor with create mode'
+        @show 'manager'
+        # DOTO: show create new model
+      else if name is 'mgr'
+        console.log 'show workflow mgr'
+        @show 'manager'
+      else if name
+        console.log 'show workflow editor for', name
+        @show 'editor'
+        @editor.load name
+      return
+
+  class WorkflowEditorView extends InnerFrameView
     initialize: (options) ->
       super options
       @view = new WorkflowView
@@ -50,23 +76,38 @@ TenantLink
         parent: @, el: find('#node_list', @el)
         workflowView: @view
       return
-    open: (name) ->
-      if name is 'new'
-        console.log 'show workflow editor with create mode'
-        @show 'manager'
-        # DOTO: show create new model
-      else if name is 'mgr'
-        console.log 'show workflow mgr'
-        @show 'manager'
-      else if name
-        console.log 'show workflow editor for', name
-        @show 'editor'
-        @view.load name
-      # '51447afb4728cb2036cf9ca1'
-      # else show the activeInnerFrame
+    load: (id) ->
+      @fetch id, (err, wf) =>
+        if wf
+          @view.load wf
+        else
+          @view.clear()
+      #TODO: load node list
       return
     render: ->
       @nodeList.render()
+      return
+    fetch: (id, callback) ->
+      wf = @workflow = new TenantWorkflow id: id
+      wf.fetch success: =>
+        async.parallel [
+          (callback) ->
+            wf.nodes.fetch success: ((c) ->
+              callback null, c), error: ->
+              callback 'fetch nodes failed'
+          (callback) ->
+            wf.links.fetch success: ((c) ->
+              callback null, c), error: ->
+              callback 'fetch links failed'
+        ], (err) =>
+          if err
+            console.error err
+            callback? err
+          else
+            console.log 'workflow', wf
+            callback? null, wf
+          return
+        return
       return
 
   class NodeListView extends View
@@ -105,45 +146,7 @@ TenantLink
       li.appendChild a
       li
 
-  # TODO: move to console
-  class ModalDialogView extends View
-    initialize: (options) ->
-      super options
-      @$el.modal
-        show: false
-        backdrop: 'static'
-      @$el.on 'hidden', @callback.bind @
-      # init action button
-      findAll('button[data-action]', @el).forEach (btn) =>
-        action = @[btn.dataset.action]
-        if typeof action is 'function'
-          btn.onclick = action.bind @
-        else
-          console.warn 'unknow action', btn.dataset.action, btn
-      return
-    popup: (data, callback) ->
-      @data = data
-      @_callback = callback
-      @show true
-    callback: (action = 'cancel') ->
-      return unless @_callback?
-      @_callback? action, @data
-      @reset()
-      return
-    reset: ->
-      @data = null
-      @_callback = null
-      @
-    #action: -> # should be customized, e.g. ok, save, export
-    #  @callback 'action_name'
-    #  @hide true
-    cencel: ->
-      @hide true
-    show: (@shown = true) ->
-      @$el.modal if @shown then 'show' else 'hide'
-      @
-    hide: (hide = true) ->
-      @show not hide
+  class WorkflowManagerView extends InnerFrameView
 
   class EditorView extends ModalDialogView
     initialize: (options) ->
@@ -308,66 +311,46 @@ TenantLink
           , 300
         return
       return
-    load: (id, callback) ->
-      # clear
+    clear: ->
       @el.innerHTML = ''
-      @_loadModel id, (err, wf) =>
-        if err or not wf
-          # TODO: show error
-          return
-        @_renderModel wf
-        callback? wf
-        return
       @
-    _loadModel: (id, callback) ->
-      wf = @model = new TenantWorkflow id: id
-      wf.fetch success: =>
-        async.parallel [
-          (callback) ->
-            wf.nodes.fetch success: ((c) ->
-              callback null, c), error: ->
-              callback 'fetch nodes failed'
-          (callback) ->
-            wf.links.fetch success: ((c) ->
-              callback null, c), error: ->
-              callback 'fetch links failed'
-        ], (err) =>
-          if err
-            console.error err
-            callback err
-            return
-          console.log 'workflow', wf
-          # pre-process nodes and links
-          wf.nodes.forEach (node) ->
-            node.workflow = wf
-            node.inLinks = []
-            node.outLinks = []
-            return
-          wf.links.forEach (link) ->
-            link.workflow = wf
-            link.prevNode = wf.nodes.get link.get 'prevNodeId'
-            link.nextNode = wf.nodes.get link.get 'nextNodeId'
-            unless link.prevNode and link.nextNode
-              console.error 'link', link.name or link.id, 'is broken, prev/next node missing'
-            link.prevNode.outLinks.push link
-            link.nextNode.inLinks.push link
-            return
-          nodes = wf.nodes
-          nodes.lonely = []
-          nodes.start = []
-          nodes.end = []
-          nodes.forEach (node) ->
-            if node.inLinks.length is node.outLinks.length is 0
-              nodes.lonely.push node
-            else if node.inLinks.length is 0
-              nodes.start.push node
-            else if node.outLinks.length is 0
-              nodes.end.push node
-            return
-          @_sortNodeViews nodes
-          # TODO: workflow validation
-          callback null, wf
+    load: (wf) ->
+      # clear
+      @clear()
+      @_processModel wf
+      @_renderModel wf
+      @
+    _processModel: (wf) ->
+      @model = wf
+      # pre-process nodes and links
+      wf.nodes.forEach (node) ->
+        node.workflow = wf
+        node.inLinks = []
+        node.outLinks = []
         return
+      wf.links.forEach (link) ->
+        link.workflow = wf
+        link.prevNode = wf.nodes.get link.get 'prevNodeId'
+        link.nextNode = wf.nodes.get link.get 'nextNodeId'
+        unless link.prevNode and link.nextNode
+          console.error 'link', link.name or link.id, 'is broken, prev/next node missing'
+        link.prevNode.outLinks.push link
+        link.nextNode.inLinks.push link
+        return
+      nodes = wf.nodes
+      nodes.lonely = []
+      nodes.start = []
+      nodes.end = []
+      nodes.forEach (node) ->
+        if node.inLinks.length is node.outLinks.length is 0
+          nodes.lonely.push node
+        else if node.inLinks.length is 0
+          nodes.start.push node
+        else if node.outLinks.length is 0
+          nodes.end.push node
+        return
+      @_sortNodeViews nodes
+      # TODO: workflow validation
       return
     _sortNodeViews: (nodes) ->
       grid = @grid = [nodes.start.concat nodes.lonely]

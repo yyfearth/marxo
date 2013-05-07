@@ -100,6 +100,9 @@ define 'console', ['lib/common'], (async) ->
     initialize: (options) ->
       super options
       @navEl = options.navEl or (find "#navbar a[href=\"##{@id}\"]")?.parentElement
+      @_initInnerFrames()
+      return
+    _initInnerFrames: ->
       @innerFrames = ({})
       findAll('.inner-frame', @el).forEach (el) =>
         name = el.dataset.name
@@ -115,10 +118,52 @@ define 'console', ['lib/common'], (async) ->
           console.log 'switch inner-frame', frameName
           find('.inner-frame.active', @el)?.classList.remove 'active'
           innerFrame.el.classList.add 'active'
+        unless innerFrame.rendered
+          innerFrame.render()
+          innerFrame.rendered = true
       else
         console.warn 'inner frame cannot find', frameName
       return
   #open: (name) -> # should be override
+
+  class ModalDialogView extends View
+    initialize: (options) ->
+      super options
+      @$el.modal
+        show: false
+        backdrop: 'static'
+      @$el.on 'hidden', @callback.bind @
+      # init action button
+      findAll('button[data-action]', @el).forEach (btn) =>
+        action = @[btn.dataset.action]
+        if typeof action is 'function'
+          btn.onclick = action.bind @
+        else
+          console.warn 'unknow action', btn.dataset.action, btn
+      return
+    popup: (data, callback) ->
+      @data = data
+      @_callback = callback
+      @show true
+    callback: (action = 'cancel') ->
+      return unless @_callback?
+      @_callback? action, @data
+      @reset()
+      return
+    reset: ->
+      @data = null
+      @_callback = null
+      @
+    #action: -> # should be customized, e.g. ok, save, export
+    #  @callback 'action_name'
+    #  @hide true
+    cencel: ->
+      @hide true
+    show: (@shown = true) ->
+      @$el.modal if @shown then 'show' else 'hide'
+      @
+    hide: (hide = true) ->
+      @show not hide
 
   class SignInView extends View
     el: '#signin'
@@ -272,6 +317,8 @@ define 'console', ['lib/common'], (async) ->
   View
   ConsoleView
   FrameView
+  InnerFrameView
+  ModalDialogView
   SignInView
   Entity
   Tenants
