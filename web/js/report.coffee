@@ -26,13 +26,13 @@ ModalDialogView
       super options
       data = [
         value: 30,
-        color: '#337'
+        color: "#D41400"
       ,
         value: 50,
-        color: "#337"
+        color: "#00C0F7"
       ,
         value: 100,
-        color: "#a11"
+        color: '#3B5998'
       ]
 
       options =
@@ -40,7 +40,7 @@ ModalDialogView
         segmentStrokeColor : "#fff"
         segmentStrokeWidth : 2
         animation : true
-        animationSteps : 150
+        animationSteps : 100
         animationEasing : "easeOutElastic"
         animateRotate : true
         animateScale : true
@@ -52,16 +52,22 @@ ModalDialogView
         labels: ["January", "February", "March", "April", "May", "June", "July"]
         datasets: [
           fillColor: "rgba(220,220,220,0.5)"
-          strokeColor: "rgba(220,220,220,1)"
-          pointColor: "rgba(220,220,220,1)"
+          strokeColor: "#D41400"
+          pointColor: "#D41400"
           pointStrokeColor: "#fff"
-          data: [19, 83, 48, 45, 32, 72, 89, ]
+          data: [19, 83, 48, 45, 32, 72, 30]
         ,
-          fillColor: "rgba(151,187,205,0.5)"
-          strokeColor: "rgba(151,187,205,1)"
-          pointColor: "rgba(151,187,205,1)"
+          fillColor: "rgba(220,220,220,0.5)"
+          strokeColor: "#00C0F7"
+          pointColor: "#00C0F7"
           pointStrokeColor: "#fff"
-          data: [64, 73, 28, 64, 15, 12, 59, ]
+          data: [64, 73, 28, 64, 15, 12, 50]
+        ,
+          fillColor: "rgba(220,220,220,0.5)"
+          strokeColor: "#3B5998"
+          pointColor: "#3B5998"
+          pointStrokeColor: "#fff"
+          data: [80, 83, 51, 88, 102, 99, 100]
         ]
 
       options =
@@ -72,8 +78,11 @@ ModalDialogView
         onAnimationComplete: ->
           console.log 'hi'
 
-      context = document.getElementById('chart2').getContext('2d')
-      chart = new Chart(context).Line(data, options)
+      element = document.getElementById('chart2')
+
+      if element
+        context = element.getContext('2d')
+        chart = new Chart(context).Line(data, options)
       return
 
   ReportFrameView
