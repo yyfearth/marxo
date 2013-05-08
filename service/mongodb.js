@@ -10,25 +10,25 @@ db.links.ensureIndex({ workflowId: 1, name: 1 });
 
 // test data
 db.workflows.insert({
-    "_id": ObjectId("51447afb4728cb2036cf9ca1"),
-    "name": "test_wf",
-    "title": "Test Workflow",
-    "description": "The test workflow",
-    "nodeIdList": [
-    	ObjectId("507f81413d070321728fde10"),
-    	ObjectId("507f81413d070321728fde11"),
-    	ObjectId("507f81413d070321728fde12"),
-    	ObjectId("507f81413d070321728fde13"),
-    	ObjectId("507f81413d070321728fde14"),
-    	ObjectId("507f81413d070321728fde15")
-    ],
-    "linkIdList": [
-    	ObjectId("507f81413d070321728fde20"),
-    	ObjectId("507f81413d070321728fde21"),
-    	ObjectId("507f81413d070321728fde22"),
-    	ObjectId("507f81413d070321728fde23"),
-    	ObjectId("507f81413d070321728fde24")
-    ]
+	"_id": ObjectId("51447afb4728cb2036cf9ca1"),
+	"name": "test_wf",
+	"title": "Test Workflow",
+	"description": "The test workflow",
+	"nodeIdList": [
+		ObjectId("507f81413d070321728fde10"),
+		ObjectId("507f81413d070321728fde11"),
+		ObjectId("507f81413d070321728fde12"),
+		ObjectId("507f81413d070321728fde13"),
+		ObjectId("507f81413d070321728fde14"),
+		ObjectId("507f81413d070321728fde15")
+	],
+	"linkIdList": [
+		ObjectId("507f81413d070321728fde20"),
+		ObjectId("507f81413d070321728fde21"),
+		ObjectId("507f81413d070321728fde22"),
+		ObjectId("507f81413d070321728fde23"),
+		ObjectId("507f81413d070321728fde24")
+	]
 });
 
 db.nodes.insert({
@@ -77,7 +77,7 @@ db.nodes.insert({
 db.links.insert({
 	"_id": ObjectId("507f81413d070321728fde20"),
 	"workflowId": ObjectId("51447afb4728cb2036cf9ca1"),
-    "title": "Like < 300",
+	"title": "Like < 300",
 	"name": "to_cancel",
 	"description": "Cancel if like count < 300",
 	"previousNodeId": ObjectId("507f81413d070321728fde10"),
@@ -86,7 +86,7 @@ db.links.insert({
 db.links.insert({
 	"_id": ObjectId("507f81413d070321728fde21"),
 	"workflowId": ObjectId("51447afb4728cb2036cf9ca1"),
-    "title": "Like >= 300",
+	"title": "Like >= 300",
 	"name": "continue_to_req",
 	"description": "Continue to post requirement if like count >= 300",
 	"previousNodeId": ObjectId("507f81413d070321728fde10"),
@@ -95,14 +95,14 @@ db.links.insert({
 db.links.insert({
 	"_id": ObjectId("507f81413d070321728fde22"),
 	"workflowId": ObjectId("51447afb4728cb2036cf9ca1"),
-    "name": "post_req_to_submit_design",
+	"name": "post_req_to_submit_design",
 	"previousNodeId": ObjectId("507f81413d070321728fde12"),
 	"nextNodeId": ObjectId("507f81413d070321728fde13")
 });
 db.links.insert({
 	"_id": ObjectId("507f81413d070321728fde23"),
 	"workflowId": ObjectId("51447afb4728cb2036cf9ca1"),
-    "title": "Pass rate <= 50%",
+	"title": "Pass rate <= 50%",
 	"name": "not_pass_to_notify",
 	"description": "Notification if pass rate <= 50%",
 	"previousNodeId": ObjectId("507f81413d070321728fde13"),
@@ -112,7 +112,7 @@ db.links.insert({
 	"_id": ObjectId("507f81413d070321728fde24"),
 	"workflowId": ObjectId("51447afb4728cb2036cf9ca1"),
 	"name": "pass_to_post",
-    "title": "Pass rate > 50%",
+	"title": "Pass rate > 50%",
 	"description": "Post & e-mail to everyone if pass rate > 50%",
 	"previousNodeId": ObjectId("507f81413d070321728fde13"),
 	"nextNodeId": ObjectId("507f81413d070321728fde15")
