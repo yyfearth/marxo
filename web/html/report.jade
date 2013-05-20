@@ -1,62 +1,60 @@
-#report.frame.container-fluid
-  .active.row-fluid.inner-frame
-    .span2.sidebar
-      .well.sidebar-nav
-        ul.sidebar-list.nav.nav-list
-          li.nav-header Projects
-          li
-            a(href='#') All
-          li
-            a(href='#') Project 1
-          li
-            a(href='#') Project 2
-        ul.sidebar-bottom.nav.nav-list
-          li.divider
-          li.nav-header Tips
-          li.tips ...
-    .span10.workspace
-      #report_view.content-view
-        .row-fluid
-          .well
-            h2 Report 1
-            p
-              | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-              | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-              | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-            p
-              a.btn(href='#report/1') View details »
-        .row-fluid
-          .well
-            h2 Report 2
-            p
-              | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-              | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-              | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-            p
-              a.btn(href='#report/2') View details »
-    #report_viewer.modal.modal-full.hide.fade(aria-labelledby='report_viewer_title', aria-hidden='true')
-      .modal-header
-        button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
-        ul.nav.nav-tabs
-          li
-            a(href='')
-              | Product Design
-              | Report Detail
-          li
-            a(href='') Evaluated Result
-          li.active
-            a(href='') Evaluated Charts
-          li
-            a(href='') Feedback Collection
-          li
-            a(href='') Submitted Files
-      .modal-body
-        .span12
-          div
-            h1 Pie Chart
-            canvas#chart1(width='800', height='400')
-          div
-            h1 Line Chart
-            canvas#chart2(width='800', height='400')
-      .modal-footer
-        button.btn(data-dismiss='modal', aria-hidden='true') Close
+.span2.sidebar
+  .well.sidebar-nav
+    ul.sidebar-list.nav.nav-list
+      li.nav-header Projects
+      li
+        a(href='#') All
+      li
+        a(href='#') Project 1
+      li
+        a(href='#') Project 2
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips ...
+.span10.workspace
+  #report_view.content-view
+    .row-fluid
+      .well
+        h2 Report 1
+        p
+          | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+          | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+          | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+        p
+          a.btn(href='#report/1') View details »
+    .row-fluid
+      .well
+        h2 Report 2
+        p
+          | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+          | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+          | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+        p
+          a.btn(href='#report/2') View details »
+#report_viewer.modal.modal-full.hide.fade(aria-labelledby='report_viewer_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+    ul.nav.nav-tabs
+      li
+        a(href='')
+          | Product Design
+          | Report Detail
+      li
+        a(href='') Evaluated Result
+      li.active
+        a(href='') Evaluated Charts
+      li
+        a(href='') Feedback Collection
+      li
+        a(href='') Submitted Files
+  .modal-body
+    .span12
+      div
+        h1 Pie Chart
+        canvas#chart1(width='800', height='400')
+      div
+        h1 Line Chart
+        canvas#chart2(width='800', height='400')
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close

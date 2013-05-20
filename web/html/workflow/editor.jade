@@ -1,20 +1,19 @@
-#workflow_editor.row-fluid.inner-frame(name='editor')
-  .span2.sidebar
-    .well
-      ul#node_list.sidebar-list.nav
-        li.nav-header Common Nodes
-        li
-          a.node(href='#node:new') Empty Node
-        li.nav-header Used Nodes
-        li.nav-header Shared Nodes
-      ul.sidebar-bottom.nav.nav-list
-        li.divider
-        li.nav-header Tips
-        li.tips
-          | Click a Node above
-          | or Drag a Node from Sidebar to Workflow Editor
-          | to Add a new Node.
-  .span10.workspace
-    #workflow_view.content-view
-  include editor/node_editor
-  include editor/link_editor
+.span2.sidebar
+  .well
+    ul#node_list.sidebar-list.nav
+      li.nav-header Common Nodes
+      li
+        a.node(href='#node:new') Empty Node
+      li.nav-header Used Nodes
+      li.nav-header Shared Nodes
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips
+        | Click a Node above
+        | or Drag a Node from Sidebar to Workflow Editor
+        | to Add a new Node.
+.span10.workspace
+  #workflow_view.content-view
+include editor/node_editor
+include editor/link_editor
