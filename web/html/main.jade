@@ -1,0 +1,20 @@
+doctype 5
+html(lang='en-US')
+head
+  meta(charset='utf-8')
+  title MARXO Console
+  link(href='css/console.css', rel='stylesheet', media='screen')
+  body
+    include signin
+    #main
+      include navbar
+      #frames
+        include home
+        include project
+        include workflow
+        include calendar
+        include content
+        include report
+        include config
+        include profile
+    script(data-main='js/main', src='js/lib/require.js')
