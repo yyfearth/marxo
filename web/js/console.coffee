@@ -114,6 +114,11 @@ define 'console', ['lib/common'], (async) ->
       return
   #open: (name) -> # should be override
 
+  class BoxView extends View
+    initialize: (options) ->
+      super options
+      return
+
   class ModalDialogView extends View
     initialize: (options) ->
       super options
@@ -200,9 +205,6 @@ define 'console', ['lib/common'], (async) ->
         return
       , @delay
       return
-
-  class WorkflowManagerView extends InnerFrameView
-
 
   class Entity extends Backbone.Model
     set: (attrs) ->
