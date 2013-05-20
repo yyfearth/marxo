@@ -1,0 +1,32 @@
+#node_editor.modal.modal-full.hide.fade(aria-labelledby='node_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+    h3#node_editor_title Node Editor
+  .modal-body
+    .sidebar.well
+      ul#action_list.sidebar-list.nav.nav-list
+        li.nav-header Common Action
+        li
+          a(href='#action:new') New Action
+      ul.sidebar-bottom.nav.nav-list
+        li.divider
+        li.nav-header Tips
+        li.tips Click a item above to add a Action to the list in the right.
+    form.form-horizontal
+      .control-group
+        label.control-label(for='node_title') Title
+        .controls
+          input#node_title(type='text', name='title', placeholder='Node Name')
+      .control-group
+        label.control-label(for='node_name') Name
+        .controls
+          input#node_name(type='text', name='name', placeholder='node_name')
+      .control-group
+        label.control-label(for='node_desc') Description
+        .controls
+          textarea#node_desc.input-xlarge(name='desc', rows='1', placeholder='Description')
+    #actions.well
+      include node_editor_actions
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary(data-action='save') Save
