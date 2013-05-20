@@ -1,0 +1,116 @@
+#content.frame.container-fluid
+  .active.row-fluid.inner-frame
+    .span2.sidebar
+      .well.sidebar-nav
+        ul.sidebar-list.nav.nav-list
+          li.nav-header Projects
+          li
+            a(href='#') All
+          li
+            a(href='#') Project 1
+          li
+            a(href='#') Project 2
+        ul.sidebar-bottom.nav.nav-list
+          li.divider
+          li.nav-header Tips
+          li.tips ...
+    .span10.workspace
+      #content_view.content-view
+        ul.pull-right
+          li.btn-group
+            button.btn.dropdown-toggle(data-toggle='dropdown')
+              | Sort
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href='#') No.
+              li
+                a(href='#') Name
+              li
+                a(href='#') Media
+              li
+                a(href='#') Project
+              li
+                a(href='#') Action
+              li
+                a(href='#') Status
+          li.btn-group
+            button.btn.btn-primary.dropdown-toggle(data-toggle='dropdown')
+              | Action
+              b.caret
+            ul.dropdown-menu
+              li
+                a(href='#') View Selected
+              li
+                a(href='#') Delete Selected
+        ul.nav.nav-pills
+          li.active
+            a(href='#') All
+          li
+            a(href='#') Page
+          li
+            a(href='#') Email
+          li
+            a(href='#') Facebook
+          li
+            a(href='#') Twitter
+          li
+            a(href='#') Google+
+        table.table.table-striped.table-hover
+          thead
+            tr
+              th
+                input(type='checkbox', name='select_all')
+              th #
+              th Content Name
+              th Post Media
+              th Project Name
+              th Action Name
+              th Status
+              th
+          tbody
+            tr
+              th
+                input(type='checkbox', data-index='0')
+              td 1
+              td
+                a(href='#') SOMY X100 Project Initialization Page
+              td Page
+              td SOMY X100
+              td Project Init. Page
+              td Posted
+              td V E D
+            tr
+              th
+                input(type='checkbox', data-index='0')
+              td 2
+              td
+                a(href='#') SOMY X100 Project Initialization Facebook Post
+              td Facebook
+              td SOMY X100
+              td Project Init. Post
+              td Posted
+              td V E D
+            tr
+              th
+                input(type='checkbox', data-index='0')
+              td 3
+              td
+                a(href='#') SOMY X100 Project Initialization Twitter Post
+              td Twitter
+              td SOMY X100
+              td Project Init. Post
+              td Posted
+              td V E D
+        .pagination
+          ul
+            li
+              a(href='#') Prev
+            li
+              a(href='#') 1
+            li
+              a(href='#') 2
+            li
+              a(href='#') 3
+            li
+              a(href='#') Next
