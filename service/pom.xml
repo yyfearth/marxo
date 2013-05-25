@@ -6,15 +6,19 @@
 
     <groupId>org.marxo</groupId>
     <artifactId>marxo</artifactId>
+    <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
 
-    <repositories>
-        <repository>
-            <id>springsource-repo</id>
-            <name>SpringSource Repository</name>
-            <url>http://repo.springsource.org/release</url>
-        </repository>
-    </repositories>
+    <name>Project Marxo</name>
+    <url>http://marxo.cloudfoundry.com/</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <finalName>marxo</finalName>
+    </build>
 
     <dependencies>
 
@@ -22,12 +26,13 @@
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>6.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.2.1.RELEASE</version>
+            <version>3.2.3.RELEASE</version>
         </dependency>
 
         <!-- Data -->
@@ -98,13 +103,15 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8</version>
+            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- Logging -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>2.0-beta4</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.12</version>
         </dependency>
     </dependencies>
 </project>
