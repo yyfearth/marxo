@@ -117,6 +117,26 @@ define 'console', ['lib/common'], (async) ->
   class BoxView extends View
     initialize: (options) ->
       super options
+    render: ->
+      @btn_min = find '.btn-minimize', @el
+      btn_min_icon = find 'i', @btn_min
+      @btn_close = find '.btn-close', @el
+      content = @contentEl = find '.box-content', @el
+      @btn_close.onclick = @onclose.bind @
+      @btn_min.onclick = =>
+        if btn_min_icon.classList.contains 'icon-up-open'
+          # minimize
+          content.classList.add 'minimized'
+          btn_min_icon.classList.remove 'icon-up-open'
+          btn_min_icon.classList.add 'icon-down-open'
+        else
+          # restore
+          content.classList.remove 'minimized'
+          btn_min_icon.classList.remove 'icon-down-open'
+          btn_min_icon.classList.add 'icon-up-open'
+      return
+    onclose: -> # should be override
+      console.log 'box close button clicked'
       return
 
   class ModalDialogView extends View
@@ -309,6 +329,7 @@ define 'console', ['lib/common'], (async) ->
   findAll
   View
   ConsoleView
+  BoxView
   FrameView
   InnerFrameView
   ModalDialogView

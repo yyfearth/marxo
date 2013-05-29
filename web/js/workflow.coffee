@@ -6,6 +6,7 @@ async
 find
 findAll
 View
+BoxView
 FrameView
 InnerFrameView
 ModalDialogView
@@ -170,13 +171,27 @@ TenantLink
     el: '#node_editor'
     initialize: (options) ->
       super options
-      @actionsEl = find '#actions', @el
+      actions = @actionsEl = find '#actions', @el
       _fixStyle = @_fixStyle.bind @
       $(window).resize _fixStyle
       $(@el).on 'shown', _fixStyle
+      $(actions).sortable();
+      # temp
+      findAll('.action.box', @el).forEach (el) =>
+        action = new ActionView el: el, parent: @
+        action.render()
       return
     _fixStyle: ->
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
+      return
+
+  class ActionView extends BoxView
+    initialize: (options) ->
+      super options
+      return
+    render: ->
+      super()
+      $('.box-header', @el).disableSelection()
       return
 
   class LinkEditorView extends EditorView

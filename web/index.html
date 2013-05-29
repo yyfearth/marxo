@@ -178,15 +178,91 @@
                   </div>
                 </form>
                 <div id="actions" class="well">
-                  <div class="box">
+                  <div id="t_post_to_multi_social_media" class="box action">
                     <div class="box-header well">
-                      <h4>Introduction</h4>
-                      <div class="box-icon">
-                        <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
-                        <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
-                      </div>
+                      <h4>Post to Multiple Social Media</h4>
+                                        <div class="box-icon">
+                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
+                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                        </div>
                     </div>
-                    <div class="box-content">content</div>
+                    <form class="box-content">
+                                        <div data-toggle="buttons-checkbox" class="btn-group">
+                                          <button type="button" value="twitter" class="btn active">Twitter</button>
+                                          <button type="button" value="facebook" class="btn active">Facebook</button>
+                                        </div>
+                                        <textarea name="post_content" placeholder="Post Content..." title="Content post to social media (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
+                      <!-- twitter limits-->
+                      <div class="help-block">The maximium content length is 140, which is limited by Twitter.<br>Use "Post to Facebook" action instead for longer content length.</div>
+                    </form>
+                  </div>
+                  <div id="t_post_to_twitter" class="box action">
+                    <div class="box-header well">
+                      <h4>Post to Twitter</h4>
+                                        <div class="box-icon">
+                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
+                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                        </div>
+                    </div>
+                    <form class="box-content">
+                                        <textarea name="post_content" placeholder="Post Content..." title="Content post to Twitter (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
+                      <!-- twitter limits-->
+                      <div class="help-block">The maximium content length is 140, which is limited by Twitter.</div>
+                    </form>
+                  </div>
+                  <div id="t_post_to_facebook" class="box action">
+                    <div class="box-header well">
+                      <h4>Post to Facebook</h4>
+                                        <div class="box-icon">
+                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
+                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                        </div>
+                    </div>
+                    <form class="box-content">
+                                        <textarea name="post_content" placeholder="Post Content..." title="Content post to Facebook (63206 max)" rows="3" maxlength="63206" class="input-block-level"></textarea>
+                      <!-- facebook limits-->
+                      <div class="help-block">The maximium content length is 63206, which is limited by Facebook.</div>
+                    </form>
+                  </div>
+                  <div id="t_send_email" class="box action">
+                    <div class="box-header well">
+                      <h4>Send Email</h4>
+                                        <div class="box-icon">
+                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
+                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                        </div>
+                    </div>
+                    <form class="box-content">
+                      <div class="input-prepend input-block-level"><span class="add-on">To</span>
+                        <input name="email_to" title="Send To" type="text" placeholder="email_1@example.com; email_2@example.com" class="span11">
+                      </div>
+                      <textarea name="email_content" placeholder="Email Content..." title="Content for email (1000 max)" rows="5" maxlength="1000" class="input-block-level"></textarea>
+                    </form>
+                  </div>
+                  <div id="t_track_multi_social_media" class="box action">
+                    <div class="box-header well">
+                      <h4>Track Multiple Social Media</h4>
+                                        <div class="box-icon">
+                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
+                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                        </div>
+                    </div>
+                    <form class="box-content">
+                                        <div data-toggle="buttons-checkbox" class="btn-group">
+                                          <button type="button" value="twitter" class="btn active">Twitter</button>
+                                          <button type="button" value="facebook" class="btn active">Facebook</button>
+                                        </div>track options
+                    </form>
+                  </div>
+                  <div id="t_track_email" class="box action">
+                    <div class="box-header well">
+                      <h4>Track Email</h4>
+                                        <div class="box-icon">
+                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
+                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                        </div>
+                    </div>
+                    <form class="box-content">track email options</form>
                   </div>
                 </div>
               </div>
