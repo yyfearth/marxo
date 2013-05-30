@@ -175,23 +175,62 @@ TenantLink
       _fixStyle = @_fixStyle.bind @
       $(window).resize _fixStyle
       $(@el).on 'shown', _fixStyle
-      $(actions).sortable();
-      # temp
-      findAll('.action.box', @el).forEach (el) =>
-        action = new ActionView el: el, parent: @
-        action.render()
+      $(actions).sortable
+        delay: 150
+        distance: 15
+      # temp TODO: load models from node
+      actions = [
+        type: 'post_to_multi_social_media'
+      ,
+        type: 'send_email'
+      ]
+      @actionViews = actions.map (action) =>
+        actionView = new ActionView model: action, parent: @, container: @actionsEl
+        actionView.render()
+        actionView
       return
     _fixStyle: ->
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
       return
 
   class ActionView extends BoxView
+    @load: (type) ->
+      if @_tpl? and @_tpl[type]?
+        @_tpl[type] # cached
+      else
+        el = find "#t_#{type}"
+        if el?
+          @_tpl ?= ({})
+          # load template
+          tpl = @_tpl[type] = el.innerHTML
+          # remove template from dom
+          el.parentNode.removeChild el
+        else
+          throw 'cannot find template for type: ' + type
+        tpl
+    className: 'box action'
     initialize: (options) ->
       super options
+      @containerEl = options.container
+      @model = options.model
+      @type = options.model.type or options.type
+      throw 'need action model and type' unless @model and @type
+      return
+    close: ->
+      @containerEl.removeChild @el
+      # TODO: deal with model and event
       return
     render: ->
+      tpl = ActionView.load @type
+      @containerEl.appendChild @el
+      @el.innerHTML = tpl
+      # get els in super
       super()
-      $('.box-header', @el).disableSelection()
+      if /webkit/i.test navigator.userAgent
+        $(@el).disableSelection()
+      else
+        $('.box-header, .btn', @el).disableSelection()
+      @form = find 'form', @el
       return
 
   class LinkEditorView extends EditorView
@@ -203,7 +242,6 @@ TenantLink
       super data, callback
 
       @
-
 
   class WorkflowView extends View
     jsPlumbDefaults:

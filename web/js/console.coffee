@@ -115,28 +115,33 @@ define 'console', ['lib/common'], (async) ->
   #open: (name) -> # should be override
 
   class BoxView extends View
+    events:
+      'click .btn-close': 'close'
+      'click .btn-minimize': 'minimize'
     initialize: (options) ->
       super options
     render: ->
       @btn_min = find '.btn-minimize', @el
-      btn_min_icon = find 'i', @btn_min
       @btn_close = find '.btn-close', @el
-      content = @contentEl = find '.box-content', @el
-      @btn_close.onclick = @onclose.bind @
-      @btn_min.onclick = =>
-        if btn_min_icon.classList.contains 'icon-up-open'
-          # minimize
-          content.classList.add 'minimized'
-          btn_min_icon.classList.remove 'icon-up-open'
-          btn_min_icon.classList.add 'icon-down-open'
-        else
-          # restore
-          content.classList.remove 'minimized'
-          btn_min_icon.classList.remove 'icon-down-open'
-          btn_min_icon.classList.add 'icon-up-open'
+      @contentEl = find '.box-content', @el
       return
-    onclose: -> # should be override
+    close: -> # should be override
       console.log 'box close button clicked'
+      return
+    minimize: ->
+      btn_min_icon = find '.btn-minimize i', @el
+      content = find '.box-content', @el
+      console.log btn_min_icon, content
+      if btn_min_icon.classList.contains 'icon-up-open'
+        # minimize
+        content.classList.add 'minimized'
+        btn_min_icon.classList.remove 'icon-up-open'
+        btn_min_icon.classList.add 'icon-down-open'
+      else
+        # restore
+        content.classList.remove 'minimized'
+        btn_min_icon.classList.remove 'icon-down-open'
+        btn_min_icon.classList.add 'icon-up-open'
       return
 
   class ModalDialogView extends View
