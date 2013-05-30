@@ -6,7 +6,7 @@ import marxo.bean.BasicEntity;
 import marxo.dao.BasicDao;
 import marxo.restlet.exception.EntityNotFoundException;
 import marxo.restlet.exception.UnknownException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import javax.servlet.http.HttpServletRequest;
