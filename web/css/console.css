@@ -5135,7 +5135,8 @@ a.badge:focus {
   opacity: 0.8;
   cursor: pointer;
 }
-#node_editor {
+#node_editor,
+#report_viewer {
   position: fixed;
   top: 5%;
   bottom: 5%;
@@ -5143,7 +5144,8 @@ a.badge:focus {
   width: 90%;
   margin: 0;
 }
-#node_editor .modal-body {
+#node_editor .modal-body,
+#report_viewer .modal-body {
   max-height: none;
   max-width: none;
   position: absolute;
@@ -5152,32 +5154,39 @@ a.badge:focus {
   left: 0;
   right: 0;
 }
-#node_editor .modal-footer {
+#node_editor .modal-footer,
+#report_viewer .modal-footer {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
 }
-#node_editor .sidebar {
+#node_editor .sidebar,
+#report_viewer .sidebar {
   float: left;
   width: 175px;
 }
-#node_editor form.form-horizontal {
+#node_editor form.form-horizontal,
+#report_viewer form.form-horizontal {
   display: block;
   margin-bottom: 0;
 }
-#node_editor form.form-horizontal .control-group {
+#node_editor form.form-horizontal .control-group,
+#report_viewer form.form-horizontal .control-group {
   display: inline-block;
   vertical-align: top;
   margin-bottom: 10px;
 }
-#node_editor form.form-horizontal .control-label {
+#node_editor form.form-horizontal .control-label,
+#report_viewer form.form-horizontal .control-label {
   width: 80px;
 }
-#node_editor form.form-horizontal .controls {
+#node_editor form.form-horizontal .controls,
+#report_viewer form.form-horizontal .controls {
   margin-left: 90px;
 }
-#node_editor #actions {
+#node_editor #actions,
+#report_viewer #actions {
   position: absolute;
   top: 100px;
   left: 200px;
