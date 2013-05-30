@@ -131,6 +131,14 @@
       margin-left: 90px;
     }
   }
+}
+
+#node_editor {
+  min-width: 600px;
+
+  .modal-body {
+    overflow: hidden;
+  }
 
   #actions {
     position: absolute;
@@ -141,5 +149,22 @@
     padding: 0;
     margin-bottom: 0;
     overflow-y: auto;
+  }
+
+  .action.box {
+    .box-header {
+      cursor: move;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    form.box-content {
+      margin: 0;
+
+      > * {
+        margin-bottom: 10px;
+      }
+    }
   }
 }

@@ -1,0 +1,45 @@
+doctype 5
+html(lang='en-US')
+head
+  meta(charset='utf-8')
+  title MARXO Console
+  link(href='css/console.css', rel='stylesheet', media='screen')
+  body
+    include signin
+    #main
+      #navbar.navbar.navbar-static-top
+        .navbar-inner.container-fluid
+          a.brand(href='#') MARXO
+          include navbar
+      #frames
+        #home.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include home
+        #project.frame.container-fluid
+          #project_creator.row-fluid.inner-frame(name='creator')
+            include project/creator
+          #project_viewer.row-fluid.inner-frame(name='viewer')
+            include project/viewer
+          #project_manager.active.row-fluid.inner-frame(name='manager')
+            include project/manager
+        #workflow.frame.container-fluid
+          #workflow_editor.row-fluid.inner-frame(name='editor')
+            include workflow/editor
+          #workflow_manager.active.row-fluid.inner-frame(name='manager')
+            include workflow/manager
+        #calendar.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include calendar
+        #content.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include content
+        #report.frame.container-fluid
+         .active.row-fluid.inner-frame
+          include report
+        #config.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include config
+        #profile.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include profile
+    script(data-main='js/main', src='js/lib/require.js')

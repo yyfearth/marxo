@@ -1,5 +1,5 @@
 /*!
- * Bootstrap v2.3.1
+ * Bootstrap v2.3.2 (without Icons)
  *
  * Copyright 2012 Twitter, Inc
  * Licensed under the Apache License v2.0
@@ -2045,6 +2045,14 @@ table th[class*="span"],
 }
 .open > .dropdown-menu {
   display: block;
+}
+.dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 990;
 }
 .pull-right > .dropdown-menu {
   right: 0;
@@ -5185,8 +5193,13 @@ a.badge:focus {
 #report_viewer form.form-horizontal .controls {
   margin-left: 90px;
 }
-#node_editor #actions,
-#report_viewer #actions {
+#node_editor {
+  min-width: 600px;
+}
+#node_editor .modal-body {
+  overflow: hidden;
+}
+#node_editor #actions {
   position: absolute;
   top: 100px;
   left: 200px;
@@ -5195,6 +5208,19 @@ a.badge:focus {
   padding: 0;
   margin-bottom: 0;
   overflow-y: auto;
+}
+#node_editor .action.box .box-header {
+  cursor: move;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#node_editor .action.box form.box-content {
+  margin: 0;
+}
+#node_editor .action.box form.box-content > * {
+  margin-bottom: 10px;
 }
 /*
  * FullCalendar v1.5.4 Stylesheet
@@ -5753,10 +5779,8 @@ body {
   margin: 0px;
   height: 100%;
 }
-.transition {
-  -webkit-transition: opacity 0.5s ease-in-out;
-  -moz-transition: opacity 0.5s ease-in-out;
-  transition: opacity 0.5s ease-in-out;
+.tpl {
+  display: none;
 }
 .box {
   border: 1px solid #DEDEDE;
@@ -5777,7 +5801,6 @@ body {
   height: 12px;
   min-height: 12px;
   margin-bottom: 0;
-  cursor: move;
   font-weight: bold;
   font-size: 16px;
   background: -moz-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
@@ -5817,6 +5840,16 @@ body {
 }
 .box .box-content {
   padding: 10px;
+  opacity: 1;
+  overflow: hidden;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
+.box .box-content.minimized {
+  opacity: 0;
+  padding: 1px 10px;
+  height: 0;
 }
 #signin {
   z-index: 1000;
@@ -5828,6 +5861,9 @@ body {
   bottom: 0px;
   right: 0px;
   background: #f5f5f5;
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
 }
 #signin .form-signin {
   position: absolute;

@@ -114,6 +114,36 @@ define 'console', ['lib/common'], (async) ->
       return
   #open: (name) -> # should be override
 
+  class BoxView extends View
+    events:
+      'click .btn-close': 'close'
+      'click .btn-minimize': 'minimize'
+    initialize: (options) ->
+      super options
+    render: ->
+      @btn_min = find '.btn-minimize', @el
+      @btn_close = find '.btn-close', @el
+      @contentEl = find '.box-content', @el
+      return
+    close: -> # should be override
+      console.log 'box close button clicked'
+      return
+    minimize: ->
+      btn_min_icon = find '.btn-minimize i', @el
+      content = find '.box-content', @el
+      console.log btn_min_icon, content
+      if btn_min_icon.classList.contains 'icon-up-open'
+        # minimize
+        content.classList.add 'minimized'
+        btn_min_icon.classList.remove 'icon-up-open'
+        btn_min_icon.classList.add 'icon-down-open'
+      else
+        # restore
+        content.classList.remove 'minimized'
+        btn_min_icon.classList.remove 'icon-down-open'
+        btn_min_icon.classList.add 'icon-up-open'
+      return
+
   class ModalDialogView extends View
     initialize: (options) ->
       super options
@@ -200,9 +230,6 @@ define 'console', ['lib/common'], (async) ->
         return
       , @delay
       return
-
-  class WorkflowManagerView extends InnerFrameView
-
 
   class Entity extends Backbone.Model
     set: (attrs) ->
@@ -307,6 +334,7 @@ define 'console', ['lib/common'], (async) ->
   findAll
   View
   ConsoleView
+  BoxView
   FrameView
   InnerFrameView
   ModalDialogView

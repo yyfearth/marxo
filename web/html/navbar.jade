@@ -1,0 +1,53 @@
+ul.nav.pull-right
+  li.dropdown
+    a(href='#profile')
+      img#avatar(src='img/earth.png')
+      span#username Wilson
+      b.caret
+    ul.dropdown-menu
+      li
+        a(href='#profile') Profile
+      li.divider
+      li
+        a(href='#signout') Sign Out
+ul.nav
+  li
+    a(href='#home') Home
+  li.dropdown
+    a(href='#project')
+      | Project
+      b.caret
+    ul.dropdown-menu
+      li
+        a(href='#project/wiz') New Project Wizard
+      li
+        a(href='#project/new') Create new Project
+      li.divider
+      li
+        a(href='#project/mgr') Manage Projects
+  li.dropdown
+    a(href='#workflow')
+      | Workflow
+      b.caret
+    ul.dropdown-menu
+      li
+        a(href='#workflow/new') Create new Workflow
+      li.divider
+      li
+        a(href='#workflow/mgr') Manage Workflows
+  li
+    a(href='#content') Content
+  li
+    a(href='#calendar') Calendar
+  li
+    a(href='#report') Report
+  li.dropdown
+    a(href='#config')
+      | Configuration
+      b.caret
+    ul.dropdown-menu
+      li
+        a(href='#config/tenant') Tenant Profile
+      li.divider
+      li
+        a(href='#config/users') Manage Members
