@@ -131,7 +131,7 @@ define 'console', ['lib/common'], (async) ->
     minimize: ->
       btn_min_icon = find '.btn-minimize i', @el
       content = find '.box-content', @el
-      console.log btn_min_icon, content
+      # console.log btn_min_icon, content
       if btn_min_icon.classList.contains 'icon-up-open'
         # minimize
         content.classList.add 'minimized'
@@ -151,13 +151,6 @@ define 'console', ['lib/common'], (async) ->
         show: false
         backdrop: 'static'
       @$el.on 'hidden', @callback.bind @
-      # init action button
-      findAll('button[data-action]', @el).forEach (btn) =>
-        action = @[btn.dataset.action]
-        if typeof action is 'function'
-          btn.onclick = action.bind @
-        else
-          console.warn 'unknow action', btn.dataset.action, btn
       return
     popup: (data, callback) ->
       @data = data

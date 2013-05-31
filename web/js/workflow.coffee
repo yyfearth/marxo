@@ -142,6 +142,8 @@ TenantLink
   class WorkflowManagerView extends InnerFrameView
 
   class EditorView extends ModalDialogView
+    events:
+      'click button.btn-save': 'save'
     initialize: (options) ->
       super options
       @form = find 'form', @el
@@ -169,32 +171,59 @@ TenantLink
 
   class NodeEditorView extends EditorView
     el: '#node_editor'
+    events:
+      'click button.btn-save': 'save'
+      'click a.action-thumb': '_addAction'
     initialize: (options) ->
       super options
-      actions = @actionsEl = find '#actions', @el
+      @actions = []
+      @actionViews = []
+      @actionsEl = find '#actions', @el
       _fixStyle = @_fixStyle.bind @
       $(window).resize _fixStyle
       $(@el).on 'shown', _fixStyle
-      $(actions).sortable
+      $(@actionsEl).sortable
         delay: 150
         distance: 15
       # temp TODO: load models from node
-      actions = [
+      [
         type: 'post_to_multi_social_media'
       ,
         type: 'send_email'
-      ]
-      @actionViews = actions.map (action) =>
-        actionView = new ActionView model: action, parent: @, container: @actionsEl
-        actionView.render()
-        actionView
+      ].forEach @addAction.bind @
       return
-    _fixStyle: ->
+    _fixStyle: -> # make sure the top of action box will below the title, name and desc
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
+      return
+    _addAction: (e) ->
+      e.preventDefault()
+      target = e.target
+      matched = target.href.match /action:(\w+)/i
+      @addAction type: matched[1] if matched
+      false
+    save: ->
+      console.log 'save'
+      # save actions
+      # TODO: read all actions and check
+      # save the node
+      super()
+      return
+    addAction: (model) ->
+      actionView = new ActionView model: model, parent: @, container: @actionsEl
+      actionView.on 'close', @removeAction.bind @
+      actionView.render()
+      @actions.push model
+      @actionViews.push actionView
+      actionView
+    removeAction: (view, model) ->
+      idx = @actions.indexOf model
+      return if idx < 0
+      @actions.splice idx, 1
+      @actionViews.splice idx, 1
       return
 
   class ActionView extends BoxView
-    @load: (type) ->
+    @load: (type) -> # load form html template
       if @_tpl? and @_tpl[type]?
         @_tpl[type] # cached
       else
@@ -217,8 +246,12 @@ TenantLink
       throw 'need action model and type' unless @model and @type
       return
     close: ->
-      @containerEl.removeChild @el
-      # TODO: deal with model and event
+      @el.parentNode.removeChild @el
+      model = @model
+      @trigger 'close', @, model
+      model.type = null
+      model.name = null
+      model.data = null
       return
     render: ->
       tpl = ActionView.load @type
@@ -231,7 +264,27 @@ TenantLink
       else
         $('.box-header, .btn', @el).disableSelection()
       @form = find 'form', @el
+      @fill @model?.data
       return
+    fill: (data) -> # filling the form with data
+      return unless data and @form
+      form = @form
+      for name, value of data
+        el = form[name]
+        #form[key].value = value
+        $(el).val value if el?.getAttribute('name') is name
+      # TODO: support customized controls
+      return
+    read: (data) -> # read form the form to get a json data
+      throw 'cannot find the form, may not rendered yet' unless @form
+      data ?= ({})
+      els = [].slice.call @form.elements
+      els.forEach (el) ->
+        $el = $ el
+        name = $el.attr 'name'
+        data[name] = $el.val() if name
+      # TODO: support customized controls
+      data
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
