@@ -15,5 +15,10 @@
         | to Add a new Node.
 .span10.workspace
   #workflow_view.content-view
+  div.tpl#t_popover
+    .popover-desc {desc}
+    .popover-buttons
+      button.btn.btn-danger.btn-delete.pull-left Delete
+      button.btn.btn-primary.btn-edit Edit
 include editor/node_editor
 include editor/link_editor

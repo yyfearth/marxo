@@ -5127,6 +5127,15 @@ a.badge:focus {
   opacity: 0.8;
   cursor: pointer;
 }
+#workflow_view .popover-buttons {
+  min-width: 125px;
+  overflow: hidden;
+  margin: 10px 0 5px;
+  text-align: right;
+}
+#workflow_view .popover-buttons btn {
+  margin: 5px;
+}
 #node_editor,
 #report_viewer {
   position: fixed;
