@@ -1,6 +1,6 @@
 "use strict"
 define 'workflow_models', ['console'], ({Entity, Tenant, ManagerCollection}) ->
-  ROOT = 'http://marxo.cloudfoundry.com/api'
+  ROOT = 'https://marxo.cloudfoundry.com/api'
   # ROOT = '/api'
 
   class Workflow extends Entity
