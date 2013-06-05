@@ -1,6 +1,5 @@
 package marxo.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jmkgreen.morphia.Datastore;
@@ -38,19 +37,24 @@ public class MongoDbConnector {
 				uri = new MongoClientURI("mongodb://localhost:27017/marxo");
 			} else {
 				System.out.println("System.getenv(\"VCAP_SERVICES\"):\n" + serviceJson);
-				// mongodb://08b9893e-6ba2-43f1-8832-00089d89853d:24278a9c-92aa-4947-b7c1-ef9c6db73d4d@172.30.48.67:25273/db
 
 				ObjectMapper m = new ObjectMapper();
 				JsonNode rootNode = m.readTree(serviceJson);
-				JsonNode credential = rootNode.get("mongodb-2.0").get(0).get("credentials");
+				JsonNode mongodb;
+				if (rootNode.hasNonNull("mongodb-2.0")) { // CloudFoundry
+					mongodb = rootNode.get("mongodb-2.0");
+				} else if (rootNode.hasNonNull("mongodb-1.8")) { // AppFog
+					mongodb = rootNode.get("mongodb-1.8");
+				} else {
+					System.out.println("Failed to parse config json, cannot find mongodb section");
+					return null;
+				}
+				JsonNode credential = mongodb.get(0).get("credentials");
 				String url = credential.get("url").asText();
 				System.out.println("Got DB URL: " + url);
 
 				uri = new MongoClientURI(url);
 			}
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-			uri = null;
 		} catch (IOException e) {
 			e.printStackTrace();
 			uri = null;
