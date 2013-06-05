@@ -1,0 +1,17 @@
+---
+applications:
+  .:
+    name: marxo
+    framework:
+      name: spring
+      info:
+        mem: 512M
+        description: Java SpringSource Spring Application
+        exec: 
+    infra: aws
+    url: ${name}.${target-base}
+    mem: '256M'
+    instances: 1
+    services:
+      mongodb-marxo:
+        type: mongodb
