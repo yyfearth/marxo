@@ -140,6 +140,7 @@ copy = (dir = out_dir) ->
     'js/report.js'
     'js/config.js'
     'css/console.css'
+    'index.html'
   ].forEach (file) ->
     in_file = path.join __dirname, file
     out_file = path.join out_dir, file
