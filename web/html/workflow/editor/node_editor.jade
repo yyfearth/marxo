@@ -1,3 +1,4 @@
+include node_editor_actions
 #node_editor.modal.modal-full.hide.fade(aria-labelledby='node_editor_title', aria-hidden='true')
   .modal-header
     button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
@@ -5,9 +6,7 @@
   .modal-body
     .sidebar.well
       ul#action_list.sidebar-list.nav.nav-list
-        li.nav-header Common Action
-        li
-          a(href='#action:new') New Action
+        mixin actions_thumb
       ul.sidebar-bottom.nav.nav-list
         li.divider
         li.nav-header Tips
@@ -26,7 +25,7 @@
         .controls
           textarea#node_desc.input-xlarge(name='desc', rows='1', placeholder='Description')
     #actions.well
-      include node_editor_actions
+      mixin actions_tpl
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close
-    button.btn.btn-primary(data-action='save') Save
+    button.btn.btn-primary.btn-save Save

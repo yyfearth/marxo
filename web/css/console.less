@@ -21,6 +21,23 @@ html, body {
   display: none;
 }
 
+.btn-round {
+  display: inline-block;
+  width: 27px;
+  height: 27px;
+  border-radius: 40px;
+  line-height: 18px;
+  vertical-align: middle;
+  font-size: 14px;
+  clear: none;
+  float: left;
+  margin: -1px 2px 1px 2px;
+  text-align: center;
+  &:before {
+    margin-left: -6px;
+  }
+}
+
 .box {
   border: 1px solid #DEDEDE;
   border-radius: 3px;
@@ -61,22 +78,6 @@ html, body {
   }
   .box-icon {
     float: right;
-    .btn-round {
-      display: inline-block;
-      width: 27px;
-      height: 27px;
-      border-radius: 40px;
-      line-height: 18px;
-      vertical-align: middle;
-      font-size: 14px;
-      clear: none;
-      float: left;
-      margin: -1px 2px 1px 2px;
-      text-align: center;
-      .icon {
-        margin-left: -9px;
-      }
-    }
   }
   .box-content {
     padding: 10px;
@@ -264,3 +265,6 @@ html, body {
   }
 }
 
+.grid-filter form {
+  margin: 0;
+}

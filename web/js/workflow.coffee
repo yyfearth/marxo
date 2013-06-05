@@ -9,6 +9,7 @@ View
 BoxView
 FrameView
 InnerFrameView
+ManagerView
 ModalDialogView
 }, {
 # Tenant
@@ -45,17 +46,21 @@ TenantLink
       @manager = new WorkflowManagerView el: '#workflow_manager', parent: @
       return
     open: (name) ->
-      if name is 'new'
-        console.log 'show workflow editor with create mode'
-        @switchTo @manager
-        # DOTO: show create new model
-      else if name is 'mgr'
-        console.log 'show workflow mgr'
-        @switchTo @manager
-      else if name
-        console.log 'show workflow editor for', name
-        @switchTo @editor
-        @editor.load name
+      switch name
+        when 'new'
+          console.log 'show workflow editor with create mode'
+          @switchTo @manager # TODO: show create dialog in @manager
+        when 'mgr'
+          console.log 'show workflow mgr'
+          @switchTo @manager
+        else
+          if name
+            console.log 'show workflow editor for', name
+            @switchTo @editor
+            @editor.load name
+          else unless @manager.rendered
+            # 1st time default frame
+            @switchTo @manager
       return
 
   class WorkflowEditorView extends InnerFrameView
@@ -79,7 +84,7 @@ TenantLink
       return
     render: ->
       @nodeList.render()
-      return
+      @
     fetch: (id, callback) ->
       wf = @workflow = new TenantWorkflow id: id
       wf.fetch success: =>
@@ -139,9 +144,12 @@ TenantLink
       li.appendChild a
       li
 
-  class WorkflowManagerView extends InnerFrameView
+  class WorkflowManagerView extends ManagerView
+    collection: new TenantWorkflows
 
   class EditorView extends ModalDialogView
+    events:
+      'click button.btn-save': 'save'
     initialize: (options) ->
       super options
       @form = find 'form', @el
@@ -149,7 +157,7 @@ TenantLink
     popup: (data, callback) ->
       super data, callback
       @fill data
-      @
+      return
     fill: (data) ->
       @_attributes = ({})
       for name, value of data.attributes
@@ -157,7 +165,7 @@ TenantLink
         if input?.name is name and input.value?
           input.value = value
           @_attributes[name] = value
-      @
+      return
     save: -> # should be customized, e.g. ok, save, export
       if @_attributes?
         for name, value of @_attributes
@@ -166,35 +174,77 @@ TenantLink
           @data.set @_attributes
       @callback 'save'
       @hide true
+      return
+    reset: -> # called after close
+      super()
+      @form.reset()
+      return
 
   class NodeEditorView extends EditorView
     el: '#node_editor'
+    events:
+      'click button.btn-save': 'save'
+      'click a.action-thumb': '_addAction'
     initialize: (options) ->
       super options
-      actions = @actionsEl = find '#actions', @el
+      @actions = []
+      @actionViews = []
+      @actionsEl = find '#actions', @el
       _fixStyle = @_fixStyle.bind @
       $(window).resize _fixStyle
       $(@el).on 'shown', _fixStyle
-      $(actions).sortable
+      $(@actionsEl).sortable
         delay: 150
         distance: 15
+      return
+    _fixStyle: -> # make sure the top of action box will below the title, name and desc
+      @actionsEl.style.top = 20 + $(@form).height() + 'px'
+      return
+    _addAction: (e) ->
+      e.preventDefault()
+      target = e.target
+      matched = target.href.match /action:(\w+)/i
+      @addAction type: matched[1] if matched
+      false
+    fill: (data) ->
+      # fill info form
+      super data
       # temp TODO: load models from node
-      actions = [
+      [
         type: 'post_to_multi_social_media'
       ,
         type: 'send_email'
-      ]
-      @actionViews = actions.map (action) =>
-        actionView = new ActionView model: action, parent: @, container: @actionsEl
-        actionView.render()
-        actionView
+      ].forEach @addAction.bind @
       return
-    _fixStyle: ->
-      @actionsEl.style.top = 20 + $(@form).height() + 'px'
+    save: ->
+      console.log 'save'
+      # save actions
+      # TODO: read all actions and check
+      # save the node
+      super()
+      return
+    reset: ->
+      super()
+      @actions = []
+      @actionViews = []
+      @actionsEl.innerHTML = ''
+      return
+    addAction: (model) ->
+      actionView = new ActionView model: model, parent: @, container: @actionsEl
+      actionView.on 'close', @removeAction.bind @
+      actionView.render()
+      @actions.push model
+      @actionViews.push actionView
+      actionView
+    removeAction: (view, model) ->
+      idx = @actions.indexOf model
+      return if idx < 0
+      @actions.splice idx, 1
+      @actionViews.splice idx, 1
       return
 
   class ActionView extends BoxView
-    @load: (type) ->
+    @tpl: (type) -> # load form html template
       if @_tpl? and @_tpl[type]?
         @_tpl[type] # cached
       else
@@ -217,11 +267,15 @@ TenantLink
       throw 'need action model and type' unless @model and @type
       return
     close: ->
-      @containerEl.removeChild @el
-      # TODO: deal with model and event
+      @el.parentNode.removeChild @el
+      model = @model
+      @trigger 'close', @, model
+      model.type = null
+      model.name = null
+      model.data = null
       return
     render: ->
-      tpl = ActionView.load @type
+      tpl = @constructor.tpl @type
       @containerEl.appendChild @el
       @el.innerHTML = tpl
       # get els in super
@@ -231,7 +285,27 @@ TenantLink
       else
         $('.box-header, .btn', @el).disableSelection()
       @form = find 'form', @el
+      @fill @model?.data
+      @
+    fill: (data) -> # filling the form with data
+      return unless data and @form
+      form = @form
+      for name, value of data
+        el = form[name]
+        #form[key].value = value
+        $(el).val value if el?.getAttribute('name') is name
+      # TODO: support customized controls
       return
+    read: (data) -> # read form the form to get a json data
+      throw 'cannot find the form, may not rendered yet' unless @form
+      data ?= ({})
+      els = [].slice.call @form.elements
+      els.forEach (el) ->
+        $el = $ el
+        name = $el.attr 'name'
+        data[name] = $el.val() if name
+      # TODO: support customized controls
+      data
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
@@ -241,7 +315,7 @@ TenantLink
     popup: (data, callback) ->
       super data, callback
 
-      @
+      return
 
   class WorkflowView extends View
     jsPlumbDefaults:
@@ -277,6 +351,10 @@ TenantLink
       spanX: 300
       spanY: 150
       vertical: false
+    events:
+      'click .popover .btn-delete': '_delete'
+      'click .popover .btn-edit': '_edit'
+      'dblclick .node': '_edit'
     initialize: (options) ->
       super options
       @nodeEditor = options.nodeEditor
@@ -303,16 +381,25 @@ TenantLink
         link = conn.getParameter 'link'
         label = conn.getOverlay 'label'
         if not link?
+          # TODO: create link
           # conn.setParameter 'link', createLink info.sourceId, info.targetId
         else if link.has 'title'
           label.setLabel link.get 'title'
         return
       jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
+        # this will be called after link view destory
         conn = info.connection
         link = conn.getParameter 'link'
-        # deleteLink info.connection.getParameter 'link'
+        # rebuild src end point for auto delele issue
         link.prevNode.view.buildSrcEndpoint()
         return
+
+      # link dblclick to edit
+      jsPlumb.bind 'dblclick', (conn) ->
+        view.editLink conn.getParameter 'link'
+        return
+
+      # for popover
       _hidePopover = -> if view._popped
         if view._popped._delay
           view._popped._delay = clearTimeout view._popped._delay
@@ -335,16 +422,8 @@ TenantLink
         label = conn.getOverlay 'label'
         _togglePopover.call label.canvas
         return
-      # link dblclick
-      jsPlumb.bind 'dblclick', (conn) ->
-        view.editLink conn.getParameter 'link'
-        return
       # node click
       @$el.on 'click', '.node', _togglePopover
-      # node dblclick
-      @$el.on 'dblclick', '.node', ->
-        view.editNode @node
-        return
       @$el.on 'mousedown', (e) ->
         if view._popped and not view.$el.find('.popover').has(e.target).length
           _hidePopover()
@@ -358,6 +437,7 @@ TenantLink
       return
     clear: ->
       @el.innerHTML = ''
+      # TODO: destory all nodes and links
       @
     load: (wf) ->
       # clear
@@ -365,6 +445,24 @@ TenantLink
       @_processModel wf
       @_renderModel wf
       @
+    _action: (action, e) ->
+      $target = $ e.target
+      $target = $target.parents '.target' unless $target.hasClass 'target'
+      if model = $target.data 'node'
+        func = @[action + 'Node']
+      else if model = $target.data 'link'
+        func = @[action + 'Link']
+      else
+        console.error 'no node or link in data', $target, e
+        return
+      func?.call @, model
+      return
+    _delete: (e) ->
+      @_action 'remove', e
+      return
+    _edit: (e) ->
+      @_action 'edit', e
+      return
     _processModel: (wf) ->
       @model = wf
       # pre-process nodes and links
@@ -474,8 +572,14 @@ TenantLink
           console.log 'canceled edit node'
       @
     removeNode: (node) ->
+      # use confirm since no support for undo
+      if confirm "Delete the node: #{node.get 'title'}?"
+        console.log 'remove node', node
+        node.view?.distory()
+      # TODO: remove view and model
       @
     addLink: (link) ->
+      # TODO: add view and model
       @
     _addLink: (link) ->
       view = link.view = new LinkView model: link, parent: @
@@ -489,6 +593,11 @@ TenantLink
           console.log 'canceled edit link'
       @
     removeLink: (link) ->
+      # use confirm since no support for undo
+      if confirm "Delete the link: #{link.get('title') or '(No Name)'}?"
+        console.log 'remove node', link
+        link.view?.distory()
+      # TODO: remove view and model
       @
     render: ->
       @el.onselectstart = ->
@@ -523,6 +632,12 @@ TenantLink
       dropOptions:
         hoverClass: 'hover'
         activeClass: 'active'
+    _popover_tpl: do ->
+      el = find '#t_popover'
+      throw 'cannot find template for popover #t_popover' unless el?
+      html = el.innerHTML
+      el.parentNode.removeChild el
+      html
     render: ->
       node = @el.node = @model
       name = @el.id = node.get 'name'
@@ -534,6 +649,7 @@ TenantLink
       jsPlumb.makeTarget @$el, @targetEndpointStyle, parameters:
         node: node
         view: @
+      @
 
     update: (node = @model) ->
       @$el.popover 'destroy'
@@ -546,11 +662,16 @@ TenantLink
       title = @el.title = node.get 'title'
       @el.style.left = node.x + 'px'
       @el.style.top = node.y + 'px'
+      @$el.addClass('target').data node: node, view: @
       @$el.popover
         container: @parentEl
         trigger: 'manual'
         placement: 'bottom'
         title: title
+        html: true
+        content: @_popover_tpl.replace '{desc}', node.get('desc') or ''
+      @$popover = @$el.data('popover').tip()
+      @$popover?.addClass('target').data node: node, view: @
       return
     buildSrcEndpoint: ->
       jsPlumb.deleteEndpoint @srcEndpoint if @srcEndpoint?
@@ -558,10 +679,17 @@ TenantLink
         model: @model
         view: @
       @
+    distory: ->
+      # TODO: destory view and model
+      @$el.popover 'destroy'
+      @trigger 'distory', @, @model
+      return
 
   class LinkView extends View
+    _popover_tpl: NodeView::_popover_tpl
     render: ->
       link = @model
+      link.view = @
       conn = @conn = jsPlumb.connect
         source: link.prevNode.view.srcEndpoint
         target: link.nextNode.view.el
@@ -585,6 +713,16 @@ TenantLink
         container: @parentEl
         trigger: 'manual'
         placement: 'bottom'
+        html: true
+        content: @_popover_tpl.replace '{desc}', link.get('desc') or ''
+      @$popover = label$el.data('popover').tip()
+      @$popover?.addClass('target').data link: link, view: @
       @
+    distory: ->
+      jsPlumb.detach @conn
+      # TODO: destory model
+      $(@labelEl).popover 'destroy'
+      @trigger 'distory', @, @model
+      return
 
   WorkflowFrameView
