@@ -4910,13 +4910,13 @@ a.badge:focus {
   content: '\f0d0';
 }
 .icon-user:before {
-  content: '👤';
+  content: '\e800';
 }
 .icon-users:before {
-  content: '👥';
+  content: '\e801';
 }
 .icon-search:before {
-  content: '🔍';
+  content: '\e802';
 }
 .ui-helper-hidden {
   display: none;
