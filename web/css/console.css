@@ -6259,3 +6259,6 @@ body {
 #calendar .workspace #calendar_view {
   display: inline-block;
 }
+.grid-filter form {
+  margin: 0;
+}

@@ -9,6 +9,7 @@ View
 BoxView
 FrameView
 InnerFrameView
+ManagerView
 ModalDialogView
 }, {
 # Tenant
@@ -45,17 +46,21 @@ TenantLink
       @manager = new WorkflowManagerView el: '#workflow_manager', parent: @
       return
     open: (name) ->
-      if name is 'new'
-        console.log 'show workflow editor with create mode'
-        @switchTo @manager
-        # DOTO: show create new model
-      else if name is 'mgr'
-        console.log 'show workflow mgr'
-        @switchTo @manager
-      else if name
-        console.log 'show workflow editor for', name
-        @switchTo @editor
-        @editor.load name
+      switch name
+        when 'new'
+          console.log 'show workflow editor with create mode'
+          @switchTo @manager # TODO: show create dialog in @manager
+        when 'mgr'
+          console.log 'show workflow mgr'
+          @switchTo @manager
+        else
+          if name
+            console.log 'show workflow editor for', name
+            @switchTo @editor
+            @editor.load name
+          else unless @manager.rendered
+            # 1st time default frame
+            @switchTo @manager
       return
 
   class WorkflowEditorView extends InnerFrameView
@@ -79,7 +84,7 @@ TenantLink
       return
     render: ->
       @nodeList.render()
-      return
+      @
     fetch: (id, callback) ->
       wf = @workflow = new TenantWorkflow id: id
       wf.fetch success: =>
@@ -139,7 +144,8 @@ TenantLink
       li.appendChild a
       li
 
-  class WorkflowManagerView extends InnerFrameView
+  class WorkflowManagerView extends ManagerView
+    collection: new TenantWorkflows
 
   class EditorView extends ModalDialogView
     events:
@@ -238,7 +244,7 @@ TenantLink
       return
 
   class ActionView extends BoxView
-    @load: (type) -> # load form html template
+    @tpl: (type) -> # load form html template
       if @_tpl? and @_tpl[type]?
         @_tpl[type] # cached
       else
@@ -269,7 +275,7 @@ TenantLink
       model.data = null
       return
     render: ->
-      tpl = ActionView.load @type
+      tpl = @constructor.tpl @type
       @containerEl.appendChild @el
       @el.innerHTML = tpl
       # get els in super
@@ -280,7 +286,7 @@ TenantLink
         $('.box-header, .btn', @el).disableSelection()
       @form = find 'form', @el
       @fill @model?.data
-      return
+      @
     fill: (data) -> # filling the form with data
       return unless data and @form
       form = @form
@@ -431,6 +437,7 @@ TenantLink
       return
     clear: ->
       @el.innerHTML = ''
+      # TODO: destory all nodes and links
       @
     load: (wf) ->
       # clear
@@ -569,7 +576,7 @@ TenantLink
       if confirm "Delete the node: #{node.get 'title'}?"
         console.log 'remove node', node
         node.view?.distory()
-        # TODO: remove view and model
+      # TODO: remove view and model
       @
     addLink: (link) ->
       # TODO: add view and model
