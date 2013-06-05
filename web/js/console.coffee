@@ -9,6 +9,8 @@ define 'console', ['lib/common'], (async) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
 
+  ## Views
+
   class View extends Backbone.View
     initialize: (options) ->
       @el.view = @
@@ -52,7 +54,7 @@ define 'console', ['lib/common'], (async) ->
     showFrame: (frame, name) ->
       frame = @frames[frame]
       return unless frame?
-      console.log 'frame', frame
+      # console.log 'frame', frame
       if frame instanceof FrameView
         frame.open? name
       else
@@ -129,19 +131,19 @@ define 'console', ['lib/common'], (async) ->
       console.log 'box close button clicked'
       return
     minimize: ->
-      btn_min_icon = find '.btn-minimize i', @el
-      content = find '.box-content', @el
-      console.log btn_min_icon, content
-      if btn_min_icon.classList.contains 'icon-up-open'
+      btn_min = @btn_min or find '.btn-minimize', @el
+      content = @contentEl or find '.box-content', @el
+      # console.log btn_min_icon, content
+      if btn_min.classList.contains 'icon-up-open'
         # minimize
         content.classList.add 'minimized'
-        btn_min_icon.classList.remove 'icon-up-open'
-        btn_min_icon.classList.add 'icon-down-open'
+        btn_min.classList.remove 'icon-up-open'
+        btn_min.classList.add 'icon-down-open'
       else
         # restore
         content.classList.remove 'minimized'
-        btn_min_icon.classList.remove 'icon-down-open'
-        btn_min_icon.classList.add 'icon-up-open'
+        btn_min.classList.remove 'icon-down-open'
+        btn_min.classList.add 'icon-up-open'
       return
 
   class ModalDialogView extends View
@@ -151,13 +153,6 @@ define 'console', ['lib/common'], (async) ->
         show: false
         backdrop: 'static'
       @$el.on 'hidden', @callback.bind @
-      # init action button
-      findAll('button[data-action]', @el).forEach (btn) =>
-        action = @[btn.dataset.action]
-        if typeof action is 'function'
-          btn.onclick = action.bind @
-        else
-          console.warn 'unknow action', btn.dataset.action, btn
       return
     popup: (data, callback) ->
       @data = data
@@ -231,6 +226,114 @@ define 'console', ['lib/common'], (async) ->
       , @delay
       return
 
+  class SeqCell extends Backgrid.StringCell
+    formatter: null
+    render: ->
+      @formatter ?=
+        fromRaw: =>
+          @model._seq + 1
+      super()
+
+  class LinkCell extends Backgrid.UriCell
+    render: ->
+      @$el.empty()
+      formattedValue = @formatter.fromRaw @model.get @column.get 'name'
+      @$el.append $('<a>',
+        tabIndex: -1
+        href: '#workflow/' + @model.id
+        title: formattedValue
+      ).text formattedValue
+      @delegateEvents()
+      @
+
+  class ActionCell extends Backgrid.Cell
+    @tpl: (type = 'action_buttons') -> # load form html template
+      if @_tpl? and @_tpl[type]?
+        @_tpl[type] # cached
+      else
+        el = find "#t_#{type}"
+        if el?
+          @_tpl ?= ({})
+          # load template
+          tpl = @_tpl[type] = el.innerHTML
+          # remove template from dom
+          el.parentNode.removeChild el
+        else
+          throw 'cannot find template for type: ' + type
+        tpl
+    render: ->
+      @el.innerHTML = @constructor.tpl @type
+      @delegateEvents()
+      @
+
+  class ManagerView extends InnerFrameView
+    columns: [
+      # name is a required parameter, but you don't really want one on a select all column
+      name: ''
+      # Backgrid.Extension.SelectRowCell lets you select individual rows
+      cell: 'select-row'
+      # Backgrid.Extension.SelectAllHeaderCell lets you select all the row on a page
+      headerCell: 'select-all'
+    ,
+      name: '' # The key of the model attribute
+      label: '#' # The name to display in the header
+      cell: SeqCell
+      editable: false
+    ,
+      name: 'title'
+      label: 'Title'
+      cell: LinkCell
+      editable: false
+    ,
+      name: 'desc'
+      label: 'Description'
+      cell: 'string'
+      editable: false
+    ,
+      name: 'status'
+      label: 'Status'
+      cell: 'string'
+      editable: false
+    ,
+      name: 'created_at'
+      label: 'Date Created'
+      cell: 'datetime'
+      editable: false
+    ,
+      name: 'updated_at'
+      label: 'Date Updated'
+      cell: 'datetime'
+      editable: false
+    ,
+      name: ''
+      label: 'Actions'
+      cell: ActionCell
+      editable: false
+      sortable: false
+    ]
+    initialize: (options) ->
+      super options
+      @collection = options.collection if options.collection instanceof ManagerCollection
+      collection = @collection
+      throw 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
+      @grid = new Backgrid.Grid
+        columns: @columns
+        collection: collection
+      @paginator = new Backgrid.Extension.Paginator
+        collection: collection
+      @filter = new Backgrid.Extension.ClientSideFilter
+        collection: collection.fullCollection,
+        fields: ['title']
+      return
+    render: ->
+      @$el.find('table.grid-table').replaceWith @grid.render().$el.addClass 'grid-table'
+      @$el.find('.grid-paginator').replaceWith @paginator.render().$el.addClass 'grid-paginator'
+      @$el.find('.grid-filter').empty().append @filter.render().$el
+      @collection.fetch reset: true
+      @
+
+  ## Entities
+
   class Entity extends Backbone.Model
     set: (attrs) ->
       #      @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
@@ -256,6 +359,21 @@ define 'console', ['lib/common'], (async) ->
 
   class User extends Entity
 
+  class ManagerCollection extends Backbone.PageableCollection
+    mode: 'client'
+    state:
+      pageSize: 20
+    initialize: (options...) ->
+      super options...
+      # add a sequence to models
+      @on 'reset', (models) ->
+        models.each (wf, i) ->
+          wf._seq = i
+        return
+      return
+    comparator: (model) -> # default comparator
+      model.get 'id'
+
   class Participants extends Backbone.Collection
     model: Participant
     url: '/users'
@@ -270,6 +388,8 @@ define 'console', ['lib/common'], (async) ->
   class Publicher extends User
 
   class Evalutator extends User # TODO: howto save them
+
+## Router
 
   class Router extends Backbone.Router
     @get: -> # singleton
@@ -337,9 +457,11 @@ define 'console', ['lib/common'], (async) ->
   BoxView
   FrameView
   InnerFrameView
+  ManagerView
   ModalDialogView
   SignInView
   Entity
+  ManagerCollection
   Tenants
   Tenant
   User

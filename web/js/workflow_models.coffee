@@ -1,6 +1,7 @@
 "use strict"
-define 'workflow_models', ['console'], ({Entity, Tenant}) ->
-  ROOT = 'http://marxo.cloudfoundry.com/api' # '/api'
+define 'workflow_models', ['console'], ({Entity, Tenant, ManagerCollection}) ->
+  ROOT = 'https://marxo.cloudfoundry.com/api'
+  # ROOT = '/api'
 
   class Workflow extends Entity
 
@@ -8,18 +9,21 @@ define 'workflow_models', ['console'], ({Entity, Tenant}) ->
 
   class TenantWorkflow extends Workflow
     urlRoot: ROOT + '/workflows'
-    initialize: ->
-      @nodes = new TenantNodes url: @url() + '/nodes', @get 'nodes'
-      @links = new TenantLinks url: @url() + '/links', @get 'links'
+    initialize: (options...) ->
+      super options...
+      url = @url?()
+      if url
+        @nodes = new TenantNodes url: @url() + '/nodes', @get 'nodes'
+        @links = new TenantLinks url: @url() + '/links', @get 'links'
       return
 
   #  class SharedWorkflows extends Backbone.Collection
   #    model: SharedWorkflow
   #    url: ROOT + '/shared/workflows'
-  class TenantWorkflows extends Backbone.Collection
+  class TenantWorkflows extends ManagerCollection
     model: TenantWorkflow
     url: ROOT + '/workflows'
-  # url: -> @tenant.url() + '/workflows'
+    # url: -> @tenant.url() + '/workflows'
 
   #  class SharedNodes extends Backbone.Collection
   #    model: SharedNode

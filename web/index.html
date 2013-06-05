@@ -4,674 +4,656 @@
   <meta charset="utf-8">
   <title>MARXO Console</title>
   <link href="css/console.css" rel="stylesheet" media="screen">
-  <body>
-    <div id="signin" class="mask">
-      <div class="container">
-        <form class="form-signin">
-          <h2 class="form-signin-heading">Please sign in</h2>
-          <input type="email" placeholder="Email" class="input-block-level">
-          <input type="password" placeholder="Password" class="input-block-level">
-          <label class="checkbox">
-            <input type="checkbox" value="remember-me">Remember me
-          </label>
-          <button type="submit" class="btn btn-large btn-primary">Sign in</button>
-        </form>
+</head>
+<body>
+  <div id="signin" class="mask">
+    <div class="container">
+      <form class="form-signin">
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <input type="email" placeholder="Email" class="input-block-level">
+        <input type="password" placeholder="Password" class="input-block-level">
+        <label class="checkbox">
+          <input type="checkbox" value="remember-me">Remember me
+        </label>
+        <button type="submit" class="btn btn-large btn-primary">Sign in</button>
+      </form>
+    </div>
+  </div>
+  <div id="main">
+    <div id="navbar" class="navbar navbar-static-top">
+      <div class="navbar-inner container-fluid"><a href="#" class="brand">MARXO</a>
+        <ul class="nav pull-right">
+          <li class="dropdown"><a href="#profile"><img id="avatar" src="img/earth.png"><span id="username">Wilson</span><b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="#profile">Profile</a></li>
+              <li class="divider"></li>
+              <li><a href="#signout">Sign Out</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="nav">
+          <li><a href="#home">Home</a></li>
+          <li class="dropdown"><a href="#project">Project<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li class="tpl"></li><!-- tmp hide it<a href="#project/wiz">New Project Wizard</a>-->
+              <li><a href="#project/new">Create new Project</a></li>
+              <li class="divider"></li>
+              <li><a href="#project/mgr">Manage Projects</a></li>
+            </ul>
+          </li>
+          <li class="dropdown"><a href="#workflow">Workflow<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="#workflow/new">Create new Workflow</a></li>
+              <li class="divider"></li>
+              <li><a href="#workflow/mgr">Manage Workflows</a></li>
+            </ul>
+          </li>
+          <li><a href="#content">Content</a></li>
+          <li><a href="#calendar">Calendar</a></li>
+          <li><a href="#report">Report</a></li>
+          <li class="dropdown"><a href="#config">Configuration<b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="#config/tenant">Tenant Profile</a></li>
+              <li class="divider"></li>
+              <li><a href="#config/users">Manage Members</a></li>
+            </ul>
+          </li>
+        </ul>
       </div>
     </div>
-    <div id="main">
-      <div id="navbar" class="navbar navbar-static-top">
-        <div class="navbar-inner container-fluid"><a href="#" class="brand">MARXO</a>
-          <ul class="nav pull-right">
-            <li class="dropdown"><a href="#profile"><img id="avatar" src="img/earth.png"><span id="username">Wilson</span><b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#profile">Profile</a></li>
-                <li class="divider"></li>
-                <li><a href="#signout">Sign Out</a></li>
+    <div id="frames">
+      <div id="home" class="frame container-fluid">
+        <div class="active row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well sidebar-nav">
+              <ul class="sidebar-list nav nav-list">
+                <li class="nav-header">Project News</li>
+                <li><a href="#">News 1</a></li>
+                <li><a href="#">News 2</a></li>
               </ul>
-            </li>
-          </ul>
-          <ul class="nav">
-            <li><a href="#home">Home</a></li>
-            <li class="dropdown"><a href="#project">Project<b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#project/wiz">New Project Wizard</a></li>
-                <li><a href="#project/new">Create new Project</a></li>
+              <ul class="sidebar-bottom nav nav-list">
                 <li class="divider"></li>
-                <li><a href="#project/mgr">Manage Projects</a></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">...</li>
               </ul>
-            </li>
-            <li class="dropdown"><a href="#workflow">Workflow<b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#workflow/new">Create new Workflow</a></li>
-                <li class="divider"></li>
-                <li><a href="#workflow/mgr">Manage Workflows</a></li>
-              </ul>
-            </li>
-            <li><a href="#content">Content</a></li>
-            <li><a href="#calendar">Calendar</a></li>
-            <li><a href="#report">Report</a></li>
-            <li class="dropdown"><a href="#config">Configuration<b class="caret"></b></a>
-              <ul class="dropdown-menu">
-                <li><a href="#config/tenant">Tenant Profile</a></li>
-                <li class="divider"></li>
-                <li><a href="#config/users">Manage Members</a></li>
-              </ul>
-            </li>
-          </ul>
+            </div>
+          </div>
+          <div class="span10 workspace">
+            <div id="home_view" class="content-view">
+              <div class="row-fluid">
+                <div class="well">
+                  <h2>Project 1</h2>
+                  <p>
+                    Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+                    commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+                    Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+                  </p>
+                  <p><a href="#" class="btn">View details »</a></p>
+                </div>
+              </div>
+              <div class="row-fluid">
+                <div class="well">
+                  <h2>Project 2</h2>
+                  <p>
+                    Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+                    commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+                    Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+                  </p>
+                  <p><a href="#" class="btn">View details »</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div id="frames">
-        <div id="home" class="frame container-fluid">
-          <div class="active row-fluid inner-frame">
-            <div class="span2 sidebar">
-              <div class="well sidebar-nav">
-                <ul class="sidebar-list nav nav-list">
-                  <li class="nav-header">Project News</li>
-                  <li><a href="#">News 1</a></li>
-                  <li><a href="#">News 2</a></li>
+      <div id="project" class="frame container-fluid">
+        <div id="project_creator" name="creator" class="row-fluid inner-frame">
+          <h4>Project Creater</h4>
+        </div>
+        <div id="project_viewer" name="viewer" class="row-fluid inner-frame">
+          <h4>Project Viewer</h4>
+        </div>
+        <div id="project_manager" name="manager" class="active row-fluid inner-frame">
+          <h4>Project Manager</h4>
+        </div>
+      </div>
+      <div id="workflow" class="frame container-fluid">
+        <div id="workflow_editor" name="editor" class="row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well">
+              <ul id="node_list" class="sidebar-list nav">
+                <li class="nav-header">Common Nodes</li>
+                <li><a href="#node:new" class="node">Empty Node</a></li>
+                <li class="nav-header">Used Nodes</li>
+                <li class="nav-header">Shared Nodes</li>
+              </ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">
+                  Click a Node above
+                  or Drag a Node from Sidebar to Workflow Editor
+                  to Add a new Node.
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="span10 workspace">
+            <h4 class="editable-title pull-left">Editable Header</h4><span class="editable-desc">Editable Description</span>
+            <div class="pull-right btn-group"><a href="#workflow/mgr" class="btn">Back to List</a>
+              <button class="btn btn-danger">Reset</button>
+              <button class="btn btn-primary">Save</button>
+            </div>
+            <div id="workflow_view" class="content-view"></div>
+            <div id="t_popover" class="tpl">
+              <div class="popover-desc">{desc}</div>
+              <div class="popover-buttons">
+                <button class="btn btn-danger btn-delete pull-left">Delete</button>
+                <button class="btn btn-primary btn-edit">Edit</button>
+              </div>
+            </div>
+          </div>
+          <!-- show in sidebar-->
+          <!-- show in the actions box-->
+          <div id="node_editor" aria-labelledby="node_editor_title" aria-hidden="true" class="modal modal-full hide fade">
+            <div class="modal-header">
+              <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+              <h3 id="node_editor_title">Node Editor</h3>
+            </div>
+            <div class="modal-body">
+              <div class="sidebar well">
+                <ul id="action_list" class="sidebar-list nav nav-list">
+                            <li class="nav-header">Social Media</li>
+                            <li><a href="#action:post_to_multi_social_media" class="action-thumb">Post to Social Media</a></li>
+                            <li><a href="#action:post_to_twitter" class="action-thumb">Post to Twitter</a></li>
+                            <li><a href="#action:post_to_facebook" class="action-thumb">Post to Facebook</a></li>
+                            <li><a href="#action:track_multi_social_media" class="action-thumb">Track Social Media</a></li>
+                            <li class="nav-header">Email</li>
+                            <li><a href="#action:send_email" class="action-thumb">Send Email</a></li>
+                            <li><a href="#action:track_email" class="action-thumb">Track Email</a></li>
                 </ul>
                 <ul class="sidebar-bottom nav nav-list">
                   <li class="divider"></li>
                   <li class="nav-header">Tips</li>
-                  <li class="tips">...</li>
+                  <li class="tips">Click a item above to add a Action to the list in the right.</li>
                 </ul>
               </div>
-            </div>
-            <div class="span10 workspace">
-              <div id="home_view" class="content-view">
-                <div class="row-fluid">
-                  <div class="well">
-                    <h2>Project 1</h2>
-                    <p>
-                      Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-                      commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-                      Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-                    </p>
-                    <p><a href="#" class="btn">View details »</a></p>
+              <form class="form-horizontal">
+                <div class="control-group">
+                  <label for="node_title" class="control-label">Title</label>
+                  <div class="controls">
+                    <input id="node_title" type="text" name="title" placeholder="Node Name">
                   </div>
                 </div>
-                <div class="row-fluid">
-                  <div class="well">
-                    <h2>Project 2</h2>
-                    <p>
-                      Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-                      commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-                      Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-                    </p>
-                    <p><a href="#" class="btn">View details »</a></p>
+                <div class="control-group">
+                  <label for="node_name" class="control-label">Name</label>
+                  <div class="controls">
+                    <input id="node_name" type="text" name="name" placeholder="node_name">
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="project" class="frame container-fluid">
-          <div id="project_creator" name="creator" class="row-fluid inner-frame">
-            <h4>Project Creater</h4>
-          </div>
-          <div id="project_viewer" name="viewer" class="row-fluid inner-frame">
-            <h4>Project Viewer</h4>
-          </div>
-          <div id="project_manager" name="manager" class="active row-fluid inner-frame">
-            <h4>Project Manager</h4>
-          </div>
-        </div>
-        <div id="workflow" class="frame container-fluid">
-          <div id="workflow_editor" name="editor" class="row-fluid inner-frame">
-            <div class="span2 sidebar">
-              <div class="well">
-                <ul id="node_list" class="sidebar-list nav">
-                  <li class="nav-header">Common Nodes</li>
-                  <li><a href="#node:new" class="node">Empty Node</a></li>
-                  <li class="nav-header">Used Nodes</li>
-                  <li class="nav-header">Shared Nodes</li>
-                </ul>
-                <ul class="sidebar-bottom nav nav-list">
-                  <li class="divider"></li>
-                  <li class="nav-header">Tips</li>
-                  <li class="tips">
-                    Click a Node above
-                    or Drag a Node from Sidebar to Workflow Editor
-                    to Add a new Node.
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="span10 workspace">
-              <div id="workflow_view" class="content-view"></div>
-            </div>
-            <div id="node_editor" aria-labelledby="node_editor_title" aria-hidden="true" class="modal modal-full hide fade">
-              <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
-                <h3 id="node_editor_title">Node Editor</h3>
-              </div>
-              <div class="modal-body">
-                <div class="sidebar well">
-                  <ul id="action_list" class="sidebar-list nav nav-list">
-                    <li class="nav-header">Common Action</li>
-                    <li><a href="#action:new">New Action</a></li>
-                  </ul>
-                  <ul class="sidebar-bottom nav nav-list">
-                    <li class="divider"></li>
-                    <li class="nav-header">Tips</li>
-                    <li class="tips">Click a item above to add a Action to the list in the right.</li>
-                  </ul>
+                <div class="control-group">
+                  <label for="node_desc" class="control-label">Description</label>
+                  <div class="controls">
+                    <textarea id="node_desc" name="desc" rows="1" placeholder="Description" class="input-xlarge"></textarea>
+                  </div>
                 </div>
-                <form class="form-horizontal">
-                  <div class="control-group">
-                    <label for="node_title" class="control-label">Title</label>
-                    <div class="controls">
-                      <input id="node_title" type="text" name="title" placeholder="Node Name">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="node_name" class="control-label">Name</label>
-                    <div class="controls">
-                      <input id="node_name" type="text" name="name" placeholder="node_name">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="node_desc" class="control-label">Description</label>
-                    <div class="controls">
-                      <textarea id="node_desc" name="desc" rows="1" placeholder="Description" class="input-xlarge"></textarea>
-                    </div>
-                  </div>
-                </form>
-                <div id="actions" class="well">
-                  <div id="t_post_to_multi_social_media" class="tpl">
-                    <div class="box-header well">
-                      <h4>Post to Multiple Social Media</h4>
+              </form>
+              <div id="actions" class="well">
+                          <div id="t_post_to_multi_social_media" class="tpl">
+                            <div class="box-header well">
+                              <h4>Post to Multiple Social Media</h4>
                                         <div class="box-icon">
-                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
-                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                          <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                          <button class="btn btn-close btn-round icon-close"></button>
                                         </div>
-                    </div>
-                    <form class="box-content">
+                            </div>
+                            <form class="box-content">
                                         <div data-toggle="buttons-checkbox" class="btn-group">
                                           <button type="button" value="twitter" class="btn active">Twitter</button>
                                           <button type="button" value="facebook" class="btn active">Facebook</button>
                                         </div>
                                         <textarea name="post_content" placeholder="Post Content..." title="Content post to social media (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
-                      <!-- twitter limits-->
-                      <div class="help-block">The maximium content length is 140, which is limited by Twitter.<br>Use "Post to Facebook" action instead for longer content length.</div>
-                    </form>
-                  </div>
-                  <div id="t_post_to_twitter" class="tpl">
-                    <div class="box-header well">
-                      <h4>Post to Twitter</h4>
+                              <div class="help-block">The maximium content length is 140, which is limited by Twitter.<br>Use "Post to Facebook" action instead for longer content length.</div>
+                            </form>
+                          </div>
+                          <div id="t_post_to_twitter" class="tpl">
+                            <div class="box-header well">
+                              <h4>Post to Twitter</h4>
                                         <div class="box-icon">
-                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
-                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                          <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                          <button class="btn btn-close btn-round icon-close"></button>
                                         </div>
-                    </div>
-                    <form class="box-content">
+                            </div>
+                            <form class="box-content">
                                         <textarea name="post_content" placeholder="Post Content..." title="Content post to Twitter (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
-                      <!-- twitter limits-->
-                      <div class="help-block">The maximium content length is 140, which is limited by Twitter.</div>
-                    </form>
-                  </div>
-                  <div id="t_post_to_facebook" class="tpl">
-                    <div class="box-header well">
-                      <h4>Post to Facebook</h4>
+                              <div class="help-block">The maximium content length is 140, which is limited by Twitter.</div>
+                            </form>
+                          </div>
+                          <div id="t_post_to_facebook" class="tpl">
+                            <div class="box-header well">
+                              <h4>Post to Facebook</h4>
                                         <div class="box-icon">
-                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
-                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                          <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                          <button class="btn btn-close btn-round icon-close"></button>
                                         </div>
-                    </div>
-                    <form class="box-content">
+                            </div>
+                            <form class="box-content">
                                         <textarea name="post_content" placeholder="Post Content..." title="Content post to Facebook (63206 max)" rows="3" maxlength="63206" class="input-block-level"></textarea>
-                      <!-- facebook limits-->
-                      <div class="help-block">The maximium content length is 63206, which is limited by Facebook.</div>
-                    </form>
-                  </div>
-                  <div id="t_send_email" class="tpl">
-                    <div class="box-header well">
-                      <h4>Send Email</h4>
+                              <div class="help-block">The maximium content length is 63206, which is limited by Facebook.</div>
+                            </form>
+                          </div>
+                          <div id="t_send_email" class="tpl">
+                            <div class="box-header well">
+                              <h4>Send Email</h4>
                                         <div class="box-icon">
-                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
-                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                          <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                          <button class="btn btn-close btn-round icon-close"></button>
                                         </div>
-                    </div>
-                    <form class="box-content">
-                      <div class="input-prepend input-block-level"><span class="add-on">To</span>
-                        <input name="email_to" title="Send To" type="text" placeholder="email_1@example.com; email_2@example.com" class="span11">
-                      </div>
-                      <textarea name="email_content" placeholder="Email Content..." title="Content for email (1000 max)" rows="5" maxlength="1000" class="input-block-level"></textarea>
-                    </form>
-                  </div>
-                  <div id="t_track_multi_social_media" class="tpl">
-                    <div class="box-header well">
-                      <h4>Track Multiple Social Media</h4>
+                            </div>
+                            <form class="box-content">
+                              <div class="input-prepend input-block-level"><span class="add-on">To</span>
+                                <input name="email_to" title="Send To" type="text" placeholder="email_1@example.com; email_2@example.com" class="span11">
+                              </div>
+                              <textarea name="email_content" placeholder="Email Content..." title="Content for email (1000 max)" rows="5" maxlength="1000" class="input-block-level"></textarea>
+                            </form>
+                          </div>
+                          <div id="t_track_multi_social_media" class="tpl">
+                            <div class="box-header well">
+                              <h4>Track Multiple Social Media</h4>
                                         <div class="box-icon">
-                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
-                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                          <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                          <button class="btn btn-close btn-round icon-close"></button>
                                         </div>
-                    </div>
-                    <form class="box-content">
+                            </div>
+                            <form class="box-content">
                                         <div data-toggle="buttons-checkbox" class="btn-group">
                                           <button type="button" value="twitter" class="btn active">Twitter</button>
                                           <button type="button" value="facebook" class="btn active">Facebook</button>
                                         </div>track options
-                    </form>
-                  </div>
-                  <div id="t_track_email" class="tpl">
-                    <div class="box-header well">
-                      <h4>Track Email</h4>
+                            </form>
+                          </div>
+                          <div id="t_track_email" class="tpl">
+                            <div class="box-header well">
+                              <h4>Track Email</h4>
                                         <div class="box-icon">
-                                          <button class="btn btn-minimize btn-round"><i class="icon icon-up-open"></i></button>
-                                          <button class="btn btn-close btn-round"><i class="icon icon-close"></i></button>
+                                          <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                          <button class="btn btn-close btn-round icon-close"></button>
                                         </div>
-                    </div>
-                    <form class="box-content">track email options</form>
+                            </div>
+                            <form class="box-content">track email options</form>
+                          </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+              <button class="btn btn-primary btn-save">Save</button>
+            </div>
+          </div>
+          <div id="link_editor" aria-labelledby="link_editor_title" aria-hidden="true" class="modal hide fade">
+            <div class="modal-header">
+              <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+              <h3 id="link_editor_title">Link Editor</h3>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="control-group">
+                  <label for="link_title" class="control-label">Title</label>
+                  <div class="controls">
+                    <input id="link_title" type="text" name="title" placeholder="Node Name">
                   </div>
                 </div>
-              </div>
-              <div class="modal-footer">
-                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
-                <button data-action="save" class="btn btn-primary">Save</button>
-              </div>
-            </div>
-            <div id="link_editor" aria-labelledby="link_editor_title" aria-hidden="true" class="modal hide fade">
-              <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
-                <h3 id="link_editor_title">Link Editor</h3>
-              </div>
-              <div class="modal-body">
-                <form class="form-horizontal">
-                  <div class="control-group">
-                    <label for="link_title" class="control-label">Title</label>
-                    <div class="controls">
-                      <input id="link_title" type="text" name="title" placeholder="Node Name">
-                    </div>
+                <div class="control-group">
+                  <label for="link_name" class="control-label">Name</label>
+                  <div class="controls">
+                    <input id="link_name" type="text" name="name" placeholder="link_name">
                   </div>
-                  <div class="control-group">
-                    <label for="link_name" class="control-label">Name</label>
-                    <div class="controls">
-                      <input id="link_name" type="text" name="name" placeholder="link_name">
-                    </div>
+                </div>
+                <div class="control-group">
+                  <label for="link_desc" class="control-label">Description</label>
+                  <div class="controls">
+                    <textarea id="link_desc" name="desc" cols="30" rows="3" placeholder="Description"></textarea>
                   </div>
-                  <div class="control-group">
-                    <label for="link_desc" class="control-label">Description</label>
-                    <div class="controls">
-                      <textarea id="link_desc" name="desc" cols="30" rows="3" placeholder="Description"></textarea>
-                    </div>
-                  </div>
-                </form>
-              </div>
-              <div class="modal-footer">
-                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
-                <button data-action="save" class="btn btn-primary">Save</button>
-              </div>
+                </div>
+              </form>
             </div>
-          </div>
-          <div id="workflow_manager" name="manager" class="active row-fluid inner-frame">
-            <h4>Workflow Manager</h4>
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>
-                    <input type="checkbox" name="select_all">
-                  </th>
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Status</th>
-                  <th>Date created</th>
-                  <th>Date modified</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th>
-                    <input type="checkbox" data-index="0">
-                  </th>
-                  <td>1</td>
-                  <td><a href="#workflow/51447afb4728cb2036cf9ca1">Survey</a></td>
-                  <td>Idle</td>
-                  <td>2013-05-06</td>
-                  <td>2013-05-06</td>
-                </tr>
-                <tr>
-                  <th>
-                    <input type="checkbox" data-index="0">
-                  </th>
-                  <td>2</td>
-                  <td><a href="#workflow/51447afb4728cb2036cf9ca1">Advertise</a></td>
-                  <td>Idle</td>
-                  <td>2013-05-06</td>
-                  <td>2013-05-06</td>
-                </tr>
-                <tr>
-                  <th>
-                    <input type="checkbox" data-index="0">
-                  </th>
-                  <td>3</td>
-                  <td><a href="#workflow/51447afb4728cb2036cf9ca1">Research</a></td>
-                  <td>Idle</td>
-                  <td>2013-05-06</td>
-                  <td>2013-05-06</td>
-                </tr>
-                <tr>
-                  <th>
-                    <input type="checkbox" data-index="0">
-                  </th>
-                  <td>4</td>
-                  <td><a href="#workflow/51447afb4728cb2036cf9ca1">Design</a></td>
-                  <td>Idle</td>
-                  <td>2013-05-06</td>
-                  <td>2013-05-06</td>
-                </tr>
-                <tr>
-                  <th>
-                    <input type="checkbox" data-index="0">
-                  </th>
-                  <td>5</td>
-                  <td><a href="#workflow/51447afb4728cb2036cf9ca1">Temporary</a></td>
-                  <td>Idle</td>
-                  <td>2013-05-06</td>
-                  <td>2013-05-06</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div id="calendar" class="frame container-fluid">
-          <div class="active row-fluid inner-frame">
-            <div class="span2 sidebar">
-              <div class="well">
-                <ul class="sidebar-list nav">
-                  <li class="nav-header">Tasks</li>
-                  <li><a href="#" class="external-event">Empty</a></li>
-                  <li><a href="#" class="external-event">Empty</a></li>
-                </ul>
-                <ul class="sidebar-bottom nav nav-list">
-                  <li class="divider"></li>
-                  <li class="nav-header">Tips</li>
-                  <li class="tips">...</li>
-                </ul>
-              </div>
-            </div>
-            <div class="span10 workspace">
-              <div id="calendar_view" class="content-view"></div>
+            <div class="modal-footer">
+              <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+              <button class="btn btn-primary btn-save">Save</button>
             </div>
           </div>
         </div>
-        <div id="content" class="frame container-fluid">
-          <div class="active row-fluid inner-frame">
-            <div class="span2 sidebar">
-              <div class="well sidebar-nav">
-                <ul class="sidebar-list nav nav-list">
-                  <li class="nav-header">Projects</li>
-                  <li><a href="#">All</a></li>
-                  <li><a href="#">Project 1</a></li>
-                  <li><a href="#">Project 2</a></li>
-                </ul>
-                <ul class="sidebar-bottom nav nav-list">
-                  <li class="divider"></li>
-                  <li class="nav-header">Tips</li>
-                  <li class="tips">...</li>
-                </ul>
-              </div>
-            </div>
-            <div class="span10 workspace">
-              <div id="content_view" class="content-view">
-                <ul class="pull-right">
-                  <li class="btn-group">
-                    <button data-toggle="dropdown" class="btn dropdown-toggle">Sort<b class="caret"></b></button>
-                    <ul class="dropdown-menu">
-                      <li><a href="#">No.</a></li>
-                      <li><a href="#">Name</a></li>
-                      <li><a href="#">Media</a></li>
-                      <li><a href="#">Project</a></li>
-                      <li><a href="#">Action</a></li>
-                      <li><a href="#">Status</a></li>
-                    </ul>
-                  </li>
-                  <li class="btn-group">
-                    <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Action<b class="caret"></b></button>
-                    <ul class="dropdown-menu">
-                      <li><a href="#">View Selected</a></li>
-                      <li><a href="#">Delete Selected</a></li>
-                    </ul>
-                  </li>
-                </ul>
-                <ul class="nav nav-pills">
-                  <li class="active"><a href="#">All</a></li>
-                  <li><a href="#">Page</a></li>
-                  <li><a href="#">Email</a></li>
-                  <li><a href="#">Facebook</a></li>
-                  <li><a href="#">Twitter</a></li>
-                  <li><a href="#">Google+</a></li>
-                </ul>
-                <table class="table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>
-                        <input type="checkbox" name="select_all">
-                      </th>
-                      <th>#</th>
-                      <th>Content Name</th>
-                      <th>Post Media</th>
-                      <th>Project Name</th>
-                      <th>Action Name</th>
-                      <th>Status</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th>
-                        <input type="checkbox" data-index="0">
-                      </th>
-                      <td>1</td>
-                      <td><a href="#">SOMY X100 Project Initialization Page</a></td>
-                      <td>Page</td>
-                      <td>SOMY X100</td>
-                      <td>Project Init. Page</td>
-                      <td>Posted</td>
-                      <td>V E D</td>
-                    </tr>
-                    <tr>
-                      <th>
-                        <input type="checkbox" data-index="0">
-                      </th>
-                      <td>2</td>
-                      <td><a href="#">SOMY X100 Project Initialization Facebook Post</a></td>
-                      <td>Facebook</td>
-                      <td>SOMY X100</td>
-                      <td>Project Init. Post</td>
-                      <td>Posted</td>
-                      <td>V E D</td>
-                    </tr>
-                    <tr>
-                      <th>
-                        <input type="checkbox" data-index="0">
-                      </th>
-                      <td>3</td>
-                      <td><a href="#">SOMY X100 Project Initialization Twitter Post</a></td>
-                      <td>Twitter</td>
-                      <td>SOMY X100</td>
-                      <td>Project Init. Post</td>
-                      <td>Posted</td>
-                      <td>V E D</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div class="pagination">
-                  <ul>
-                    <li><a href="#">Prev</a></li>
-                    <li><a href="#">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                    <li><a href="#">Next</a></li>
-                  </ul>
-                </div>
-              </div>
+        <div id="workflow_manager" name="manager" class="active row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well">
+              <ul class="sidebar-list nav nav-list">
+                <li class="nav-header">Templates</li>
+                <li><a href="#workflow:new">Empty Workflow</a></li>
+                <li class="nav-header">Workflows</li>
+              </ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">
+                  Click a Template above
+                  to Add a new Workflow based on the selected template.
+                </li>
+              </ul>
             </div>
           </div>
-        </div>
-        <div id="report" class="frame container-fluid">
-          <div class="active row-fluid inner-frame">
-            <div class="span2 sidebar">
-              <div class="well sidebar-nav">
-                <ul class="sidebar-list nav nav-list">
-                  <li class="nav-header">Projects</li>
-                  <li><a href="#">All</a></li>
-                  <li><a href="#">Project 1</a></li>
-                  <li><a href="#">Project 2</a></li>
-                </ul>
-                <ul class="sidebar-bottom nav nav-list">
-                  <li class="divider"></li>
-                  <li class="nav-header">Tips</li>
-                  <li class="tips">...</li>
-                </ul>
-              </div>
-            </div>
-            <div class="span10 workspace">
-              <div id="report_view" class="content-view">
-                <div class="row-fluid">
-                  <div class="well">
-                    <h2>Report 1</h2>
-                    <p>
-                      Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-                      commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-                      Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-                    </p>
-                    <p><a href="#report/1" class="btn">View details »</a></p>
-                  </div>
-                </div>
-                <div class="row-fluid">
-                  <div class="well">
-                    <h2>Report 2</h2>
-                    <p>
-                      Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-                      commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-                      Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-                    </p>
-                    <p><a href="#report/2" class="btn">View details »</a></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="report_viewer" aria-labelledby="report_viewer_title" aria-hidden="true" class="modal modal-full hide fade">
-              <div class="modal-header">
-                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
-                <ul class="nav nav-tabs">
-                  <li><a href="">
-                      Product Design
-                      Report Detail</a></li>
-                  <li><a href="">Evaluated Result</a></li>
-                  <li class="active"><a href="">Evaluated Charts</a></li>
-                  <li><a href="">Feedback Collection</a></li>
-                  <li><a href="">Submitted Files</a></li>
-                </ul>
-              </div>
-              <div class="modal-body">
-                <div class="span12">
-                  <div>
-                    <h1>Pie Chart</h1>
-                    <canvas id="chart1" width="800" height="400"></canvas>
-                  </div>
-                  <div>
-                    <h1>Line Chart</h1>
-                    <canvas id="chart2" width="800" height="400"></canvas>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="config" class="frame container-fluid">
-          <div class="active row-fluid inner-frame">
-            <div class="span2 sidebar">
-              <div class="well sidebar-nav">
-                <ul class="sidebar-list nav nav-list">
-                  <li class="nav-header">Configuration</li>
-                  <li><a href="#config/tenant">Tenant Profile</a></li>
-                  <li class="nav-header">Members Management</li>
-                  <li><a href="#config/users">Member List</a></li>
-                  <li class="nav-header">Members of Projects</li>
-                  <li><a href="#config/users/project1">Project 1</a></li>
-                  <li><a href="#config/users/project2">Project 2</a></li>
-                </ul>
-                <ul class="sidebar-bottom nav nav-list">
-                  <li class="divider"></li>
-                  <li class="nav-header">Tips</li>
-                  <li class="tips">...</li>
-                </ul>
-              </div>
-            </div>
-            <div class="span10 workspace">
-              <div id="tenant_profile" name="profile" class="inner-frame active">
-                <form class="form-horizontal">
-                  <div class="control-group">
-                    <label for="tenant_id" class="control-label">ID</label>
-                    <div class="controls">
-                      <input id="tenant_id" type="text" placeholder="tenant_id" name="id" maxlength="64" class="input-large uneditable-input">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="tenant_name" class="control-label">Name</label>
-                    <div class="controls">
-                      <input id="tenant_name" type="text" placeholder="Organization Name" name="name" maxlength="255" class="input-large">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="tenant_desc" class="control-label">Description</label>
-                    <div class="controls">
-                      <textarea id="tenant_desc" placeholder="Description about the organization ..." rows="4" name="desc"></textarea>
-                    </div>
-                  </div>
-                  <hr>
-                  <div class="control-group">
-                    <label for="contact_name" class="control-label">Contact Name</label>
-                    <div class="controls">
-                      <input id="contact_name" type="text" name="contact" placeholder="Contact Name" class="input-large">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="contact_email" class="control-label">E-mail</label>
-                    <div class="controls">
-                      <input id="contact_email" type="text" name="email" placeholder="contact@email.org" class="input-large">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="contact_tel" class="control-label">Tel #</label>
-                    <div class="controls">
-                      <input id="contact_tel" type="text" name="tel" placeholder="(408) 888-8888" class="input-large">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="contact_fax" class="control-label">Fax</label>
-                    <div class="controls">
-                      <input id="contact_fax" type="text" name="fax" placeholder="(408) 888-9999" class="input-large">
-                    </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="contact_addr" class="control-label">Address</label>
-                    <div class="controls">
-                      <input id="contact_addr" type="text" name="addr" placeholder="Contact Street Address" class="input-xxlarge">
-                    </div>
-                  </div>
-                  <div class="form-actions">
-                    <input type="submit" value="Update" class="btn btn-primary">
-                    <input type="reset" value="Reset" class="btn">
-                  </div>
-                </form>
-              </div>
-              <div id="user_manager" name="manager" class="inner-frame">Member List (support filter)</div>
-            </div>
-          </div>
-        </div>
-        <div id="profile" class="frame container-fluid">
-          <div class="active row-fluid inner-frame">
-            <h4>User Profile</h4>
+          <div class="span10 workspace">
+            <ul>
+              <li class="btn-group grid-filter"></li>
+              <li class="btn-group pull-right">
+                <button class="btn">Reload</button>
+                <button disabled class="btn btn-danger">Delete</button>
+              </li>
+            </ul>
+            <table class="grid-table"></table>
+            <div class="grid-paginator"></div>
           </div>
         </div>
       </div>
+      <div id="calendar" class="frame container-fluid">
+        <div class="active row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well">
+              <ul class="sidebar-list nav">
+                <li class="nav-header">Tasks</li>
+                <li><a href="#" class="external-event">Empty</a></li>
+                <li><a href="#" class="external-event">Empty</a></li>
+              </ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">...</li>
+              </ul>
+            </div>
+          </div>
+          <div class="span10 workspace">
+            <div id="calendar_view" class="content-view"></div>
+          </div>
+        </div>
+      </div>
+      <div id="content" class="frame container-fluid">
+        <div class="active row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well sidebar-nav">
+              <ul class="sidebar-list nav nav-list">
+                <li class="nav-header">Projects</li>
+                <li><a href="#">All</a></li>
+                <li><a href="#">Project 1</a></li>
+                <li><a href="#">Project 2</a></li>
+              </ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">...</li>
+              </ul>
+            </div>
+          </div>
+          <div class="span10 workspace">
+            <div id="content_view" class="content-view">
+              <ul class="pull-right">
+                <li class="btn-group">
+                  <button data-toggle="dropdown" class="btn dropdown-toggle">Sort<b class="caret"></b></button>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">No.</a></li>
+                    <li><a href="#">Name</a></li>
+                    <li><a href="#">Media</a></li>
+                    <li><a href="#">Project</a></li>
+                    <li><a href="#">Action</a></li>
+                    <li><a href="#">Status</a></li>
+                  </ul>
+                </li>
+                <li class="btn-group">
+                  <button data-toggle="dropdown" class="btn btn-primary dropdown-toggle">Action<b class="caret"></b></button>
+                  <ul class="dropdown-menu">
+                    <li><a href="#">View Selected</a></li>
+                    <li><a href="#">Delete Selected</a></li>
+                  </ul>
+                </li>
+              </ul>
+              <ul class="nav nav-pills">
+                <li class="active"><a href="#">All</a></li>
+                <li><a href="#">Page</a></li>
+                <li><a href="#">Email</a></li>
+                <li><a href="#">Facebook</a></li>
+                <li><a href="#">Twitter</a></li>
+                <li><a href="#">Google+</a></li>
+              </ul>
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>
+                      <input type="checkbox" name="select_all">
+                    </th>
+                    <th>#</th>
+                    <th>Content Name</th>
+                    <th>Post Media</th>
+                    <th>Project Name</th>
+                    <th>Action Name</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>
+                      <input type="checkbox" data-index="0">
+                    </th>
+                    <td>1</td>
+                    <td><a href="#">SOMY X100 Project Initialization Page</a></td>
+                    <td>Page</td>
+                    <td>SOMY X100</td>
+                    <td>Project Init. Page</td>
+                    <td>Posted</td>
+                    <td>V E D</td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <input type="checkbox" data-index="0">
+                    </th>
+                    <td>2</td>
+                    <td><a href="#">SOMY X100 Project Initialization Facebook Post</a></td>
+                    <td>Facebook</td>
+                    <td>SOMY X100</td>
+                    <td>Project Init. Post</td>
+                    <td>Posted</td>
+                    <td>V E D</td>
+                  </tr>
+                  <tr>
+                    <th>
+                      <input type="checkbox" data-index="0">
+                    </th>
+                    <td>3</td>
+                    <td><a href="#">SOMY X100 Project Initialization Twitter Post</a></td>
+                    <td>Twitter</td>
+                    <td>SOMY X100</td>
+                    <td>Project Init. Post</td>
+                    <td>Posted</td>
+                    <td>V E D</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="pagination">
+                <ul>
+                  <li><a href="#">Prev</a></li>
+                  <li><a href="#">1</a></li>
+                  <li><a href="#">2</a></li>
+                  <li><a href="#">3</a></li>
+                  <li><a href="#">Next</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="report" class="frame container-fluid">
+        <div class="active row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well sidebar-nav">
+              <ul class="sidebar-list nav nav-list">
+                <li class="nav-header">Projects</li>
+                <li><a href="#">All</a></li>
+                <li><a href="#">Project 1</a></li>
+                <li><a href="#">Project 2</a></li>
+              </ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">...</li>
+              </ul>
+            </div>
+          </div>
+          <div class="span10 workspace">
+            <div id="report_view" class="content-view">
+              <div class="row-fluid">
+                <div class="well">
+                  <h2>Report 1</h2>
+                  <p>
+                    Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+                    commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+                    Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+                  </p>
+                  <p><a href="#report/1" class="btn">View details »</a></p>
+                </div>
+              </div>
+              <div class="row-fluid">
+                <div class="well">
+                  <h2>Report 2</h2>
+                  <p>
+                    Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
+                    commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
+                    Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
+                  </p>
+                  <p><a href="#report/2" class="btn">View details »</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="report_viewer" aria-labelledby="report_viewer_title" aria-hidden="true" class="modal modal-full hide fade">
+            <div class="modal-header">
+              <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+              <ul class="nav nav-tabs">
+                <li><a href="">
+                    Product Design
+                    Report Detail</a></li>
+                <li><a href="">Evaluated Result</a></li>
+                <li class="active"><a href="">Evaluated Charts</a></li>
+                <li><a href="">Feedback Collection</a></li>
+                <li><a href="">Submitted Files</a></li>
+              </ul>
+            </div>
+            <div class="modal-body">
+              <div class="span12">
+                <div>
+                  <h1>Pie Chart</h1>
+                  <canvas id="chart1" width="800" height="400"></canvas>
+                </div>
+                <div>
+                  <h1>Line Chart</h1>
+                  <canvas id="chart2" width="800" height="400"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="config" class="frame container-fluid">
+        <div class="active row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well sidebar-nav">
+              <ul class="sidebar-list nav nav-list">
+                <li class="nav-header">Configuration</li>
+                <li><a href="#config/tenant">Tenant Profile</a></li>
+                <li class="nav-header">Members Management</li>
+                <li><a href="#config/users">Member List</a></li>
+                <li class="nav-header">Members of Projects</li>
+                <li><a href="#config/users/project1">Project 1</a></li>
+                <li><a href="#config/users/project2">Project 2</a></li>
+              </ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">...</li>
+              </ul>
+            </div>
+          </div>
+          <div class="span10 workspace">
+            <div id="tenant_profile" name="profile" class="inner-frame active">
+              <form class="form-horizontal">
+                <div class="control-group">
+                  <label for="tenant_id" class="control-label">ID</label>
+                  <div class="controls">
+                    <input id="tenant_id" type="text" placeholder="tenant_id" name="id" maxlength="64" class="input-large uneditable-input">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="tenant_name" class="control-label">Name</label>
+                  <div class="controls">
+                    <input id="tenant_name" type="text" placeholder="Organization Name" name="name" maxlength="255" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="tenant_desc" class="control-label">Description</label>
+                  <div class="controls">
+                    <textarea id="tenant_desc" placeholder="Description about the organization ..." rows="4" name="desc"></textarea>
+                  </div>
+                </div>
+                <hr>
+                <div class="control-group">
+                  <label for="contact_name" class="control-label">Contact Name</label>
+                  <div class="controls">
+                    <input id="contact_name" type="text" name="contact" placeholder="Contact Name" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_email" class="control-label">E-mail</label>
+                  <div class="controls">
+                    <input id="contact_email" type="text" name="email" placeholder="contact@email.org" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_tel" class="control-label">Tel #</label>
+                  <div class="controls">
+                    <input id="contact_tel" type="text" name="tel" placeholder="(408) 888-8888" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_fax" class="control-label">Fax</label>
+                  <div class="controls">
+                    <input id="contact_fax" type="text" name="fax" placeholder="(408) 888-9999" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_addr" class="control-label">Address</label>
+                  <div class="controls">
+                    <input id="contact_addr" type="text" name="addr" placeholder="Contact Street Address" class="input-xxlarge">
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <input type="submit" value="Update" class="btn btn-primary">
+                  <input type="reset" value="Reset" class="btn">
+                </div>
+              </form>
+            </div>
+            <div id="user_manager" name="manager" class="inner-frame">Member List (support filter)</div>
+          </div>
+        </div>
+      </div>
+      <div id="profile" class="frame container-fluid">
+        <div class="active row-fluid inner-frame">
+          <h4>User Profile</h4>
+        </div>
+      </div>
     </div>
-    <script data-main="js/main" src="js/lib/require.js"></script>
-  </body>
-</head>
+  </div>
+  <div id="t_action_buttons" class="tpl">
+    <button title="Edit" class="btn btn-primary btn-round icon-pencil"></button>
+    <button title="Delete" class="btn btn-danger btn-round icon-close"></button>
+  </div>
+  <script data-main="js/main" src="js/lib/require.js"></script>
+</body>

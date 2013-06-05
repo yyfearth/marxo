@@ -14,6 +14,17 @@
         | or Drag a Node from Sidebar to Workflow Editor
         | to Add a new Node.
 .span10.workspace
+  h4.editable-title.pull-left Editable Header
+  span.editable-desc Editable Description
+  .pull-right.btn-group
+    a.btn(href='#workflow/mgr') Back to List
+    button.btn.btn-danger Reset
+    button.btn.btn-primary Save
   #workflow_view.content-view
+  div.tpl#t_popover
+    .popover-desc {desc}
+    .popover-buttons
+      button.btn.btn-danger.btn-delete.pull-left Delete
+      button.btn.btn-primary.btn-edit Edit
 include editor/node_editor
 include editor/link_editor

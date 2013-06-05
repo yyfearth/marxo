@@ -1,82 +1,22 @@
-h4 Workflow Manager
-table.table.table-striped.table-hover
-  thead
-    tr
-      th
-        input(type='checkbox', name='select_all')
-      th
-        | #
-      th
-        | Name
-      th
-        | Status
-      th
-        | Date created
-      th
-        | Date modified
-  tbody
-    tr
-      th
-        input(type='checkbox', data-index='0')
-      td
-        | 1
-      td
-        a(href='#workflow/51447afb4728cb2036cf9ca1') Survey
-      td
-        | Idle
-      td
-        | 2013-05-06
-      td
-        | 2013-05-06
-    tr
-      th
-        input(type='checkbox', data-index='0')
-      td
-        | 2
-      td
-        a(href='#workflow/51447afb4728cb2036cf9ca1') Advertise
-      td
-        | Idle
-      td
-        | 2013-05-06
-      td
-        | 2013-05-06
-    tr
-      th
-        input(type='checkbox', data-index='0')
-      td
-        | 3
-      td
-        a(href='#workflow/51447afb4728cb2036cf9ca1') Research
-      td
-        | Idle
-      td
-        | 2013-05-06
-      td
-        | 2013-05-06
-    tr
-      th
-        input(type='checkbox', data-index='0')
-      td
-        | 4
-      td
-        a(href='#workflow/51447afb4728cb2036cf9ca1') Design
-      td
-        | Idle
-      td
-        | 2013-05-06
-      td
-        | 2013-05-06
-    tr
-      th
-        input(type='checkbox', data-index='0')
-      td
-        | 5
-      td
-        a(href='#workflow/51447afb4728cb2036cf9ca1') Temporary
-      td
-        | Idle
-      td
-        | 2013-05-06
-      td
-        | 2013-05-06
+.span2.sidebar
+  .well
+    ul.sidebar-list.nav.nav-list
+      li.nav-header Templates
+      li
+        a(href='#workflow:new') Empty Workflow
+      li.nav-header Workflows
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips
+        | Click a Template above
+        | to Add a new Workflow based on the selected template.
+.span10.workspace
+  ul
+    li.btn-group.grid-filter
+    li.btn-group.pull-right
+      button.btn Reload
+      button.btn.btn-danger(disabled) Delete
+
+  table.grid-table
+  .grid-paginator
