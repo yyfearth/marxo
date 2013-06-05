@@ -129,19 +129,19 @@ define 'console', ['lib/common'], (async) ->
       console.log 'box close button clicked'
       return
     minimize: ->
-      btn_min_icon = find '.btn-minimize i', @el
-      content = find '.box-content', @el
+      btn_min = @btn_min or find '.btn-minimize', @el
+      content = @contentEl or find '.box-content', @el
       # console.log btn_min_icon, content
-      if btn_min_icon.classList.contains 'icon-up-open'
+      if btn_min.classList.contains 'icon-up-open'
         # minimize
         content.classList.add 'minimized'
-        btn_min_icon.classList.remove 'icon-up-open'
-        btn_min_icon.classList.add 'icon-down-open'
+        btn_min.classList.remove 'icon-up-open'
+        btn_min.classList.add 'icon-down-open'
       else
         # restore
         content.classList.remove 'minimized'
-        btn_min_icon.classList.remove 'icon-down-open'
-        btn_min_icon.classList.add 'icon-up-open'
+        btn_min.classList.remove 'icon-down-open'
+        btn_min.classList.add 'icon-up-open'
       return
 
   class ModalDialogView extends View

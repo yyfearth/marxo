@@ -6046,6 +6046,22 @@ body {
 .tpl {
   display: none;
 }
+.btn-round {
+  display: inline-block;
+  width: 27px;
+  height: 27px;
+  border-radius: 40px;
+  line-height: 18px;
+  vertical-align: middle;
+  font-size: 14px;
+  clear: none;
+  float: left;
+  margin: -1px 2px 1px 2px;
+  text-align: center;
+}
+.btn-round:before {
+  margin-left: -6px;
+}
 .box {
   border: 1px solid #DEDEDE;
   border-radius: 3px;
@@ -6085,22 +6101,6 @@ body {
 }
 .box .box-icon {
   float: right;
-}
-.box .box-icon .btn-round {
-  display: inline-block;
-  width: 27px;
-  height: 27px;
-  border-radius: 40px;
-  line-height: 18px;
-  vertical-align: middle;
-  font-size: 14px;
-  clear: none;
-  float: left;
-  margin: -1px 2px 1px 2px;
-  text-align: center;
-}
-.box .box-icon .btn-round .icon {
-  margin-left: -9px;
 }
 .box .box-content {
   padding: 10px;
