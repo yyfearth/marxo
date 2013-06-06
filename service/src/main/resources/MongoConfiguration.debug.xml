@@ -9,4 +9,9 @@
         <constructor-arg index="0" type="org.springframework.data.mongodb.MongoDbFactory" ref="mongoDbFactory"/>
     </bean>
 
+    <!--Data Access Objects-->
+    <bean id="workflowDao" class="marxo.dao.WorkflowDao"/>
+    <bean id="nodeDao" class="marxo.dao.NodeDao"/>
+    <bean id="linkDao" class="marxo.dao.LinkDao"/>
+
 </beans>
