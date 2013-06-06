@@ -11,6 +11,7 @@ FrameView
 InnerFrameView
 ManagerView
 ModalDialogView
+FormDialogView
 }, {
 # Tenant
 # SharedWorkflows
@@ -39,17 +40,20 @@ Node
 TenantLinks
 TenantLink
 }) ->
+
+  ## Workflow Main Frame
   class WorkflowFrameView extends FrameView
     initialize: (options) ->
       super options
       @editor = new WorkflowEditorView el: '#workflow_editor', parent: @
       @manager = new WorkflowManagerView el: '#workflow_manager', parent: @
-      return
+      @
     open: (name) ->
       switch name
         when 'new'
           console.log 'show workflow editor with create mode'
-          @switchTo @manager # TODO: show create dialog in @manager
+          @switchTo @manager
+          @manager.create name
         when 'mgr'
           console.log 'show workflow mgr'
           @switchTo @manager
@@ -61,7 +65,48 @@ TenantLink
           else unless @manager.rendered
             # 1st time default frame
             @switchTo @manager
-      return
+      @
+
+  ## Workflow Manager
+
+  class WorkflowManagerView extends ManagerView
+    collection: new TenantWorkflows
+    initialize: (options) ->
+      super options
+      @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
+      # temp
+      @$el.find('#wf_template_list').on 'click', '.wf_tempate a', (e) =>
+        e.preventDefault()
+        wf = e.target.href.match /#workflow:(\w+)/
+        console.log 'wf template clicked', wf
+        @create wf[1] if wf.length is 2
+        false
+      @
+    create: (template) ->
+      template = '' if not template or /^(?:new|empty)$/i.test template
+      @creator.popup template: template, (action, data) =>
+        if action is 'save'
+          console.log 'create new wf:', data
+          @collection.create data
+      @
+
+  class WorkflowCreatorView extends FormDialogView
+    el: '#workflow_creator'
+    initialize: (options) ->
+      super options
+      @$el.on 'hidden', -> location.hash = '#workflow/mgr'
+      @
+    popup: (data, callback) ->
+      super data, callback
+      @fill data
+      @
+    save: ->
+      @data = @read()
+      @callback 'save'
+      @hide true
+      @
+
+  ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
   class WorkflowEditorView extends InnerFrameView
     initialize: (options) ->
@@ -73,7 +118,7 @@ TenantLink
       @nodeList = new NodeListView
         el: find('#node_list', @el)
         workflowView: @view
-      return
+      @
     load: (id) ->
       @fetch id, (err, wf) =>
         if wf
@@ -81,7 +126,7 @@ TenantLink
         else
           @view.clear()
       #TODO: load node list
-      return
+      @
     render: ->
       @nodeList.render()
       @
@@ -104,9 +149,9 @@ TenantLink
           else
             console.log 'workflow', wf
             callback? null, wf
-          return
         return
       return
+      @
 
   class NodeListView extends View
     initialize: (options) ->
@@ -118,7 +163,7 @@ TenantLink
           e.preventDefault()
           @workflowView.addNode el.dataset.node
           false
-        return
+      return
     render: ->
       @el.innerHTML = ''
       items = document.createDocumentFragment()
@@ -144,46 +189,26 @@ TenantLink
       li.appendChild a
       li
 
-  class WorkflowManagerView extends ManagerView
-    collection: new TenantWorkflows
-
-  class EditorView extends ModalDialogView
-    events:
-      'click button.btn-save': 'save'
-    initialize: (options) ->
-      super options
-      @form = find 'form', @el
-      return
+  class EditorView extends FormDialogView
     popup: (data, callback) ->
+      throw 'data must be an model entity' unless data instanceof Entity
+      # already set @data = data
       super data, callback
-      @fill data
-      return
-    fill: (data) ->
-      @_attributes = ({})
-      for name, value of data.attributes
-        input = @form[name]
-        if input?.name is name and input.value?
-          input.value = value
-          @_attributes[name] = value
-      return
-    save: -> # should be customized, e.g. ok, save, export
-      if @_attributes?
-        for name, value of @_attributes
-          input = @form[name]
-          @_attributes[name] = input.value if input.value isnt value
-          @data.set @_attributes
+      @fill data.attributes
+      @
+    save: ->
+      @data.set @read()
       @callback 'save'
       @hide true
-      return
+      @
     reset: -> # called after close
       super()
       @form.reset()
-      return
+      @
 
   class NodeEditorView extends EditorView
     el: '#node_editor'
     events:
-      'click button.btn-save': 'save'
       'click a.action-thumb': '_addAction'
     initialize: (options) ->
       super options
@@ -196,7 +221,7 @@ TenantLink
       $(@actionsEl).sortable
         delay: 150
         distance: 15
-      return
+      @
     _fixStyle: -> # make sure the top of action box will below the title, name and desc
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
       return
@@ -215,20 +240,20 @@ TenantLink
       ,
         type: 'send_email'
       ].forEach @addAction.bind @
-      return
+      @
     save: ->
       console.log 'save'
       # save actions
       # TODO: read all actions and check
       # save the node
       super()
-      return
+      @
     reset: ->
       super()
       @actions = []
       @actionViews = []
       @actionsEl.innerHTML = ''
-      return
+      @
     addAction: (model) ->
       actionView = new ActionView model: model, parent: @, container: @actionsEl
       actionView.on 'close', @removeAction.bind @
@@ -241,7 +266,7 @@ TenantLink
       return if idx < 0
       @actions.splice idx, 1
       @actionViews.splice idx, 1
-      return
+      @
 
   class ActionView extends BoxView
     @tpl: (type) -> # load form html template
@@ -265,7 +290,7 @@ TenantLink
       @model = options.model
       @type = options.model.type or options.type
       throw 'need action model and type' unless @model and @type
-      return
+      @
     close: ->
       @el.parentNode.removeChild @el
       model = @model
@@ -273,7 +298,7 @@ TenantLink
       model.type = null
       model.name = null
       model.data = null
-      return
+      @
     render: ->
       tpl = @constructor.tpl @type
       @containerEl.appendChild @el
@@ -295,7 +320,7 @@ TenantLink
         #form[key].value = value
         $(el).val value if el?.getAttribute('name') is name
       # TODO: support customized controls
-      return
+      @
     read: (data) -> # read form the form to get a json data
       throw 'cannot find the form, may not rendered yet' unless @form
       data ?= ({})
@@ -309,13 +334,13 @@ TenantLink
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
-    initialize: (options) ->
-      super options
-      return
-    popup: (data, callback) ->
-      super data, callback
+    #initialize: (options) ->
+    #  super options
+    #popup: (data, callback) ->
+    #  super data, callback
+    #  @
 
-      return
+  ## Workflow Views (Workflow/Node/Link View)
 
   class WorkflowView extends View
     jsPlumbDefaults:
@@ -361,7 +386,7 @@ TenantLink
       @linkEditor = options.linkEditor
       jsPlumb.importDefaults @jsPlumbDefaults
       @render()
-      return
+      @
     _bind: ->
       view = @
       # link label

@@ -154,13 +154,12 @@ define 'console', ['lib/common'], (async) ->
         backdrop: 'static'
       @$el.on 'hidden', @callback.bind @
       return
-    popup: (data, callback) ->
-      @data = data
+    popup: (@data, callback) ->
       @_callback = callback
       @show true
     callback: (action = 'cancel') ->
       return unless @_callback?
-      @_callback? action, @data
+      @_callback? action, @data, @
       @reset()
       return
     reset: ->
@@ -177,6 +176,55 @@ define 'console', ['lib/common'], (async) ->
       @
     hide: (hide = true) ->
       @show not hide
+
+
+  class FormDialogView extends ModalDialogView
+    initialize: (options) ->
+      super options
+      @form = find 'form', @el
+      @form.onsubmit = (e) =>
+        e.preventDefault()
+        @save()
+        false
+      submit_btn = find '[type="submit"]', @form
+      unless submit_btn?
+        submit_btn = document.createElement 'input'
+        submit_btn.type = 'submit'
+        submit_btn.style.display = 'none'
+        @form.appendChild submit_btn
+      @_submit_btn = submit_btn
+      find('button.btn-save', @el)?.onclick = @submit.bind @
+      @
+    submit: ->
+      @_submit_btn.click()
+      @
+    #popup: (data, callback) ->
+    #  # already set @data = data
+    #  super data, callback
+    #  @fill data
+    #  @
+    fill: (attributes) ->
+      @_attributes = ({})
+      for name, value of attributes
+        input = @form[name]
+        if input?.name is name and input.value?
+          input.value = value
+          @_attributes[name] = value
+      @
+    read: ->
+      attributes = @_attributes
+      if attributes? then for input in @form.elements
+        name = input.getAttribute 'name'
+        attributes[name] = input.value if name and (input.value or attributes[name]?)
+      attributes
+    #save: ->
+    #  @callback 'save'
+    #  @hide true
+    #  @
+    reset: -> # called after close
+      super()
+      @form.reset()
+      @
 
   class SignInView extends View
     el: '#signin'
@@ -231,7 +279,8 @@ define 'console', ['lib/common'], (async) ->
     render: ->
       @formatter ?=
         fromRaw: =>
-          @model._seq + 1
+          seq = @model._seq
+          if seq? then seq + 1 else ''
       super()
 
   class LinkCell extends Backgrid.UriCell
@@ -459,6 +508,7 @@ define 'console', ['lib/common'], (async) ->
   InnerFrameView
   ManagerView
   ModalDialogView
+  FormDialogView
   SignInView
   Entity
   ManagerCollection

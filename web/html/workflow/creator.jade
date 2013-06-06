@@ -1,0 +1,26 @@
+#workflow_creator.modal.hide.fade(aria-labelledby='wf_creator_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#wf_creator_title Create Workflow
+  .modal-body
+    form.form-horizontal
+      .control-group
+        label.control-label(for='wf_template') Template
+        .controls
+          select#wf_template(name='template')
+            option(value='') Empty Workflow
+      .control-group
+        label.control-label(for='wf_title') Title
+        .controls
+          input#wf_title(type='text', name='title', placeholder='Workflow Name', required)
+      .control-group
+        label.control-label(for='wf_name') Name
+        .controls
+          input#wf_name(type='text', name='name', placeholder='wf_name', required)
+      .control-group
+        label.control-label(for='wf_desc') Description
+        .controls
+          textarea#wf_desc(name='desc', cols='30', rows='3', placeholder='Description')
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Create
