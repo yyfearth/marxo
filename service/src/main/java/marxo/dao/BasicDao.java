@@ -1,63 +1,69 @@
 package marxo.dao;
 
-import com.github.jmkgreen.morphia.dao.BasicDAO;
-import com.github.jmkgreen.morphia.query.Query;
-import com.github.jmkgreen.morphia.query.QueryResults;
-import marxo.data.MongoDbConnector;
+import marxo.bean.BasicEntity;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.BasicQuery;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
-/**
- * @param <E> Entity type
- */
-public class BasicDao<E> extends BasicDAO<E, ObjectId> {
+public abstract class BasicDao<E extends BasicEntity> {
+
+	@Autowired
+	MongoTemplate mongoTemplate;
+	Class<E> clazz;
 
 	public BasicDao() {
-		super(MongoDbConnector.getDatastore());
+		//noinspection unchecked
+		Class<E> clazz = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		this.clazz = clazz;
 	}
 
 	public boolean exists(ObjectId id) {
-		return exists("_id", id);
+		return mongoTemplate.findById(id, clazz) != null;
 	}
 
-	public boolean exists(String id) {
-		return exists(new ObjectId(id));
+	public void count(Query query) {
+		mongoTemplate.count(query, clazz);
+	}
+
+	public void count() {
+		mongoTemplate.count(new BasicQuery(""), clazz);
+	}
+
+	public void insert(E entity) {
+		mongoTemplate.insert(entity);
+	}
+
+	public void insert(List<E> entities) {
+		mongoTemplate.insert(entities, clazz);
 	}
 
 	public List<E> findAll() {
-		QueryResults<E> entities = super.find();
-		return entities.asList();
+		return mongoTemplate.findAll(clazz);
 	}
 
-	public List<E> findBy(Query<E> query) {
-		QueryResults<E> entities = super.find(query);
-		return entities.asList();
+	public E get(ObjectId id) {
+		return mongoTemplate.findById(id, clazz);
 	}
 
-	public List<E> findBy(String condition, Object value) {
-		return findBy(createQuery().filter(condition, value));
+	public List<E> find(Query query) {
+		return mongoTemplate.find(query, clazz);
 	}
 
-	public List<E> findBy(String field, ObjectId id) {
-		return findBy(createQuery().field(field).equal(id));
+	public void save(E entity) {
+		mongoTemplate.save(entity);
 	}
 
-	public List<E> findBy(String field, String id) {
-		return findBy(createQuery().field(field).equal(new ObjectId(id)));
+	public E delete(E entity) {
+		return deleteById(entity.getId());
 	}
 
-	public List<E> findBy(String field, Collection<ObjectId> ids) {
-		return findBy(createQuery().field(field).in(ids));
-	}
-
-	public List<E> findBy(String field, String[] ids) {
-		List<ObjectId> idList = new ArrayList<ObjectId>(ids.length);
-		for (String id : ids) {
-			idList.add(new ObjectId(id));
-		}
-		return findBy(createQuery().field(field).in(idList));
+	public E deleteById(ObjectId id) {
+		return mongoTemplate.findAndRemove(Query.query(Criteria.where("id").is(id)), clazz);
 	}
 }

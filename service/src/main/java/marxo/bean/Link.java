@@ -3,14 +3,27 @@ package marxo.bean;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.github.jmkgreen.morphia.annotations.Entity;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Entity(value = "links")
+@Document
 @JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNodeId", "nextNodeId", "condition", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Link extends BasicEntity {
+
+	@JsonProperty("desc")
+	String description;
+	@JsonIgnore
+	ObjectId workflowId;
+	@JsonIgnore
+	List<ObjectId> actionIds;
+	@JsonIgnore
+	ObjectId previousNodeId;
+	@JsonIgnore
+	ObjectId nextNodeId;
+	@JsonIgnore
+	Condition condition;
 
 	public String getDescription() {
 		return description;
@@ -59,19 +72,6 @@ public class Link extends BasicEntity {
 	public void setCondition(Condition condition) {
 		this.condition = condition;
 	}
-
-	@JsonProperty("desc")
-	String description;
-	@JsonIgnore
-	ObjectId workflowId;
-	@JsonIgnore
-	List<ObjectId> actionIds;
-	@JsonIgnore
-	ObjectId previousNodeId;
-	@JsonIgnore
-	ObjectId nextNodeId;
-	@JsonIgnore
-	Condition condition;
 	// TODO: embedded condition, hide it for now
 
 	@JsonProperty("prevNodeId")

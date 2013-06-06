@@ -2,11 +2,14 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.jmkgreen.morphia.annotations.Entity;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity(value = "nodes")
+@Document
 public class TenantLink extends Link {
+	@JsonIgnore
+	ObjectId templateId;
+
 	public ObjectId getTemplateId() {
 		return templateId;
 	}
@@ -14,9 +17,6 @@ public class TenantLink extends Link {
 	public void setTemplateId(ObjectId templateId) {
 		this.templateId = templateId;
 	}
-
-	@JsonIgnore
-	ObjectId templateId;
 
 	@JsonProperty("template")
 	public Node getTemplate() {

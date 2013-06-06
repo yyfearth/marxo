@@ -2,12 +2,26 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.jmkgreen.morphia.annotations.Id;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
 
 import java.util.Date;
 
 public abstract class BasicEntity {
+
+	@Id
+	@JsonIgnore
+	ObjectId id;
+	String name;
+	String title;
+	@JsonIgnore
+	ObjectId createdByUserId;
+	@JsonProperty("created")
+	Date createdDate;
+	@JsonIgnore
+	ObjectId modifiedByUserId;
+	@JsonProperty("modified")
+	Date modifiedDate;
 
 	public ObjectId getId() {
 		return id;
@@ -64,20 +78,6 @@ public abstract class BasicEntity {
 	public void setModifiedDate(Date modifiedDate) {
 		this.modifiedDate = modifiedDate;
 	}
-
-	@Id
-	@JsonIgnore
-	ObjectId id;
-	String name;
-	String title;
-	@JsonIgnore
-	ObjectId createdByUserId;
-	@JsonProperty("created")
-	Date createdDate;
-	@JsonIgnore
-	ObjectId modifiedByUserId;
-	@JsonProperty("modified")
-	Date modifiedDate;
 
 	////////// For JSON output
 	@JsonProperty("id")
