@@ -38,11 +38,18 @@ define 'console', ['lib/common'], (async) ->
       @fixStyles()
       return
     fixStyles: ->
+      # auto resize
       navContainer = find '#navbar', @el
       framesContainer = find '#frames', @el
       do window.onresize = =>
         h = navContainer.clientHeight or 41
         framesContainer.style.top = h + 'px'
+        return
+      # hide menu after click
+      $('.dropdown-menu').click ->
+        navContainer.classList.add 'hide-dropdown'
+        $(document.body).one 'mousemove', ->
+          navContainer.classList.remove 'hide-dropdown'
         return
       return
     showFrame: (frame, name) ->
