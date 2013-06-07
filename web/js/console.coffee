@@ -386,16 +386,16 @@ define 'console', ['lib/common'], (async) ->
   ## Entities
 
   class Entity extends Backbone.Model
-    set: (attrs) ->
-      #      @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
-      super attrs
-    validate: (attrs) ->
-      unless attrs.name and attrs.id
-        'id and name are required'
-      else unless /\w{,10}/.test attrs.name
-        'name max len is 10 and must be consist of alphabetic char or _'
-      else
-        return
+    #set: (attrs, options) ->
+    #  @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
+    #  super attrs, options
+    #validate: (attrs) ->
+    #  unless attrs.name and attrs.id
+    #    'id and name are required'
+    #  else unless /\w{,10}/.test attrs.name
+    #    'name max len is 10 and must be consist of alphabetic char or _'
+    #  else
+    #    return
 
   # TODO: include workflow models when need
 

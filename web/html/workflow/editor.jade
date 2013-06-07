@@ -14,12 +14,14 @@
         | or Drag a Node from Sidebar to Workflow Editor
         | to Add a new Node.
 .span10.workspace
-  h4.editable-title.pull-left Editable Header
-  span.editable-desc Editable Description
-  .pull-right.btn-group
-    a.btn(href='#workflow/mgr') Back to List
-    button.btn.btn-danger Reset
-    button.btn.btn-primary Save
+  .page-header
+    .wf-actions.pull-right.btn-group
+      a.btn(href='#workflow/mgr') Back to List
+      button.btn.btn-danger.wf-reset Reset
+      button.btn.btn-primary.wf-save Save
+    h3
+      span.editable-title(title='Change Workflow Title', contenteditable='true')
+      small.editable-desc(title='Change Workflow Description', contenteditable='true')
   #workflow_view.content-view
   div.tpl#t_popover
     .popover-desc {desc}

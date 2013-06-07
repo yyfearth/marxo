@@ -6126,6 +6126,16 @@ body {
   margin-left: 13px;
   overflow: auto;
 }
+#frames .frame .workspace .page-header {
+  margin: 0 0 10px;
+  padding-bottom: 0;
+}
+#frames .frame .workspace .page-header h3 {
+  margin: 0 .2em;
+}
+#frames .frame .workspace .page-header h3 small {
+  margin-left: 1em;
+}
 #frames .frame .workspace .pull-right .dropdown-menu {
   left: auto;
   right: 0;

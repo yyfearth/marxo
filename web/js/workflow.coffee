@@ -12,6 +12,7 @@ InnerFrameView
 ManagerView
 ModalDialogView
 FormDialogView
+Entity
 }, {
 # Tenant
 # SharedWorkflows
@@ -109,6 +110,9 @@ TenantLink
   ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
   class WorkflowEditorView extends InnerFrameView
+    events:
+      'click .wf-save': 'save'
+      'click .wf-reset': 'reset'
     initialize: (options) ->
       super options
       @view = new WorkflowView
@@ -118,11 +122,54 @@ TenantLink
       @nodeList = new NodeListView
         el: find('#node_list', @el)
         workflowView: @view
+
+      @btnSave = find '.wf-save', @el
+      title = @titleEl = find '.editable-title', @el
+      desc = @descEl = find '.editable-desc', @el
+
+      title.onblur = =>
+        @model.set title: title.textContent
+        console.log 'change title', title.textContent, @model.toJSON()
+      title.onkeydown = (e) =>
+        if e.keyCode is 13
+          e.preventDefault()
+          title.onblur()
+          @btnSave.focus()
+          false
+      desc.onblur = =>
+        @model.set desc: desc.textContent
+        console.log 'change desc', desc.textContent, @model.toJSON()
+      desc.onkeydown = (e) =>
+        if e.keyCode is 13
+          e.preventDefault()
+          desc.onblur()
+          @btnSave.focus()
+          false
+
+      $([title, desc]).tooltip placement: 'bottom'
       @
-    load: (id) ->
+    reset: ->
+      @load() if confirm 'All changes will be descarded since last save, are you sure to do that?'
+      @
+    save: ->
+      if @model?.hasChanged()
+        console.log 'save', @model.attributes
+        @model.save {},
+          success: (wf) ->
+            console.log 'saved', wf
+          error: ->
+            console.error 'save failed'
+      @
+    load: (id = @id) ->
       @fetch id, (err, wf) =>
+        @id = id
+        @titleEl.textContent = wf.get 'title'
+        @descEl.textContent = wf.get 'desc'
+        @model = wf
         if wf
           @view.load wf
+          # clear changed
+          wf.set id: id
         else
           @view.clear()
       #TODO: load node list
