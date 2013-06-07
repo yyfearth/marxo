@@ -35,12 +35,6 @@ define 'console', ['lib/common'], (async) ->
           parent: @
           navEl: navEl?.parentElement
         return
-      [ # for debug only
-        'home'
-        'content'
-        'profile'
-      ].forEach (n) =>
-        @frames[n] = new FrameView @frames[n]
       @fixStyles()
       return
     fixStyles: ->
@@ -58,6 +52,7 @@ define 'console', ['lib/common'], (async) ->
       if frame instanceof FrameView
         frame.open? name
       else
+        console.log 'load module:', frame.id
         require [frame.id], (TheFrameView) =>
           frame = @frames[frame.id] = new TheFrameView frame
           frame.render()
