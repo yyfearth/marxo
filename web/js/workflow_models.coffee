@@ -1,99 +1,50 @@
 "use strict"
 
-define 'workflow_models', ['console'], ({Entity, Tenant, ManagerCollection}) ->
+define 'workflow_models', ['console'], ({Entity, ManagerCollection}) ->
   ROOT = 'https://marxo.cloudfoundry.com/api'
   # ROOT = '/api'
 
   class Workflow extends Entity
-
-  #  class SharedWorkflow extends Workflow
-
-  class TenantWorkflow extends Workflow
     urlRoot: ROOT + '/workflows'
     initialize: (options...) ->
       super options...
       url = @url?()
       if url
-        @nodes = new TenantNodes url: @url() + '/nodes', @get 'nodes'
-        @links = new TenantLinks url: @url() + '/links', @get 'links'
-      return
+        @nodes = new Nodes url: @url() + '/nodes', @get 'nodes'
+        @links = new Links url: @url() + '/links', @get 'links'
+      @
 
-  #  class SharedWorkflows extends Backbone.Collection
-  #    model: SharedWorkflow
-  #    url: ROOT + '/shared/workflows'
-  class TenantWorkflows extends ManagerCollection
-    model: TenantWorkflow
+  class Workflows extends ManagerCollection
+    model: Workflow
     url: ROOT + '/workflows'
-    # url: -> @tenant.url() + '/workflows'
-
-  #  class SharedNodes extends Backbone.Collection
-  #    model: SharedNode
-  #    url: ROOT + '/shared/nodes'
+  # url: -> @tenant.url() + '/workflows'
 
   class Node extends Entity
 
-  #  class SharedNode extends Node
-
-  class TenantNode extends Node
-
-  #  class SharedLinks extends Backbone.Collection
-  #    model: SharedLink
-  #    url: ROOT + '/shared/links'
-
-  class TenantNodes extends Backbone.Collection
-    model: TenantNode
+  class Nodes extends Backbone.Collection
+    model: Node
     url: ROOT + '/nodes'
-  #    url: -> @workflow.url() + '/nodes'
+  # url: -> @workflow.url() + '/nodes'
 
   class Link extends Entity
 
-  #  class SharedLink extends Link
-
-  class TenantLink extends Link
-
-  class TenantLinks extends Backbone.Collection
-    model: TenantLink
+  class Links extends Backbone.Collection
+    model: Link
     url: ROOT + '/links'
-  #    url: -> @workflow.url() + '/links'
+  # url: -> @workflow.url() + '/links'
 
-  #  class SharedActions extends Backbone.Collection
-  #    model: Action
-  #    url: ROOT + '/shared/actions'
+  # class Action extends Entity
 
-  #  class TenantActions extends Backbone.Collection
+  # class Actions extends Backbone.Collection
   #    model: Action
   #    url: -> @node.url() + '/actions'
-  #
-  #  class Action extends Entity
 
   { # exports
-  #  Tenant
-  #  SharedWorkflows
-  #  TenantWorkflows
-  #  Workflow
-  #  SharedWorkflow
-  #  TenantWorkflow
-  #  SharedNodes
-  #  TenantNodes
-  #  Node
-  #  SharedNode
-  #  TenantNode
-  #  SharedLinks
-  #  TenantLinks
-  #  Link
-  #  SharedLink
-  #  TenantLink
-  #  SharedActions
-  #  TenantActions
-  #  Action
-
-  TenantWorkflows
+  Workflows
   Workflow
-  TenantWorkflow
-  TenantNodes
+  Nodes
   Node
-  TenantNode
-  TenantLinks
+  Links
   Link
-  TenantLink
+  # Action
   }

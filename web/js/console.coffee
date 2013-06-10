@@ -161,6 +161,7 @@ define 'console', ['lib/common'], (async) ->
       @show true
     callback: (action = 'cancel') ->
       return unless @_callback?
+      @trigger action, @data, @
       @_callback? action, @data, @
       @reset()
       return
@@ -397,8 +398,6 @@ define 'console', ['lib/common'], (async) ->
     #  else
     #    return
 
-  # TODO: include workflow models when need
-
   class Tenants extends Backbone.Collection
     model: Tenant
     url: '/'
@@ -438,7 +437,7 @@ define 'console', ['lib/common'], (async) ->
 
   class Publicher extends User
 
-  class Evalutator extends User # TODO: howto save them
+  class Evalutator extends User
 
 ## Router
 

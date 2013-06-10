@@ -120,7 +120,6 @@ html .fc,
 
 .fc-state-highlight {
   // <td> today cell
-  // TODO: add .fc-today to <th>
   background: #ffc;
 }
 
@@ -482,8 +481,7 @@ table.fc-border-separate {
 }
 
 .fc-agenda-allday .fc-day-content {
-  min-height: 34px; // TODO: doesnt work well in quirksmode
-  _height: 34px;
+  min-height: 34px;
 }
 
 // divider (between all-day and slots)
@@ -552,7 +550,6 @@ table.fc-border-separate {
   height: 100%;
   background: #fff;
   opacity: .3;
-  filter: alpha(opacity=30);
 }
 
 // resizable
@@ -567,9 +564,4 @@ table.fc-border-separate {
   font-family: monospace;
   text-align: center;
   cursor: s-resize;
-}
-
-.fc-agenda .ui-resizable-resizing {
-  // TODO: better selector
-  _overflow: hidden;
 }

@@ -5538,7 +5538,6 @@ table.fc-border-separate {
 }
 .fc-agenda-allday .fc-day-content {
   min-height: 34px;
-  _height: 34px;
 }
 .fc-agenda-divider-inner {
   height: 2px;
@@ -5588,7 +5587,6 @@ table.fc-border-separate {
   height: 100%;
   background: #fff;
   opacity: .3;
-  filter: alpha(opacity=30);
 }
 .fc-event-vert .ui-resizable-s {
   bottom: 0 !important;
@@ -5600,9 +5598,6 @@ table.fc-border-separate {
   font-family: monospace;
   text-align: center;
   cursor: s-resize;
-}
-.fc-agenda .ui-resizable-resizing {
-  _overflow: hidden;
 }
 #external-events {
   float: left;

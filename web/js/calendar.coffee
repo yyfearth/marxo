@@ -5,7 +5,6 @@ define 'calendar', ['console', 'lib/jquery-ui', 'lib/fullcalendar'], ({find, Fra
     initialize: (options) ->
       super options
       @sidebarListEl = find '.sidebar-list', @el
-
       return
     render: ->
       $('#calendar_view', @el).fullCalendar

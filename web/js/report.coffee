@@ -10,6 +10,7 @@ FrameView
 ModalDialogView
 # Tenant
 }) ->
+
   class ReportFrameView extends FrameView
     initialize: (options) ->
       super options

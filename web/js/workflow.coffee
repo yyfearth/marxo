@@ -14,32 +14,12 @@ ModalDialogView
 FormDialogView
 Entity
 }, {
-# Tenant
-# SharedWorkflows
-# TenantWorkflows
-# Workflow
-# SharedWorkflow
-# TenantWorkflow
-# SharedNodes
-# TenantNodes
-# Node
-# SharedNode
-# TenantNode
-# SharedLinks
-# TenantLinks
-# Link
-# SharedLink
-# TenantLink
-# SharedActions
-# TenantActions
-# Action
-TenantWorkflows
-TenantWorkflow
-TenantNodes
-TenantNode
+Workflows
+Workflow
+Nodes
 Node
-TenantLinks
-TenantLink
+Links
+Link
 }) ->
 
   ## Workflow Main Frame
@@ -71,7 +51,7 @@ TenantLink
   ## Workflow Manager
 
   class WorkflowManagerView extends ManagerView
-    collection: new TenantWorkflows
+    collection: new Workflows
     initialize: (options) ->
       super options
       @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
@@ -86,17 +66,22 @@ TenantLink
     create: (template) ->
       template = '' if not template or /^(?:new|empty)$/i.test template
       @creator.popup template: template, (action, data) =>
-        if action is 'save'
-          console.log 'create new wf:', data
-          @collection.create data
+        switch action
+          when 'save'
+            console.log 'create new wf:', data
+            @collection.create data
+            # TODO: location.hash = '#workflow/' + data.id
+          when 'cancel'
+            location.hash = '#workflow/mgr'
+          else
+            console.error 'unsupported action', action
+            location.hash = '#workflow/mgr'
       @
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
     initialize: (options) ->
       super options
-      @$el.on 'hidden', -> location.hash = '#workflow/mgr'
-      @
     popup: (data, callback) ->
       super data, callback
       @fill data
@@ -178,7 +163,7 @@ TenantLink
       @nodeList.render()
       @
     fetch: (id, callback) ->
-      wf = @workflow = new TenantWorkflow id: id
+      wf = @workflow = new Workflow id: id
       wf.fetch success: =>
         async.parallel [
           (callback) ->
@@ -629,7 +614,7 @@ TenantLink
       @el.appendChild view.el
       return
     createNode: ->
-      @nodeEditor.popup (new TenantNode), (action, node) =>
+      @nodeEditor.popup (new Node), (action, node) =>
         if action is 'save'
           @_addNode node
         else # canceled

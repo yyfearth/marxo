@@ -10,6 +10,7 @@ InnerFrameView
 #ModalDialogView
 # Tenant
 }) ->
+
   class ConfigFrameView extends FrameView
     initialize: (options) ->
       super options
