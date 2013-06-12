@@ -1,6 +1,6 @@
 "use strict"
 
-define 'console', ['lib/common'], (async) ->
+define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
   find = (selector, parent) ->
     parent ?= document
     parent.querySelector selector
@@ -384,62 +384,7 @@ define 'console', ['lib/common'], (async) ->
       @collection.fetch reset: true
       @
 
-  ## Entities
-
-  class Entity extends Backbone.Model
-    #set: (attrs, options) ->
-    #  @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
-    #  super attrs, options
-    #validate: (attrs) ->
-    #  unless attrs.name and attrs.id
-    #    'id and name are required'
-    #  else unless /\w{,10}/.test attrs.name
-    #    'name max len is 10 and must be consist of alphabetic char or _'
-    #  else
-    #    return
-
-  class Tenants extends Backbone.Collection
-    model: Tenant
-    url: '/'
-
-  class Tenant extends Entity
-    url: ->
-      ROOT + '/' + @name + '/profile'
-  #    idAttribute: '_name'
-
-  class User extends Entity
-
-  class ManagerCollection extends Backbone.PageableCollection
-    mode: 'client'
-    state:
-      pageSize: 20
-    initialize: (options...) ->
-      super options...
-      # add a sequence to models
-      @on 'reset', (models) ->
-        models.each (wf, i) ->
-          wf._seq = i
-        return
-      return
-    comparator: (model) -> # default comparator
-      model.get 'id'
-
-  class Participants extends Backbone.Collection
-    model: Participant
-    url: '/users'
-
-  class Publichers extends Backbone.Collection
-    model: Publicher
-    url: ->
-      @tenant.url() + '/users'
-
-  class Participant extends User
-
-  class Publicher extends User
-
-  class Evalutator extends User
-
-## Router
+  ## Router
 
   class Router extends Backbone.Router
     @get: -> # singleton
@@ -511,15 +456,5 @@ define 'console', ['lib/common'], (async) ->
   ModalDialogView
   FormDialogView
   SignInView
-  Entity
-  ManagerCollection
-  Tenants
-  Tenant
-  User
-  Participants
-  Publichers
-  Participant
-  Publicher
-  Evalutator
   Router
   }

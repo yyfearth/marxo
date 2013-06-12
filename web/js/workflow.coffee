@@ -1,6 +1,6 @@
 "use strict"
 
-define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
+define 'workflow', ['console', 'models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
 async
 find
@@ -12,8 +12,8 @@ InnerFrameView
 ManagerView
 ModalDialogView
 FormDialogView
-Entity
 }, {
+Entity
 Workflows
 Workflow
 Nodes
@@ -145,16 +145,16 @@ Link
           error: ->
             console.error 'save failed'
       @
-    load: (id = @id) ->
-      @fetch id, (err, wf) =>
-        @id = id
+    load: (wf = @id) ->
+      if typeof wf is 'string'
+        @fetch wf, (err, wf) => @load wf
+      else
+        @id = wf.id
         @titleEl.textContent = wf.get 'title'
         @descEl.textContent = wf.get 'desc'
         @model = wf
         if wf
-          @view.load wf
-          # clear changed
-          wf.set id: id
+          @view.load wf.warp true
         else
           @view.clear()
       #TODO: load node list
@@ -165,24 +165,7 @@ Link
     fetch: (id, callback) ->
       wf = @workflow = new Workflow id: id
       wf.fetch success: =>
-        async.parallel [
-          (callback) ->
-            wf.nodes.fetch success: ((c) ->
-              callback null, c), error: ->
-              callback 'fetch nodes failed'
-          (callback) ->
-            wf.links.fetch success: ((c) ->
-              callback null, c), error: ->
-              callback 'fetch links failed'
-        ], (err) =>
-          if err
-            console.error err
-            callback? err
-          else
-            console.log 'workflow', wf
-            callback? null, wf
-        return
-      return
+        callback null, wf
       @
 
   class NodeListView extends View
