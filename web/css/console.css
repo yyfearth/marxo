@@ -4862,7 +4862,7 @@ a.badge:focus {
 .icon-mail:before {
   content: '\2709';
 }
-.icon-pencil:before {
+.icon-edit:before {
   content: '\270e';
 }
 .icon-ok:before {
