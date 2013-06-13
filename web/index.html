@@ -346,10 +346,14 @@
             <ul>
               <li class="btn-group grid-filter"></li>
               <li class="btn-group pull-right">
-                <button class="btn">Reload</button>
-                <button disabled class="btn btn-danger">Delete</button>
+                <button name="reload" class="btn">Reload</button>
+                <button name="remove_all" title="Remove Selected" disabled class="btn btn-danger">Remove</button>
               </li>
             </ul>
+            <div id="t_wf_action_cell" class="tpl">
+              <button title="Edit" name="edit" class="btn btn-primary btn-round icon-edit"></button>
+              <button title="Remove" name="remove" class="btn btn-danger btn-round icon-close"></button>
+            </div>
             <table class="grid-table"></table>
             <div class="grid-paginator"></div>
           </div>
@@ -692,10 +696,6 @@
         </div>
       </div>
     </div>
-  </div>
-  <div id="t_action_buttons" class="tpl">
-    <button title="Edit" class="btn btn-primary btn-round icon-pencil"></button>
-    <button title="Delete" class="btn btn-danger btn-round icon-close"></button>
   </div>
 </body>
 <!--  script(data-main='js/main', src='js/lib/require.js')-->

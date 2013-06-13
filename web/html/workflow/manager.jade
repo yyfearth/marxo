@@ -15,8 +15,12 @@
   ul
     li.btn-group.grid-filter
     li.btn-group.pull-right
-      button.btn Reload
-      button.btn.btn-danger(disabled) Delete
+      button.btn(name='reload') Reload
+      button.btn.btn-danger(name='remove_all', title='Remove Selected', disabled) Remove
+
+  #t_wf_action_cell.tpl
+    button.btn.btn-primary.btn-round.icon-edit(title='Edit', name='edit')
+    button.btn.btn-danger.btn-round.icon-close(title='Remove', name='remove')
 
   table.grid-table
   .grid-paginator
