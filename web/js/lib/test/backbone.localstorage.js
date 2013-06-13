@@ -42,6 +42,8 @@
 		var store = this.localStorage().getItem(this.name);
 		this.records = (store && store.split(",")) || [];
 	};
+	
+	var seperator = '/'
 
 	_.extend(Backbone.LocalStorage.prototype, {
 
@@ -57,7 +59,7 @@
 				model.id = oid();
 				model.set(model.idAttribute, model.id);
 			}
-			this.localStorage().setItem(this.name + "-" + model.id, JSON.stringify(model));
+			this.localStorage().setItem(this.name + seperator + model.id, JSON.stringify(model));
 			this.records.push(model.id.toString());
 			this.save();
 			return this.find(model);
@@ -65,7 +67,7 @@
 
 		// Update a model by replacing its copy in `this.data`.
 		update: function (model) {
-			this.localStorage().setItem(this.name + "-" + model.id, JSON.stringify(model));
+			this.localStorage().setItem(this.name + seperator + model.id, JSON.stringify(model));
 			if (!_.include(this.records, model.id.toString()))
 				this.records.push(model.id.toString());
 			this.save();
@@ -74,7 +76,7 @@
 
 		// Retrieve a model from `this.data` by id.
 		find: function (model) {
-			return this.jsonData(this.localStorage().getItem(this.name + "-" + model.id));
+			return this.jsonData(this.localStorage().getItem(this.name + seperator + model.id));
 		},
 
 		// Return the array of all models currently in storage.
@@ -82,7 +84,7 @@
 			// Lodash removed _#chain in v1.0.0-rc.1
 			return (_.chain || _)(this.records)
 				.map(function (id) {
-					return this.jsonData(this.localStorage().getItem(this.name + "-" + id));
+					return this.jsonData(this.localStorage().getItem(this.name + seperator + id));
 				}, this)
 				.compact()
 				.value();
@@ -92,7 +94,7 @@
 		destroy: function (model) {
 			if (model.isNew())
 				return false
-			this.localStorage().removeItem(this.name + "-" + model.id);
+			this.localStorage().removeItem(this.name + seperator + model.id);
 			this.records = _.reject(this.records, function (id) {
 				return id === model.id.toString();
 			});
@@ -112,7 +114,7 @@
 		// Clear localStorage for specific collection.
 		_clear: function () {
 			var local = this.localStorage(),
-				itemRe = new RegExp("^" + this.name + "-");
+				itemRe = new RegExp("^" + this.name + seperator);
 
 			// Remove id-tracking item (e.g., "foo").
 			local.removeItem(this.name);
