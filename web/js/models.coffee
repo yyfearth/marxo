@@ -6,7 +6,10 @@ define 'models', ['lib/common'], ->
 
   ## Common
 
-  class Entity extends Backbone.Model
+  Entity = Backbone.Model
+  Collection = Backbone.Collection
+
+  #class Entity extends Backbone.Model
     #set: (attrs, options) ->
     #  @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
     #  super attrs, options
@@ -17,7 +20,7 @@ define 'models', ['lib/common'], ->
     #    'name max len is 10 and must be consist of alphabetic char or _'
     #  else
     #    return
-  class Collection extends Backbone.Collection
+  #class Collection extends Backbone.Collection
 
   class ManagerCollection extends Backbone.PageableCollection
     mode: 'client'
@@ -29,18 +32,19 @@ define 'models', ['lib/common'], ->
       @on 'reset', (models) ->
         models.each (wf, i) ->
           wf._seq = i
-    comparator: (model) -> # default comparator
-      model.get 'id'
 
   ## Tenant / User
 
-  class Tenants extends Collection
-    model: Tenant
+  class Tenant extends Entity
     urlRoot: '/tenants'
 
-  class Tenant extends Entity
-
   class User extends Entity
+
+  class Participant extends User
+
+  class Publicher extends User
+
+  class Evalutator extends User
 
   class Participants extends Collection
     model: Participant
@@ -49,12 +53,6 @@ define 'models', ['lib/common'], ->
   class Publichers extends Collection
     model: Publicher
     url: -> (@tenant?.url?() or '') + '/users'
-
-  class Participant extends User
-
-  class Publicher extends User
-
-  class Evalutator extends User
 
     ## Workflow
 
@@ -146,13 +144,35 @@ define 'models', ['lib/common'], ->
     model: Action
   # url: -> @node.url() + '/actions'
 
+  ## Project
+
+  class Project extends Entity
+
+  class Projects extends ManagerCollection
+    model: Project
+    url: ROOT + '/projects'
+  
+  ## Home
+
   class Notification extends Entity
+
+  class Notifications extends ManagerCollection
+    model: Notification
+    url: ROOT + '/notifications'
+
+  ## Content
+
+  class Content extends Entity
+
+  class Contents extends ManagerCollection
+    model: Content
+    url: ROOT + '/contents'
+
 
   { # exports
   Entity
   Collection
   ManagerCollection
-  Tenants
   Tenant
   User
   Participants
@@ -168,4 +188,10 @@ define 'models', ['lib/common'], ->
   Link
   Actions
   Action
+  Projects
+  Project
+  Notification
+  Notifications
+  Content
+  Contents
   }
