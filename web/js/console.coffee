@@ -279,31 +279,39 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
 
   class SeqCell extends Backgrid.StringCell
     formatter: null
-    render: ->
+    initialize: (options) ->
       @formatter ?=
         fromRaw: =>
           seq = @model._seq
           if seq? then seq + 1 else ''
-      super()
+        toRaw: =>
+          @model.id
+      super options
 
   class LinkCell extends Backgrid.UriCell
+    urlRoot: ''
+    initialize: (options) ->
+      super options
+      @urlRoot += '/' if @urlRoot[-1..] isnt '/'
     render: ->
       @$el.empty()
       formattedValue = @formatter.fromRaw @model.get @column.get 'name'
       @$el.append $('<a>',
         tabIndex: -1
-        href: '#workflow/' + @model.id
+        href: @urlRoot + @model.id
         title: formattedValue
       ).text formattedValue
       @delegateEvents()
       @
 
   class ActionCell extends Backgrid.Cell
-    @tpl: (type = 'action_buttons') -> # load form html template
-      if @_tpl? and @_tpl[type]?
+    @tpl: (type) -> # load form html template
+      if not type
+        ''
+      else if @_tpl? and @_tpl[type]?
         @_tpl[type] # cached
       else
-        el = find "#t_#{type}"
+        el = find "#t_#{type}_action_cell"
         if el?
           @_tpl ?= ({})
           # load template
@@ -313,13 +321,16 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
         else
           throw 'cannot find template for type: ' + type
         tpl
+    className: 'action-cell'
     render: ->
       @el.innerHTML = @constructor.tpl @type
+      @el.dataset.model = @model.id
+      @$el.data 'model', @model
       @delegateEvents()
       @
 
   class ManagerView extends InnerFrameView
-    columns: [
+    defaultColumns: [
       # name is a required parameter, but you don't really want one on a select all column
       name: ''
       # Backgrid.Extension.SelectRowCell lets you select individual rows
@@ -327,62 +338,51 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       # Backgrid.Extension.SelectAllHeaderCell lets you select all the row on a page
       headerCell: 'select-all'
     ,
-      name: '' # The key of the model attribute
+      name: 'id' # The key of the model attribute
       label: '#' # The name to display in the header
       cell: SeqCell
       editable: false
-    ,
-      name: 'title'
-      label: 'Title'
-      cell: LinkCell
-      editable: false
-    ,
-      name: 'desc'
-      label: 'Description'
-      cell: 'string'
-      editable: false
-    ,
-      name: 'status'
-      label: 'Status'
-      cell: 'string'
-      editable: false
-    ,
-      name: 'created_at'
-      label: 'Date Created'
-      cell: 'datetime'
-      editable: false
-    ,
-      name: 'updated_at'
-      label: 'Date Updated'
-      cell: 'datetime'
-      editable: false
-    ,
-      name: ''
-      label: 'Actions'
-      cell: ActionCell
-      editable: false
-      sortable: false
     ]
+    defaultEvents:
+      'click .action-cell .btn': '_action'
+      'click .btn[name="reload"]': 'reload'
     initialize: (options) ->
+      @events ?= {}
+      for own event, action of @defaultEvents
+        @events[event] ?= action
+
       super options
+
       @collection = options.collection if options.collection instanceof ManagerCollection
       collection = @collection
       throw 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
+      columns = unless @columns then @defaultColumns else @defaultColumns.concat @columns
       @grid = new Backgrid.Grid
-        columns: @columns
+        columns: columns
         collection: collection
       @paginator = new Backgrid.Extension.Paginator
         collection: collection
       @filter = new Backgrid.Extension.ClientSideFilter
         collection: collection.fullCollection,
         fields: ['title']
-      return
+      @
     render: ->
       @$el.find('table.grid-table').replaceWith @grid.render().$el.addClass 'grid-table'
       @$el.find('.grid-paginator').replaceWith @paginator.render().$el.addClass 'grid-paginator'
       @$el.find('.grid-filter').empty().append @filter.render().$el
+      @reload()
+      @
+    reload: ->
       @collection.fetch reset: true
       @
+    _action: (e) ->
+      btn = e.target
+      action = btn.dataset.action or btn.getAttribute 'name'
+      cell = btn.parentNode
+      # model = $(cell).data('model')
+      model = @collection.get cell.dataset.model
+      console.log 'action', action, model
+      @trigger action, model if action and model
 
   ## Router
 
@@ -444,7 +444,6 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       return
 
   { # exports
-  async
   find
   findAll
   View
@@ -456,5 +455,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
   ModalDialogView
   FormDialogView
   SignInView
+  ActionCell
+  LinkCell
   Router
   }

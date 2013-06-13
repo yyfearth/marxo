@@ -2,7 +2,6 @@
 
 define 'workflow', ['console', 'models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
-async
 find
 findAll
 View
@@ -12,13 +11,13 @@ InnerFrameView
 ManagerView
 ModalDialogView
 FormDialogView
+LinkCell
+ActionCell
 }, {
 Entity
 Workflows
 Workflow
-Nodes
 Node
-Links
 Link
 }) ->
 
@@ -51,6 +50,38 @@ Link
   ## Workflow Manager
 
   class WorkflowManagerView extends ManagerView
+    columns: [
+      name: 'title'
+      label: 'Title'
+      cell: LinkCell.extend(urlRoot: '#workflow')
+      editable: false
+    ,
+      name: 'desc'
+      label: 'Description'
+      cell: 'string'
+      editable: false
+    ,
+      name: 'status'
+      label: 'Status'
+      cell: 'string'
+      editable: false
+    ,
+      name: 'created_at'
+      label: 'Date Created'
+      cell: 'datetime'
+      editable: false
+    ,
+      name: 'updated_at'
+      label: 'Date Updated'
+      cell: 'datetime'
+      editable: false
+    ,
+      name: ''
+      label: 'Actions'
+      cell: ActionCell.extend(type: 'wf')
+      editable: false
+      sortable: false
+    ]
     collection: new Workflows
     initialize: (options) ->
       super options
@@ -62,6 +93,9 @@ Link
         console.log 'wf template clicked', wf
         @create wf[1] if wf.length is 2
         false
+      @on
+        edit: @edit.bind @
+        remove: @remove.bind @
       @
     create: (template) ->
       template = '' if not template or /^(?:new|empty)$/i.test template
@@ -76,6 +110,15 @@ Link
           else
             console.error 'unsupported action', action
             location.hash = '#workflow/mgr'
+      @
+    edit: (model) ->
+      location.href = '#workflow/' + model.id
+      @
+    remove: (model) ->
+      # TODO: check usage, if used cannot remove directly
+      if confirm 'Make sure this workflow is not in use!\nDo you realy want to remove this workflow?'
+        model.destroy()
+      #console.log 'delete', model, @
       @
 
   class WorkflowCreatorView extends FormDialogView
