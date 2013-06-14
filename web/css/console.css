@@ -5906,23 +5906,26 @@ body {
   height: 100%;
 }
 .tpl {
-  display: none;
+  display: none !important;
 }
 .btn-round {
   display: inline-block;
-  width: 27px;
-  height: 27px;
-  border-radius: 40px;
-  line-height: 18px;
+  width: 25px;
+  height: 25px;
+  border-radius: 25px;
+  line-height: 25px;
   vertical-align: middle;
   font-size: 14px;
   clear: none;
   float: left;
-  margin: -1px 2px 1px 2px;
+  padding: 0;
+  margin: 0 2px;
   text-align: center;
+  overflow: hidden;
 }
-.btn-round:before {
-  margin-left: -6px;
+button.btn-round {
+  width: 27px;
+  height: 27px;
 }
 ul.action-bar {
   margin-left: 0;
