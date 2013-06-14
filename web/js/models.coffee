@@ -7,31 +7,32 @@ define 'models', ['lib/common'], ->
   ## Common
 
   Entity = Backbone.Model
-  Collection = Backbone.Collection
-
   #class Entity extends Backbone.Model
-    #set: (attrs, options) ->
-    #  @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
-    #  super attrs, options
-    #validate: (attrs) ->
-    #  unless attrs.name and attrs.id
-    #    'id and name are required'
-    #  else unless /\w{,10}/.test attrs.name
-    #    'name max len is 10 and must be consist of alphabetic char or _'
-    #  else
-    #    return
-  #class Collection extends Backbone.Collection
+  #  set: (attrs, options) ->
+  #    @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
+  #    super attrs, options
+  #  validate: (attrs) ->
+  #    unless attrs.name and attrs.id
+  #      'id and name are required'
+  #    else unless /\w{,10}/.test attrs.name
+  #      'name max len is 10 and must be consist of alphabetic char or _'
+  #    else
+  #      return
+
+  # just a alias, otherwise PageableCollection will not extends Collection
+  Collection = Backbone.Collection
 
   class ManagerCollection extends Backbone.PageableCollection
     mode: 'client'
-    state:
-      pageSize: 20
-    initialize: (models, options) ->
-      super models, options
-      # add a sequence to models
-      @on 'reset', (models) ->
-        models.each (wf, i) ->
-          wf._seq = i
+    defaultState:
+      pageSize: 15
+      sortKey: 'id' # updated_at'
+      order: 1 # -1
+    constructor: (options...) ->
+      @state ?= {}
+      for key, value of @defaultState
+        @state[key] = value
+      super options...
 
   ## Tenant / User
 
@@ -54,7 +55,7 @@ define 'models', ['lib/common'], ->
     model: Publicher
     url: -> (@tenant?.url?() or '') + '/users'
 
-    ## Workflow
+  ## Workflow
 
   class Workflow extends Entity
     urlRoot: ROOT + '/workflows'
@@ -151,7 +152,7 @@ define 'models', ['lib/common'], ->
   class Projects extends ManagerCollection
     model: Project
     url: ROOT + '/projects'
-  
+
   ## Home
 
   class Notification extends Entity
