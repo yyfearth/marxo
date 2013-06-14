@@ -15,13 +15,13 @@
         | to Add a new Node.
 .span10.workspace
   .page-header
-    .wf-actions.pull-right.btn-group
-      a.btn(href='#workflow/mgr') Back to List
-      button.btn.btn-danger.wf-reset Reset
-      button.btn.btn-primary.wf-save Save
+    .wf-actions.pull-right
+      a.btn(href='#workflow/mgr', title='Go back to Workflow Manager', data-placement='bottom') Back to List
+      button.btn.btn-danger.wf-reset(title='Reset workflow to previous save', data-placement='bottom') Reset
+      button.btn.btn-primary.wf-save(title='Save the workflow', data-placement='bottom') Save
     h3
-      span.editable-title(title='Change Workflow Title', contenteditable='true')
-      small.editable-desc(title='Change Workflow Description', contenteditable='true')
+      span.editable-title(title='Change Workflow Title', data-placement='bottom', contenteditable='true')
+      small.editable-desc(title='Change Workflow Description', data-placement='bottom', contenteditable='true')
   #workflow_view.content-view
   div.tpl#t_popover
     .popover-desc {desc}

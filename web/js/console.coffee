@@ -443,6 +443,8 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       @navigate 'signin', replace: true
       return
 
+  $ -> $(document.body).tooltip selector: '[title]:not([data-original-title])'
+
   { # exports
   find
   findAll
