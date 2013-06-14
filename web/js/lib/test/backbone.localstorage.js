@@ -29,7 +29,7 @@
 	 * @return {string}
 	 */
 	function oid() {
-		return new Array(7).join(S4());
+		return S4() + S4() + S4() + S4() + S4() + S4();
 	}
 
 // Our Store is represented by a single JS object in *localStorage*. Create it
@@ -59,6 +59,7 @@
 				model.id = oid();
 				model.set(model.idAttribute, model.id);
 			}
+			model.set({created_at: new Date(), updated_at: new Date()});
 			this.localStorage().setItem(this.name + seperator + model.id, JSON.stringify(model));
 			this.records.push(model.id.toString());
 			this.save();
@@ -70,6 +71,7 @@
 			this.localStorage().setItem(this.name + seperator + model.id, JSON.stringify(model));
 			if (!_.include(this.records, model.id.toString()))
 				this.records.push(model.id.toString());
+			model.set('updated_at', new Date());
 			this.save();
 			return this.find(model);
 		},
