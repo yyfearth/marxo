@@ -357,6 +357,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       @el.innerHTML = @constructor.tpl @type
       @el.dataset.model = @model.id
       @$el.data 'model', @model
+      @$el.find('.btn[title]').attr 'data-container': 'body'
       @delegateEvents()
       @
 
@@ -455,7 +456,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
         wait: 300
 
       # tooltip on bottom
-      $('.action-buttons .btn[title]').attr 'data-placement': 'bottom'
+      $('.action-buttons .btn[title]').attr 'data-placement': 'bottom', 'data-container': 'body'
       @
     _configColumns: ->
       columns = []
