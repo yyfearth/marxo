@@ -375,19 +375,19 @@
                 <div class="control-group">
                   <label for="wf_title" class="control-label">Title</label>
                   <div class="controls">
-                    <input id="wf_title" type="text" name="title" placeholder="Workflow Name" required>
+                    <input id="wf_title" type="text" name="title" placeholder="Workflow Name" maxlength="32" required>
                   </div>
                 </div>
                 <div class="control-group">
                   <label for="wf_name" class="control-label">Name</label>
                   <div class="controls">
-                    <input id="wf_name" type="text" name="name" placeholder="wf_name" required>
+                    <input id="wf_name" type="text" name="name" placeholder="wf_name" pattern="[a-z0-9_\-]{3,32}" maxlength="32" required>
                   </div>
                 </div>
                 <div class="control-group">
                   <label for="wf_desc" class="control-label">Description</label>
                   <div class="controls">
-                    <textarea id="wf_desc" name="desc" cols="30" rows="3" placeholder="Description"></textarea>
+                    <textarea id="wf_desc" name="desc" cols="30" rows="3" maxlength="2048" placeholder="Description"></textarea>
                   </div>
                 </div>
               </form>

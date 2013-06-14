@@ -12,15 +12,15 @@
       .control-group
         label.control-label(for='wf_title') Title
         .controls
-          input#wf_title(type='text', name='title', placeholder='Workflow Name', required)
+          input#wf_title(type='text', name='title', placeholder='Workflow Name', maxlength='32', required)
       .control-group
         label.control-label(for='wf_name') Name
         .controls
-          input#wf_name(type='text', name='name', placeholder='wf_name', required)
+          input#wf_name(type='text', name='name', placeholder='wf_name', pattern='[a-z0-9_\\-]{3,32}', maxlength='32', required)
       .control-group
         label.control-label(for='wf_desc') Description
         .controls
-          textarea#wf_desc(name='desc', cols='30', rows='3', placeholder='Description')
+          textarea#wf_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Create
