@@ -26,8 +26,8 @@ define 'models', ['lib/common'], ->
     mode: 'client'
     defaultState:
       pageSize: 15
-      sortKey: 'id' # updated_at'
-      order: 1 # -1
+      sortKey: 'updated_at'
+      order: -1
     constructor: (options...) ->
       @state ?= {}
       for key, value of @defaultState

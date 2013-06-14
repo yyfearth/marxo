@@ -550,8 +550,8 @@ Link
         return
       wf.links.forEach (link) ->
         link.workflow = wf
-        link.prevNode = wf.nodes.get link.get 'prevNodeId'
-        link.nextNode = wf.nodes.get link.get 'nextNodeId'
+        link.prevNode = wf.nodes.get link.get 'prev_node_id'
+        link.nextNode = wf.nodes.get link.get 'next_node_id'
         unless link.prevNode and link.nextNode
           console.error 'link', link.name or link.id, 'is broken, prev/next node missing'
         link.prevNode.outLinks.push link
