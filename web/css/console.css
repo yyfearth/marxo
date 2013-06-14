@@ -6159,6 +6159,9 @@ ul.action-bar .nav {
 #calendar .workspace #calendar_view {
   display: inline-block;
 }
+.grid-table .datetime-cell {
+  font-size: 12px;
+}
 .grid-filter form {
   margin: 0;
 }

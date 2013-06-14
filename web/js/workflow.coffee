@@ -51,36 +51,14 @@ Link
 
   class WorkflowManagerView extends ManagerView
     columns: [
-      name: 'title'
-      label: 'Title'
-      cell: LinkCell.extend(urlRoot: '#workflow')
-      editable: false
-    ,
-      name: 'desc'
-      label: 'Description'
-      cell: 'string'
-      editable: false
-    ,
-      name: 'status'
-      label: 'Status'
-      cell: 'string'
-      editable: false
-    ,
-      name: 'created_at'
-      label: 'Date Created'
-      cell: 'datetime'
-      editable: false
-    ,
-      name: 'updated_at'
-      label: 'Date Updated'
-      cell: 'datetime'
-      editable: false
-    ,
-      name: ''
-      label: 'Actions'
-      cell: ActionCell.extend(type: 'wf')
-      editable: false
-      sortable: false
+      'checkbox'
+      'id'
+      'title:#workflow'
+      'desc'
+      'status'
+      'created_at'
+      'updated_at'
+      'actions:wf'
     ]
     collection: new Workflows
     initialize: (options) ->
@@ -93,9 +71,11 @@ Link
         console.log 'wf template clicked', wf
         @create wf[1] if wf.length is 2
         false
+      _remove = @remove.bind @
       @on
         edit: @edit.bind @
-        remove: @remove.bind @
+        remove: _remove
+        remove_selected: _remove
       @
     create: (template) ->
       template = '' if not template or /^(?:new|empty)$/i.test template
@@ -103,8 +83,8 @@ Link
         switch action
           when 'save'
             console.log 'create new wf:', data
-            @collection.create data
-            # TODO: location.hash = '#workflow/' + data.id
+            @collection.create data, wait: true
+            # location.hash = '#workflow/' + data.id
           when 'cancel'
             location.hash = '#workflow/mgr'
           else
@@ -114,15 +94,21 @@ Link
     edit: (model) ->
       location.href = '#workflow/' + model.id
       @
-    remove: (model) ->
-      # TODO: check usage, if used cannot remove directly
-      if confirm 'Make sure this workflow is not in use!\nDo you realy want to remove this workflow?'
-        model.destroy()
+    remove: (models) ->
+      models = [models] unless Array.isArray models
+      if confirm 'Make sure these selected workflows is not in use!\nDo you realy want to remove selected workflows?'
+        # TODO: check usage, if used cannot remove directly
+        model?.destroy() for model in models
+        @reload() if models.length >= @pageSize / 2
       #console.log 'delete', model, @
       @
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
+    events:
+      'input #wf_title': '_title_typed'
+      'input #wf_name': '_name_typed'
+      'change #wf_name': '_name_changed'
     initialize: (options) ->
       super options
     popup: (data, callback) ->
@@ -134,7 +120,16 @@ Link
       @callback 'save'
       @hide true
       @
-
+    _name_typed: ->
+      @form.name._auto = not @form.name.value
+      return
+    _name_changed: ->
+      @form.name.value = @form.name.value.toLowerCase()
+      return
+    _title_typed: ->
+      if @form.name._auto isnt false
+        @form.name.value = @form.title.value.replace(/\W+/g, '_')[0..32].toLowerCase()
+      return
   ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
   class WorkflowEditorView extends InnerFrameView
@@ -155,6 +150,7 @@ Link
       title = @titleEl = find '.editable-title', @el
       desc = @descEl = find '.editable-desc', @el
 
+      # TODO: use dialog instead
       title.onblur = =>
         @model.set title: title.textContent
         console.log 'change title', title.textContent, @model.toJSON()
@@ -173,8 +169,6 @@ Link
           desc.onblur()
           @btnSave.focus()
           false
-
-      $([title, desc]).tooltip placement: 'bottom'
       @
     reset: ->
       @load() if confirm 'All changes will be descarded since last save, are you sure to do that?'

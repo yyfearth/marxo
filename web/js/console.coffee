@@ -18,6 +18,14 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
         @parent = options.parent
         @parentEl = @parent.el
       return
+    delayedTrigger: (eventName, delay = 10, args...) ->
+      timeout_key = "_#{eventName}_timtout"
+      clearTimeout @[timeout_key] if @[timeout_key]
+      @[timeout_key] = setTimeout =>
+        @[timeout_key] = null
+        @trigger eventName, args...
+        return
+      , delay
 
   class ConsoleView extends View
     el: '#main'
@@ -304,6 +312,29 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       @delegateEvents()
       @
 
+  class DateTimeCell extends Backgrid.StringCell
+    className: 'datetime-cell'
+    formatter: null
+    initialize: (options) ->
+      @formatter ?=
+        fromRaw: (datetime) ->
+          if datetime instanceof Date
+            datetime.toLocaleString()
+          else
+            try
+              new Date(datetime).toLocaleString()
+            catch e
+              console.error 'convert datetime error', datetime, e
+              ''
+        toRaw: (datetime) ->
+          # or to timestamp?
+          try
+            new Date(datetime).toISOString()
+          catch e
+            console.error 'convert datetime error', datetime, e
+            ''
+      super options
+
   class ActionCell extends Backgrid.Cell
     @tpl: (type) -> # load form html template
       if not type
@@ -329,26 +360,72 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       @delegateEvents()
       @
 
+  class ManagerPaginator extends Backgrid.Extension.Paginator
+    className: 'pagination'
+    initialize: (options) ->
+      super options
+      # fix for backgrid.paginator re-render
+      @collection.on 'reset', => @render()
+    render: ->
+      super()
+      if @collection.state.totalPages < 2
+        @$el.hide()
+      else
+        @$el.show()
+      @
+
   class ManagerView extends InnerFrameView
-    defaultColumns: [
-      # name is a required parameter, but you don't really want one on a select all column
-      name: ''
-      # Backgrid.Extension.SelectRowCell lets you select individual rows
-      cell: 'select-row'
-      # Backgrid.Extension.SelectAllHeaderCell lets you select all the row on a page
-      headerCell: 'select-all'
-    ,
-      name: 'id' # The key of the model attribute
-      label: '#' # The name to display in the header
-      cell: SeqCell
-      editable: false
-    ]
-    defaultEvents:
-      'click .action-cell .btn': '_action'
-      'click .btn[name="reload"]': 'reload'
+    _predefinedColumns: {
+      checkbox:
+        # name is a required parameter, but you don't really want one on a select all column
+        name: ''
+        # Backgrid.Extension.SelectRowCell lets you select individual rows
+        cell: 'select-row'
+        # Backgrid.Extension.SelectAllHeaderCell lets you select all the row on a page
+        headerCell: 'select-all'
+      id:
+        name: 'id' # The key of the model attribute
+        label: '#' # The name to display in the header
+        cell: SeqCell
+        editable: false
+      name:
+        name: 'name'
+        label: 'Name'
+        cell: 'string'
+        editable: false
+      title:
+        name: 'title'
+        label: 'Title'
+        cell: 'string'
+        editable: false
+      desc:
+        name: 'desc'
+        label: 'Description'
+        cell: 'string'
+        editable: false
+      status: # TODO: change to list cell and editable
+        name: 'status'
+        label: 'Status'
+        cell: 'string'
+        editable: false
+      created_at:
+        name: 'created_at'
+        label: 'Date Created'
+        cell: DateTimeCell
+        editable: false
+      updated_at:
+        name: 'updated_at'
+        label: 'Date Updated'
+        cell: DateTimeCell
+        editable: false
+    }
+    _defaultEvents:
+      'click .action-cell .btn': '_action_cell'
+      'click .action-buttons .btn': '_action_buttons'
+      'change input[type="checkbox"]': '_selection_changed'
     initialize: (options) ->
       @events ?= {}
-      for own event, action of @defaultEvents
+      for own event, action of @_defaultEvents
         @events[event] ?= action
 
       super options
@@ -356,26 +433,76 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       @collection = options.collection if options.collection instanceof ManagerCollection
       collection = @collection
       throw 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
-      columns = unless @columns then @defaultColumns else @defaultColumns.concat @columns
+      # add a sequence to models
+      _gen_seq = -> collection.fullCollection.each (model, i) -> model._seq = i
+      collection.fullCollection.on reset: _gen_seq
+      collection.on add: _gen_seq, remove: _gen_seq
+      # selection may change after remove
+      collection.on 'remove', => @_selection_changed()
+      # page size alias
+      @pageSize = collection.state.pageSize or 15
+      #window.collection = collection # debug
+      #window.mgr = @ # debug
+
       @grid = new Backgrid.Grid
-        columns: columns
+        columns: @_configColumns()
         collection: collection
-      @paginator = new Backgrid.Extension.Paginator
+      @paginator = new ManagerPaginator
         collection: collection
       @filter = new Backgrid.Extension.ClientSideFilter
         collection: collection.fullCollection,
         fields: ['title']
+        wait: 300
+
+      # tooltip on bottom
+      $('.action-buttons .btn[title]').attr 'data-placement': 'bottom'
       @
+    _configColumns: ->
+      columns = []
+      for cfg in @columns
+        if typeof cfg is 'string'
+          cfgs = cfg.split ':'
+          if cfgs[1]
+            cfg = switch cfgs[0]
+              when 'actions'
+                name: ''
+                label: ''
+                cell: ActionCell.extend(type: cfgs[1])
+                editable: false
+                sortable: false
+              when 'title'
+                name: 'title'
+                label: 'Title'
+                cell: LinkCell.extend(urlRoot: cfgs[1])
+                editable: false
+              else
+                null
+            if cfg
+              columns.push cfg
+            else
+              console.error 'cannot understand predefined column', cfg
+          else if @_predefinedColumns[cfg]?
+            cfg = @_predefinedColumns[cfg]
+            columns.push cfg
+          else
+            console.error 'cannot found predefined column', cfg
+        else
+          columns.push cfg
+      columns
     render: ->
       @$el.find('table.grid-table').replaceWith @grid.render().$el.addClass 'grid-table'
       @$el.find('.grid-paginator').replaceWith @paginator.render().$el.addClass 'grid-paginator'
       @$el.find('.grid-filter').empty().append @filter.render().$el
       @reload()
+      @$enable_if_selected = @$el.find '.enable_if_selected'
       @
     reload: ->
       @collection.fetch reset: true
+      @collection.getPage 1
       @
-    _action: (e) ->
+    getSelected: ->
+      @grid.getSelectedModels().filter (r) -> r?
+    _action_cell: (e) ->
       btn = e.target
       action = btn.dataset.action or btn.getAttribute 'name'
       cell = btn.parentNode
@@ -383,6 +510,25 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       model = @collection.get cell.dataset.model
       console.log 'action', action, model
       @trigger action, model if action and model
+      return
+    _action_buttons: (e) ->
+      btn = e.target
+      action = btn.dataset.action or btn.getAttribute 'name'
+      return unless action
+      if btn.classList.contains 'enable_if_selected'
+        selected = @getSelected()
+        console.log 'action', action, selected
+        @trigger action, selected, @
+      else
+        console.log 'action', action
+        @trigger action, @
+        @[action]?() # reload
+      return
+    _selection_changed: ->
+      selected = @getSelected()
+      @$enable_if_selected.prop 'disabled', not selected?.length
+      @delayedTrigger 'selection_changed', 100, selected, @grid, @
+      return
 
   ## Router
 
@@ -457,7 +603,5 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
   ModalDialogView
   FormDialogView
   SignInView
-  ActionCell
-  LinkCell
   Router
   }
