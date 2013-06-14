@@ -296,46 +296,59 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
           @model.id
       super options
 
-  class LinkCell extends Backgrid.UriCell
-    urlRoot: ''
+  class Backgrid.LinkCell extends Backgrid.UriCell
     initialize: (options) ->
       super options
-      @urlRoot += '/' if @urlRoot[-1..] isnt '/'
+      @urlRoot = @column.get('urlRoot') or @urlRoot
+      @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
     render: ->
       @$el.empty()
-      formattedValue = @formatter.fromRaw @model.get @column.get 'name'
-      @$el.append $('<a>',
+      key = @column.get 'name'
+      title = @model.get key
+      if title.id and title.title
+        id = title.id
+        title = title.title
+        tooltip = _.escape title
+      else
+        id = @model.id
+        tooltip = @model.escape(@column.get('tooltip') or @column.get('name') or 'title')
+      url = unless @urlRoot then null else '#' + @urlRoot + id
+      @$el.addClass(key + '-link-cell').append $('<a>',
         tabIndex: -1
-        href: @urlRoot + @model.id
-        title: formattedValue
-      ).text formattedValue
+        href: url
+      ).text title
+      @$el.attr title: tooltip, 'data-container': 'body'
       @delegateEvents()
       @
 
-  class DateTimeCell extends Backgrid.StringCell
+  class Backgrid.TooltipCell extends Backgrid.StringCell
+    className: 'tooltip-cell'
+    render: ->
+      super()
+      key = @column.get('tooltip') or @column.get('name') or 'title'
+      tooltip = @model.escape key
+      @$el.attr title: tooltip, 'data-container': 'body'
+      @
+
+  class Backgrid.ReadonlyDatetimeCell extends Backgrid.StringCell
     className: 'datetime-cell'
     formatter: null
     initialize: (options) ->
       @formatter ?=
         fromRaw: (datetime) ->
-          if datetime instanceof Date
-            datetime.toLocaleString()
-          else
-            try
-              new Date(datetime).toLocaleString()
-            catch e
-              console.error 'convert datetime error', datetime, e
-              ''
-        toRaw: (datetime) ->
-          # or to timestamp?
-          try
-            new Date(datetime).toISOString()
-          catch e
-            console.error 'convert datetime error', datetime, e
+          if not datetime
             ''
+          else if datetime instanceof Date
+            datetime.toLocaleString()
+          else if typeof datetime is 'number' or /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test datetime
+            new Date(datetime).toLocaleString()
+          else
+            console.error 'unsupported datetime', datetime
+            ''
+        toRaw: -> return
       super options
 
-  class ActionCell extends Backgrid.Cell
+  class Backgrid.ActionsCell extends Backgrid.Cell
     @tpl: (type) -> # load form html template
       if not type
         ''
@@ -354,7 +367,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
         tpl
     className: 'action-cell'
     render: ->
-      @el.innerHTML = @constructor.tpl @type
+      @el.innerHTML = @constructor.tpl @column.get('name') or @name
       @el.dataset.model = @model.id
       @$el.data 'model', @model
       @$el.find('.btn[title]').attr 'data-container': 'body'
@@ -397,12 +410,17 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       title:
         name: 'title'
         label: 'Title'
-        cell: 'string'
+        cell: 'tooltip'
         editable: false
       desc:
         name: 'desc'
         label: 'Description'
         cell: 'string'
+        editable: false
+      project:
+        name: 'project'
+        label: 'Project'
+        cell: 'link'
         editable: false
       status: # TODO: change to list cell and editable
         name: 'status'
@@ -412,12 +430,12 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       created_at:
         name: 'created_at'
         label: 'Date Created'
-        cell: DateTimeCell
+        cell: 'readonly-datetime'
         editable: false
       updated_at:
         name: 'updated_at'
         label: 'Date Updated'
-        cell: DateTimeCell
+        cell: 'readonly-datetime'
         editable: false
     }
     _defaultEvents:
@@ -466,15 +484,16 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
           if cfgs[1]
             cfg = switch cfgs[0]
               when 'actions'
-                name: ''
+                name: cfgs[1]
                 label: ''
-                cell: ActionCell.extend(type: cfgs[1])
                 editable: false
                 sortable: false
+                cell: 'actions'
               when 'title'
                 name: 'title'
                 label: 'Title'
-                cell: LinkCell.extend(urlRoot: cfgs[1])
+                cell: 'link'
+                urlRoot: cfgs[1]
                 editable: false
               else
                 null

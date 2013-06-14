@@ -144,11 +144,11 @@ Contents
       title: 'Post Idea'
     action:
       id: 'f8e39128e0b51ecb5b1e6e40'
-      title: 'Project Init. Page'
+      title: 'Post to Multiple Socal Media'
     url: 'about:blank'
     status: 'POSTED'
     created_at: new Date(1371191307656)
-    updated_at: new Date(1371191307656)
+    posted_at: new Date(1371191307656)
   ,
     id: 'e57bf4f6aad752f9fc37fcf2'
     title: 'SOMY X100 Project Initialization'
@@ -162,11 +162,11 @@ Contents
       title: 'Post Idea'
     action:
       id: 'f8e39128e0b51ecb5b1e6e40'
-      type: 'Post to Multiple Socal Media'
+      title: 'Post to Multiple Socal Media'
     url: 'about:blank'
     status: 'POSTED'
     created_at: new Date(1371191307656)
-    updated_at: new Date(1371191307656)
+    posted_at: new Date(1371191307656)
   ,
     id: 'e57bf4f6aad752f9fc37fcf3'
     title: 'SOMY X100 Project Initialization'
@@ -180,11 +180,11 @@ Contents
       title: 'Post Idea'
     action:
       id: 'f8e39128e0b51ecb5b1e6e40'
-      type: 'Post to Multiple Socal Media'
+      title: 'Post to Multiple Socal Media'
     url: 'about:blank'
     status: 'POSTED'
     created_at: new Date(1371191307656)
-    updated_at: new Date(1371191307656)
+    posted_at: new Date(1371191307656)
   ,
     id: 'e57bf4f6aad752f9fc37fef1'
     title: 'SOMY X100 Project Notification'
@@ -198,11 +198,9 @@ Contents
       title: 'Notification'
     action:
       id: 'f8e39128e0b51ecb5b1e6e40'
-      type: 'Post to Multiple Socal Media'
-    url: 'about:blank'
+      title: 'Post to Multiple Socal Media'
     status: 'WAITING'
     created_at: new Date(1371191309656)
-    updated_at: new Date(1371191309656)
   ,
     id: 'e57bf4f6aad752f9fc37fef2'
     title: 'SOMY X100 Project Notification'
@@ -216,11 +214,9 @@ Contents
       title: 'Notification'
     action:
       id: 'f8e39128e0b51ecb5b1e6e40'
-      type: 'Post to Multiple Socal Media'
-    url: 'about:blank'
+      title: 'Post to Multiple Socal Media'
     status: 'WAITING'
     created_at: new Date(1371191309656)
-    updated_at: new Date(1371191309656)
   ,
     id: 'e57bf4f6aad752f9fc37fef3'
     title: 'SOMY X100 Project Notification'
@@ -234,11 +230,9 @@ Contents
       title: 'Notification'
     action:
       id: 'f8e39128e0b51ecb5b1e6e40'
-      type: 'Post to Multiple Socal Media'
-    url: 'about:blank'
+      title: 'Post to Multiple Socal Media'
     status: 'WAITING'
     created_at: new Date(1371191309656)
-    updated_at: new Date(1371191309656)
   ]
 
   workflows = new Workflows

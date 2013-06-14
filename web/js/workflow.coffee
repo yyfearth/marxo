@@ -53,7 +53,7 @@ Link
     columns: [
       'checkbox'
       'id'
-      'title:#workflow'
+      'title:workflow'
       'desc'
       'status'
       'created_at'
