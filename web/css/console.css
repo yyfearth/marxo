@@ -6165,6 +6165,14 @@ ul.action-bar .nav {
 .grid-table .datetime-cell {
   font-size: 12px;
 }
+.grid-table .project-link-cell,
+.grid-table .node-link-cell,
+.grid-table .action-link-cell {
+  max-width: 5em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
 .grid-filter form {
   margin: 0;
 }
