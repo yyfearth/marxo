@@ -5924,6 +5924,17 @@ body {
 .btn-round:before {
   margin-left: -6px;
 }
+ul.action-bar {
+  margin-left: 0;
+  list-style: none;
+}
+ul.action-bar > li {
+  display: inline-block;
+  margin-left: 5px;
+}
+ul.action-bar .nav {
+  margin-bottom: 0;
+}
 .box {
   border: 1px solid #DEDEDE;
   border-radius: 3px;
