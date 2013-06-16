@@ -150,6 +150,7 @@ define 'models', ['lib/common'], ->
   class Project extends Entity
 
   class Projects extends ManagerCollection
+    @projects = new Projects
     model: Project
     url: ROOT + '/projects'
 

@@ -147,7 +147,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'SOMY X100 Project Initialization Page'
       media: 'PAGE'
       project:
-        id: '577d415a8287e48327d8443c'
+        id: '50447afb4728cc2036cf9cf1'
         title: 'SOMY X100'
       node:
         id: '507f81413d070321728fde10'
@@ -165,7 +165,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'SOMY X100 Project Initialization Facebook Post'
       media: 'FACEBOOK'
       project:
-        id: '577d415a8287e48327d8443c'
+        id: '50447afb4728cc2036cf9cf1'
         title: 'SOMY X100'
       node:
         id: '507f81413d070321728fde10'
@@ -183,7 +183,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'SOMY X100 Project Initialization Twitter Post'
       media: 'TWITTER'
       project:
-        id: '577d415a8287e48327d8443c'
+        id: '50447afb4728cc2036cf9cf1'
         title: 'SOMY X100'
       node:
         id: '507f81413d070321728fde10'
@@ -201,7 +201,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'SOMY X100 Project Notification Page'
       media: 'PAGE'
       project:
-        id: '577d415a8287e48327d8443c'
+        id: '50447afb4728cc2036cf9cf1'
         title: 'SOMY X100'
       node:
         id: '507f81413d070321728fde14'
@@ -217,7 +217,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'SOMY X100 Project Notification Facebook Post'
       media: 'FACEBOOK'
       project:
-        id: '577d415a8287e48327d8443c'
+        id: '50447afb4728cc2036cf9cf1'
         title: 'SOMY X100'
       node:
         id: '507f81413d070321728fde14'
@@ -233,7 +233,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'SOMY X100 Project Notification Twitter Post'
       media: 'TWITTER'
       project:
-        id: '577d415a8287e48327d8443c'
+        id: '50447afb4728cc2036cf9cf1'
         title: 'SOMY X100'
       node:
         id: '507f81413d070321728fde14'

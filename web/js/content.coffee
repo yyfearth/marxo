@@ -8,6 +8,7 @@ find
 FrameView
 ManagerView
 NavFilterView
+ProjectFilterView
 #ModalDialogView
 # Project
 }, {
@@ -93,10 +94,15 @@ Contents
     collection: new Contents
     initialize: (options) ->
       super options
+      collection = @collection.fullCollection
       @mediaFilter = new NavFilterView
         el: '#media-filter'
         field: 'media'
-        collection: @collection.fullCollection
+        collection: collection
+      @projectFilter = new ProjectFilterView
+        el: find('ul.project-list', @el)
+        field: 'project.id'
+        collection: collection
       #_view = @view.bind @
       _remove = @remove.bind @
       @on
@@ -117,6 +123,11 @@ Contents
       #    model?.destroy() for model in models
       #    @reload() if models.length >= @pageSize / 2
       #  #console.log 'delete', model, @
+      @
+    render: ->
+      super()
+      @mediaFilter.render()
+      @projectFilter.render()
       @
   #view: (models) ->
   #  models = [models] unless Array.isArray models

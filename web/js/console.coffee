@@ -1,6 +1,11 @@
 "use strict"
 
-define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
+define 'console', ['models', 'lib/common'],
+({
+ManagerCollection
+Projects
+}) ->
+
   find = (selector, parent) ->
     parent ?= document
     parent.querySelector selector
@@ -190,7 +195,6 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
     hide: (hide = true) ->
       @show not hide
 
-
   class FormDialogView extends ModalDialogView
     initialize: (options) ->
       super options
@@ -286,6 +290,8 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
         return
       , @delay
       return
+
+  ## Manager View
 
   class SeqCell extends Backgrid.StringCell
     formatter: null
@@ -391,25 +397,40 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       @
 
   class NavFilterView extends Backgrid.Extension.ClientSideFilter
+    # TODO: support multiple filters
     events:
       'click a[href]': '_switch'
     initialize: (options) ->
-      field = options?.field
+      field = options?.field or @field
       throw 'nav filter only accept one options.field' unless typeof field is 'string'
       @fields = [field]
+      @keys = field.split '.'
       root = options.urlRoot or @urlRoot or field
       @_regex = new RegExp "##{root}:(\\w+)"
+      @_matchers = {}
       super options
-    search: (value) ->
-      matcher = @makeMatcher value
+    search: (query) ->
       col = @collection
       col.pageableCollection?.getFirstPage silent: true
-      shadow = @_gen_seq @shadowCollection.filter matcher.bind @
+      shadow = @_gen_seq @shadowCollection.filter @getMatcher query
       col.reset shadow, reindex: false
+      @lastQuery = query
       @
     clear: ->
       @collection.reset @_gen_seq(@shadowCollection.models), reindex: false
+      @lastQuery = null
       @
+    getMatcher: (query) ->
+      @_matchers[query] ?= @makeMatcher query
+    makeMatcher: (query) ->
+      regexp = new RegExp query.trim(), 'i'
+      keys = @keys
+      (model) ->
+        i = 0
+        value = model.get keys[i]
+        while value and key = keys[++i]
+          value = value[key]
+        regexp.test value
     render: ->
       @delegateEvents()
       @
@@ -422,14 +443,64 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       last = find '.active', @el
       if last isnt a.parentElement
         matched = a.href.match @_regex
-        media = matched?[1]
-        if media is 'all'
+        query = matched?[1]
+        console.log 'filter', @fields[0], query
+        if query is 'all'
           @clear()
-        else if media
-          @search media
+        else if query
+          @search query
         last?.classList.remove 'active'
         a.parentElement.classList.add 'active'
       false
+
+  class ProjectFilterView extends NavFilterView
+    field: 'project_id'
+    urlRoot: 'project'
+    _reload_timeout: 60000 # 1min
+    render: ->
+      super()
+      @el.innerHTML = ''
+      @el.appendChild @_renderHeader()
+      @el.appendChild @_renderItem null
+      projects = @projects or Projects.projects
+      ts = new Date().getTime()
+      if not projects._last_load or ts - projects._last_load > @_reload_timeout
+        # TODO: add a refresh button
+        projects.fetch
+          reset: true
+          success: (models) =>
+            @_load models
+            projects._last_load = new Date().getTime()
+            return
+      else
+        @_load projects
+      @
+    _load: (models) ->
+      fragments = document.createDocumentFragment()
+      console.log 'get projects', models
+      models.forEach (project) =>
+        fragments.appendChild @_renderItem project
+        return
+      @el.appendChild fragments
+      return
+    _renderHeader: (title = 'Projects') ->
+      header = document.createElement 'li'
+      header.className = 'nav-header'
+      header.textContent = title
+      header
+    _renderItem: (project) ->
+      li = document.createElement 'li'
+      li.className = 'project-list-item'
+      a = document.createElement 'a'
+      if project?.id
+        a.href = "##{@urlRoot}:#{project.id}"
+        a.textContent = project.get 'title'
+      else
+        a.href = "##{@urlRoot}:all"
+        a.textContent = 'All'
+        li.className += ' active'
+      li.appendChild a
+      li
 
   class ManagerView extends InnerFrameView
     _predefinedColumns: {
@@ -664,6 +735,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
   InnerFrameView
   ManagerView
   NavFilterView
+  ProjectFilterView
   ModalDialogView
   FormDialogView
   SignInView
