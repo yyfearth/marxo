@@ -44,6 +44,8 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
           navEl: navEl?.parentElement
         return
       @fixStyles()
+      # Init tooltips
+      @$el.tooltip selector: '[title]'
       return
     fixStyles: ->
       # auto resize
@@ -162,7 +164,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       @$el.modal
         show: false
         backdrop: 'static'
-      @$el.on 'hidden', @callback.bind @
+      @$el.on 'hidden', (e) => @callback() if e.target is @el
       return
     popup: (@data, callback) ->
       @_callback = callback
@@ -608,8 +610,6 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       ConsoleView.get().signout()
       @navigate 'signin', replace: true
       return
-
-  $ -> $(document.body).tooltip selector: '[title]:not([data-original-title])'
 
   { # exports
   find

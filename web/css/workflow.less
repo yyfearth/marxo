@@ -177,4 +177,21 @@
       }
     }
   }
+
+  #too_many_actions_alert {
+    margin: 0;
+    margin-top: -10px;
+    height: 0;
+    opacity: 0;
+    padding: 0;
+    border: none;
+    .transition('all');
+    &.active {
+      margin-top: 0;
+      height: auto;
+      opacity: 1;
+      padding: 8px 35px 8px 14px;
+      border: 1px solid #fbeed5;
+    }
+  }
 }

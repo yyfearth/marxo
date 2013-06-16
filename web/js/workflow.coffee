@@ -262,6 +262,7 @@ Link
     el: '#node_editor'
     events:
       'click a.action-thumb': '_addAction'
+    _too_many_actions_limit: 7
     initialize: (options) ->
       super options
       @actions = []
@@ -273,6 +274,7 @@ Link
       $(@actionsEl).sortable
         delay: 150
         distance: 15
+      @_too_many_alert = find '#too_many_actions_alert', @el
       @
     _fixStyle: -> # make sure the top of action box will below the title, name and desc
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
@@ -312,29 +314,39 @@ Link
       actionView.render()
       @actions.push model
       @actionViews.push actionView
+      actionView.el.scrollIntoView true
+      @_checkActionLimit()
       actionView
     removeAction: (view, model) ->
       idx = @actions.indexOf model
       return if idx < 0
       @actions.splice idx, 1
       @actionViews.splice idx, 1
+      @_checkActionLimit()
       @
+    _checkActionLimit: ->
+      cls = @_too_many_alert.classList
+      if @actions.length > @_too_many_actions_limit
+        cls.add 'active'
+        @_too_many_alert.scrollIntoView true
+      else
+        cls.remove 'active'
 
   class ActionView extends BoxView
+    @_tpl: {}
     @tpl: (type) -> # load form html template
-      if @_tpl? and @_tpl[type]?
-        @_tpl[type] # cached
-      else
-        el = find "#t_#{type}"
+      tpl = @_tpl[type] # cached
+      unless tpl?
+        el = find "#t_#{type}_action"
         if el?
-          @_tpl ?= ({})
+          console.log 'load action tpl', type, el.id
           # load template
           tpl = @_tpl[type] = el.innerHTML
           # remove template from dom
           el.parentNode.removeChild el
         else
           throw 'cannot find template for type: ' + type
-        tpl
+      tpl
     className: 'box action'
     initialize: (options) ->
       super options
@@ -353,7 +365,8 @@ Link
       @
     render: ->
       tpl = @constructor.tpl @type
-      @containerEl.appendChild @el
+      #@containerEl.appendChild @el
+      @containerEl.insertBefore @el, find '.alert', @containerEl
       @el.innerHTML = tpl
       # get els in super
       super()
@@ -645,8 +658,10 @@ Link
         if action is 'save'
           node.view.update node
           console.log 'saved node', node
-        else # canceled
+        else if action is 'cancel' # canceled
           console.log 'canceled edit node'
+        else
+          console.error 'unknown action', action
       @
     removeNode: (node) ->
       # use confirm since no support for undo

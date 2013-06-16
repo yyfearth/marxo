@@ -200,8 +200,8 @@
                   </div>
                 </div>
               </form>
-              <div id="actions" class="well">
-                          <div id="t_post_to_multi_social_media" class="tpl">
+              <div class="action_tpls tpl">
+                          <div id="t_post_to_multi_social_media_action" class="tpl">
                             <div class="box-header well">
                               <h4>Post to Multiple Social Media</h4>
                                         <div class="box-icon">
@@ -218,7 +218,7 @@
                               <div class="help-block">The maximium content length is 140, which is limited by Twitter.<br>Use "Post to Facebook" action instead for longer content length.</div>
                             </form>
                           </div>
-                          <div id="t_post_to_twitter" class="tpl">
+                          <div id="t_post_to_twitter_action" class="tpl">
                             <div class="box-header well">
                               <h4>Post to Twitter</h4>
                                         <div class="box-icon">
@@ -231,7 +231,7 @@
                               <div class="help-block">The maximium content length is 140, which is limited by Twitter.</div>
                             </form>
                           </div>
-                          <div id="t_post_to_facebook" class="tpl">
+                          <div id="t_post_to_facebook_action" class="tpl">
                             <div class="box-header well">
                               <h4>Post to Facebook</h4>
                                         <div class="box-icon">
@@ -244,7 +244,7 @@
                               <div class="help-block">The maximium content length is 63206, which is limited by Facebook.</div>
                             </form>
                           </div>
-                          <div id="t_send_email" class="tpl">
+                          <div id="t_send_email_action" class="tpl">
                             <div class="box-header well">
                               <h4>Send Email</h4>
                                         <div class="box-icon">
@@ -259,7 +259,7 @@
                               <textarea name="email_content" placeholder="Email Content..." title="Content for email (1000 max)" rows="5" maxlength="1000" class="input-block-level"></textarea>
                             </form>
                           </div>
-                          <div id="t_track_multi_social_media" class="tpl">
+                          <div id="t_track_multi_social_media_action" class="tpl">
                             <div class="box-header well">
                               <h4>Track Multiple Social Media</h4>
                                         <div class="box-icon">
@@ -274,7 +274,7 @@
                                         </div>track options
                             </form>
                           </div>
-                          <div id="t_track_email" class="tpl">
+                          <div id="t_track_email_action" class="tpl">
                             <div class="box-header well">
                               <h4>Track Email</h4>
                                         <div class="box-icon">
@@ -284,6 +284,9 @@
                             </div>
                             <form class="box-content">track email options</form>
                           </div>
+              </div>
+              <div id="actions" class="well">
+                <div id="too_many_actions_alert" class="alert"><strong>Too many actions!&nbsp;</strong>Keep the logic of a node simple to understand and excute.</div>
               </div>
             </div>
             <div class="modal-footer">

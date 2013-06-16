@@ -31,7 +31,7 @@ mixin actions_thumb
 
 // show in the actions box
 mixin actions_tpl
-  #t_post_to_multi_social_media.tpl
+  #t_post_to_multi_social_media_action.tpl
     .box-header.well
       h4 Post to Multiple Social Media
       mixin box_icons
@@ -43,7 +43,7 @@ mixin actions_tpl
         br
         | Use "Post to Facebook" action instead for longer content length.
 
-  #t_post_to_twitter.tpl
+  #t_post_to_twitter_action.tpl
     .box-header.well
       h4 Post to Twitter
       mixin box_icons
@@ -51,7 +51,7 @@ mixin actions_tpl
       mixin post_content('Twitter', 140, 2)
       .help-block The maximium content length is 140, which is limited by Twitter.
 
-  #t_post_to_facebook.tpl
+  #t_post_to_facebook_action.tpl
     .box-header.well
       h4 Post to Facebook
       mixin box_icons
@@ -59,7 +59,7 @@ mixin actions_tpl
       mixin post_content('Facebook', 63206, 3)
       .help-block The maximium content length is 63206, which is limited by Facebook.
 
-  #t_send_email.tpl
+  #t_send_email_action.tpl
     .box-header.well
       h4 Send Email
       mixin box_icons
@@ -71,7 +71,7 @@ mixin actions_tpl
       textarea.input-block-level(name='email_content', placeholder='Email Content...',
       title='Content for email (1000 max)', rows=5, maxlength=1000)
 
-  #t_track_multi_social_media.tpl
+  #t_track_multi_social_media_action.tpl
     .box-header.well
       h4 Track Multiple Social Media
       mixin box_icons
@@ -79,7 +79,7 @@ mixin actions_tpl
       mixin multi_social_media_group_btns
       | track options
 
-  #t_track_email.tpl
+  #t_track_email_action.tpl
     .box-header.well
       h4 Track Email
       mixin box_icons

@@ -24,8 +24,13 @@ include node_editor_actions
         label.control-label(for='node_desc') Description
         .controls
           textarea#node_desc.input-xlarge(name='desc', rows='1', placeholder='Description')
-    #actions.well
+    .action_tpls.tpl
       mixin actions_tpl
+    #actions.well
+      #too_many_actions_alert.alert
+        strong Too many actions!&nbsp;
+        | Keep the logic of a node simple to understand and excute.
+
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save
