@@ -124,6 +124,10 @@ Contents
       #    @reload() if models.length >= @pageSize / 2
       #  #console.log 'delete', model, @
       @
+    reload: ->
+      super()
+      @mediaFilter.clear()
+      @projectFilter.clear()
     render: ->
       super()
       @mediaFilter.render()

@@ -396,10 +396,75 @@ Projects
         @$el.show()
       @
 
-  class NavFilterView extends Backgrid.Extension.ClientSideFilter
-    # TODO: support multiple filters
+  class MergeableFilter extends Backgrid.Extension.ClientSideFilter
     events:
-      'click a[href]': '_switch'
+      'click .close': (e) ->
+        e.preventDefault()
+        @clear()
+        false
+      'input input[type=text]': 'search'
+      'submit': (e) ->
+        e.preventDefault()
+        @search()
+        false
+    initialize: (options) ->
+      super options
+      @_shared_matchers = @collection._matchers ?= []
+    getMatcher: (query) ->
+      @makeMatcher(query).bind @
+    mergeMatcher: (query) ->
+      _matchers = @_shared_matchers
+      #console.log 'old _matchers', _matchers
+      for matcher, i in _matchers
+        if matcher._filter is @
+          _matchers.splice i, 1
+          break
+      #console.log 'existing other _matchers', _matchers
+      if query
+        matcher = @getMatcher query
+        matcher._filter = @
+        _matchers.push matcher
+        #console.log 'add matcher', _matchers
+      if _matchers.length > 1
+        # merge matchers for more than one
+        #console.log 'combine _matchers', _matchers
+        (query) ->
+          for matcher in _matchers
+            return false if false is matcher? query
+          true
+      else
+        # only or no matcher
+        _matchers[0]
+    search: ->
+      @_search @$el.find('input[type=text]').val()
+    _search: (query) ->
+      query = null unless query
+      console.log 'search', query
+      col = @collection
+      col.pageableCollection?.getFirstPage silent: true
+      matcher = @mergeMatcher query
+      if matcher
+        shadow = @_gen_seq @shadowCollection.filter matcher
+        col.reset shadow, reindex: false
+        col._filtered = true
+      else if col._filtered # query is null and no other matchers
+        col.reset @_gen_seq(@shadowCollection.models), reindex: false
+        col._filtered = false
+      @lastQuery = query
+      @
+    clear: ->
+      @$el.find('input[type=text]').val('')
+      @search null
+    _gen_seq: (col) ->
+      col.forEach (model, i) -> model._seq = i
+      col
+
+  class NavFilterView extends MergeableFilter
+    events:
+      'click a[href]': (e) ->
+        e.preventDefault()
+        @select e.target
+        false
     initialize: (options) ->
       field = options?.field or @field
       throw 'nav filter only accept one options.field' unless typeof field is 'string'
@@ -409,17 +474,6 @@ Projects
       @_regex = new RegExp "##{root}:(\\w+)"
       @_matchers = {}
       super options
-    search: (query) ->
-      col = @collection
-      col.pageableCollection?.getFirstPage silent: true
-      shadow = @_gen_seq @shadowCollection.filter @getMatcher query
-      col.reset shadow, reindex: false
-      @lastQuery = query
-      @
-    clear: ->
-      @collection.reset @_gen_seq(@shadowCollection.models), reindex: false
-      @lastQuery = null
-      @
     getMatcher: (query) ->
       @_matchers[query] ?= @makeMatcher query
     makeMatcher: (query) ->
@@ -431,27 +485,26 @@ Projects
         while value and key = keys[++i]
           value = value[key]
         regexp.test value
+    search: (query) ->
+      @_search query
     render: ->
       @delegateEvents()
       @
-    _gen_seq: (col) ->
-      col.forEach (model, i) -> model._seq = i
-      col
-    _switch: (e) ->
-      e.preventDefault()
-      a = e.target
+    clear: ->
+      @select null
+    select: (a) ->
+      # 1st a is the default
+      a ?= find 'a[href]', @el
       last = find '.active', @el
       if last isnt a.parentElement
         matched = a.href.match @_regex
         query = matched?[1]
         console.log 'filter', @fields[0], query
-        if query is 'all'
-          @clear()
-        else if query
-          @search query
+        query = null if query is 'all'
+        @search query
         last?.classList.remove 'active'
         a.parentElement.classList.add 'active'
-      false
+      @
 
   class ProjectFilterView extends NavFilterView
     field: 'project_id'
@@ -583,7 +636,7 @@ Projects
         collection: collection
       @paginator = new ManagerPaginator
         collection: collection
-      @filter = new Backgrid.Extension.ClientSideFilter
+      @filter = new MergeableFilter
         collection: collection.fullCollection,
         fields: ['title']
         wait: 300
@@ -634,6 +687,7 @@ Projects
     reload: ->
       @collection.fetch reset: true
       @collection.getPage 1
+      @filter.clear()
       @
     getSelected: ->
       @grid.getSelectedModels().filter (r) -> r?
