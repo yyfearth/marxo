@@ -6189,9 +6189,20 @@ ul.action-bar .nav {
 .grid-table .datetime-cell {
   font-size: 12px;
 }
-.grid-table .project-link-cell,
-.grid-table .node-link-cell,
+.grid-table .project-link-cell {
+  max-width: 6em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
 .grid-table .action-link-cell {
+  max-width: 12em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.grid-table .action-link-cell .project-title {
+  display: inline-block;
   max-width: 5em;
   text-overflow: ellipsis;
   white-space: nowrap;

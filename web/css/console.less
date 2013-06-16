@@ -310,15 +310,26 @@ ul.action-bar {
   }
 }
 
+.ellipsis(@max_width: 5em) {
+  max-width: @max_width;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 .grid-table {
   .datetime-cell {
     font-size: 12px;
   }
-  .project-link-cell, .node-link-cell, .action-link-cell {
-    max-width: 5em;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+  .project-link-cell {
+    .ellipsis(6em);
+  }
+  .action-link-cell {
+    .ellipsis(12em);
+    .project-title {
+      display: inline-block;
+      .ellipsis(5em);
+    }
   }
 }
 

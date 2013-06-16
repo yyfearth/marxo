@@ -390,6 +390,47 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
         @$el.show()
       @
 
+  class NavFilterView extends Backgrid.Extension.ClientSideFilter
+    events:
+      'click a[href]': '_switch'
+    initialize: (options) ->
+      field = options?.field
+      throw 'nav filter only accept one options.field' unless typeof field is 'string'
+      @fields = [field]
+      root = options.urlRoot or @urlRoot or field
+      @_regex = new RegExp "##{root}:(\\w+)"
+      super options
+    search: (value) ->
+      matcher = @makeMatcher value
+      col = @collection
+      col.pageableCollection?.getFirstPage silent: true
+      shadow = @_gen_seq @shadowCollection.filter matcher.bind @
+      col.reset shadow, reindex: false
+      @
+    clear: ->
+      @collection.reset @_gen_seq(@shadowCollection.models), reindex: false
+      @
+    render: ->
+      @delegateEvents()
+      @
+    _gen_seq: (col) ->
+      col.forEach (model, i) -> model._seq = i
+      col
+    _switch: (e) ->
+      e.preventDefault()
+      a = e.target
+      last = find '.active', @el
+      if last isnt a.parentElement
+        matched = a.href.match @_regex
+        media = matched?[1]
+        if media is 'all'
+          @clear()
+        else if media
+          @search media
+        last?.classList.remove 'active'
+        a.parentElement.classList.add 'active'
+      false
+
   class ManagerView extends InnerFrameView
     _predefinedColumns: {
       checkbox:
@@ -422,6 +463,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       project:
         name: 'project'
         label: 'Project'
+        urlRoot: 'project'
         cell: 'link'
         editable: false
       status: # TODO: change to list cell and editable
@@ -621,6 +663,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
   FrameView
   InnerFrameView
   ManagerView
+  NavFilterView
   ModalDialogView
   FormDialogView
   SignInView

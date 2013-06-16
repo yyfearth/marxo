@@ -2,11 +2,12 @@
 
 define 'content', ['console', 'models'],
 ({
-#find
+find
 #findAll
 #View
 FrameView
 ManagerView
+NavFilterView
 #ModalDialogView
 # Project
 }, {
@@ -20,6 +21,23 @@ Contents
     render: ->
       super()
       @manager.render()
+      @
+
+  class NodeActionCell extends Backgrid.LinkCell
+    render: ->
+      @$el.empty()
+      project = @model.get 'project'
+      node = @model.get 'node'
+      action = @model.get 'action'
+      url = "#project/#{project.id}/node/#{node.id}/action/#{action.id}"
+      tooltip = "#{node.title}: #{action.title}"
+      html = "<span class='project-title'>#{_.escape node.title}</span>: #{_.escape action.title}"
+      @$el.addClass('action-link-cell').append $('<a>',
+        tabIndex: -1
+        href: url
+      ).html html
+      @$el.attr title: tooltip, 'data-container': 'body'
+      @delegateEvents()
       @
 
   class ContentActionCell extends Backgrid.ActionsCell
@@ -52,14 +70,9 @@ Contents
     ,
       'project'
     ,
-      name: 'node'
-      label: 'Node'
-      cell: 'link'
-      editable: false
-    ,
       name: 'action'
-      label: 'Action'
-      cell: 'link'
+      label: 'Node: Action'
+      cell: NodeActionCell
       editable: false
     ,
       'status'
@@ -80,6 +93,10 @@ Contents
     collection: new Contents
     initialize: (options) ->
       super options
+      @mediaFilter = new NavFilterView
+        el: '#media-filter'
+        field: 'media'
+        collection: @collection.fullCollection
       #_view = @view.bind @
       _remove = @remove.bind @
       @on
