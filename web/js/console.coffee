@@ -531,6 +531,7 @@ define 'console', ['models', 'lib/common'], ({ManagerCollection}) ->
       # model = $(cell).data('model')
       model = @collection.get cell.dataset.model
       console.log 'action', action, model
+      $(btn).tooltip 'hide'
       @trigger action, model if action and model
       return
     _action_buttons: (e) ->

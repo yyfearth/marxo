@@ -114,7 +114,37 @@
           <h4>Project Viewer</h4>
         </div>
         <div id="project_manager" name="manager" class="active row-fluid inner-frame">
-          <h4>Project Manager</h4>
+          <div class="span2 sidebar">
+            <div id="wf_template_list" class="well">
+              <ul class="sidebar-list nav nav-list">
+                <li class="nav-header">Workflows</li>
+                <li class="workflow"><a href="#workflow:new">Workflow 1</a></li>
+              </ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">
+                  Click a Workflow above
+                  to Add a new Project based on the selected Workflow.
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="span10 workspace">
+            <ul class="action-bar">
+              <li class="head">Project Manager</li>
+              <li class="grid-filter"></li>
+              <li class="action-buttons pull-right">
+                <button name="reload" title="Reload Table" class="btn">Reload</button>
+                <button title="Batch Control Selected" disabled class="btn btn-danger enable_if_selected">Operation</button>
+              </li>
+            </ul>
+            <div id="t_project_action_cell" class="tpl"><a title="View" name="view" class="btn btn-info btn-round icon-search"></a>
+              <button title="Remove" name="remove" class="btn btn-danger btn-round icon-close"></button>
+            </div>
+            <table class="grid-table"></table>
+            <div class="grid-paginator"></div>
+          </div>
         </div>
       </div>
       <div id="workflow" class="frame container-fluid">
@@ -347,6 +377,7 @@
           </div>
           <div class="span10 workspace">
             <ul class="action-bar">
+              <li class="head">Workflow Manager</li>
               <li class="grid-filter"></li>
               <li class="action-buttons pull-right">
                 <button name="reload" title="Reload Table" class="btn">Reload</button>
