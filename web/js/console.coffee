@@ -2,6 +2,7 @@
 
 define 'console', ['models', 'lib/common'],
 ({
+Collection
 ManagerCollection
 Projects
 }) ->
@@ -291,6 +292,72 @@ Projects
       , @delay
       return
 
+  class NavListView extends View
+    urlRoot: ''
+    headerTitle: ''
+    defaultItem: 'all'
+    itemClassName: ''
+    _reload_timeout: 60000 # 1min
+    initialize: (options) ->
+      super options
+      @collection = options.collection or @collection
+      throw 'collection must be given' unless @collection instanceof Collection
+      @urlRoot = options.urlRoot or @urlRoot
+      @headerTitle = options.headerTitle or @headerTitle
+      @defaultItem = options.defaultItem or @defaultItem
+      @itemClassName = options.itemClassName or @itemClassName
+      @collection.on 'reset', @render.bind @
+      @fetch false if options.auto
+    fetch: (force) ->
+      col = @collection
+      ts = new Date().getTime()
+      if force or not col._last_load or ts - col._last_load > @_reload_timeout
+        # TODO: add a refresh button
+        #console.log 'fetch for list', @headerTitle
+        col.fetch reset: true
+        col._last_load = new Date().getTime()
+      @
+    render: ->
+      #@_clear()
+      @_render()
+      @
+    _clear: ->
+      @el.innerHTML = ''
+      @el.appendChild @_renderHeader null
+      @el.appendChild @_renderItem null
+      return
+    _render: (models = @collection) ->
+      console.log 'render models', models
+      fragments = document.createDocumentFragment()
+      models.forEach (model) =>
+        fragments.appendChild @_renderItem model
+        return
+      @el.appendChild fragments
+      return
+    _renderHeader: (title = @headerTitle) ->
+      header = document.createElement 'li'
+      header.className = 'nav-header'
+      header.textContent = title
+      header
+    _renderItem: (model = @defaultItem) ->
+      console.log 'render item', model
+      li = document.createElement 'li'
+      li.className = @itemClassName
+      a = document.createElement 'a'
+      if model.id
+        a.href = "##{@urlRoot}:#{model.id}"
+        a.textContent = model.get 'title'
+      else if model is 'all'
+        a.href = "##{@urlRoot}:all"
+        a.textContent = 'All'
+        li.className += ' active'
+      else if model is 'new' or model is 'empty'
+        a.href = "##{@urlRoot}:new"
+        a.textContent = 'Empty'
+        li.className += ' active'
+      li.appendChild a
+      li
+
   ## Manager View
 
   class SeqCell extends Backgrid.StringCell
@@ -509,51 +576,20 @@ Projects
   class ProjectFilterView extends NavFilterView
     field: 'project_id'
     urlRoot: 'project'
-    _reload_timeout: 60000 # 1min
+    initialize: (options) ->
+      super options
+      @list = new NavListView
+        el: @el
+        auto: false
+        collection: Projects.projects
+        urlRoot: @urlRoot
+        headerTitle: 'Projects'
+        defaultItem: 'all'
+        itemClassName: 'project-list-item'
     render: ->
       super()
-      @el.innerHTML = ''
-      @el.appendChild @_renderHeader()
-      @el.appendChild @_renderItem null
-      projects = @projects or Projects.projects
-      ts = new Date().getTime()
-      if not projects._last_load or ts - projects._last_load > @_reload_timeout
-        # TODO: add a refresh button
-        projects.fetch
-          reset: true
-          success: (models) =>
-            @_load models
-            projects._last_load = new Date().getTime()
-            return
-      else
-        @_load projects
+      @list.fetch()
       @
-    _load: (models) ->
-      fragments = document.createDocumentFragment()
-      console.log 'get projects', models
-      models.forEach (project) =>
-        fragments.appendChild @_renderItem project
-        return
-      @el.appendChild fragments
-      return
-    _renderHeader: (title = 'Projects') ->
-      header = document.createElement 'li'
-      header.className = 'nav-header'
-      header.textContent = title
-      header
-    _renderItem: (project) ->
-      li = document.createElement 'li'
-      li.className = 'project-list-item'
-      a = document.createElement 'a'
-      if project?.id
-        a.href = "##{@urlRoot}:#{project.id}"
-        a.textContent = project.get 'title'
-      else
-        a.href = "##{@urlRoot}:all"
-        a.textContent = 'All'
-        li.className += ' active'
-      li.appendChild a
-      li
 
   class ManagerView extends InnerFrameView
     _predefinedColumns: {
@@ -787,6 +823,7 @@ Projects
   BoxView
   FrameView
   InnerFrameView
+  NavListView
   ManagerView
   NavFilterView
   ProjectFilterView
