@@ -1,6 +1,6 @@
 "use strict"
 
-define 'config', ['console'],
+define 'config', ['console', 'manager'],
 ({
 #find
 #findAll
@@ -10,6 +10,7 @@ InnerFrameView
 #ModalDialogView
 # Tenant
 }) ->
+
   class ConfigFrameView extends FrameView
     initialize: (options) ->
       super options

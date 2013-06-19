@@ -1,12 +1,3 @@
-/*!
- * Bootstrap v2.3.2 (without Icons)
- *
- * Copyright 2012 Twitter, Inc
- * Licensed under the Apache License v2.0
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Designed and built with all the love in the world @twitter by @mdo and @fat.
- */
 .clearfix {
   *zoom: 1;
 }
@@ -4841,24 +4832,10 @@ a.badge:focus {
   margin-right: .2em;
   text-align: center;
   opacity: .8;
-  /* For safety - reset parent styles, that can break glyph codes*/
-
   font-variant: normal;
   text-transform: none;
-  /* fix buttons height, for twitter bootstrap */
-
   line-height: 1em;
-  /* Animation center compensation - magrins should be symmetric */
-
-  /* remove if not needed */
-
   margin-left: .2em;
-  /* you can be more comfortable with increased icons size */
-
-  /* font-size: 120%; */
-
-  /* Uncomment for 3D effect */
-
   text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3);
 }
 .icon-plus:before {
@@ -4876,7 +4853,7 @@ a.badge:focus {
 .icon-mail:before {
   content: '\2709';
 }
-.icon-pencil:before {
+.icon-edit:before {
   content: '\270e';
 }
 .icon-ok:before {
@@ -4910,13 +4887,13 @@ a.badge:focus {
   content: '\f0d0';
 }
 .icon-user:before {
-  content: '👤';
+  content: '\e800';
 }
 .icon-users:before {
-  content: '👥';
+  content: '\e801';
 }
 .icon-search:before {
-  content: '🔍';
+  content: '\e802';
 }
 .ui-helper-hidden {
   display: none;
@@ -5215,16 +5192,24 @@ a.badge:focus {
 #node_editor .action.box form.box-content > * {
   margin-bottom: 10px;
 }
-/*
- * FullCalendar v1.5.4 Stylesheet
- *
- * Copyright (c) 2011 Adam Shaw
- * Dual licensed under the MIT and GPL licenses, located in
- * MIT-LICENSE.txt and GPL-LICENSE.txt respectively.
- *
- * Date: Tue Sep 4 23:38:33 2012 -0700
- *
- */
+#node_editor #too_many_actions_alert {
+  margin: 0;
+  margin-top: -10px;
+  height: 0;
+  opacity: 0;
+  padding: 0;
+  border: none;
+  -webkit-transition: 'all' 0.5s ease-in-out 0;
+  -moz-transition: 'all' 0.5s ease-in-out 0;
+  transition: 'all' 0.5s ease-in-out 0;
+}
+#node_editor #too_many_actions_alert.active {
+  margin-top: 0;
+  height: auto;
+  opacity: 1;
+  padding: 8px 35px 8px 14px;
+  border: 1px solid #fbeed5;
+}
 .fc {
   direction: ltr;
   text-align: left;
@@ -5242,8 +5227,6 @@ html .fc,
   padding: 0;
   vertical-align: top;
 }
-/* Header
-------------------------------------------------------------------------*/
 .fc-header td {
   white-space: nowrap;
 }
@@ -5273,21 +5256,15 @@ html .fc,
   margin-bottom: 1em;
   vertical-align: top;
 }
-/* buttons edges butting together */
 .fc-header .fc-button {
   margin-right: -1px;
 }
 .fc-header .fc-corner-right {
   margin-right: 1px;
-  /* back to normal */
-
 }
 .fc-header .ui-corner-right {
   margin-right: 0;
-  /* back to normal */
-
 }
-/* button layering (for border precedence) */
 .fc-header .fc-state-hover,
 .fc-header .ui-state-hover {
   z-index: 2;
@@ -5299,50 +5276,30 @@ html .fc,
 .fc-header .ui-state-active {
   z-index: 4;
 }
-/* Content
-------------------------------------------------------------------------*/
 .fc-content {
   clear: both;
 }
 .fc-view {
   width: 100%;
-  /* needed for view switching (when view is absolute) */
-
   overflow: hidden;
 }
-/* Cell Styles
-------------------------------------------------------------------------*/
 .fc-widget-header,
 .fc-widget-content {
-  /* <td>, usually */
-
   border: 1px solid #ccc;
 }
 .fc-state-highlight {
-  /* <td> today cell */
-  /* TODO: add .fc-today to <th> */
-
   background: #ffc;
 }
 .fc-cell-overlay {
-  /* semi-transparent rectangle while dragging */
-
   background: #9cf;
   opacity: .2;
-  filter: alpha(opacity=20);
-  /* for IE */
-
 }
-/* Buttons
-------------------------------------------------------------------------*/
 .fc-button {
   position: relative;
   display: inline-block;
   cursor: pointer;
 }
 .fc-state-default {
-  /* non-theme */
-
   border-style: solid;
   border-width: 1px 0;
 }
@@ -5352,8 +5309,6 @@ html .fc,
   overflow: hidden;
 }
 .fc-state-default .fc-button-inner {
-  /* non-theme */
-
   border-style: solid;
   border-width: 0 1px;
 }
@@ -5365,7 +5320,6 @@ html .fc,
   padding: 0 .6em;
   white-space: nowrap;
 }
-/* icon (for jquery ui) */
 .fc-button-content .fc-icon-wrap {
   position: relative;
   float: left;
@@ -5378,7 +5332,6 @@ html .fc,
   *margin-top: 0;
   *top: -50%;
 }
-/* gloss effect */
 .fc-state-default .fc-button-effect {
   position: absolute;
   top: 50%;
@@ -5397,7 +5350,6 @@ html .fc,
   opacity: .09;
   filter: alpha(opacity=9);
 }
-/* button states (determines colors)  */
 .fc-state-default,
 .fc-state-default .fc-button-inner {
   border-style: solid;
@@ -5431,8 +5383,6 @@ html .fc,
 .fc-state-disabled .fc-button-effect {
   display: none;
 }
-/* Global Event Styles
-------------------------------------------------------------------------*/
 .fc-event {
   border-style: solid;
   border-width: 0;
@@ -5451,14 +5401,8 @@ a.fc-event {
 }
 .fc-event-skin {
   border-color: #36c;
-  /* default BORDER color */
-
   background-color: #36c;
-  /* default BACKGROUND color */
-
   color: #fff;
-  /* default TEXT color */
-
 }
 .fc-event-inner {
   position: relative;
@@ -5473,49 +5417,28 @@ a.fc-event {
   padding: 0 1px;
 }
 .fc .ui-resizable-handle {
-  /*** TODO: don't use ui-resizable anymore, change class ***/
-
   display: block;
   position: absolute;
   z-index: 99999;
-  overflow: hidden;
-  /* hacky spaces (IE6/7) */
-
-  font-size: 300%;
-  line-height: 50%;
-  /* */
-
 }
-/* Horizontal Events
-------------------------------------------------------------------------*/
 .fc-event-hori {
   border-width: 1px 0;
   margin-bottom: 1px;
 }
-/* resizable */
 .fc-event-hori .ui-resizable-e {
-  top: 0           !important;
-  /* importants override pre jquery ui 1.7 styles */
-
+  top: 0 !important;
   right: -3px !important;
-  width: 7px       !important;
-  height: 100%     !important;
+  width: 7px !important;
+  height: 100% !important;
   cursor: e-resize;
 }
 .fc-event-hori .ui-resizable-w {
-  top: 0           !important;
+  top: 0 !important;
   left: -3px !important;
-  width: 7px       !important;
-  height: 100%     !important;
+  width: 7px !important;
+  height: 100% !important;
   cursor: w-resize;
 }
-.fc-event-hori .ui-resizable-handle {
-  _padding-bottom: 14px;
-  /* IE6 had 0 height */
-
-}
-/* Fake Rounded Corners (for buttons and events)
-------------------------------------------------------------*/
 .fc-corner-left {
   margin-left: 1px;
 }
@@ -5542,8 +5465,6 @@ a.fc-event {
 .fc-corner-bottom .fc-event-inner {
   margin-bottom: -1px;
 }
-/* Fake Rounded Corners SPECIFICALLY FOR EVENTS
------------------------------------------------------------------*/
 .fc-corner-left .fc-event-inner {
   border-left-width: 1px;
 }
@@ -5556,8 +5477,6 @@ a.fc-event {
 .fc-corner-bottom .fc-event-inner {
   border-bottom-width: 1px;
 }
-/* Reusable Separate-border Table
-------------------------------------------------------------*/
 table.fc-border-separate {
   border-collapse: separate;
 }
@@ -5577,8 +5496,6 @@ table.fc-border-separate {
 .fc-border-separate tbody tr.fc-first th {
   border-top-width: 0;
 }
-/* Month View, Basic Week View, Basic Day View
-------------------------------------------------------------------------*/
 .fc-grid th {
   text-align: center;
 }
@@ -5588,33 +5505,20 @@ table.fc-border-separate {
 }
 .fc-grid .fc-other-month .fc-day-number {
   opacity: 0.3;
-  filter: alpha(opacity=30);
-  /* for IE */
-
-  /* opacity with small font can sometimes look too faded
-	   might want to set the 'color' property instead
-	   making day-numbers bold also fixes the problem */
-
 }
 .fc-grid .fc-day-content {
   clear: both;
   padding: 2px 2px 1px;
-  /* distance between events and day edges */
-
 }
-/* event styles */
 .fc-grid .fc-event-time {
   font-weight: bold;
 }
-/* right-to-left */
 .fc-rtl .fc-grid .fc-day-number {
   float: left;
 }
 .fc-rtl .fc-grid .fc-event-time {
   float: right;
 }
-/* Agenda Week View, Agenda Day View
-------------------------------------------------------------------------*/
 .fc-agenda table {
   border-collapse: separate;
 }
@@ -5632,24 +5536,18 @@ table.fc-border-separate {
 .fc-agenda .fc-day-content {
   padding: 2px 2px 1px;
 }
-/* make axis border take precedence */
 .fc-agenda-days .fc-agenda-axis {
   border-right-width: 1px;
 }
 .fc-agenda-days .fc-col0 {
   border-left-width: 0;
 }
-/* all-day area */
 .fc-agenda-allday th {
   border-width: 0 1px;
 }
 .fc-agenda-allday .fc-day-content {
   min-height: 34px;
-  /* TODO: doesnt work well in quirksmode */
-
-  _height: 34px;
 }
-/* divider (between all-day and slots) */
 .fc-agenda-divider-inner {
   height: 2px;
   overflow: hidden;
@@ -5657,7 +5555,6 @@ table.fc-border-separate {
 .fc-widget-header .fc-agenda-divider-inner {
   background: #eee;
 }
-/* slot rows */
 .fc-agenda-slots th {
   border-width: 1px 1px 0;
 }
@@ -5676,13 +5573,6 @@ table.fc-border-separate {
 .fc-agenda-slots tr.fc-minor td {
   border-top-style: dotted;
 }
-.fc-agenda-slots tr.fc-minor th.ui-widget-header {
-  *border-top-style: solid;
-  /* doesn't work with background in IE6/7 */
-
-}
-/* Vertical Events
-------------------------------------------------------------------------*/
 .fc-event-vert {
   border-width: 0 1px;
 }
@@ -5698,8 +5588,6 @@ table.fc-border-separate {
   font-size: 10px;
 }
 .fc-event-vert .fc-event-bg {
-  /* makes the event lighter w/ a semi-transparent overlay  */
-
   position: absolute;
   z-index: 1;
   top: 0;
@@ -5708,32 +5596,17 @@ table.fc-border-separate {
   height: 100%;
   background: #fff;
   opacity: .3;
-  filter: alpha(opacity=30);
 }
-.fc .ui-draggable-dragging .fc-event-bg,
-.fc-select-helper .fc-event-bg {
-  display: none\9;
-  /* for IE6/7/8. nested opacity filters while dragging don't work */
-
-}
-/* resizable */
 .fc-event-vert .ui-resizable-s {
-  bottom: 0        !important;
-  /* importants override pre jquery ui 1.7 styles */
-
-  width: 100%      !important;
-  height: 8px      !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 8px !important;
   overflow: hidden !important;
   line-height: 8px !important;
-  font-size: 11px  !important;
+  font-size: 11px !important;
   font-family: monospace;
   text-align: center;
   cursor: s-resize;
-}
-.fc-agenda .ui-resizable-resizing {
-  /* TODO: better selector */
-
-  _overflow: hidden;
 }
 #external-events {
   float: left;
@@ -5748,8 +5621,6 @@ table.fc-border-separate {
   padding-top: 1em;
 }
 .external-event {
-  /* try to mimick the look of a real event */
-
   margin: 10px 0;
   padding: 2px 4px;
   background: #3366CC;
@@ -6044,23 +5915,43 @@ body {
   height: 100%;
 }
 .tpl {
-  display: none;
+  display: none !important;
 }
 .btn-round {
   display: inline-block;
-  width: 27px;
-  height: 27px;
-  border-radius: 40px;
-  line-height: 18px;
+  width: 25px;
+  height: 25px;
+  border-radius: 25px;
+  line-height: 25px;
   vertical-align: middle;
   font-size: 14px;
   clear: none;
   float: left;
-  margin: -1px 2px 1px 2px;
+  padding: 0;
+  margin: 0 2px;
   text-align: center;
+  overflow: hidden;
 }
-.btn-round:before {
-  margin-left: -6px;
+button.btn-round {
+  width: 27px;
+  height: 27px;
+}
+ul.action-bar {
+  margin-left: 0;
+  list-style: none;
+}
+ul.action-bar > .head {
+  font-size: 20px;
+  font-weight: bold;
+  vertical-align: bottom;
+  margin-bottom: 3px;
+}
+ul.action-bar > li {
+  display: inline-block;
+  margin-left: 5px;
+}
+ul.action-bar .nav {
+  margin-bottom: 0;
 }
 .box {
   border: 1px solid #DEDEDE;
@@ -6106,9 +5997,9 @@ body {
   padding: 10px;
   opacity: 1;
   overflow: hidden;
-  -webkit-transition: all 0.3s ease;
-  -moz-transition: all 0.3s ease;
-  transition: all 0.3s ease;
+  -webkit-transition: all 0.3s ease 0;
+  -moz-transition: all 0.3s ease 0;
+  transition: all 0.3s ease 0;
 }
 .box .box-content.minimized {
   opacity: 0;
@@ -6125,9 +6016,9 @@ body {
   bottom: 0px;
   right: 0px;
   background: #f5f5f5;
-  -webkit-transition: opacity 0.5s ease-in-out;
-  -moz-transition: opacity 0.5s ease-in-out;
-  transition: opacity 0.5s ease-in-out;
+  -webkit-transition: opacity 0.5s ease-in-out 0;
+  -moz-transition: opacity 0.5s ease-in-out 0;
+  transition: opacity 0.5s ease-in-out 0;
 }
 #signin .form-signin {
   position: absolute;
@@ -6178,15 +6069,32 @@ body {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
-#navbar ul.nav li.dropdown:hover ul.dropdown-menu {
+#navbar ul.nav > li {
+  -webkit-transition: background-color 0.1s ease-in-out 0;
+  -moz-transition: background-color 0.1s ease-in-out 0;
+  transition: background-color 0.1s ease-in-out 0;
+}
+#navbar ul.nav > li:hover {
+  background-color: rgba(200, 200, 200, 0.2);
+}
+#navbar ul.nav li.dropdown ul.dropdown-menu,
+#navbar.hide-dropdown ul.nav li.dropdown:hover ul.dropdown-menu {
   display: block;
+  visibility: hidden;
+  margin-top: -5px;
+  opacity: 0;
+  -webkit-transition: all 0.2s ease-in-out 0.1s;
+  -moz-transition: all 0.2s ease-in-out 0.1s;
+  transition: all 0.2s ease-in-out 0.1s;
+}
+#navbar ul.nav li.dropdown:hover ul.dropdown-menu {
+  visibility: visible;
+  opacity: 1;
+  margin-top: 0;
 }
 #navbar li.dropdown .caret {
   border-top-color: #999;
   border-bottom-color: #999;
-}
-#navbar .dropdown-menu {
-  margin-top: 0px;
 }
 #frames {
   position: absolute;
@@ -6242,6 +6150,16 @@ body {
   margin-left: 13px;
   overflow: auto;
 }
+#frames .frame .workspace .page-header {
+  margin: 0 0 10px;
+  padding-bottom: 0;
+}
+#frames .frame .workspace .page-header h3 {
+  margin: 0 .2em;
+}
+#frames .frame .workspace .page-header h3 small {
+  margin-left: 1em;
+}
 #frames .frame .workspace .pull-right .dropdown-menu {
   left: auto;
   right: 0;
@@ -6258,6 +6176,28 @@ body {
 }
 #calendar .workspace #calendar_view {
   display: inline-block;
+}
+.grid-table .datetime-cell {
+  font-size: 12px;
+}
+.grid-table .project-link-cell {
+  max-width: 6em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.grid-table .action-link-cell {
+  max-width: 12em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.grid-table .action-link-cell .project-title {
+  display: inline-block;
+  max-width: 5em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .grid-filter form {
   margin: 0;

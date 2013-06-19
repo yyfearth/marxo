@@ -1,0 +1,39 @@
+#!/bin/bash
+BASEDIR=$(cd "$(dirname "$(which $0)")" && pwd)
+cd $BASEDIR > /dev/null
+
+echo copy libs
+rm -rf out/js
+mkdir -p out/js/lib/test
+cp js/lib/*.js out/js/lib/
+cp js/lib/test/*.js out/js/lib/test/
+
+echo compile all coffee script
+coffee -cm js/*.coffee
+
+echo js/console.js + js/manager.js -> out/js/console.js
+coffee -j out/js/console.js -c js/console.coffee js/manager.coffee
+uglifyjs out/js/console.js -o out/js/console.js -mc --screw-ie8
+
+for js in js/*.js ; do
+    [[ -f "$js" ]] || continue
+    #[[ "$js" == "js/test_data.js" ]] && continue
+    [[ "$js" == "js/manager.js" || "$js" == "js/console.js" ]] && continue
+    echo $js -> out/$js
+    uglifyjs "$js" -o "out/$js" -mc --screw-ie8
+done
+
+echo compile less to out/css/console.css
+rm out/css/console.css
+lessc --no-ie-compat --yui-compress -O2 css/console.less out/css/console.css
+
+echo compile jade to out/index.html
+rm out/index.html
+jade -D -p . index.jade -o out/
+
+echo copy other resources
+rm -rf out/img out/font
+cp -r img out/
+cp -r font out/
+
+cd - > /dev/null

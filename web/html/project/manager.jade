@@ -1,1 +1,26 @@
-h4 Project Manager
+.span2.sidebar
+  #wf_template_list.well
+    ul.sidebar-list.nav.nav-list
+      li.nav-header Workflows
+      li.workflow
+        a(href='#workflow:new') Workflow 1
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips
+        | Click a Workflow above
+        | to Add a new Project based on the selected Workflow.
+.span10.workspace
+  ul.action-bar
+    li.head Project Manager
+    li.grid-filter
+    li.action-buttons.pull-right
+      button.btn(name='reload', title='Reload Table') Reload
+      button.btn.btn-danger.enable_if_selected(title='Batch Control Selected', disabled) Operation
+
+  #t_project_action_cell.tpl
+    a.btn.btn-info.btn-round.icon-search(title='View', name='view')
+    button.btn.btn-danger.btn-round.icon-close(title='Remove', name='remove')
+
+  table.grid-table
+  .grid-paginator

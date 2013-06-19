@@ -1,4 +1,5 @@
 "use strict"
+
 require ['console'], ({ConsoleView, SignInView, Router}) ->
   # EP
   window.app = app =

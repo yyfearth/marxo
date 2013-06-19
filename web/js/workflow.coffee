@@ -1,55 +1,38 @@
 "use strict"
 
-define 'workflow', ['console', 'workflow_models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
+define 'workflow', ['console', 'manager', 'models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
-async
 find
 findAll
 View
 BoxView
 FrameView
 InnerFrameView
-ManagerView
 ModalDialogView
+FormDialogView
 }, {
-# Tenant
-# SharedWorkflows
-# TenantWorkflows
-# Workflow
-# SharedWorkflow
-# TenantWorkflow
-# SharedNodes
-# TenantNodes
-# Node
-# SharedNode
-# TenantNode
-# SharedLinks
-# TenantLinks
-# Link
-# SharedLink
-# TenantLink
-# SharedActions
-# TenantActions
-# Action
-TenantWorkflows
-TenantWorkflow
-TenantNodes
-TenantNode
+ManagerView
+}, {
+Entity
+Workflows
+Workflow
 Node
-TenantLinks
-TenantLink
+Link
 }) ->
+
+  ## Workflow Main Frame
   class WorkflowFrameView extends FrameView
     initialize: (options) ->
       super options
       @editor = new WorkflowEditorView el: '#workflow_editor', parent: @
       @manager = new WorkflowManagerView el: '#workflow_manager', parent: @
-      return
+      @
     open: (name) ->
       switch name
         when 'new'
           console.log 'show workflow editor with create mode'
-          @switchTo @manager # TODO: show create dialog in @manager
+          @switchTo @manager
+          @manager.create name
         when 'mgr'
           console.log 'show workflow mgr'
           @switchTo @manager
@@ -61,9 +44,106 @@ TenantLink
           else unless @manager.rendered
             # 1st time default frame
             @switchTo @manager
+      @
+
+  ## Workflow Manager
+
+  class WorkflowActionCell extends Backgrid.ActionsCell
+    render: ->
+      super()
+      # TODO: show buttons depend on status
+      edit_btn = @el.querySelector('a[name="edit"]')
+      edit_btn.href = '#workflow/' + @model.id
+      @
+
+  class WorkflowManagerView extends ManagerView
+    columns: [
+      'checkbox'
+      'id'
+      'title:workflow'
+      'desc'
+      'status'
+      'created_at'
+      'updated_at'
+    ,
+      name: 'workflow'
+      label: ''
+      editable: false
+      sortable: false
+      cell: WorkflowActionCell
+    ]
+    collection: new Workflows
+    initialize: (options) ->
+      super options
+      @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
+      # temp
+      @$el.find('#wf_template_list').on 'click', '.wf_tempate a', (e) =>
+        e.preventDefault()
+        wf = e.target.href.match /#workflow:(\w+)/
+        console.log 'wf template clicked', wf
+        @create wf[1] if wf.length is 2
+        false
+      _remove = @remove.bind @
+      @on
+        remove: _remove
+        remove_selected: _remove
+      @
+    create: (template) ->
+      template = '' if not template or /^(?:new|empty)$/i.test template
+      @creator.popup template: template, (action, data) =>
+        switch action
+          when 'save'
+            console.log 'create new wf:', data
+            @collection.create data, wait: true
+            # location.hash = '#workflow/' + data.id
+          when 'cancel'
+            location.hash = '#workflow/mgr'
+          else
+            console.error 'unsupported action', action
+            location.hash = '#workflow/mgr'
+      @
+    remove: (models) ->
+      models = [models] unless Array.isArray models
+      if confirm 'Make sure these selected workflows is not in use!\nDo you realy want to remove selected workflows?'
+        # TODO: check usage, if used cannot remove directly
+        model?.destroy() for model in models
+        @reload() if models.length >= @pageSize / 2
+      #console.log 'delete', model, @
+      @
+
+  class WorkflowCreatorView extends FormDialogView
+    el: '#workflow_creator'
+    events:
+      'input #wf_title': '_title_typed'
+      'input #wf_name': '_name_typed'
+      'change #wf_name': '_name_changed'
+    initialize: (options) ->
+      super options
+    popup: (data, callback) ->
+      super data, callback
+      @fill data
+      @
+    save: ->
+      @data = @read()
+      @callback 'save'
+      @hide true
+      @
+    _name_typed: ->
+      @form.name._auto = not @form.name.value
       return
+    _name_changed: ->
+      @form.name.value = @form.name.value.toLowerCase()
+      return
+    _title_typed: ->
+      if @form.name._auto isnt false
+        @form.name.value = @form.title.value.replace(/\W+/g, '_')[0..32].toLowerCase()
+      return
+  ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
   class WorkflowEditorView extends InnerFrameView
+    events:
+      'click .wf-save': 'save'
+      'click .wf-reset': 'reset'
     initialize: (options) ->
       super options
       @view = new WorkflowView
@@ -73,40 +153,65 @@ TenantLink
       @nodeList = new NodeListView
         el: find('#node_list', @el)
         workflowView: @view
-      return
-    load: (id) ->
-      @fetch id, (err, wf) =>
+
+      @btnSave = find '.wf-save', @el
+      title = @titleEl = find '.editable-title', @el
+      desc = @descEl = find '.editable-desc', @el
+
+      # TODO: use dialog instead
+      title.onblur = =>
+        @model.set title: title.textContent
+        console.log 'change title', title.textContent, @model.toJSON()
+      title.onkeydown = (e) =>
+        if e.keyCode is 13
+          e.preventDefault()
+          title.onblur()
+          @btnSave.focus()
+          false
+      desc.onblur = =>
+        @model.set desc: desc.textContent
+        console.log 'change desc', desc.textContent, @model.toJSON()
+      desc.onkeydown = (e) =>
+        if e.keyCode is 13
+          e.preventDefault()
+          desc.onblur()
+          @btnSave.focus()
+          false
+      @
+    reset: ->
+      @load() if confirm 'All changes will be descarded since last save, are you sure to do that?'
+      @
+    save: ->
+      if @model?.hasChanged()
+        console.log 'save', @model.attributes
+        @model.save {},
+          success: (wf) ->
+            console.log 'saved', wf
+          error: ->
+            console.error 'save failed'
+      @
+    load: (wf = @id) ->
+      if typeof wf is 'string'
+        @fetch wf, (err, wf) => @load wf
+      else
+        @id = wf.id
+        @titleEl.textContent = wf.get 'title'
+        @descEl.textContent = wf.get 'desc'
+        @model = wf
         if wf
-          @view.load wf
+          @view.load wf.warp true
         else
           @view.clear()
       #TODO: load node list
-      return
+      @
     render: ->
       @nodeList.render()
       @
     fetch: (id, callback) ->
-      wf = @workflow = new TenantWorkflow id: id
+      wf = @workflow = new Workflow id: id
       wf.fetch success: =>
-        async.parallel [
-          (callback) ->
-            wf.nodes.fetch success: ((c) ->
-              callback null, c), error: ->
-              callback 'fetch nodes failed'
-          (callback) ->
-            wf.links.fetch success: ((c) ->
-              callback null, c), error: ->
-              callback 'fetch links failed'
-        ], (err) =>
-          if err
-            console.error err
-            callback? err
-          else
-            console.log 'workflow', wf
-            callback? null, wf
-          return
-        return
-      return
+        callback null, wf
+      @
 
   class NodeListView extends View
     initialize: (options) ->
@@ -118,7 +223,7 @@ TenantLink
           e.preventDefault()
           @workflowView.addNode el.dataset.node
           false
-        return
+      return
     render: ->
       @el.innerHTML = ''
       items = document.createDocumentFragment()
@@ -144,47 +249,28 @@ TenantLink
       li.appendChild a
       li
 
-  class WorkflowManagerView extends ManagerView
-    collection: new TenantWorkflows
-
-  class EditorView extends ModalDialogView
-    events:
-      'click button.btn-save': 'save'
-    initialize: (options) ->
-      super options
-      @form = find 'form', @el
-      return
+  class EditorView extends FormDialogView
     popup: (data, callback) ->
+      throw 'data must be an model entity' unless data instanceof Entity
+      # already set @data = data
       super data, callback
-      @fill data
-      return
-    fill: (data) ->
-      @_attributes = ({})
-      for name, value of data.attributes
-        input = @form[name]
-        if input?.name is name and input.value?
-          input.value = value
-          @_attributes[name] = value
-      return
-    save: -> # should be customized, e.g. ok, save, export
-      if @_attributes?
-        for name, value of @_attributes
-          input = @form[name]
-          @_attributes[name] = input.value if input.value isnt value
-          @data.set @_attributes
+      @fill data.attributes
+      @
+    save: ->
+      @data.set @read()
       @callback 'save'
       @hide true
-      return
+      @
     reset: -> # called after close
       super()
       @form.reset()
-      return
+      @
 
   class NodeEditorView extends EditorView
     el: '#node_editor'
     events:
-      'click button.btn-save': 'save'
       'click a.action-thumb': '_addAction'
+    _too_many_actions_limit: 7
     initialize: (options) ->
       super options
       @actions = []
@@ -196,7 +282,8 @@ TenantLink
       $(@actionsEl).sortable
         delay: 150
         distance: 15
-      return
+      @_too_many_alert = find '#too_many_actions_alert', @el
+      @
     _fixStyle: -> # make sure the top of action box will below the title, name and desc
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
       return
@@ -215,49 +302,59 @@ TenantLink
       ,
         type: 'send_email'
       ].forEach @addAction.bind @
-      return
+      @
     save: ->
       console.log 'save'
       # save actions
       # TODO: read all actions and check
       # save the node
       super()
-      return
+      @
     reset: ->
       super()
       @actions = []
       @actionViews = []
       @actionsEl.innerHTML = ''
-      return
+      @
     addAction: (model) ->
       actionView = new ActionView model: model, parent: @, container: @actionsEl
       actionView.on 'close', @removeAction.bind @
       actionView.render()
       @actions.push model
       @actionViews.push actionView
+      actionView.el.scrollIntoView true
+      @_checkActionLimit()
       actionView
     removeAction: (view, model) ->
       idx = @actions.indexOf model
       return if idx < 0
       @actions.splice idx, 1
       @actionViews.splice idx, 1
-      return
+      @_checkActionLimit()
+      @
+    _checkActionLimit: ->
+      cls = @_too_many_alert.classList
+      if @actions.length > @_too_many_actions_limit
+        cls.add 'active'
+        @_too_many_alert.scrollIntoView true
+      else
+        cls.remove 'active'
 
   class ActionView extends BoxView
+    @_tpl: {}
     @tpl: (type) -> # load form html template
-      if @_tpl? and @_tpl[type]?
-        @_tpl[type] # cached
-      else
-        el = find "#t_#{type}"
+      tpl = @_tpl[type] # cached
+      unless tpl?
+        el = find "#t_#{type}_action"
         if el?
-          @_tpl ?= ({})
+          console.log 'load action tpl', type, el.id
           # load template
           tpl = @_tpl[type] = el.innerHTML
           # remove template from dom
           el.parentNode.removeChild el
         else
           throw 'cannot find template for type: ' + type
-        tpl
+      tpl
     className: 'box action'
     initialize: (options) ->
       super options
@@ -265,7 +362,7 @@ TenantLink
       @model = options.model
       @type = options.model.type or options.type
       throw 'need action model and type' unless @model and @type
-      return
+      @
     close: ->
       @el.parentNode.removeChild @el
       model = @model
@@ -273,10 +370,11 @@ TenantLink
       model.type = null
       model.name = null
       model.data = null
-      return
+      @
     render: ->
       tpl = @constructor.tpl @type
-      @containerEl.appendChild @el
+      #@containerEl.appendChild @el
+      @containerEl.insertBefore @el, find '.alert', @containerEl
       @el.innerHTML = tpl
       # get els in super
       super()
@@ -295,10 +393,10 @@ TenantLink
         #form[key].value = value
         $(el).val value if el?.getAttribute('name') is name
       # TODO: support customized controls
-      return
+      @
     read: (data) -> # read form the form to get a json data
       throw 'cannot find the form, may not rendered yet' unless @form
-      data ?= ({})
+      data ?= {}
       els = [].slice.call @form.elements
       els.forEach (el) ->
         $el = $ el
@@ -309,13 +407,13 @@ TenantLink
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
-    initialize: (options) ->
-      super options
-      return
-    popup: (data, callback) ->
-      super data, callback
+    #initialize: (options) ->
+    #  super options
+    #popup: (data, callback) ->
+    #  super data, callback
+    #  @
 
-      return
+  ## Workflow Views (Workflow/Node/Link View)
 
   class WorkflowView extends View
     jsPlumbDefaults:
@@ -361,7 +459,7 @@ TenantLink
       @linkEditor = options.linkEditor
       jsPlumb.importDefaults @jsPlumbDefaults
       @render()
-      return
+      @
     _bind: ->
       view = @
       # link label
@@ -473,8 +571,8 @@ TenantLink
         return
       wf.links.forEach (link) ->
         link.workflow = wf
-        link.prevNode = wf.nodes.get link.get 'prevNodeId'
-        link.nextNode = wf.nodes.get link.get 'nextNodeId'
+        link.prevNode = wf.nodes.get link.get 'prev_node_id'
+        link.nextNode = wf.nodes.get link.get 'next_node_id'
         unless link.prevNode and link.nextNode
           console.error 'link', link.name or link.id, 'is broken, prev/next node missing'
         link.prevNode.outLinks.push link
@@ -557,7 +655,7 @@ TenantLink
       @el.appendChild view.el
       return
     createNode: ->
-      @nodeEditor.popup (new TenantNode), (action, node) =>
+      @nodeEditor.popup (new Node), (action, node) =>
         if action is 'save'
           @_addNode node
         else # canceled
@@ -568,8 +666,10 @@ TenantLink
         if action is 'save'
           node.view.update node
           console.log 'saved node', node
-        else # canceled
+        else if action is 'cancel' # canceled
           console.log 'canceled edit node'
+        else
+          console.error 'unknown action', action
       @
     removeNode: (node) ->
       # use confirm since no support for undo
@@ -580,6 +680,7 @@ TenantLink
       @
     addLink: (link) ->
       # TODO: add view and model
+      console.log 'TODO: add link', link
       @
     _addLink: (link) ->
       view = link.view = new LinkView model: link, parent: @
@@ -600,8 +701,8 @@ TenantLink
       # TODO: remove view and model
       @
     render: ->
-      @el.onselectstart = ->
-        false
+      # chrome fix
+      @el.onselectstart = -> false
       @
 
   class NodeView extends View

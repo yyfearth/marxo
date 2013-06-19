@@ -10,6 +10,7 @@ FrameView
 ModalDialogView
 # Tenant
 }) ->
+
   class ReportFrameView extends FrameView
     initialize: (options) ->
       super options
@@ -24,6 +25,8 @@ ModalDialogView
     el: '#report_viewer'
     initialize: (options) ->
       super options
+      @$el.on 'hidden', -> location.hash = '#report'
+
       data = [
         value: 30,
         color: "#D41400"

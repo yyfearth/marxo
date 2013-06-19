@@ -1,6 +1,9 @@
 "use strict"
 
-define 'console', ['lib/common'], (async) ->
+define 'console', ['models', 'lib/common'], ({Collection}) ->
+
+  ## Utils
+
   find = (selector, parent) ->
     parent ?= document
     parent.querySelector selector
@@ -8,6 +11,18 @@ define 'console', ['lib/common'], (async) ->
   findAll = (selector, parent) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
+
+  # enable coffeescript class for javascript mixin
+  # https://github.com/yi/coffee-acts-as
+  # ex: class C
+  #       @acts_as A, B
+  Function::acts_as = (argv...) ->
+    #console.log "[Function::acts_as]: argv #{argv}"
+    for cl in argv
+      @::["__is#{cl}"] = true
+      for key, value of cl::
+        @::[key] = value
+    @
 
   ## Views
 
@@ -18,6 +33,14 @@ define 'console', ['lib/common'], (async) ->
         @parent = options.parent
         @parentEl = @parent.el
       return
+    delayedTrigger: (eventName, delay = 10, args...) ->
+      timeout_key = "_#{eventName}_timtout"
+      clearTimeout @[timeout_key] if @[timeout_key]
+      @[timeout_key] = setTimeout =>
+        @[timeout_key] = null
+        @trigger eventName, args...
+        return
+      , delay
 
   class ConsoleView extends View
     el: '#main'
@@ -26,7 +49,7 @@ define 'console', ['lib/common'], (async) ->
         @instance = new @
       @instance
     initialize: ->
-      @frames = ({})
+      @frames = {}
       findAll('.frame', @el).forEach (frame) =>
         navEl = find "#navbar a[href=\"##{frame.id}\"]"
         @frames[frame.id] =
@@ -35,20 +58,23 @@ define 'console', ['lib/common'], (async) ->
           parent: @
           navEl: navEl?.parentElement
         return
-      [ # for debug only
-        'home'
-        'content'
-        'profile'
-      ].forEach (n) =>
-        @frames[n] = new FrameView @frames[n]
       @fixStyles()
+      # Init tooltips
+      @$el.tooltip selector: '[title]'
       return
     fixStyles: ->
+      # auto resize
       navContainer = find '#navbar', @el
       framesContainer = find '#frames', @el
       do window.onresize = =>
         h = navContainer.clientHeight or 41
         framesContainer.style.top = h + 'px'
+        return
+      # hide menu after click
+      $('.dropdown-menu').click ->
+        navContainer.classList.add 'hide-dropdown'
+        $(document.body).one 'mousemove', ->
+          navContainer.classList.remove 'hide-dropdown'
         return
       return
     showFrame: (frame, name) ->
@@ -58,6 +84,7 @@ define 'console', ['lib/common'], (async) ->
       if frame instanceof FrameView
         frame.open? name
       else
+        console.log 'load module:', frame.id
         require [frame.id], (TheFrameView) =>
           frame = @frames[frame.id] = new TheFrameView frame
           frame.render()
@@ -152,15 +179,15 @@ define 'console', ['lib/common'], (async) ->
       @$el.modal
         show: false
         backdrop: 'static'
-      @$el.on 'hidden', @callback.bind @
+      @$el.on 'hidden', (e) => @callback() if e.target is @el
       return
-    popup: (data, callback) ->
-      @data = data
+    popup: (@data, callback) ->
       @_callback = callback
       @show true
     callback: (action = 'cancel') ->
       return unless @_callback?
-      @_callback? action, @data
+      @trigger action, @data, @
+      @_callback? action, @data, @
       @reset()
       return
     reset: ->
@@ -177,6 +204,54 @@ define 'console', ['lib/common'], (async) ->
       @
     hide: (hide = true) ->
       @show not hide
+
+  class FormDialogView extends ModalDialogView
+    initialize: (options) ->
+      super options
+      @form = find 'form', @el
+      @form.onsubmit = (e) =>
+        e.preventDefault()
+        @save()
+        false
+      submit_btn = find '[type="submit"]', @form
+      unless submit_btn?
+        submit_btn = document.createElement 'input'
+        submit_btn.type = 'submit'
+        submit_btn.style.display = 'none'
+        @form.appendChild submit_btn
+      @_submit_btn = submit_btn
+      find('button.btn-save', @el)?.onclick = @submit.bind @
+      @
+    submit: ->
+      @_submit_btn.click()
+      @
+    #popup: (data, callback) ->
+    #  # already set @data = data
+    #  super data, callback
+    #  @fill data
+    #  @
+    fill: (attributes) ->
+      @_attributes = {}
+      for name, value of attributes
+        input = @form[name]
+        if input?.name is name and input.value?
+          input.value = value
+          @_attributes[name] = value
+      @
+    read: ->
+      attributes = @_attributes
+      if attributes? then for input in @form.elements
+        name = input.getAttribute 'name'
+        attributes[name] = input.value if name and (input.value or attributes[name]?)
+      attributes
+    #save: ->
+    #  @callback 'save'
+    #  @hide true
+    #  @
+    reset: -> # called after close
+      super()
+      @form.reset()
+      @
 
   class SignInView extends View
     el: '#signin'
@@ -226,170 +301,73 @@ define 'console', ['lib/common'], (async) ->
       , @delay
       return
 
-  class SeqCell extends Backgrid.StringCell
-    formatter: null
-    render: ->
-      @formatter ?=
-        fromRaw: =>
-          @model._seq + 1
-      super()
-
-  class LinkCell extends Backgrid.UriCell
-    render: ->
-      @$el.empty()
-      formattedValue = @formatter.fromRaw @model.get @column.get 'name'
-      @$el.append $('<a>',
-        tabIndex: -1
-        href: '#workflow/' + @model.id
-        title: formattedValue
-      ).text formattedValue
-      @delegateEvents()
-      @
-
-  class ActionCell extends Backgrid.Cell
-    @tpl: (type = 'action_buttons') -> # load form html template
-      if @_tpl? and @_tpl[type]?
-        @_tpl[type] # cached
-      else
-        el = find "#t_#{type}"
-        if el?
-          @_tpl ?= ({})
-          # load template
-          tpl = @_tpl[type] = el.innerHTML
-          # remove template from dom
-          el.parentNode.removeChild el
-        else
-          throw 'cannot find template for type: ' + type
-        tpl
-    render: ->
-      @el.innerHTML = @constructor.tpl @type
-      @delegateEvents()
-      @
-
-  class ManagerView extends InnerFrameView
-    columns: [
-      # name is a required parameter, but you don't really want one on a select all column
-      name: ''
-      # Backgrid.Extension.SelectRowCell lets you select individual rows
-      cell: 'select-row'
-      # Backgrid.Extension.SelectAllHeaderCell lets you select all the row on a page
-      headerCell: 'select-all'
-    ,
-      name: '' # The key of the model attribute
-      label: '#' # The name to display in the header
-      cell: SeqCell
-      editable: false
-    ,
-      name: 'title'
-      label: 'Title'
-      cell: LinkCell
-      editable: false
-    ,
-      name: 'desc'
-      label: 'Description'
-      cell: 'string'
-      editable: false
-    ,
-      name: 'status'
-      label: 'Status'
-      cell: 'string'
-      editable: false
-    ,
-      name: 'created_at'
-      label: 'Date Created'
-      cell: 'datetime'
-      editable: false
-    ,
-      name: 'updated_at'
-      label: 'Date Updated'
-      cell: 'datetime'
-      editable: false
-    ,
-      name: ''
-      label: 'Actions'
-      cell: ActionCell
-      editable: false
-      sortable: false
-    ]
+  class NavListView extends View
+    urlRoot: ''
+    headerTitle: ''
+    defaultItem: 'all'
+    itemClassName: ''
+    _reload_timeout: 60000 # 1min
     initialize: (options) ->
       super options
-      @collection = options.collection if options.collection instanceof ManagerCollection
-      collection = @collection
-      throw 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
-      @grid = new Backgrid.Grid
-        columns: @columns
-        collection: collection
-      @paginator = new Backgrid.Extension.Paginator
-        collection: collection
-      @filter = new Backgrid.Extension.ClientSideFilter
-        collection: collection.fullCollection,
-        fields: ['title']
-      return
-    render: ->
-      @$el.find('table.grid-table').replaceWith @grid.render().$el.addClass 'grid-table'
-      @$el.find('.grid-paginator').replaceWith @paginator.render().$el.addClass 'grid-paginator'
-      @$el.find('.grid-filter').empty().append @filter.render().$el
-      @collection.fetch reset: true
+      @collection = options.collection or @collection
+      throw 'collection must be given' unless @collection instanceof Collection
+      @urlRoot = options.urlRoot or @urlRoot
+      @headerTitle = options.headerTitle or @headerTitle
+      @defaultItem = options.defaultItem or @defaultItem
+      @itemClassName = options.itemClassName or @itemClassName
+      @collection.on 'reset', @render.bind @
+      @fetch false if options.auto
+    fetch: (force) ->
+      col = @collection
+      ts = new Date().getTime()
+      if force or not col._last_load or ts - col._last_load > @_reload_timeout
+        # TODO: add a refresh button
+        #console.log 'fetch for list', @headerTitle
+        col.fetch reset: true
+        col._last_load = new Date().getTime()
       @
-
-  ## Entities
-
-  class Entity extends Backbone.Model
-    set: (attrs) ->
-      #      @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
-      super attrs
-    validate: (attrs) ->
-      unless attrs.name and attrs.id
-        'id and name are required'
-      else unless /\w{,10}/.test attrs.name
-        'name max len is 10 and must be consist of alphabetic char or _'
-      else
-        return
-
-  # TODO: include workflow models when need
-
-  class Tenants extends Backbone.Collection
-    model: Tenant
-    url: '/'
-
-  class Tenant extends Entity
-    url: ->
-      ROOT + '/' + @name + '/profile'
-  #    idAttribute: '_name'
-
-  class User extends Entity
-
-  class ManagerCollection extends Backbone.PageableCollection
-    mode: 'client'
-    state:
-      pageSize: 20
-    initialize: (options...) ->
-      super options...
-      # add a sequence to models
-      @on 'reset', (models) ->
-        models.each (wf, i) ->
-          wf._seq = i
-        return
+    render: ->
+      #@_clear()
+      @_render()
+      @
+    _clear: ->
+      @el.innerHTML = ''
+      @el.appendChild @_renderHeader null
+      @el.appendChild @_renderItem null
       return
-    comparator: (model) -> # default comparator
-      model.get 'id'
+    _render: (models = @collection) ->
+      console.log 'render models', models
+      fragments = document.createDocumentFragment()
+      models.forEach (model) =>
+        fragments.appendChild @_renderItem model
+        return
+      @el.appendChild fragments
+      return
+    _renderHeader: (title = @headerTitle) ->
+      header = document.createElement 'li'
+      header.className = 'nav-header'
+      header.textContent = title
+      header
+    _renderItem: (model = @defaultItem) ->
+      console.log 'render item', model
+      li = document.createElement 'li'
+      li.className = @itemClassName
+      a = document.createElement 'a'
+      if model.id
+        a.href = "##{@urlRoot}:#{model.id}"
+        a.textContent = model.get 'title'
+      else if model is 'all'
+        a.href = "##{@urlRoot}:all"
+        a.textContent = 'All'
+        li.className += ' active'
+      else if model is 'new' or model is 'empty'
+        a.href = "##{@urlRoot}:new"
+        a.textContent = 'Empty'
+        li.className += ' active'
+      li.appendChild a
+      li
 
-  class Participants extends Backbone.Collection
-    model: Participant
-    url: '/users'
-
-  class Publichers extends Backbone.Collection
-    model: Publicher
-    url: ->
-      @tenant.url() + '/users'
-
-  class Participant extends User
-
-  class Publicher extends User
-
-  class Evalutator extends User # TODO: howto save them
-
-## Router
+  ## Router
 
   class Router extends Backbone.Router
     @get: -> # singleton
@@ -449,7 +427,6 @@ define 'console', ['lib/common'], (async) ->
       return
 
   { # exports
-  async
   find
   findAll
   View
@@ -457,18 +434,9 @@ define 'console', ['lib/common'], (async) ->
   BoxView
   FrameView
   InnerFrameView
-  ManagerView
+  NavListView
   ModalDialogView
+  FormDialogView
   SignInView
-  Entity
-  ManagerCollection
-  Tenants
-  Tenant
-  User
-  Participants
-  Publichers
-  Participant
-  Publicher
-  Evalutator
   Router
   }
