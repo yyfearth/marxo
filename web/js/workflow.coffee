@@ -49,6 +49,14 @@ Link
 
   ## Workflow Manager
 
+  class WorkflowActionCell extends Backgrid.ActionsCell
+    render: ->
+      super()
+      # TODO: show buttons depend on status
+      edit_btn = @el.querySelector('a[name="edit"]')
+      edit_btn.href = '#workflow/' + @model.id
+      @
+
   class WorkflowManagerView extends ManagerView
     columns: [
       'checkbox'
@@ -58,7 +66,12 @@ Link
       'status'
       'created_at'
       'updated_at'
-      'actions:wf'
+    ,
+      name: 'workflow'
+      label: ''
+      editable: false
+      sortable: false
+      cell: WorkflowActionCell
     ]
     collection: new Workflows
     initialize: (options) ->
@@ -73,7 +86,6 @@ Link
         false
       _remove = @remove.bind @
       @on
-        edit: @edit.bind @
         remove: _remove
         remove_selected: _remove
       @
@@ -90,9 +102,6 @@ Link
           else
             console.error 'unsupported action', action
             location.hash = '#workflow/mgr'
-      @
-    edit: (model) ->
-      location.href = '#workflow/' + model.id
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
