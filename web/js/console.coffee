@@ -7,6 +7,8 @@ ManagerCollection
 Projects
 }) ->
 
+  ## Utils
+
   find = (selector, parent) ->
     parent ?= document
     parent.querySelector selector
@@ -14,6 +16,18 @@ Projects
   findAll = (selector, parent) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
+
+  # enable coffeescript class for javascript mixin
+  # https://github.com/yi/coffee-acts-as
+  # ex: class C
+  #       @acts_as A, B
+  Function::acts_as = (argv...) ->
+    #console.log "[Function::acts_as]: argv #{argv}"
+    for cl in argv
+      @::["__is#{cl}"] = true
+      for key, value of cl::
+        @::[key] = value
+    @
 
   ## Views
 
