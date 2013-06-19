@@ -1,14 +1,15 @@
 "use strict"
 
-define 'project', ['console', 'models'],
+define 'project', ['console', 'manager', 'models'],
 ({
 #find
 #findAll
 #View
 FrameView
 InnerFrameView
-ManagerView
 #ModalDialogView
+}, {
+ManagerView
 }, {
 Projects
 }) ->

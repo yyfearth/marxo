@@ -1,6 +1,6 @@
 "use strict"
 
-define 'workflow', ['console', 'models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
+define 'workflow', ['console', 'manager', 'models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
 ({
 find
 findAll
@@ -8,11 +8,10 @@ View
 BoxView
 FrameView
 InnerFrameView
-ManagerView
 ModalDialogView
 FormDialogView
-LinkCell
-ActionCell
+}, {
+ManagerView
 }, {
 Entity
 Workflows
@@ -397,7 +396,7 @@ Link
       @
     read: (data) -> # read form the form to get a json data
       throw 'cannot find the form, may not rendered yet' unless @form
-      data ?= ({})
+      data ?= {}
       els = [].slice.call @form.elements
       els.forEach (el) ->
         $el = $ el
@@ -681,6 +680,7 @@ Link
       @
     addLink: (link) ->
       # TODO: add view and model
+      console.log 'TODO: add link', link
       @
     _addLink: (link) ->
       view = link.view = new LinkView model: link, parent: @
@@ -701,8 +701,8 @@ Link
       # TODO: remove view and model
       @
     render: ->
-      @el.onselectstart = ->
-        false
+      # chrome fix
+      @el.onselectstart = -> false
       @
 
   class NodeView extends View

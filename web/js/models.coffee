@@ -1,6 +1,6 @@
 "use strict"
 
-define 'models', ['lib/common'], ->
+define 'models', ['lib/common', 'lib/backgrid'], ->
   # ROOT = 'https://marxo.cloudfoundry.com/api'
   ROOT = '/api'
 

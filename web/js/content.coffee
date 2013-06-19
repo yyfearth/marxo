@@ -1,18 +1,18 @@
 "use strict"
 
-define 'content', ['console', 'models'],
+define 'content', ['console', 'models', 'manager'],
 ({
 find
 #findAll
 #View
 FrameView
+#ModalDialogView
+}, {
+Contents
+}, {
 ManagerView
 NavFilterView
 ProjectFilterView
-#ModalDialogView
-# Project
-}, {
-Contents
 }) ->
 
   class ContentFrameView extends FrameView
