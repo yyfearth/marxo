@@ -243,6 +243,22 @@ define 'test_data', ['models'], (models) ->
         title: 'Post to Multiple Socal Media'
       status: 'WAITING'
       created_at: new Date(1371191309656)
+    ,
+      id: 'e57bf4f6aad752f9fc37feff'
+      title: 'Test Content'
+      desc: 'Test Content'
+      media: 'TWITTER'
+      project:
+        id: '51447afb4728cc2036cf9cf1'
+        title: 'Test Project'
+      node:
+        id: '517f81413d070321728fde14'
+        title: 'Test Node'
+      action:
+        id: 'f8e39128e0b51ecb5b1e6e40'
+        title: 'Post to Multiple Socal Media'
+      status: 'WAITING'
+      created_at: new Date(1371191309656)
     ]
 
   exports = {}
