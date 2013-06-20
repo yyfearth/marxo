@@ -760,7 +760,7 @@ Link
 
     _renderModel: (node = @model) ->
       @el.innerHTML = node.escape 'title'
-      title = @el.title = node.get 'title'
+      title = node.get 'title'
       @el.style.left = node.x + 'px'
       @el.style.top = node.y + 'px'
       @$el.addClass('target').data node: node, view: @
@@ -802,16 +802,16 @@ Link
       @setElement conn.canvas
       @label = conn.getOverlay 'label'
       @labelEl = @label.canvas
-      title = link.get 'title'
       label$el = $(@labelEl)
       # _desc = "#{link.prevNode.get 'title'} to #{link.nextNode.get 'title'}"
-      if title
-        @labelEl.title = 'Link: ' + title
+      if link.has 'title'
+        title = 'Link: ' + link.get 'title'
       else
         label$el.css 'visibility', 'hidden'
-        @labelEl.title = 'Link'
+        title = 'Link'
       label$el.popover
         container: @parentEl
+        title: title
         trigger: 'manual'
         placement: 'bottom'
         html: true
