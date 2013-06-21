@@ -199,7 +199,10 @@ Link
         @descEl.textContent = wf.get 'desc'
         @model = wf
         if wf
-          @view.load wf.warp true
+          if wf.loaded()
+            @view.load wf
+          else
+            wf.fetch success: (wf) => @view.load wf
         else
           @view.clear()
       #TODO: load node list
@@ -538,9 +541,8 @@ Link
       # TODO: destory all nodes and links
       @
     load: (wf) ->
-      # clear
       @clear()
-      @_processModel wf
+      @model = wf
       @_renderModel wf
       @
     _action: (action, e) ->
@@ -561,24 +563,7 @@ Link
     _edit: (e) ->
       @_action 'edit', e
       return
-    _processModel: (wf) ->
-      @model = wf
-      # pre-process nodes and links
-      wf.nodes.forEach (node) ->
-        node.workflow = wf
-        node.inLinks = []
-        node.outLinks = []
-        return
-      wf.links.forEach (link) ->
-        link.workflow = wf
-        link.prevNode = wf.nodes.get link.get 'prev_node_id'
-        link.nextNode = wf.nodes.get link.get 'next_node_id'
-        unless link.prevNode and link.nextNode
-          console.error 'link', link.name or link.id, 'is broken, prev/next node missing'
-        link.prevNode.outLinks.push link
-        link.nextNode.inLinks.push link
-        return
-      nodes = wf.nodes
+    _sortNodeViews: (nodes) ->
       nodes.lonely = []
       nodes.start = []
       nodes.end = []
@@ -589,11 +574,7 @@ Link
           nodes.start.push node
         else if node.outLinks.length is 0
           nodes.end.push node
-        return
-      @_sortNodeViews nodes
-      # TODO: workflow validation
-      return
-    _sortNodeViews: (nodes) ->
+
       grid = @grid = [nodes.start.concat nodes.lonely]
       {vertical, padding, spanX, spanY} = @gridDefaults
 
@@ -625,6 +606,7 @@ Link
       console.log 'render wf', wf
       wf = @model
       throw 'workflow not loaded' unless wf?
+      @_sortNodeViews wf.nodes
       # must bind before render nodes/links
       @_bind()
       # build nodes

@@ -61,64 +61,79 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
     urlRoot: ROOT + '/workflows'
     initialize: (model, options) ->
       super model, options
-      @warp model
-      @on
-        sync: => @warp @, true
-        reset: => @_warped = false
+      @_warp model
       @
-    warp: (model = @, rewarp) ->
-      if model is true
-        rewarp = true
-        model = @attributes
-      return @ if @_warped and not rewarp
+    _warp: (model = @) ->
       model = model.attributes if model instanceof @constructor
-      #url = @url?() or @url or ''
-      if Array.isArray model.nodes
-        nodes = model.nodes
-      else if Array.isArray model.nodeIds
-        nodes = model.nodeIds.map (id) -> new Node id: id
-      else
-        nodes = []
-      @nodes = new Nodes nodes
-      # url: url + '/nodes'
+      url = @url?() or @url or ''
+      _nodes_loaded = Array.isArray model.nodes
+      nodes = if _nodes_loaded then model.nodes else []
+      @nodes = new Nodes nodes, url: url + '/nodes'
+      @nodes._loaded = _nodes_loaded
+      _createNodeRef = @_createNodeRef.bind @
+      @nodes.forEach _createNodeRef
+      @nodes.on add: _createNodeRef, remove: @_removeNodeRef.bind @
 
-      if Array.isArray model.links
-        links = model.links
-      else if Array.isArray model.linkIds
-        links = model.linkIds.map (id) -> new link id: id
-      else
-        links = []
-      @links = new Links links
-      # url: url + '/links'
+      _links_loaded = Array.isArray model.links
+      links = if _links_loaded then model.links else []
+      @links = new Links links, url: url + '/links'
+      @links._loaded = _links_loaded
+      _createLinkRef = @_createLinkRef.bind @
+      @links.forEach _createLinkRef
+      @links.on add: _createLinkRef, remove: @_removeLinkRef.bind @
 
       @set {}
-      @_warped = true
       @
-    load: (reload, callback) ->
-      if typeof reload is 'function'
-        callback = reload
-        reload = false
-      @warp()
-      if @_load and not reload
-        callback? null, @
-      else async.parallel [
-        (callback) =>
-          @nodes.fetch success: ((c) ->
-            callback null, c), error: ->
-            callback 'fetch nodes failed'
-        (callback) =>
-          @links.fetch success: ((c) ->
-            callback null, c), error: ->
-            callback 'fetch links failed'
-      ], (err) =>
-        if err
-          console.error err
-          callback? err
-        else
-          console.log 'workflow', @
-          @_loaded = true
-          callback? null, @
+    fetch: (options = {}) -> # override for warp
+      _success = options.success?.bind @
+      options.success = (collection, response, options) =>
+        @_warp collection
+        _success? collection, response, options
+        return
+      super options
       @
+    save: (attributes = {}, options) -> # override for sync ids
+      node_ids = @nodes.map (r) -> r.id
+      link_ids = @links.map (r) -> r.id
+      attributes.node_ids = node_ids if node_ids.join(',') isnt @get('node_ids').join(',')
+      attributes.node_ids = link_ids if link_ids.join(',') isnt @get('link_ids').join(',')
+      super attributes, options
+      @
+    loaded: ->
+      @nodes?._loaded and @links?._loaded
+    createNode: (data) ->
+      @nodes.create data, wait: true
+      @
+    _createNodeRef: (node) ->
+      throw 'it must be a Node object' unless node instanceof Node
+      node.workflow = @
+      node.inLinks = []
+      node.outLinks = []
+      return
+    _removeNodeRef: (node) ->
+      # TODO: remove links connected?
+      return
+    createLink: (data) ->
+      @links.create data, wait: true
+      @
+    _createLinkRef: (link) ->
+      throw 'it must be a Link object' unless link instanceof Link
+      unless link.has('prev_node_id') and link.has('next_node_id')
+        throw 'link ' + (link.name or link.id) + 'is broken, prev/next node missing'
+      link.workflow = @
+      link.prevNode = @nodes.get link.get 'prev_node_id'
+      link.nextNode = @nodes.get link.get 'next_node_id'
+      link.prevNode.outLinks.push link
+      link.nextNode.inLinks.push link
+      return
+    _removeLinkRef: (link) ->
+      outLinks = link.prevNode.outLinks
+      idx = outLinks.indexOf link
+      outLinks.splice idx, 1
+      inLinks = link.nextNode.inLinks
+      idx = inLinks.indexOf link
+      inLinks.splice idx, 1
+      return
 
   class Workflows extends ManagerCollection
     model: Workflow
