@@ -93,10 +93,10 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
       super options
       @
     save: (attributes = {}, options) -> # override for sync ids
-      node_ids = @nodes.map (r) -> r.id
-      link_ids = @links.map (r) -> r.id
-      attributes.node_ids = node_ids if node_ids.join(',') isnt @get('node_ids').join(',')
-      attributes.node_ids = link_ids if link_ids.join(',') isnt @get('link_ids').join(',')
+      node_ids = @nodes?.map (r) -> r.id
+      link_ids = @links?.map (r) -> r.id
+      attributes.node_ids = node_ids if node_ids?.join(',') isnt @get('node_ids')?.join(',')
+      attributes.node_ids = link_ids if link_ids?.join(',') isnt @get('link_ids')?.join(',')
       super attributes, options
       @
     loaded: ->
@@ -134,6 +134,13 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
       idx = inLinks.indexOf link
       inLinks.splice idx, 1
       return
+    hasLink: (from, to) ->
+      from = @nodes.get from if typeof from is 'string'
+      to = @nodes.get to if typeof to is 'string'
+      for link in from.outLinks
+        return true if link.nextNode is to
+      false
+
 
   class Workflows extends ManagerCollection
     model: Workflow
