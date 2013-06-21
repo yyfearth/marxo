@@ -5953,6 +5953,9 @@ ul.action-bar > li {
 ul.action-bar .nav {
   margin-bottom: 0;
 }
+.action-buttons > .btn {
+  margin-left: 5px;
+}
 .box {
   border: 1px solid #DEDEDE;
   border-radius: 3px;
