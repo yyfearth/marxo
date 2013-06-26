@@ -18,6 +18,8 @@ Workflows
 Workflow
 Node
 Link
+Actions
+Action
 }) ->
 
   ## Workflow Main Frame
@@ -269,8 +271,6 @@ Link
     _too_many_actions_limit: 7
     initialize: (options) ->
       super options
-      @actions = []
-      @actionViews = []
       @actionsEl = find '#actions', @el
       _fixStyle = @_fixStyle.bind @
       $(window).resize _fixStyle
@@ -287,45 +287,46 @@ Link
       e.preventDefault()
       target = e.target
       matched = target.href.match /action:(\w+)/i
-      @addAction type: matched[1] if matched
+      @actions?.add @addAction type: matched[1] if matched
       false
-    fill: (data) ->
+    _getActionEls: ->
+      els = @actionsEl.querySelectorAll '.action'
+      [].slice.call els or []
+    fill: (attributes) ->
       # fill info form
-      super data
-      # temp TODO: load models from node
-      [
-        type: 'post_to_multi_social_media'
-      ,
-        type: 'send_email'
-      ].forEach @addAction.bind @
+      super attributes
+      @actions = new Actions attributes.actions or []
+      @actions.forEach @addAction.bind @
       @
     save: ->
       console.log 'save'
       # save actions
+      actions = @_getActionEls().map (el) =>
+        action = $(el).data 'model'
+        throw 'cannot get action from action.$el' unless action
+        action.attributes
+      @data.set 'actions', actions
+      console.log 'save actions', actions, @data
       # TODO: read all actions and check
       # save the node
       super()
       @
     reset: ->
       super()
-      @actions = []
-      @actionViews = []
-      @actionsEl.innerHTML = ''
+      @actions?.forEach (model) -> model.destroy()
+      @actions = null
+      @_getActionEls().forEach (el) -> el.parentNode.removeChild el
       @
     addAction: (model) ->
+      model = new Action model unless model instanceof Action
       actionView = new ActionView model: model, parent: @, container: @actionsEl
       actionView.on 'close', @removeAction.bind @
       actionView.render()
-      @actions.push model
-      @actionViews.push actionView
       actionView.el.scrollIntoView true
       @_checkActionLimit()
       actionView
     removeAction: (view, model) ->
-      idx = @actions.indexOf model
-      return if idx < 0
-      @actions.splice idx, 1
-      @actionViews.splice idx, 1
+      model.destroy()
       @_checkActionLimit()
       @
     _checkActionLimit: ->
@@ -356,7 +357,8 @@ Link
       super options
       @containerEl = options.container
       @model = options.model
-      @type = options.model.type or options.type
+      @model.view = @
+      @type = @model.get?('type') or options.model.type or options.type
       throw 'need action model and type' unless @model and @type
       @
     close: ->
@@ -372,6 +374,7 @@ Link
       #@containerEl.appendChild @el
       @containerEl.insertBefore @el, find '.alert', @containerEl
       @el.innerHTML = tpl
+      @el.id = @model.id or ''
       # get els in super
       super()
       if /webkit/i.test navigator.userAgent
@@ -380,6 +383,8 @@ Link
         $('.box-header, .btn', @el).disableSelection()
       @form = find 'form', @el
       @fill @model?.data
+      @$el.data model: @model, view: @
+      @listenTo @model, 'destroy', => @destroy()
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
@@ -400,6 +405,11 @@ Link
         data[name] = $el.val() if name
       # TODO: support customized controls
       data
+    destroy: ->
+      console.log '@el', @el, @el.parentNode
+      @stopListening @model
+      @el.parentNode?.removeChild @el
+      return
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
