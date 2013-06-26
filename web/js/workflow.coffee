@@ -18,6 +18,8 @@ Workflows
 Workflow
 Node
 Link
+Actions
+Action
 }) ->
 
   ## Workflow Main Frame
@@ -113,10 +115,6 @@ Link
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
-    events:
-      'input #wf_title': '_title_typed'
-      'input #wf_name': '_name_typed'
-      'change #wf_name': '_name_changed'
     initialize: (options) ->
       super options
     popup: (data, callback) ->
@@ -128,16 +126,6 @@ Link
       @callback 'save'
       @hide true
       @
-    _name_typed: ->
-      @form.name._auto = not @form.name.value
-      return
-    _name_changed: ->
-      @form.name.value = @form.name.value.toLowerCase()
-      return
-    _title_typed: ->
-      if @form.name._auto isnt false
-        @form.name.value = @form.title.value.replace(/\W+/g, '_')[0..32].toLowerCase()
-      return
   ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
   class WorkflowEditorView extends InnerFrameView
@@ -182,13 +170,20 @@ Link
       @load() if confirm 'All changes will be descarded since last save, are you sure to do that?'
       @
     save: ->
-      if @model?.hasChanged()
-        console.log 'save', @model.attributes
-        @model.save {},
-          success: (wf) ->
-            console.log 'saved', wf
-          error: ->
-            console.error 'save failed'
+      #if @model?.hasChanged()
+      console.log 'save', @model.attributes
+      @model.nodes.forEach (node) ->
+        node.view.el.style.zIndex = ''
+        style = node.view.el.getAttribute 'style'
+        if style isnt node.get 'style'
+          node.set 'style', style
+          #node.save()
+          console.log 'node style', node.id, style
+      @model.save {},
+        success: (wf) ->
+          console.log 'saved', wf
+        error: ->
+          console.error 'save failed'
       @
     load: (wf = @id) ->
       if typeof wf is 'string'
@@ -199,7 +194,10 @@ Link
         @descEl.textContent = wf.get 'desc'
         @model = wf
         if wf
-          @view.load wf.warp true
+          if wf.loaded()
+            @view.load wf
+          else
+            wf.fetch success: (wf) => @view.load wf
         else
           @view.clear()
       #TODO: load node list
@@ -273,8 +271,6 @@ Link
     _too_many_actions_limit: 7
     initialize: (options) ->
       super options
-      @actions = []
-      @actionViews = []
       @actionsEl = find '#actions', @el
       _fixStyle = @_fixStyle.bind @
       $(window).resize _fixStyle
@@ -291,45 +287,46 @@ Link
       e.preventDefault()
       target = e.target
       matched = target.href.match /action:(\w+)/i
-      @addAction type: matched[1] if matched
+      @actions?.add @addAction type: matched[1] if matched
       false
-    fill: (data) ->
+    _getActionEls: ->
+      els = @actionsEl.querySelectorAll '.action'
+      [].slice.call els or []
+    fill: (attributes) ->
       # fill info form
-      super data
-      # temp TODO: load models from node
-      [
-        type: 'post_to_multi_social_media'
-      ,
-        type: 'send_email'
-      ].forEach @addAction.bind @
+      super attributes
+      @actions = new Actions attributes.actions or []
+      @actions.forEach @addAction.bind @
       @
     save: ->
       console.log 'save'
       # save actions
+      actions = @_getActionEls().map (el) =>
+        action = $(el).data 'model'
+        throw 'cannot get action from action.$el' unless action
+        action.attributes
+      @data.set 'actions', actions
+      console.log 'save actions', actions, @data
       # TODO: read all actions and check
       # save the node
       super()
       @
     reset: ->
       super()
-      @actions = []
-      @actionViews = []
-      @actionsEl.innerHTML = ''
+      @actions?.forEach (model) -> model.destroy()
+      @actions = null
+      @_getActionEls().forEach (el) -> el.parentNode.removeChild el
       @
     addAction: (model) ->
+      model = new Action model unless model instanceof Action
       actionView = new ActionView model: model, parent: @, container: @actionsEl
       actionView.on 'close', @removeAction.bind @
       actionView.render()
-      @actions.push model
-      @actionViews.push actionView
       actionView.el.scrollIntoView true
       @_checkActionLimit()
       actionView
     removeAction: (view, model) ->
-      idx = @actions.indexOf model
-      return if idx < 0
-      @actions.splice idx, 1
-      @actionViews.splice idx, 1
+      model.destroy()
       @_checkActionLimit()
       @
     _checkActionLimit: ->
@@ -360,7 +357,8 @@ Link
       super options
       @containerEl = options.container
       @model = options.model
-      @type = options.model.type or options.type
+      @model.view = @
+      @type = @model.get?('type') or options.model.type or options.type
       throw 'need action model and type' unless @model and @type
       @
     close: ->
@@ -376,6 +374,7 @@ Link
       #@containerEl.appendChild @el
       @containerEl.insertBefore @el, find '.alert', @containerEl
       @el.innerHTML = tpl
+      @el.id = @model.id or ''
       # get els in super
       super()
       if /webkit/i.test navigator.userAgent
@@ -384,6 +383,8 @@ Link
         $('.box-header, .btn', @el).disableSelection()
       @form = find 'form', @el
       @fill @model?.data
+      @$el.data model: @model, view: @
+      @listenTo @model, 'destroy', => @destroy()
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
@@ -404,6 +405,11 @@ Link
         data[name] = $el.val() if name
       # TODO: support customized controls
       data
+    destroy: ->
+      console.log '@el', @el, @el.parentNode
+      @stopListening @model
+      @el.parentNode?.removeChild @el
+      return
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
@@ -434,7 +440,7 @@ Link
       ]
       ConnectionOverlays: [
         [ 'Arrow',
-          location: 1
+          location: -5
           id: 'arrow'
         ]
         [ 'Label',
@@ -449,10 +455,6 @@ Link
       spanX: 300
       spanY: 150
       vertical: false
-    events:
-      'click .popover .btn-delete': '_delete'
-      'click .popover .btn-edit': '_edit'
-      'dblclick .node': '_edit'
     initialize: (options) ->
       super options
       @nodeEditor = options.nodeEditor
@@ -462,36 +464,10 @@ Link
       @
     _bind: ->
       view = @
-      # link label
-      #  jsPlumb.bind 'beforeDrop', (info) ->
-      #    uuid = info.sourceId + '-' + info.targetId
-      #    newlink = data.links.index[uuid]
-      #    oldLink = info.connection.getParameter 'link'
-      #    if newlink?
-      #      console.log 'link exists', uuid
-      #      # alert 'link exists' if oldLink?
-      #      false # cancel if link exists
-      #    else
-      #      deleteLink oldLink if oldLink?
-      #      true
-      jsPlumb.bind 'jsPlumbConnection', (info) ->
-        conn = info.connection
-        link = conn.getParameter 'link'
-        label = conn.getOverlay 'label'
-        if not link?
-          # TODO: create link
-          # conn.setParameter 'link', createLink info.sourceId, info.targetId
-        else if link.has 'title'
-          label.setLabel link.get 'title'
-        return
-      jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
-        # this will be called after link view destory
-        conn = info.connection
-        link = conn.getParameter 'link'
-        # rebuild src end point for auto delele issue
-        link.prevNode.view.buildSrcEndpoint()
-        return
-
+      jsPlumb.bind 'beforeDrop', (info) ->
+        unless view.model.hasLink info.sourceId, info.targetId
+          view.createLink info.sourceId, info.targetId
+        false
       # link dblclick to edit
       jsPlumb.bind 'dblclick', (conn) ->
         view.editLink conn.getParameter 'link'
@@ -521,8 +497,9 @@ Link
         _togglePopover.call label.canvas
         return
       # node click
-      @$el.on 'click', '.node', _togglePopover
-      @$el.on 'mousedown', (e) ->
+      $el = @$el
+      $el.on 'click', '.node', _togglePopover
+      $el.on 'mousedown', (e) ->
         if view._popped and not view.$el.find('.popover').has(e.target).length
           _hidePopover()
           org_popped = view._popped
@@ -532,17 +509,10 @@ Link
             delete org_popped._hidding
           , 300
         return
+      $el.on 'click', '.popover .btn-delete', (e) -> view._action 'remove', e
+      $el.on 'click', '.popover .btn-edit', (e) -> view._action 'edit', e
+      $el.on 'dblclick', '.node', (e) -> view._action 'edit', e
       return
-    clear: ->
-      @el.innerHTML = ''
-      # TODO: destory all nodes and links
-      @
-    load: (wf) ->
-      # clear
-      @clear()
-      @_processModel wf
-      @_renderModel wf
-      @
     _action: (action, e) ->
       $target = $ e.target
       $target = $target.parents '.target' unless $target.hasClass 'target'
@@ -555,30 +525,23 @@ Link
         return
       func?.call @, model
       return
-    _delete: (e) ->
-      @_action 'remove', e
-      return
-    _edit: (e) ->
-      @_action 'edit', e
-      return
-    _processModel: (wf) ->
+    clear: ->
+      # TODO: destroy all views of nodes and links
+      @el.innerHTML = ''
+      # unbind model events
+      @stopListening @model
+      @
+    load: (wf) ->
+      @clear()
       @model = wf
-      # pre-process nodes and links
-      wf.nodes.forEach (node) ->
-        node.workflow = wf
-        node.inLinks = []
-        node.outLinks = []
-        return
-      wf.links.forEach (link) ->
-        link.workflow = wf
-        link.prevNode = wf.nodes.get link.get 'prev_node_id'
-        link.nextNode = wf.nodes.get link.get 'next_node_id'
-        unless link.prevNode and link.nextNode
-          console.error 'link', link.name or link.id, 'is broken, prev/next node missing'
-        link.prevNode.outLinks.push link
-        link.nextNode.inLinks.push link
-        return
-      nodes = wf.nodes
+      # bind add node/link event
+      @listenTo @model.nodes, 'add', @_addNode.bind @
+      @listenTo @model.links, 'add', @_addLink.bind @
+      # node/link remove already binded on destory
+
+      @_renderModel wf
+      @
+    _sortNodeViews: (nodes) ->
       nodes.lonely = []
       nodes.start = []
       nodes.end = []
@@ -589,11 +552,7 @@ Link
           nodes.start.push node
         else if node.outLinks.length is 0
           nodes.end.push node
-        return
-      @_sortNodeViews nodes
-      # TODO: workflow validation
-      return
-    _sortNodeViews: (nodes) ->
+
       grid = @grid = [nodes.start.concat nodes.lonely]
       {vertical, padding, spanX, spanY} = @gridDefaults
 
@@ -625,16 +584,11 @@ Link
       console.log 'render wf', wf
       wf = @model
       throw 'workflow not loaded' unless wf?
-      # must bind before render nodes/links
-      @_bind()
-      # build nodes
-      wf.nodes.forEach (node) =>
-        @_addNode node
-        return
-      # build links
-      wf.links.forEach (link) =>
-        @_addLink link
-        return
+      console.log wf.nodes
+      unless wf.nodes.length and wf.nodes.at(0).has 'style'
+        @_sortNodeViews wf.nodes
+      wf.nodes.forEach @_addNode.bind @
+      wf.links.forEach @_addLink.bind @
       return
     addNode: (node = 'emtpy') ->
       if node is 'new' or node is 'empty'
@@ -647,7 +601,9 @@ Link
         console.error 'add a invalid node', node
         throw 'add a invalid node'
       console.log 'add node', node
-      @_addNode node
+      #@model.nodes.add node
+      @model.createNode node
+      #@_addNode node
       @
     _addNode: (node) ->
       view = node.view = new NodeView model: node, parent: @
@@ -657,7 +613,9 @@ Link
     createNode: ->
       @nodeEditor.popup (new Node), (action, node) =>
         if action is 'save'
-          @_addNode node
+          #@_addNode node
+          #@model.nodes.add node
+          @model.createNode node
         else # canceled
           console.log 'canceled create node'
       @
@@ -675,8 +633,25 @@ Link
       # use confirm since no support for undo
       if confirm "Delete the node: #{node.get 'title'}?"
         console.log 'remove node', node
-        node.view?.distory()
-      # TODO: remove view and model
+        #@model.nodes.remove node
+        console.log @model.nodes
+        node.destroy()
+        console.log @model.nodes
+      @
+    createLink: (from, to) ->
+      from = @model.nodes.get from unless from.id and from.has 'name'
+      to = @model.nodes.get to unless to.id and to.has 'name'
+      name = "#{from.get 'name'}_to_#{to.get 'name'}"
+      data = new Link
+        name: name[0..32].toLowerCase()
+        prev_node_id: from.id
+        next_node_id: to.id
+      @linkEditor.popup data, (action, link) =>
+        if action is 'save'
+          #@model.links.add link
+          @model.createLink link
+        else # canceled
+          console.log 'canceled create link'
       @
     addLink: (link) ->
       # TODO: add view and model
@@ -689,6 +664,7 @@ Link
     editLink: (link) ->
       @linkEditor.popup link, (action, link) =>
         if action is 'save'
+          link.view.update link
           console.log 'saved link', link
         else # canceled
           console.log 'canceled edit link'
@@ -697,10 +673,12 @@ Link
       # use confirm since no support for undo
       if confirm "Delete the link: #{link.get('title') or '(No Name)'}?"
         console.log 'remove node', link
-        link.view?.distory()
-      # TODO: remove view and model
+        link.destroy()
       @
     render: ->
+      @_bind()
+      # TODO: make el drag scrollable
+      # @$el.draggable axis: 'x'
       # chrome fix
       @el.onselectstart = -> false
       @
@@ -741,28 +719,32 @@ Link
       html
     render: ->
       node = @el.node = @model
-      name = @el.id = node.get 'name'
+      @el.id = node.id
+      @listenTo node, 'destroy', => @destroy()
       @_renderModel node
       jsPlumb.draggable @$el
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
-      @buildSrcEndpoint()
+      @srcEndpoint ?= jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
+        model: @model
+        view: @
       jsPlumb.makeTarget @$el, @targetEndpointStyle, parameters:
         node: node
         view: @
       @
-
     update: (node = @model) ->
       @$el.popover 'destroy'
       @_renderModel node
       jsPlumb.repaint @el.id
       @
-
     _renderModel: (node = @model) ->
       @el.innerHTML = node.escape 'title'
-      title = @el.title = node.get 'title'
-      @el.style.left = node.x + 'px'
-      @el.style.top = node.y + 'px'
+      title = node.get 'title'
+      if node.has 'style'
+        @el.setAttribute 'style', node.get 'style'
+      else
+        @el.style.left = node.x + 'px'
+        @el.style.top = node.y + 'px'
       @$el.addClass('target').data node: node, view: @
       @$el.popover
         container: @parentEl
@@ -774,16 +756,13 @@ Link
       @$popover = @$el.data('popover').tip()
       @$popover?.addClass('target').data node: node, view: @
       return
-    buildSrcEndpoint: ->
-      jsPlumb.deleteEndpoint @srcEndpoint if @srcEndpoint?
-      @srcEndpoint = jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
-        model: @model
-        view: @
-      @
-    distory: ->
-      # TODO: destory view and model
+    destroy: ->
+      @stopListening @model
       @$el.popover 'destroy'
-      @trigger 'distory', @, @model
+      jsPlumb.deleteEndpoint @srcEndpoint
+      jsPlumb.deleteEndpoint @
+      @el.parentNode.removeChild @el
+      @trigger 'destroy', @, @model
       return
 
   class LinkView extends View
@@ -800,18 +779,24 @@ Link
           link: link
           view: @
       @setElement conn.canvas
+      @listenTo link, 'destroy', => @destroy()
       @label = conn.getOverlay 'label'
       @labelEl = @label.canvas
-      title = link.get 'title'
+      @_renderLabel link
+      @
+    update: (link = @model) ->
+      $(@labelEl).popover 'destroy'
+      @_renderLabel link
+      @
+    _renderLabel: (link) ->
       label$el = $(@labelEl)
       # _desc = "#{link.prevNode.get 'title'} to #{link.nextNode.get 'title'}"
-      if title
-        @labelEl.title = 'Link: ' + title
-      else
-        label$el.css 'visibility', 'hidden'
-        @labelEl.title = 'Link'
+      title = link.get 'title'
+      @label.setLabel title or ''
+      label$el.css 'visibility', if title then 'visible' else 'hidden'
       label$el.popover
         container: @parentEl
+        title: title or 'Link'
         trigger: 'manual'
         placement: 'bottom'
         html: true
@@ -819,11 +804,12 @@ Link
       @$popover = label$el.data('popover').tip()
       @$popover?.addClass('target').data link: link, view: @
       @
-    distory: ->
+    destroy: ->
+      console.log 'destroy', @conn, @model, @
       jsPlumb.detach @conn
-      # TODO: destory model
+      @stopListening @model
       $(@labelEl).popover 'destroy'
-      @trigger 'distory', @, @model
+      @trigger 'destroy', @, @model
       return
 
   WorkflowFrameView

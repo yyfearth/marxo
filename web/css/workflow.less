@@ -35,11 +35,15 @@
     min-width: 5em;
     height: 5em;
     line-height: 5em;
-    z-index: 20;
     position: absolute;
     padding: 0.5em 1em;
     cursor: pointer;
     margin: 0;
+    z-index: 20 !important;
+
+    &:hover {
+      z-index: 21 !important;
+    }
 
     &.active {
       border: 1px dotted green;
@@ -64,7 +68,7 @@
   }
 
   .endpoint {
-    z-index: 21;
+    z-index: 22;
     cursor: move;
     &:after {
       position: absolute;
