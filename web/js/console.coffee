@@ -221,6 +221,14 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         @form.appendChild submit_btn
       @_submit_btn = submit_btn
       find('button.btn-save', @el)?.onclick = @submit.bind @
+      if @form.title and @form.name
+        $(@form.title).on 'input', =>
+          if @form.name._auto isnt false
+            @form.name.value = @form.title.value.replace(/\W+/g, '_')[0..32].toLowerCase()
+          return
+        $(@form.name).on
+          input: => @form.name._auto = not @form.name.value
+          change: => @form.name.value = @form.name.value.toLowerCase()
       @
     submit: ->
       @_submit_btn.click()

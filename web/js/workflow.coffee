@@ -113,10 +113,6 @@ Link
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
-    events:
-      'input #wf_title': '_title_typed'
-      'input #wf_name': '_name_typed'
-      'change #wf_name': '_name_changed'
     initialize: (options) ->
       super options
     popup: (data, callback) ->
@@ -128,16 +124,6 @@ Link
       @callback 'save'
       @hide true
       @
-    _name_typed: ->
-      @form.name._auto = not @form.name.value
-      return
-    _name_changed: ->
-      @form.name.value = @form.name.value.toLowerCase()
-      return
-    _title_typed: ->
-      if @form.name._auto isnt false
-        @form.name.value = @form.title.value.replace(/\W+/g, '_')[0..32].toLowerCase()
-      return
   ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
   class WorkflowEditorView extends InnerFrameView
