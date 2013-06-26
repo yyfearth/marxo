@@ -97,6 +97,10 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
       link_ids = @links?.map (r) -> r.id
       attributes.node_ids = node_ids if node_ids?.join(',') isnt @get('node_ids')?.join(',')
       attributes.node_ids = link_ids if link_ids?.join(',') isnt @get('link_ids')?.join(',')
+      # for test only
+      if @nodes?.length then attributes.nodes = @nodes?.map (r) -> r.attributes
+      if @links?.length then attributes.links = @links?.map (r) -> r.attributes
+      console.log 'save workflow', attributes, @
       super attributes, options
       @
     loaded: ->

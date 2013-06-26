@@ -182,13 +182,20 @@ Link
       @load() if confirm 'All changes will be descarded since last save, are you sure to do that?'
       @
     save: ->
-      if @model?.hasChanged()
-        console.log 'save', @model.attributes
-        @model.save {},
-          success: (wf) ->
-            console.log 'saved', wf
-          error: ->
-            console.error 'save failed'
+      #if @model?.hasChanged()
+      console.log 'save', @model.attributes
+      @model.nodes.forEach (node) ->
+        node.view.el.style.zIndex = ''
+        style = node.view.el.getAttribute 'style'
+        if style isnt node.get 'style'
+          node.set 'style', style
+          #node.save()
+          console.log 'node style', node.id, style
+      @model.save {},
+        success: (wf) ->
+          console.log 'saved', wf
+        error: ->
+          console.error 'save failed'
       @
     load: (wf = @id) ->
       if typeof wf is 'string'
@@ -589,7 +596,9 @@ Link
       console.log 'render wf', wf
       wf = @model
       throw 'workflow not loaded' unless wf?
-      @_sortNodeViews wf.nodes
+      console.log wf.nodes
+      unless wf.nodes.length and wf.nodes.at(0).has 'style'
+        @_sortNodeViews wf.nodes
       wf.nodes.forEach @_addNode.bind @
       wf.links.forEach @_addLink.bind @
       return
@@ -739,8 +748,11 @@ Link
     _renderModel: (node = @model) ->
       @el.innerHTML = node.escape 'title'
       title = node.get 'title'
-      @el.style.left = node.x + 'px'
-      @el.style.top = node.y + 'px'
+      if node.has 'style'
+        @el.setAttribute 'style', node.get 'style'
+      else
+        @el.style.left = node.x + 'px'
+        @el.style.top = node.y + 'px'
       @$el.addClass('target').data node: node, view: @
       @$el.popover
         container: @parentEl
@@ -791,7 +803,6 @@ Link
       @_renderLabel link
       @
     _renderLabel: (link) ->
-      console.log '@label', @label
       label$el = $(@labelEl)
       # _desc = "#{link.prevNode.get 'title'} to #{link.nextNode.get 'title'}"
       title = link.get 'title'
