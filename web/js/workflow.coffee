@@ -458,14 +458,6 @@ Link
         unless view.model.hasLink info.sourceId, info.targetId
           view.createLink info.sourceId, info.targetId
         false
-      jsPlumb.bind 'jsPlumbConnectionDetached', (info) ->
-        # this will be called after link view destroy
-        conn = info.connection
-        link = conn.getParameter 'link'
-        # rebuild src end point for auto delele issue
-        link.prevNode.view.buildSrcEndpoint()
-        return
-
       # link dblclick to edit
       jsPlumb.bind 'dblclick', (conn) ->
         view.editLink conn.getParameter 'link'
@@ -637,9 +629,13 @@ Link
         console.log @model.nodes
       @
     createLink: (from, to) ->
+      from = @model.nodes.get from unless from.id and from.has 'name'
+      to = @model.nodes.get to unless to.id and to.has 'name'
+      name = "#{from.get 'name'}_to_#{to.get 'name'}"
       data = new Link
-        prev_node_id: from.id or from
-        next_node_id: to.id or to
+        name: name[0..32].toLowerCase()
+        prev_node_id: from.id
+        next_node_id: to.id
       @linkEditor.popup data, (action, link) =>
         if action is 'save'
           #@model.links.add link
@@ -719,18 +715,18 @@ Link
       jsPlumb.draggable @$el
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
-      @buildSrcEndpoint()
+      @srcEndpoint ?= jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
+        model: @model
+        view: @
       jsPlumb.makeTarget @$el, @targetEndpointStyle, parameters:
         node: node
         view: @
       @
-
     update: (node = @model) ->
       @$el.popover 'destroy'
       @_renderModel node
       jsPlumb.repaint @el.id
       @
-
     _renderModel: (node = @model) ->
       @el.innerHTML = node.escape 'title'
       title = node.get 'title'
@@ -750,12 +746,6 @@ Link
       @$popover = @$el.data('popover').tip()
       @$popover?.addClass('target').data node: node, view: @
       return
-    buildSrcEndpoint: ->
-      jsPlumb.deleteEndpoint @srcEndpoint if @srcEndpoint?
-      @srcEndpoint = jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
-        model: @model
-        view: @
-      @
     destroy: ->
       @stopListening @model
       @$el.popover 'destroy'
@@ -805,6 +795,7 @@ Link
       @$popover?.addClass('target').data link: link, view: @
       @
     destroy: ->
+      console.log 'destroy', @conn, @model, @
       jsPlumb.detach @conn
       @stopListening @model
       $(@labelEl).popover 'destroy'
