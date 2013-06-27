@@ -4,6 +4,186 @@ define 'test_data', ['models'], (models) ->
 
   data =
     workflows: [
+      id: '50447afb4728cb2036cf9ca0'
+      title: 'Demo Workflow'
+      name: 'demo_workflow'
+      desc: 'Demo Workflow for App Dev and Logo Desgin'
+      node_ids: [
+        '50447afb4728cb2036cf9cb0'
+        '50447afb4728cb2036cf9cb1'
+        '50447afb4728cb2036cf9cb2'
+        '50447afb4728cb2036cf9cb3'
+        '50447afb4728cb2036cf9cb4'
+        '50447afb4728cb2036cf9cb5'
+        '50447afb4728cb2036cf9cb6'
+        '50447afb4728cb2036cf9cb7'
+      ]
+      link_ids: [
+        '50447afb4728cb2036cf9cc0'
+        '50447afb4728cb2036cf9cc1'
+        '50447afb4728cb2036cf9cc2'
+        '50447afb4728cb2036cf9cc3'
+        '50447afb4728cb2036cf9cc4'
+        '50447afb4728cb2036cf9cc5'
+        '50447afb4728cb2036cf9cc6'
+        '50447afb4728cb2036cf9cc7'
+        '50447afb4728cb2036cf9cc8'
+        '50447afb4728cb2036cf9cc9'
+      ]
+      nodes: [
+        id: '50447afb4728cb2036cf9cb0'
+        title: 'Post Idea'
+        name: 'post_idea'
+        desc: 'Post project idea'
+        created_at: '2013-06-27T00:23:31.747Z'
+        updated_at: '2013-06-27T00:23:31.747Z'
+        style: 'left: 26px; top: 43px;'
+        actions: []
+      ,
+        id: '50447afb4728cb2036cf9cb1'
+        title: 'Post Requirements'
+        name: 'post_requirements'
+        desc: 'Post requirements'
+        created_at: '2013-06-27T00:24:55.070Z'
+        updated_at: '2013-06-27T00:24:55.070Z'
+        style: 'left: 334px; top: 44px;'
+        actions: []
+      ,
+        id: '50447afb4728cb2036cf9cb2'
+        title: 'Cancel Notification'
+        name: 'cancel_notification'
+        desc: 'Cancel project for less response than expected'
+        created_at: '2013-06-27T00:25:58.702Z'
+        updated_at: '2013-06-27T00:25:58.702Z'
+        style: 'left: 334px; top: 204px;'
+        actions: []
+      ,
+        id: '50447afb4728cb2036cf9cb3'
+        title: 'Retrieve App Submissions'
+        name: 'retrieve_app_submissions'
+        desc: 'Retrieve app submissions'
+        created_at: '2013-06-27T00:32:46.817Z'
+        updated_at: '2013-06-27T00:32:46.817Z'
+        style: 'left: 613px; top: 44px;'
+        actions: []
+      ,
+        id: '50447afb4728cb2036cf9cb4'
+        title: 'Retrieve Logo Design'
+        name: 'retrieve_logo_design'
+        desc: 'Retrieve logo design'
+        created_at: '2013-06-27T00:35:36.856Z'
+        updated_at: '2013-06-27T00:35:36.856Z'
+        style: 'left: 629px; top: 282px;'
+        actions: []
+      ,
+        id: '50447afb4728cb2036cf9cb5'
+        title: 'Email to Evaluators'
+        name: 'email_to_evaluators'
+        desc: 'Email to evaluators'
+        created_at: '2013-06-27T00:36:21.950Z'
+        updated_at: '2013-06-27T00:36:21.950Z'
+        style: 'left: 1018px; top: 44px;'
+        actions: []
+      ,
+        id: '50447afb4728cb2036cf9cb6'
+        title: 'Post and Vote'
+        name: 'post_and_vote'
+        desc: 'Post and vote'
+        created_at: '2013-06-27T00:36:47.097Z'
+        updated_at: '2013-06-27T00:36:47.097Z'
+        style: 'left: 1043px; top: 282px;'
+        actions: []
+      ,
+        id: '50447afb4728cb2036cf9cb7'
+        title: 'Post Final Result and Reward'
+        name: 'post_final_result_and_reward'
+        desc: 'Post final result and reward'
+        created_at: '2013-06-27T00:39:04.602Z'
+        updated_at: '2013-06-27T00:39:04.602Z'
+        style: 'left: 1420px; top: 183px;'
+        actions: []
+      ]
+      links: [
+        id: '50447afb4728cb2036cf9cc0'
+        name: '10_days_likes_gte_300'
+        prev_node_id: '50447afb4728cb2036cf9cb0'
+        next_node_id: '50447afb4728cb2036cf9cb1'
+        title: '10 Days & Likes >= 300'
+        created_at: '2013-06-27T00:27:31.946Z'
+        updated_at: '2013-06-27T00:27:31.946Z'
+      ,
+        id: '50447afb4728cb2036cf9cc1'
+        name: '10_days_likes_lt_300'
+        prev_node_id: '50447afb4728cb2036cf9cb0'
+        next_node_id: '50447afb4728cb2036cf9cb2'
+        title: '10 Days & Likes < 300'
+        created_at: '2013-06-27T00:28:58.636Z'
+        updated_at: '2013-06-27T00:28:58.636Z'
+      ,
+        id: '50447afb4728cb2036cf9cc2'
+        name: 'post_req_to_retrieve_app'
+        prev_node_id: '50447afb4728cb2036cf9cb1'
+        next_node_id: '50447afb4728cb2036cf9cb3'
+        created_at: '2013-06-27T00:33:01.670Z'
+        updated_at: '2013-06-27T00:33:01.670Z'
+      ,
+        id: '50447afb4728cb2036cf9cc3'
+        name: 'post_req_to_retrieve_logo'
+        prev_node_id: '50447afb4728cb2036cf9cb1'
+        next_node_id: '50447afb4728cb2036cf9cb4'
+        created_at: '2013-06-27T00:35:45.912Z'
+        updated_at: '2013-06-27T00:35:45.912Z'
+      ,
+        id: '50447afb4728cb2036cf9cc4'
+        name: 'retrieve_app_to_evaluate'
+        prev_node_id: '50447afb4728cb2036cf9cb3'
+        next_node_id: '50447afb4728cb2036cf9cb5'
+        title: '15 Days & > 80% Response'
+        created_at: '2013-06-27T00:37:24.163Z'
+        updated_at: '2013-06-27T00:37:24.163Z'
+      ,
+        id: '50447afb4728cb2036cf9cc5'
+        name: 'retrieve_logo_to_post_and_vote'
+        prev_node_id: '50447afb4728cb2036cf9cb4'
+        next_node_id: '50447afb4728cb2036cf9cb6'
+        title: '10 Days & Submissions >= 3'
+        created_at: '2013-06-27T00:37:43.706Z'
+        updated_at: '2013-06-27T00:37:43.706Z'
+      ,
+        id: '50447afb4728cb2036cf9cc6'
+        title: 'Failed'
+        name: 'faild_to_evaluate'
+        desc: 'Manual trigger back if failed to evaluate'
+        prev_node_id: '50447afb4728cb2036cf9cb5'
+        next_node_id: '50447afb4728cb2036cf9cb3'
+        created_at: '2013-06-27T00:37:51.943Z'
+        updated_at: '2013-06-27T00:37:51.943Z'
+      ,
+        id: '50447afb4728cb2036cf9cc7'
+        title: 'Failed'
+        desc: 'Manual trigger back if failed to vote'
+        prev_node_id: '50447afb4728cb2036cf9cb6'
+        next_node_id: '50447afb4728cb2036cf9cb4'
+        created_at: '2013-06-27T00:38:05.360Z'
+        updated_at: '2013-06-27T00:38:05.360Z'
+      ,
+        id: '50447afb4728cb2036cf9cc8'
+        name: 'evaluate_to_post_final'
+        prev_node_id: '50447afb4728cb2036cf9cb5'
+        next_node_id: '50447afb4728cb2036cf9cb7'
+        created_at: '2013-06-27T00:39:22.841Z'
+        updated_at: '2013-06-27T00:39:22.841Z'
+      ,
+        id: '50447afb4728cb2036cf9cc9'
+        name: 'post_and_vote_to_post_final'
+        prev_node_id: '50447afb4728cb2036cf9cb6'
+        next_node_id: '50447afb4728cb2036cf9cb7'
+        created_at: '2013-06-27T00:39:26.674Z'
+        updated_at: '2013-06-27T00:39:26.674Z'
+      ]
+      created_at: '2013-06-27T00:22:20.272Z'
+      updated_at: '2013-06-27T00:22:20.272Z'
+    ,
       id: '50447afb4728cb2036cf9ca1'
       name: 'test_wf'
       title: 'Test Workflow'
