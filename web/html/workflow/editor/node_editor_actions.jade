@@ -12,31 +12,118 @@ mixin post_content(media, max, rows)
   textarea.input-block-level(name='post_content', placeholder='Post Content...',
   title='Content post to ' + media + ' (' + max + ' max)', rows=rows, maxlength=max)
 
+mixin action_template_select
+  select(name='template', disabled)
+    option (Select from Template)
+
+mixin track_checkbox
+  label.checkbox.inline
+    input(type='checkbox', name='track', checked)
+    | Track
+
+mixin track_checkbox_disabled
+  label.checkbox.inline
+    input(type='checkbox', name='track', checked, disabled)
+    | Track
+
 // show in sidebar
 mixin actions_thumb
+  li.nav-header Content Page
+  li
+    a.action-thumb(href='#action:post_info_page', data-placement='bottom'
+    title='Generate a information page using templates and post as a web page')
+      | Post Information Page
+  li
+    a.action-thumb(href='#action:post_form', data-placement='bottom'
+    title='Generate a survey form using templates and post as a web form page')
+      | Post Form
   li.nav-header Social Media
   li
-    a.action-thumb(href='#action:post_to_multi_social_media') Post to Social Media
+    a.action-thumb(href='#action:post_to_multi_social_media',
+    title='Post the same message to multiple selected social media')
+      | Post to Social Media
   li
-    a.action-thumb(href='#action:post_to_twitter') Post to Twitter
+    a.action-thumb(href='#action:post_to_twitter',
+    title='Post message to Twitter')
+      | Post to Twitter
   li
-    a.action-thumb(href='#action:post_to_facebook') Post to Facebook
-  li
-    a.action-thumb(href='#action:track_multi_social_media') Track Social Media
+    a.action-thumb(href='#action:post_to_facebook',
+    title='Post message to Facebook')
+      | Post to Facebook
   li.nav-header Email
   li
-    a.action-thumb(href='#action:send_email') Send Email
+    a.action-thumb(href='#action:send_email',
+    title='Send email to selected email addresses')
+      | Send Email
+  li.nav-header Report
   li
-    a.action-thumb(href='#action:track_email') Track Email
+    a.action-thumb(href='#action:generate_report',
+    title='Generate report from selected tracking data')
+      | Generate Report
+  li
+    a.action-thumb(href='#action:calc_data',
+    title='Do some calculation on existing tracking data')
+      | Calculate Data
 
 // show in the actions box
 mixin actions_tpl
+
+  #t_post_info_page_action.tpl
+    .box-header.well
+      h4 Post Information Page
+      mixin box_icons
+    form.box-content
+      ul.action-bar
+        li
+          mixin action_template_select
+        li
+          a.btn.btn-primary(href='#page') Design Page
+        li
+          a.btn.btn-info(href='about:blank', target='_blank') Preview
+        li
+          mixin track_checkbox
+      .info (Page Info)
+      .help-block
+        | Information Page is a web page to display information.
+        br
+        | Click "Design Page" button to design the page.
+        br
+        | Click "Preview" button to preview the generated page.
+
+  #t_post_form_action.tpl
+    .box-header.well
+      h4 Post Form
+      mixin box_icons
+    form.box-content
+      ul.action-bar
+        li
+          mixin action_template_select
+        li
+          a.btn.btn-primary(href='#page') Design Form
+        li
+          a.btn.btn-info(href='about:blank', target='_blank') Preview
+        li
+          mixin track_checkbox_disabled
+      .info (Form Info)
+      .help-block
+        | Form is a web page with predefined controlls to allow people to submit.
+        br
+        | Click "Design Form" button to design the form.
+        br
+        | Click "Preview" button to preview the generated page.
+
   #t_post_to_multi_social_media_action.tpl
     .box-header.well
       h4 Post to Multiple Social Media
       mixin box_icons
     form.box-content
-      mixin multi_social_media_group_btns
+      ul.action-bar
+        li
+          mixin multi_social_media_group_btns
+        li
+          mixin action_template_select
+        li
+          mixin track_checkbox
       mixin post_content('social media', 140, 2)
       .help-block
         | The maximium content length is 140, which is limited by Twitter.
@@ -48,6 +135,11 @@ mixin actions_tpl
       h4 Post to Twitter
       mixin box_icons
     form.box-content
+      ul.action-bar
+        li
+          mixin action_template_select
+        li
+          mixin track_checkbox
       mixin post_content('Twitter', 140, 2)
       .help-block The maximium content length is 140, which is limited by Twitter.
 
@@ -56,6 +148,11 @@ mixin actions_tpl
       h4 Post to Facebook
       mixin box_icons
     form.box-content
+      ul.action-bar
+        li
+          mixin action_template_select
+        li
+          mixin track_checkbox
       mixin post_content('Facebook', 63206, 3)
       .help-block The maximium content length is 63206, which is limited by Facebook.
 
@@ -68,20 +165,23 @@ mixin actions_tpl
         span.add-on To
         input.span11(name="email_to", title='Send To', type='text',
         placeholder='email_1@example.com; email_2@example.com')
+      mixin action_template_select
+      mixin track_checkbox
       textarea.input-block-level(name='email_content', placeholder='Email Content...',
       title='Content for email (1000 max)', rows=5, maxlength=1000)
 
-  #t_track_multi_social_media_action.tpl
+  #t_generate_report_action.tpl
     .box-header.well
-      h4 Track Multiple Social Media
+      h4 Generate Report
       mixin box_icons
     form.box-content
-      mixin multi_social_media_group_btns
-      | track options
+      | Generate Report
+      .help-block Generate Report
 
-  #t_track_email_action.tpl
+  #t_calc_data_action.tpl
     .box-header.well
-      h4 Track Email
+      h4 Calculate Data
       mixin box_icons
     form.box-content
-      | track email options
+      | Calculate Data
+      .help-block Calculate Data
