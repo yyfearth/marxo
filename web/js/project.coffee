@@ -20,7 +20,7 @@ Projects
       @viewer = new ProjectViewerView el: '#project_viewer', parent: @
       @manager = new ProjectManagemerView el: '#project_manager', parent: @
       return
-    open: (name) ->
+    open: (name, sub) ->
       switch name
         when 'new'
           @switchTo @creator
@@ -30,6 +30,7 @@ Projects
           if name
             @switchTo @viewer
             @viewer.load name
+            @viewer.popup sub if sub
       return
     render: ->
       super()
@@ -70,6 +71,11 @@ Projects
     #      super options
     load: (name) ->
       console.log 'load project', name
+      @
+    popup: ({link, node, action} = {}) ->
+      throw 'cannot open a action without given a node' if action and not node
+      throw 'node and link cannot be open together' if link and node
+      console.log 'popup node/link viewer', {link, node, action}
       @
 
   ProjectFrameView

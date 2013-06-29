@@ -5953,6 +5953,9 @@ ul.action-bar > li {
   display: inline-block;
   margin-left: 5px;
 }
+ul.action-bar > li > * {
+  margin: 0;
+}
 ul.action-bar .nav {
   margin-bottom: 0;
 }
