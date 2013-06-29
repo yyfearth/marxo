@@ -55,6 +55,11 @@ mixin actions_thumb
     a.action-thumb(href='#action:send_email',
     title='Send email to selected email addresses')
       | Send Email
+  li.nav-header Schedule
+  li
+    a.action-thumb(href='#action:make_schedule',
+    title='Create a schedule in calendar')
+      | Make Schedule
   li.nav-header Report
   li
     a.action-thumb(href='#action:generate_report',
@@ -185,3 +190,11 @@ mixin actions_tpl
     form.box-content
       | Calculate Data
       .help-block Calculate Data
+
+  #t_make_schedule_action.tpl
+    .box-header.well
+      h4 Make Schedule
+      mixin box_icons
+    form.box-content
+      | Make Schedule
+      .help-block Make Schedule
