@@ -38,7 +38,16 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:23:31.747Z'
         updated_at: '2013-06-27T00:23:31.747Z'
         style: 'left: 26px; top: 43px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f00'
+          type: 'post_info_page'
+        ,
+          id: '50447afb4728cb2036cf9f01'
+          type: 'post_to_multi_social_media'
+        ,
+          id: '50447afb4728cb2036cf9f02'
+          type: 'generate_report'
+        ]
       ,
         id: '50447afb4728cb2036cf9cb1'
         title: 'Post Requirements'
@@ -47,7 +56,16 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:24:55.070Z'
         updated_at: '2013-06-27T00:24:55.070Z'
         style: 'left: 334px; top: 44px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f03'
+          type: 'post_info_page'
+        ,
+          id: '50447afb4728cb2036cf9ce4'
+          type: 'post_to_multi_social_media'
+        ,
+          id: '50447afb4728cb2036cf9f05'
+          type: 'generate_report'
+        ]
       ,
         id: '50447afb4728cb2036cf9cb2'
         title: 'Cancel Notification'
@@ -56,7 +74,10 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:25:58.702Z'
         updated_at: '2013-06-27T00:25:58.702Z'
         style: 'left: 334px; top: 204px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f06'
+          type: 'post_to_multi_social_media'
+        ]
       ,
         id: '50447afb4728cb2036cf9cb3'
         title: 'Retrieve App Submissions'
@@ -65,7 +86,16 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:32:46.817Z'
         updated_at: '2013-06-27T00:32:46.817Z'
         style: 'left: 613px; top: 44px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f07'
+          type: 'post_form'
+        ,
+          id: '50447afb4728cb2036cf9f08'
+          type: 'post_to_multi_social_media'
+        ,
+          id: '50447afb4728cb2036cf9f09'
+          type: 'generate_report'
+        ]
       ,
         id: '50447afb4728cb2036cf9cb4'
         title: 'Retrieve Logo Design'
@@ -74,7 +104,16 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:35:36.856Z'
         updated_at: '2013-06-27T00:35:36.856Z'
         style: 'left: 629px; top: 282px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f0a'
+          type: 'post_form'
+        ,
+          id: '50447afb4728cb2036cf9f0b'
+          type: 'post_to_multi_social_media'
+        ,
+          id: '50447afb4728cb2036cf9f0c'
+          type: 'generate_report'
+        ]
       ,
         id: '50447afb4728cb2036cf9cb5'
         title: 'Email to Evaluators'
@@ -83,7 +122,16 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:36:21.950Z'
         updated_at: '2013-06-27T00:36:21.950Z'
         style: 'left: 1018px; top: 44px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f0d'
+          type: 'post_form'
+        ,
+          id: '50447afb4728cb2036cf9f0e'
+          type: 'send_email'
+        ,
+          id: '50447afb4728cb2036cf9f0f'
+          type: 'generate_report'
+        ]
       ,
         id: '50447afb4728cb2036cf9cb6'
         title: 'Post and Vote'
@@ -92,7 +140,16 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:36:47.097Z'
         updated_at: '2013-06-27T00:36:47.097Z'
         style: 'left: 1043px; top: 282px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f10'
+          type: 'post_form'
+        ,
+          id: '50447afb4728cb2036cf9f11'
+          type: 'post_to_multi_social_media'
+        ,
+          id: '50447afb4728cb2036cf9f12'
+          type: 'generate_report'
+        ]
       ,
         id: '50447afb4728cb2036cf9cb7'
         title: 'Post Final Result and Reward'
@@ -101,7 +158,19 @@ define 'test_data', ['models'], (models) ->
         created_at: '2013-06-27T00:39:04.602Z'
         updated_at: '2013-06-27T00:39:04.602Z'
         style: 'left: 1420px; top: 183px;'
-        actions: []
+        actions: [
+          id: '50447afb4728cb2036cf9f13'
+          type: 'post_info_page'
+        ,
+          id: '50447afb4728cb2036cf9f14'
+          type: 'post_to_multi_social_media'
+        ,
+          id: '50447afb4728cb2036cf9f15'
+          type: 'send_email'
+        ,
+          id: '50447afb4728cb2036cf9f16'
+          type: 'generate_report'
+        ]
       ]
       links: [
         id: '50447afb4728cb2036cf9cc0'
@@ -151,7 +220,7 @@ define 'test_data', ['models'], (models) ->
         updated_at: '2013-06-27T00:37:43.706Z'
       ,
         id: '50447afb4728cb2036cf9cc6'
-        title: 'Failed'
+        title: '(fallback)'
         name: 'faild_to_evaluate'
         desc: 'Manual trigger back if failed to evaluate'
         prev_node_id: '50447afb4728cb2036cf9cb5'
@@ -160,7 +229,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: '2013-06-27T00:37:51.943Z'
       ,
         id: '50447afb4728cb2036cf9cc7'
-        title: 'Failed'
+        title: '(fallback)'
+        name: 'failed_to_vote'
         desc: 'Manual trigger back if failed to vote'
         prev_node_id: '50447afb4728cb2036cf9cb6'
         next_node_id: '50447afb4728cb2036cf9cb4'

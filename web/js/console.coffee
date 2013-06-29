@@ -77,18 +77,18 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           navContainer.classList.remove 'hide-dropdown'
         return
       return
-    showFrame: (frame, name) ->
+    showFrame: (frame, name, sub) ->
       frame = @frames[frame]
       return unless frame?
       # console.log 'frame', frame
       if frame instanceof FrameView
-        frame.open? name
+        frame.open? name, sub
       else
         console.log 'load module:', frame.id
         require [frame.id], (TheFrameView) =>
           frame = @frames[frame.id] = new TheFrameView frame
           frame.render()
-          frame.open? name
+          frame.open? name, sub
           return
       unless frame.el.classList.contains 'active'
         find('#main .frame.active')?.classList.remove 'active'
@@ -181,23 +181,32 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         backdrop: 'static'
       @$el.on 'hidden', (e) => @callback() if e.target is @el
       return
-    popup: (@data, callback) ->
-      @_callback = callback
-      @show true
+    popup: (data, callback) ->
+      if data is @data
+        callback? 'ignored'
+      else
+        @reset()
+        @data = data
+        @_callback = callback
+        @show true
+      @
     callback: (action = 'cancel') ->
       return unless @_callback?
       @trigger action, @data, @
       @_callback? action, @data, @
+      @_action = action
       @reset()
       return
     reset: ->
       @data = null
+      @_action = null
       @_callback = null
       @
     #action: -> # should be customized, e.g. ok, save, export
     #  @callback 'action_name'
     #  @hide true
-    cencel: ->
+    cancel: ->
+      @callback() if @_callback
       @hide true
     show: (@shown = true) ->
       @$el.modal if @shown then 'show' else 'hide'
@@ -392,25 +401,30 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       'config'
       'profile'
     ]
+    routes:
+      'workflow/:id(/link/:link)(/node/:node)(/action/:action)': (id, link, node, action) ->
+        @show 'workflow', id, {link, node, action}
+      'project/:id(/link/:link)(/node/:node)(/action/:action)': (id, link, node, action) ->
+        @show 'project', id, {link, node, action}
     constructor: (options) ->
       super options
       @route '', 'home', =>
         @navigate 'home', replace: true
         @show 'home'
       @frames.forEach (frame) =>
-        @route frame + '(/:name)', frame, (name) =>
+        @route frame + '(/:name)(/)', frame, (name) =>
           @show frame, name
         return
       @route 'signin', 'signin', => return
       @route 'signout', 'signout'
       return
 
-    show: (frame, name) ->
+    show: (frame, name, sub) ->
       unless sessionStorage.user
         @navigate 'signin', replace: true
         return
-      console.log 'route', frame, name or ''
-      ConsoleView.get()?.showFrame frame, name
+      console.log 'route', frame, (name or ''), sub
+      ConsoleView.get()?.showFrame frame, name, sub
       handler = @[frame]
       handler.call @, name if handler?
       return

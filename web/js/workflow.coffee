@@ -29,7 +29,7 @@ Action
       @editor = new WorkflowEditorView el: '#workflow_editor', parent: @
       @manager = new WorkflowManagerView el: '#workflow_manager', parent: @
       @
-    open: (name) ->
+    open: (name, sub) ->
       switch name
         when 'new'
           console.log 'show workflow editor with create mode'
@@ -42,7 +42,7 @@ Action
           if name
             console.log 'show workflow editor for', name
             @switchTo @editor
-            @editor.load name
+            @editor.load name, sub
           else unless @manager.rendered
             # 1st time default frame
             @switchTo @manager
@@ -167,7 +167,7 @@ Action
           false
       @
     reset: ->
-      @load() if confirm 'All changes will be descarded since last save, are you sure to do that?'
+      @reload() if confirm 'All changes will be descarded since last save, are you sure to do that?'
       @
     save: ->
       #if @model?.hasChanged()
@@ -185,23 +185,37 @@ Action
         error: ->
           console.error 'save failed'
       @
-    load: (wf = @id) ->
-      if typeof wf is 'string'
-        @fetch wf, (err, wf) => @load wf
-      else
-        @id = wf.id
-        @titleEl.textContent = wf.get 'title'
-        @descEl.textContent = wf.get 'desc'
-        @model = wf
-        if wf
-          if wf.loaded()
-            @view.load wf
-          else
-            wf.fetch success: (wf) => @view.load wf
+    load: (wf, sub) ->
+      if not wf
+        @id = null
+        @model = null
+        @titleEl.textContent = ''
+        @descEl.textContent = ''
+        @view.clear()
+      else if typeof wf is 'string'
+        if @id is wf and not sub?.reload
+          @load @model, sub
         else
-          @view.clear()
+          @fetch wf, (err, wf) => @load wf, sub
+      else if wf.id
+        if @id is wf.id
+          @view.load wf, sub
+        else
+          @id = wf.id
+          @titleEl.textContent = wf.get 'title'
+          @descEl.textContent = wf.get 'desc'
+          @model = wf
+          if wf.loaded()
+            @view.load wf, sub
+          else
+            wf.fetch success: (wf) =>
+              @view.load wf, sub
+      else
+        throw 'load neigher workflow id string nor workflow object'
       #TODO: load node list
       @
+    reload: ->
+      @load @id, reload: true
     render: ->
       @nodeList.render()
       @
@@ -211,6 +225,7 @@ Action
         callback null, wf
       @
 
+  # TODO: replace it using  nav list view?
   class NodeListView extends View
     initialize: (options) ->
       super options
@@ -250,9 +265,9 @@ Action
   class EditorView extends FormDialogView
     popup: (data, callback) ->
       throw 'data must be an model entity' unless data instanceof Entity
-      # already set @data = data
+      same = data is @data
       super data, callback
-      @fill data.attributes
+      @fill data.attributes unless same
       @
     save: ->
       @data.set @read()
@@ -295,6 +310,7 @@ Action
     fill: (attributes) ->
       # fill info form
       super attributes
+      @clearActions()
       @actions = new Actions attributes.actions or []
       @actions.forEach @addAction.bind @
       @
@@ -313,16 +329,33 @@ Action
       @
     reset: ->
       super()
-      @actions?.forEach (model) -> model.destroy()
+      @clearActions()
+      @
+    clearActions: ->
+      @actions?.forEach (model) -> model.view?.destroy()
       @actions = null
       @_getActionEls().forEach (el) -> el.parentNode.removeChild el
-      @
+    viewAction: (id) ->
+      console.log 'view action id:', id
+      el = @actionsEl.querySelector '#action_' + id
+      if el?
+        console.log 'dataset5', @el.dataset['aria-hidden']
+        hidden = @el.getAttribute 'aria-hidden'
+        if hidden is 'true'
+          @$el.one 'shown', -> el.scrollIntoView()
+        else if hidden is 'false'
+          el.scrollIntoView()
+        else
+          setTimeout ->
+            el.scrollIntoView()
+          , 600
+      el
     addAction: (model) ->
       model = new Action model unless model instanceof Action
       actionView = new ActionView model: model, parent: @, container: @actionsEl
       actionView.on 'close', @removeAction.bind @
       actionView.render()
-      actionView.el.scrollIntoView true
+      actionView.el.scrollIntoView()
       @_checkActionLimit()
       actionView
     removeAction: (view, model) ->
@@ -333,7 +366,7 @@ Action
       cls = @_too_many_alert.classList
       if @actions.length > @_too_many_actions_limit
         cls.add 'active'
-        @_too_many_alert.scrollIntoView true
+        @_too_many_alert.scrollIntoView()
       else
         cls.remove 'active'
 
@@ -374,7 +407,7 @@ Action
       #@containerEl.appendChild @el
       @containerEl.insertBefore @el, find '.alert', @containerEl
       @el.innerHTML = tpl
-      @el.id = @model.id or ''
+      @el.id = 'action_' + @model.id or 'no_id'
       # get els in super
       super()
       if /webkit/i.test navigator.userAgent
@@ -406,7 +439,6 @@ Action
       # TODO: support customized controls
       data
     destroy: ->
-      console.log '@el', @el, @el.parentNode
       @stopListening @model
       @el.parentNode?.removeChild @el
       return
@@ -465,8 +497,11 @@ Action
     _bind: ->
       view = @
       jsPlumb.bind 'beforeDrop', (info) ->
-        unless view.model.hasLink info.sourceId, info.targetId
-          view.createLink info.sourceId, info.targetId
+        sourceId = info.sourceId[5..]
+        targetId = info.targetId[5..]
+        unless view.model.hasLink sourceId, targetId
+          # remove node_ in id
+          view.createLink sourceId, targetId
         false
       # link dblclick to edit
       jsPlumb.bind 'dblclick', (conn) ->
@@ -531,15 +566,30 @@ Action
       # unbind model events
       @stopListening @model
       @
-    load: (wf) ->
-      @clear()
-      @model = wf
-      # bind add node/link event
-      @listenTo @model.nodes, 'add', @_addNode.bind @
-      @listenTo @model.links, 'add', @_addLink.bind @
-      # node/link remove already binded on destory
+    load: (wf, {link, node, action, reload} = {}) ->
+      throw 'cannot open a action without given a node' if action and not node
+      throw 'node and link cannot be open together' if link and node
 
-      @_renderModel wf
+      if wf isnt @model or reload
+        @clear()
+        @model = wf
+        # bind add node/link event
+        @listenTo @model.nodes, 'add', @_addNode.bind @
+        @listenTo @model.links, 'add', @_addLink.bind @
+        # node/link remove already binded on destory
+
+        @_renderModel wf
+        @hash = "#workflow/#{wf.id}"
+
+      #console.log 'load wf', location.hash
+      if node
+        @editNode wf.nodes.get node
+        @nodeEditor.viewAction action if action
+      else if link
+        @editLink wf.links.get link
+      else
+        @nodeEditor.cancel()
+        @linkEditor.cancel()
       @
     _sortNodeViews: (nodes) ->
       nodes.lonely = []
@@ -617,19 +667,25 @@ Action
           #@model.nodes.add node
           @model.createNode node
         else # canceled
-          console.log 'canceled create node'
+          console.log 'canceled or ignored create node', action
       @
     editNode: (node) ->
+      return @ unless node?.id
       @nodeEditor.popup node, (action, node) =>
         if action is 'save'
           node.view.update node
           console.log 'saved node', node
-        else if action is 'cancel' # canceled
-          console.log 'canceled edit node'
         else
-          console.error 'unknown action', action
+          console.log 'canceled or ignored edit node', action
+        # restore url to workflow only
+        location.hash = @hash if action isnt 'ignored'
+      # add node to url
+      hash = "#{@hash}/node/#{node.id}"
+      if location.hash.indexOf(hash) is -1
+        @nodeEditor.$el.one 'shown', -> location.hash = hash
       @
     removeNode: (node) ->
+      return @ unless node?.id
       # use confirm since no support for undo
       if confirm "Delete the node: #{node.get 'title'}?"
         console.log 'remove node', node
@@ -651,7 +707,7 @@ Action
           #@model.links.add link
           @model.createLink link
         else # canceled
-          console.log 'canceled create link'
+          console.log 'canceled or ignored create link', action
       @
     addLink: (link) ->
       # TODO: add view and model
@@ -662,14 +718,22 @@ Action
       view.render()
       return
     editLink: (link) ->
+      return @ unless link?.id
       @linkEditor.popup link, (action, link) =>
         if action is 'save'
           link.view.update link
           console.log 'saved link', link
         else # canceled
-          console.log 'canceled edit link'
+          console.log 'canceled or ignored edit link', action
+        # restore url to workflow only
+        location.hash = @hash if action isnt 'ignored'
+      # add link to url
+      hash = "#{@hash}/link/#{link.id}"
+      if location.hash.indexOf(hash) is -1
+        @linkEditor.$el.one 'shown', -> location.hash = hash
       @
     removeLink: (link) ->
+      return @ unless link?.id
       # use confirm since no support for undo
       if confirm "Delete the link: #{link.get('title') or '(No Name)'}?"
         console.log 'remove node', link
@@ -719,7 +783,7 @@ Action
       html
     render: ->
       node = @el.node = @model
-      @el.id = node.id
+      @el.id = 'node_' + node.id
       @listenTo node, 'destroy', => @destroy()
       @_renderModel node
       jsPlumb.draggable @$el
