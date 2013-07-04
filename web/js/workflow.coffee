@@ -10,12 +10,14 @@ FrameView
 InnerFrameView
 ModalDialogView
 FormDialogView
+NavListView
 }, {
 ManagerView
 }, {
 Entity
 Workflows
 Workflow
+Nodes
 Node
 Link
 Actions
@@ -154,6 +156,13 @@ Action
       @titleEl = find '.editable-title', @el
       @descEl = find '.editable-desc', @el
 
+      @listenTo @nodeList, 'select', (id, node) =>
+        console.log 'select from node list', id, node
+        if id is 'new'
+          node = null
+        else if id
+          node ?= @model.nodes.get id
+        @view.createNode node
       @
     reset: ->
       @reload() if confirm 'All changes will be descarded since last save, are you sure to do that?'
@@ -175,6 +184,10 @@ Action
           console.error 'save failed'
       @
     load: (wf, sub) ->
+      _load = (wf) =>
+        @view.load wf, sub
+        @nodeList.setNodes wf.nodes
+        return
       if not wf
         @id = null
         @model = null
@@ -188,20 +201,18 @@ Action
           @fetch wf, (err, wf) => @load wf, sub
       else if wf.id
         if @id is wf.id
-          @view.load wf, sub
+          _load wf
         else
           @id = wf.id
           @titleEl.textContent = wf.get 'title'
           @descEl.textContent = wf.get 'desc'
           @model = wf
           if wf.loaded()
-            @view.load wf, sub
+            _load wf
           else
-            wf.fetch success: (wf) =>
-              @view.load wf, sub
+            wf.fetch success: _load
       else
         throw 'load neigher workflow id string nor workflow object'
-      #TODO: load node list
       @
     reload: ->
       @load @id, reload: true
@@ -214,42 +225,41 @@ Action
         callback null, wf
       @
 
-  # TODO: replace it using  nav list view?
-  class NodeListView extends View
+  class NodeListView extends NavListView
+    urlRoot: 'node'
+    headerTitle: 'Common Nodes'
+    defaultItem: new Node id: 'new', title: 'Empty Node'
+    itemClassName: ''
+    targetClassName: 'node'
+    collection: new Nodes
     initialize: (options) ->
       super options
-      @workflowView = options.workflowView
       @el.onclick = (e) =>
         el = e.target
-        if el.tagName is 'A' and el.dataset.node
+        if el.tagName is 'A' and el.dataset.id
           e.preventDefault()
-          @workflowView.addNode el.dataset.node
+          @trigger 'select', el.dataset.id, $(el).data 'model'
           false
-      return
-    render: ->
-      @el.innerHTML = ''
-      items = document.createDocumentFragment()
-      items.appendChild @renderHeader 'Common Nodes'
-      items.appendChild @renderItem 'common', new Node id: 'new', name: 'Empty Node'
-      #items.appendChild @renderHeader 'Used Nodes'
-      items.appendChild @renderHeader 'Shared Nodes'
-      @el.appendChild items
       @
-    renderHeader: (text) ->
-      li = document.createElement 'li'
-      li.className = 'nav-header'
-      li.innerHTML = text
-      li
-    renderItem: (listName, node) ->
-      li = document.createElement 'li'
-      a = document.createElement 'a'
-      a.className = 'node'
-      a.href = '#node:' + node.id
-      a.dataset.list = listName
-      a.dataset.node = node.id
-      a.innerHTML = node.get 'name'
-      li.appendChild a
-      li
+    setNodes: (nodes) ->
+      if @nodes isnt nodes
+        @stopListening @nodes if @nodes
+        @nodes = nodes
+        if nodes
+          render = @render.bind @
+          @listenTo nodes, 'reset', render
+          @listenTo nodes, 'add', render
+          @listenTo nodes, 'remove', render
+        @render()
+      @
+    render: ->
+      @_clear()
+      @el.appendChild @_renderHeader 'Shared Nodes'
+      @_render()
+      if @nodes
+        @el.appendChild @_renderHeader 'Used Nodes'
+        @_render @nodes
+      @
 
   class EditorView extends FormDialogView
     popup: (data, callback) ->
@@ -633,9 +643,6 @@ Action
       if node is 'new' or node is 'empty'
         console.log 'add a empty node'
         return @createNode()
-      if typeof node is 'string'
-        console.log 'add node by id', node
-        # TODO: add node by id
       else unless node instanceof Node
         console.error 'add a invalid node', node
         throw 'add a invalid node'
@@ -649,8 +656,24 @@ Action
       view.render()
       @el.appendChild view.el
       return
-    createNode: ->
-      @nodeEditor.popup (new Node), (action, node) =>
+    createNode: (node) ->
+      if not node
+        node = new Node
+      else if node instanceof Node and node.id
+        node = node.clone()
+        node.set
+          template_id: node.id
+          name: node.get('name') + '_clone'
+          title: node.get('title') + ' (Clone)'
+          desc: node.get('desc') + ' (Clone)'
+        node.unset 'style'
+        node.unset 'id'
+      else if node.name
+        node = new Node node
+      else
+        console.error 'invalid node to create', node
+        return
+      @nodeEditor.popup node, (action, node) =>
         if action is 'save'
           #@_addNode node
           #@model.nodes.add node

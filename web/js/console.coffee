@@ -326,6 +326,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     headerTitle: ''
     defaultItem: 'all'
     itemClassName: ''
+    targetClassName: ''
     _reload_timeout: 60000 # 1min
     initialize: (options) ->
       super options
@@ -335,6 +336,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @headerTitle = options.headerTitle or @headerTitle
       @defaultItem = options.defaultItem or @defaultItem
       @itemClassName = options.itemClassName or @itemClassName
+      @targetClassName = options.targetClassName or @targetClassName
       @collection.on 'reset', @render.bind @
       @fetch false if options.auto
     fetch: (force) ->
@@ -346,7 +348,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         col.fetch reset: true
         col._last_load = new Date().getTime()
       @
-    render: ->
+    render: -> # should be override
       #@_clear()
       @_render()
       @
@@ -356,7 +358,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @el.appendChild @_renderItem null
       return
     _render: (models = @collection) ->
-      console.log 'render models', models
+      #console.log 'render models', models
       fragments = document.createDocumentFragment()
       models.forEach (model) =>
         fragments.appendChild @_renderItem model
@@ -369,13 +371,16 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       header.textContent = title
       header
     _renderItem: (model = @defaultItem) ->
-      console.log 'render item', model
+      #console.log 'render item', model
       li = document.createElement 'li'
-      li.className = @itemClassName
+      li.className = @itemClassName if @itemClassName
       a = document.createElement 'a'
+      a.className = @targetClassName if @targetClassName
       if model.id
         a.href = "##{@urlRoot}:#{model.id}"
         a.textContent = model.get 'title'
+        a.dataset.id = model.id
+        $(a).data 'model', model
       else if model is 'all'
         a.href = "##{@urlRoot}:all"
         a.textContent = 'All'
@@ -383,7 +388,6 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       else if model is 'new' or model is 'empty'
         a.href = "##{@urlRoot}:new"
         a.textContent = 'Empty'
-        li.className += ' active'
       li.appendChild a
       li
 
