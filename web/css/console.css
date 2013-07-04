@@ -5098,12 +5098,12 @@ a.badge:focus {
   padding: 30px;
 }
 #workflow_view .link-label {
-  background-color: white;
+  background-color: #fff;
   padding: 0.4em;
   font: 12px sans-serif;
   color: #444;
   z-index: 21;
-  border: 1px dotted gray;
+  border: 1px dotted #999;
   opacity: 0.8;
   cursor: pointer;
 }
@@ -5115,6 +5115,10 @@ a.badge:focus {
 }
 #workflow_view .popover-buttons btn {
   margin: 5px;
+}
+#workflow_header {
+  display: inline-block;
+  cursor: pointer;
 }
 #node_editor,
 #report_viewer {

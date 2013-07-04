@@ -174,7 +174,7 @@
                 <button title="Reset workflow to previous save" data-placement="bottom" class="btn btn-danger wf-reset">Reset</button>
                 <button title="Save the workflow" data-placement="bottom" class="btn btn-primary wf-save">Save</button>
               </div>
-              <h3><span title="Change Workflow Title" data-placement="bottom" contenteditable="true" class="editable-title"></span><small title="Change Workflow Description" data-placement="bottom" contenteditable="true" class="editable-desc"></small></h3>
+              <h3 id="workflow_header" title="Change Workflow Title and Description" data-placement="bottom"><span class="editable-title"></span><small class="editable-desc"></small></h3>
             </div>
             <div id="workflow_view" class="content-view"></div>
             <div id="t_popover" class="tpl">
@@ -465,9 +465,9 @@
                   </div>
                 </div>
                 <div class="control-group">
-                  <label for="link_desc" class="control-label">Condition</label>
+                  <label for="link_conditional" class="control-label">Condition</label>
                   <div class="controls">
-                    <label title="Wait until the condition is fulfilled" class="checkbox">
+                    <label id="link_conditional" title="Wait until the condition is fulfilled" class="checkbox">
                       <input type="checkbox" name="conditional">Enable
                     </label>
                     <select disabled>
@@ -477,6 +477,38 @@
                       <button type="button" title="Add another OR condition" class="btn btn-round">or</button>
                       <button type="button" title="Add another AND condition" class="btn btn-info btn-round">and</button>
                     </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+              <button class="btn btn-primary btn-save">Save</button>
+            </div>
+          </div>
+          <div id="workflow_title_editor" aria-labelledby="workflow_title_editor_header" aria-hidden="true" class="modal hide fade">
+            <div class="modal-header">
+              <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+              <h3 id="workflow_title_editor_header">Rename Workflow</h3>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="control-group">
+                  <label for="wf_rename_title" class="control-label">Title</label>
+                  <div class="controls">
+                    <input id="wf_rename_title" type="text" name="title" placeholder="Workflow Name">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="wf_rename_name" class="control-label">Name</label>
+                  <div class="controls">
+                    <input id="wf_rename_name" type="text" name="name" placeholder="workflow_name" required>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="wf_rename_desc" class="control-label">Description</label>
+                  <div class="controls">
+                    <textarea id="wf_rename_desc" name="desc" cols="30" rows="3" placeholder="Description"></textarea>
                   </div>
                 </div>
               </form>

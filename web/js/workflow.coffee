@@ -132,6 +132,12 @@ Action
     events:
       'click .wf-save': 'save'
       'click .wf-reset': 'reset'
+      'click #workflow_header': ->
+        @renamer.popup @model, (action, wf) =>
+          if action is 'save'
+            console.log 'save title', wf
+            @titleEl.textContent = wf.get 'title'
+            @descEl.textContent = wf.get 'desc'
     initialize: (options) ->
       super options
       @view = new WorkflowView
@@ -141,30 +147,13 @@ Action
       @nodeList = new NodeListView
         el: find('#node_list', @el)
         workflowView: @view
+      @renamer = new EditorView
+        el: find('#workflow_title_editor', @el)
 
       @btnSave = find '.wf-save', @el
-      title = @titleEl = find '.editable-title', @el
-      desc = @descEl = find '.editable-desc', @el
+      @titleEl = find '.editable-title', @el
+      @descEl = find '.editable-desc', @el
 
-      # TODO: use dialog instead
-      title.onblur = =>
-        @model.set title: title.textContent
-        console.log 'change title', title.textContent, @model.toJSON()
-      title.onkeydown = (e) =>
-        if e.keyCode is 13
-          e.preventDefault()
-          title.onblur()
-          @btnSave.focus()
-          false
-      desc.onblur = =>
-        @model.set desc: desc.textContent
-        console.log 'change desc', desc.textContent, @model.toJSON()
-      desc.onkeydown = (e) =>
-        if e.keyCode is 13
-          e.preventDefault()
-          desc.onblur()
-          @btnSave.focus()
-          false
       @
     reset: ->
       @reload() if confirm 'All changes will be descarded since last save, are you sure to do that?'
