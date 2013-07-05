@@ -648,13 +648,13 @@
                 <li class="grid-filter"></li>
                 <li class="action-buttons pull-right">
                   <button name="reload" title="Reload Table" class="btn">Reload</button>
-                  <button name="view_selected" title="View Selected" disabled class="btn enable_if_selected tpl">View</button>
-                  <button name="remove_selected" title="Remove Selected" disabled class="btn btn-danger enable_if_selected tpl">Remove</button>
+                  <button name="view_selected" title="View Selected" disabled class="btn enable_if_selected hide">View</button>
+                  <button name="remove_selected" title="Remove Selected" disabled class="btn btn-danger enable_if_selected hide">Remove</button>
                 </li>
               </ul>
               <div id="t_content_action_cell" class="tpl"><a title="View post in new window" name="view" target="_blank" class="btn btn-info btn-round icon-search"></a>
                 <button title="Edit" name="edit" class="btn btn-primary btn-round icon-edit"></button>
-                <button title="Remove" name="remove" class="tpl btn btn-danger btn-round icon-close"></button>
+                <button title="Remove" name="remove" class="hide btn btn-danger btn-round icon-close"></button>
               </div>
               <table id="content_table" class="grid-table"></table>
               <div class="grid-paginator"></div>
@@ -738,17 +738,14 @@
         </div>
       </div>
       <div id="config" class="frame container-fluid">
-        <div class="active row-fluid inner-frame">
+        <div id="tenant_profile" name="tenant" class="row-fluid inner-frame">
           <div class="span2 sidebar">
             <div class="well sidebar-nav">
               <ul class="sidebar-list nav nav-list">
                 <li class="nav-header">Configuration</li>
                 <li><a href="#config/tenant">Tenant Profile</a></li>
-                <li class="nav-header">Members Management</li>
+                <li class="nav-header">Members</li>
                 <li><a href="#config/users">Member List</a></li>
-                <li class="nav-header">Members of Projects</li>
-                <li><a href="#users:project1">Project 1</a></li>
-                <li><a href="#users:project2">Project 2</a></li>
               </ul>
               <ul class="sidebar-bottom nav nav-list">
                 <li class="divider"></li>
@@ -758,64 +755,91 @@
             </div>
           </div>
           <div class="span10 workspace">
-            <div id="tenant_profile" name="profile" class="inner-frame active">
-              <form class="form-horizontal">
-                <div class="control-group">
-                  <label for="tenant_id" class="control-label">ID</label>
-                  <div class="controls">
-                    <input id="tenant_id" type="text" placeholder="tenant_id" name="id" maxlength="64" class="input-large uneditable-input">
-                  </div>
+            <form class="form-horizontal">
+              <div class="control-group">
+                <label for="tenant_id" class="control-label">ID</label>
+                <div class="controls">
+                  <input id="tenant_id" type="text" placeholder="tenant_id" name="id" maxlength="64" class="input-large uneditable-input">
                 </div>
-                <div class="control-group">
-                  <label for="tenant_name" class="control-label">Name</label>
-                  <div class="controls">
-                    <input id="tenant_name" type="text" placeholder="Organization Name" name="name" maxlength="255" class="input-large">
-                  </div>
+              </div>
+              <div class="control-group">
+                <label for="tenant_name" class="control-label">Name</label>
+                <div class="controls">
+                  <input id="tenant_name" type="text" placeholder="Organization Name" name="name" maxlength="255" class="input-large">
                 </div>
-                <div class="control-group">
-                  <label for="tenant_desc" class="control-label">Description</label>
-                  <div class="controls">
-                    <textarea id="tenant_desc" placeholder="Description about the organization ..." rows="4" name="desc"></textarea>
-                  </div>
+              </div>
+              <div class="control-group">
+                <label for="tenant_desc" class="control-label">Description</label>
+                <div class="controls">
+                  <textarea id="tenant_desc" placeholder="Description about the organization ..." rows="4" name="desc"></textarea>
                 </div>
-                <hr>
-                <div class="control-group">
-                  <label for="contact_name" class="control-label">Contact Name</label>
-                  <div class="controls">
-                    <input id="contact_name" type="text" name="contact" placeholder="Contact Name" class="input-large">
-                  </div>
+              </div>
+              <hr>
+              <div class="control-group">
+                <label for="contact_name" class="control-label">Contact Name</label>
+                <div class="controls">
+                  <input id="contact_name" type="text" name="contact" placeholder="Contact Name" class="input-large">
                 </div>
-                <div class="control-group">
-                  <label for="contact_email" class="control-label">E-mail</label>
-                  <div class="controls">
-                    <input id="contact_email" type="text" name="email" placeholder="contact@email.org" class="input-large">
-                  </div>
+              </div>
+              <div class="control-group">
+                <label for="contact_email" class="control-label">E-mail</label>
+                <div class="controls">
+                  <input id="contact_email" type="text" name="email" placeholder="contact@email.org" class="input-large">
                 </div>
-                <div class="control-group">
-                  <label for="contact_tel" class="control-label">Tel #</label>
-                  <div class="controls">
-                    <input id="contact_tel" type="text" name="tel" placeholder="(408) 888-8888" class="input-large">
-                  </div>
+              </div>
+              <div class="control-group">
+                <label for="contact_tel" class="control-label">Tel #</label>
+                <div class="controls">
+                  <input id="contact_tel" type="text" name="tel" placeholder="(408) 888-8888" class="input-large">
                 </div>
-                <div class="control-group">
-                  <label for="contact_fax" class="control-label">Fax</label>
-                  <div class="controls">
-                    <input id="contact_fax" type="text" name="fax" placeholder="(408) 888-9999" class="input-large">
-                  </div>
+              </div>
+              <div class="control-group">
+                <label for="contact_fax" class="control-label">Fax</label>
+                <div class="controls">
+                  <input id="contact_fax" type="text" name="fax" placeholder="(408) 888-9999" class="input-large">
                 </div>
-                <div class="control-group">
-                  <label for="contact_addr" class="control-label">Address</label>
-                  <div class="controls">
-                    <input id="contact_addr" type="text" name="addr" placeholder="Contact Street Address" class="input-xxlarge">
-                  </div>
+              </div>
+              <div class="control-group">
+                <label for="contact_addr" class="control-label">Address</label>
+                <div class="controls">
+                  <input id="contact_addr" type="text" name="addr" placeholder="Contact Street Address" class="input-xxlarge">
                 </div>
-                <div class="form-actions">
-                  <input type="submit" value="Update" class="btn btn-primary">
-                  <input type="reset" value="Reset" class="btn">
-                </div>
-              </form>
+              </div>
+              <div class="form-actions">
+                <input type="submit" value="Update" class="btn btn-primary">
+                <input type="reset" value="Reset" class="btn">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div id="user_manager" name="manager" class="row-fluid inner-frame">
+          <div class="span2 sidebar">
+            <div class="well sidebar-nav">
+              <ul class="project-list sidebar-list nav nav-list"></ul>
+              <ul class="sidebar-bottom nav nav-list">
+                <li class="divider"></li>
+                <li class="nav-header">Tips</li>
+                <li class="tips">Click Project List above to filter members by project.</li>
+              </ul>
             </div>
-            <div id="user_manager" name="manager" class="inner-frame">Member List (support filter)</div>
+          </div>
+          <div class="span10 workspace">
+            <ul class="action-bar">
+              <li class="head">Member Manager</li>
+              <li class="grid-filter"></li>
+              <li class="action-buttons pull-right">
+                <button name="reload" title="Reload Table" class="btn">Reload</button>
+                <button name="view_selected" title="View Selected" disabled class="btn enable_if_selected hide">View</button>
+                <button name="remove_selected" title="Remove Selected" disabled class="btn btn-danger enable_if_selected">Remove</button>
+                <button name="create" title="Add Member" class="btn btn-primary">Add</button>
+              </li>
+            </ul>
+            <div id="t_user_action_cell" class="tpl">
+              <button title="Edit" name="edit" class="btn btn-primary btn-round icon-edit"></button>
+              <button title="Remove" name="remove" class="hide btn btn-danger btn-round icon-close"></button>
+            </div>
+            <table id="user_table" class="grid-table"></table>
+            <div class="grid-paginator"></div>
           </div>
         </div>
       </div>

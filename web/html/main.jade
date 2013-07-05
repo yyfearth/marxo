@@ -37,8 +37,10 @@ body
         .active.row-fluid.inner-frame
           include report
       #config.frame.container-fluid
-        .active.row-fluid.inner-frame
-          include config
+        #tenant_profile.row-fluid.inner-frame(name='tenant')
+          include config/tenant
+        #user_manager.row-fluid.inner-frame(name='manager')
+          include config/manager
       #profile.frame.container-fluid
         .active.row-fluid.inner-frame
           include profile
