@@ -31,6 +31,9 @@ Projects
             @switchTo @viewer
             @viewer.load name
             @viewer.popup sub if sub
+          else unless @manager.rendered
+            # 1st time default frame
+            @switchTo @manager
       return
     render: ->
       super()
