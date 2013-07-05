@@ -230,7 +230,7 @@ Action
     headerTitle: 'Common Nodes'
     defaultItem: new Node id: 'new', title: 'Empty Node'
     itemClassName: ''
-    targetClassName: 'node'
+    targetClassName: 'node thumb'
     collection: new Nodes
     initialize: (options) ->
       super options
@@ -240,6 +240,15 @@ Action
           e.preventDefault()
           @trigger 'select', el.dataset.id, $(el).data 'model'
           false
+      # draggable delegation
+      @$el.on 'mouseenter', '.node', (e) =>
+        unless $.data e.target, 'is_draggable'
+          console.log 'draaa', e.target
+          $(e.target).draggable(
+            containment: @parent.el
+            helper: 'clone'
+            zIndex: 999
+          ).data 'is_draggable', true
       @
     setNodes: (nodes) ->
       if @nodes isnt nodes
@@ -546,6 +555,24 @@ Action
       $el.on 'click', '.popover .btn-delete', (e) -> view._action 'remove', e
       $el.on 'click', '.popover .btn-edit', (e) -> view._action 'edit', e
       $el.on 'dblclick', '.node', (e) -> view._action 'edit', e
+
+      # droppable for .node
+      $el.droppable
+        accept: '.node.thumb'
+        drop: (e, ui) =>
+          node = ui.draggable.data 'model'
+          if node instanceof Node
+            # set style after createNode since it will remove style when clone
+            @createNode node, (node) ->
+              $el_offset = $el.offset()
+              x = ui.offset.left - $el_offset.left
+              y = ui.offset.top - $el_offset.top
+              node.set 'style', "left:#{if x < 0 then 0 else x}px;top:#{if y < 0 then 0 else y}px"
+              true
+            true
+          else
+            false
+
       return
     _action: (action, e) ->
       $target = $ e.target
@@ -633,7 +660,7 @@ Action
       console.log 'render wf', wf
       wf = @model
       throw 'workflow not loaded' unless wf?
-      console.log wf.nodes
+      #console.log wf.nodes
       unless wf.nodes.length and wf.nodes.at(0).has 'style'
         @_sortNodeViews wf.nodes
       wf.nodes.forEach @_addNode.bind @
@@ -656,16 +683,18 @@ Action
       view.render()
       @el.appendChild view.el
       return
-    createNode: (node) ->
-      if not node
+    createNode: (node, callback) ->
+      if not node or node.id is 'new'
         node = new Node
       else if node instanceof Node and node.id
         node = node.clone()
+        title = node.get 'title'
+        desc = node.get 'desc'
         node.set
           template_id: node.id
           name: node.get('name') + '_clone'
-          title: node.get('title') + ' (Clone)'
-          desc: node.get('desc') + ' (Clone)'
+          title: title + ' (Clone)'
+          desc: if desc then desc + ' (Clone)' else null
         node.unset 'style'
         node.unset 'id'
       else if node.name
@@ -675,9 +704,8 @@ Action
         return
       @nodeEditor.popup node, (action, node) =>
         if action is 'save'
-          #@_addNode node
-          #@model.nodes.add node
-          @model.createNode node
+          # prevent create if callback return false
+          @model.createNode node if false isnt callback? node
         else # canceled
           console.log 'canceled or ignored create node', action
       @
@@ -702,11 +730,9 @@ Action
       if confirm "Delete the node: #{node.get 'title'}?"
         console.log 'remove node', node
         #@model.nodes.remove node
-        console.log @model.nodes
         node.destroy()
-        console.log @model.nodes
       @
-    createLink: (from, to) ->
+    createLink: (from, to, callback) ->
       from = @model.nodes.get from unless from.id and from.has 'name'
       to = @model.nodes.get to unless to.id and to.has 'name'
       name = "#{from.get 'name'}_to_#{to.get 'name'}"
@@ -717,7 +743,7 @@ Action
       @linkEditor.popup data, (action, link) =>
         if action is 'save'
           #@model.links.add link
-          @model.createLink link
+          @model.createLink link if false isnt callback? link
         else # canceled
           console.log 'canceled or ignored create link', action
       @
