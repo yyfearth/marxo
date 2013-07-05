@@ -337,19 +337,21 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @defaultItem = options.defaultItem or @defaultItem
       @itemClassName = options.itemClassName or @itemClassName
       @targetClassName = options.targetClassName or @targetClassName
-      @collection.on 'reset', @render.bind @
+      @listenTo @collection, 'reset', @render.bind @
       @fetch false if options.auto
     fetch: (force) ->
       col = @collection
       ts = new Date().getTime()
       if force or not col._last_load or ts - col._last_load > @_reload_timeout
         # TODO: add a refresh button
-        #console.log 'fetch for list', @headerTitle
+        console.log 'fetch for list', @headerTitle
         col.fetch reset: true
         col._last_load = new Date().getTime()
-      @
-    render: -> # should be override
-      #@_clear()
+        true
+      else
+        false
+    render: ->
+      @_clear()
       @_render()
       @
     _clear: ->
@@ -381,13 +383,19 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         a.textContent = model.get 'title'
         a.dataset.id = model.id
         $(a).data 'model', model
+      else if model.href
+        a.href = model.href
+        a.textContent = model.title
       else if model is 'all'
         a.href = "##{@urlRoot}:all"
         a.textContent = 'All'
-        li.className += ' active'
       else if model is 'new' or model is 'empty'
         a.href = "##{@urlRoot}:new"
         a.textContent = 'Empty'
+      else
+        console.error 'unsupported item for list', model
+        return
+      li.className += ' active' if model is @defaultItem
       li.appendChild a
       li
 
