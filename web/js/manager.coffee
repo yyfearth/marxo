@@ -218,7 +218,7 @@ Projects
       # 1st a is the default
       a ?= find 'a[href]', @el
       last = find '.active', @el
-      if last isnt a.parentElement
+      if last isnt a?.parentElement
         matched = a.href.match @_regex
         query = matched?[1]
         console.log 'filter', @fields[0], query
@@ -231,19 +231,21 @@ Projects
   class ProjectFilterView extends NavFilterView
     field: 'project_id'
     urlRoot: 'project'
+    headerTitle: 'Projects'
     initialize: (options) ->
       super options
+      @headerTitle = options.headerTitle or @headerTitle
       @list = new NavListView
         el: @el
         auto: false
         collection: Projects.projects
         urlRoot: @urlRoot
-        headerTitle: 'Projects'
+        headerTitle: @headerTitle
         defaultItem: 'all'
         itemClassName: 'project-list-item'
     render: ->
       super()
-      @list.fetch()
+      @list.render() unless @list.fetch()
       @
 
   ## Manager View

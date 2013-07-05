@@ -231,12 +231,15 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @_submit_btn = submit_btn
       find('button.btn-save', @el)?.onclick = @submit.bind @
       if @form.title and @form.name
+        matched = false
+        cached = ''
         $(@form.title).on 'input', =>
-          if @form.name._auto isnt false
-            @form.name.value = @form.title.value.replace(/\W+/g, '_')[0..32].toLowerCase()
+          cached = @form.title.value.trim().replace(/\W+/g, '_')[0..32].toLowerCase()
+          matched or= not @form.name.value
+          @form.name.value = cached if matched
           return
         $(@form.name).on
-          input: => @form.name._auto = not @form.name.value
+          input: => matched = @form.name.value is cached
           change: => @form.name.value = @form.name.value.toLowerCase()
       @
     submit: ->
@@ -323,6 +326,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     headerTitle: ''
     defaultItem: 'all'
     itemClassName: ''
+    targetClassName: ''
     _reload_timeout: 60000 # 1min
     initialize: (options) ->
       super options
@@ -332,19 +336,22 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @headerTitle = options.headerTitle or @headerTitle
       @defaultItem = options.defaultItem or @defaultItem
       @itemClassName = options.itemClassName or @itemClassName
-      @collection.on 'reset', @render.bind @
+      @targetClassName = options.targetClassName or @targetClassName
+      @listenTo @collection, 'reset', @render.bind @
       @fetch false if options.auto
     fetch: (force) ->
       col = @collection
       ts = new Date().getTime()
       if force or not col._last_load or ts - col._last_load > @_reload_timeout
         # TODO: add a refresh button
-        #console.log 'fetch for list', @headerTitle
+        console.log 'fetch for list', @headerTitle
         col.fetch reset: true
         col._last_load = new Date().getTime()
-      @
+        true
+      else
+        false
     render: ->
-      #@_clear()
+      @_clear()
       @_render()
       @
     _clear: ->
@@ -353,7 +360,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @el.appendChild @_renderItem null
       return
     _render: (models = @collection) ->
-      console.log 'render models', models
+      #console.log 'render models', models
       fragments = document.createDocumentFragment()
       models.forEach (model) =>
         fragments.appendChild @_renderItem model
@@ -366,21 +373,29 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       header.textContent = title
       header
     _renderItem: (model = @defaultItem) ->
-      console.log 'render item', model
+      #console.log 'render item', model
       li = document.createElement 'li'
-      li.className = @itemClassName
+      li.className = @itemClassName if @itemClassName
       a = document.createElement 'a'
+      a.className = @targetClassName if @targetClassName
       if model.id
         a.href = "##{@urlRoot}:#{model.id}"
         a.textContent = model.get 'title'
+        a.dataset.id = model.id
+        $(a).data 'model', model
+      else if model.href
+        a.href = model.href
+        a.textContent = model.title
       else if model is 'all'
         a.href = "##{@urlRoot}:all"
         a.textContent = 'All'
-        li.className += ' active'
       else if model is 'new' or model is 'empty'
         a.href = "##{@urlRoot}:new"
         a.textContent = 'Empty'
-        li.className += ' active'
+      else
+        console.error 'unsupported item for list', model
+        return
+      li.className += ' active' if model is @defaultItem
       li.appendChild a
       li
 

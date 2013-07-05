@@ -10,12 +10,14 @@ FrameView
 InnerFrameView
 ModalDialogView
 FormDialogView
+NavListView
 }, {
 ManagerView
 }, {
 Entity
 Workflows
 Workflow
+Nodes
 Node
 Link
 Actions
@@ -132,6 +134,12 @@ Action
     events:
       'click .wf-save': 'save'
       'click .wf-reset': 'reset'
+      'click #workflow_header': ->
+        @renamer.popup @model, (action, wf) =>
+          if action is 'save'
+            console.log 'save title', wf
+            @titleEl.textContent = wf.get 'title'
+            @descEl.textContent = wf.get 'desc'
     initialize: (options) ->
       super options
       @view = new WorkflowView
@@ -140,31 +148,21 @@ Action
         linkEditor: new LinkEditorView
       @nodeList = new NodeListView
         el: find('#node_list', @el)
-        workflowView: @view
+        parent: @
+      @renamer = new EditorView
+        el: find('#workflow_title_editor', @el)
 
       @btnSave = find '.wf-save', @el
-      title = @titleEl = find '.editable-title', @el
-      desc = @descEl = find '.editable-desc', @el
+      @titleEl = find '.editable-title', @el
+      @descEl = find '.editable-desc', @el
 
-      # TODO: use dialog instead
-      title.onblur = =>
-        @model.set title: title.textContent
-        console.log 'change title', title.textContent, @model.toJSON()
-      title.onkeydown = (e) =>
-        if e.keyCode is 13
-          e.preventDefault()
-          title.onblur()
-          @btnSave.focus()
-          false
-      desc.onblur = =>
-        @model.set desc: desc.textContent
-        console.log 'change desc', desc.textContent, @model.toJSON()
-      desc.onkeydown = (e) =>
-        if e.keyCode is 13
-          e.preventDefault()
-          desc.onblur()
-          @btnSave.focus()
-          false
+      @listenTo @nodeList, 'select', (id, node) =>
+        console.log 'select from node list', id, node
+        if id is 'new'
+          node = null
+        else if id
+          node ?= @model.nodes.get id
+        @view.createNode node
       @
     reset: ->
       @reload() if confirm 'All changes will be descarded since last save, are you sure to do that?'
@@ -186,6 +184,10 @@ Action
           console.error 'save failed'
       @
     load: (wf, sub) ->
+      _load = (wf) =>
+        @view.load wf, sub
+        @nodeList.setNodes wf.nodes
+        return
       if not wf
         @id = null
         @model = null
@@ -199,20 +201,18 @@ Action
           @fetch wf, (err, wf) => @load wf, sub
       else if wf.id
         if @id is wf.id
-          @view.load wf, sub
+          _load wf
         else
           @id = wf.id
           @titleEl.textContent = wf.get 'title'
           @descEl.textContent = wf.get 'desc'
           @model = wf
           if wf.loaded()
-            @view.load wf, sub
+            _load wf
           else
-            wf.fetch success: (wf) =>
-              @view.load wf, sub
+            wf.fetch success: _load
       else
         throw 'load neigher workflow id string nor workflow object'
-      #TODO: load node list
       @
     reload: ->
       @load @id, reload: true
@@ -225,42 +225,50 @@ Action
         callback null, wf
       @
 
-  # TODO: replace it using  nav list view?
-  class NodeListView extends View
+  class NodeListView extends NavListView
+    urlRoot: 'node'
+    headerTitle: 'Common Nodes'
+    defaultItem: new Node id: 'new', title: 'Empty Node'
+    itemClassName: ''
+    targetClassName: 'node thumb'
+    collection: new Nodes
     initialize: (options) ->
       super options
-      @workflowView = options.workflowView
       @el.onclick = (e) =>
         el = e.target
-        if el.tagName is 'A' and el.dataset.node
+        if el.tagName is 'A' and el.dataset.id
           e.preventDefault()
-          @workflowView.addNode el.dataset.node
+          @trigger 'select', el.dataset.id, $(el).data 'model'
           false
-      return
-    render: ->
-      @el.innerHTML = ''
-      items = document.createDocumentFragment()
-      items.appendChild @renderHeader 'Common Nodes'
-      items.appendChild @renderItem 'common', new Node id: 'new', name: 'Empty Node'
-      #items.appendChild @renderHeader 'Used Nodes'
-      items.appendChild @renderHeader 'Shared Nodes'
-      @el.appendChild items
+      # draggable delegation
+      @$el.on 'mouseenter', '.node', (e) =>
+        unless $.data e.target, 'is_draggable'
+          console.log 'draaa', e.target
+          $(e.target).draggable(
+            containment: @parent.el
+            helper: 'clone'
+            zIndex: 999
+          ).data 'is_draggable', true
       @
-    renderHeader: (text) ->
-      li = document.createElement 'li'
-      li.className = 'nav-header'
-      li.innerHTML = text
-      li
-    renderItem: (listName, node) ->
-      li = document.createElement 'li'
-      a = document.createElement 'a'
-      a.className = 'node'
-      a.href = '#node:' + node.id
-      a.dataset.list = listName
-      a.dataset.node = node.id
-      a.innerHTML = node.get 'name'
-      li.appendChild a
-      li
+    setNodes: (nodes) ->
+      if @nodes isnt nodes
+        @stopListening @nodes if @nodes
+        @nodes = nodes
+        if nodes
+          render = @render.bind @
+          @listenTo nodes, 'reset', render
+          @listenTo nodes, 'add', render
+          @listenTo nodes, 'remove', render
+        @render()
+      @
+    render: ->
+      @_clear()
+      @el.appendChild @_renderHeader 'Shared Nodes'
+      @_render()
+      if @nodes
+        @el.appendChild @_renderHeader 'Used Nodes'
+        @_render @nodes
+      @
 
   class EditorView extends FormDialogView
     popup: (data, callback) ->
@@ -547,6 +555,24 @@ Action
       $el.on 'click', '.popover .btn-delete', (e) -> view._action 'remove', e
       $el.on 'click', '.popover .btn-edit', (e) -> view._action 'edit', e
       $el.on 'dblclick', '.node', (e) -> view._action 'edit', e
+
+      # droppable for .node
+      $el.droppable
+        accept: '.node.thumb'
+        drop: (e, ui) =>
+          node = ui.draggable.data 'model'
+          if node instanceof Node
+            # set style after createNode since it will remove style when clone
+            @createNode node, (node) ->
+              $el_offset = $el.offset()
+              x = ui.offset.left - $el_offset.left
+              y = ui.offset.top - $el_offset.top
+              node.set 'style', "left:#{if x < 0 then 0 else x}px;top:#{if y < 0 then 0 else y}px"
+              true
+            true
+          else
+            false
+
       return
     _action: (action, e) ->
       $target = $ e.target
@@ -634,7 +660,7 @@ Action
       console.log 'render wf', wf
       wf = @model
       throw 'workflow not loaded' unless wf?
-      console.log wf.nodes
+      #console.log wf.nodes
       unless wf.nodes.length and wf.nodes.at(0).has 'style'
         @_sortNodeViews wf.nodes
       wf.nodes.forEach @_addNode.bind @
@@ -644,9 +670,6 @@ Action
       if node is 'new' or node is 'empty'
         console.log 'add a empty node'
         return @createNode()
-      if typeof node is 'string'
-        console.log 'add node by id', node
-        # TODO: add node by id
       else unless node instanceof Node
         console.error 'add a invalid node', node
         throw 'add a invalid node'
@@ -660,12 +683,29 @@ Action
       view.render()
       @el.appendChild view.el
       return
-    createNode: ->
-      @nodeEditor.popup (new Node), (action, node) =>
+    createNode: (node, callback) ->
+      if not node or node.id is 'new'
+        node = new Node
+      else if node instanceof Node and node.id
+        node = node.clone()
+        title = node.get 'title'
+        desc = node.get 'desc'
+        node.set
+          template_id: node.id
+          name: node.get('name') + '_clone'
+          title: title + ' (Clone)'
+          desc: if desc then desc + ' (Clone)' else null
+        node.unset 'style'
+        node.unset 'id'
+      else if node.name
+        node = new Node node
+      else
+        console.error 'invalid node to create', node
+        return
+      @nodeEditor.popup node, (action, node) =>
         if action is 'save'
-          #@_addNode node
-          #@model.nodes.add node
-          @model.createNode node
+          # prevent create if callback return false
+          @model.createNode node if false isnt callback? node
         else # canceled
           console.log 'canceled or ignored create node', action
       @
@@ -690,11 +730,9 @@ Action
       if confirm "Delete the node: #{node.get 'title'}?"
         console.log 'remove node', node
         #@model.nodes.remove node
-        console.log @model.nodes
         node.destroy()
-        console.log @model.nodes
       @
-    createLink: (from, to) ->
+    createLink: (from, to, callback) ->
       from = @model.nodes.get from unless from.id and from.has 'name'
       to = @model.nodes.get to unless to.id and to.has 'name'
       name = "#{from.get 'name'}_to_#{to.get 'name'}"
@@ -705,7 +743,7 @@ Action
       @linkEditor.popup data, (action, link) =>
         if action is 'save'
           #@model.links.add link
-          @model.createLink link
+          @model.createLink link if false isnt callback? link
         else # canceled
           console.log 'canceled or ignored create link', action
       @
@@ -786,7 +824,7 @@ Action
       @el.id = 'node_' + node.id
       @listenTo node, 'destroy', => @destroy()
       @_renderModel node
-      jsPlumb.draggable @$el
+      jsPlumb.draggable @$el, stack: '.node'
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
       @srcEndpoint ?= jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:

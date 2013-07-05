@@ -5034,12 +5034,12 @@ a.badge:focus {
   -moz-border-radius: 0.5em;
   border-radius: 0.5em;
   opacity: 0.8;
-  white-space: nowrap;
   text-align: center;
   background-color: #eeeeef;
   color: black;
   font-family: helvetica;
-  padding: 0.5em 1em;
+  padding: 0.5em;
+  min-width: 5em;
   margin: 10px;
   font-size: 0.9em;
 }
@@ -5058,14 +5058,14 @@ a.badge:focus {
   overflow: auto;
 }
 #workflow_view .node {
-  min-width: 5em;
   height: 5em;
   line-height: 5em;
   position: absolute;
+  white-space: nowrap;
   padding: 0.5em 1em;
   cursor: pointer;
   margin: 0;
-  z-index: 20 !important;
+  z-index: 20;
 }
 #workflow_view .node:hover {
   z-index: 21 !important;
@@ -5098,12 +5098,12 @@ a.badge:focus {
   padding: 30px;
 }
 #workflow_view .link-label {
-  background-color: white;
+  background-color: #fff;
   padding: 0.4em;
   font: 12px sans-serif;
   color: #444;
   z-index: 21;
-  border: 1px dotted gray;
+  border: 1px dotted #999;
   opacity: 0.8;
   cursor: pointer;
 }
@@ -5115,6 +5115,10 @@ a.badge:focus {
 }
 #workflow_view .popover-buttons btn {
   margin: 5px;
+}
+#workflow_header {
+  display: inline-block;
+  cursor: pointer;
 }
 #node_editor,
 #report_viewer {

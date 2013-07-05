@@ -17,9 +17,9 @@
         .controls
           textarea#link_desc(name='desc', cols='30', rows='3', placeholder='Description')
       .control-group
-        label.control-label(for='link_desc') Condition
+        label.control-label(for='link_conditional') Condition
         .controls
-          label.checkbox(title='Wait until the condition is fulfilled')
+          label#link_conditional.checkbox(title='Wait until the condition is fulfilled')
             input(type='checkbox', name='conditional')
             | Enable
           select(disabled)
