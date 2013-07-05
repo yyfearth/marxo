@@ -41,19 +41,19 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
 
   class User extends Entity
 
-  class Participant extends User
+#  class Participant extends User
 
   class Publicher extends User
 
-  class Evalutator extends User
+#  class Evalutator extends User
 
-  class Participants extends Collection
-    model: Participant
-    url: '/users'
+#  class Participants extends Collection
+#    model: Participant
+#    url: '/users'
 
-  class Publichers extends Collection
+  class Publichers extends ManagerCollection
     model: Publicher
-    url: -> (@tenant?.url?() or '') + '/users'
+    url: -> '/users'
 
   ## Workflow
 
@@ -203,11 +203,11 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
   ManagerCollection
   Tenant
   User
-  Participants
+#  Participants
   Publichers
-  Participant
+#  Participant
   Publicher
-  Evalutator
+#  Evalutator
   Workflows
   Workflow
   Nodes
