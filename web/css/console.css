@@ -5039,6 +5039,7 @@ a.badge:focus {
   color: black;
   font-family: helvetica;
   padding: 0.5em;
+  min-width: 5em;
   margin: 10px;
   font-size: 0.9em;
 }
@@ -5057,7 +5058,6 @@ a.badge:focus {
   overflow: auto;
 }
 #workflow_view .node {
-  min-width: 5em;
   height: 5em;
   line-height: 5em;
   position: absolute;
@@ -5065,7 +5065,7 @@ a.badge:focus {
   padding: 0.5em 1em;
   cursor: pointer;
   margin: 0;
-  z-index: 20 !important;
+  z-index: 20;
 }
 #workflow_view .node:hover {
   z-index: 21 !important;

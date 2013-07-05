@@ -148,7 +148,7 @@ Action
         linkEditor: new LinkEditorView
       @nodeList = new NodeListView
         el: find('#node_list', @el)
-        workflowView: @view
+        parent: @
       @renamer = new EditorView
         el: find('#workflow_title_editor', @el)
 
@@ -798,7 +798,7 @@ Action
       @el.id = 'node_' + node.id
       @listenTo node, 'destroy', => @destroy()
       @_renderModel node
-      jsPlumb.draggable @$el
+      jsPlumb.draggable @$el, stack: '.node'
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
       @srcEndpoint ?= jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
