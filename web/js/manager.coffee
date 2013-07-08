@@ -1,6 +1,6 @@
 "use strict"
 
-define 'manager', ['console', 'models', 'lib/backgrid'],
+define 'manager', ['console', 'models'],
 ({
 find
 InnerFrameView
