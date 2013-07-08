@@ -147,6 +147,7 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
 
 
   class Workflows extends ManagerCollection
+    @workflows: new Workflows
     model: Workflow
     url: ROOT + '/workflows'
   # url: -> @tenant.url() + '/workflows'
@@ -176,7 +177,7 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
   class Project extends Entity
 
   class Projects extends ManagerCollection
-    @projects = new Projects
+    @projects: new Projects
     model: Project
     url: ROOT + '/projects'
 
@@ -196,6 +197,13 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
     model: Content
     url: ROOT + '/contents'
 
+  ## Report
+
+  class Report extends Entity
+
+  class Reports extends ManagerCollection
+    model: Report
+    url: ROOT + '/reports'
 
   { # exports
   Entity
@@ -203,10 +211,10 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
   ManagerCollection
   Tenant
   User
-#  Participants
   Publichers
-#  Participant
   Publicher
+#  Participants
+#  Participant
 #  Evalutator
   Workflows
   Workflow
@@ -218,8 +226,10 @@ define 'models', ['lib/common', 'lib/backgrid'], ->
   Action
   Projects
   Project
-  Notification
   Notifications
+  Notification
   Content
   Contents
+  Report
+  Reports
   }

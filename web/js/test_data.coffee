@@ -511,6 +511,25 @@ define 'test_data', ['models'], (models) ->
       created_at: new Date(1371191309656)
     ]
 
+    reports: [
+      id: 'e57bf4f6aad752f9fc51fef0'
+      title: 'Test Report'
+      desc: 'Test Report'
+      project:
+        id: '51447afb4728cc2036cf9cf1'
+        title: 'Test Project'
+      node:
+        id: '517f81413d070321728fde14'
+        title: 'Test Node'
+      action:
+        id: 'f8e39128e0b51ecb5b1e6e40'
+        title: 'Post to Multiple Socal Media'
+      status: 'COLLECTING'
+      created_at: new Date(1373284304000)
+      updated_at: new Date(1373284304000)
+      ended_at: new Date(1373457155000)
+    ]
+
   exports = {}
   for name, list of data
     name = name.toLowerCase()

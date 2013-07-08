@@ -667,45 +667,48 @@
         <div class="active row-fluid inner-frame">
           <div class="span2 sidebar">
             <div class="well sidebar-nav">
-              <ul class="sidebar-list nav nav-list">
+              <ul class="project-list sidebar-list nav nav-list">
                 <li class="nav-header">Projects</li>
-                <li><a href="#">All</a></li>
-                <li><a href="#">Project 1</a></li>
-                <li><a href="#">Project 2</a></li>
+                <li><a href="#project:all">All</a></li>
               </ul>
               <ul class="sidebar-bottom nav nav-list">
                 <li class="divider"></li>
                 <li class="nav-header">Tips</li>
-                <li class="tips">...</li>
+                <li class="tips">
+                  Click Project List above to filter by project,
+                  Click the link in the right table to view detailed report.
+                </li>
               </ul>
             </div>
           </div>
           <div class="span10 workspace">
-            <div id="report_view" class="content-view">
-              <div class="row-fluid">
-                <div class="well">
-                  <h2>Report 1</h2>
-                  <p>
-                    Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-                    commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-                    Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-                  </p>
-                  <p><a href="#report/1" class="btn">View details »</a></p>
-                </div>
+            <div id="report_view" class="report-view">
+              <ul class="action-bar">
+                <li class="head">Report</li>
+                <li class="pull-left tmp">
+                  <ul id="media-filter" class="nav nav-pills">
+                    <li class="active"><a href="#media:all">All</a></li>
+                    <li><a href="#media:page">Page</a></li>
+                    <li><a href="#media:facebook">Facebook</a></li>
+                    <li><a href="#media:twitter">Twitter</a></li>
+                    <li class="disabled"><a href="#media:email">Email</a></li>
+                  </ul>
+                </li>
+                <li class="grid-filter"></li>
+                <li class="action-buttons pull-right">
+                  <button name="reload" title="Reload Table" class="btn">Reload</button>
+                  <button name="remove_selected" title="Remove Selected" disabled class="btn btn-danger enable_if_selected">Remove</button>
+                </li>
+              </ul>
+              <div id="t_report_action_cell" class="tpl"><a title="View post in new window" name="view" class="btn btn-info btn-round icon-search"></a>
+                <button title="Edit" name="edit" class="btn btn-primary btn-round icon-edit tmp"></button>
+                <button title="Remove" name="remove" class="tmp btn btn-danger btn-round icon-close"></button>
               </div>
-              <div class="row-fluid">
-                <div class="well">
-                  <h2>Report 2</h2>
-                  <p>
-                    Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-                    commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-                    Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-                  </p>
-                  <p><a href="#report/2" class="btn">View details »</a></p>
-                </div>
-              </div>
+              <table id="report_table" class="grid-table"></table>
+              <div class="grid-paginator"></div>
             </div>
           </div>
+          <!-- temp hide media-filter, edit and remove buttons-->
           <div id="report_viewer" aria-labelledby="report_viewer_title" aria-hidden="true" class="modal modal-full hide fade">
             <div class="modal-header">
               <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
