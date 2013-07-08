@@ -5921,7 +5921,8 @@ body {
   margin: 0px;
   height: 100%;
 }
-.tpl {
+.tpl,
+.tmp {
   display: none !important;
 }
 .btn-round {

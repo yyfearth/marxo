@@ -101,6 +101,24 @@ Projects
       @delegateEvents()
       @
 
+
+  class Backgrid.NodeActionCell extends Backgrid.LinkCell
+    render: ->
+      @$el.empty()
+      project = @model.get 'project'
+      node = @model.get 'node'
+      action = @model.get 'action'
+      url = "#project/#{project.id}/node/#{node.id}/action/#{action.id}"
+      tooltip = "#{node.title}: #{action.title}"
+      html = "<span class='project-title'>#{_.escape node.title}</span>: #{_.escape action.title}"
+      @$el.addClass('action-link-cell').append $('<a>',
+        tabIndex: -1
+        href: url
+      ).html html
+      @$el.attr title: tooltip, 'data-container': 'body'
+      @delegateEvents()
+      @
+
   ## Paginator
   class ManagerPaginator extends Backgrid.Extension.Paginator
     className: 'pagination'
@@ -284,6 +302,11 @@ Projects
         label: 'Project'
         urlRoot: 'project'
         cell: 'link'
+        editable: false
+      node_action:
+        name: 'action'
+        label: 'Node: Action'
+        cell: 'node-action'
         editable: false
       status: # TODO: change to list cell and editable
         name: 'status'
