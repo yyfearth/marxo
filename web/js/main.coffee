@@ -8,5 +8,6 @@ require ['console'], ({ConsoleView, SignInView, Router}) ->
     router: Router.get()
 
   Backbone.history.start()
+  document.title = document.title.replace /^.*?(?=MARXO)/i, ''
 
   return
