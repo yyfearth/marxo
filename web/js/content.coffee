@@ -1,11 +1,12 @@
 "use strict"
 
-define 'content', ['console', 'models', 'manager'],
+define 'content', ['console', 'models', 'manager', 'lib/bootstrap-wysiwyg'],
 ({
 find
 #findAll
 #View
 FrameView
+InnerFrameView
 #ModalDialogView
 }, {
 Contents
@@ -19,9 +20,72 @@ ProjectFilterView
     initialize: (options) ->
       super options
       @manager = new ContentManagerView el: @el, parent: @
+      @editor = new ContentEditor el: '#content_editor', parent: @
+      @
     render: ->
       super
       @manager.render()
+      @editor.render()
+      # test
+      @
+
+  class ContentEditor extends InnerFrameView
+    _fonts: [
+      'Serif'
+      'Sans'
+      'Arial'
+      'Arial Black'
+      'Courier'
+      'Courier New'
+      'Comic Sans MS'
+      'Helvetica'
+      'Impact'
+      'Lucida Grande'
+      'Lucida Sans'
+      'Tahoma'
+      'Times'
+      'Times New Roman'
+      'Verdana'
+    ]
+    initialize: (options) ->
+      super options
+      @editor = find '.rich-editor', @el
+      @
+    _renderFonts: ->
+      fontTarget = find '.fonts-select', @el
+      fontTarget.innerHTML = ''
+      flagment = document.createDocumentFragment()
+      for fontName in @_fonts
+        li = document.createElement 'li'
+        a = document.createElement 'a'
+        a.dataset.edit = 'fontName #{fontName}'
+        a.style.fontFamily = fontName
+        a.textContent = fontName
+        li.appendChild a
+        flagment.appendChild li
+      fontTarget.appendChild flagment
+      return
+    render: ->
+      super
+      @$el.find('a[title]').tooltip container: @el
+      @_renderFonts()
+      @$el.find('.btn.hyperlink').click ->
+        setTimeout =>
+          $(@).siblings('.dropdown-menu').find('input').focus()
+        , 200
+      @$el.find('.dropdown-menu input').click( -> false).change(->
+        $(@).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
+      ).keydown (e) ->
+        if e.which is 27 # esc
+          @value = ''
+          $(@).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
+        true
+      @$el.find('[type=file]').each ->
+        overlay = $(@)
+        target = $(overlay.data('target'))
+        overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
+          .width(target.outerWidth()).height target.outerHeight()
+      @$el.find('.rich-editor').wysiwyg()
       @
 
   class ContentActionCell extends Backgrid.ActionsCell
