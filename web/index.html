@@ -701,39 +701,87 @@
                   </div>
                 </div>
                 <section id="section_1">
-                  <legend>New Question</legend>
+                  <legend>
+                    <label for="section_1_title">New Section</label>
+                  </legend>
                   <div class="control-group">
-                    <label for="page_title" class="control-label">Section Title</label>
+                    <label for="section_1_title" class="control-label">Section Title</label>
                     <div class="controls">
-                      <input id="section_1_title" type="text" placeholder="The title of the page" name="section_1_title" maxlength="255" class="input-large">
+                      <input id="section_1_title" type="text" placeholder="The title of the section" name="section_1_title" maxlength="255" class="input-large">
                     </div>
                   </div>
                   <div class="control-group">
                     <label for="section_1_desc" class="control-label">Section Description</label>
                     <div class="controls">
-                      <textarea id="section_1_desc" rows="3" placeholder="The title of the page" name="section_1_title" maxlength="65535" class="input-xxlarge"></textarea>
+                      <textarea id="section_1_desc" rows="3" placeholder="The description of the section" name="section_1_title" maxlength="65535" class="input-xxlarge"></textarea>
                     </div>
                   </div>
                   <div class="control-group">
                     <label for="page_title" class="control-label">Section Type</label>
                     <div class="controls">
                       <select id="section_type" name="section_1_type" class="input-xlarge">
-                        <option value="none">Description Only (No Question)</option>
+                        <option checked>Description Only (No Question)</option>
                         <option value="text">Simple Text</option>
                         <option value="html">Rich Text</option>
                         <option value="radio">Multiple Selection</option>
                         <option value="file">File Upload</option>
                       </select>
-                      <label>
-                        <input id="multiline_text" type="checkbox">Multiple Line
-                      </label>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="multiline_text" class="control-label">Multiple Line</label>
+                    <div class="controls">
+                      <input id="multiline_text" type="checkbox">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="file_accept" class="control-label">File Type</label>
+                    <div class="controls">
                       <select id="file_accept">
-                        <option value="*" checked>Any</option>
+                        <option checked>Any</option>
                         <option value="image/*">Image Only</option>
                         <option value="video/*">Video Only</option>
                         <option value="audio/*">Audio Only</option>
                         <option value="audio/*|video/*|image/*">Image, Video or Audio</option>
                       </select>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="gen_from_list" class="control-label">Auto Generate Rows</label>
+                    <div class="controls">
+                      <input id="gen_from_list" type="checkbox" title="Generate rows from a list">
+                      <input id="gen_list_key" type="text">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label class="control-label">Options</label>
+                    <div class="controls">
+                      <label>
+                        <input type="radio" disabled>
+                        <input type="text">
+                      </label>
+                      <label>
+                        <input type="radio" disabled>
+                        <input type="text">
+                      </label>
+                    </div>
+                  </div>
+                </section>
+                <button type="button" title="Add a new section" class="btn btn-round">+</button>
+                <section id="section_1">
+                  <legend>
+                    <label>Submit Options</label>
+                  </legend>
+                  <div class="control-group">
+                    <label for="another_response" class="control-label">Allow Another Response</label>
+                    <div class="controls">
+                      <input id="another_response" type="checkbox">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="another_response" class="control-label">Next Page</label>
+                    <div class="controls">
+                      <input type="radio">
                     </div>
                   </div>
                 </section>

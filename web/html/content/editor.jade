@@ -78,30 +78,67 @@ mixin rich_editor(id)
       .controls
         mixin rich_editor('page_desc')
     section#section_1
-      legend New Question
+      legend
+        label(for='section_1_title') New Section
       .control-group
-        label.control-label(for='page_title') Section Title
+        label.control-label(for='section_1_title') Section Title
         .controls
-          input#section_1_title.input-large(type='text', placeholder='The title of the page', name='section_1_title', maxlength='255')
+          input#section_1_title.input-large(type='text', placeholder='The title of the section', name='section_1_title', maxlength='255')
       .control-group
         label.control-label(for='section_1_desc') Section Description
         .controls
-          textarea#section_1_desc.input-xxlarge(rows=3, placeholder='The title of the page', name='section_1_title', maxlength='65535')
+          textarea#section_1_desc.input-xxlarge(rows=3, placeholder='The description of the section', name='section_1_title', maxlength='65535')
       .control-group
         label.control-label(for='page_title') Section Type
         .controls
           select#section_type.input-xlarge(name='section_1_type')
-            option(value='none') Description Only (No Question)
+            option(checked) Description Only (No Question)
             option(value='text') Simple Text
             option(value='html') Rich Text
             option(value='radio') Multiple Selection
             option(value='file') File Upload
-          label
-            input#multiline_text(type='checkbox')
-            | Multiple Line
+
+      .control-group
+        label.control-label(for='multiline_text') Multiple Line
+        .controls
+          input#multiline_text(type='checkbox')
+
+      .control-group
+        label.control-label(for='file_accept') File Type
+        .controls
           select#file_accept
-            option(value='*', checked) Any
+            option(checked) Any
             option(value='image/*') Image Only
             option(value='video/*') Video Only
             option(value='audio/*') Audio Only
             option(value='audio/*|video/*|image/*') Image, Video or Audio
+
+      .control-group
+        label.control-label(for='gen_from_list') Auto Generate Rows
+        .controls
+          input#gen_from_list(type='checkbox', title='Generate rows from a list')
+          input#gen_list_key(type='text')
+      .control-group
+        label.control-label Options
+        .controls
+          label
+            input(type='radio', disabled)
+            input(type='text')
+          label
+            input(type='radio', disabled)
+            input(type='text')
+
+    button.btn.btn-round(type='button', title='Add a new section') +
+
+    section#section_1
+      legend
+        label Submit Options
+      .control-group
+        label.control-label(for='another_response') Allow Another Response
+        .controls
+          input#another_response(type='checkbox')
+      .control-group
+        label.control-label(for='another_response') Next Page
+        .controls
+          input(type='radio')
+
