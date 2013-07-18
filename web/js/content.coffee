@@ -26,8 +26,9 @@ ProjectFilterView
       if name
         @editor.render() unless @editor.rendered
         @editor.show true # test
-      else unless @manager.rendered
-        @manager.render()
+      else
+        @manager.render() unless @manager.rendered
+        @editor.cancel()
       @
 
   class ContentEditor extends FormDialogView
@@ -50,7 +51,7 @@ ProjectFilterView
     ]
     initialize: (options) ->
       super options
-      @$el.on 'hidden', -> history.go -1
+      @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
       @editor = find '.rich-editor', @el
       @
     popup: (data, callback) ->
