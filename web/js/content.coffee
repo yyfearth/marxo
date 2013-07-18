@@ -28,12 +28,13 @@ ProjectFilterView
     render: ->
       super
       # TODO: show buttons depend on status
-      view_btn = @el.querySelector('a[name="view"]')
+      view_btn = find 'a[name="view"]', @el
       url = @model.get 'url'
       if url
         view_btn.href = @model.get 'url'
       else
         view_btn.style.display = 'none'
+      find('button[name="edit"]', @el).style.display = 'none' if 'POSTED' is @model.get 'status'
       @
 
   class ContentManagerView extends ManagerView
