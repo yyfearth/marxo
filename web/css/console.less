@@ -11,6 +11,13 @@
   transition: @properties @duration @transition @delay;
 }
 
+.ellipsis(@max_width: 5em) {
+  max-width: @max_width;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 html, body {
   padding: 0px;
   margin: 0px;
@@ -348,11 +355,8 @@ ul.action-bar {
 
 }
 
-.ellipsis(@max_width: 5em) {
-  max-width: @max_width;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
+.form-horizontal .control-group {
+  margin-bottom: 10px; // override default 20px
 }
 
 .grid-table {

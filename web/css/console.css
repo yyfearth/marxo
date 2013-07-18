@@ -6221,6 +6221,9 @@ ul.action-bar .nav {
   left: 0;
   right: 0;
 }
+.form-horizontal .control-group {
+  margin-bottom: 10px;
+}
 .grid-table .datetime-cell {
   font-size: 12px;
 }
