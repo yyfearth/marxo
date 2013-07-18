@@ -1,37 +1,44 @@
 .span2.sidebar
   .well.sidebar-nav
-    ul.sidebar-list.nav.nav-list
+    ul.project-list.sidebar-list.nav.nav-list
       li.nav-header Projects
       li
-        a(href='#') All
-      li
-        a(href='#') Project 1
-      li
-        a(href='#') Project 2
+        a(href='#project:all') All
     ul.sidebar-bottom.nav.nav-list
       li.divider
       li.nav-header Tips
-      li.tips ...
+      li.tips
+        | Click Project List above to filter by project,
+        | Click the link in the right table to view detailed report.
 .span10.workspace
-  #report_view.content-view
-    .row-fluid
-      .well
-        h2 Report 1
-        p
-          | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-          | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-          | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-        p
-          a.btn(href='#report/1') View details »
-    .row-fluid
-      .well
-        h2 Report 2
-        p
-          | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-          | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-          | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-        p
-          a.btn(href='#report/2') View details »
+  #report_view.report-view
+    ul.action-bar
+      li.head Report
+      li.pull-left.tmp
+        ul#media-filter.nav.nav-pills
+          li.active
+            a(href='#media:all') All
+          li
+            a(href='#media:page') Page
+          li
+            a(href='#media:facebook') Facebook
+          li
+            a(href='#media:twitter') Twitter
+          li.disabled
+            a(href='#media:email') Email
+      li.grid-filter
+      li.action-buttons.pull-right
+        button.btn(name='reload', title='Reload Table') Reload
+        button.btn.btn-danger.enable_if_selected(name='remove_selected', title='Remove Selected', disabled) Remove
+    #t_report_action_cell.tpl
+      a.btn.btn-info.btn-round.icon-search(title='View post in new window', name='view')
+      button.btn.btn-primary.btn-round.icon-edit.tmp(title='Edit', name='edit')
+      button.tmp.btn.btn-danger.btn-round.icon-close(title='Remove', name='remove')
+    table#report_table.grid-table
+    .grid-paginator
+
+// temp hide media-filter, edit and remove buttons
+
 #report_viewer.modal.modal-full.hide.fade(aria-labelledby='report_viewer_title', aria-hidden='true')
   .modal-header
     button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;

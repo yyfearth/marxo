@@ -54,7 +54,7 @@ Action
 
   class WorkflowActionCell extends Backgrid.ActionsCell
     render: ->
-      super()
+      super
       # TODO: show buttons depend on status
       edit_btn = @el.querySelector('a[name="edit"]')
       edit_btn.href = '#workflow/' + @model.id
@@ -283,7 +283,7 @@ Action
       @hide true
       @
     reset: -> # called after close
-      super()
+      super
       @form.reset()
       @
 
@@ -333,10 +333,10 @@ Action
       console.log 'save actions', actions, @data
       # TODO: read all actions and check
       # save the node
-      super()
+      super
       @
     reset: ->
-      super()
+      super
       @clearActions()
       @
     clearActions: ->
@@ -417,7 +417,7 @@ Action
       @el.innerHTML = tpl
       @el.id = 'action_' + @model.id or 'no_id'
       # get els in super
-      super()
+      super
       if /webkit/i.test navigator.userAgent
         $(@el).disableSelection()
       else

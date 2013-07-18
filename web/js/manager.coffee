@@ -1,6 +1,6 @@
 "use strict"
 
-define 'manager', ['console', 'models', 'lib/backgrid'],
+define 'manager', ['console', 'models'],
 ({
 find
 InnerFrameView
@@ -51,7 +51,7 @@ Projects
   class Backgrid.TooltipCell extends Backgrid.StringCell
     className: 'tooltip-cell'
     render: ->
-      super()
+      super
       key = @column.get('tooltip') or @column.get('name') or 'title'
       tooltip = @model.escape key
       @$el.attr title: tooltip, 'data-container': 'body'
@@ -101,6 +101,24 @@ Projects
       @delegateEvents()
       @
 
+
+  class Backgrid.NodeActionCell extends Backgrid.LinkCell
+    render: ->
+      @$el.empty()
+      project = @model.get 'project'
+      node = @model.get 'node'
+      action = @model.get 'action'
+      url = "#project/#{project.id}/node/#{node.id}/action/#{action.id}"
+      tooltip = "#{node.title}: #{action.title}"
+      html = "<span class='project-title'>#{_.escape node.title}</span>: #{_.escape action.title}"
+      @$el.addClass('action-link-cell').append $('<a>',
+        tabIndex: -1
+        href: url
+      ).html html
+      @$el.attr title: tooltip, 'data-container': 'body'
+      @delegateEvents()
+      @
+
   ## Paginator
   class ManagerPaginator extends Backgrid.Extension.Paginator
     className: 'pagination'
@@ -109,7 +127,7 @@ Projects
       # fix for backgrid.paginator re-render
       @collection.on 'reset', => @render()
     render: ->
-      super()
+      super
       if @collection.state.totalPages < 2
         @$el.hide()
       else
@@ -244,7 +262,7 @@ Projects
         defaultItem: 'all'
         itemClassName: 'project-list-item'
     render: ->
-      super()
+      super
       @list.render() unless @list.fetch()
       @
 
@@ -284,6 +302,11 @@ Projects
         label: 'Project'
         urlRoot: 'project'
         cell: 'link'
+        editable: false
+      node_action:
+        name: 'action'
+        label: 'Node: Action'
+        cell: 'node-action'
         editable: false
       status: # TODO: change to list cell and editable
         name: 'status'

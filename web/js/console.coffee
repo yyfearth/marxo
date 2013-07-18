@@ -269,7 +269,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     #  @hide true
     #  @
     reset: -> # called after close
-      super()
+      super
       @form.reset()
       @
 

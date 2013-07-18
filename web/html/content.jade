@@ -28,12 +28,12 @@
       li.grid-filter
       li.action-buttons.pull-right
         button.btn(name='reload', title='Reload Table') Reload
-        button.btn.enable_if_selected(name='view_selected', title='View Selected', disabled).hide View
-        button.btn.btn-danger.enable_if_selected(name='remove_selected', title='Remove Selected', disabled).hide Remove
+        button.btn.enable_if_selected(name='view_selected', title='View Selected', disabled).tmp View
+        button.btn.btn-danger.enable_if_selected(name='remove_selected', title='Remove Selected', disabled).tmp Remove
     #t_content_action_cell.tpl
       a.btn.btn-info.btn-round.icon-search(title='View post in new window', name='view', target='_blank')
       button.btn.btn-primary.btn-round.icon-edit(title='Edit', name='edit')
-      button.hide.btn.btn-danger.btn-round.icon-close(title='Remove', name='remove')
+      button.tmp.btn.btn-danger.btn-round.icon-close(title='Remove', name='remove')
     table#content_table.grid-table
     .grid-paginator
 // temp hide view_selected, remove_selected, and remove buttons

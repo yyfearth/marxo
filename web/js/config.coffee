@@ -40,7 +40,7 @@ Publichers
 
   #  class UserActionCell extends Backgrid.ActionsCell
   #    render: ->
-  #      super()
+  #      super
   #      # TODO: show buttons depend on status
   #      view_btn = @el.querySelector('a[name="view"]')
   #      view_btn.href = '#config/users/' + @model.id
@@ -69,10 +69,10 @@ Publichers
         collection: @collection.fullCollection
       @
     reload: ->
-      super()
+      super
       @projectFilter.clear()
     render: ->
-      super()
+      super
       @projectFilter.render()
       @
 

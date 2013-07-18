@@ -20,37 +20,21 @@ ProjectFilterView
       super options
       @manager = new ContentManagerView el: @el, parent: @
     render: ->
-      super()
+      super
       @manager.render()
-      @
-
-  class NodeActionCell extends Backgrid.LinkCell
-    render: ->
-      @$el.empty()
-      project = @model.get 'project'
-      node = @model.get 'node'
-      action = @model.get 'action'
-      url = "#project/#{project.id}/node/#{node.id}/action/#{action.id}"
-      tooltip = "#{node.title}: #{action.title}"
-      html = "<span class='project-title'>#{_.escape node.title}</span>: #{_.escape action.title}"
-      @$el.addClass('action-link-cell').append $('<a>',
-        tabIndex: -1
-        href: url
-      ).html html
-      @$el.attr title: tooltip, 'data-container': 'body'
-      @delegateEvents()
       @
 
   class ContentActionCell extends Backgrid.ActionsCell
     render: ->
-      super()
+      super
       # TODO: show buttons depend on status
-      view_btn = @el.querySelector('a[name="view"]')
+      view_btn = find 'a[name="view"]', @el
       url = @model.get 'url'
       if url
         view_btn.href = @model.get 'url'
       else
         view_btn.style.display = 'none'
+      find('button[name="edit"]', @el).style.display = 'none' if 'POSTED' is @model.get 'status'
       @
 
   class ContentManagerView extends ManagerView
@@ -70,12 +54,7 @@ ProjectFilterView
       editable: false
     ,
       'project'
-    ,
-      name: 'action'
-      label: 'Node: Action'
-      cell: NodeActionCell
-      editable: false
-    ,
+      'node_action'
       'status'
     ,
       name: 'posted_at'
@@ -125,11 +104,11 @@ ProjectFilterView
       #  #console.log 'delete', model, @
       @
     reload: ->
-      super()
+      super
       @mediaFilter.clear()
       @projectFilter.clear()
     render: ->
-      super()
+      super
       @mediaFilter.render()
       @projectFilter.render()
       @

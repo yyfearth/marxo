@@ -9,4 +9,6 @@ require ['console'], ({ConsoleView, SignInView, Router}) ->
 
   Backbone.history.start()
 
+  document.body.style.opacity = 1
+  document.title = document.title.replace /^.*?(?=MARXO)/i, ''
   return
