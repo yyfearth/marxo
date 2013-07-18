@@ -140,6 +140,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           innerframe.el.classList.add 'active'
         unless innerframe.rendered
           innerframe.render()
+          innerframe.rendered = true
       else
         console.warn 'inner frame cannot find', frameName
       return
@@ -181,7 +182,8 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @$el.modal
         show: false
         backdrop: 'static'
-      @$el.on 'hidden', (e) => @callback() if e.target is @el
+      @$el.on 'hidden', (e) =>
+        @callback() if e.target is @el and false isnt @trigger 'hidden', @
       return
     popup: (data, callback) ->
       if data is @data
