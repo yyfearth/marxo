@@ -34,7 +34,7 @@ ProjectFilterView
 
   class ReportActionCell extends Backgrid.ActionsCell
     render: ->
-      super()
+      super
       # TODO: show buttons depend on status
       view_btn = @el.querySelector('a[name="view"]')
       view_btn.href = '#report/' + @model.id
@@ -101,11 +101,11 @@ ProjectFilterView
       #  #console.log 'delete', model, @
       @
     reload: ->
-      super()
+      super
       #@mediaFilter.clear()
       @projectFilter.clear()
     render: ->
-      super()
+      super
       #@mediaFilter.render()
       @projectFilter.render()
       @

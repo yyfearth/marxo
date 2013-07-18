@@ -51,7 +51,7 @@ Projects
   class Backgrid.TooltipCell extends Backgrid.StringCell
     className: 'tooltip-cell'
     render: ->
-      super()
+      super
       key = @column.get('tooltip') or @column.get('name') or 'title'
       tooltip = @model.escape key
       @$el.attr title: tooltip, 'data-container': 'body'
@@ -127,7 +127,7 @@ Projects
       # fix for backgrid.paginator re-render
       @collection.on 'reset', => @render()
     render: ->
-      super()
+      super
       if @collection.state.totalPages < 2
         @$el.hide()
       else
@@ -262,7 +262,7 @@ Projects
         defaultItem: 'all'
         itemClassName: 'project-list-item'
     render: ->
-      super()
+      super
       @list.render() unless @list.fetch()
       @
 
