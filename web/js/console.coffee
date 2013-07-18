@@ -41,6 +41,9 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         @trigger eventName, args...
         return
       , delay
+    render: ->
+      @rendered = true
+      @
 
   class ConsoleView extends View
     el: '#main'
@@ -137,7 +140,6 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           innerframe.el.classList.add 'active'
         unless innerframe.rendered
           innerframe.render()
-          innerframe.rendered = true
       else
         console.warn 'inner frame cannot find', frameName
       return
