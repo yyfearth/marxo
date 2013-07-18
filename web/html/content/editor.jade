@@ -65,19 +65,38 @@ include rich_editor
               input(type='radio', disabled)
               input(type='text')
 
-      button.btn.btn-round(type='button', title='Add a new section') +
+      button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
 
       section#section_1
         legend
           label Submit Options
         .control-group
+          label.control-label(for='next_page_type') Next Page Type
+          .controls
+            label
+              input(type='radio', name='next_page_type', value='thanks', checked)
+              | Thanks Only
+            label
+              input(type='radio', name='next_page_type', value='results', disabled)
+              | Results Page
+            label
+              input(type='radio', name='next_page_type', value='page')
+              | Another Page
+            label
+              input(type='radio', name='next_page_type', value='url')
+              | Jump to URL
+        .control-group
           label.control-label(for='another_response') Allow Another Response
           .controls
-            input#another_response(type='checkbox')
+            input#another_response(type='checkbox', name='another_response')
         .control-group
-          label.control-label(for='another_response') Next Page
+          label.control-label(for='next_page_key') Next Page Key
           .controls
-            input(type='radio')
+            input#next_page_key(type='text', name='next_page_key')
+        .control-group
+          label.control-label(for='next_page_url') Next Page URL
+          .controls
+            input#next_page_url(type='url', name='next_page_url')
 
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close

@@ -770,21 +770,44 @@
                     </div>
                   </div>
                 </section>
-                <button type="button" title="Add a new section" class="btn btn-round">+</button>
+                <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
                 <section id="section_1">
                   <legend>
                     <label>Submit Options</label>
                   </legend>
                   <div class="control-group">
-                    <label for="another_response" class="control-label">Allow Another Response</label>
+                    <label for="next_page_type" class="control-label">Next Page Type</label>
                     <div class="controls">
-                      <input id="another_response" type="checkbox">
+                      <label>
+                        <input type="radio" name="next_page_type" value="thanks" checked>Thanks Only
+                      </label>
+                      <label>
+                        <input type="radio" name="next_page_type" value="results" disabled>Results Page
+                      </label>
+                      <label>
+                        <input type="radio" name="next_page_type" value="page">Another Page
+                      </label>
+                      <label>
+                        <input type="radio" name="next_page_type" value="url">Jump to URL
+                      </label>
                     </div>
                   </div>
                   <div class="control-group">
-                    <label for="another_response" class="control-label">Next Page</label>
+                    <label for="another_response" class="control-label">Allow Another Response</label>
                     <div class="controls">
-                      <input type="radio">
+                      <input id="another_response" type="checkbox" name="another_response">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="next_page_key" class="control-label">Next Page Key</label>
+                    <div class="controls">
+                      <input id="next_page_key" type="text" name="next_page_key">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="next_page_url" class="control-label">Next Page URL</label>
+                    <div class="controls">
+                      <input id="next_page_url" type="url" name="next_page_url">
                     </div>
                   </div>
                 </section>
