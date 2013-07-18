@@ -318,6 +318,36 @@ ul.action-bar {
   }
 }
 
+.modal-full {
+  position: fixed;
+  top: 5%;
+  bottom: 5%;
+  left: 5%;
+  width: 90%;
+  margin: 0;
+
+  &.fade, &.fade.in { // override
+    top: 5%;
+  }
+
+  .modal-body {
+    max-height: none;
+    max-width: none;
+    position: absolute;
+    top: 50px;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+  }
+  .modal-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+}
+
 .ellipsis(@max_width: 5em) {
   max-width: @max_width;
   text-overflow: ellipsis;

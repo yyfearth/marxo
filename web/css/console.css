@@ -6194,6 +6194,33 @@ ul.action-bar .nav {
 #calendar .workspace #calendar_view {
   display: inline-block;
 }
+.modal-full {
+  position: fixed;
+  top: 5%;
+  bottom: 5%;
+  left: 5%;
+  width: 90%;
+  margin: 0;
+}
+.modal-full.fade,
+.modal-full.fade.in {
+  top: 5%;
+}
+.modal-full .modal-body {
+  max-height: none;
+  max-width: none;
+  position: absolute;
+  top: 50px;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+}
+.modal-full .modal-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
 .grid-table .datetime-cell {
   font-size: 12px;
 }

@@ -106,28 +106,11 @@
   cursor: pointer;
 }
 
-#node_editor, #report_viewer {
-  position: fixed;
-  top: 5%;
-  bottom: 5%;
-  left: 5%;
-  width: 90%;
-  margin: 0;
+#node_editor {
+  min-width: 600px;
 
   .modal-body {
-    max-height: none;
-    max-width: none;
-    position: absolute;
-    top: 50px;
-    bottom: 60px;
-    left: 0;
-    right: 0;
-  }
-  .modal-footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    overflow: hidden;
   }
 
   .sidebar {
@@ -149,14 +132,6 @@
     .controls {
       margin-left: 90px;
     }
-  }
-}
-
-#node_editor {
-  min-width: 600px;
-
-  .modal-body {
-    overflow: hidden;
   }
 
   #actions {
