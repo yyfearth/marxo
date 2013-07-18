@@ -1,144 +1,84 @@
-mixin rich_editor(id)
-  .btn-toolbar(data-role='editor-toolbar', data-target='#' + id)
-    .btn-group
-      a.btn.dropdown-toggle(data-toggle='dropdown', title='Font')
-        i.icon-font
-        b.caret
-      ul.fonts-select.dropdown-menu
-    .btn-group
-      a.btn.dropdown-toggle(data-toggle='dropdown', title='Font Size')
-        i.icon-text-height
-        b.caret
-      ul.dropdown-menu
-        li
-          a(data-edit='fontSize 5')
-            font(size='5') Large
-        li
-          a(data-edit='fontSize 3')
-            font(size='3') Normal
-        li
-          a(data-edit='fontSize 1')
-            font(size='1') Small
-    .btn-group
-      a.btn(data-edit='bold', title='Bold (Ctrl/Cmd+B)')
-        i.icon-bold
-      a.btn(data-edit='italic', title='Italic (Ctrl/Cmd+I)')
-        i.icon-italic
-      a.btn(data-edit='strikethrough', title='Strikethrough')
-        i.icon-strike
-      a.btn(data-edit='underline', title='Underline (Ctrl/Cmd+U)')
-        i.icon-underline
-    .btn-group
-      a.btn(data-edit='insertunorderedlist', title='Bullet list')
-        i.icon-list-bullet
-      a.btn(data-edit='insertorderedlist', title='Number list')
-        i.icon-list-numbered
-      a.btn(data-edit='outdent', title='Reduce indent (Shift+Tab)')
-        i.icon-indent-left
-      a.btn(data-edit='indent', title='Indent (Tab)')
-        i.icon-indent-right
-    .btn-group
-      a.btn(data-edit='justifyleft', title='Align Left')
-        i.icon-align-left
-      a.btn(data-edit='justifycenter', title='Center')
-        i.icon-align-center
-      a.btn(data-edit='justifyright', title='Align Right')
-        i.icon-align-right
-      a.btn(data-edit='justifyfull', title='Justify')
-        i.icon-align-justify
-    .btn-group
-      a.btn(data-edit='unlink', title='Remove Hyperlink')
-        i.icon-unlink
-      a.btn.hyperlink.dropdown-toggle(data-toggle='dropdown', title='Hyperlink')
-        i.icon-link
-      ul.dropdown-menu
-        li.input-append
-          input(placeholder='URL', type='text', data-edit='createLink')
-          button.btn(type='button') Add
-    .btn-group
-      a.btn(id='btn_picture_' + id, title='Insert picture (or just drag & drop)')
-        i.icon-picture
-        input(type='file', data-target='#btn_picture_' + id, data-edit='insertImage')
-    .btn-group
-      a.btn(data-edit='undo', title='Undo (Ctrl/Cmd+Z)')
-        i.icon-undo
-      a.btn(data-edit='redo', title='Redo (Ctrl/Cmd+Y)')
-        i.icon-redo
-    .rich-editor(id=id)
+include rich_editor
 
-#content_editor
-  h2 Content Editor
-  form.form-horizontal
-    .control-group
-      label.control-label(for='page_title') Page Title
-      .controls
-        input#page_title.input-large(type='text', placeholder='The title of the page', name='page_title', maxlength='255')
-    .control-group
-      label.control-label(for='page_title') Page Description
-      .controls
-        mixin rich_editor('page_desc')
-    section#section_1
-      legend
-        label(for='section_1_title') New Section
+#content_editor.modal.modal-full.hide.fade(aria-labelledby='content_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#content_editor_title Content Editor
+  .modal-body
+    form.form-horizontal
       .control-group
-        label.control-label(for='section_1_title') Section Title
+        label.control-label(for='page_title') Page Title
         .controls
-          input#section_1_title.input-large(type='text', placeholder='The title of the section', name='section_1_title', maxlength='255')
+          input#page_title.input-large(type='text', placeholder='The title of the page', name='page_title', maxlength='255')
       .control-group
-        label.control-label(for='section_1_desc') Section Description
+        label.control-label(for='page_title') Page Description
         .controls
-          textarea#section_1_desc.input-xxlarge(rows=3, placeholder='The description of the section', name='section_1_title', maxlength='65535')
-      .control-group
-        label.control-label(for='page_title') Section Type
-        .controls
-          select#section_type.input-xlarge(name='section_1_type')
-            option(checked) Description Only (No Question)
-            option(value='text') Simple Text
-            option(value='html') Rich Text
-            option(value='radio') Multiple Selection
-            option(value='file') File Upload
+          mixin rich_editor('page_desc')
+      section#section_1
+        legend
+          label(for='section_1_title') New Section
+        .control-group
+          label.control-label(for='section_1_title') Section Title
+          .controls
+            input#section_1_title.input-large(type='text', placeholder='The title of the section', name='section_1_title', maxlength='255')
+        .control-group
+          label.control-label(for='section_1_desc') Section Description
+          .controls
+            textarea#section_1_desc.input-block-level(rows=3, placeholder='The description of the section', name='section_1_title', maxlength='65535')
+        .control-group
+          label.control-label(for='page_title') Section Type
+          .controls
+            select#section_type.input-xlarge(name='section_1_type')
+              option(checked) Description Only (No Question)
+              option(value='text') Simple Text
+              option(value='html') Rich Text
+              option(value='radio') Multiple Selection
+              option(value='file') File Upload
 
-      .control-group
-        label.control-label(for='multiline_text') Multiple Line
-        .controls
-          input#multiline_text(type='checkbox')
+        .control-group
+          label.control-label(for='multiline_text') Multiple Line
+          .controls
+            input#multiline_text(type='checkbox')
 
-      .control-group
-        label.control-label(for='file_accept') File Type
-        .controls
-          select#file_accept
-            option(checked) Any
-            option(value='image/*') Image Only
-            option(value='video/*') Video Only
-            option(value='audio/*') Audio Only
-            option(value='audio/*|video/*|image/*') Image, Video or Audio
+        .control-group
+          label.control-label(for='file_accept') File Type
+          .controls
+            select#file_accept
+              option(checked) Any
+              option(value='image/*') Image Only
+              option(value='video/*') Video Only
+              option(value='audio/*') Audio Only
+              option(value='audio/*|video/*|image/*') Image, Video or Audio
 
-      .control-group
-        label.control-label(for='gen_from_list') Auto Generate Rows
-        .controls
-          input#gen_from_list(type='checkbox', title='Generate rows from a list')
-          input#gen_list_key(type='text')
-      .control-group
-        label.control-label Options
-        .controls
-          label
-            input(type='radio', disabled)
-            input(type='text')
-          label
-            input(type='radio', disabled)
-            input(type='text')
+        .control-group
+          label.control-label(for='gen_from_list') Auto Generate Rows
+          .controls
+            input#gen_from_list(type='checkbox', title='Generate rows from a list')
+            input#gen_list_key(type='text')
+        .control-group
+          label.control-label Options
+          .controls
+            label
+              input(type='radio', disabled)
+              input(type='text')
+            label
+              input(type='radio', disabled)
+              input(type='text')
 
-    button.btn.btn-round(type='button', title='Add a new section') +
+      button.btn.btn-round(type='button', title='Add a new section') +
 
-    section#section_1
-      legend
-        label Submit Options
-      .control-group
-        label.control-label(for='another_response') Allow Another Response
-        .controls
-          input#another_response(type='checkbox')
-      .control-group
-        label.control-label(for='another_response') Next Page
-        .controls
-          input(type='radio')
+      section#section_1
+        legend
+          label Submit Options
+        .control-group
+          label.control-label(for='another_response') Allow Another Response
+          .controls
+            input#another_response(type='checkbox')
+        .control-group
+          label.control-label(for='another_response') Next Page
+          .controls
+            input(type='radio')
 
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save

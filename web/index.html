@@ -648,19 +648,22 @@
                 <li class="grid-filter"></li>
                 <li class="action-buttons pull-right">
                   <button name="reload" title="Reload Table" class="btn">Reload</button>
-                  <button name="view_selected" title="View Selected" disabled class="btn enable_if_selected tmp">View</button>
                   <button name="remove_selected" title="Remove Selected" disabled class="btn btn-danger enable_if_selected tmp">Remove</button>
                 </li>
               </ul>
-              <div id="t_content_action_cell" class="tpl"><a title="View post in new window" name="view" target="_blank" class="btn btn-info btn-round icon-search"></a>
-                <button title="Edit" name="edit" class="btn btn-primary btn-round icon-edit"></button>
+              <div id="t_content_action_cell" class="tpl"><a title="View post in new window" name="view" target="_blank" class="btn btn-info btn-round icon-search"></a><a title="Edit" name="edit" class="btn btn-primary btn-round icon-edit"></a>
                 <button title="Remove" name="remove" class="tmp btn btn-danger btn-round icon-close"></button>
               </div>
               <table id="content_table" class="grid-table"></table>
               <div class="grid-paginator"></div>
             </div>
-            <div id="content_editor">
-              <h2>Content Editor</h2>
+          </div>
+          <div id="content_editor" aria-labelledby="content_editor_title" aria-hidden="true" class="modal modal-full hide fade">
+            <div class="modal-header">
+              <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+              <h3 id="content_editor_title">Content Editor</h3>
+            </div>
+            <div class="modal-body">
               <form class="form-horizontal">
                 <div class="control-group">
                   <label for="page_title" class="control-label">Page Title</label>
@@ -671,33 +674,33 @@
                 <div class="control-group">
                   <label for="page_title" class="control-label">Page Description</label>
                   <div class="controls">
-                                <div data-role="editor-toolbar" data-target="#page_desc" class="btn-toolbar">
-                                  <div class="btn-group"><a data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></a>
-                                    <ul class="fonts-select dropdown-menu"></ul>
-                                  </div>
-                                  <div class="btn-group"><a data-toggle="dropdown" title="Font Size" class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></a>
-                                    <ul class="dropdown-menu">
-                                      <li><a data-edit="fontSize 5"><font size="5">Large</font></a></li>
-                                      <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
-                                      <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
-                                    </ul>
-                                  </div>
-                                  <div class="btn-group"><a data-edit="bold" title="Bold (Ctrl/Cmd+B)" class="btn"><i class="icon-bold"></i></a><a data-edit="italic" title="Italic (Ctrl/Cmd+I)" class="btn"><i class="icon-italic"></i></a><a data-edit="strikethrough" title="Strikethrough" class="btn"><i class="icon-strike"></i></a><a data-edit="underline" title="Underline (Ctrl/Cmd+U)" class="btn"><i class="icon-underline"></i></a></div>
-                                  <div class="btn-group"><a data-edit="insertunorderedlist" title="Bullet list" class="btn"><i class="icon-list-bullet"></i></a><a data-edit="insertorderedlist" title="Number list" class="btn"><i class="icon-list-numbered"></i></a><a data-edit="outdent" title="Reduce indent (Shift+Tab)" class="btn"><i class="icon-indent-left"></i></a><a data-edit="indent" title="Indent (Tab)" class="btn"><i class="icon-indent-right"></i></a></div>
-                                  <div class="btn-group"><a data-edit="justifyleft" title="Align Left" class="btn"><i class="icon-align-left"></i></a><a data-edit="justifycenter" title="Center" class="btn"><i class="icon-align-center"></i></a><a data-edit="justifyright" title="Align Right" class="btn"><i class="icon-align-right"></i></a><a data-edit="justifyfull" title="Justify" class="btn"><i class="icon-align-justify"></i></a></div>
-                                  <div class="btn-group"><a data-edit="unlink" title="Remove Hyperlink" class="btn"><i class="icon-unlink"></i></a><a data-toggle="dropdown" title="Hyperlink" class="btn hyperlink dropdown-toggle"><i class="icon-link"></i></a>
-                                    <ul class="dropdown-menu">
-                                      <li class="input-append">
-                                        <input placeholder="URL" type="text" data-edit="createLink">
-                                        <button type="button" class="btn">Add</button>
-                                      </li>
-                                    </ul>
-                                  </div>
-                                  <div class="btn-group"><a id="btn_picture_page_desc" title="Insert picture (or just drag &amp; drop)" class="btn"><i class="icon-picture"></i>
-                                      <input type="file" data-target="#btn_picture_page_desc" data-edit="insertImage"></a></div>
-                                  <div class="btn-group"><a data-edit="undo" title="Undo (Ctrl/Cmd+Z)" class="btn"><i class="icon-undo"></i></a><a data-edit="redo" title="Redo (Ctrl/Cmd+Y)" class="btn"><i class="icon-redo"></i></a></div>
-                                  <div id="page_desc" class="rich-editor"></div>
+                              <div data-role="editor-toolbar" data-target="#page_desc" class="btn-toolbar">
+                                <div class="btn-group"><a data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></a>
+                                  <ul class="fonts-select dropdown-menu"></ul>
                                 </div>
+                                <div class="btn-group"><a data-toggle="dropdown" title="Font Size" class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></a>
+                                  <ul class="dropdown-menu">
+                                    <li><a data-edit="fontSize 5"><font size="5">Large</font></a></li>
+                                    <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
+                                    <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
+                                  </ul>
+                                </div>
+                                <div class="btn-group"><a data-edit="bold" title="Bold (Ctrl/Cmd+B)" class="btn"><i class="icon-bold"></i></a><a data-edit="italic" title="Italic (Ctrl/Cmd+I)" class="btn"><i class="icon-italic"></i></a><a data-edit="strikethrough" title="Strikethrough" class="btn"><i class="icon-strike"></i></a><a data-edit="underline" title="Underline (Ctrl/Cmd+U)" class="btn"><i class="icon-underline"></i></a></div>
+                                <div class="btn-group"><a data-edit="insertunorderedlist" title="Bullet list" class="btn"><i class="icon-list-bullet"></i></a><a data-edit="insertorderedlist" title="Number list" class="btn"><i class="icon-list-numbered"></i></a><a data-edit="outdent" title="Reduce indent (Shift+Tab)" class="btn"><i class="icon-indent-left"></i></a><a data-edit="indent" title="Indent (Tab)" class="btn"><i class="icon-indent-right"></i></a></div>
+                                <div class="btn-group"><a data-edit="justifyleft" title="Align Left" class="btn"><i class="icon-align-left"></i></a><a data-edit="justifycenter" title="Center" class="btn"><i class="icon-align-center"></i></a><a data-edit="justifyright" title="Align Right" class="btn"><i class="icon-align-right"></i></a><a data-edit="justifyfull" title="Justify" class="btn"><i class="icon-align-justify"></i></a></div>
+                                <div class="btn-group"><a data-edit="unlink" title="Remove Hyperlink" class="btn"><i class="icon-unlink"></i></a><a data-toggle="dropdown" title="Hyperlink" class="btn hyperlink dropdown-toggle"><i class="icon-link"></i></a>
+                                  <ul class="dropdown-menu">
+                                    <li class="input-append">
+                                      <input placeholder="URL" type="text" data-edit="createLink">
+                                      <button type="button" class="btn">Add</button>
+                                    </li>
+                                  </ul>
+                                </div>
+                                <div class="btn-group"><a id="btn_picture_page_desc" title="Insert picture (or just drag &amp; drop)" class="btn"><i class="icon-picture"></i>
+                                    <input type="file" data-target="#btn_picture_page_desc" data-edit="insertImage"></a></div>
+                                <div class="btn-group"><a data-edit="undo" title="Undo (Ctrl/Cmd+Z)" class="btn"><i class="icon-undo"></i></a><a data-edit="redo" title="Redo (Ctrl/Cmd+Y)" class="btn"><i class="icon-redo"></i></a></div>
+                                <div id="page_desc" class="rich-editor"></div>
+                              </div>
                   </div>
                 </div>
                 <section id="section_1">
@@ -713,7 +716,7 @@
                   <div class="control-group">
                     <label for="section_1_desc" class="control-label">Section Description</label>
                     <div class="controls">
-                      <textarea id="section_1_desc" rows="3" placeholder="The description of the section" name="section_1_title" maxlength="65535" class="input-xxlarge"></textarea>
+                      <textarea id="section_1_desc" rows="3" placeholder="The description of the section" name="section_1_title" maxlength="65535" class="input-block-level"></textarea>
                     </div>
                   </div>
                   <div class="control-group">
@@ -787,8 +790,12 @@
                 </section>
               </form>
             </div>
+            <div class="modal-footer">
+              <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+              <button class="btn btn-primary btn-save">Save</button>
+            </div>
           </div>
-          <!-- temp hide view_selected, remove_selected, and remove buttons-->
+          <!-- temp hide remove selected, remove buttons-->
         </div>
       </div>
       <div id="report" class="frame container-fluid">

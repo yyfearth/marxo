@@ -7,7 +7,7 @@ find
 #View
 FrameView
 InnerFrameView
-#ModalDialogView
+FormDialogView
 }, {
 Contents
 }, {
@@ -22,14 +22,15 @@ ProjectFilterView
       @manager = new ContentManagerView el: @el, parent: @
       @editor = new ContentEditor el: '#content_editor', parent: @
       @
-    render: ->
-      super
-      @manager.render()
-      @editor.render()
-      # test
+    open: (name) ->
+      if name
+        @editor.render() unless @editor.rendered
+        @editor.show true # test
+      else unless @manager.rendered
+        @manager.render()
       @
 
-  class ContentEditor extends InnerFrameView
+  class ContentEditor extends FormDialogView
     _fonts: [
       'Serif'
       'Sans'
@@ -49,7 +50,17 @@ ProjectFilterView
     ]
     initialize: (options) ->
       super options
+      @$el.on 'hidden', -> history.go -1
       @editor = find '.rich-editor', @el
+      @
+    popup: (data, callback) ->
+      super data, callback
+      @fill data
+      @
+    save: ->
+      @data = @read()
+      @callback 'save'
+      @hide true
       @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
@@ -73,7 +84,7 @@ ProjectFilterView
         setTimeout =>
           $(@).siblings('.dropdown-menu').find('input').focus()
         , 200
-      @$el.find('.dropdown-menu input').click( -> false).change(->
+      @$el.find('.dropdown-menu input').click(-> false).change(->
         $(@).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
       ).keydown (e) ->
         if e.which is 27 # esc
@@ -98,7 +109,11 @@ ProjectFilterView
         view_btn.href = @model.get 'url'
       else
         view_btn.style.display = 'none'
-      find('button[name="edit"]', @el).style.display = 'none' if 'POSTED' is @model.get 'status'
+      edit_btn = find 'a[name="edit"]', @el
+      if 'POSTED' isnt @model.get 'status'
+        edit_btn.href = '#content/' + @model.id
+      else
+        edit_btn.style.display = 'none'
       @
 
   class ContentManagerView extends ManagerView
@@ -146,17 +161,10 @@ ProjectFilterView
         el: find('ul.project-list', @el)
         field: 'project.id'
         collection: collection
-      #_view = @view.bind @
       _remove = @remove.bind @
       @on
-        edit: @edit.bind @
-      #view: _view
-      #view_selected: _view
         remove: _remove
         remove_selected: _remove
-      @
-    edit: (model) ->
-      console.log 'edit', model
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
@@ -176,8 +184,5 @@ ProjectFilterView
       @mediaFilter.render()
       @projectFilter.render()
       @
-  #view: (models) ->
-  #  models = [models] unless Array.isArray models
-  #  console.log 'view', models
 
   ContentFrameView

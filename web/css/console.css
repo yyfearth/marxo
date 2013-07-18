@@ -5180,61 +5180,30 @@ a.badge:focus {
   display: inline-block;
   cursor: pointer;
 }
-#node_editor,
-#report_viewer {
-  position: fixed;
-  top: 5%;
-  bottom: 5%;
-  left: 5%;
-  width: 90%;
-  margin: 0;
-}
-#node_editor .modal-body,
-#report_viewer .modal-body {
-  max-height: none;
-  max-width: none;
-  position: absolute;
-  top: 50px;
-  bottom: 60px;
-  left: 0;
-  right: 0;
-}
-#node_editor .modal-footer,
-#report_viewer .modal-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-#node_editor .sidebar,
-#report_viewer .sidebar {
-  float: left;
-  width: 175px;
-}
-#node_editor form.form-horizontal,
-#report_viewer form.form-horizontal {
-  display: block;
-  margin-bottom: 0;
-}
-#node_editor form.form-horizontal .control-group,
-#report_viewer form.form-horizontal .control-group {
-  display: inline-block;
-  vertical-align: top;
-  margin-bottom: 10px;
-}
-#node_editor form.form-horizontal .control-label,
-#report_viewer form.form-horizontal .control-label {
-  width: 80px;
-}
-#node_editor form.form-horizontal .controls,
-#report_viewer form.form-horizontal .controls {
-  margin-left: 90px;
-}
 #node_editor {
   min-width: 600px;
 }
 #node_editor .modal-body {
   overflow: hidden;
+}
+#node_editor .sidebar {
+  float: left;
+  width: 175px;
+}
+#node_editor form.form-horizontal {
+  display: block;
+  margin-bottom: 0;
+}
+#node_editor form.form-horizontal .control-group {
+  display: inline-block;
+  vertical-align: top;
+  margin-bottom: 10px;
+}
+#node_editor form.form-horizontal .control-label {
+  width: 80px;
+}
+#node_editor form.form-horizontal .controls {
+  margin-left: 90px;
 }
 #node_editor #actions {
   position: absolute;
@@ -5308,20 +5277,13 @@ div[data-role="editor-toolbar"] .rich-editor {
   -moz-user-select: all;
   user-select: all;
 }
-div[data-role="editor-toolbar"] .btn-voice {
-  width: 20px;
-  color: transparent;
-  background-color: transparent;
-  -webkit-transform: scale(2, 2);
-  -moz-transform: scale(2, 2);
-  transform: scale(2, 2);
-  border: transparent;
+div[data-role="editor-toolbar"] ::-webkit-file-upload-button {
   cursor: pointer;
-  box-shadow: none;
-  -webkit-box-shadow: none;
 }
-::-webkit-file-upload-button {
-  cursor: pointer;
+#content_editor form {
+  max-width: 900px;
+  min-width: 600px;
+  margin: 0 auto;
 }
 .fc {
   direction: ltr;

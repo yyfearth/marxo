@@ -31,20 +31,14 @@ div[data-role="editor-toolbar"] {
     user-select: all;
   }
 
-  .btn-voice {
-    width: 20px;
-    color: transparent;
-    background-color: transparent;
-    -webkit-transform: scale(2.0, 2.0);
-    -moz-transform: scale(2.0, 2.0);
-    transform: scale(2.0, 2.0);
-    border: transparent;
+  ::-webkit-file-upload-button {
     cursor: pointer;
-    box-shadow: none;
-    -webkit-box-shadow: none;
   }
+
 }
 
-::-webkit-file-upload-button {
-  cursor: pointer;
+#content_editor form {
+  max-width: 900px;
+  min-width: 600px;
+  margin: 0 auto;
 }
