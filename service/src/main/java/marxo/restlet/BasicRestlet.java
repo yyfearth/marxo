@@ -19,10 +19,6 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.List;
 
-/**
- * @param <E> Entity type
- * @param <D> DAO type
- */
 public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>> implements Restlet {
 
 	public static final String ID_PATTERN_STRING = "[\\da-fA-F]{24}";
@@ -84,9 +80,7 @@ public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>>
 	public E set(@PathParam("id") String id, E entity) {
 		ObjectId objectId = new ObjectId(id);
 
-		System.out.println("Does exist? " + dao.exists("id", objectId));
-
-		WriteResult writeResult = dao.deleteById(objectId);
+		dao.deleteById(objectId)
 
 		System.out.println("getN: " + writeResult.getN());
 
@@ -124,8 +118,6 @@ public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>>
 		if (errorMessage != null) {
 			throw new UnknownException("Unable to delete the entity");
 		}
-
-		// no return will be 204 (No Content) if succeed
 	}
 
 	// to get parameter in url
