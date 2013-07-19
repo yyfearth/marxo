@@ -4853,7 +4853,8 @@ a.badge:focus {
 .icon-mail:before {
   content: '\2709';
 }
-.icon-edit:before {
+.icon-edit:before,
+.icon-pencil:before {
   content: '\270e';
 }
 .icon-ok:before {
@@ -4861,6 +4862,14 @@ a.badge:focus {
 }
 .icon-close:before {
   content: '\2715';
+}
+.icon-undo:before,
+.icon-ccw:before {
+  content: '\e815';
+}
+.icon-redo:before,
+.icon-cw:before {
+  content: '\e814';
 }
 .icon-user-add:before {
   content: '\e700';
@@ -4880,11 +4889,56 @@ a.badge:focus {
 .icon-refresh:before {
   content: '\e760';
 }
-.icon-spin:before {
-  content: '\e834';
+.icon-font:before {
+  content: '\e804';
+}
+.icon-bold:before {
+  content: '\e805';
+}
+.icon-italic:before {
+  content: '\e806';
+}
+.icon-text-height:before {
+  content: '\e803';
+}
+.icon-align-left:before {
+  content: '\e807';
+}
+.icon-align-center:before {
+  content: '\e808';
+}
+.icon-align-right:before {
+  content: '\e809';
+}
+.icon-align-justify:before {
+  content: '\e80a';
+}
+.icon-indent-left:before {
+  content: '\e80c';
+}
+.icon-indent-right:before {
+  content: '\e80d';
+}
+.icon-list-bullet:before {
+  content: '\e80e';
+}
+.icon-list-numbered:before {
+  content: '\e80f';
+}
+.icon-strike:before {
+  content: '\e80b';
+}
+.icon-underline:before {
+  content: '\e810';
 }
 .icon-wizard:before {
   content: '\f0d0';
+}
+.icon-unlink:before {
+  content: '\e812';
+}
+.icon-picture:before {
+  content: '\e816';
 }
 .icon-user:before {
   content: '\e800';
@@ -4892,8 +4946,14 @@ a.badge:focus {
 .icon-users:before {
   content: '\e801';
 }
+.icon-attach:before {
+  content: '\e813';
+}
 .icon-search:before {
   content: '\e802';
+}
+.icon-link:before {
+  content: '\e811';
 }
 .ui-helper-hidden {
   display: none;
@@ -6193,6 +6253,36 @@ ul.action-bar .nav {
 }
 #calendar .workspace #calendar_view {
   display: inline-block;
+}
+.modal-full {
+  position: fixed;
+  top: 5%;
+  bottom: 5%;
+  left: 5%;
+  width: 90%;
+  margin: 0;
+}
+.modal-full.fade,
+.modal-full.fade.in {
+  top: 5%;
+}
+.modal-full .modal-body {
+  max-height: none;
+  max-width: none;
+  position: absolute;
+  top: 50px;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+}
+.modal-full .modal-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.form-horizontal .control-group {
+  margin-bottom: 10px;
 }
 .grid-table .datetime-cell {
   font-size: 12px;

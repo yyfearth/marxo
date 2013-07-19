@@ -327,7 +327,7 @@ Projects
     _defaultEvents:
       'click .action-cell .btn': '_action_cell'
       'click .action-buttons .btn': '_action_buttons'
-      'change input[type="checkbox"]': '_selection_changed'
+      'change .select-row-cell input[type="checkbox"]': '_selection_changed'
     initialize: (options) ->
       @events ?= {}
       for own event, action of @_defaultEvents
@@ -396,6 +396,7 @@ Projects
           columns.push cfg
       columns
     render: ->
+      super
       @$el.find('table.grid-table').replaceWith @grid.render().$el.addClass 'grid-table'
       @$el.find('.grid-paginator').replaceWith @paginator.render().$el.addClass 'grid-paginator'
       @$el.find('.grid-filter').empty().append @filter.render().$el

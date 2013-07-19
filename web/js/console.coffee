@@ -41,6 +41,9 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         @trigger eventName, args...
         return
       , delay
+    render: ->
+      @rendered = true
+      @
 
   class ConsoleView extends View
     el: '#main'
@@ -179,7 +182,8 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @$el.modal
         show: false
         backdrop: 'static'
-      @$el.on 'hidden', (e) => @callback() if e.target is @el
+      @$el.on 'hidden', (e) =>
+        @callback() if e.target is @el and false isnt @trigger 'hidden', @
       return
     popup: (data, callback) ->
       if data is @data
