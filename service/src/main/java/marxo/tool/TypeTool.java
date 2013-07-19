@@ -77,7 +77,7 @@ public class TypeTool {
 			return new ArrayList<ObjectId>(0);
 		}
 
-		ArrayList<ObjectId> idList = new ArrayList<ObjectId>();
+		ArrayList<ObjectId> idList = new ArrayList<ObjectId>(entities.length);
 
 		for (int i = 0; i < entities.length; i++) {
 			idList.add(i, entities[i].getId());
