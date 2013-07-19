@@ -1,0 +1,34 @@
+########## IntelliJ ##########
+*.iml
+*.ipr
+*.iws
+.idea/
+
+########## Windows ##########
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+########## OSX ##########
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+########## Web ##########
+# Source Map
+*.map
+# Compiled Source
+web/js/*.js
+web/css/*.css
+web/out/
+service/src/main/webapp/console/
+
+########## NodeJS ##########
+node_modules
+
+########## Java ##########
+# Project output
+out
+target
