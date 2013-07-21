@@ -1,7 +1,9 @@
 "use strict"
 
-define 'content', ['console', 'models', 'manager', 'lib/bootstrap-wysiwyg'],
-({
+define 'content', [
+  'console', 'models', 'manager'
+  'lib/bootstrap-wysiwyg'
+], ({
 find
 #findAll
 #View
@@ -76,7 +78,6 @@ ProjectFilterView
         li.appendChild a
         flagment.appendChild li
       fontTarget.appendChild flagment
-      return
     render: ->
       super
       @$el.find('a[title]').tooltip container: @el
