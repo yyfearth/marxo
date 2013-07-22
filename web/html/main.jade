@@ -45,4 +45,7 @@ body(style='opacity:0')
         .active.row-fluid.inner-frame
           include profile
 
-//  script(data-main='js/main', src='js/lib/require.js')
+  - if (!test)
+    script(data-main='js/main', src='js/lib/require.js')
+  - else
+    script(data-main='js/test', src='js/lib/require.js')
