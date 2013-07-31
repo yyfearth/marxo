@@ -2,10 +2,11 @@
 
 define 'content', [
   'console', 'models', 'manager'
+  'lib/jquery-ui'
   'lib/bootstrap-wysiwyg'
 ], ({
 find
-#findAll
+findAll
 #View
 BoxView
 FrameView
@@ -59,7 +60,14 @@ ProjectFilterView
       super options
       @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
       @editor = find '.rich-editor', @el
+      @contentDesc = new BoxView el: find '#content_desc', @el
+      @submitOptions = new BoxView el: find '#submit_options', @el
       @sectionsEl = find '#sections', @el
+      $(@sectionsEl).sortable
+        axis: 'y'
+        delay: 150
+        distance: 15
+        cancel: '.box-content'
       @
     popup: (data, callback) ->
       super data, callback
@@ -74,6 +82,10 @@ ProjectFilterView
       super data
       @addSection null # test only
       @
+    reset: ->
+      super
+      @sectionsEl.innerHTML = ''
+      @
     addSection: (section) ->
       section = new SectionEditor id: 0, parent: @ # test only
       section.render()
@@ -81,7 +93,7 @@ ProjectFilterView
       @sectionsEl.appendChild section.el
       @
     removeSection: (section) ->
-      section.destory()
+      section.close()
       @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
@@ -90,7 +102,7 @@ ProjectFilterView
       for fontName in @_fonts
         li = document.createElement 'li'
         a = document.createElement 'a'
-        a.dataset.edit = 'fontName #{fontName}'
+        a.dataset.edit = "fontName #{fontName}"
         a.style.fontFamily = fontName
         a.textContent = fontName
         li.appendChild a
@@ -117,8 +129,6 @@ ProjectFilterView
         overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
           .width(target.outerWidth()).height target.outerHeight()
       @$el.find('.rich-editor').wysiwyg()
-      @contentDesc = new BoxView el: find '#content_desc', @el
-      @submitOptions = new BoxView el: find '#submit_options', @el
       @
 
   class SectionEditor extends BoxView
@@ -137,8 +147,26 @@ ProjectFilterView
       throw 'id must be given for a section' unless @id
       @
     render: ->
+      super
       @el.id = @id
       @el.innerHTML = @tpl.replace /section_#/g, @id
+      @typeEl = find "##{@id}_type", @el
+      @typeEl.onchange = => @changeType @typeEl.value
+      @optionFields = findAll '.option-field', @el
+      @titleEl = find "##{@id}_title", @el
+      title = find '.box-title', @el
+      @titleEl.onchange = ->
+        title.textContent = unless @value then 'New Section' else 'Section: ' + @value
+        true
+      @
+    changeType: (type) ->
+      console.log 'change type', type
+      for field in @optionFields
+        cls = field.classList
+        if type and cls.contains type + '-option'
+          cls.remove 'hide'
+        else
+          cls.add 'hide'
       @
     close: ->
       @destroy()

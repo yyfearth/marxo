@@ -45,8 +45,17 @@ div[data-role="editor-toolbar"] {
     margin: 0 auto;
   }
 
-  legend {
-    margin-bottom: 2px;
+  .section.box{
+    .box-header {
+      cursor: move;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .box-content {
+      background: #fff;
+    }
   }
 
   #new_section {

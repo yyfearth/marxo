@@ -5656,8 +5656,15 @@ div[data-role="editor-toolbar"] ::-webkit-file-upload-button {
   min-width: 600px;
   margin: 0 auto;
 }
-#content_editor legend {
-  margin-bottom: 2px;
+#content_editor .section.box .box-header {
+  cursor: move;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#content_editor .section.box .box-content {
+  background: #fff;
 }
 #content_editor #new_section {
   display: block;

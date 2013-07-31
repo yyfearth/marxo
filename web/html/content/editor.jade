@@ -15,7 +15,8 @@ include rich_editor
           .control-group
             label.control-label(for='page_title') Page Title
             .controls
-              input#page_title.input-large(type='text', placeholder='The title of the page', name='page_title', maxlength='255')
+              input#page_title.input-large(type='text', name='page_title',
+              placeholder='The title of the page', maxlength='255', required)
           .control-group
             label.control-label(for='page_title') Page Description
             .controls
@@ -25,7 +26,7 @@ include rich_editor
 
       section#section_tpl.tpl
         .box-header.well
-          h4 New Section
+          h4.box-title New Section
           .box-icon
             button.btn.btn-minimize.btn-round.icon-up-open(type='button')
             button.btn.btn-close.btn-round.icon-close(type='button')
@@ -33,8 +34,8 @@ include rich_editor
           .control-group
             label.control-label(for='section_#_title') Section Title
             .controls
-              input.input-large(id='section_#_title', name='section_#.section_title',
-              type='text', placeholder='The title of the section', maxlength='255')
+              input.input-large(id='section_#_title', name='section_#.section_title', type='text',
+              placeholder='The title of the section', maxlength='255', required)
           .control-group
             label.control-label(for='section_#_desc') Section Description
             .controls
