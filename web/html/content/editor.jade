@@ -14,49 +14,53 @@ include rich_editor
         label.control-label(for='page_title') Page Description
         .controls
           mixin rich_editor('page_desc')
-      section#section_1
+
+      #sections
+
+      section#section_tpl.tpl
         legend
-          label(for='section_1_title') New Section
+          button.close.pull-right(title='Remove this section') &times;
+          label(for='section_#_title') New Section
         .control-group
-          label.control-label(for='section_1_title') Section Title
+          label.control-label(for='section_#_title') Section Title
           .controls
-            input#section_1_title.input-large(type='text', placeholder='The title of the section', name='section_1_title', maxlength='255')
+            input.input-large(id='section_#_title', name='section_#.section_title',
+            type='text', placeholder='The title of the section', maxlength='255')
         .control-group
-          label.control-label(for='section_1_desc') Section Description
+          label.control-label(for='section_#_desc') Section Description
           .controls
-            textarea#section_1_desc.input-block-level(rows=3, placeholder='The description of the section', name='section_1_title', maxlength='65535')
+            textarea.input-block-level(id='section_#_desc', name='section_#.section_desc',
+            rows=3, placeholder='The description of the section', maxlength='65535')
         .control-group
-          label.control-label(for='page_title') Section Type
+          label.control-label(for='section_#_type') Section Type
           .controls
-            select#section_type.input-xlarge(name='section_1_type')
+            select.input-xlarge(id='section_#_type', name='section_#.section_type')
               option(checked) Description Only (No Question)
               option(value='text') Simple Text
               option(value='html') Rich Text
               option(value='radio') Multiple Selection
               option(value='file') File Upload
-
-        .control-group
-          label.control-label(for='multiline_text') Multiple Line
+        .control-group.hide.option-field.text-option
+          label.control-label(for='section_#_multiline') Multiple Line
           .controls
-            input#multiline_text(type='checkbox')
-
-        .control-group
-          label.control-label(for='file_accept') File Type
+            input(id='section_#_multiline', name='section_#.text_multiline', type='checkbox')
+        .control-group.hide.option-field.file-option
+          label.control-label(for='section_#_file_accept') File Type
           .controls
-            select#file_accept
+            select(id='section_#_file_accept', name='section_#.file_accept')
               option(checked) Any
               option(value='image/*') Image Only
               option(value='video/*') Video Only
               option(value='audio/*') Audio Only
               option(value='audio/*|video/*|image/*') Image, Video or Audio
-
-        .control-group
-          label.control-label(for='gen_from_list') Auto Generate Rows
+        .control-group.hide.option-field.radio-option
+          label.control-label(for='section_#_gen_from_list') Auto Generate Rows
           .controls
-            input#gen_from_list(type='checkbox', title='Generate rows from a list')
-            input#gen_list_key(type='text')
-        .control-group
-          label.control-label Options
+            input(id='section_#_gen_from_list', name='section_#.gen_from_list',
+            type='checkbox', title='Generate rows from a list')
+            input(id='section_#_gen_list_key', name='section_#.gen_list_key', type='text')
+        .control-group.hide.option-field.radio-option
+          label.control-label Manual Set Options
           .controls
             label
               input(type='radio', disabled)
@@ -67,22 +71,22 @@ include rich_editor
 
       button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
 
-      section#section_1
+      section#section_final
         legend
           label Submit Options
         .control-group
           label.control-label(for='next_page_type') Next Page Type
           .controls
-            label
+            label.radio
               input(type='radio', name='next_page_type', value='thanks', checked)
               | Thanks Only
-            label
+            label.radio
               input(type='radio', name='next_page_type', value='results', disabled)
               | Results Page
-            label
+            label.radio
               input(type='radio', name='next_page_type', value='page')
               | Another Page
-            label
+            label.radio
               input(type='radio', name='next_page_type', value='url')
               | Jump to URL
         .control-group

@@ -703,26 +703,28 @@
                               </div>
                   </div>
                 </div>
-                <section id="section_1">
+                <div id="sections"></div>
+                <section id="section_tpl" class="tpl">
                   <legend>
-                    <label for="section_1_title">New Section</label>
+                    <button title="Remove this section" class="close pull-right">&times;</button>
+                    <label for="section_#_title">New Section</label>
                   </legend>
                   <div class="control-group">
-                    <label for="section_1_title" class="control-label">Section Title</label>
+                    <label for="section_#_title" class="control-label">Section Title</label>
                     <div class="controls">
-                      <input id="section_1_title" type="text" placeholder="The title of the section" name="section_1_title" maxlength="255" class="input-large">
+                      <input id="section_#_title" name="section_#.section_title" type="text" placeholder="The title of the section" maxlength="255" class="input-large">
                     </div>
                   </div>
                   <div class="control-group">
-                    <label for="section_1_desc" class="control-label">Section Description</label>
+                    <label for="section_#_desc" class="control-label">Section Description</label>
                     <div class="controls">
-                      <textarea id="section_1_desc" rows="3" placeholder="The description of the section" name="section_1_title" maxlength="65535" class="input-block-level"></textarea>
+                      <textarea id="section_#_desc" name="section_#.section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
                     </div>
                   </div>
                   <div class="control-group">
-                    <label for="page_title" class="control-label">Section Type</label>
+                    <label for="section_#_type" class="control-label">Section Type</label>
                     <div class="controls">
-                      <select id="section_type" name="section_1_type" class="input-xlarge">
+                      <select id="section_#_type" name="section_#.section_type" class="input-xlarge">
                         <option checked>Description Only (No Question)</option>
                         <option value="text">Simple Text</option>
                         <option value="html">Rich Text</option>
@@ -731,16 +733,16 @@
                       </select>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label for="multiline_text" class="control-label">Multiple Line</label>
+                  <div class="control-group hide option-field text-option">
+                    <label for="section_#_multiline" class="control-label">Multiple Line</label>
                     <div class="controls">
-                      <input id="multiline_text" type="checkbox">
+                      <input id="section_#_multiline" name="section_#.text_multiline" type="checkbox">
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label for="file_accept" class="control-label">File Type</label>
+                  <div class="control-group hide option-field file-option">
+                    <label for="section_#_file_accept" class="control-label">File Type</label>
                     <div class="controls">
-                      <select id="file_accept">
+                      <select id="section_#_file_accept" name="section_#.file_accept">
                         <option checked>Any</option>
                         <option value="image/*">Image Only</option>
                         <option value="video/*">Video Only</option>
@@ -749,15 +751,15 @@
                       </select>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label for="gen_from_list" class="control-label">Auto Generate Rows</label>
+                  <div class="control-group hide option-field radio-option">
+                    <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
                     <div class="controls">
-                      <input id="gen_from_list" type="checkbox" title="Generate rows from a list">
-                      <input id="gen_list_key" type="text">
+                      <input id="section_#_gen_from_list" name="section_#.gen_from_list" type="checkbox" title="Generate rows from a list">
+                      <input id="section_#_gen_list_key" name="section_#.gen_list_key" type="text">
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label class="control-label">Options</label>
+                  <div class="control-group hide option-field radio-option">
+                    <label class="control-label">Manual Set Options</label>
                     <div class="controls">
                       <label>
                         <input type="radio" disabled>
@@ -771,23 +773,23 @@
                   </div>
                 </section>
                 <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
-                <section id="section_1">
+                <section id="section_final">
                   <legend>
                     <label>Submit Options</label>
                   </legend>
                   <div class="control-group">
                     <label for="next_page_type" class="control-label">Next Page Type</label>
                     <div class="controls">
-                      <label>
+                      <label class="radio">
                         <input type="radio" name="next_page_type" value="thanks" checked>Thanks Only
                       </label>
-                      <label>
+                      <label class="radio">
                         <input type="radio" name="next_page_type" value="results" disabled>Results Page
                       </label>
-                      <label>
+                      <label class="radio">
                         <input type="radio" name="next_page_type" value="page">Another Page
                       </label>
-                      <label>
+                      <label class="radio">
                         <input type="radio" name="next_page_type" value="url">Jump to URL
                       </label>
                     </div>

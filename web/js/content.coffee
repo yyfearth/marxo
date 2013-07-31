@@ -6,7 +6,7 @@ define 'content', [
 ], ({
 find
 #findAll
-#View
+View
 FrameView
 InnerFrameView
 FormDialogView
@@ -55,6 +55,7 @@ ProjectFilterView
       super options
       @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
       @editor = find '.rich-editor', @el
+      @sections = find '#sections', @el
       @
     popup: (data, callback) ->
       super data, callback
@@ -100,6 +101,20 @@ ProjectFilterView
           .width(target.outerWidth()).height target.outerHeight()
       @$el.find('.rich-editor').wysiwyg()
       @
+
+  class SectionEditor extends View
+    tagName: 'section'
+    tpl: do ->
+      tpl_el = document.querySelector('#section_tpl')
+      throw 'cannot load template from #section_tpl' unless tpl_el
+      tpl_el.parentNode.removeChild tpl_el
+      tpl_el.innerHTML
+    render: ->
+      @el.id = @id
+      @el.innerHTML = @tpl.replace /section_#/g, @id
+      @
+
+  ## manager
 
   class ContentActionCell extends Backgrid.ActionsCell
     render: ->
