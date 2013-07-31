@@ -27,7 +27,8 @@ ProjectFilterView
     open: (name) ->
       if name
         @editor.render() unless @editor.rendered
-        @editor.show true # test
+        @editor.popup {}, (action, data) => # test only
+          console.log action, data
       else
         @manager.render() unless @manager.rendered
         @editor.cancel()
@@ -51,11 +52,13 @@ ProjectFilterView
       'Times New Roman'
       'Verdana'
     ]
+    events:
+      'click #new_section': -> @addSection null
     initialize: (options) ->
       super options
       @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
       @editor = find '.rich-editor', @el
-      @sections = find '#sections', @el
+      @sectionsEl = find '#sections', @el
       @
     popup: (data, callback) ->
       super data, callback
@@ -65,6 +68,19 @@ ProjectFilterView
       @data = @read()
       @callback 'save'
       @hide true
+      @
+    fill: (data) ->
+      super data
+      @addSection null
+      @
+    addSection: (section) ->
+      section = new SectionEditor parent: @
+      section.render()
+      console.log section
+      @sectionsEl.appendChild section.el
+      @
+    removeSection: (section) ->
+      section.destory()
       @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
@@ -104,6 +120,11 @@ ProjectFilterView
 
   class SectionEditor extends View
     tagName: 'section'
+    events:
+      'click .close': (e) ->
+        e.stopPropagation()
+        @destroy()
+        false
     tpl: do ->
       tpl_el = document.querySelector('#section_tpl')
       throw 'cannot load template from #section_tpl' unless tpl_el
@@ -112,6 +133,9 @@ ProjectFilterView
     render: ->
       @el.id = @id
       @el.innerHTML = @tpl.replace /section_#/g, @id
+      @
+    destroy: ->
+      @el.parentNode.removeChild @el
       @
 
   ## manager
