@@ -665,151 +665,171 @@
             </div>
             <div class="modal-body">
               <form class="form-horizontal">
-                <div class="control-group">
-                  <label for="page_title" class="control-label">Page Title</label>
-                  <div class="controls">
-                    <input id="page_title" type="text" placeholder="The title of the page" name="page_title" maxlength="255" class="input-large">
+                <section id="content_desc" class="box">
+                  <div class="box-header well">
+                    <h4>Page Description</h4>
+                    <div class="box-icon">
+                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
+                    </div>
                   </div>
-                </div>
-                <div class="control-group">
-                  <label for="page_title" class="control-label">Page Description</label>
-                  <div class="controls">
-                              <div data-role="editor-toolbar" data-target="#page_desc" class="btn-toolbar">
-                                <div class="btn-group"><a data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></a>
-                                  <ul class="fonts-select dropdown-menu"></ul>
-                                </div>
-                                <div class="btn-group"><a data-toggle="dropdown" title="Font Size" class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></a>
-                                  <ul class="dropdown-menu">
-                                    <li><a data-edit="fontSize 5"><font size="5">Large</font></a></li>
-                                    <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
-                                    <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
-                                  </ul>
-                                </div>
-                                <div class="btn-group"><a data-edit="bold" title="Bold (Ctrl/Cmd+B)" class="btn"><i class="icon-bold"></i></a><a data-edit="italic" title="Italic (Ctrl/Cmd+I)" class="btn"><i class="icon-italic"></i></a><a data-edit="strikethrough" title="Strikethrough" class="btn"><i class="icon-strike"></i></a><a data-edit="underline" title="Underline (Ctrl/Cmd+U)" class="btn"><i class="icon-underline"></i></a></div>
-                                <div class="btn-group"><a data-edit="insertunorderedlist" title="Bullet list" class="btn"><i class="icon-list-bullet"></i></a><a data-edit="insertorderedlist" title="Number list" class="btn"><i class="icon-list-numbered"></i></a><a data-edit="outdent" title="Reduce indent (Shift+Tab)" class="btn"><i class="icon-indent-left"></i></a><a data-edit="indent" title="Indent (Tab)" class="btn"><i class="icon-indent-right"></i></a></div>
-                                <div class="btn-group"><a data-edit="justifyleft" title="Align Left" class="btn"><i class="icon-align-left"></i></a><a data-edit="justifycenter" title="Center" class="btn"><i class="icon-align-center"></i></a><a data-edit="justifyright" title="Align Right" class="btn"><i class="icon-align-right"></i></a><a data-edit="justifyfull" title="Justify" class="btn"><i class="icon-align-justify"></i></a></div>
-                                <div class="btn-group"><a data-edit="unlink" title="Remove Hyperlink" class="btn"><i class="icon-unlink"></i></a><a data-toggle="dropdown" title="Hyperlink" class="btn hyperlink dropdown-toggle"><i class="icon-link"></i></a>
-                                  <ul class="dropdown-menu">
-                                    <li class="input-append">
-                                      <input placeholder="URL" type="text" data-edit="createLink">
-                                      <button type="button" class="btn">Add</button>
-                                    </li>
-                                  </ul>
-                                </div>
-                                <div class="btn-group"><a id="btn_picture_page_desc" title="Insert picture (or just drag &amp; drop)" class="btn"><i class="icon-picture"></i>
-                                    <input type="file" data-target="#btn_picture_page_desc" data-edit="insertImage"></a></div>
-                                <div class="btn-group"><a data-edit="undo" title="Undo (Ctrl/Cmd+Z)" class="btn"><i class="icon-undo"></i></a><a data-edit="redo" title="Redo (Ctrl/Cmd+Y)" class="btn"><i class="icon-redo"></i></a></div>
-                                <div id="page_desc" class="rich-editor"></div>
-                              </div>
+                  <div class="box-content">
+                    <div class="control-group">
+                      <label for="page_title" class="control-label">Page Title</label>
+                      <div class="controls">
+                        <input id="page_title" type="text" placeholder="The title of the page" name="page_title" maxlength="255" class="input-large">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label for="page_title" class="control-label">Page Description</label>
+                      <div class="controls">
+                                  <div data-role="editor-toolbar" data-target="#page_desc" class="btn-toolbar">
+                                    <div class="btn-group"><a data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></a>
+                                      <ul class="fonts-select dropdown-menu"></ul>
+                                    </div>
+                                    <div class="btn-group"><a data-toggle="dropdown" title="Font Size" class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></a>
+                                      <ul class="dropdown-menu">
+                                        <li><a data-edit="fontSize 5"><font size="5">Large</font></a></li>
+                                        <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
+                                        <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
+                                      </ul>
+                                    </div>
+                                    <div class="btn-group"><a data-edit="bold" title="Bold (Ctrl/Cmd+B)" class="btn"><i class="icon-bold"></i></a><a data-edit="italic" title="Italic (Ctrl/Cmd+I)" class="btn"><i class="icon-italic"></i></a><a data-edit="strikethrough" title="Strikethrough" class="btn"><i class="icon-strike"></i></a><a data-edit="underline" title="Underline (Ctrl/Cmd+U)" class="btn"><i class="icon-underline"></i></a></div>
+                                    <div class="btn-group"><a data-edit="insertunorderedlist" title="Bullet list" class="btn"><i class="icon-list-bullet"></i></a><a data-edit="insertorderedlist" title="Number list" class="btn"><i class="icon-list-numbered"></i></a><a data-edit="outdent" title="Reduce indent (Shift+Tab)" class="btn"><i class="icon-indent-left"></i></a><a data-edit="indent" title="Indent (Tab)" class="btn"><i class="icon-indent-right"></i></a></div>
+                                    <div class="btn-group"><a data-edit="justifyleft" title="Align Left" class="btn"><i class="icon-align-left"></i></a><a data-edit="justifycenter" title="Center" class="btn"><i class="icon-align-center"></i></a><a data-edit="justifyright" title="Align Right" class="btn"><i class="icon-align-right"></i></a><a data-edit="justifyfull" title="Justify" class="btn"><i class="icon-align-justify"></i></a></div>
+                                    <div class="btn-group"><a data-edit="unlink" title="Remove Hyperlink" class="btn"><i class="icon-unlink"></i></a><a data-toggle="dropdown" title="Hyperlink" class="btn hyperlink dropdown-toggle"><i class="icon-link"></i></a>
+                                      <ul class="dropdown-menu">
+                                        <li class="input-append">
+                                          <input placeholder="URL" type="text" data-edit="createLink">
+                                          <button type="button" class="btn">Add</button>
+                                        </li>
+                                      </ul>
+                                    </div>
+                                    <div class="btn-group"><a id="btn_picture_page_desc" title="Insert picture (or just drag &amp; drop)" class="btn"><i class="icon-picture"></i>
+                                        <input type="file" data-target="#btn_picture_page_desc" data-edit="insertImage"></a></div>
+                                    <div class="btn-group"><a data-edit="undo" title="Undo (Ctrl/Cmd+Z)" class="btn"><i class="icon-undo"></i></a><a data-edit="redo" title="Redo (Ctrl/Cmd+Y)" class="btn"><i class="icon-redo"></i></a></div>
+                                    <div id="page_desc" class="rich-editor"></div>
+                                  </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </section>
                 <div id="sections"></div>
                 <section id="section_tpl" class="tpl">
-                  <legend>
-                    <button title="Remove this section" class="close pull-right">&times;</button>
-                    <label for="section_#_title">New Section</label>
-                  </legend>
-                  <div class="control-group">
-                    <label for="section_#_title" class="control-label">Section Title</label>
-                    <div class="controls">
-                      <input id="section_#_title" name="section_#.section_title" type="text" placeholder="The title of the section" maxlength="255" class="input-large">
+                  <div class="box-header well">
+                    <h4>New Section</h4>
+                    <div class="box-icon">
+                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
+                      <button type="button" class="btn btn-close btn-round icon-close"></button>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label for="section_#_desc" class="control-label">Section Description</label>
-                    <div class="controls">
-                      <textarea id="section_#_desc" name="section_#.section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
+                  <div class="box-content">
+                    <div class="control-group">
+                      <label for="section_#_title" class="control-label">Section Title</label>
+                      <div class="controls">
+                        <input id="section_#_title" name="section_#.section_title" type="text" placeholder="The title of the section" maxlength="255" class="input-large">
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="section_#_type" class="control-label">Section Type</label>
-                    <div class="controls">
-                      <select id="section_#_type" name="section_#.section_type" class="input-xlarge">
-                        <option checked>Description Only (No Question)</option>
-                        <option value="text">Simple Text</option>
-                        <option value="html">Rich Text</option>
-                        <option value="radio">Multiple Selection</option>
-                        <option value="file">File Upload</option>
-                      </select>
+                    <div class="control-group">
+                      <label for="section_#_desc" class="control-label">Section Description</label>
+                      <div class="controls">
+                        <textarea id="section_#_desc" name="section_#.section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group hide option-field text-option">
-                    <label for="section_#_multiline" class="control-label">Multiple Line</label>
-                    <div class="controls">
-                      <input id="section_#_multiline" name="section_#.text_multiline" type="checkbox">
+                    <div class="control-group">
+                      <label for="section_#_type" class="control-label">Section Type</label>
+                      <div class="controls">
+                        <select id="section_#_type" name="section_#.section_type" class="input-xlarge">
+                          <option value="" checked>Description Only (No Question)</option>
+                          <option value="text">Simple Text</option>
+                          <option value="html">Rich Text</option>
+                          <option value="radio">Multiple Selection</option>
+                          <option value="file">File Upload</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group hide option-field file-option">
-                    <label for="section_#_file_accept" class="control-label">File Type</label>
-                    <div class="controls">
-                      <select id="section_#_file_accept" name="section_#.file_accept">
-                        <option checked>Any</option>
-                        <option value="image/*">Image Only</option>
-                        <option value="video/*">Video Only</option>
-                        <option value="audio/*">Audio Only</option>
-                        <option value="audio/*|video/*|image/*">Image, Video or Audio</option>
-                      </select>
+                    <div class="control-group hide option-field text-option">
+                      <label for="section_#_multiline" class="control-label">Multiple Line</label>
+                      <div class="controls">
+                        <input id="section_#_multiline" name="section_#.text_multiline" type="checkbox">
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group hide option-field radio-option">
-                    <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
-                    <div class="controls">
-                      <input id="section_#_gen_from_list" name="section_#.gen_from_list" type="checkbox" title="Generate rows from a list">
-                      <input id="section_#_gen_list_key" name="section_#.gen_list_key" type="text">
+                    <div class="control-group hide option-field file-option">
+                      <label for="section_#_file_accept" class="control-label">File Type</label>
+                      <div class="controls">
+                        <select id="section_#_file_accept" name="section_#.file_accept">
+                          <option checked>Any</option>
+                          <option value="image/*">Image Only</option>
+                          <option value="video/*">Video Only</option>
+                          <option value="audio/*">Audio Only</option>
+                          <option value="audio/*|video/*|image/*">Image, Video or Audio</option>
+                        </select>
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group hide option-field radio-option">
-                    <label class="control-label">Manual Set Options</label>
-                    <div class="controls">
-                      <label>
-                        <input type="radio" disabled>
-                        <input type="text">
-                      </label>
-                      <label>
-                        <input type="radio" disabled>
-                        <input type="text">
-                      </label>
+                    <div class="control-group hide option-field radio-option">
+                      <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
+                      <div class="controls">
+                        <input id="section_#_gen_from_list" name="section_#.gen_from_list" type="checkbox" title="Generate rows from a list">
+                        <input id="section_#_gen_list_key" name="section_#.gen_list_key" type="text">
+                      </div>
+                    </div>
+                    <div class="control-group hide option-field radio-option">
+                      <label class="control-label">Manual Set Options</label>
+                      <div class="controls">
+                        <label>
+                          <input type="radio" disabled>
+                          <input type="text">
+                        </label>
+                        <label>
+                          <input type="radio" disabled>
+                          <input type="text">
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </section>
                 <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
-                <section id="section_final">
-                  <legend>
-                    <label>Submit Options</label>
-                  </legend>
-                  <div class="control-group">
-                    <label for="next_page_type" class="control-label">Next Page Type</label>
-                    <div class="controls">
-                      <label class="radio">
-                        <input type="radio" name="next_page_type" value="thanks" checked>Thanks Only
-                      </label>
-                      <label class="radio">
-                        <input type="radio" name="next_page_type" value="results" disabled>Results Page
-                      </label>
-                      <label class="radio">
-                        <input type="radio" name="next_page_type" value="page">Another Page
-                      </label>
-                      <label class="radio">
-                        <input type="radio" name="next_page_type" value="url">Jump to URL
-                      </label>
+                <section id="submit_options" class="box">
+                  <div class="box-header well">
+                    <h4>Submit Options</h4>
+                    <div class="box-icon">
+                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
                     </div>
                   </div>
-                  <div class="control-group">
-                    <label for="another_response" class="control-label">Allow Another Response</label>
-                    <div class="controls">
-                      <input id="another_response" type="checkbox" name="another_response">
+                  <div class="box-content">
+                    <div class="control-group">
+                      <label for="next_page_type" class="control-label">Next Page Type</label>
+                      <div class="controls">
+                        <label class="radio">
+                          <input type="radio" name="next_page_type" value="thanks" checked>Thanks Only
+                        </label>
+                        <label class="radio">
+                          <input type="radio" name="next_page_type" value="results" disabled>Results Page
+                        </label>
+                        <label class="radio">
+                          <input type="radio" name="next_page_type" value="page">Another Page
+                        </label>
+                        <label class="radio">
+                          <input type="radio" name="next_page_type" value="url">Jump to URL
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="next_page_key" class="control-label">Next Page Key</label>
-                    <div class="controls">
-                      <input id="next_page_key" type="text" name="next_page_key">
+                    <div class="control-group">
+                      <label for="another_response" class="control-label">Allow Another Response</label>
+                      <div class="controls">
+                        <input id="another_response" type="checkbox" name="another_response">
+                      </div>
                     </div>
-                  </div>
-                  <div class="control-group">
-                    <label for="next_page_url" class="control-label">Next Page URL</label>
-                    <div class="controls">
-                      <input id="next_page_url" type="url" name="next_page_url">
+                    <div class="control-group">
+                      <label for="next_page_key" class="control-label">Next Page Key</label>
+                      <div class="controls">
+                        <input id="next_page_key" type="text" name="next_page_key">
+                      </div>
+                    </div>
+                    <div class="control-group">
+                      <label for="next_page_url" class="control-label">Next Page URL</label>
+                      <div class="controls">
+                        <input id="next_page_url" type="url" name="next_page_url">
+                      </div>
                     </div>
                   </div>
                 </section>

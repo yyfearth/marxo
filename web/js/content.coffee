@@ -6,7 +6,8 @@ define 'content', [
 ], ({
 find
 #findAll
-View
+#View
+BoxView
 FrameView
 InnerFrameView
 FormDialogView
@@ -53,7 +54,7 @@ ProjectFilterView
       'Verdana'
     ]
     events:
-      'click #new_section': -> @addSection null
+      'click #new_section': -> @addSection null # test only
     initialize: (options) ->
       super options
       @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
@@ -71,10 +72,10 @@ ProjectFilterView
       @
     fill: (data) ->
       super data
-      @addSection null
+      @addSection null # test only
       @
     addSection: (section) ->
-      section = new SectionEditor parent: @
+      section = new SectionEditor id: 0, parent: @ # test only
       section.render()
       console.log section
       @sectionsEl.appendChild section.el
@@ -116,24 +117,31 @@ ProjectFilterView
         overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
           .width(target.outerWidth()).height target.outerHeight()
       @$el.find('.rich-editor').wysiwyg()
+      @contentDesc = new BoxView el: find '#content_desc', @el
+      @submitOptions = new BoxView el: find '#submit_options', @el
       @
 
-  class SectionEditor extends View
+  class SectionEditor extends BoxView
     tagName: 'section'
-    events:
-      'click .close': (e) ->
-        e.stopPropagation()
-        @destroy()
-        false
+    className: 'box section'
     tpl: do ->
       tpl_el = document.querySelector('#section_tpl')
       throw 'cannot load template from #section_tpl' unless tpl_el
       tpl_el.parentNode.removeChild tpl_el
       tpl_el.innerHTML
+    initialize: (options) ->
+      super options
+      @id ?= options.id
+      @id = 'section_' + @id if typeof @id is 'number'
+      console.log @id
+      throw 'id must be given for a section' unless @id
+      @
     render: ->
       @el.id = @id
       @el.innerHTML = @tpl.replace /section_#/g, @id
       @
+    close: ->
+      @destroy()
     destroy: ->
       @el.parentNode.removeChild @el
       @

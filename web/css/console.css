@@ -5660,7 +5660,7 @@ div[data-role="editor-toolbar"] ::-webkit-file-upload-button {
   margin-bottom: 2px;
 }
 #content_editor #new_section {
-  display: inline-block;
+  display: block;
   font-size: 32px;
   margin: 10px 47%;
   width: 48px;
