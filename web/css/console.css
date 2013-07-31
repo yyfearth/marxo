@@ -5997,7 +5997,6 @@ body {
   vertical-align: middle;
   font-size: 14px;
   clear: none;
-  float: left;
   padding: 0;
   margin: 0 2px;
   text-align: center;
@@ -6049,6 +6048,7 @@ ul.action-bar .nav {
   height: 12px;
   min-height: 12px;
   margin-bottom: 0;
+  padding-right: 10px;
   font-weight: bold;
   font-size: 16px;
   background: -moz-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.1) 100%);
