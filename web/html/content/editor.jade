@@ -1,0 +1,130 @@
+include rich_editor
+
+#content_editor.modal.modal-full.hide.fade(aria-labelledby='content_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#content_editor_title Content Editor
+  .modal-body
+    form.form-horizontal
+      section.box#content_desc
+        .box-header.well
+          h4 Page Description
+          .box-icon
+            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+        .box-content
+          .control-group
+            label.control-label(for='page_title') Page Title
+            .controls
+              input#page_title.input-large(type='text', name='page_title',
+              placeholder='The title of the page', maxlength='255', required)
+              span.help-inline(title='Required') *
+          .control-group
+            label.control-label(for='page_title') Page Description
+            .controls
+              mixin rich_editor('page_desc')
+
+      #sections
+
+      section#section_tpl.tpl
+        .box-header.well
+          h4.box-title New Section
+          .box-icon
+            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+            button.btn.btn-close.btn-round.icon-close(type='button')
+        .box-content
+          .control-group
+            label.control-label(for='section_#_title') Section Title
+            .controls
+              input.input-large(id='section_#_title', name='section_#.section_title', type='text',
+              placeholder='The title of the section', maxlength='255', required)
+              span.help-inline(title='Required') *
+          .control-group
+            label.control-label(for='section_#_desc') Section Description
+            .controls
+              textarea.input-block-level(id='section_#_desc', name='section_#.section_desc',
+              rows=3, placeholder='The description of the section', maxlength='65535')
+          .control-group
+            label.control-label(for='section_#_type') Section Type
+            .controls
+              select.input-xlarge(id='section_#_type', name='section_#.section_type')
+                option(value='', checked) Description Only (No Question)
+                option(value='text') Simple Text
+                option(value='html') Rich Text
+                option(value='radio') Multiple Selection
+                option(value='file') File Upload
+          .control-group.hide.option-field.text-option
+            label.control-label(for='section_#_multiline') Simple Text Option
+            .controls
+              label.checkbox
+                input(id='section_#_multiline', name='section_#.text_multiline', type='checkbox')
+                | Support Multiple Line
+          .control-group.hide.option-field.file-option
+            label.control-label(for='section_#_file_accept') File Type
+            .controls
+              select(id='section_#_file_accept', name='section_#.file_accept')
+                option(checked) Any
+                option(value='image/*') Image Only
+                option(value='video/*') Video Only
+                option(value='audio/*') Audio Only
+                option(value='audio/*|video/*|image/*') Image, Video or Audio
+          .control-group.hide.option-field.radio-option
+            label.control-label(for='section_#_gen_from_list') Auto Generate Rows
+            .controls
+              input(id='section_#_gen_from_list', name='section_#.gen_from_list',
+              type='checkbox', title='Generate rows from a list', checked)
+              input(id='section_#_gen_list_key', name='section_#.gen_list_key', type='text',
+              title='Context Key for the List', placeholder='Context Key for the List', data-option-required)
+          .control-group.hide.option-field(id='section_#_manual_options')
+            label.control-label Manual Set Options
+            .controls
+              label
+                input(type='radio', disabled)
+                input(type='text')
+              label
+                input(type='radio', disabled)
+                input(type='text')
+
+      button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
+
+      section.box#submit_options
+        .box-header.well
+          h4 Submit Options
+          .box-icon
+            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+        .box-content
+          .control-group
+            label.control-label(for='next_page_type') Next Page Type
+            .controls
+              label.radio
+                input(type='radio', name='next_page_type', value='thanks', checked)
+                | Thanks Only
+              label.radio
+                input(type='radio', name='next_page_type', value='results', disabled)
+                | Results Page
+              label.radio
+                input(type='radio', name='next_page_type', value='page')
+                | Another Page
+              label.radio
+                input(type='radio', name='next_page_type', value='url')
+                | Jump to URL
+          .control-group.option-field.thanks-option.results-option
+            label.control-label(for='another_response') Next Page Option
+            .controls
+              label.checkbox
+                input#another_response(type='checkbox', name='another_response')
+                | Allow Another Response
+          .control-group.option-field.page-option.hide
+            label.control-label(for='next_page_key') Next Page Key
+            .controls
+              input#next_page_key(type='text', name='next_page_key', data-option-required)
+              span.help-inline(title='Required') *
+          .control-group.option-field.url-option.hide
+            label.control-label(for='next_page_url') Next Page URL
+            .controls
+              input#next_page_url(type='url', name='next_page_url', data-option-required)
+              span.help-inline(title='Required') *
+
+  .modal-footer
+    button.btn.btn-info.pull-left.btn-preview Preview
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save
