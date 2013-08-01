@@ -17,6 +17,7 @@ include rich_editor
             .controls
               input#page_title.input-large(type='text', name='page_title',
               placeholder='The title of the page', maxlength='255', required)
+              span.help-inline(title='Required') *
           .control-group
             label.control-label(for='page_title') Page Description
             .controls
@@ -36,6 +37,7 @@ include rich_editor
             .controls
               input.input-large(id='section_#_title', name='section_#.section_title', type='text',
               placeholder='The title of the section', maxlength='255', required)
+              span.help-inline(title='Required') *
           .control-group
             label.control-label(for='section_#_desc') Section Description
             .controls
@@ -51,9 +53,11 @@ include rich_editor
                 option(value='radio') Multiple Selection
                 option(value='file') File Upload
           .control-group.hide.option-field.text-option
-            label.control-label(for='section_#_multiline') Multiple Line
+            label.control-label(for='section_#_multiline') Simple Text Option
             .controls
-              input(id='section_#_multiline', name='section_#.text_multiline', type='checkbox')
+              label.checkbox
+                input(id='section_#_multiline', name='section_#.text_multiline', type='checkbox')
+                | Support Multiple Line
           .control-group.hide.option-field.file-option
             label.control-label(for='section_#_file_accept') File Type
             .controls
@@ -67,9 +71,10 @@ include rich_editor
             label.control-label(for='section_#_gen_from_list') Auto Generate Rows
             .controls
               input(id='section_#_gen_from_list', name='section_#.gen_from_list',
-              type='checkbox', title='Generate rows from a list')
-              input(id='section_#_gen_list_key', name='section_#.gen_list_key', type='text')
-          .control-group.hide.option-field.radio-option
+              type='checkbox', title='Generate rows from a list', checked)
+              input(id='section_#_gen_list_key', name='section_#.gen_list_key', type='text',
+              title='Context Key for the List', placeholder='Context Key for the List', data-option-required)
+          .control-group.hide.option-field(id='section_#_manual_options')
             label.control-label Manual Set Options
             .controls
               label
@@ -102,18 +107,22 @@ include rich_editor
               label.radio
                 input(type='radio', name='next_page_type', value='url')
                 | Jump to URL
-          .control-group
-            label.control-label(for='another_response') Allow Another Response
+          .control-group.option-field.thanks-option.results-option
+            label.control-label(for='another_response') Next Page Option
             .controls
-              input#another_response(type='checkbox', name='another_response')
-          .control-group
+              label.checkbox
+                input#another_response(type='checkbox', name='another_response')
+                | Allow Another Response
+          .control-group.option-field.page-option.hide
             label.control-label(for='next_page_key') Next Page Key
             .controls
-              input#next_page_key(type='text', name='next_page_key')
-          .control-group
+              input#next_page_key(type='text', name='next_page_key', data-option-required)
+              span.help-inline(title='Required') *
+          .control-group.option-field.url-option.hide
             label.control-label(for='next_page_url') Next Page URL
             .controls
-              input#next_page_url(type='url', name='next_page_url')
+              input#next_page_url(type='url', name='next_page_url', data-option-required)
+              span.help-inline(title='Required') *
 
   .modal-footer
     button.btn.btn-info.pull-left.btn-preview Preview

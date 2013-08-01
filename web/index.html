@@ -676,7 +676,7 @@
                     <div class="control-group">
                       <label for="page_title" class="control-label">Page Title</label>
                       <div class="controls">
-                        <input id="page_title" type="text" name="page_title" placeholder="The title of the page" maxlength="255" required class="input-large">
+                        <input id="page_title" type="text" name="page_title" placeholder="The title of the page" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
                     <div class="control-group">
@@ -726,7 +726,7 @@
                     <div class="control-group">
                       <label for="section_#_title" class="control-label">Section Title</label>
                       <div class="controls">
-                        <input id="section_#_title" name="section_#.section_title" type="text" placeholder="The title of the section" maxlength="255" required class="input-large">
+                        <input id="section_#_title" name="section_#.section_title" type="text" placeholder="The title of the section" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
                     <div class="control-group">
@@ -748,9 +748,11 @@
                       </div>
                     </div>
                     <div class="control-group hide option-field text-option">
-                      <label for="section_#_multiline" class="control-label">Multiple Line</label>
+                      <label for="section_#_multiline" class="control-label">Simple Text Option</label>
                       <div class="controls">
-                        <input id="section_#_multiline" name="section_#.text_multiline" type="checkbox">
+                        <label class="checkbox">
+                          <input id="section_#_multiline" name="section_#.text_multiline" type="checkbox">Support Multiple Line
+                        </label>
                       </div>
                     </div>
                     <div class="control-group hide option-field file-option">
@@ -768,11 +770,11 @@
                     <div class="control-group hide option-field radio-option">
                       <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
                       <div class="controls">
-                        <input id="section_#_gen_from_list" name="section_#.gen_from_list" type="checkbox" title="Generate rows from a list">
-                        <input id="section_#_gen_list_key" name="section_#.gen_list_key" type="text">
+                        <input id="section_#_gen_from_list" name="section_#.gen_from_list" type="checkbox" title="Generate rows from a list" checked>
+                        <input id="section_#_gen_list_key" name="section_#.gen_list_key" type="text" title="Context Key for the List" placeholder="Context Key for the List" data-option-required>
                       </div>
                     </div>
-                    <div class="control-group hide option-field radio-option">
+                    <div id="section_#_manual_options" class="control-group hide option-field">
                       <label class="control-label">Manual Set Options</label>
                       <div class="controls">
                         <label>
@@ -813,22 +815,24 @@
                         </label>
                       </div>
                     </div>
-                    <div class="control-group">
-                      <label for="another_response" class="control-label">Allow Another Response</label>
+                    <div class="control-group option-field thanks-option results-option">
+                      <label for="another_response" class="control-label">Next Page Option</label>
                       <div class="controls">
-                        <input id="another_response" type="checkbox" name="another_response">
+                        <label class="checkbox">
+                          <input id="another_response" type="checkbox" name="another_response">Allow Another Response
+                        </label>
                       </div>
                     </div>
-                    <div class="control-group">
+                    <div class="control-group option-field page-option hide">
                       <label for="next_page_key" class="control-label">Next Page Key</label>
                       <div class="controls">
-                        <input id="next_page_key" type="text" name="next_page_key">
+                        <input id="next_page_key" type="text" name="next_page_key" data-option-required><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
-                    <div class="control-group">
+                    <div class="control-group option-field url-option hide">
                       <label for="next_page_url" class="control-label">Next Page URL</label>
                       <div class="controls">
-                        <input id="next_page_url" type="url" name="next_page_url">
+                        <input id="next_page_url" type="url" name="next_page_url" data-option-required><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
                   </div>

@@ -61,7 +61,7 @@ ProjectFilterView
       @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
       @editor = find '.rich-editor', @el
       @contentDesc = new BoxView el: find '#content_desc', @el
-      @submitOptions = new BoxView el: find '#submit_options', @el
+      @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
       @sectionsEl = find '#sections', @el
       $(@sectionsEl).sortable
         axis: 'y'
@@ -131,7 +131,23 @@ ProjectFilterView
       @$el.find('.rich-editor').wysiwyg()
       @
 
+  class ChangeTypeMixin
+    changeType: (type) ->
+      console.log 'change type', type
+      @optionFields ?= findAll '.option-field', @el
+      for field in @optionFields
+        cls = field.classList
+        show = type and cls.contains type + '-option'
+        required = find '[data-option-required]', field
+        required?.required = show
+        if show
+          cls.remove 'hide'
+        else
+          cls.add 'hide'
+      @
+
   class SectionEditor extends BoxView
+    @acts_as ChangeTypeMixin
     tagName: 'section'
     className: 'box section'
     tpl: do ->
@@ -146,32 +162,49 @@ ProjectFilterView
       console.log @id
       throw 'id must be given for a section' unless @id
       @
+    _bind: ->
+      typeEl = @_find 'type'
+      typeEl.onchange = => @changeType typeEl.value
+      titleEl = @_find 'title'
+      title = find '.box-title', @el
+      titleEl.onchange = ->
+        title.textContent = unless @value then 'New Section' else 'Section: ' + @value
+        true
+      auto_gen = @_find 'gen_from_list'
+      auto_gen_key = @_find 'gen_list_key'
+      manual_options = @_find 'manual_options'
+      auto_gen.onchange = ->
+        auto_gen_key.disabled = not @checked
+        cls = manual_options.classList
+        if @checked
+          cls.add 'hide'
+          cls.remove 'radio-option'
+        else
+          cls.remove 'hide'
+          cls.add 'radio-option'
+        true
+      @
+    _find: (part_id) ->
+      find "##{@id}_#{part_id}", @el
     render: ->
       super
       @el.id = @id
       @el.innerHTML = @tpl.replace /section_#/g, @id
-      @typeEl = find "##{@id}_type", @el
-      @typeEl.onchange = => @changeType @typeEl.value
-      @optionFields = findAll '.option-field', @el
-      @titleEl = find "##{@id}_title", @el
-      title = find '.box-title', @el
-      @titleEl.onchange = ->
-        title.textContent = unless @value then 'New Section' else 'Section: ' + @value
-        true
-      @
-    changeType: (type) ->
-      console.log 'change type', type
-      for field in @optionFields
-        cls = field.classList
-        if type and cls.contains type + '-option'
-          cls.remove 'hide'
-        else
-          cls.add 'hide'
+      @_bind()
       @
     close: ->
       @destroy()
     destroy: ->
       @el.parentNode.removeChild @el
+      @
+
+  class SubmitOptionsEditor extends BoxView
+    @acts_as ChangeTypeMixin
+    initialize: (options) ->
+      super options
+      changeType = @changeType.bind @
+      @$el.on 'change', 'input[type=radio]', ->
+        changeType @value if @checked
       @
 
   ## manager
