@@ -147,6 +147,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   #open: (name) -> # should be override
 
   class BoxView extends View
+    className: 'box'
     events:
       'click .btn-close': 'close'
       'click .btn-minimize': 'minimize'

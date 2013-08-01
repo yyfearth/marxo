@@ -299,8 +299,10 @@ Action
       $(window).resize _fixStyle
       $(@el).on 'shown', _fixStyle
       $(@actionsEl).sortable
+        axis: 'y'
         delay: 150
         distance: 15
+        cancel: '.box-content'
       @_too_many_alert = find '#too_many_actions_alert', @el
       @
     _fixStyle: -> # make sure the top of action box will below the title, name and desc
