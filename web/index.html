@@ -664,24 +664,25 @@
               <h3 id="content_editor_title">Content Editor</h3>
             </div>
             <div class="modal-body">
-              <form class="form-horizontal">
-                <section id="content_desc" class="box">
-                  <div class="box-header well">
-                    <h4>Page Description</h4>
-                    <div class="box-icon">
-                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
-                    </div>
+              <section id="page_desc" class="box">
+                <div class="box-header well">
+                  <h4>Page Description</h4>
+                  <div class="box-icon">
+                    <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
                   </div>
-                  <div class="box-content">
+                </div>
+                <div class="box-content">
+                  <form id="page_desc_form" class="form-horizontal">
                     <div class="control-group">
                       <label for="page_title" class="control-label">Page Title</label>
                       <div class="controls">
-                        <input id="page_title" type="text" name="page_title" placeholder="The title of the page" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
+                        <input id="page_title" type="text" name="title" placeholder="The title of the page" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
                     <div class="control-group">
                       <label for="page_title" class="control-label">Page Description</label>
                       <div class="controls">
+                        <textarea id="page_desc_raw" name="desc" maxlength="255" class="input-block-level"></textarea>
                                   <div data-role="editor-toolbar" data-target="#page_desc" class="btn-toolbar">
                                     <div class="btn-group"><a data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></a>
                                       <ul class="fonts-select dropdown-menu"></ul>
@@ -711,34 +712,36 @@
                                   </div>
                       </div>
                     </div>
+                  </form>
+                </div>
+              </section>
+              <div id="sections"></div>
+              <section id="section_tpl" class="tpl">
+                <div class="box-header well">
+                  <h4 class="box-title">New Section</h4>
+                  <div class="box-icon">
+                    <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
+                    <button type="button" class="btn btn-close btn-round icon-close"></button>
                   </div>
-                </section>
-                <div id="sections"></div>
-                <section id="section_tpl" class="tpl">
-                  <div class="box-header well">
-                    <h4 class="box-title">New Section</h4>
-                    <div class="box-icon">
-                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
-                      <button type="button" class="btn btn-close btn-round icon-close"></button>
-                    </div>
-                  </div>
-                  <div class="box-content">
+                </div>
+                <div class="box-content">
+                  <form id="section_#_form" class="form-horizontal">
                     <div class="control-group">
                       <label for="section_#_title" class="control-label">Section Title</label>
                       <div class="controls">
-                        <input id="section_#_title" name="section_#.section_title" type="text" placeholder="The title of the section" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
+                        <input id="section_#_title" name="section_title" type="text" placeholder="The title of the section" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
                     <div class="control-group">
                       <label for="section_#_desc" class="control-label">Section Description</label>
                       <div class="controls">
-                        <textarea id="section_#_desc" name="section_#.section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
+                        <textarea id="section_#_desc" name="section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
                       </div>
                     </div>
                     <div class="control-group">
                       <label for="section_#_type" class="control-label">Section Type</label>
                       <div class="controls">
-                        <select id="section_#_type" name="section_#.section_type" class="input-xlarge">
+                        <select id="section_#_type" name="section_type" class="input-xlarge">
                           <option value="" checked>Description Only (No Question)</option>
                           <option value="text">Simple Text</option>
                           <option value="html">Rich Text</option>
@@ -751,14 +754,14 @@
                       <label for="section_#_multiline" class="control-label">Simple Text Option</label>
                       <div class="controls">
                         <label class="checkbox">
-                          <input id="section_#_multiline" name="section_#.text_multiline" type="checkbox">Support Multiple Line
+                          <input id="section_#_multiline" name="text_multiline" type="checkbox">Support Multiple Line
                         </label>
                       </div>
                     </div>
                     <div class="control-group hide option-field file-option">
                       <label for="section_#_file_accept" class="control-label">File Type</label>
                       <div class="controls">
-                        <select id="section_#_file_accept" name="section_#.file_accept">
+                        <select id="section_#_file_accept" name="file_accept">
                           <option checked>Any</option>
                           <option value="image/*">Image Only</option>
                           <option value="video/*">Video Only</option>
@@ -770,8 +773,8 @@
                     <div class="control-group hide option-field radio-option">
                       <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
                       <div class="controls">
-                        <input id="section_#_gen_from_list" name="section_#.gen_from_list" type="checkbox" title="Generate rows from a list" checked>
-                        <input id="section_#_gen_list_key" name="section_#.gen_list_key" type="text" title="Context Key for the List" placeholder="Context Key for the List" data-option-required>
+                        <input id="section_#_gen_from_list" name="gen_from_list" type="checkbox" title="Generate rows from a list" checked>
+                        <input id="section_#_gen_list_key" name="gen_list_key" type="text" title="Context Key for the List" placeholder="Context Key for the List" data-option-required>
                       </div>
                     </div>
                     <div id="section_#_manual_options" class="control-group hide option-field">
@@ -787,17 +790,19 @@
                         </label>
                       </div>
                     </div>
+                  </form>
+                </div>
+              </section>
+              <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
+              <section id="submit_options" class="box">
+                <div class="box-header well">
+                  <h4>Submit Options</h4>
+                  <div class="box-icon">
+                    <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
                   </div>
-                </section>
-                <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
-                <section id="submit_options" class="box">
-                  <div class="box-header well">
-                    <h4>Submit Options</h4>
-                    <div class="box-icon">
-                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
-                    </div>
-                  </div>
-                  <div class="box-content">
+                </div>
+                <div class="box-content">
+                  <form id="submit_options_form" class="form-horizontal">
                     <div class="control-group">
                       <label for="next_page_type" class="control-label">Next Page Type</label>
                       <div class="controls">
@@ -835,9 +840,9 @@
                         <input id="next_page_url" type="url" name="next_page_url" data-option-required><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
-                  </div>
-                </section>
-              </form>
+                  </form>
+                </div>
+              </section>
             </div>
             <div class="modal-footer">
               <button class="btn btn-info pull-left btn-preview">Preview</button>

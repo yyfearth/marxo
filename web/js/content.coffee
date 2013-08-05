@@ -7,9 +7,11 @@ findAll
 BoxView
 FrameView
 InnerFrameView
-FormDialogView
+ModalDialogView
+FormViewMixin
 }, {
 Contents
+Content
 }, {
 ManagerView
 NavFilterView
@@ -25,14 +27,20 @@ ProjectFilterView
     open: (name) ->
       if name
         @editor.render() unless @editor.rendered
-        @editor.popup {}, (action, data) => # test only
+        @editor.load name, (action, data) ->
+          if action is 'save'
+            data.save {},
+              success: (content) ->
+                console.log 'saved', content
+              error: ->
+                console.error 'save failed'
           console.log action, data
       else
         @manager.render() unless @manager.rendered
         @editor.cancel()
       @
 
-  class ContentEditor extends FormDialogView
+  class ContentEditor extends ModalDialogView
     _fonts: [
       'Serif'
       'Sans'
@@ -52,12 +60,14 @@ ProjectFilterView
     ]
     events:
       'click #new_section': -> @addSection null # test only
+      'click .btn-save': 'save'
     initialize: (options) ->
       super options
       @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
       @editor = find '.rich-editor', @el
-      @contentDesc = new BoxView el: find '#content_desc', @el
+      @pageDesc = new BoxFormView el: find '#page_desc', @el
       @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
+      @sections = []
       @sectionsEl = find '#sections', @el
       $(@sectionsEl).sortable
         axis: 'y'
@@ -65,31 +75,78 @@ ProjectFilterView
         distance: 15
         cancel: '.box-content'
       @
+    load: (id, callback) ->
+      if id instanceof Content
+        @popup id, callback
+      else if typeof id is 'string'
+        new Content({id}).fetch success: (data) => @popup data, callback
+      else
+        throw 'content editor can only load a content model or an id string'
     popup: (data, callback) ->
       super data, callback
-      @fill data
+      console.log 'content form', data.attributes
+      @pageDesc.fill data.attributes
+      @cfg = data.get 'data'
+      console.log 'cfg data', @cfg
+      @submitOptions.fill @cfg?.submit_options
+      @cfg?.sections?.forEach (section) =>
+        console.log 'add section', section
+        @addSection section
       @
     save: ->
-      @data = @read()
-      @callback 'save'
-      @hide true
+      read = (formView) ->
+        deferred = $.Deferred()
+        if formView instanceof BoxFormView
+          _t = setTimeout ->
+            console.warn 'read box form timeout', formView.id
+            deferred.reject formView
+          , 100
+          formView.submit ->
+            clearTimeout _t
+            # console.log 'passed', formView.el.id, formView.read()
+            deferred.resolve formView.read()
+        else
+          console.error 'read invalid box form', formView
+          deferred.reject formView
+        deferred.promise()
+
+      defered = [read @pageDesc]
+      for el in findAll '.box.section', @el
+        _idx = el.dataset.idx
+        data = read @sections[_idx]
+        data._idx = _idx
+        defered.push data
+      defered.push read @submitOptions
+
+      $.when.apply(@, defered).done (page_desc, sections..., submit_options) =>
+        # TODO: transform form data into model data
+        console.log 'save content editor', page_desc, sections, submit_options
+        @data.set 'title', page_desc.title
+        sections = sections.sort (a, b) -> a._idx - b._idx
+        delete sec._idx for sec in sections
+        # TODO: deal with desc
+        # TODO: deal with manual set options
+        @data.set 'data', {page_desc, sections, submit_options}
+        @callback 'save'
+        @hide true
       @
-    fill: (data) ->
-      super data
-      @addSection null # test only
-      @
-    reset: ->
+    reset: -> # called after close
       super
       @sectionsEl.innerHTML = ''
+      @pageDesc.reset()
+      @submitOptions.reset()
       @
-    addSection: (section) ->
-      section = new SectionEditor id: 0, parent: @ # test only
-      section.render()
-      console.log section
-      @sectionsEl.appendChild section.el
+    addSection: (data) ->
+      view = new SectionEditor idx: @sections.length, parent: @ # test only
+      view.render()
+      view.fill data
+      console.log data
+      @sectionsEl.appendChild view.el
+      @sections.push view
       @
-    removeSection: (section) ->
-      section.close()
+    removeSection: (view) ->
+      @sections[view.id] = null
+      view.close()
       @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
@@ -106,6 +163,8 @@ ProjectFilterView
       fontTarget.appendChild flagment
     render: ->
       super
+      @pageDesc.render()
+      @submitOptions.render()
       @$el.find('a[title]').tooltip container: @el
       @_renderFonts()
       @$el.find('.btn.hyperlink').click ->
@@ -127,6 +186,14 @@ ProjectFilterView
       @$el.find('.rich-editor').wysiwyg()
       @
 
+  class BoxFormView extends BoxView
+    @acts_as FormViewMixin
+    render: ->
+      @initForm()
+    reset: ->
+      @form.reset()
+      @
+
   class ChangeTypeMixin
     changeType: (type) ->
       console.log 'change type', type
@@ -136,13 +203,16 @@ ProjectFilterView
         show = type and cls.contains type + '-option'
         required = find '[data-option-required]', field
         required?.required = show
+        #for input in findAll 'input, select, file', field
+        # input.disabled = not show
+        # input.style.visibility = if show then 'visible' else 'hidden'
         if show
           cls.remove 'hide'
         else
           cls.add 'hide'
       @
 
-  class SectionEditor extends BoxView
+  class SectionEditor extends BoxFormView
     @acts_as ChangeTypeMixin
     tagName: 'section'
     className: 'box section'
@@ -153,7 +223,8 @@ ProjectFilterView
       tpl_el.innerHTML
     initialize: (options) ->
       super options
-      @id ?= options.id
+      @idx = options.idx
+      @id ?= options.id or @idx
       @id = 'section_' + @id if typeof @id is 'number'
       console.log @id
       throw 'id must be given for a section' unless @id
@@ -161,6 +232,7 @@ ProjectFilterView
     _bind: ->
       typeEl = @_find 'type'
       typeEl.onchange = => @changeType typeEl.value
+      typeEl.onchange()
       titleEl = @_find 'title'
       title = find '.box-title', @el
       titleEl.onchange = ->
@@ -183,10 +255,12 @@ ProjectFilterView
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el
     render: ->
-      super
       @el.id = @id
+      @el.dataset.idx = @idx
       @el.innerHTML = @tpl.replace /section_#/g, @id
+      super
       @_bind()
+      @fill() # init read
       @
     close: ->
       @destroy()
@@ -194,7 +268,7 @@ ProjectFilterView
       @el.parentNode.removeChild @el
       @
 
-  class SubmitOptionsEditor extends BoxView
+  class SubmitOptionsEditor extends BoxFormView
     @acts_as ChangeTypeMixin
     initialize: (options) ->
       super options
