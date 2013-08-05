@@ -149,7 +149,7 @@ define 'models', ['lib/common'], ->
   class Workflows extends ManagerCollection
     @workflows: new Workflows
     model: Workflow
-    url: ROOT + '/workflows'
+    url: Workflow::urlRoot
   # url: -> @tenant.url() + '/workflows'
 
   class Node extends Entity
@@ -175,11 +175,12 @@ define 'models', ['lib/common'], ->
   ## Project
 
   class Project extends Entity
+    urlRoot: ROOT + '/projects'
 
   class Projects extends ManagerCollection
     @projects: new Projects
     model: Project
-    url: ROOT + '/projects'
+    url: Project::urlRoot
 
   ## Home
 
@@ -192,10 +193,11 @@ define 'models', ['lib/common'], ->
   ## Content
 
   class Content extends Entity
+    urlRoot: ROOT + '/contents'
 
   class Contents extends ManagerCollection
     model: Content
-    url: ROOT + '/contents'
+    url: Content::urlRoot
 
   ## Report
 
