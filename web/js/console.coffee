@@ -12,10 +12,11 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
 
-  # enable coffeescript class for javascript mixin
+  # Enable CoffeeScript class for Javascript Mixin
   # https://github.com/yi/coffee-acts-as
-  # ex: class C
-  #       @acts_as A, B
+  # e.g.: class A ...   class B ...
+  #       class C
+  #         @acts_as A, B
   Function::acts_as = (argv...) ->
     #console.log "[Function::acts_as]: argv #{argv}"
     for cl in argv
