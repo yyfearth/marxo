@@ -282,10 +282,6 @@ Action
       @callback 'save'
       @hide true
       @
-    reset: -> # called after close
-      super
-      @form.reset()
-      @
 
   class NodeEditorView extends EditorView
     el: '#node_editor'
