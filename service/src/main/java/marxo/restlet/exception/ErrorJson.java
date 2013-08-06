@@ -1,12 +1,6 @@
 package marxo.restlet.exception;
 
-import com.github.jmkgreen.morphia.annotations.Embedded;
-
 public class ErrorJson {
-
-	public Error getError() {
-		return error;
-	}
 
 	Error error;
 
@@ -14,22 +8,25 @@ public class ErrorJson {
 		this.error = new Error(type, message);
 	}
 
-	@Embedded
+	public Error getError() {
+		return error;
+	}
+
 	public class Error {
-		public String getType() {
-			return type;
-		}
-
-		public String getMessage() {
-			return message;
-		}
-
 		String type;
 		String message;
 
 		Error(String type, String message) {
 			this.type = type;
 			this.message = message;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public String getMessage() {
+			return message;
 		}
 	}
 
