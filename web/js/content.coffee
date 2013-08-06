@@ -50,6 +50,7 @@ ProjectFilterView
     events:
       'click #new_section': -> @addSection()
       'click .btn-save': 'save'
+    # TODO: preview btn
     initialize: (options) ->
       super options
       _hash_regex = /content\/.+/
@@ -60,6 +61,7 @@ ProjectFilterView
         , 100
       @editor = find '.rich-editor', @el
       @pageDesc = new BoxFormView el: find '#page_desc', @el
+      # TODO: desc rich editor support with code which
       @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
       @sections = []
       @sectionsEl = find '#sections', @el
@@ -119,7 +121,6 @@ ProjectFilterView
         sections = sections.sort (a, b) -> a._idx - b._idx
         delete sec._idx for sec in sections
         # TODO: deal with desc
-        # TODO: deal with manual set options
         @data.set 'data', {page_desc, sections, submit_options}
         @callback 'save'
         @hide true
@@ -299,6 +300,7 @@ ProjectFilterView
       super
       @$typeEl.change()
       @
+    # TODO: live preview
 
   class AutoIncOptionList extends View
     events:
@@ -368,7 +370,6 @@ ProjectFilterView
   class ContentActionCell extends Backgrid.ActionsCell
     render: ->
       super
-      # TODO: show buttons depend on status
       view_btn = find 'a[name="view"]', @el
       url = @model.get 'url'
       if url
