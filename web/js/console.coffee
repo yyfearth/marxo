@@ -12,10 +12,11 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
 
-  # enable coffeescript class for javascript mixin
+  # Enable CoffeeScript class for Javascript Mixin
   # https://github.com/yi/coffee-acts-as
-  # ex: class C
-  #       @acts_as A, B
+  # e.g.: class A ...   class B ...
+  #       class C
+  #         @acts_as A, B
   Function::acts_as = (argv...) ->
     #console.log "[Function::acts_as]: argv #{argv}"
     for cl in argv
@@ -184,7 +185,9 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         show: false
         backdrop: 'static'
       @$el.on 'hidden', (e) =>
-        @callback() if e.target is @el and false isnt @trigger 'hidden', @
+        if e.target is @el and false isnt @trigger 'hidden', @
+          @callback()
+          @reset()
       return
     popup: (data, callback) ->
       if data is @data
@@ -200,7 +203,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @trigger action, @data, @
       @_callback? action, @data, @
       @_action = action
-      @reset()
+      #@reset() # move to hidden
       return
     reset: ->
       @data = null
@@ -219,13 +222,15 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     hide: (hide = true) ->
       @show not hide
 
-  class FormDialogView extends ModalDialogView
-    initialize: (options) ->
-      super options
+  class FormViewMixin
+    initForm: ->
       @form = find 'form', @el
+      throw 'FormViewMixin require a form element in ' + (@el.id or @el.outerHTML) unless @form
       @form.onsubmit = (e) =>
         e.preventDefault()
-        @save()
+        @form._callback? @form
+        @form._callback = null
+        @trigger 'submit', @form
         false
       submit_btn = find '[type="submit"]', @form
       unless submit_btn?
@@ -234,7 +239,6 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         submit_btn.style.display = 'none'
         @form.appendChild submit_btn
       @_submit_btn = submit_btn
-      find('button.btn-save', @el)?.onclick = @submit.bind @
       if @form.title and @form.name
         matched = false
         cached = ''
@@ -242,33 +246,69 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           cached = @form.title.value.trim().replace(/\W+/g, '_')[0..32].toLowerCase()
           matched or= not @form.name.value
           @form.name.value = cached if matched
-          return
+        return
         $(@form.name).on
           input: => matched = @form.name.value is cached
           change: => @form.name.value = @form.name.value.toLowerCase()
       @
-    submit: ->
+    submit: (callback) ->
+      @form._callback = callback if typeof callback is 'function'
       @_submit_btn.click()
+      @
+    fill: (attributes) ->
+      @_attributes = {}
+      if attributes? then for name, value of attributes
+        input = @form[name]
+        console.log input.name, input.length, input, value, input.value? if input?
+        if input?.item?(0)?.type is 'radio'
+          input = [].slice.call input
+          for radio in input
+            checked = radio.type is 'radio' and radio.value is value
+            if radio.checked isnt checked
+              radio.checked = checked
+              $(radio).change() if checked # fire event
+        else if input?.name is name and input.value?
+          if input.type is 'checkbox'
+            input.checked = value
+            $(input).change()
+          else
+            $(input).val(value).change() # set value and fire event
+        @_attributes[name] = value
+      #console.log 'fill form', @_attributes
+      @
+    read: ->
+      if @_attributes? # must use after fill
+        attributes = {}
+        for input in @form.elements
+          name = input.name
+          if name and not input.disabled and not $(input).is(':hidden')
+          #input.style.visibility isnt 'hidden'
+            switch input.type
+              when 'radio'
+                attributes[name] = input.value if input.checked
+              when 'checkbox'
+                attributes[name] = input.checked
+              else
+                attributes[name] = input.value if input.value or @_attributes[name]?
+        attributes
+      else
+        null
+    #reset: ->
+    #  @form.reset()
+    #  @
+
+  class FormDialogView extends ModalDialogView
+    @acts_as FormViewMixin
+    initialize: (options) ->
+      super options
+      @initForm()
+      find('button.btn-save', @el)?.onclick = => @submit @save.bind @
       @
     #popup: (data, callback) ->
     #  # already set @data = data
     #  super data, callback
     #  @fill data
     #  @
-    fill: (attributes) ->
-      @_attributes = {}
-      for name, value of attributes
-        input = @form[name]
-        if input?.name is name and input.value?
-          input.value = value
-          @_attributes[name] = value
-      @
-    read: ->
-      attributes = @_attributes
-      if attributes? then for input in @form.elements
-        name = input.getAttribute 'name'
-        attributes[name] = input.value if name and (input.value or attributes[name]?)
-      attributes
     #save: ->
     #  @callback 'save'
     #  @hide true
@@ -479,6 +519,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   NavListView
   ModalDialogView
   FormDialogView
+  FormViewMixin
   SignInView
   Router
   }
