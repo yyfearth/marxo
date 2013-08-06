@@ -185,7 +185,9 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         show: false
         backdrop: 'static'
       @$el.on 'hidden', (e) =>
-        @callback() if e.target is @el and false isnt @trigger 'hidden', @
+        if e.target is @el and false isnt @trigger 'hidden', @
+          @callback()
+          @reset()
       return
     popup: (data, callback) ->
       if data is @data
@@ -201,7 +203,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @trigger action, @data, @
       @_callback? action, @data, @
       @_action = action
-      @reset()
+      #@reset() # move to hidden
       return
     reset: ->
       @data = null
