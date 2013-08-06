@@ -190,20 +190,37 @@ ProjectFilterView
 
   class ChangeTypeMixin
     changeType: (type) ->
-      #console.log 'change type', type
-      @optionFields ?= findAll '.option-field', @el
-      for field in @optionFields
-        cls = field.classList
-        show = type and cls.contains type + '-option'
-        required = find '[data-option-required]', field
-        required?.required = show
-        #for input in findAll 'input, select, file', field
-        # input.disabled = not show
-        # input.style.visibility = if show then 'visible' else 'hidden'
-        if show
-          cls.remove 'hide'
-        else
-          cls.add 'hide'
+      unless type is @_type
+        @trigger 'type_change', type, @_type
+        #console.log 'change type', type
+        @optionFields ?= findAll '.option-field', @el
+        for field in @optionFields
+          cls = field.classList
+          show = type and cls.contains type + '-option'
+          required = find '[data-option-required]', field
+          required?.required = show
+          #for input in findAll 'input, select, file', field
+          # input.disabled = not show
+          # input.style.visibility = if show then 'visible' else 'hidden'
+          if show
+            cls.remove 'hide'
+          else
+            cls.add 'hide'
+        @_type = type
+      @
+
+  class SubmitOptionsEditor extends BoxFormView
+    @acts_as ChangeTypeMixin
+    initialize: (options) ->
+      super options
+      changeType = @changeType.bind @
+      @$typeEl = @$el.find 'input[type=radio]'
+      @$el.on 'change', 'input[type=radio]', ->
+        changeType @value if @checked
+      @
+    reset: ->
+      super
+      @$typeEl.change()
       @
 
   class SectionEditor extends BoxFormView
@@ -224,6 +241,7 @@ ProjectFilterView
       @
     _bind: ->
       typeEl = @_find 'type'
+      @$typeEl = $ typeEl
       typeEl.onchange = => @changeType typeEl.value
       typeEl.onchange()
       titleEl = @_find 'title'
@@ -252,7 +270,8 @@ ProjectFilterView
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el
     fill: (data) ->
-      super
+      @reset()
+      super data
       if data?.section_type is 'radio' and not data.gen_from_list and data.manual_options
         # manual options
         @autoIncOptionList.fill data.manual_options
@@ -275,6 +294,10 @@ ProjectFilterView
       @destroy()
     destroy: ->
       @el.parentNode.removeChild @el
+      @
+    reset: ->
+      super
+      @$typeEl.change()
       @
 
   class AutoIncOptionList extends View
@@ -339,15 +362,6 @@ ProjectFilterView
           true
       @values = if valid then Object.keys(values) else null
       valid
-
-  class SubmitOptionsEditor extends BoxFormView
-    @acts_as ChangeTypeMixin
-    initialize: (options) ->
-      super options
-      changeType = @changeType.bind @
-      @$el.on 'change', 'input[type=radio]', ->
-        changeType @value if @checked
-      @
 
   ## manager
 
