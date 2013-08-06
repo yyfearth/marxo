@@ -773,20 +773,17 @@
                     <div class="control-group hide option-field radio-option">
                       <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
                       <div class="controls">
-                        <input id="section_#_gen_from_list" name="gen_from_list" type="checkbox" title="Generate rows from a list" checked>
+                        <input id="section_#_gen_from_list" name="gen_from_list" type="checkbox" title="Generate rows from a list" checked>&nbsp;
                         <input id="section_#_gen_list_key" name="gen_list_key" type="text" title="Context Key for the List" placeholder="Context Key for the List" data-option-required>
                       </div>
                     </div>
                     <div id="section_#_manual_options" class="control-group hide option-field">
                       <label class="control-label">Manual Set Options</label>
                       <div class="controls">
-                        <label>
-                          <input type="radio" disabled>
-                          <input type="text">
-                        </label>
-                        <label>
-                          <input type="radio" disabled>
-                          <input type="text">
+                        <label class="manual_option">&nbsp;
+                          <input type="text" data-option-required class="manual_option_text new">
+                          <button type="button" tabindex="-1" class="close">&times;</button>
+                          <input type="radio" disabled class="fake-input">
                         </label>
                       </div>
                     </div>

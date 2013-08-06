@@ -74,17 +74,17 @@ include rich_editor
             .controls
               input(id='section_#_gen_from_list', name='gen_from_list',
               type='checkbox', title='Generate rows from a list', checked)
+              | &nbsp;
               input(id='section_#_gen_list_key', name='gen_list_key', type='text',
               title='Context Key for the List', placeholder='Context Key for the List', data-option-required)
           .control-group.hide.option-field(id='section_#_manual_options')
             label.control-label Manual Set Options
             .controls
-              label
-                input(type='radio', disabled)
-                input(type='text')
-              label
-                input(type='radio', disabled)
-                input(type='text')
+              label.manual_option
+                | &nbsp;
+                input.manual_option_text.new(type='text', data-option-required)
+                button.close(type='button', tabindex='-1') &times;
+                input.fake-input(type='radio', disabled)
 
     button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
 

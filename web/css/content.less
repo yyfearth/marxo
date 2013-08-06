@@ -58,6 +58,25 @@ div[data-role="editor-toolbar"] {
     }
   }
 
+  .manual_option {
+    line-height: 30px;
+    .fake-input {
+      float: left;
+      margin-top: 10px;
+    }
+    .close {
+      float: none;
+    }
+    .new + .close {
+      display: none;
+    }
+    .error {
+      color: #b94a48;
+      border-color: #b94a48;
+      outline-color: #b94a48;
+    }
+  }
+
   #new_section {
     display: block;
     font-size: 32px;
@@ -67,5 +86,4 @@ div[data-role="editor-toolbar"] {
     line-height: 32px;
     text-align: center;
   }
-
 }

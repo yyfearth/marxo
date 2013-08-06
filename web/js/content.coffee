@@ -3,7 +3,7 @@
 define 'content', ['console', 'models', 'manager', 'lib/jquery-ui', 'lib/content'], ({
 find
 findAll
-#View
+View
 BoxView
 FrameView
 InnerFrameView
@@ -42,28 +42,22 @@ ProjectFilterView
 
   class ContentEditor extends ModalDialogView
     _fonts: [
-      'Serif'
-      'Sans'
-      'Arial'
-      'Arial Black'
-      'Courier'
-      'Courier New'
-      'Comic Sans MS'
-      'Helvetica'
-      'Impact'
-      'Lucida Grande'
-      'Lucida Sans'
-      'Tahoma'
-      'Times'
-      'Times New Roman'
-      'Verdana'
+      'Serif', 'Sans', 'Arial', 'Arial Black'
+      'Courier', 'Courier New', 'Comic Sans MS'
+      'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
+      'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
     events:
-      'click #new_section': -> @addSection null # test only
+      'click #new_section': -> @addSection()
       'click .btn-save': 'save'
     initialize: (options) ->
       super options
-      @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
+      _hash_regex = /content\/.+/
+      @on 'hidden', ->
+        history.go(-1) if _hash_regex.test location.hash
+        setTimeout -> # fallback when go back to the same hash
+          location.hash = '#content' if _hash_regex.test location.hash
+        , 100
       @editor = find '.rich-editor', @el
       @pageDesc = new BoxFormView el: find '#page_desc', @el
       @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
@@ -84,13 +78,13 @@ ProjectFilterView
         throw 'content editor can only load a content model or an id string'
     popup: (data, callback) ->
       super data, callback
-      console.log 'content form', data.attributes
+      #console.log 'content form', data.attributes
       @pageDesc.fill data.attributes
       @cfg = data.get 'data'
-      console.log 'cfg data', @cfg
+      #console.log 'cfg data', @cfg
       @submitOptions.fill @cfg?.submit_options
       @cfg?.sections?.forEach (section) =>
-        console.log 'add section', section
+        #console.log 'add section', section
         @addSection section
       @
     save: ->
@@ -120,7 +114,7 @@ ProjectFilterView
 
       $.when.apply(@, defered).done (page_desc, sections..., submit_options) =>
         # TODO: transform form data into model data
-        console.log 'save content editor', page_desc, sections, submit_options
+        #console.log 'save content editor', page_desc, sections, submit_options
         @data.set 'title', page_desc.title
         sections = sections.sort (a, b) -> a._idx - b._idx
         delete sec._idx for sec in sections
@@ -140,7 +134,7 @@ ProjectFilterView
       view = new SectionEditor idx: @sections.length, parent: @ # test only
       view.render()
       view.fill data
-      console.log data
+      #console.log data
       @sectionsEl.appendChild view.el
       @sections.push view
       @
@@ -196,7 +190,7 @@ ProjectFilterView
 
   class ChangeTypeMixin
     changeType: (type) ->
-      console.log 'change type', type
+      #console.log 'change type', type
       @optionFields ?= findAll '.option-field', @el
       for field in @optionFields
         cls = field.classList
@@ -226,7 +220,6 @@ ProjectFilterView
       @idx = options.idx
       @id ?= options.id or @idx
       @id = 'section_' + @id if typeof @id is 'number'
-      console.log @id
       throw 'id must be given for a section' unless @id
       @
     _bind: ->
@@ -241,19 +234,35 @@ ProjectFilterView
       auto_gen = @_find 'gen_from_list'
       auto_gen_key = @_find 'gen_list_key'
       manual_options = @_find 'manual_options'
+      manual_option_label = find 'input[type=text]', manual_options
       auto_gen.onchange = ->
         auto_gen_key.disabled = not @checked
         cls = manual_options.classList
         if @checked
           cls.add 'hide'
           cls.remove 'radio-option'
+          auto_gen_key.select()
         else
           cls.remove 'hide'
           cls.add 'radio-option'
+          manual_option_label.select()
         true
+      @autoIncOptionList = new AutoIncOptionList el: manual_options
       @
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el
+    fill: (data) ->
+      super
+      if data?.section_type is 'radio' and not data.gen_from_list and data.manual_options
+        # manual options
+        @autoIncOptionList.fill data.manual_options
+      @
+    read: ->
+      data = super()
+      # manual options
+      if data?.section_type is 'radio' and not data.gen_from_list
+        data.manual_options = @autoIncOptionList.read()
+      data
     render: ->
       @el.id = @id
       @el.dataset.idx = @idx
@@ -267,6 +276,69 @@ ProjectFilterView
     destroy: ->
       @el.parentNode.removeChild @el
       @
+
+  class AutoIncOptionList extends View
+    events:
+      'input input.manual_option_text.new': (e) ->
+        input = e.target
+        if input.value.trim()
+          input.classList.remove 'new'
+          input.required = true
+          input.dataset.optionRequired = true
+          @_container.appendChild @_tpl.cloneNode true
+        true
+      'click .close': (e) ->
+        e.preventDefault()
+        $(e.target).parents('label.manual_option').remove()
+        false
+      'blur input.manual_option_text': ->
+        @validate false
+    initialize: (options) ->
+      super options
+      tpl = find 'label.manual_option', @el
+      throw 'cannot find manual option tpl' unless tpl
+      @_tpl = tpl.cloneNode true
+      dataset = find('input.manual_option_text[data-option-required]', @_tpl).dataset
+      delete dataset.optionRequired
+      @_container = find '.controls', @el
+
+      @
+    fill: (values) ->
+      throw 'values should be an string array' unless values?.length
+      frag = document.createDocumentFragment()
+      for val in values
+        el = @_tpl.cloneNode true
+        input = find 'input.manual_option_text', el
+        input.value = val
+        input.classList.remove 'new'
+        frag.appendChild el
+      $(@_container).prepend frag
+      @validate()
+      @
+    read: ->
+      @validate()
+      @values
+    validate: (silence) -> # it will generate value
+      silence = Boolean silence
+      values = {}
+      valid = true
+      @$el.find('input.manual_option_text:not(.new)').removeClass('error').each ->
+        val = @value.trim()
+        if not val
+          valid = false
+          true
+        else if values.hasOwnProperty val
+          @classList.add 'error'
+          $(@).one 'input', -> @classList.remove 'error'
+          @select() unless silence
+          valid = false
+          silence
+        else
+          @value = val
+          values[val] = @
+          true
+      @values = if valid then Object.keys(values) else null
+      valid
 
   class SubmitOptionsEditor extends BoxFormView
     @acts_as ChangeTypeMixin
