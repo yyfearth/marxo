@@ -1,7 +1,6 @@
 package marxo.restlet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.WriteResult;
 import marxo.bean.BasicEntity;
 import marxo.dao.BasicDao;
 import marxo.restlet.exception.EntityNotFoundException;
@@ -23,12 +22,10 @@ public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>>
 
 	public static final String ID_PATTERN_STRING = "[\\da-fA-F]{24}";
 	public static final String ID_PATH = "{id:" + ID_PATTERN_STRING + "}";
-
+	protected D dao;
 	// @Context ServletContext context;
 	@Context
 	HttpServletRequest request;
-
-	protected D dao;
 
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -80,14 +77,16 @@ public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>>
 	public E set(@PathParam("id") String id, E entity) {
 		ObjectId objectId = new ObjectId(id);
 
-		dao.deleteById(objectId)
+		dao.deleteById(objectId);
 
-		System.out.println("getN: " + writeResult.getN());
+//		dao.insert(entity);
 
-		if (writeResult.getError() != null) {
-			System.out.println(writeResult.getError());
-			throw new UnknownException("The database didn't accept the query.");
-		}
+//		System.out.println("getN: " + writeResult.getN());
+//
+//		if (writeResult.getError() != null) {
+//			System.out.println(writeResult.getError());
+//			throw new UnknownException("The database didn't accept the query.");
+//		}
 
 		try {
 			if (entity.getId() == null) {
@@ -113,15 +112,15 @@ public abstract class BasicRestlet<E extends BasicEntity, D extends BasicDao<E>>
 	@Path(ID_PATH)
 	@Produces(MediaType.APPLICATION_JSON)
 	public void delete(@PathParam("id") String id) {
-		String errorMessage = dao.deleteById(new ObjectId(id)).getError();
+		E entity = dao.deleteById(new ObjectId(id));
 
-		if (errorMessage != null) {
+		if (entity == null) {
 			throw new UnknownException("Unable to delete the entity");
 		}
 	}
 
 	// to get parameter in url
-	public String getParameter(String paramName){
+	public String getParameter(String paramName) {
 		return request.getParameter(paramName);
 	}
 
