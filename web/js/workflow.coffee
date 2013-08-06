@@ -745,10 +745,6 @@ Action
         else # canceled
           console.log 'canceled or ignored create link', action
       @
-    addLink: (link) ->
-      # TODO: add view and model
-      console.log 'TODO: add link', link
-      @
     _addLink: (link) ->
       view = link.view = new LinkView model: link, parent: @
       view.render()
