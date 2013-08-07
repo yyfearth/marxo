@@ -1,41 +1,44 @@
 #!/bin/bash
 cd "$(dirname "$(which $0)")" > /dev/null
+
+dist="dist"
+
 function out {
     echo -e "$(tput bold)$(tput setaf 3)$1 $(tput setaf 7)-> $(tput setaf 4)$2$(tput sgr0)"
 }
 
-out 'js/lib/*' 'out/js/lib/*'
-rm -rf out/js
-mkdir -p out/js/lib/test
-cp js/lib/*.js out/js/lib/
-cp js/lib/test/*.js out/js/lib/test/
+out "js/lib/" "$dist/js/lib/"
+rm -rf "$dist/js"
+mkdir -p "$dist/js/lib/test"
+cp js/lib/*.js "$dist/js/lib/"
+cp js/lib/test/*.js "$dist/js/lib/test/"
 
-out 'js/models.coffee + js/console.coffee + js/manager.coffee + js/main.coffee' 'out/js/main.js'
-coffee -pjc js/models.coffee js/console.coffee js/manager.coffee js/main.coffee \
- | uglifyjs - -o out/js/main.js -mc --screw-ie8
+out "js/models.coffee + js/console.coffee + js/manager.coffee + js/main.coffee" "$dist/js/main.js"
+coffee -pjc "js/models.coffee" "js/console.coffee" "js/manager.coffee" "js/main.coffee" \
+ | uglifyjs - -o "$dist/js/main.js" -mc --screw-ie8
 
 for coffee in js/*.coffee ; do
     [[ -f "$coffee" ]] || continue
     name="$(basename -s .coffee $coffee)"
     #[[ "$name" == "test_data" ]] && continue
     [[ "$name" == "manager" || "$name" == "models" || "$name" == "console" || "$name" == "main" ]] && continue
-    js="out/js/$name.js"
-    out "$coffee" "$js"
-    coffee -cp "$coffee" | uglifyjs - -o "$js" -mc --screw-ie8
+    js="$dist/js/$name.js"
+    out $coffee $js
+    coffee -cp $coffee | uglifyjs - -o $js -mc --screw-ie8
 done
 
-out 'css/console.less' 'out/css/console.css'
-rm out/css/console.css
-lessc --no-ie-compat --yui-compress -O2 css/console.less out/css/console.css
+out "css/console.less" "$dist/css/console.css"
+rm "$dist/css/console.css"
+lessc --no-ie-compat --yui-compress -O2 "css/console.less" "$dist/css/console.css"
 
-out 'index.jade + html/*' 'out/index.html'
-rm out/index.html
-jade -D -p . index.jade -o out/ > /dev/null
+out "index.jade + html/" "$dist/index.html"
+rm "$dist/index.html"
+jade -D -p . "index.jade" -o "$dist/" > /dev/null
 
-rm -rf out/img out/font
-out 'img/*' 'out/img/*'
-cp -r img out/
-out 'font/*' 'out/font/*'
-cp -r font out/
+rm -rf "$dist/img" "$dist/font"
+out "img/" "$dist/img/"
+cp -r "img" "$dist/"
+out "font/" "$dist/font/"
+cp -r "font" "$dist/"
 
 cd - > /dev/null

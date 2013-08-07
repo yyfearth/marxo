@@ -30,5 +30,5 @@ node_modules
 
 ########## Java ##########
 # Project output
-out
+dist
 target
