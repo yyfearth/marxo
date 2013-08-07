@@ -1,38 +1,41 @@
 #!/bin/bash
 cd "$(dirname "$(which $0)")" > /dev/null
+function out {
+    echo -e "$(tput bold)$(tput setaf 3)$1 $(tput setaf 7)-> $(tput setaf 4)$2$(tput sgr0)"
+}
 
-echo 'copy libs'
+out 'js/lib/*' 'out/js/lib/*'
 rm -rf out/js
 mkdir -p out/js/lib/test
 cp js/lib/*.js out/js/lib/
 cp js/lib/test/*.js out/js/lib/test/
 
-echo 'compile all coffee script'
-coffee -cm js/*.coffee
+out 'js/models.coffee + js/console.coffee + js/manager.coffee + js/main.coffee' 'out/js/main.js'
+coffee -pjc js/models.coffee js/console.coffee js/manager.coffee js/main.coffee \
+ | uglifyjs - -o out/js/main.js -mc --screw-ie8
 
-echo 'js/models.coffee + js/console.coffee + js/manager.coffee + js/main.coffee -> out/js/main.js'
-coffee -j out/js/main.js -c js/models.coffee js/console.coffee js/manager.coffee js/main.coffee
-uglifyjs out/js/main.js -o out/js/main.js -mc --screw-ie8
-
-for js in js/*.js ; do
-    [[ -f "$js" ]] || continue
-    #[[ "$js" == "js/test_data.js" ]] && continue
-    [[ "$js" == "js/manager.js" || "$js" == "js/models.js" || "$js" == "js/console.js" || "$js" == "js/main.js" ]] && continue
-    echo $js -> out/$js
-    uglifyjs "$js" -o "out/$js" -mc --screw-ie8
+for coffee in js/*.coffee ; do
+    [[ -f "$coffee" ]] || continue
+    name="$(basename -s .coffee $coffee)"
+    #[[ "$name" == "test_data" ]] && continue
+    [[ "$name" == "manager" || "$name" == "models" || "$name" == "console" || "$name" == "main" ]] && continue
+    js="out/js/$name.js"
+    out "$coffee" "$js"
+    coffee -cp "$coffee" | uglifyjs - -o "$js" -mc --screw-ie8
 done
 
-echo 'compile less to out/css/console.css'
+out 'css/console.less' 'out/css/console.css'
 rm out/css/console.css
 lessc --no-ie-compat --yui-compress -O2 css/console.less out/css/console.css
 
-echo 'compile jade to out/index.html'
+out 'index.jade + html/*' 'out/index.html'
 rm out/index.html
-jade -D -p . index.jade -o out/
+jade -D -p . index.jade -o out/ > /dev/null
 
-echo 'copy other resources'
 rm -rf out/img out/font
+out 'img/*' 'out/img/*'
 cp -r img out/
+out 'font/*' 'out/font/*'
 cp -r font out/
 
 cd - > /dev/null
