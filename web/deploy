@@ -10,18 +10,16 @@ mkdir -p out/js/lib/test
 cp js/lib/*.js out/js/lib/
 cp js/lib/test/*.js out/js/lib/test/
 
-js="out/js/lib/bootstrap-wysiwyg.js"
-uglifyjs $js -o $js -mc --screw-ie8
-
 out 'js/models.coffee + js/console.coffee + js/manager.coffee + js/main.coffee' 'out/js/main.js'
 coffee -pjc js/models.coffee js/console.coffee js/manager.coffee js/main.coffee \
  | uglifyjs - -o out/js/main.js -mc --screw-ie8
 
 for coffee in js/*.coffee ; do
     [[ -f "$coffee" ]] || continue
-    #[[ "$coffee" == "js/test_data.coffee" ]] && continue
-    [[ "$coffee" == "js/manager.coffee" || "$coffee" == "js/models.coffee" || "$coffee" == "js/console.coffee" || "$coffee" == "js/main.coffee" ]] && continue
-    js="out/js/$(basename -s .coffee $coffee).js"
+    name="$(basename -s .coffee $coffee)"
+    #[[ "$name" == "test_data" ]] && continue
+    [[ "$name" == "manager" || "$name" == "models" || "$name" == "console" || "$name" == "main" ]] && continue
+    js="out/js/$name.js"
     out "$coffee" "$js"
     coffee -cp "$coffee" | uglifyjs - -o "$js" -mc --screw-ie8
 done
