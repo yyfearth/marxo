@@ -1,10 +1,6 @@
 "use strict"
 
-define 'content', [
-  'console', 'models', 'manager'
-  'lib/jquery-ui'
-  'lib/bootstrap-wysiwyg'
-], ({
+define 'content', ['console', 'models', 'manager', 'lib/jquery-ui', 'lib/content'], ({
 find
 findAll
 #View
