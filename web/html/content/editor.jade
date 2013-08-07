@@ -81,12 +81,11 @@ include rich_editor
               title='Context Key for the List', placeholder='Context Key for the List', data-option-required)
           .control-group.hide.option-field(id='section_#_manual_options')
             label.control-label Manual Set Options
-            .controls
-              label.manual_option
-                | &nbsp;
+            ul.controls
+              li.manual_option
+                i.fake-radio
                 input.manual_option_text.new(type='text', data-option-required)
                 button.close(type='button', tabindex='-1') &times;
-                input.fake-input(type='radio', disabled)
         .preview.well
 
     button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +

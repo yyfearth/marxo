@@ -45,7 +45,7 @@ div[data-role="editor-toolbar"] {
     margin: 0 auto;
   }
 
-  .section.box{
+  .section.box {
     .box-header {
       cursor: move;
       -webkit-user-select: none;
@@ -58,14 +58,31 @@ div[data-role="editor-toolbar"] {
     }
   }
 
-  .manual_option {
+  li.manual_option {
     line-height: 30px;
-    .fake-input {
-      float: left;
-      margin-top: 10px;
-    }
+    list-style: none;
     .close {
       float: none;
+      cursor: pointer;
+    }
+    .fake-radio, .fake-checkbox {
+      color: #aaa;
+    }
+    .fake-radio:before {
+      content: '\25CB';
+      font-size: 32px;
+      line-height: 32px;
+      vertical-align: middle;
+    }
+    .fake-checkbox:before {
+      content: '\25A1';
+      font-size: 26px;
+      line-height: 32px;
+      vertical-align: middle;
+    }
+    .manual_option_text {
+      cursor: text;
+      margin: 0 5px;
     }
     .new + .close {
       display: none;

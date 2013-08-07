@@ -272,16 +272,14 @@ ProjectFilterView
         true
       @autoIncOptionList = new AutoIncOptionList el: manual_options
       # bind change event
-      @listenTo @autoIncOptionList, 'remove', (value, el) =>
+      @listenTo @autoIncOptionList, 'change', (el) =>
         @trigger 'change', el, @data
       $(@form).on 'change', 'input, textarea, select', (e) =>
         @trigger 'change', e.target, @data
       # bind update preview on any changes
       @previewEl = find '.preview', @el
-      _updatePreview = => @delayedTrigger 'update_preview', 500, @data
-      @on
-        update_preview: @updatePreview.bind @
-        change: _updatePreview, fill: _updatePreview, reset: _updatePreview
+      @on 'change fill reset', => @delayedTrigger 'update_preview', 500, @data
+      @on 'update_preview', @updatePreview.bind @
       @
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el
@@ -375,25 +373,35 @@ ProjectFilterView
           input.required = true
           input.dataset.optionRequired = true
           @_container.appendChild @_tpl.cloneNode true
+          @trigger 'change change:add', input, @
         true
       'click .close': (e) ->
         e.preventDefault()
-        $el = $(e.target).parents('label.manual_option')
+        $el = $(e.target).parents('.manual_option')
         val = $el.find('input.manual_option_text').val()
         $el.remove()
-        @trigger 'remove', val, $el[0]
+        @trigger 'change change:remove', $el[0], val
         @validate()
         false
       'blur input.manual_option_text': ->
         @validate false
     initialize: (options) ->
       super options
-      tpl = find 'label.manual_option', @el
+      tpl = find '.manual_option', @el
       throw 'cannot find manual option tpl' unless tpl
       @_tpl = tpl.cloneNode true
       dataset = find('input.manual_option_text[data-option-required]', @_tpl).dataset
       delete dataset.optionRequired
       @_container = find '.controls', @el
+      # make options sortable
+      $(@_container).sortable
+        axis: 'y'
+        delay: 150
+        distance: 5
+        cursor: 'move'
+        items: '>.manual_option:not(:has(.new))'
+        cancel: 'input.manual_option_text'
+        change: (e, ui) => @trigger 'change change:move', ui.item[0], @
       @
     fill: (values) ->
       if values?.length
