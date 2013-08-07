@@ -209,6 +209,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @data = null
       @_action = null
       @_callback = null
+      @trigger 'reset', @
       @
     #action: -> # should be customized, e.g. ok, save, export
     #  @callback 'action_name'
@@ -230,7 +231,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         e.preventDefault()
         @form._callback? @form
         @form._callback = null
-        @trigger 'submit', @form
+        @trigger 'submit', @form, @data
         false
       submit_btn = find '[type="submit"]', @form
       unless submit_btn?
@@ -259,7 +260,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @_attributes = {}
       if attributes? then for name, value of attributes
         input = @form[name]
-        console.log input.name, input.length, input, value, input.value? if input?
+        #console.log input.name, input.length, input, value, input.value? if input?
         if input?.item?(0)?.type is 'radio'
           input = [].slice.call input
           for radio in input
@@ -274,6 +275,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           else
             $(input).val(value).change() # set value and fire event
         @_attributes[name] = value
+      @trigger 'fill', @_attributes, attributes
       #console.log 'fill form', @_attributes
       @
     read: ->
@@ -290,6 +292,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
                 attributes[name] = input.checked
               else
                 attributes[name] = input.value if input.value or @_attributes[name]?
+        @trigger 'read', attributes, @_attributes
         attributes
       else
         null
