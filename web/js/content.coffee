@@ -3,13 +3,15 @@
 define 'content', ['console', 'models', 'manager', 'lib/jquery-ui', 'lib/content'], ({
 find
 findAll
-#View
+View
 BoxView
 FrameView
 InnerFrameView
-FormDialogView
+ModalDialogView
+FormViewMixin
 }, {
 Contents
+Content
 }, {
 ManagerView
 NavFilterView
@@ -25,39 +27,43 @@ ProjectFilterView
     open: (name) ->
       if name
         @editor.render() unless @editor.rendered
-        @editor.popup {}, (action, data) => # test only
+        @editor.load name, (action, data) ->
+          if action is 'save'
+            data.save {},
+              success: (content) ->
+                console.log 'saved', content
+              error: ->
+                console.error 'save failed'
           console.log action, data
       else
         @manager.render() unless @manager.rendered
         @editor.cancel()
       @
 
-  class ContentEditor extends FormDialogView
+  class ContentEditor extends ModalDialogView
     _fonts: [
-      'Serif'
-      'Sans'
-      'Arial'
-      'Arial Black'
-      'Courier'
-      'Courier New'
-      'Comic Sans MS'
-      'Helvetica'
-      'Impact'
-      'Lucida Grande'
-      'Lucida Sans'
-      'Tahoma'
-      'Times'
-      'Times New Roman'
-      'Verdana'
+      'Serif', 'Sans', 'Arial', 'Arial Black'
+      'Courier', 'Courier New', 'Comic Sans MS'
+      'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
+      'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
     events:
-      'click #new_section': -> @addSection null # test only
+      'click #new_section': -> @addSection()
+      'click .btn-save': 'save'
+    # TODO: preview btn
     initialize: (options) ->
       super options
-      @on 'hidden', -> history.go(-1) if /content\/.+/.test location.hash
+      _hash_regex = /content\/.+/
+      @on 'hidden', ->
+        history.go(-1) if _hash_regex.test location.hash
+        setTimeout -> # fallback when go back to the same hash
+          location.hash = '#content' if _hash_regex.test location.hash
+        , 100
       @editor = find '.rich-editor', @el
-      @contentDesc = new BoxView el: find '#content_desc', @el
+      @pageDesc = new BoxFormView el: find '#page_desc', @el
+      # TODO: desc rich editor support with code which
       @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
+      @sections = []
       @sectionsEl = find '#sections', @el
       $(@sectionsEl).sortable
         axis: 'y'
@@ -65,31 +71,77 @@ ProjectFilterView
         distance: 15
         cancel: '.box-content'
       @
+    load: (id, callback) ->
+      if id instanceof Content
+        @popup id, callback
+      else if typeof id is 'string'
+        new Content({id}).fetch success: (data) => @popup data, callback
+      else
+        throw 'content editor can only load a content model or an id string'
     popup: (data, callback) ->
       super data, callback
-      @fill data
+      #console.log 'content form', data.attributes
+      @pageDesc.fill data.attributes
+      @cfg = data.get 'data'
+      #console.log 'cfg data', @cfg
+      @submitOptions.fill @cfg?.submit_options
+      @cfg?.sections?.forEach (section) =>
+        #console.log 'add section', section
+        @addSection section
       @
     save: ->
-      @data = @read()
-      @callback 'save'
-      @hide true
+      read = (formView) ->
+        deferred = $.Deferred()
+        if formView instanceof BoxFormView
+          _t = setTimeout ->
+            console.warn 'read box form timeout', formView.id
+            deferred.reject formView
+          , 100
+          formView.submit ->
+            clearTimeout _t
+            # console.log 'passed', formView.el.id, formView.read()
+            deferred.resolve formView.read()
+        else
+          console.error 'read invalid box form', formView
+          deferred.reject formView
+        deferred.promise()
+
+      defered = [read @pageDesc]
+      for el in findAll '.box.section', @el
+        _idx = el.dataset.idx
+        data = read @sections[_idx]
+        data._idx = _idx
+        defered.push data
+      defered.push read @submitOptions
+
+      $.when.apply(@, defered).done (page_desc, sections..., submit_options) =>
+        #console.log 'save content editor', page_desc, sections, submit_options
+        @data.set 'title', page_desc.title
+        sections = sections.sort (a, b) -> a._idx - b._idx
+        delete sec._idx for sec in sections
+        # TODO: deal with desc
+        # TODO: deal with invalid settings
+        @data.set 'data', {page_desc, sections, submit_options}
+        @callback 'save'
+        @hide true
       @
-    fill: (data) ->
-      super data
-      @addSection null # test only
-      @
-    reset: ->
+    reset: -> # called after close
       super
       @sectionsEl.innerHTML = ''
+      @pageDesc.reset()
+      @submitOptions.reset()
       @
-    addSection: (section) ->
-      section = new SectionEditor id: 0, parent: @ # test only
-      section.render()
-      console.log section
-      @sectionsEl.appendChild section.el
+    addSection: (data) ->
+      view = new SectionEditor idx: @sections.length, parent: @ # test only
+      view.render()
+      view.fill data
+      #console.log data
+      @sectionsEl.appendChild view.el
+      @sections.push view
       @
-    removeSection: (section) ->
-      section.close()
+    removeSection: (view) ->
+      @sections[view.id] = null
+      view.close()
       @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
@@ -106,7 +158,10 @@ ProjectFilterView
       fontTarget.appendChild flagment
     render: ->
       super
-      @$el.find('a[title]').tooltip container: @el
+      @pageDesc.render()
+      @submitOptions.render()
+      _body = find '.modal-body', @el
+      $(_body).find('.btn[title]').tooltip container: _body
       @_renderFonts()
       @$el.find('.btn.hyperlink').click ->
         setTimeout =>
@@ -127,22 +182,50 @@ ProjectFilterView
       @$el.find('.rich-editor').wysiwyg()
       @
 
-  class ChangeTypeMixin
-    changeType: (type) ->
-      console.log 'change type', type
-      @optionFields ?= findAll '.option-field', @el
-      for field in @optionFields
-        cls = field.classList
-        show = type and cls.contains type + '-option'
-        required = find '[data-option-required]', field
-        required?.required = show
-        if show
-          cls.remove 'hide'
-        else
-          cls.add 'hide'
+  class BoxFormView extends BoxView
+    @acts_as FormViewMixin
+    render: ->
+      @initForm()
+    reset: ->
+      @form.reset()
       @
 
-  class SectionEditor extends BoxView
+  class ChangeTypeMixin
+    changeType: (type) ->
+      unless type is @_type
+        @trigger 'type_change', type, @_type
+        #console.log 'change type', type
+        @optionFields ?= findAll '.option-field', @el
+        for field in @optionFields
+          cls = field.classList
+          show = type and cls.contains type + '-option'
+          required = find '[data-option-required]', field
+          required?.required = show
+          #for input in findAll 'input, select, file', field
+          # input.disabled = not show
+          # input.style.visibility = if show then 'visible' else 'hidden'
+          if show
+            cls.remove 'hide'
+          else
+            cls.add 'hide'
+        @_type = type
+      @
+
+  class SubmitOptionsEditor extends BoxFormView
+    @acts_as ChangeTypeMixin
+    initialize: (options) ->
+      super options
+      changeType = @changeType.bind @
+      @$typeEl = @$el.find 'input[type=radio]'
+      @$el.on 'change', 'input[type=radio]', ->
+        changeType @value if @checked
+      @
+    reset: ->
+      super
+      @$typeEl.change()
+      @
+
+  class SectionEditor extends BoxFormView
     @acts_as ChangeTypeMixin
     tagName: 'section'
     className: 'box section'
@@ -153,62 +236,217 @@ ProjectFilterView
       tpl_el.innerHTML
     initialize: (options) ->
       super options
-      @id ?= options.id
+      @idx = options.idx
+      @id ?= options.id or @idx
       @id = 'section_' + @id if typeof @id is 'number'
-      console.log @id
       throw 'id must be given for a section' unless @id
       @
     _bind: ->
-      typeEl = @_find 'type'
-      typeEl.onchange = => @changeType typeEl.value
+      # bind title change
       titleEl = @_find 'title'
       title = find '.box-title', @el
       titleEl.onchange = ->
         title.textContent = unless @value then 'New Section' else 'Section: ' + @value
         true
+      # bind type change
+      typeEl = @_find 'type'
+      @$typeEl = $ typeEl
+      typeEl.onchange = => @changeType typeEl.value
+      typeEl.onchange()
+      # bind radio type change
       auto_gen = @_find 'gen_from_list'
       auto_gen_key = @_find 'gen_list_key'
       manual_options = @_find 'manual_options'
+      manual_option_label = find 'input[type=text]', manual_options
       auto_gen.onchange = ->
         auto_gen_key.disabled = not @checked
         cls = manual_options.classList
         if @checked
           cls.add 'hide'
           cls.remove 'radio-option'
+          auto_gen_key.select()
         else
           cls.remove 'hide'
           cls.add 'radio-option'
+          manual_option_label.select()
         true
+      @autoIncOptionList = new AutoIncOptionList el: manual_options
+      # bind change event
+      @listenTo @autoIncOptionList, 'change', (el) =>
+        @trigger 'change', el, @data
+      $(@form).on 'change', 'input, textarea, select', (e) =>
+        @trigger 'change', e.target, @data
+      # bind update preview on any changes
+      @previewEl = find '.preview', @el
+      @on 'change fill reset', => @delayedTrigger 'update_preview', 500, @data
+      @on 'update_preview', @updatePreview.bind @
       @
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el
+    fill: (data) ->
+      @reset()
+      super data
+      if data?.section_type is 'radio' and not data.gen_from_list and data.manual_options
+        # manual options
+        @autoIncOptionList.fill data.manual_options
+      @
+    read: ->
+      data = super()
+      # manual options
+      if data?.section_type is 'radio' and not data.gen_from_list
+        data.manual_options = @autoIncOptionList.read()
+      # TODO: stop if invalid
+      data
     render: ->
-      super
       @el.id = @id
+      @el.dataset.idx = @idx
       @el.innerHTML = @tpl.replace /section_#/g, @id
+      super
       @_bind()
+      @fill() # init read
       @
     close: ->
       @destroy()
     destroy: ->
       @el.parentNode.removeChild @el
       @
+    reset: ->
+      super
+      @$typeEl.change()
+      @
+    _preview_tpl: do ->
+      tpl_el = document.querySelector('#preview_tpl')
+      throw 'cannot load template from #section_tpl' unless tpl_el
+      tpl_el.parentNode.removeChild tpl_el
+      tpls = {}
+      for tpl in findAll '.tpl[name]', tpl_el
+        tpls[tpl.getAttribute('name')] = tpl.innerHTML
+      throw 'cannot find preview tpl with name section' unless tpls.section
+      tpls
+    genPreview: (data) ->
+      #console.log 'gen preview', @id, data
+      tpl = @_preview_tpl
+      type = data.section_type or ''
+      switch type
+        when ''
+          body = ''
+        when 'text'
+          body = if data.text_multiline then tpl.textarea else tpl.text
+        when 'html'
+          body = tpl.html
+        when 'radio'
+          el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
+          list = unless data.gen_from_list then data.manual_options else [
+            'List item 1 (Auto Genearted)'
+            'List item 2 (Auto Genearted)'
+            '... (Auto Genearted)'
+          ]
+          body = list.map((item) -> el.replace '{{text}}', item).join '\n'
+        when 'file'
+          accept = data.file_accept
+          if accept is 'image/*'
+            body = tpl.image
+          else
+            accept = unless accept then '' else "accept='#{accept}' "
+            body = tpl.file.replace /accept(?:=['"]{2})?/, accept
+        else
+          throw 'unknown section type ' + type
+      tpl.section
+        .replace('{{title}}', data.section_title or '(Need a Title)')
+        .replace('{{desc}}', data.section_desc or '')
+        .replace('{{body}}', body)
+    updatePreview: ->
+      data = @read()
+      console.log 'update preview', @id, data
+      if Object.keys(data).length
+        @previewEl.innerHTML = @genPreview data
+      else
+        @previewEl.innerHTML = ''
+      @
 
-  class SubmitOptionsEditor extends BoxView
-    @acts_as ChangeTypeMixin
+  class AutoIncOptionList extends View
+    events:
+      'input input.manual_option_text.new': (e) ->
+        input = e.target
+        if input.value.trim()
+          input.classList.remove 'new'
+          input.required = true
+          input.dataset.optionRequired = true
+          @_container.appendChild @_tpl.cloneNode true
+          @trigger 'change change:add', input, @
+        true
+      'click .close': (e) ->
+        e.preventDefault()
+        $el = $(e.target).parents('.manual_option')
+        val = $el.find('input.manual_option_text').val()
+        $el.remove()
+        @trigger 'change change:remove', $el[0], val
+        @validate()
+        false
+      'blur input.manual_option_text': ->
+        @validate false
     initialize: (options) ->
       super options
-      changeType = @changeType.bind @
-      @$el.on 'change', 'input[type=radio]', ->
-        changeType @value if @checked
+      tpl = find '.manual_option', @el
+      throw 'cannot find manual option tpl' unless tpl
+      @_tpl = tpl.cloneNode true
+      dataset = find('input.manual_option_text[data-option-required]', @_tpl).dataset
+      delete dataset.optionRequired
+      @_container = find '.controls', @el
+      # make options sortable
+      $(@_container).sortable
+        axis: 'y'
+        delay: 150
+        distance: 5
+        cursor: 'move'
+        items: '>.manual_option:not(:has(.new))'
+        cancel: 'input.manual_option_text'
+        change: (e, ui) => @trigger 'change change:move', ui.item[0], @
       @
+    fill: (values) ->
+      if values?.length
+        frag = document.createDocumentFragment()
+        for val in values
+          el = @_tpl.cloneNode true
+          input = find 'input.manual_option_text', el
+          input.value = val
+          input.classList.remove 'new'
+          frag.appendChild el
+        $(@_container).prepend frag
+        @validate()
+      else
+        console.error 'values should be an string array', values
+      @
+    read: ->
+      @validate()
+      @values
+    validate: (silence) -> # it will generate value
+      silence = Boolean silence
+      values = {}
+      valid = true
+      @$el.find('input.manual_option_text:not(.new)').removeClass('error').each ->
+        val = @value.trim()
+        if not val
+          valid = false
+          true
+        else if values.hasOwnProperty val
+          @classList.add 'error'
+          $(@).one 'input', -> @classList.remove 'error'
+          @select() unless silence
+          valid = false
+          silence
+        else
+          @value = val
+          values[val] = @
+          true
+      @values = if valid then Object.keys(values) else null
+      valid
 
   ## manager
 
   class ContentActionCell extends Backgrid.ActionsCell
     render: ->
       super
-      # TODO: show buttons depend on status
       view_btn = find 'a[name="view"]', @el
       url = @model.get 'url'
       if url

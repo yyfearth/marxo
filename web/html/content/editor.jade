@@ -5,48 +5,52 @@ include rich_editor
     button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
     h3#content_editor_title Content Editor
   .modal-body
-    form.form-horizontal
-      section.box#content_desc
-        .box-header.well
-          h4 Page Description
-          .box-icon
-            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
-        .box-content
+    section.box#page_desc
+      .box-header.well
+        h4 Page Description
+        .box-icon
+          button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+      .box-content
+        form.form-horizontal#page_desc_form
           .control-group
             label.control-label(for='page_title') Page Title
             .controls
-              input#page_title.input-large(type='text', name='page_title',
+              input#page_title.input-large(type='text', name='title',
               placeholder='The title of the page', maxlength='255', required)
               span.help-inline(title='Required') *
           .control-group
             label.control-label(for='page_title') Page Description
             .controls
+              textarea#page_desc_raw.input-block-level(name='desc', maxlength='255')
               mixin rich_editor('page_desc')
 
-      #sections
+    #sections
 
-      section#section_tpl.tpl
-        .box-header.well
-          h4.box-title New Section
-          .box-icon
-            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
-            button.btn.btn-close.btn-round.icon-close(type='button')
-        .box-content
+    include preview_tpl
+
+    section#section_tpl.tpl
+      .box-header.well
+        h4.box-title New Section
+        .box-icon
+          button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+          button.btn.btn-close.btn-round.icon-close(type='button')
+      .box-content
+        form.form-horizontal(id='section_#_form')
           .control-group
             label.control-label(for='section_#_title') Section Title
             .controls
-              input.input-large(id='section_#_title', name='section_#.section_title', type='text',
+              input.input-large(id='section_#_title', name='section_title', type='text',
               placeholder='The title of the section', maxlength='255', required)
               span.help-inline(title='Required') *
           .control-group
             label.control-label(for='section_#_desc') Section Description
             .controls
-              textarea.input-block-level(id='section_#_desc', name='section_#.section_desc',
+              textarea.input-block-level(id='section_#_desc', name='section_desc',
               rows=3, placeholder='The description of the section', maxlength='65535')
           .control-group
             label.control-label(for='section_#_type') Section Type
             .controls
-              select.input-xlarge(id='section_#_type', name='section_#.section_type')
+              select.input-xlarge(id='section_#_type', name='section_type')
                 option(value='', checked) Description Only (No Question)
                 option(value='text') Simple Text
                 option(value='html') Rich Text
@@ -56,13 +60,13 @@ include rich_editor
             label.control-label(for='section_#_multiline') Simple Text Option
             .controls
               label.checkbox
-                input(id='section_#_multiline', name='section_#.text_multiline', type='checkbox')
+                input(id='section_#_multiline', name='text_multiline', type='checkbox')
                 | Support Multiple Line
           .control-group.hide.option-field.file-option
             label.control-label(for='section_#_file_accept') File Type
             .controls
-              select(id='section_#_file_accept', name='section_#.file_accept')
-                option(checked) Any
+              select(id='section_#_file_accept', name='file_accept')
+                option(value='', checked) Any
                 option(value='image/*') Image Only
                 option(value='video/*') Video Only
                 option(value='audio/*') Audio Only
@@ -70,28 +74,29 @@ include rich_editor
           .control-group.hide.option-field.radio-option
             label.control-label(for='section_#_gen_from_list') Auto Generate Rows
             .controls
-              input(id='section_#_gen_from_list', name='section_#.gen_from_list',
+              input(id='section_#_gen_from_list', name='gen_from_list',
               type='checkbox', title='Generate rows from a list', checked)
-              input(id='section_#_gen_list_key', name='section_#.gen_list_key', type='text',
+              | &nbsp;
+              input(id='section_#_gen_list_key', name='gen_list_key', type='text',
               title='Context Key for the List', placeholder='Context Key for the List', data-option-required)
           .control-group.hide.option-field(id='section_#_manual_options')
             label.control-label Manual Set Options
-            .controls
-              label
-                input(type='radio', disabled)
-                input(type='text')
-              label
-                input(type='radio', disabled)
-                input(type='text')
+            ul.controls
+              li.manual_option
+                i.fake-radio
+                input.manual_option_text.new(type='text', data-option-required)
+                button.close(type='button', tabindex='-1') &times;
+        .preview.well
 
-      button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
+    button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
 
-      section.box#submit_options
-        .box-header.well
-          h4 Submit Options
-          .box-icon
-            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
-        .box-content
+    section.box#submit_options
+      .box-header.well
+        h4 Submit Options
+        .box-icon
+          button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+      .box-content
+        form.form-horizontal#submit_options_form
           .control-group
             label.control-label(for='next_page_type') Next Page Type
             .controls
@@ -125,6 +130,6 @@ include rich_editor
               span.help-inline(title='Required') *
 
   .modal-footer
-    button.btn.btn-info.pull-left.btn-preview Preview
+    button.btn.btn-info.pull-left.btn-preview(disabled) Preview
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save

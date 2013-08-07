@@ -664,39 +664,59 @@
               <h3 id="content_editor_title">Content Editor</h3>
             </div>
             <div class="modal-body">
-              <form class="form-horizontal">
-                <section id="content_desc" class="box">
-                  <div class="box-header well">
-                    <h4>Page Description</h4>
-                    <div class="box-icon">
-                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
-                    </div>
+              <section id="page_desc" class="box">
+                <div class="box-header well">
+                  <h4>Page Description</h4>
+                  <div class="box-icon">
+                    <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
                   </div>
-                  <div class="box-content">
+                </div>
+                <div class="box-content">
+                  <form id="page_desc_form" class="form-horizontal">
                     <div class="control-group">
                       <label for="page_title" class="control-label">Page Title</label>
                       <div class="controls">
-                        <input id="page_title" type="text" name="page_title" placeholder="The title of the page" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
+                        <input id="page_title" type="text" name="title" placeholder="The title of the page" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
                     <div class="control-group">
                       <label for="page_title" class="control-label">Page Description</label>
                       <div class="controls">
+                        <textarea id="page_desc_raw" name="desc" maxlength="255" class="input-block-level"></textarea>
                                   <div data-role="editor-toolbar" data-target="#page_desc" class="btn-toolbar">
-                                    <div class="btn-group"><a data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></a>
+                                    <div class="btn-group">
+                                      <button data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></button>
                                       <ul class="fonts-select dropdown-menu"></ul>
                                     </div>
-                                    <div class="btn-group"><a data-toggle="dropdown" title="Font Size" class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></a>
+                                    <div class="btn-group">
+                                      <button data-toggle="dropdown" title="Font Size" class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></button>
                                       <ul class="dropdown-menu">
                                         <li><a data-edit="fontSize 5"><font size="5">Large</font></a></li>
                                         <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
                                         <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
                                       </ul>
                                     </div>
-                                    <div class="btn-group"><a data-edit="bold" title="Bold (Ctrl/Cmd+B)" class="btn"><i class="icon-bold"></i></a><a data-edit="italic" title="Italic (Ctrl/Cmd+I)" class="btn"><i class="icon-italic"></i></a><a data-edit="strikethrough" title="Strikethrough" class="btn"><i class="icon-strike"></i></a><a data-edit="underline" title="Underline (Ctrl/Cmd+U)" class="btn"><i class="icon-underline"></i></a></div>
-                                    <div class="btn-group"><a data-edit="insertunorderedlist" title="Bullet list" class="btn"><i class="icon-list-bullet"></i></a><a data-edit="insertorderedlist" title="Number list" class="btn"><i class="icon-list-numbered"></i></a><a data-edit="outdent" title="Reduce indent (Shift+Tab)" class="btn"><i class="icon-indent-left"></i></a><a data-edit="indent" title="Indent (Tab)" class="btn"><i class="icon-indent-right"></i></a></div>
-                                    <div class="btn-group"><a data-edit="justifyleft" title="Align Left" class="btn"><i class="icon-align-left"></i></a><a data-edit="justifycenter" title="Center" class="btn"><i class="icon-align-center"></i></a><a data-edit="justifyright" title="Align Right" class="btn"><i class="icon-align-right"></i></a><a data-edit="justifyfull" title="Justify" class="btn"><i class="icon-align-justify"></i></a></div>
-                                    <div class="btn-group"><a data-edit="unlink" title="Remove Hyperlink" class="btn"><i class="icon-unlink"></i></a><a data-toggle="dropdown" title="Hyperlink" class="btn hyperlink dropdown-toggle"><i class="icon-link"></i></a>
+                                    <div class="btn-group">
+                                      <button data-edit="bold" title="Bold (Ctrl/Cmd+B)" class="btn"><i class="icon-bold"></i></button>
+                                      <button data-edit="italic" title="Italic (Ctrl/Cmd+I)" class="btn"><i class="icon-italic"></i></button>
+                                      <button data-edit="strikethrough" title="Strikethrough" class="btn"><i class="icon-strike"></i></button>
+                                      <button data-edit="underline" title="Underline (Ctrl/Cmd+U)" class="btn"><i class="icon-underline"></i></button>
+                                    </div>
+                                    <div class="btn-group">
+                                      <button data-edit="insertunorderedlist" title="Bullet list" class="btn"><i class="icon-list-bullet"></i></button>
+                                      <button data-edit="insertorderedlist" title="Number list" class="btn"><i class="icon-list-numbered"></i></button>
+                                      <button data-edit="outdent" title="Reduce indent (Shift+Tab)" class="btn"><i class="icon-indent-left"></i></button>
+                                      <button data-edit="indent" title="Indent (Tab)" class="btn"><i class="icon-indent-right"></i></button>
+                                    </div>
+                                    <div class="btn-group">
+                                      <button data-edit="justifyleft" title="Align Left" class="btn"><i class="icon-align-left"></i></button>
+                                      <button data-edit="justifycenter" title="Center" class="btn"><i class="icon-align-center"></i></button>
+                                      <button data-edit="justifyright" title="Align Right" class="btn"><i class="icon-align-right"></i></button>
+                                      <button data-edit="justifyfull" title="Justify" class="btn"><i class="icon-align-justify"></i></button>
+                                    </div>
+                                    <div class="btn-group">
+                                      <button data-edit="unlink" title="Remove Hyperlink" class="btn"><i class="icon-unlink"></i></button>
+                                      <button data-toggle="dropdown" title="Hyperlink" class="btn hyperlink dropdown-toggle"><i class="icon-link"></i></button>
                                       <ul class="dropdown-menu">
                                         <li class="input-append">
                                           <input placeholder="URL" type="text" data-edit="createLink">
@@ -704,41 +724,99 @@
                                         </li>
                                       </ul>
                                     </div>
-                                    <div class="btn-group"><a id="btn_picture_page_desc" title="Insert picture (or just drag &amp; drop)" class="btn"><i class="icon-picture"></i>
-                                        <input type="file" data-target="#btn_picture_page_desc" data-edit="insertImage"></a></div>
-                                    <div class="btn-group"><a data-edit="undo" title="Undo (Ctrl/Cmd+Z)" class="btn"><i class="icon-undo"></i></a><a data-edit="redo" title="Redo (Ctrl/Cmd+Y)" class="btn"><i class="icon-redo"></i></a></div>
+                                    <div class="btn-group">
+                                      <button id="btn_picture_page_desc" title="Insert picture (or just drag &amp; drop)" class="btn"><i class="icon-picture"></i>
+                                        <input type="file" data-target="#btn_picture_page_desc" data-edit="insertImage">
+                                      </button>
+                                    </div>
+                                    <div class="btn-group">
+                                      <button data-edit="undo" title="Undo (Ctrl/Cmd+Z)" class="btn"><i class="icon-undo"></i></button>
+                                      <button data-edit="redo" title="Redo (Ctrl/Cmd+Y)" class="btn"><i class="icon-redo"></i></button>
+                                    </div>
                                     <div id="page_desc" class="rich-editor"></div>
                                   </div>
                       </div>
                     </div>
-                  </div>
-                </section>
-                <div id="sections"></div>
-                <section id="section_tpl" class="tpl">
-                  <div class="box-header well">
-                    <h4 class="box-title">New Section</h4>
-                    <div class="box-icon">
-                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
-                      <button type="button" class="btn btn-close btn-round icon-close"></button>
+                  </form>
+                </div>
+              </section>
+              <div id="sections"></div>
+              <div id="preview_tpl" class="tpl">
+                <div name="section" class="tpl">
+                  <section>
+                    <legend><span class="preview-title">{{title}}</span><small class="muted">&nbsp; (Preview)</small></legend>
+                    <div class="preview-desc">{{desc}}</div>
+                    <div class="preview-body">{{body}}</div>
+                  </section>
+                </div>
+                <div name="text" class="tpl">
+                  <input type="text" placeholder="Simple Text (Single Line)" class="input-block-level">
+                </div>
+                <div name="textarea" class="tpl">
+                  <textarea rows="3" placeholder="Simple Text (Multiple Line)" class="input-block-level"></textarea>
+                </div>
+                <div name="html" class="tpl">
+                  <div data-role="editor-toolbar" class="btn-toolbar">
+                    <div class="btn-group">
+                      <button data-toggle="dropdown" disabled class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></button>
                     </div>
+                    <div class="btn-group">
+                      <button data-toggle="dropdown" disabled class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></button>
+                    </div>
+                    <div class="btn-group">
+                      <button disabled class="btn"><i class="icon-bold"></i></button>
+                      <button disabled class="btn"><i class="icon-italic"></i></button>
+                      <button disabled class="btn"><i class="icon-strike"></i></button>
+                      <button disabled class="btn"><i class="icon-underline"></i></button>
+                    </div>
+                    <div contenteditable="true" class="rich-editor"><em>Rich</em>&nbsp;<strong>Text</strong></div>
                   </div>
-                  <div class="box-content">
+                </div>
+                <div name="radio" class="tpl">
+                  <label class="radio">
+                    <input type="radio" name="{{name}}">{{text}}
+                  </label>
+                </div>
+                <div name="image" class="tpl">
+                  <div data-provides="fileupload" class="fileupload fileupload-new">
+                    <div style="width: 200px; height: 150px;" class="fileupload-preview thumbnail"></div>
+                    <div><span class="btn btn-file"><span class="fileupload-new">Select</span><span class="fileupload-exists">Change</span>
+                        <input type="file" accept="image/*"></span><a href="#" data-dismiss="fileupload" class="btn fileupload-exists">Remove</a></div>
+                  </div>
+                </div>
+                <div name="file" class="tpl">
+                  <div data-provides="fileupload" class="fileupload fileupload-new"><span class="btn btn-file"><span class="fileupload-new">Select</span><span class="fileupload-exists">Change</span>
+                      <input type="file" accept></span>&nbsp;<span class="fileupload-preview"></span>
+                    <button data-dismiss="fileupload" class="close fileupload-exists">&times;</button>
+                  </div>
+                </div>
+              </div>
+              <section id="section_tpl" class="tpl">
+                <div class="box-header well">
+                  <h4 class="box-title">New Section</h4>
+                  <div class="box-icon">
+                    <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
+                    <button type="button" class="btn btn-close btn-round icon-close"></button>
+                  </div>
+                </div>
+                <div class="box-content">
+                  <form id="section_#_form" class="form-horizontal">
                     <div class="control-group">
                       <label for="section_#_title" class="control-label">Section Title</label>
                       <div class="controls">
-                        <input id="section_#_title" name="section_#.section_title" type="text" placeholder="The title of the section" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
+                        <input id="section_#_title" name="section_title" type="text" placeholder="The title of the section" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
                     <div class="control-group">
                       <label for="section_#_desc" class="control-label">Section Description</label>
                       <div class="controls">
-                        <textarea id="section_#_desc" name="section_#.section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
+                        <textarea id="section_#_desc" name="section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
                       </div>
                     </div>
                     <div class="control-group">
                       <label for="section_#_type" class="control-label">Section Type</label>
                       <div class="controls">
-                        <select id="section_#_type" name="section_#.section_type" class="input-xlarge">
+                        <select id="section_#_type" name="section_type" class="input-xlarge">
                           <option value="" checked>Description Only (No Question)</option>
                           <option value="text">Simple Text</option>
                           <option value="html">Rich Text</option>
@@ -751,15 +829,15 @@
                       <label for="section_#_multiline" class="control-label">Simple Text Option</label>
                       <div class="controls">
                         <label class="checkbox">
-                          <input id="section_#_multiline" name="section_#.text_multiline" type="checkbox">Support Multiple Line
+                          <input id="section_#_multiline" name="text_multiline" type="checkbox">Support Multiple Line
                         </label>
                       </div>
                     </div>
                     <div class="control-group hide option-field file-option">
                       <label for="section_#_file_accept" class="control-label">File Type</label>
                       <div class="controls">
-                        <select id="section_#_file_accept" name="section_#.file_accept">
-                          <option checked>Any</option>
+                        <select id="section_#_file_accept" name="file_accept">
+                          <option value="" checked>Any</option>
                           <option value="image/*">Image Only</option>
                           <option value="video/*">Video Only</option>
                           <option value="audio/*">Audio Only</option>
@@ -770,34 +848,33 @@
                     <div class="control-group hide option-field radio-option">
                       <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
                       <div class="controls">
-                        <input id="section_#_gen_from_list" name="section_#.gen_from_list" type="checkbox" title="Generate rows from a list" checked>
-                        <input id="section_#_gen_list_key" name="section_#.gen_list_key" type="text" title="Context Key for the List" placeholder="Context Key for the List" data-option-required>
+                        <input id="section_#_gen_from_list" name="gen_from_list" type="checkbox" title="Generate rows from a list" checked>&nbsp;
+                        <input id="section_#_gen_list_key" name="gen_list_key" type="text" title="Context Key for the List" placeholder="Context Key for the List" data-option-required>
                       </div>
                     </div>
                     <div id="section_#_manual_options" class="control-group hide option-field">
                       <label class="control-label">Manual Set Options</label>
-                      <div class="controls">
-                        <label>
-                          <input type="radio" disabled>
-                          <input type="text">
-                        </label>
-                        <label>
-                          <input type="radio" disabled>
-                          <input type="text">
-                        </label>
-                      </div>
+                      <ul class="controls">
+                        <li class="manual_option"><i class="fake-radio"></i>
+                          <input type="text" data-option-required class="manual_option_text new">
+                          <button type="button" tabindex="-1" class="close">&times;</button>
+                        </li>
+                      </ul>
                     </div>
+                  </form>
+                  <div class="preview well"></div>
+                </div>
+              </section>
+              <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
+              <section id="submit_options" class="box">
+                <div class="box-header well">
+                  <h4>Submit Options</h4>
+                  <div class="box-icon">
+                    <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
                   </div>
-                </section>
-                <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
-                <section id="submit_options" class="box">
-                  <div class="box-header well">
-                    <h4>Submit Options</h4>
-                    <div class="box-icon">
-                      <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
-                    </div>
-                  </div>
-                  <div class="box-content">
+                </div>
+                <div class="box-content">
+                  <form id="submit_options_form" class="form-horizontal">
                     <div class="control-group">
                       <label for="next_page_type" class="control-label">Next Page Type</label>
                       <div class="controls">
@@ -835,12 +912,12 @@
                         <input id="next_page_url" type="url" name="next_page_url" data-option-required><span title="Required" class="help-inline">*</span>
                       </div>
                     </div>
-                  </div>
-                </section>
-              </form>
+                  </form>
+                </div>
+              </section>
             </div>
             <div class="modal-footer">
-              <button class="btn btn-info pull-left btn-preview">Preview</button>
+              <button disabled class="btn btn-info pull-left btn-preview">Preview</button>
               <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
               <button class="btn btn-primary btn-save">Save</button>
             </div>
