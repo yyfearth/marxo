@@ -7,6 +7,9 @@ mkdir -p out/js/lib/test
 cp js/lib/*.js out/js/lib/
 cp js/lib/test/*.js out/js/lib/test/
 
+js="out/js/lib/bootstrap-wysiwyg.js"
+uglifyjs $js -o $js -mc --screw-ie8
+
 echo 'js/models.coffee + js/console.coffee + js/manager.coffee + js/main.coffee -> out/js/main.js'
 coffee -pjc js/models.coffee js/console.coffee js/manager.coffee js/main.coffee \
  | uglifyjs - -o out/js/main.js -mc --screw-ie8
