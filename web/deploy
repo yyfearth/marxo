@@ -7,19 +7,17 @@ mkdir -p out/js/lib/test
 cp js/lib/*.js out/js/lib/
 cp js/lib/test/*.js out/js/lib/test/
 
-echo 'compile all coffee script'
-coffee -cm js/*.coffee
-
 echo 'js/models.coffee + js/console.coffee + js/manager.coffee + js/main.coffee -> out/js/main.js'
-coffee -j out/js/main.js -c js/models.coffee js/console.coffee js/manager.coffee js/main.coffee
-uglifyjs out/js/main.js -o out/js/main.js -mc --screw-ie8
+coffee -pjc js/models.coffee js/console.coffee js/manager.coffee js/main.coffee \
+ | uglifyjs - -o out/js/main.js -mc --screw-ie8
 
-for js in js/*.js ; do
-    [[ -f "$js" ]] || continue
-    #[[ "$js" == "js/test_data.js" ]] && continue
-    [[ "$js" == "js/manager.js" || "$js" == "js/models.js" || "$js" == "js/console.js" || "$js" == "js/main.js" ]] && continue
-    echo $js -> out/$js
-    uglifyjs "$js" -o "out/$js" -mc --screw-ie8
+for coffee in js/*.coffee ; do
+    [[ -f "$coffee" ]] || continue
+    #[[ "$coffee" == "js/test_data.coffee" ]] && continue
+    [[ "$coffee" == "js/manager.coffee" || "$coffee" == "js/models.coffee" || "$coffee" == "js/console.coffee" || "$coffee" == "js/main.coffee" ]] && continue
+    js="out/js/$(basename -s .coffee $coffee).js"
+    echo "$coffee -> $js"
+    coffee -cp "$coffee" | uglifyjs - -o "$js" -mc --screw-ie8
 done
 
 echo 'compile less to out/css/console.css'
