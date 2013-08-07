@@ -26,6 +26,8 @@ include rich_editor
 
     #sections
 
+    include preview_tpl
+
     section#section_tpl.tpl
       .box-header.well
         h4.box-title New Section
@@ -64,7 +66,7 @@ include rich_editor
             label.control-label(for='section_#_file_accept') File Type
             .controls
               select(id='section_#_file_accept', name='file_accept')
-                option(checked) Any
+                option(value='', checked) Any
                 option(value='image/*') Image Only
                 option(value='video/*') Video Only
                 option(value='audio/*') Audio Only
@@ -85,6 +87,7 @@ include rich_editor
                 input.manual_option_text.new(type='text', data-option-required)
                 button.close(type='button', tabindex='-1') &times;
                 input.fake-input(type='radio', disabled)
+        .preview.well
 
     button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
 
@@ -128,6 +131,6 @@ include rich_editor
               span.help-inline(title='Required') *
 
   .modal-footer
-    button.btn.btn-info.pull-left.btn-preview Preview
+    button.btn.btn-info.pull-left.btn-preview(disabled) Preview
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save

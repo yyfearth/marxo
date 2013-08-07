@@ -115,12 +115,12 @@ ProjectFilterView
       defered.push read @submitOptions
 
       $.when.apply(@, defered).done (page_desc, sections..., submit_options) =>
-        # TODO: transform form data into model data
         #console.log 'save content editor', page_desc, sections, submit_options
         @data.set 'title', page_desc.title
         sections = sections.sort (a, b) -> a._idx - b._idx
         delete sec._idx for sec in sections
         # TODO: deal with desc
+        # TODO: deal with invalid settings
         @data.set 'data', {page_desc, sections, submit_options}
         @callback 'save'
         @hide true
@@ -160,7 +160,8 @@ ProjectFilterView
       super
       @pageDesc.render()
       @submitOptions.render()
-      @$el.find('a[title]').tooltip container: @el
+      _body = find '.modal-body', @el
+      $(_body).find('.btn[title]').tooltip container: _body
       @_renderFonts()
       @$el.find('.btn.hyperlink').click ->
         setTimeout =>
@@ -241,15 +242,18 @@ ProjectFilterView
       throw 'id must be given for a section' unless @id
       @
     _bind: ->
-      typeEl = @_find 'type'
-      @$typeEl = $ typeEl
-      typeEl.onchange = => @changeType typeEl.value
-      typeEl.onchange()
+      # bind title change
       titleEl = @_find 'title'
       title = find '.box-title', @el
       titleEl.onchange = ->
         title.textContent = unless @value then 'New Section' else 'Section: ' + @value
         true
+      # bind type change
+      typeEl = @_find 'type'
+      @$typeEl = $ typeEl
+      typeEl.onchange = => @changeType typeEl.value
+      typeEl.onchange()
+      # bind radio type change
       auto_gen = @_find 'gen_from_list'
       auto_gen_key = @_find 'gen_list_key'
       manual_options = @_find 'manual_options'
@@ -267,6 +271,17 @@ ProjectFilterView
           manual_option_label.select()
         true
       @autoIncOptionList = new AutoIncOptionList el: manual_options
+      # bind change event
+      @listenTo @autoIncOptionList, 'remove', (value, el) =>
+        @trigger 'change', el, @data
+      $(@form).on 'change', 'input, textarea, select', (e) =>
+        @trigger 'change', e.target, @data
+      # bind update preview on any changes
+      @previewEl = find '.preview', @el
+      _updatePreview = => @delayedTrigger 'update_preview', 500, @data
+      @on
+        update_preview: @updatePreview.bind @
+        change: _updatePreview, fill: _updatePreview, reset: _updatePreview
       @
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el
@@ -282,6 +297,7 @@ ProjectFilterView
       # manual options
       if data?.section_type is 'radio' and not data.gen_from_list
         data.manual_options = @autoIncOptionList.read()
+      # TODO: stop if invalid
       data
     render: ->
       @el.id = @id
@@ -300,7 +316,55 @@ ProjectFilterView
       super
       @$typeEl.change()
       @
-    # TODO: live preview
+    _preview_tpl: do ->
+      tpl_el = document.querySelector('#preview_tpl')
+      throw 'cannot load template from #section_tpl' unless tpl_el
+      tpl_el.parentNode.removeChild tpl_el
+      tpls = {}
+      for tpl in findAll '.tpl[name]', tpl_el
+        tpls[tpl.getAttribute('name')] = tpl.innerHTML
+      throw 'cannot find preview tpl with name section' unless tpls.section
+      tpls
+    genPreview: (data) ->
+      #console.log 'gen preview', @id, data
+      tpl = @_preview_tpl
+      type = data.section_type or ''
+      switch type
+        when ''
+          body = ''
+        when 'text'
+          body = if data.text_multiline then tpl.textarea else tpl.text
+        when 'html'
+          body = tpl.html
+        when 'radio'
+          el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
+          list = unless data.gen_from_list then data.manual_options else [
+            'List item 1 (Auto Genearted)'
+            'List item 2 (Auto Genearted)'
+            '... (Auto Genearted)'
+          ]
+          body = list.map((item) -> el.replace '{{text}}', item).join '\n'
+        when 'file'
+          accept = data.file_accept
+          if accept is 'image/*'
+            body = tpl.image
+          else
+            accept = unless accept then '' else "accept='#{accept}' "
+            body = tpl.file.replace /accept(?:=['"]{2})?/, accept
+        else
+          throw 'unknown section type ' + type
+      tpl.section
+        .replace('{{title}}', data.section_title or '(Need a Title)')
+        .replace('{{desc}}', data.section_desc or '')
+        .replace('{{body}}', body)
+    updatePreview: ->
+      data = @read()
+      console.log 'update preview', @id, data
+      if Object.keys(data).length
+        @previewEl.innerHTML = @genPreview data
+      else
+        @previewEl.innerHTML = ''
+      @
 
   class AutoIncOptionList extends View
     events:
@@ -314,7 +378,11 @@ ProjectFilterView
         true
       'click .close': (e) ->
         e.preventDefault()
-        $(e.target).parents('label.manual_option').remove()
+        $el = $(e.target).parents('label.manual_option')
+        val = $el.find('input.manual_option_text').val()
+        $el.remove()
+        @trigger 'remove', val, $el[0]
+        @validate()
         false
       'blur input.manual_option_text': ->
         @validate false
@@ -326,19 +394,20 @@ ProjectFilterView
       dataset = find('input.manual_option_text[data-option-required]', @_tpl).dataset
       delete dataset.optionRequired
       @_container = find '.controls', @el
-
       @
     fill: (values) ->
-      throw 'values should be an string array' unless values?.length
-      frag = document.createDocumentFragment()
-      for val in values
-        el = @_tpl.cloneNode true
-        input = find 'input.manual_option_text', el
-        input.value = val
-        input.classList.remove 'new'
-        frag.appendChild el
-      $(@_container).prepend frag
-      @validate()
+      if values?.length
+        frag = document.createDocumentFragment()
+        for val in values
+          el = @_tpl.cloneNode true
+          input = find 'input.manual_option_text', el
+          input.value = val
+          input.classList.remove 'new'
+          frag.appendChild el
+        $(@_container).prepend frag
+        @validate()
+      else
+        console.error 'values should be an string array', values
       @
     read: ->
       @validate()

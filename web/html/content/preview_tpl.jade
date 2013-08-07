@@ -1,0 +1,57 @@
+#preview_tpl.tpl
+  .tpl(name='section')
+    section
+      legend
+        span.preview-title {{title}}
+        small.muted &nbsp; (Preview)
+      .preview-desc {{desc}}
+      .preview-body {{body}}
+  .tpl(name='text')
+    input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
+  .tpl(name='textarea')
+    textarea.input-block-level(rows=3, placeholder='Simple Text (Multiple Line)')
+  .tpl(name='html')
+    .btn-toolbar(data-role='editor-toolbar')
+      .btn-group
+        button.btn.dropdown-toggle(data-toggle='dropdown', disabled)
+          i.icon-font
+          b.caret
+      .btn-group
+        button.btn.dropdown-toggle(data-toggle='dropdown', disabled)
+          i.icon-text-height
+          b.caret
+      .btn-group
+        button.btn(disabled)
+          i.icon-bold
+        button.btn(disabled)
+          i.icon-italic
+        button.btn(disabled)
+          i.icon-strike
+        button.btn(disabled)
+          i.icon-underline
+      .rich-editor(contenteditable='true')
+        em Rich
+        | &nbsp;
+        strong Text
+  .tpl(name='radio')
+    label.radio
+      input(type='radio', name='{{name}}')
+      | {{text}}
+  .tpl(name='image')
+    .fileupload.fileupload-new(data-provides='fileupload')
+      .fileupload-preview.thumbnail(style='width: 200px; height: 150px;')
+      div
+        span.btn.btn-file
+          span.fileupload-new Select
+          span.fileupload-exists Change
+          input(type='file', accept='image/*')
+        a.btn.fileupload-exists(href='#', data-dismiss='fileupload') Remove
+  .tpl(name='file')
+    .fileupload.fileupload-new(data-provides='fileupload')
+      span.btn.btn-file
+        span.fileupload-new Select
+        span.fileupload-exists Change
+        input(type='file', accept)
+      | &nbsp;
+      span.fileupload-preview
+      button.close.fileupload-exists(data-dismiss='fileupload') &times;

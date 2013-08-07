@@ -1,12 +1,12 @@
 mixin rich_editor(id)
   .btn-toolbar(data-role='editor-toolbar', data-target='##{id}')
     .btn-group
-      a.btn.dropdown-toggle(data-toggle='dropdown', title='Font')
+      button.btn.dropdown-toggle(data-toggle='dropdown', title='Font')
         i.icon-font
         b.caret
       ul.fonts-select.dropdown-menu
     .btn-group
-      a.btn.dropdown-toggle(data-toggle='dropdown', title='Font Size')
+      button.btn.dropdown-toggle(data-toggle='dropdown', title='Font Size')
         i.icon-text-height
         b.caret
       ul.dropdown-menu
@@ -20,48 +20,48 @@ mixin rich_editor(id)
           a(data-edit='fontSize 1')
             font(size='1') Small
     .btn-group
-      a.btn(data-edit='bold', title='Bold (Ctrl/Cmd+B)')
+      button.btn(data-edit='bold', title='Bold (Ctrl/Cmd+B)')
         i.icon-bold
-      a.btn(data-edit='italic', title='Italic (Ctrl/Cmd+I)')
+      button.btn(data-edit='italic', title='Italic (Ctrl/Cmd+I)')
         i.icon-italic
-      a.btn(data-edit='strikethrough', title='Strikethrough')
+      button.btn(data-edit='strikethrough', title='Strikethrough')
         i.icon-strike
-      a.btn(data-edit='underline', title='Underline (Ctrl/Cmd+U)')
+      button.btn(data-edit='underline', title='Underline (Ctrl/Cmd+U)')
         i.icon-underline
     .btn-group
-      a.btn(data-edit='insertunorderedlist', title='Bullet list')
+      button.btn(data-edit='insertunorderedlist', title='Bullet list')
         i.icon-list-bullet
-      a.btn(data-edit='insertorderedlist', title='Number list')
+      button.btn(data-edit='insertorderedlist', title='Number list')
         i.icon-list-numbered
-      a.btn(data-edit='outdent', title='Reduce indent (Shift+Tab)')
+      button.btn(data-edit='outdent', title='Reduce indent (Shift+Tab)')
         i.icon-indent-left
-      a.btn(data-edit='indent', title='Indent (Tab)')
+      button.btn(data-edit='indent', title='Indent (Tab)')
         i.icon-indent-right
     .btn-group
-      a.btn(data-edit='justifyleft', title='Align Left')
+      button.btn(data-edit='justifyleft', title='Align Left')
         i.icon-align-left
-      a.btn(data-edit='justifycenter', title='Center')
+      button.btn(data-edit='justifycenter', title='Center')
         i.icon-align-center
-      a.btn(data-edit='justifyright', title='Align Right')
+      button.btn(data-edit='justifyright', title='Align Right')
         i.icon-align-right
-      a.btn(data-edit='justifyfull', title='Justify')
+      button.btn(data-edit='justifyfull', title='Justify')
         i.icon-align-justify
     .btn-group
-      a.btn(data-edit='unlink', title='Remove Hyperlink')
+      button.btn(data-edit='unlink', title='Remove Hyperlink')
         i.icon-unlink
-      a.btn.hyperlink.dropdown-toggle(data-toggle='dropdown', title='Hyperlink')
+      button.btn.hyperlink.dropdown-toggle(data-toggle='dropdown', title='Hyperlink')
         i.icon-link
       ul.dropdown-menu
         li.input-append
           input(placeholder='URL', type='text', data-edit='createLink')
           button.btn(type='button') Add
     .btn-group
-      a.btn(id='btn_picture_#{id}', title='Insert picture (or just drag & drop)')
+      button.btn(id='btn_picture_#{id}', title='Insert picture (or just drag & drop)')
         i.icon-picture
         input(type='file', data-target='#btn_picture_' + id, data-edit='insertImage')
     .btn-group
-      a.btn(data-edit='undo', title='Undo (Ctrl/Cmd+Z)')
+      button.btn(data-edit='undo', title='Undo (Ctrl/Cmd+Z)')
         i.icon-undo
-      a.btn(data-edit='redo', title='Redo (Ctrl/Cmd+Y)')
+      button.btn(data-edit='redo', title='Redo (Ctrl/Cmd+Y)')
         i.icon-redo
     .rich-editor(id=id)
