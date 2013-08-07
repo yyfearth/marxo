@@ -115,7 +115,8 @@ define 'models', ['lib/common'], ->
       node.outLinks = []
       return
     _removeNodeRef: (node) ->
-      # TODO: remove links connected?
+      # remove all connected links
+      node.inLinks.concat(node.outLinks).forEach (link) -> link.destroy()
       return
     createLink: (data) ->
       @links.create data, wait: true

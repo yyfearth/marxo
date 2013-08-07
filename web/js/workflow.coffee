@@ -221,8 +221,7 @@ Action
       @
     fetch: (id, callback) ->
       wf = @workflow = new Workflow id: id
-      wf.fetch success: =>
-        callback null, wf
+      wf.fetch success: -> callback null, wf
       @
 
   class NodeListView extends NavListView
@@ -323,7 +322,7 @@ Action
     save: ->
       console.log 'save'
       # save actions
-      actions = @_getActionEls().map (el) =>
+      actions = @_getActionEls().map (el) ->
         action = $(el).data 'model'
         throw 'cannot get action from action.$el' unless action
         action.attributes
@@ -744,10 +743,6 @@ Action
           @model.createLink link if false isnt callback? link
         else # canceled
           console.log 'canceled or ignored create link', action
-      @
-    addLink: (link) ->
-      # TODO: add view and model
-      console.log 'TODO: add link', link
       @
     _addLink: (link) ->
       view = link.view = new LinkView model: link, parent: @

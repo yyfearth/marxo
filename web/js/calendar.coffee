@@ -58,7 +58,7 @@ define 'calendar', ['console', 'lib/jquery-ui', 'lib/fullcalendar'], ({find, Fra
       # for auto size
       container = viewEl.parentNode
       r = 800 / 645
-      autoResize = =>
+      autoResize = ->
         w = container.clientWidth
         h = container.clientHeight
         if w / h < r
