@@ -56,7 +56,7 @@ $(dist)/js/lib: js/lib
 	cp $^/test/*.js $@/test/
 
 $(dist)/js/main.js: js/models.coffee js/console.coffee js/manager.coffee js/main.coffee
-	@echo "$(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
+	@echo "$(CWHT)- $(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
 	@mkdir -p $(@D)
 	coffee -pjc $^ | uglifyjs - -o $@ -mc --screw-ie8
 
