@@ -77,20 +77,18 @@ Action
       cell: WorkflowActionCell
     ]
     collection: new Workflows
-    initialize: (options) ->
-      super options
-      @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
-      # temp
-      @$el.find('#wf_template_list').on 'click', '.wf_tempate a', (e) =>
+    events:
+      'click #wf_template_list .wf_tempate a': (e) ->
         e.preventDefault()
         wf = e.target.href.match /#workflow:(\w+)/
         console.log 'wf template clicked', wf
         @create wf[1] if wf.length is 2
         false
+    initialize: (options) ->
+      super options
+      @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
       _remove = @remove.bind @
-      @on
-        remove: _remove
-        remove_selected: _remove
+      @on remove: _remove, remove_selected: _remove
       @
     create: (template) ->
       template = '' if not template or /^(?:new|empty)$/i.test template
@@ -231,16 +229,14 @@ Action
     itemClassName: ''
     targetClassName: 'node thumb'
     collection: new Nodes
-    initialize: (options) ->
-      super options
-      @el.onclick = (e) =>
+    events:
+      'click': (e) ->
         el = e.target
         if el.tagName is 'A' and el.dataset.id
           e.preventDefault()
           @trigger 'select', el.dataset.id, $(el).data 'model'
           false
-      # draggable delegation
-      @$el.on 'mouseenter', '.node', (e) =>
+      'mouseenter .node': (e) ->
         unless $.data e.target, 'is_draggable'
           console.log 'draaa', e.target
           $(e.target).draggable(
@@ -248,7 +244,7 @@ Action
             helper: 'clone'
             zIndex: 999
           ).data 'is_draggable', true
-      @
+        return
     setNodes: (nodes) ->
       if @nodes isnt nodes
         @stopListening @nodes if @nodes
@@ -492,6 +488,14 @@ Action
       spanX: 300
       spanY: 150
       vertical: false
+
+    events:
+      'click .node': '_togglePopover'
+      'mousedown': '_cancelPopover'
+      'click .popover .btn-delete': (e) -> @_action 'remove', e
+      'click .popover .btn-edit': (e) -> @_action 'edit', e
+      'dblclick .node': (e) -> @_action 'edit', e
+
     initialize: (options) ->
       super options
       @nodeEditor = options.nodeEditor
@@ -513,55 +517,21 @@ Action
         view.editLink conn.getParameter 'link'
         return
 
-      # for popover
-      _hidePopover = -> if view._popped
-        if view._popped._delay
-          view._popped._delay = clearTimeout view._popped._delay
-        else
-          $(view._popped).popover 'hide'
-        return
-      _togglePopover = ->
-        if view._popped isnt @ and not @_hidding
-          @._delay = setTimeout =>
-            $(@).popover 'show' if view._popped = @
-            @._delay = null
-          , 100
-          view._popped = @
-        else
-          _hidePopover()
-          view._popped = null
-        return
       # link click
-      jsPlumb.bind 'click', (conn) ->
+      jsPlumb.bind 'click', (conn) =>
         label = conn.getOverlay 'label'
-        _togglePopover.call label.canvas
+        @_togglePopover target: label.canvas
         return
-      # node click
-      $el = @$el
-      $el.on 'click', '.node', _togglePopover
-      $el.on 'mousedown', (e) ->
-        if view._popped and not view.$el.find('.popover').has(e.target).length
-          _hidePopover()
-          org_popped = view._popped
-          view._popped = null
-          org_popped._hidding = true
-          setTimeout ->
-            delete org_popped._hidding
-          , 300
-        return
-      $el.on 'click', '.popover .btn-delete', (e) -> view._action 'remove', e
-      $el.on 'click', '.popover .btn-edit', (e) -> view._action 'edit', e
-      $el.on 'dblclick', '.node', (e) -> view._action 'edit', e
 
       # droppable for .node
-      $el.droppable
+      @$el.droppable
         accept: '.node.thumb'
         drop: (e, ui) =>
           node = ui.draggable.data 'model'
           if node instanceof Node
             # set style after createNode since it will remove style when clone
-            @createNode node, (node) ->
-              $el_offset = $el.offset()
+            @createNode node, (node) =>
+              $el_offset = @$el.offset()
               x = ui.offset.left - $el_offset.left
               y = ui.offset.top - $el_offset.top
               node.set 'style', "left:#{if x < 0 then 0 else x}px;top:#{if y < 0 then 0 else y}px"
@@ -571,6 +541,36 @@ Action
             false
 
       return
+
+    _hidePopover: ->
+      _popped = @_popped
+      if _popped
+        _popped._delay = clearTimeout(_popped._delay) if _popped._delay
+        $(_popped).popover 'hide'
+      return
+    _cancelPopover: (e) ->
+      if @_popped and not @$el.find('.popover').has(e.target).length
+        @_hidePopover()
+        org_popped = @_popped
+        @_popped = null
+        org_popped._hidding = true
+        setTimeout ->
+          delete org_popped._hidding
+        , 300
+      return
+    _togglePopover: (e) ->
+      el = e.target
+      if @_popped isnt el and not el._hidding
+        el._delay = setTimeout =>
+          $(el).popover 'show' if @_popped = el
+          el._delay = null
+        , 100
+        @_popped = el
+      else
+        @_hidePopover()
+        @_popped = null
+      return
+      
     _action: (action, e) ->
       $target = $ e.target
       $target = $target.parents '.target' unless $target.hasClass 'target'

@@ -48,6 +48,12 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
 
   class ConsoleView extends View
     el: '#main'
+    events:
+      'click .dropdown-menu': -> # hide menu after click
+        @navContainer.classList.add 'hide-dropdown'
+        $(document.body).one 'mousemove', =>
+          @navContainer.classList.remove 'hide-dropdown'
+        return
     @get: -> # singleton
       unless @instance?
         @instance = new @
@@ -63,6 +69,8 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           navEl: navEl?.parentElement
         return
       @fixStyles()
+      @navContainer = find '#navbar', @el
+      @framesContainer = find '#frames', @el
       # Init tooltips
       @$el.tooltip selector: '[title]'
       return
@@ -73,12 +81,6 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       do window.onresize = =>
         h = navContainer.clientHeight or 41
         framesContainer.style.top = h + 'px'
-        return
-      # hide menu after click
-      $('.dropdown-menu').click ->
-        navContainer.classList.add 'hide-dropdown'
-        $(document.body).one 'mousemove', ->
-          navContainer.classList.remove 'hide-dropdown'
         return
       return
     showFrame: (frame, name, sub) ->
