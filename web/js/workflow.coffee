@@ -354,7 +354,7 @@ Action
     addAction: (model) ->
       model = new Action model unless model instanceof Action
       actionView = new ActionView model: model, parent: @, container: @actionsEl
-      actionView.on 'close', @removeAction.bind @
+      @listenTo actionView, 'remove', @removeAction.bind @
       actionView.render()
       actionView.el.scrollIntoView()
       @_checkActionLimit()
