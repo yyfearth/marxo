@@ -141,7 +141,7 @@ ProjectFilterView
       @
     removeSection: (view) ->
       @sections[view.id] = null
-      view.close()
+      view.remove()
       @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
@@ -299,11 +299,6 @@ ProjectFilterView
       super
       @_bind()
       @fill() # init read
-      @
-    close: ->
-      @destroy()
-    destroy: ->
-      @el.parentNode.removeChild @el
       @
     reset: ->
       super

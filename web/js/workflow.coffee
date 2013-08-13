@@ -398,14 +398,12 @@ Action
       @type = @model.get?('type') or options.model.type or options.type
       throw 'need action model and type' unless @model and @type
       @
-    close: ->
-      @el.parentNode.removeChild @el
+    remove: ->
       model = @model
-      @trigger 'close', @, model
       model.type = null
       model.name = null
       model.data = null
-      @
+      super
     render: ->
       tpl = @constructor.tpl @type
       #@containerEl.appendChild @el
@@ -421,7 +419,7 @@ Action
       @form = find 'form', @el
       @fill @model?.data
       @$el.data model: @model, view: @
-      @listenTo @model, 'destroy', => @destroy()
+      @listenTo @model, 'destroy', @remove.bind @
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
@@ -442,10 +440,6 @@ Action
         data[name] = $el.val() if name
       # TODO: support customized controls
       data
-    destroy: ->
-      @stopListening @model
-      @el.parentNode?.removeChild @el
-      return
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
@@ -602,7 +596,7 @@ Action
         # bind add node/link event
         @listenTo @model.nodes, 'add', @_addNode.bind @
         @listenTo @model.links, 'add', @_addLink.bind @
-        # node/link remove already binded on destory
+        # node/link remove already binded on destroy
 
         @_renderModel wf
         @hash = "#workflow/#{wf.id}"
@@ -818,7 +812,7 @@ Action
     render: ->
       node = @el.node = @model
       @el.id = 'node_' + node.id
-      @listenTo node, 'destroy', => @destroy()
+      @listenTo node, 'destroy', @remove.bind @
       @_renderModel node
       jsPlumb.draggable @$el, stack: '.node'
       @parentEl.appendChild @el
@@ -854,14 +848,11 @@ Action
       @$popover = @$el.data('popover').tip()
       @$popover?.addClass('target').data node: node, view: @
       return
-    destroy: ->
-      @stopListening @model
+    remove: ->
       @$el.popover 'destroy'
       jsPlumb.deleteEndpoint @srcEndpoint
       jsPlumb.deleteEndpoint @
-      @el.parentNode.removeChild @el
-      @trigger 'destroy', @, @model
-      return
+      super
 
   class LinkView extends View
     _popover_tpl: NodeView::_popover_tpl
@@ -877,13 +868,13 @@ Action
           link: link
           view: @
       @setElement conn.canvas
-      @listenTo link, 'destroy', => @destroy()
+      @listenTo link, 'destroy', @remove.bind @
       @label = conn.getOverlay 'label'
       @labelEl = @label.canvas
       @_renderLabel link
       @
     update: (link = @model) ->
-      $(@labelEl).popover 'destroy'
+      @_destroyPopover()
       @_renderLabel link
       @
     _renderLabel: (link) ->
@@ -902,12 +893,12 @@ Action
       @$popover = label$el.data('popover').tip()
       @$popover?.addClass('target').data link: link, view: @
       @
-    destroy: ->
-      console.log 'destroy', @conn, @model, @
-      jsPlumb.detach @conn
-      @stopListening @model
+    _destroyPopover: ->
       $(@labelEl).popover 'destroy'
-      @trigger 'destroy', @, @model
-      return
+    remove: ->
+      console.log 'remove', @conn, @model, @
+      jsPlumb.detach @conn
+      @_destroyPopover()
+      super
 
   WorkflowFrameView

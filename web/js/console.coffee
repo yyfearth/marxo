@@ -152,7 +152,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   class BoxView extends View
     className: 'box'
     events:
-      'click .btn-close': 'close'
+      'click .btn-close': 'remove'
       'click .btn-minimize': 'minimize'
     initialize: (options) ->
       super options
@@ -160,9 +160,6 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @btn_min = find '.btn-minimize', @el
       @btn_close = find '.btn-close', @el
       @contentEl = find '.box-content', @el
-      return
-    close: -> # should be override
-      console.log 'box close button clicked'
       return
     minimize: ->
       btn_min = @btn_min or find '.btn-minimize', @el
