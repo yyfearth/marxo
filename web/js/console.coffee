@@ -68,21 +68,21 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           parent: @
           navEl: navEl?.parentElement
         return
-      @fixStyles()
+      # fix style
       @navContainer = find '#navbar', @el
       @framesContainer = find '#frames', @el
+      @_fixStyle = @_fixStyle.bind @
+      $(window).on 'resize', @_fixStyle
       # Init tooltips
       @$el.tooltip selector: '[title]'
       return
-    fixStyles: ->
-      # auto resize
-      navContainer = find '#navbar', @el
-      framesContainer = find '#frames', @el
-      do window.onresize = =>
-        h = navContainer.clientHeight or 41
-        framesContainer.style.top = h + 'px'
-        return
+    _fixStyle: ->
+      h = @navContainer.clientHeight or 41
+      @framesContainer.style.top = h + 'px'
       return
+    remove: ->
+      $(window).off 'resize', @_fixStyle
+      super
     showFrame: (frame, name, sub) ->
       frame = @frames[frame]
       return unless frame?

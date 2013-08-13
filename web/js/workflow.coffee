@@ -282,13 +282,13 @@ Action
     el: '#node_editor'
     events:
       'click a.action-thumb': '_addAction'
+      'shown': '_fixStyle'
     _too_many_actions_limit: 7
     initialize: (options) ->
       super options
       @actionsEl = find '#actions', @el
-      _fixStyle = @_fixStyle.bind @
-      $(window).resize _fixStyle
-      $(@el).on 'shown', _fixStyle
+      @_fixStyle = @_fixStyle.bind @
+      $(window).on 'resize', @_fixStyle
       $(@actionsEl).sortable
         axis: 'y'
         delay: 150
@@ -296,6 +296,9 @@ Action
         cancel: '.box-content'
       @_too_many_alert = find '#too_many_actions_alert', @el
       @
+    remove: ->
+      $(window).off 'resize', @_fixStyle
+      super
     _fixStyle: -> # make sure the top of action box will below the title, name and desc
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
       return
