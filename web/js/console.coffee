@@ -48,6 +48,12 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
 
   class ConsoleView extends View
     el: '#main'
+    events:
+      'click .dropdown-menu': -> # hide menu after click
+        @navContainer.classList.add 'hide-dropdown'
+        $(document.body).one 'mousemove', =>
+          @navContainer.classList.remove 'hide-dropdown'
+        return
     @get: -> # singleton
       unless @instance?
         @instance = new @
@@ -62,25 +68,21 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           parent: @
           navEl: navEl?.parentElement
         return
-      @fixStyles()
+      # fix style
+      @navContainer = find '#navbar', @el
+      @framesContainer = find '#frames', @el
+      @_fixStyle = @_fixStyle.bind @
+      $(window).on 'resize', @_fixStyle
       # Init tooltips
       @$el.tooltip selector: '[title]'
       return
-    fixStyles: ->
-      # auto resize
-      navContainer = find '#navbar', @el
-      framesContainer = find '#frames', @el
-      do window.onresize = =>
-        h = navContainer.clientHeight or 41
-        framesContainer.style.top = h + 'px'
-        return
-      # hide menu after click
-      $('.dropdown-menu').click ->
-        navContainer.classList.add 'hide-dropdown'
-        $(document.body).one 'mousemove', ->
-          navContainer.classList.remove 'hide-dropdown'
-        return
+    _fixStyle: ->
+      h = @navContainer.clientHeight or 41
+      @framesContainer.style.top = h + 'px'
       return
+    remove: ->
+      $(window).off 'resize', @_fixStyle
+      super
     showFrame: (frame, name, sub) ->
       frame = @frames[frame]
       return unless frame?
@@ -150,7 +152,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   class BoxView extends View
     className: 'box'
     events:
-      'click .btn-close': 'close'
+      'click .btn-close': 'remove'
       'click .btn-minimize': 'minimize'
     initialize: (options) ->
       super options
@@ -158,9 +160,6 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @btn_min = find '.btn-minimize', @el
       @btn_close = find '.btn-close', @el
       @contentEl = find '.box-content', @el
-      return
-    close: -> # should be override
-      console.log 'box close button clicked'
       return
     minimize: ->
       btn_min = @btn_min or find '.btn-minimize', @el

@@ -141,7 +141,7 @@ ProjectFilterView
       @
     removeSection: (view) ->
       @sections[view.id] = null
-      view.close()
+      view.remove()
       @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
@@ -213,16 +213,12 @@ ProjectFilterView
 
   class SubmitOptionsEditor extends BoxFormView
     @acts_as ChangeTypeMixin
-    initialize: (options) ->
-      super options
-      changeType = @changeType.bind @
-      @$typeEl = @$el.find 'input[type=radio]'
-      @$el.on 'change', 'input[type=radio]', ->
-        changeType @value if @checked
-      @
+    events:
+      'change input[type=radio]': ->
+        @changeType @value if @checked
     reset: ->
       super
-      @$typeEl.change()
+      @$el.find('input[type=radio]').change()
       @
 
   class SectionEditor extends BoxFormView
@@ -251,8 +247,7 @@ ProjectFilterView
       # bind type change
       typeEl = @_find 'type'
       @$typeEl = $ typeEl
-      typeEl.onchange = => @changeType typeEl.value
-      typeEl.onchange()
+      do typeEl.onchange = => @changeType typeEl.value
       # bind radio type change
       auto_gen = @_find 'gen_from_list'
       auto_gen_key = @_find 'gen_list_key'
@@ -304,11 +299,6 @@ ProjectFilterView
       super
       @_bind()
       @fill() # init read
-      @
-    close: ->
-      @destroy()
-    destroy: ->
-      @el.parentNode.removeChild @el
       @
     reset: ->
       super

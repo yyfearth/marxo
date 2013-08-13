@@ -77,20 +77,18 @@ Action
       cell: WorkflowActionCell
     ]
     collection: new Workflows
-    initialize: (options) ->
-      super options
-      @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
-      # temp
-      @$el.find('#wf_template_list').on 'click', '.wf_tempate a', (e) =>
+    events:
+      'click #wf_template_list .wf_tempate a': (e) ->
         e.preventDefault()
         wf = e.target.href.match /#workflow:(\w+)/
         console.log 'wf template clicked', wf
         @create wf[1] if wf.length is 2
         false
+    initialize: (options) ->
+      super options
+      @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
       _remove = @remove.bind @
-      @on
-        remove: _remove
-        remove_selected: _remove
+      @on remove: _remove, remove_selected: _remove
       @
     create: (template) ->
       template = '' if not template or /^(?:new|empty)$/i.test template
@@ -231,16 +229,14 @@ Action
     itemClassName: ''
     targetClassName: 'node thumb'
     collection: new Nodes
-    initialize: (options) ->
-      super options
-      @el.onclick = (e) =>
+    events:
+      'click': (e) ->
         el = e.target
         if el.tagName is 'A' and el.dataset.id
           e.preventDefault()
           @trigger 'select', el.dataset.id, $(el).data 'model'
           false
-      # draggable delegation
-      @$el.on 'mouseenter', '.node', (e) =>
+      'mouseenter .node': (e) ->
         unless $.data e.target, 'is_draggable'
           console.log 'draaa', e.target
           $(e.target).draggable(
@@ -248,7 +244,7 @@ Action
             helper: 'clone'
             zIndex: 999
           ).data 'is_draggable', true
-      @
+        return
     setNodes: (nodes) ->
       if @nodes isnt nodes
         @stopListening @nodes if @nodes
@@ -286,13 +282,13 @@ Action
     el: '#node_editor'
     events:
       'click a.action-thumb': '_addAction'
+      'shown': '_fixStyle'
     _too_many_actions_limit: 7
     initialize: (options) ->
       super options
       @actionsEl = find '#actions', @el
-      _fixStyle = @_fixStyle.bind @
-      $(window).resize _fixStyle
-      $(@el).on 'shown', _fixStyle
+      @_fixStyle = @_fixStyle.bind @
+      $(window).on 'resize', @_fixStyle
       $(@actionsEl).sortable
         axis: 'y'
         delay: 150
@@ -300,6 +296,9 @@ Action
         cancel: '.box-content'
       @_too_many_alert = find '#too_many_actions_alert', @el
       @
+    remove: ->
+      $(window).off 'resize', @_fixStyle
+      super
     _fixStyle: -> # make sure the top of action box will below the title, name and desc
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
       return
@@ -358,7 +357,7 @@ Action
     addAction: (model) ->
       model = new Action model unless model instanceof Action
       actionView = new ActionView model: model, parent: @, container: @actionsEl
-      actionView.on 'close', @removeAction.bind @
+      @listenTo actionView, 'remove', @removeAction.bind @
       actionView.render()
       actionView.el.scrollIntoView()
       @_checkActionLimit()
@@ -399,14 +398,12 @@ Action
       @type = @model.get?('type') or options.model.type or options.type
       throw 'need action model and type' unless @model and @type
       @
-    close: ->
-      @el.parentNode.removeChild @el
+    remove: ->
       model = @model
-      @trigger 'close', @, model
       model.type = null
       model.name = null
       model.data = null
-      @
+      super
     render: ->
       tpl = @constructor.tpl @type
       #@containerEl.appendChild @el
@@ -422,7 +419,7 @@ Action
       @form = find 'form', @el
       @fill @model?.data
       @$el.data model: @model, view: @
-      @listenTo @model, 'destroy', => @destroy()
+      @listenTo @model, 'destroy', @remove.bind @
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
@@ -443,10 +440,6 @@ Action
         data[name] = $el.val() if name
       # TODO: support customized controls
       data
-    destroy: ->
-      @stopListening @model
-      @el.parentNode?.removeChild @el
-      return
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
@@ -492,6 +485,14 @@ Action
       spanX: 300
       spanY: 150
       vertical: false
+
+    events:
+      'click .node': '_togglePopover'
+      'mousedown': '_cancelPopover'
+      'click .popover .btn-delete': (e) -> @_action 'remove', e
+      'click .popover .btn-edit': (e) -> @_action 'edit', e
+      'dblclick .node': (e) -> @_action 'edit', e
+
     initialize: (options) ->
       super options
       @nodeEditor = options.nodeEditor
@@ -513,55 +514,21 @@ Action
         view.editLink conn.getParameter 'link'
         return
 
-      # for popover
-      _hidePopover = -> if view._popped
-        if view._popped._delay
-          view._popped._delay = clearTimeout view._popped._delay
-        else
-          $(view._popped).popover 'hide'
-        return
-      _togglePopover = ->
-        if view._popped isnt @ and not @_hidding
-          @._delay = setTimeout =>
-            $(@).popover 'show' if view._popped = @
-            @._delay = null
-          , 100
-          view._popped = @
-        else
-          _hidePopover()
-          view._popped = null
-        return
       # link click
-      jsPlumb.bind 'click', (conn) ->
+      jsPlumb.bind 'click', (conn) =>
         label = conn.getOverlay 'label'
-        _togglePopover.call label.canvas
+        @_togglePopover target: label.canvas
         return
-      # node click
-      $el = @$el
-      $el.on 'click', '.node', _togglePopover
-      $el.on 'mousedown', (e) ->
-        if view._popped and not view.$el.find('.popover').has(e.target).length
-          _hidePopover()
-          org_popped = view._popped
-          view._popped = null
-          org_popped._hidding = true
-          setTimeout ->
-            delete org_popped._hidding
-          , 300
-        return
-      $el.on 'click', '.popover .btn-delete', (e) -> view._action 'remove', e
-      $el.on 'click', '.popover .btn-edit', (e) -> view._action 'edit', e
-      $el.on 'dblclick', '.node', (e) -> view._action 'edit', e
 
       # droppable for .node
-      $el.droppable
+      @$el.droppable
         accept: '.node.thumb'
         drop: (e, ui) =>
           node = ui.draggable.data 'model'
           if node instanceof Node
             # set style after createNode since it will remove style when clone
-            @createNode node, (node) ->
-              $el_offset = $el.offset()
+            @createNode node, (node) =>
+              $el_offset = @$el.offset()
               x = ui.offset.left - $el_offset.left
               y = ui.offset.top - $el_offset.top
               node.set 'style', "left:#{if x < 0 then 0 else x}px;top:#{if y < 0 then 0 else y}px"
@@ -571,6 +538,36 @@ Action
             false
 
       return
+
+    _hidePopover: ->
+      _popped = @_popped
+      if _popped
+        _popped._delay = clearTimeout(_popped._delay) if _popped._delay
+        $(_popped).popover 'hide'
+      return
+    _cancelPopover: (e) ->
+      if @_popped and not @$el.find('.popover').has(e.target).length
+        @_hidePopover()
+        org_popped = @_popped
+        @_popped = null
+        org_popped._hidding = true
+        setTimeout ->
+          delete org_popped._hidding
+        , 300
+      return
+    _togglePopover: (e) ->
+      el = e.target
+      if @_popped isnt el and not el._hidding
+        el._delay = setTimeout =>
+          $(el).popover 'show' if @_popped = el
+          el._delay = null
+        , 100
+        @_popped = el
+      else
+        @_hidePopover()
+        @_popped = null
+      return
+      
     _action: (action, e) ->
       $target = $ e.target
       $target = $target.parents '.target' unless $target.hasClass 'target'
@@ -599,7 +596,7 @@ Action
         # bind add node/link event
         @listenTo @model.nodes, 'add', @_addNode.bind @
         @listenTo @model.links, 'add', @_addLink.bind @
-        # node/link remove already binded on destory
+        # node/link remove already binded on destroy
 
         @_renderModel wf
         @hash = "#workflow/#{wf.id}"
@@ -815,7 +812,7 @@ Action
     render: ->
       node = @el.node = @model
       @el.id = 'node_' + node.id
-      @listenTo node, 'destroy', => @destroy()
+      @listenTo node, 'destroy', @remove.bind @
       @_renderModel node
       jsPlumb.draggable @$el, stack: '.node'
       @parentEl.appendChild @el
@@ -851,14 +848,11 @@ Action
       @$popover = @$el.data('popover').tip()
       @$popover?.addClass('target').data node: node, view: @
       return
-    destroy: ->
-      @stopListening @model
+    remove: ->
       @$el.popover 'destroy'
       jsPlumb.deleteEndpoint @srcEndpoint
       jsPlumb.deleteEndpoint @
-      @el.parentNode.removeChild @el
-      @trigger 'destroy', @, @model
-      return
+      super
 
   class LinkView extends View
     _popover_tpl: NodeView::_popover_tpl
@@ -874,13 +868,13 @@ Action
           link: link
           view: @
       @setElement conn.canvas
-      @listenTo link, 'destroy', => @destroy()
+      @listenTo link, 'destroy', @remove.bind @
       @label = conn.getOverlay 'label'
       @labelEl = @label.canvas
       @_renderLabel link
       @
     update: (link = @model) ->
-      $(@labelEl).popover 'destroy'
+      @_destroyPopover()
       @_renderLabel link
       @
     _renderLabel: (link) ->
@@ -899,12 +893,12 @@ Action
       @$popover = label$el.data('popover').tip()
       @$popover?.addClass('target').data link: link, view: @
       @
-    destroy: ->
-      console.log 'destroy', @conn, @model, @
-      jsPlumb.detach @conn
-      @stopListening @model
+    _destroyPopover: ->
       $(@labelEl).popover 'destroy'
-      @trigger 'destroy', @, @model
-      return
+    remove: ->
+      console.log 'remove', @conn, @model, @
+      jsPlumb.detach @conn
+      @_destroyPopover()
+      super
 
   WorkflowFrameView

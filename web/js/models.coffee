@@ -72,7 +72,7 @@ define 'models', ['lib/common'], ->
       @nodes._loaded = _nodes_loaded
       _createNodeRef = @_createNodeRef.bind @
       @nodes.forEach _createNodeRef
-      @nodes.on add: _createNodeRef, remove: @_removeNodeRef.bind @
+      @listenTo @nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
 
       _links_loaded = Array.isArray model.links
       links = if _links_loaded then model.links else []
@@ -80,7 +80,7 @@ define 'models', ['lib/common'], ->
       @links._loaded = _links_loaded
       _createLinkRef = @_createLinkRef.bind @
       @links.forEach _createLinkRef
-      @links.on add: _createLinkRef, remove: @_removeLinkRef.bind @
+      @listenTo @links, add: _createLinkRef, remove: @_removeLinkRef.bind @
 
       @set {}
       @

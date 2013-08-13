@@ -125,7 +125,7 @@ Projects
     initialize: (options) ->
       super options
       # fix for backgrid.paginator re-render
-      @collection.on 'reset', => @render()
+      @listenTo @collection, 'reset', @render.bind @
     render: ->
       super
       if @collection.state.totalPages < 2
@@ -340,10 +340,10 @@ Projects
       throw 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
       # add a sequence to models
       _gen_seq = -> collection.fullCollection.each (model, i) -> model._seq = i
-      collection.fullCollection.on reset: _gen_seq
-      collection.on add: _gen_seq, remove: _gen_seq
+      @listenTo collection.fullCollection, 'reset', _gen_seq
+      @listenTo collection, add: _gen_seq, remove: _gen_seq
       # selection may change after remove
-      collection.on 'remove', => @_selection_changed()
+      @listenTo collection, 'remove', @_selection_changed.bind @
       # page size alias
       @pageSize = collection.state.pageSize or 15
       #window.collection = collection # debug
