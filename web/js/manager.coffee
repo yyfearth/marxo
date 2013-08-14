@@ -3,6 +3,7 @@
 define 'manager', ['console', 'models'],
 ({
 find
+tpl
 InnerFrameView
 NavListView
 }, {
@@ -76,31 +77,17 @@ Projects
       super options
 
   class Backgrid.ActionsCell extends Backgrid.Cell
-    @_tpl: {}
-    @tpl: (type) -> # load form html template
-      if not type
-        ''
-      else if @_tpl? and @_tpl[type]?
-        @_tpl[type] # cached
-      else
-        el = find "#t_#{type}_action_cell"
-        if el?
-          # load template
-          tpl = @_tpl[type] = el.innerHTML
-          # remove template from dom
-          el.parentNode.removeChild el
-        else
-          throw 'cannot find template for type: ' + type
-        tpl
     className: 'action-cell'
+    _tpl: {}
+    tpl: (type) -> # load form html template
+      unless type then '' else @_tpl[type] ?= tpl "#t_#{type}_action_cell"
     render: ->
-      @el.innerHTML = @constructor.tpl @column.get('name') or @name
+      @el.innerHTML = @tpl @column.get('name') or @name
       @el.dataset.model = @model.id
       @$el.data 'model', @model
       @$el.find('.btn[title]').attr 'data-container': 'body'
       @delegateEvents()
       @
-
 
   class Backgrid.NodeActionCell extends Backgrid.LinkCell
     render: ->

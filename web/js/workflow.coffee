@@ -4,6 +4,8 @@ define 'workflow', ['console', 'manager', 'models', 'lib/jquery-ui', 'lib/jquery
 ({
 find
 findAll
+tpl
+tplAll
 View
 BoxView
 FrameView
@@ -803,12 +805,7 @@ Action
       dropOptions:
         hoverClass: 'hover'
         activeClass: 'active'
-    _popover_tpl: do ->
-      el = find '#t_popover'
-      throw 'cannot find template for popover #t_popover' unless el?
-      html = el.innerHTML
-      el.parentNode.removeChild el
-      html
+    _popover_tpl: tpl('#t_popover')
     render: ->
       node = @el.node = @model
       @el.id = 'node_' + node.id

@@ -12,6 +12,25 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
 
+  tpl = (selector, returnDom) ->
+    tpl_el = find selector
+    throw 'cannot load template from ' + selector unless tpl_el
+    tpl_el.parentNode.removeChild tpl_el
+    if returnDom then tpl_el else tpl_el.innerHTML
+
+  tplAll = (selector, multi) ->
+    hash = {}
+    unless multi # default
+      tpl_els = findAll '.tpl[name]', tpl selector, true
+    else
+      tpl_els = findAll selector
+    throw 'unable to find tpl elements or empty in ' + selector unless tpl_els.length
+    for tpl in tpl_els
+      name = tpl.getAttribute 'name'
+      throw 'to get a tpl dict, tpl element must have a "name" attribute' unless name
+      hash[name] = tpl.innerHTML
+    hash
+
   # Enable CoffeeScript class for Javascript Mixin
   # https://github.com/yi/coffee-acts-as
   # e.g.: class A ...   class B ...
@@ -513,6 +532,8 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   { # exports
   find
   findAll
+  tpl
+  tplAll
   View
   ConsoleView
   BoxView

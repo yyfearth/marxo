@@ -3,6 +3,8 @@
 define 'content', ['console', 'models', 'manager', 'lib/jquery-ui', 'lib/content'], ({
 find
 findAll
+tpl
+tplAll
 View
 BoxView
 FrameView
@@ -132,7 +134,7 @@ ProjectFilterView
       @submitOptions.reset()
       @
     addSection: (data) ->
-      view = new SectionEditor idx: @sections.length, parent: @ # test only
+      view = new SectionEditor idx: @sections.length, parent: @
       view.render()
       view.fill data
       #console.log data
@@ -225,11 +227,7 @@ ProjectFilterView
     @acts_as ChangeTypeMixin
     tagName: 'section'
     className: 'box section'
-    tpl: do ->
-      tpl_el = document.querySelector('#section_tpl')
-      throw 'cannot load template from #section_tpl' unless tpl_el
-      tpl_el.parentNode.removeChild tpl_el
-      tpl_el.innerHTML
+    tpl: tpl('#section_tpl')
     initialize: (options) ->
       super options
       @idx = options.idx
@@ -298,19 +296,15 @@ ProjectFilterView
       @el.innerHTML = @tpl.replace /section_#/g, @id
       super
       @_bind()
-      @fill() # init read
+      # init read
+      @fill()
       @
     reset: ->
       super
       @$typeEl.change()
       @
     _preview_tpl: do ->
-      tpl_el = document.querySelector('#preview_tpl')
-      throw 'cannot load template from #section_tpl' unless tpl_el
-      tpl_el.parentNode.removeChild tpl_el
-      tpls = {}
-      for tpl in findAll '.tpl[name]', tpl_el
-        tpls[tpl.getAttribute('name')] = tpl.innerHTML
+      tpls = tplAll '#preview_tpl'
       throw 'cannot find preview tpl with name section' unless tpls.section
       tpls
     genPreview: (data) ->
