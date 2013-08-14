@@ -265,7 +265,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           cached = @form.title.value.trim().replace(/\W+/g, '_')[0..32].toLowerCase()
           matched or= not @form.name.value
           @form.name.value = cached if matched
-        return
+          return
         $(@form.name).on
           input: => matched = @form.name.value is cached
           change: => @form.name.value = @form.name.value.toLowerCase()
