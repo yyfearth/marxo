@@ -1,10 +1,7 @@
 #preview_tpl.tpl
   .tpl(name='section')
     section
-      legend
-        span.preview-title {{title}}
-        small.muted &nbsp; (Preview)
-      .preview-desc {{desc}}
+      legend.preview-title {{title}}
       .preview-body {{body}}
   .tpl(name='text')
     input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
