@@ -239,13 +239,12 @@ Action
           @trigger 'select', el.dataset.id, $(el).data 'model'
           false
       'mouseenter .node': (e) ->
-        unless $.data e.target, 'is_draggable'
-          console.log 'draaa', e.target
+        unless $.data e.target, 'is-draggable'
           $(e.target).draggable(
             containment: @parent.el
             helper: 'clone'
             zIndex: 999
-          ).data 'is_draggable', true
+          ).data 'is-draggable', true
         return
     setNodes: (nodes) ->
       if @nodes isnt nodes
@@ -310,9 +309,6 @@ Action
       matched = target.href.match /action:(\w+)/i
       @actions?.add @addAction type: matched[1] if matched
       false
-    _getActionEls: ->
-      els = @actionsEl.querySelectorAll '.action'
-      [].slice.call els or []
     fill: (attributes) ->
       # fill info form
       super attributes
@@ -323,7 +319,7 @@ Action
     save: ->
       console.log 'save'
       # save actions
-      actions = @_getActionEls().map (el) ->
+      actions = findAll('.action', @actionsEl).map (el) ->
         action = $(el).data 'model'
         throw 'cannot get action from action.$el' unless action
         action.attributes
@@ -336,11 +332,11 @@ Action
     reset: ->
       super
       @clearActions()
-      @
     clearActions: ->
-      @actions?.forEach (model) -> model.view?.destroy()
+      @actions?.forEach (model) -> model.view?.remove()
       @actions = null
-      @_getActionEls().forEach (el) -> el.parentNode.removeChild el
+      $(findAll('.action', @actionsEl)).remove()
+      @
     viewAction: (id) ->
       console.log 'view action id:', id
       el = @actionsEl.querySelector '#action_' + id
@@ -377,21 +373,8 @@ Action
         cls.remove 'active'
 
   class ActionView extends BoxView
-    @_tpl: {}
-    @tpl: (type) -> # load form html template
-      tpl = @_tpl[type] # cached
-      unless tpl?
-        el = find "#t_#{type}_action"
-        if el?
-          console.log 'load action tpl', type, el.id
-          # load template
-          tpl = @_tpl[type] = el.innerHTML
-          # remove template from dom
-          el.parentNode.removeChild el
-        else
-          throw 'cannot find template for type: ' + type
-      tpl
     className: 'box action'
+    _tpl: tplAll '#actions_tpl'
     initialize: (options) ->
       super options
       @containerEl = options.container
@@ -407,11 +390,10 @@ Action
       model.data = null
       super
     render: ->
-      tpl = @constructor.tpl @type
+      @el.innerHTML = @_tpl[@type]
+      @el.id = 'action_' + @model.id or 'no_id'
       #@containerEl.appendChild @el
       @containerEl.insertBefore @el, find '.alert', @containerEl
-      @el.innerHTML = tpl
-      @el.id = 'action_' + @model.id or 'no_id'
       # get els in super
       super
       if /webkit/i.test navigator.userAgent
