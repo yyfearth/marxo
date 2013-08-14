@@ -49,6 +49,7 @@ ProjectFilterView
       'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
       'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
+    _html_tpl: tpl('#html_tpl')
     events:
       'click #new_section': -> @addSection()
       'click .btn-save': 'save'

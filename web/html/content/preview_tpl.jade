@@ -55,3 +55,14 @@
       | &nbsp;
       span.fileupload-preview
       button.close.fileupload-exists(data-dismiss='fileupload') &times;
+
+script#html_tpl.tpl(name='html', type='text/html')
+  <!doctype html>
+  <html lang="en-US">
+  <head>
+  <meta charset="utf-8"/>
+  <title>{{title}}</title>
+  {{head}}
+  </head>
+  <body>{{body}}</body>
+  </html>
