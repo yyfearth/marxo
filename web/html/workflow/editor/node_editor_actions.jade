@@ -72,129 +72,130 @@ mixin actions_thumb
 
 // show in the actions box
 mixin actions_tpl
+  #actions_tpl.tpl
 
-  #t_post_info_page_action.tpl
-    .box-header.well
-      h4 Post Information Page
-      mixin box_icons
-    form.box-content
-      ul.action-bar
-        li
-          mixin action_template_select
-        li
-          a.btn.btn-primary(href='#page') Design Page
-        li
-          a.btn.btn-info(href='about:blank', target='_blank') Preview
-        li
-          mixin track_checkbox
-      .info (Page Info)
-      .help-block
-        | Information Page is a web page to display information.
-        br
-        | Click "Design Page" button to design the page.
-        br
-        | Click "Preview" button to preview the generated page.
+    .tpl(name='post_info_page')
+      .box-header.well
+        h4 Post Information Page
+        mixin box_icons
+      form.box-content
+        ul.action-bar
+          li
+            mixin action_template_select
+          li
+            a.btn.btn-primary(href='#page') Design Page
+          li
+            a.btn.btn-info(href='about:blank', target='_blank') Preview
+          li
+            mixin track_checkbox
+        .info (Page Info)
+        .help-block
+          | Information Page is a web page to display information.
+          br
+          | Click "Design Page" button to design the page.
+          br
+          | Click "Preview" button to preview the generated page.
 
-  #t_post_form_action.tpl
-    .box-header.well
-      h4 Post Form
-      mixin box_icons
-    form.box-content
-      ul.action-bar
-        li
-          mixin action_template_select
-        li
-          a.btn.btn-primary(href='#page') Design Form
-        li
-          a.btn.btn-info(href='about:blank', target='_blank') Preview
-        li
-          mixin track_checkbox_disabled
-      .info (Form Info)
-      .help-block
-        | Form is a web page with predefined controlls to allow people to submit.
-        br
-        | Click "Design Form" button to design the form.
-        br
-        | Click "Preview" button to preview the generated page.
+    .tpl(name='post_form')
+      .box-header.well
+        h4 Post Form
+        mixin box_icons
+      form.box-content
+        ul.action-bar
+          li
+            mixin action_template_select
+          li
+            a.btn.btn-primary(href='#page') Design Form
+          li
+            a.btn.btn-info(href='about:blank', target='_blank') Preview
+          li
+            mixin track_checkbox_disabled
+        .info (Form Info)
+        .help-block
+          | Form is a web page with predefined controlls to allow people to submit.
+          br
+          | Click "Design Form" button to design the form.
+          br
+          | Click "Preview" button to preview the generated page.
 
-  #t_post_to_multi_social_media_action.tpl
-    .box-header.well
-      h4 Post to Multiple Social Media
-      mixin box_icons
-    form.box-content
-      ul.action-bar
-        li
-          mixin multi_social_media_group_btns
-        li
-          mixin action_template_select
-        li
-          mixin track_checkbox
-      mixin post_content('social media', 140, 2)
-      .help-block
-        | The maximium content length is 140, which is limited by Twitter.
-        br
-        | Use "Post to Facebook" action instead for longer content length.
+    .tpl(name='post_to_multi_social_media')
+      .box-header.well
+        h4 Post to Multiple Social Media
+        mixin box_icons
+      form.box-content
+        ul.action-bar
+          li
+            mixin multi_social_media_group_btns
+          li
+            mixin action_template_select
+          li
+            mixin track_checkbox
+        mixin post_content('social media', 140, 2)
+        .help-block
+          | The maximium content length is 140, which is limited by Twitter.
+          br
+          | Use "Post to Facebook" action instead for longer content length.
 
-  #t_post_to_twitter_action.tpl
-    .box-header.well
-      h4 Post to Twitter
-      mixin box_icons
-    form.box-content
-      ul.action-bar
-        li
-          mixin action_template_select
-        li
-          mixin track_checkbox
-      mixin post_content('Twitter', 140, 2)
-      .help-block The maximium content length is 140, which is limited by Twitter.
+    .tpl(name='post_to_twitter')
+      .box-header.well
+        h4 Post to Twitter
+        mixin box_icons
+      form.box-content
+        ul.action-bar
+          li
+            mixin action_template_select
+          li
+            mixin track_checkbox
+        mixin post_content('Twitter', 140, 2)
+        .help-block The maximium content length is 140, which is limited by Twitter.
 
-  #t_post_to_facebook_action.tpl
-    .box-header.well
-      h4 Post to Facebook
-      mixin box_icons
-    form.box-content
-      ul.action-bar
-        li
-          mixin action_template_select
-        li
-          mixin track_checkbox
-      mixin post_content('Facebook', 63206, 3)
-      .help-block The maximium content length is 63206, which is limited by Facebook.
+    .tpl(name='post_to_facebook')
+      .box-header.well
+        h4 Post to Facebook
+        mixin box_icons
+      form.box-content
+        ul.action-bar
+          li
+            mixin action_template_select
+          li
+            mixin track_checkbox
+        mixin post_content('Facebook', 63206, 3)
+        .help-block The maximium content length is 63206, which is limited by Facebook.
 
-  #t_send_email_action.tpl
-    .box-header.well
-      h4 Send Email
-      mixin box_icons
-    form.box-content
-      .input-prepend.input-block-level
-        span.add-on To
-        input.span11(name="email_to", title='Send To', type='text',
-        placeholder='email_1@example.com; email_2@example.com')
-      mixin action_template_select
-      mixin track_checkbox
-      textarea.input-block-level(name='email_content', placeholder='Email Content...',
-      title='Content for email (1000 max)', rows=5, maxlength=1000)
+    .tpl(name='send_email')
+      .box-header.well
+        h4 Send Email
+        mixin box_icons
+      form.box-content
+        .input-prepend.input-block-level
+          span.add-on To
+          input.span11(name="email_to", title='Send To', type='text',
+          placeholder='email_1@example.com; email_2@example.com')
+        mixin action_template_select
+        mixin track_checkbox
+        textarea.input-block-level(name='email_content', placeholder='Email Content...',
+        title='Content for email (1000 max)', rows=5, maxlength=1000)
 
-  #t_generate_report_action.tpl
-    .box-header.well
-      h4 Generate Report
-      mixin box_icons
-    form.box-content
-      | Generate Report
-      .help-block Generate Report
+    .tpl(name='generate_report')
+      .box-header.well
+        h4 Generate Report
+        mixin box_icons
+      form.box-content
+        | Generate Report
+        .help-block Generate Report
 
-  #t_calc_data_action.tpl
-    .box-header.well
-      h4 Calculate Data
-      mixin box_icons
-    form.box-content
-      | Calculate Data
-      .help-block Calculate Data
+    .tpl(name='calc_data')
+      .box-header.well
+        h4 Calculate Data
+        mixin box_icons
+      form.box-content
+        | Calculate Data
+        .help-block Calculate Data
 
-  #t_make_schedule_action.tpl
-    .box-header.well
-      h4 Make Schedule
-      mixin box_icons
-    form.box-content
-      | Make Schedule
-      .help-block Make Schedule
+    .tpl(name='make_schedule')
+      .box-header.well
+        h4 Make Schedule
+        mixin box_icons
+      form.box-content
+        | Make Schedule
+        .help-block Make Schedule
