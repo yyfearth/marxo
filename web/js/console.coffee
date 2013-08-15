@@ -25,10 +25,10 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     else
       tpl_els = findAll selector
     throw 'unable to find tpl elements or empty in ' + selector unless tpl_els.length
-    for tpl in tpl_els
-      name = tpl.getAttribute 'name'
+    for tpl_el in tpl_els
+      name = tpl_el.getAttribute 'name'
       throw 'to get a tpl dict, tpl element must have a "name" attribute' unless name
-      hash[name] = tpl.innerHTML
+      hash[name] = tpl_el.innerHTML
     hash
 
   # Enable CoffeeScript class for Javascript Mixin
