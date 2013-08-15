@@ -49,10 +49,11 @@ ProjectFilterView
       'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
       'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
+    _preview_html_tpl: tpl('#preview_html_tpl').trim()
     events:
       'click #new_section': -> @addSection()
       'click .btn-save': 'save'
-    # TODO: preview btn
+      'click .btn-preview': 'togglePreview'
     initialize: (options) ->
       super options
       _hash_regex = /content\/.+/
@@ -61,6 +62,8 @@ ProjectFilterView
         setTimeout -> # fallback when go back to the same hash
           location.hash = '#content' if _hash_regex.test location.hash
         , 100
+      @iframe = find 'iframe', @el
+      @btnPreview = find '.btn-preview', @el
       @editor = find '.rich-editor', @el
       @pageDesc = new BoxFormView el: find '#page_desc', @el
       # TODO: desc rich editor support with code which
@@ -91,7 +94,7 @@ ProjectFilterView
         #console.log 'add section', section
         @addSection section
       @
-    save: ->
+    read: (callback) ->
       read = (formView) ->
         deferred = $.Deferred()
         if formView instanceof BoxFormView
@@ -108,6 +111,8 @@ ProjectFilterView
           deferred.reject formView
         deferred.promise()
 
+      throw 'content editor read is async, callback is needed' unless typeof callback is 'function'
+
       defered = [read @pageDesc]
       for el in findAll '.box.section', @el
         _idx = el.dataset.idx
@@ -116,17 +121,21 @@ ProjectFilterView
         defered.push data
       defered.push read @submitOptions
 
-      $.when.apply(@, defered).done (page_desc, sections..., submit_options) =>
+      $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections..., submit_options) ->
         #console.log 'save content editor', page_desc, sections, submit_options
-        @data.set 'title', page_desc.title
-        sections = sections.sort (a, b) -> a._idx - b._idx
-        delete sec._idx for sec in sections
-        # TODO: deal with desc
-        # TODO: deal with invalid settings
-        @data.set 'data', {page_desc, sections, submit_options}
-        @callback 'save'
-        @hide true
+        callback {page_desc, sections, submit_options}
       @
+    save: ->
+      @read (data) =>
+        if data
+          @data.set 'title', page_desc.title
+          sections = sections.sort (a, b) -> a._idx - b._idx
+          delete sec._idx for sec in sections
+          # TODO: deal with desc
+          # TODO: deal with invalid settings
+          @data.set 'data', data
+          @callback 'save'
+          @hide true
     reset: -> # called after close
       super
       @sectionsEl.innerHTML = ''
@@ -145,6 +154,43 @@ ProjectFilterView
       @sections[view.id] = null
       view.remove()
       @
+    togglePreview: ->
+      cls = @iframe.classList
+      btnCls = @btnPreview.classList
+      if cls.contains 'active'
+        # hide
+        cls.remove 'active'
+        btnCls.remove 'active'
+      else
+        # gen preview and show
+        @btnPreview.disabled = true
+        @read (data) =>
+          #console.log 'read', data
+          if data
+            iframe = @iframe
+            html = @_genPreview data
+            if html isnt iframe.getAttribute 'srcdoc'
+              iframe.setAttribute 'srcdoc', html
+              unless 'srcdoc' of iframe
+                url = 'javascript: window.frameElement.getAttribute("srcdoc");'
+                iframe.src = url
+                iframe.contentWindow?.location = url
+            cls.add 'active'
+            btnCls.add 'active'
+          else
+            cls.remove 'active'
+            btnCls.remove 'active'
+          @btnPreview.disabled = false
+      @
+    _genPreview: ({page_desc, sections}) ->
+      #console.log 'gen preview page', page_desc, sections
+      content = ["<h1>#{page_desc.title}</h1>\n<p>#{page_desc.desc or ''}</p>"]
+      for data, i in sections
+        view = new SectionEditor idx: i
+        content.push view.genPreview data
+      content = content.join '\n'
+      @_preview_html_tpl.replace('{{content}}', content).replace(/(?=>)\s+|\s+(?=<)/mg, '')
+
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
       fontTarget.innerHTML = ''
