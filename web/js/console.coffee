@@ -25,10 +25,10 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     else
       tpl_els = findAll selector
     throw 'unable to find tpl elements or empty in ' + selector unless tpl_els.length
-    for tpl in tpl_els
-      name = tpl.getAttribute 'name'
+    for tpl_el in tpl_els
+      name = tpl_el.getAttribute 'name'
       throw 'to get a tpl dict, tpl element must have a "name" attribute' unless name
-      hash[name] = tpl.innerHTML
+      hash[name] = tpl_el.innerHTML
     hash
 
   # Enable CoffeeScript class for Javascript Mixin
@@ -265,7 +265,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           cached = @form.title.value.trim().replace(/\W+/g, '_')[0..32].toLowerCase()
           matched or= not @form.name.value
           @form.name.value = cached if matched
-        return
+          return
         $(@form.name).on
           input: => matched = @form.name.value is cached
           change: => @form.name.value = @form.name.value.toLowerCase()
