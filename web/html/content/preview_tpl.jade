@@ -2,6 +2,7 @@
   .tpl(name='section')
     section
       legend.preview-title {{title}}
+      p.preview-desc {{desc}}
       .preview-body {{body}}
   .tpl(name='text')
     input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
@@ -53,13 +54,24 @@
       span.fileupload-preview
       button.close.fileupload-exists(data-dismiss='fileupload') &times;
 
-script#html_tpl.tpl(name='html', type='text/html')
+script#preview_html_tpl.tpl(name='html', type='text/html')
   <!doctype html>
   <html lang="en-US">
   <head>
   <meta charset="utf-8"/>
-  <title>{{title}}</title>
-  {{head}}
+  <link href="css/preview.css" rel="stylesheet" media="screen"/>
   </head>
-  <body>{{body}}</body>
+  <body>
+  <div class="container">
+  <form>
+  {{content}}
+  <div class="form-actions">
+  <input type="submit" class="btn btn-primary" disabled value="Submit"/>
+  &nbsp;
+  <input class="btn" type="reset"/>
+  </div>
+  </from>
+  </div>
+  <script src="js/lib/preview.js"></script>
+  </body>
   </html>

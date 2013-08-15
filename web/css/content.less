@@ -5,7 +5,7 @@
   section.box {
     max-width: 1000px;
     min-width: 600px;
-    margin: 15px auto;
+    margin: 0 auto 15px auto;
   }
 
   .section.box {
@@ -78,6 +78,25 @@
     }
     .preview-desc {
       margin: 10px 0;
+    }
+  }
+
+  iframe {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: #fff;
+    border: none;
+    margin: 0;
+    &.active {
+      display: block;
+      & + article {
+        display: none;
+      }
     }
   }
 }
