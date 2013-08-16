@@ -26,6 +26,8 @@ clean: clean_js clean_css clean_res clean_html
 
 clean_js:
 	rm -rf "$(dist)/js"
+clean_lib:
+	rm -rf "$(dist)/js/lib"
 clean_css:
 	rm -rf "$(dist)/css"
 clean_res:
@@ -33,7 +35,7 @@ clean_res:
 clean_html:
 	rm -f "$(dist)/index.html"
 
-lib: $(dist)/js/lib
+lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js
 main: $(dist)/js/main.js
 modules: $(DIST_MODULES)
 js: lib main modules
@@ -49,21 +51,55 @@ $(dist)/font: font
 	$(print)
 	cp -r $^/ $@/
 
-$(dist)/js/lib: js/lib
+$(dist)/js/lib/jquery-ui.js: js/lib/jquery-ui.js
 	$(print)
-	@mkdir -p $@/test/
-	cp $^/*.js $@/
-	cp $^/test/*.js $@/test/
+	@mkdir -p $(@D)
+	cp $^ $@
+
+$(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js
+	$(print)
+	@mkdir -p $(@D)
+	cat $^ | uglifyjs - --screw-ie8 -o $@
 
 $(dist)/js/main.js: js/models.coffee js/console.coffee js/manager.coffee js/main.coffee
 	@echo "$(CWHT)- $(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
 	@mkdir -p $(@D)
-	coffee -pjc $^ | uglifyjs - -o $@ -mc --screw-ie8
+	coffee -pjc $^ | uglifyjs - -mco $@ --screw-ie8
+
+$(dist)/js/test.js: js/test.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/backbone.localstorage.js - | uglifyjs - -mco $@ --screw-ie8
+
+$(dist)/js/workflow.js: js/workflow.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/jquery-jsplumb.js - | uglifyjs - -mco $@ --screw-ie8
+
+$(dist)/js/calendar.js: js/calendar.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/fullcalendar.js - | uglifyjs - -mco $@ --screw-ie8
+
+$(dist)/js/content.js: js/content.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/content.js - | uglifyjs - -mco $@ --screw-ie8
+
+$(dist)/js/report.js: js/report.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/chart.js - | uglifyjs - -mco $@ --screw-ie8
+
+$(dist)/js/preview.js: js/preview.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/preview.js - | uglifyjs - -mco $@ --screw-ie8
 
 $(dist)/js/%.js: js/%.coffee
 	$(print)
 	@mkdir -p $(@D)
-	coffee -pc $< | uglifyjs - -o $@ -mc --screw-ie8
+	coffee -pc $< | uglifyjs - -mco $@ --screw-ie8
 
 $(dist)/css/console.css: css/console.less
 	$(print)
