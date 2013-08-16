@@ -8,7 +8,8 @@
  *
  */
 
-(function () {
+define('lib/backbone.localstorage', ['lib/common'], function () {
+
 // A simple module to replace `Backbone.sync` with *localStorage*-based
 // persistence. Models are given GUIDS, and saved into a JSON object. Simple
 // as that.
@@ -42,7 +43,7 @@
 		var store = this.localStorage().getItem(this.name);
 		this.records = (store && store.split(",")) || [];
 	};
-	
+
 	var seperator = '/'
 
 	_.extend(Backbone.LocalStorage.prototype, {
@@ -150,7 +151,7 @@
 			key = model.urlRoot || url.replace(model.id, '');
 			if (key.slice(-1) == '/')
 				key = key.slice(0, -1);
-		} else if (model instanceof Backbone.Collection){
+		} else if (model instanceof Backbone.Collection) {
 			key = url;
 		}
 		var store = stores[key];
@@ -222,4 +223,4 @@
 	Backbone.sync = Backbone.LocalStorage.sync;
 
 	return Backbone.LocalStorage;
-}).call(window);
+});

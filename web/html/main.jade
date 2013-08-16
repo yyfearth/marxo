@@ -4,6 +4,7 @@ html(lang='en-US')
     meta(charset='utf-8')
     title Loading... - MARXO Console
     link(href='css/console.css', rel='stylesheet', media='screen')
+    link(rel='prefetch', href='font/marxo-font-icon.woff')
   body(style='opacity:0')
     include signin
     #main
@@ -46,6 +47,6 @@ html(lang='en-US')
             include profile
 
     - if (!test)
-      script(data-main='js/main', src='js/lib/require.js')
+      script(data-main='js/main', src='js/lib/require.js', async)
     - else
-      script(data-main='js/test', src='js/lib/require.js')
+      script(data-main='js/test', src='js/lib/require.js', async)
