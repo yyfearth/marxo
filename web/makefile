@@ -39,7 +39,7 @@ lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js
 main: $(dist)/js/main.js
 modules: $(DIST_MODULES)
 js: lib main modules
-css: $(dist)/css/console.css
+css: $(dist)/css/console.css $(dist)/css/preview.css
 html: $(dist)/index.html
 res: $(dist)/img $(dist)/font
 
@@ -101,10 +101,10 @@ $(dist)/js/%.js: js/%.coffee
 	@mkdir -p $(@D)
 	coffee -pc $< | uglifyjs - -mco $@ --screw-ie8
 
-$(dist)/css/console.css: css/console.less
+$(dist)/css/%.css: css/%.less
 	$(print)
 	@mkdir -p $(@D)
-	lessc --no-ie-compat --yui-compress -O2 "css/console.less" "$(dist)/css/console.css"
+	lessc --no-ie-compat --yui-compress -O2 $^ $@
 
 $(dist)/index.html: index.jade
 	$(print)
