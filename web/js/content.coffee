@@ -117,7 +117,6 @@ ProjectFilterView
       for el in findAll '.box.section', @el
         _idx = el.dataset.idx
         data = read @sections[_idx]
-        data._idx = _idx
         defered.push data
       defered.push read @submitOptions
 
@@ -128,9 +127,7 @@ ProjectFilterView
     save: ->
       @read (data) =>
         if data
-          @data.set 'title', page_desc.title
-          sections = sections.sort (a, b) -> a._idx - b._idx
-          delete sec._idx for sec in sections
+          @data.set 'title', data.page_desc.title
           # TODO: deal with desc
           # TODO: deal with invalid settings
           @data.set 'data', data
