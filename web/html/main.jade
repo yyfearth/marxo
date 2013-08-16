@@ -46,6 +46,6 @@ html(lang='en-US')
             include profile
 
     - if (!test)
-      script(data-main='js/main', src='js/lib/require.js')
+      script(data-main='js/main', src='js/lib/require.js', async)
     - else
-      script(data-main='js/test', src='js/lib/require.js')
+      script(data-main='js/test', src='js/lib/require.js', async)
