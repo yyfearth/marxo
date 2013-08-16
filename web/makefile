@@ -31,7 +31,7 @@ clean_lib:
 clean_css:
 	rm -rf "$(dist)/css"
 clean_res:
-	rm -rf "$(dist)/font" "$(dist)/img"
+	rm -rf "$(dist)/font"
 clean_html:
 	rm -f "$(dist)/index.html"
 
@@ -41,11 +41,7 @@ modules: $(DIST_MODULES)
 js: lib main modules
 css: $(dist)/css/console.css $(dist)/css/preview.css
 html: $(dist)/index.html
-res: $(dist)/img $(dist)/font
-
-$(dist)/img: img
-	$(print)
-	cp -r $^/ $@/
+res: $(dist)/font
 
 $(dist)/font: font
 	$(print)
