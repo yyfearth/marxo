@@ -312,7 +312,7 @@ Projects
         editable: false
     }
     _defaultEvents:
-      'click .action-cell .btn': '_action_cell'
+      'click .action-cell button[name]': '_action_cell'
       'click .action-buttons .btn': '_action_buttons'
       'change .select-row-cell input[type="checkbox"]': '_selection_changed'
     initialize: (options) ->
