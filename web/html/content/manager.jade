@@ -18,17 +18,16 @@
           li.active
             a(href='#media:all') All
           li
-            a(href='#media:page') Page
+            a.icon-page(href='#media:page') Page
           li
-            a(href='#media:facebook') Facebook
+            a.icon-facebook(href='#media:facebook') Facebook
           li
-            a(href='#media:twitter') Twitter
+            a.icon-twitter(href='#media:twitter') Twitter
           li
-            a(href='#media:email') Email
+            a.icon-mail(href='#media:email') Email
       li.grid-filter
       li.action-buttons.pull-right
-        button.btn(name='reload', title='Reload Table') Reload
-        button.btn.btn-danger.enable_if_selected(name='remove_selected', title='Remove Selected', disabled).tmp Remove
+        button.btn.icon-refresh(name='reload', title='Reload Table') Reload
     #t_content_action_cell.tpl
       a.btn.btn-info.btn-round.icon-search(title='View post in new window', name='view', target='_blank')
       a.btn.btn-primary.btn-round.icon-edit(title='Edit', name='edit')
