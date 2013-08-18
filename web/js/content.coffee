@@ -26,10 +26,10 @@ ProjectFilterView
       @manager = new ContentManagerView el: @el, parent: @
       @editor = new ContentEditor el: '#content_editor', parent: @
       @
-    open: (name) ->
+    open: (name, arg) ->
       if name
         @editor.render() unless @editor.rendered
-        @editor.load name, (action, data) ->
+        @editor.load name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
@@ -71,14 +71,14 @@ ProjectFilterView
         distance: 15
         cancel: '.box-content'
       @
-    load: (id, callback) ->
+    load: (id, action, callback) ->
       if id instanceof Content
         @popup id, callback
       else if typeof id is 'string'
-        new Content({id}).fetch success: (data) => @popup data, callback
+        new Content({id}).fetch success: (data) => @popup data, action, callback
       else
         throw 'content editor can only load a content model or an id string'
-    popup: (data, callback) ->
+    popup: (data, action, callback) ->
       super data, callback
       #console.log 'content form', data.attributes
       @pageDesc.fill data.attributes
@@ -88,6 +88,10 @@ ProjectFilterView
       @cfg?.sections?.forEach (section) =>
         #console.log 'add section', section
         @addSection section
+      if action is 'preview'
+        setTimeout =>
+          @togglePreview()
+        , 500
       @
     read: (callback) ->
       read = (formView) ->
@@ -133,6 +137,8 @@ ProjectFilterView
       @sectionsEl.innerHTML = ''
       @pageDesc.reset()
       @submitOptions.reset()
+      @iframe.classList.remove 'active'
+      @btnPreview.classList.remove 'active'
       @
     addSection: (data) ->
       view = new SectionEditor idx: @sections.length, parent: @
@@ -475,11 +481,12 @@ ProjectFilterView
         view_btn.href = @model.get 'url'
       else
         view_btn.style.display = 'none'
-      edit_btn = find 'a[name="edit"]', @el
-      if 'POSTED' isnt @model.get 'status'
-        edit_btn.href = '#content/' + @model.id
+      report_btn = find 'a[name="report"]', @el
+      if 'POSTED' is @model.get 'status'
+        report_btn.href = '#report/test' #"#report/#{@model.id}"
+        @$el.find('.pre-status').hide()
       else
-        edit_btn.style.display = 'none'
+        report_btn.style.display = 'none'
       @
 
   class ContentManagerView extends ManagerView
@@ -532,14 +539,8 @@ ProjectFilterView
         remove: _remove
         remove_selected: _remove
       @
-    remove: (models) ->
-      models = [models] unless Array.isArray models
-      console.log 'remove', models
-      #  if confirm 'Make sure these selected workflows is not in use!\nDo you realy want to remove selected workflows?'
-      #    # TODO: check usage, if used cannot remove directly
-      #    model?.destroy() for model in models
-      #    @reload() if models.length >= @pageSize / 2
-      #  #console.log 'delete', model, @
+    block: (model) ->
+      console.log 'block', model
       @
     reload: ->
       super

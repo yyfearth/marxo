@@ -498,6 +498,8 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         @show 'workflow', id, {link, node, action}
       'project/:id(/link/:link)(/node/:node)(/action/:action)': (id, link, node, action) ->
         @show 'project', id, {link, node, action}
+      'content/:id(/:action)': (id, action) ->
+        @show 'content', id, action
     constructor: (options) ->
       super options
       @route '', 'home', =>
