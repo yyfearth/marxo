@@ -82,7 +82,8 @@ Projects
     tpl: (type) -> # load form html template
       unless type then '' else @_tpl[type] ?= tpl "#t_#{type}_action_cell"
     render: ->
-      @el.innerHTML = @tpl @column.get('name') or @name
+      html = @tpl @column.get('name') or @name
+      @el.innerHTML = html.replace /\{\{id\}\}/g, @model.id
       @el.dataset.model = @model.id
       @$el.data 'model', @model
       @$el.find('.btn[title]').attr 'data-container': 'body'

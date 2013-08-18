@@ -33,14 +33,6 @@ ProjectFilterView
         @manager.render()
       @
 
-  class ReportActionCell extends Backgrid.ActionsCell
-    render: ->
-      super
-      # TODO: show buttons depend on status
-      view_btn = @el.querySelector('a[name="view"]')
-      view_btn.href = '#report/' + @model.id
-      @
-
   class ReportManagerView extends ManagerView
     columns: [
       'checkbox'
@@ -68,7 +60,7 @@ ProjectFilterView
       label: ''
       editable: false
       sortable: false
-      cell: ReportActionCell
+      cell: 'actions'
     ]
     collection: new Reports
     initialize: (options) ->
