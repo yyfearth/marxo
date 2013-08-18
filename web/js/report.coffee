@@ -26,7 +26,8 @@ ProjectFilterView
       @
     open: (name) ->
       if name
-        @viewer.show true
+        @viewer.popup {}, (action, data) ->
+          console.log 'report dialog', action, data
       else unless @manager.rendered
         # TODO: show real data
         @manager.render()
@@ -115,9 +116,9 @@ ProjectFilterView
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'
+    goBackOnHidden: '#report'
     initialize: (options) ->
       super options
-      @on 'hidden', -> location.hash = '#report'
 
       data = [
         value: 30,

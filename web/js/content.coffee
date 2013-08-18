@@ -50,18 +50,13 @@ ProjectFilterView
       'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
     _preview_html_tpl: tpl('#preview_html_tpl').trim()
+    goBackOnHidden: '#content'
     events:
       'click #new_section': -> @addSection()
       'click .btn-save': 'save'
       'click .btn-preview': 'togglePreview'
     initialize: (options) ->
       super options
-      _hash_regex = /content\/.+/
-      @on 'hidden', ->
-        history.go(-1) if _hash_regex.test location.hash
-        setTimeout -> # fallback when go back to the same hash
-          location.hash = '#content' if _hash_regex.test location.hash
-        , 100
       @iframe = find 'iframe', @el
       @btnPreview = find '.btn-preview', @el
       @editor = find '.rich-editor', @el

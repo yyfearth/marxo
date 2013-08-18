@@ -205,8 +205,17 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @$el.on 'hidden', (e) =>
         if e.target is @el and false isnt @trigger 'hidden', @
           @callback()
+          @goBack() if @goBackOnHidden
           @reset()
-      return
+      @
+    goBack: ->
+      hash = location.hash
+      if @_hash is hash
+        history.go -1
+        if typeof @goBackOnHidden is 'string' then setTimeout ->
+          location.hash = @goBackOnHidden if location.hash is hash
+        , 100
+      @
     popup: (data, callback) ->
       if data is @data
         callback? 'ignored'
@@ -214,6 +223,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         @reset()
         @data = data
         @_callback = callback
+        @_hash = location.hash
         @show true
       @
     callback: (action = 'cancel') ->
@@ -222,11 +232,12 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       @_callback? action, @data, @
       @_action = action
       #@reset() # move to hidden
-      return
+      @
     reset: ->
       @data = null
       @_action = null
       @_callback = null
+      @_hash = null
       @trigger 'reset', @
       @
     #action: -> # should be customized, e.g. ok, save, export
