@@ -133,6 +133,8 @@ ProjectFilterView
       @sectionsEl.innerHTML = ''
       @pageDesc.reset()
       @submitOptions.reset()
+      @iframe.classList.remove 'active'
+      @btnPreview.classList.remove 'active'
       @
     addSection: (data) ->
       view = new SectionEditor idx: @sections.length, parent: @
@@ -475,11 +477,12 @@ ProjectFilterView
         view_btn.href = @model.get 'url'
       else
         view_btn.style.display = 'none'
-      edit_btn = find 'a[name="edit"]', @el
-      if 'POSTED' isnt @model.get 'status'
-        edit_btn.href = '#content/' + @model.id
+      report_btn = find 'a[name="report"]', @el
+      if 'POSTED' is @model.get 'status'
+        report_btn.href = '#report/test' #"#report/#{@model.id}"
+        @$el.find('.pre-status').hide()
       else
-        edit_btn.style.display = 'none'
+        report_btn.style.display = 'none'
       @
 
   class ContentManagerView extends ManagerView
@@ -532,14 +535,8 @@ ProjectFilterView
         remove: _remove
         remove_selected: _remove
       @
-    remove: (models) ->
-      models = [models] unless Array.isArray models
-      console.log 'remove', models
-      #  if confirm 'Make sure these selected workflows is not in use!\nDo you realy want to remove selected workflows?'
-      #    # TODO: check usage, if used cannot remove directly
-      #    model?.destroy() for model in models
-      #    @reload() if models.length >= @pageSize / 2
-      #  #console.log 'delete', model, @
+    block: (model) ->
+      console.log 'block', model
       @
     reload: ->
       super
