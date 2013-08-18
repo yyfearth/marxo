@@ -82,7 +82,8 @@ Projects
     tpl: (type) -> # load form html template
       unless type then '' else @_tpl[type] ?= tpl "#t_#{type}_action_cell"
     render: ->
-      @el.innerHTML = @tpl @column.get('name') or @name
+      html = @tpl @column.get('name') or @name
+      @el.innerHTML = html.replace /\{\{id\}\}/g, @model.id
       @el.dataset.model = @model.id
       @$el.data 'model', @model
       @$el.find('.btn[title]').attr 'data-container': 'body'
@@ -312,7 +313,7 @@ Projects
         editable: false
     }
     _defaultEvents:
-      'click .action-cell .btn': '_action_cell'
+      'click .action-cell button[name]': '_action_cell'
       'click .action-buttons .btn': '_action_buttons'
       'change .select-row-cell input[type="checkbox"]': '_selection_changed'
     initialize: (options) ->

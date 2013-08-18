@@ -54,14 +54,6 @@ Action
 
   ## Workflow Manager
 
-  class WorkflowActionCell extends Backgrid.ActionsCell
-    render: ->
-      super
-      # TODO: show buttons depend on status
-      edit_btn = @el.querySelector('a[name="edit"]')
-      edit_btn.href = '#workflow/' + @model.id
-      @
-
   class WorkflowManagerView extends ManagerView
     columns: [
       'checkbox'
@@ -76,7 +68,7 @@ Action
       label: ''
       editable: false
       sortable: false
-      cell: WorkflowActionCell
+      cell: 'actions'
     ]
     collection: new Workflows
     events:
