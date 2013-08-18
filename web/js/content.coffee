@@ -26,10 +26,10 @@ ProjectFilterView
       @manager = new ContentManagerView el: @el, parent: @
       @editor = new ContentEditor el: '#content_editor', parent: @
       @
-    open: (name) ->
+    open: (name, arg) ->
       if name
         @editor.render() unless @editor.rendered
-        @editor.load name, (action, data) ->
+        @editor.load name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
@@ -71,14 +71,14 @@ ProjectFilterView
         distance: 15
         cancel: '.box-content'
       @
-    load: (id, callback) ->
+    load: (id, action, callback) ->
       if id instanceof Content
         @popup id, callback
       else if typeof id is 'string'
-        new Content({id}).fetch success: (data) => @popup data, callback
+        new Content({id}).fetch success: (data) => @popup data, action, callback
       else
         throw 'content editor can only load a content model or an id string'
-    popup: (data, callback) ->
+    popup: (data, action, callback) ->
       super data, callback
       #console.log 'content form', data.attributes
       @pageDesc.fill data.attributes
@@ -88,6 +88,10 @@ ProjectFilterView
       @cfg?.sections?.forEach (section) =>
         #console.log 'add section', section
         @addSection section
+      if action is 'preview'
+        setTimeout =>
+          @togglePreview()
+        , 500
       @
     read: (callback) ->
       read = (formView) ->
