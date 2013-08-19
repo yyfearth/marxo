@@ -43,13 +43,10 @@ Action
           console.log 'show workflow mgr'
           @switchTo @manager
         else
-          if name
-            console.log 'show workflow editor for', name
-            @switchTo @editor
-            @editor.load name, sub
-          else unless @manager.rendered
-            # 1st time default frame
-            @switchTo @manager
+          throw 'open workflow with a name or id is needed' unless name
+          console.log 'show workflow editor for', name
+          @switchTo @editor
+          @editor.load name, sub
       @
 
   ## Workflow Manager

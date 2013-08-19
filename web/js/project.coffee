@@ -27,13 +27,10 @@ Projects
         when 'mgr'
           @switchTo @manager
         else
-          if name
-            @switchTo @viewer
-            @viewer.load name
-            @viewer.popup sub if sub
-          else unless @manager.rendered
-            # 1st time default frame
-            @switchTo @manager
+          throw 'open project with a name or id is needed' unless name
+          @switchTo @viewer
+          @viewer.load name
+          @viewer.popup sub if sub
       return
     render: ->
       super
