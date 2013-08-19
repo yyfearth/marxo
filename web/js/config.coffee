@@ -29,9 +29,7 @@ Publichers
         when 'tenant'
           @switchTo @profile
         else
-          unless @profile.rendered
-            # 1st time default frame
-            @switchTo @profile
+          throw 'empty or unknown sub action for config frame ' + name
       @
 
   class TenantProfileView extends InnerFrameView

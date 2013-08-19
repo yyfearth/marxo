@@ -68,30 +68,29 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   class ConsoleView extends View
     el: '#main'
     events:
-      'click .dropdown-menu': -> # hide menu after click
-        @navContainer.classList.add 'hide-dropdown'
-        $(document.body).one 'mousemove', =>
-          @navContainer.classList.remove 'hide-dropdown'
+      'click .dropdown-menu li': -> # hide menu after click
+        cls = @navContainer.classList
+        cls.add 'hide-dropdown'
+        $(document.body).one 'mousemove', ->
+          cls.remove 'hide-dropdown'
         return
     @get: -> # singleton
-      unless @instance?
-        @instance = new @
+      @instance = new @ unless @instance?
       @instance
     initialize: ->
       @frames = {}
       findAll('.frame', @el).forEach (frame) =>
-        navEl = find "#navbar a[href=\"##{frame.id}\"]"
         @frames[frame.id] =
           id: frame.id
           el: frame
           parent: @
-          navEl: navEl?.parentElement
         return
       # fix style
       @navContainer = find '#navbar', @el
       @framesContainer = find '#frames', @el
       @_fixStyle = @_fixStyle.bind @
       $(window).on 'resize', @_fixStyle
+      @$frames = $('#navbar [data-frame]')
       # Init tooltips
       @$el.tooltip selector: '[title]'
       return
@@ -119,8 +118,12 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         find('#main .frame.active')?.classList.remove 'active'
         find('#navbar li.active')?.classList.remove 'active'
         frame.el.classList.add 'active'
-        frame.navEl.classList.add 'active'
         $(window).resize()
+
+      $frame = @$frames.filter("[data-frame='#{frame.id}']").addClass 'active'
+      $target = $frame.find("[data-inner-frame='#{name}']").addClass 'active'
+      @$frames.not($frame).removeClass 'active'
+      @$frames.find(".active[data-inner-frame]").not($target).removeClass 'active'
       return
     signout: ->
       # TODO: sign out
@@ -353,8 +356,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   class SignInView extends View
     el: '#signin'
     @get: -> # singleton
-      unless @instance?
-        @instance = new @
+      @instance = new @ unless @instance?
       @instance
     events:
       'submit form': 'submit'
@@ -480,19 +482,8 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
 
   class Router extends Backbone.Router
     @get: -> # singleton
-      unless @instance?
-        @instance = new @
+      @instance = new @ unless @instance?
       @instance
-    frames: [
-      'home'
-      'project'
-      'workflow'
-      'calendar'
-      'content'
-      'report'
-      'config'
-      'profile'
-    ]
     routes:
       'workflow/:id(/link/:link)(/node/:node)(/action/:action)': (id, link, node, action) ->
         @show 'workflow', id, {link, node, action}
@@ -500,47 +491,52 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         @show 'project', id, {link, node, action}
       'content/:id(/:action)': (id, action) ->
         @show 'content', id, action
+      'signout': 'signout'
     constructor: (options) ->
       super options
       @route '', 'home', =>
         @navigate 'home', replace: true
         @show 'home'
-      @frames.forEach (frame) =>
-        @route frame + '(/:name)(/)', frame, (name) =>
-          @show frame, name
-        return
       @route 'signin', 'signin', => return
-      @route 'signout', 'signout'
-      return
+
+      @frames = {}
+      for frameMenu in findAll '[data-frame]', find '#navbar'
+        frame = frameMenu.dataset.frame
+        _frame = @frames[frame] =
+          _name: frame
+        for innerMenu in findAll '[data-inner-frame]', frameMenu
+          innerFrame = innerMenu.dataset.innerFrame
+          _inner = _frame[innerFrame] =
+            _name: innerFrame
+          _frame._cur = _inner if innerMenu.dataset.default
+
+        do (frame) => @route frame + '(/:name)(/)', frame, (name) =>
+          @show frame, name
+      @
 
     show: (frame, name, sub) ->
       unless sessionStorage.user
         @navigate 'signin', replace: true
-        return
-      console.log 'route', frame, (name or ''), sub
-      ConsoleView.get()?.showFrame frame, name, sub
-      handler = @[frame]
-      handler.call @, name if handler?
-      return
+      else
+        console.log 'route', frame, (name or ''), sub
+        _frame = @frames[frame]
+        if _frame._cur? and not name
+          name = _frame._cur?._name
+          if name then @navigate "##{frame}/#{name}", replace: true
+        _frame._cur = _frame[name] if name
+        @frames._cur = _frame
+        #console.log 'frames data', frame, name, @frames
 
-    #home: -> return
-#    project: (name) ->
-#      if name is 'new'
-#        console.log 'show project create'
-#      else if name is 'mgr'
-#        console.log 'show project mgr'
-#      else if name
-#        console.log 'show project viewr?/editor? for', name
-#      return
-    #calendar: (name) -> return
-    #content: (name) -> return
-    #report: (name) -> return
+        ConsoleView.get()?.showFrame frame, name, sub
+        handler = @[frame]
+        handler.call @, name if handler?
+      @
 
     signout: ->
       console.log 'sign out'
       ConsoleView.get().signout()
       @navigate 'signin', replace: true
-      return
+      @
 
   { # exports
   find
