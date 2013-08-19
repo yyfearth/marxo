@@ -1,6 +1,11 @@
 "use strict"
 
-define 'content', ['console', 'models', 'manager', 'lib/jquery-ui', 'lib/content'], ({
+define 'content', [
+  'console', 'models', 'manager'
+  'lib/jquery-ui'
+  'lib/bootstrap-fileupload'
+  'lib/bootstrap-wysiwyg'
+], ({
 find
 findAll
 tpl

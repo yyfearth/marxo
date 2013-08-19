@@ -1,9 +1,9 @@
-/* http://github.com/mindmup/bootstrap-wysiwyg */
-/*global jQuery, $, FileReader*/
-/*jslint browser:true*/
-/* Modified by yyfearth@gmail.com for hotkeys with jQuery 2.0 */
+/**
+ * http://github.com/mindmup/bootstrap-wysiwyg
+ * Modified by yyfearth@gmail.com for hotkeys with jQuery 2.0
+ */
 (function ($) {
-	'use strict';
+	"use strict";
 	var readFileIntoDataUrl = function (fileInfo) {
 		var loader = $.Deferred(),
 			fReader = new FileReader();
@@ -220,4 +220,7 @@
 		dragAndDropImages: true,
 		fileUploadError: function (reason, detail) { console.log("File upload error", reason, detail); }
 	};
+
+	// AMD
+	define('lib/bootstrap-wysiwyg', ['lib/common']);
 }(window.jQuery));
