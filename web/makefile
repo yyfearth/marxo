@@ -80,7 +80,7 @@ $(dist)/js/calendar.js: js/calendar.coffee
 $(dist)/js/content.js: js/content.coffee
 	$(print)
 	@mkdir -p $(@D)
-	coffee -pc $< | cat js/lib/content.js - | uglifyjs - -mco $@ --screw-ie8
+	coffee -pc $< | cat js/lib/bootstrap-wysiwyg.js js/lib/bootstrap-fileupload - | uglifyjs - -mco $@ --screw-ie8
 
 $(dist)/js/report.js: js/report.coffee
 	$(print)

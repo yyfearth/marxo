@@ -1,6 +1,11 @@
 "use strict"
 
-define 'content', ['console', 'models', 'manager', 'lib/jquery-ui', 'lib/content'], ({
+define 'content', [
+  'console', 'models', 'manager'
+  'lib/jquery-ui'
+  'lib/bootstrap-fileupload'
+  'lib/bootstrap-wysiwyg'
+], ({
 find
 findAll
 tpl
@@ -483,7 +488,8 @@ ProjectFilterView
         view_btn.style.display = 'none'
       report_btn = find 'a[name="report"]', @el
       if 'POSTED' is @model.get 'status'
-        report_btn.href = '#report/test' #"#report/#{@model.id}"
+        report_btn.href = '#report/test'
+        #"#report/#{@model.id}"
         @$el.find('.pre-status').hide()
       else
         report_btn.style.display = 'none'
