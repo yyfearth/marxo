@@ -74,8 +74,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
           @navContainer.classList.remove 'hide-dropdown'
         return
     @get: -> # singleton
-      unless @instance?
-        @instance = new @
+      @instance = new @ unless @instance?
       @instance
     initialize: ->
       @frames = {}
@@ -353,8 +352,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   class SignInView extends View
     el: '#signin'
     @get: -> # singleton
-      unless @instance?
-        @instance = new @
+      @instance = new @ unless @instance?
       @instance
     events:
       'submit form': 'submit'
@@ -480,8 +478,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
 
   class Router extends Backbone.Router
     @get: -> # singleton
-      unless @instance?
-        @instance = new @
+      @instance = new @ unless @instance?
       @instance
     frames: [
       'home'
