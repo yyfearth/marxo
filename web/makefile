@@ -60,7 +60,7 @@ $(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js
 $(dist)/js/main.js: js/models.coffee js/console.coffee js/manager.coffee js/main.coffee
 	@echo "$(CWHT)- $(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
 	@mkdir -p $(@D)
-	coffee -pjc $^ | uglifyjs - -mco $@ --screw-ie8
+	coffee -pjc $^ | cat js/lib/backgrid.js - | uglifyjs - -mco $@ --screw-ie8
 
 $(dist)/js/test.js: js/test.coffee
 	$(print)
