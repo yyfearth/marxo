@@ -522,8 +522,8 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         _frame = @frames[frame]
         if _frame._cur? and not name
           name = _frame._cur?._name
-          @navigate "##{frame}/#{name}", replace: true
-        _frame._cur = _frame[name] ?= _name: name
+          if name then @navigate "##{frame}/#{name}", replace: true
+        _frame._cur = _frame[name] if name
         @frames._cur = _frame
         #console.log 'frames data', frame, name, @frames
 
