@@ -68,10 +68,11 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
   class ConsoleView extends View
     el: '#main'
     events:
-      'click .dropdown-menu': -> # hide menu after click
-        @navContainer.classList.add 'hide-dropdown'
-        $(document.body).one 'mousemove', =>
-          @navContainer.classList.remove 'hide-dropdown'
+      'click .dropdown-menu li': -> # hide menu after click
+        cls = @navContainer.classList
+        cls.add 'hide-dropdown'
+        $(document.body).one 'mousemove', ->
+          cls.remove 'hide-dropdown'
         return
     @get: -> # singleton
       @instance = new @ unless @instance?
@@ -79,18 +80,17 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     initialize: ->
       @frames = {}
       findAll('.frame', @el).forEach (frame) =>
-        navEl = find "#navbar a[href=\"##{frame.id}\"]"
         @frames[frame.id] =
           id: frame.id
           el: frame
           parent: @
-          navEl: navEl?.parentElement
         return
       # fix style
       @navContainer = find '#navbar', @el
       @framesContainer = find '#frames', @el
       @_fixStyle = @_fixStyle.bind @
       $(window).on 'resize', @_fixStyle
+      @$frames = $('#navbar [data-frame]')
       # Init tooltips
       @$el.tooltip selector: '[title]'
       return
@@ -118,8 +118,12 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         find('#main .frame.active')?.classList.remove 'active'
         find('#navbar li.active')?.classList.remove 'active'
         frame.el.classList.add 'active'
-        frame.navEl.classList.add 'active'
         $(window).resize()
+
+      $frame = @$frames.filter("[data-frame='#{frame.id}']").addClass 'active'
+      $target = $frame.find("[data-inner-frame='#{name}']").addClass 'active'
+      @$frames.not($frame).removeClass 'active'
+      @$frames.find(".active[data-inner-frame]").not($target).removeClass 'active'
       return
     signout: ->
       # TODO: sign out
