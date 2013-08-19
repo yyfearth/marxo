@@ -50,6 +50,8 @@ FrameView
     render: ->
       fullCalendar = @fullCalendar ?= @$el.fullCalendar.bind @$el
 
+      @$el.empty()
+
       @cfg.drop ?= (date, allDay, e) =>
         # this function is called when something is dropped
         $thumb = $(e.target)
