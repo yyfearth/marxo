@@ -480,16 +480,6 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     @get: -> # singleton
       @instance = new @ unless @instance?
       @instance
-    frames: [
-      'home'
-      'project'
-      'workflow'
-      'calendar'
-      'content'
-      'report'
-      'config'
-      'profile'
-    ]
     routes:
       'workflow/:id(/link/:link)(/node/:node)(/action/:action)': (id, link, node, action) ->
         @show 'workflow', id, {link, node, action}
@@ -497,47 +487,52 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
         @show 'project', id, {link, node, action}
       'content/:id(/:action)': (id, action) ->
         @show 'content', id, action
+      'signout': 'signout'
     constructor: (options) ->
       super options
       @route '', 'home', =>
         @navigate 'home', replace: true
         @show 'home'
-      @frames.forEach (frame) =>
-        @route frame + '(/:name)(/)', frame, (name) =>
-          @show frame, name
-        return
       @route 'signin', 'signin', => return
-      @route 'signout', 'signout'
-      return
+
+      @frames = {}
+      for frameMenu in findAll '[data-frame]', find '#navbar'
+        frame = frameMenu.dataset.frame
+        _frame = @frames[frame] =
+          _name: frame
+        for innerMenu in findAll '[data-inner-frame]', frameMenu
+          innerFrame = innerMenu.dataset.innerFrame
+          _inner = _frame[innerFrame] =
+            _name: innerFrame
+          _frame._cur = _inner if innerMenu.dataset.default
+
+        do (frame) => @route frame + '(/:name)(/)', frame, (name) =>
+          @show frame, name
+      @
 
     show: (frame, name, sub) ->
       unless sessionStorage.user
         @navigate 'signin', replace: true
-        return
-      console.log 'route', frame, (name or ''), sub
-      ConsoleView.get()?.showFrame frame, name, sub
-      handler = @[frame]
-      handler.call @, name if handler?
-      return
+      else
+        console.log 'route', frame, (name or ''), sub
+        _frame = @frames[frame]
+        if _frame._cur? and not name
+          name = _frame._cur?._name
+          @navigate "##{frame}/#{name}", replace: true
+        _frame._cur = _frame[name] ?= _name: name
+        @frames._cur = _frame
+        #console.log 'frames data', frame, name, @frames
 
-    #home: -> return
-#    project: (name) ->
-#      if name is 'new'
-#        console.log 'show project create'
-#      else if name is 'mgr'
-#        console.log 'show project mgr'
-#      else if name
-#        console.log 'show project viewr?/editor? for', name
-#      return
-    #calendar: (name) -> return
-    #content: (name) -> return
-    #report: (name) -> return
+        ConsoleView.get()?.showFrame frame, name, sub
+        handler = @[frame]
+        handler.call @, name if handler?
+      @
 
     signout: ->
       console.log 'sign out'
       ConsoleView.get().signout()
       @navigate 'signin', replace: true
-      return
+      @
 
   { # exports
   find
