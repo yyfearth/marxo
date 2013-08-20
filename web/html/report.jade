@@ -26,16 +26,17 @@
             a(href='#media:twitter') Twitter
           li.disabled
             a(href='#media:email') Email
-      li.grid-filter
       li.action-buttons.pull-right
         button.btn(name='reload', title='Reload Table') Reload
         button.tmp.btn.btn-danger.enable_if_selected(name='remove_selected', title='Remove Selected', disabled) Remove
+      li.grid-filter
     #t_report_action_cell.tpl
       a.btn.btn-info.btn-round.icon-report(title='View post in new window', name='view', href='#report/{{id}}')
       button.btn.btn-primary.btn-round.icon-edit.tmp(title='Edit', name='edit')
       button.tmp.btn.btn-danger.btn-round.icon-close(title='Remove', name='remove')
-    table#report_table.grid-table
-      caption.loading.icon-spinner.animate-spin
+    .grid-scroller
+      table#report_table.grid-table
+        caption.loading.icon-spinner.animate-spin
     .grid-paginator
 
 // temp hide media-filter, edit and remove buttons
