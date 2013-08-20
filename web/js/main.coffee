@@ -10,7 +10,7 @@ do browser_test = ->
   if /MSIE[1-8]\b/i.test UA
     fail 'Microsoft Internet Explorer versions below 9 are not supported!'
   else if /^Opera\//i.test UA
-    fail 'Old versions of Opera (before 15, non-Webkit) are not tested for compatibility!\nA Webkit-based Opera are recommended.'
+    fail 'Old versions of Opera (before 15) are not tested for compatibility!\nA recent version of Opera (from 15) is recommended.'
   else if /^Mozilla\/4/i.test UA
     fail 'Your browser is out-of-date!'
   return
