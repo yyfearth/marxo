@@ -41,7 +41,15 @@ modules: $(DIST_MODULES)
 js: lib main modules
 css: $(dist)/css/console.css $(dist)/css/preview.css
 html: $(dist)/index.html
-res: $(dist)/font
+res: $(dist)/font $(dist)/favicon.ico $(dist)/robots.txt
+
+$(dist)/favicon.ico: favicon.ico
+	$(print)
+	cp -r $^ $@
+
+$(dist)/robots.txt: robots.txt
+	$(print)
+	cp -r $^ $@
 
 $(dist)/font: font
 	$(print)
