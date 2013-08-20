@@ -21,8 +21,8 @@
 }
 
 html, body {
-  padding: 0px;
-  margin: 0px;
+  padding: 0;
+  margin: 0;
   height: 100%;
   .transition;
 }
@@ -47,6 +47,9 @@ html, body {
   button& { // add border and padding
     width: 27px;
     height: 27px;
+  }
+  &:before {
+    margin: 0;
   }
 }
 
@@ -137,10 +140,10 @@ ul.action-bar {
 
   &.mask {
     position: fixed;
-    top: 0px;
-    left: 0px;
-    bottom: 0px;
-    right: 0px;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
     background: #f5f5f5;
     .transition
   }
@@ -182,7 +185,7 @@ ul.action-bar {
   position: absolute;
   width: 100%;
   height: 100%;
-  min-width: 700px;
+  min-width: 768px;
   visibility: hidden;
 
   .loading {
@@ -190,12 +193,15 @@ ul.action-bar {
     top: 50%;
     left: 50%;
     height: 32px;
-    width: 45px;
+    width: 32px;
     padding: 0;
     font-size: 32px;
     line-height: 32px;
-    margin-left: -22.5px;
+    margin-left: -16px;
     margin-top: -16px;
+    &:before {
+      margin: 0;
+    }
   }
 }
 
@@ -212,16 +218,16 @@ ul.action-bar {
 }
 
 #navbar {
-  box-shadow: 0px 0px 15px #aaa;
-
-  .nav {
-    margin: 0px;
-  }
-
-  ul.nav > li {
-    .transition(background-color, .1s);
-    &:hover {
-      background-color: rgba(200, 200, 200, .2);
+  box-shadow: 0 0 15px #aaa;
+  ul.nav {
+    margin: 0;
+    > li {
+      display: inline-block;
+      margin: 0;
+      .transition(background-color, .1s);
+      &:hover {
+        background-color: rgba(200, 200, 200, .2);
+      }
     }
   }
 
@@ -244,14 +250,18 @@ ul.action-bar {
     border-top-color: #999;
     border-bottom-color: #999;
   }
+
+  [class^="icon-"]:before, [class*=" icon-"]:before {
+    margin: 0 5px 0 -5px;
+  }
 }
 
 #frames {
   position: absolute;
   top: 41px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
+  bottom: 0;
+  left: 0;
+  right: 0;
 
   .frame, .inner-frame {
     display: none;
@@ -262,18 +272,18 @@ ul.action-bar {
 
   .frame {
     position: absolute;
-    top: 15px;
-    bottom: 15px;
-    left: 15px;
-    right: 0; //15px;
-    padding: 0px;
-    margin: 0px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px;
+    margin: 0;
 
     .inner-frame, .sidebar, .workspace, .sidebar .well {
       position: relative;
       height: 100%;
-      padding: 0px;
-      margin: 0px;
+      padding: 0;
+      margin: 0;
     }
 
     .sidebar-list {
@@ -290,8 +300,8 @@ ul.action-bar {
       height: 25%;
       bottom: 10px;
       overflow: hidden;
-      left: 0px;
-      right: 0px;
+      left: 0;
+      right: 0;
       text-overflow: ellipsis;
     }
 
@@ -362,6 +372,11 @@ ul.action-bar {
 
 .form-horizontal .control-group {
   margin-bottom: 10px; // override default 20px
+}
+
+.grid-scroller {
+  width: 100%;
+  overflow: auto;
 }
 
 .grid-table {
