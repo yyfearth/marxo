@@ -1,6 +1,6 @@
 "use strict"
 
-define 'console', ['models', 'lib/common'], ({Collection}) ->
+define 'console', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) ->
 
   ## Utils
 
