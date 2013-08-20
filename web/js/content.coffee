@@ -54,7 +54,7 @@ ProjectFilterView
       'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
       'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
-    _preview_html_tpl: tpl('#preview_html_tpl').trim()
+    _preview_html_tpl: tpl('#preview_html_tpl').trim().replace(/_tpl_?(?=[^<]*>)/g, '')
     goBackOnHidden: '#content'
     events:
       'click #new_section': -> @addSection()
@@ -192,7 +192,7 @@ ProjectFilterView
         view = new SectionEditor idx: i
         content.push view.genPreview data
       content = content.join '\n'
-      @_preview_html_tpl.replace('{{content}}', content).replace(/(?=>)\s+|\s+(?=<)/mg, '')
+      @_preview_html_tpl.replace '{{content}}', content
 
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
