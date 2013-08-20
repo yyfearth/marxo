@@ -1,6 +1,6 @@
 "use strict"
 
-define 'console', ['models', 'lib/common'], ({Collection}) ->
+define 'console', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) ->
 
   ## Utils
 
@@ -12,11 +12,14 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     parent ?= document
     [].slice.call parent.querySelectorAll selector
 
+  _html = (el) ->
+    el.innerHTML.trim().replace(/\s+/g, ' ').replace(/> </g, '>\n<')
+
   tpl = (selector, returnDom) ->
     tpl_el = find selector
     throw 'cannot load template from ' + selector unless tpl_el
     tpl_el.parentNode.removeChild tpl_el
-    if returnDom then tpl_el else tpl_el.innerHTML
+    if returnDom then tpl_el else _html tpl_el
 
   tplAll = (selector, multi) ->
     hash = {}
@@ -28,7 +31,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
     for tpl_el in tpl_els
       name = tpl_el.getAttribute 'name'
       throw 'to get a tpl dict, tpl element must have a "name" attribute' unless name
-      hash[name] = tpl_el.innerHTML
+      hash[name] = _html tpl_el
     hash
 
   # Enable CoffeeScript class for Javascript Mixin
@@ -518,7 +521,7 @@ define 'console', ['models', 'lib/common'], ({Collection}) ->
       unless sessionStorage.user
         @navigate 'signin', replace: true
       else
-        console.log 'route', frame, (name or ''), sub
+        console.log 'route', frame, (name or ''), sub or ''
         _frame = @frames[frame]
         if _frame._cur? and not name
           name = _frame._cur?._name

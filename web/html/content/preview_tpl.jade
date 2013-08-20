@@ -56,12 +56,12 @@
 
 script#preview_html_tpl.tpl(name='html', type='text/html')
   <!doctype html>
-  <html lang="en-US">
+  <html_tpl lang="en-US">
   <head>
   <meta charset="utf-8"/>
   <link href="css/preview.css" rel="stylesheet" media="screen"/>
   </head>
-  <body>
+  <body_tpl>
   <div class="container">
   <form>
   {{content}}
@@ -70,8 +70,8 @@ script#preview_html_tpl.tpl(name='html', type='text/html')
   &nbsp;
   <input class="btn" type="reset"/>
   </div>
-  </from>
+  </form>
   </div>
-  <script src="js/lib/preview.js"></script>
-  </body>
-  </html>
+  <scrip_tpl_t src="js/lib/preview.js"></scrip_tpl_t>
+  </body_tpl>
+  </html_tpl>
