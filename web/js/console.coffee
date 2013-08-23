@@ -67,6 +67,9 @@ define 'console', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) 
     render: ->
       @rendered = true
       @
+    remove: ->
+      @trigger 'remove', @
+      super
 
   class ConsoleView extends View
     el: '#main'
