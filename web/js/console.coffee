@@ -497,6 +497,8 @@ define 'console', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) 
         @show 'project', id, {link, node, action}
       'content/:id(/:action)': (id, action) ->
         @show 'content', id, action
+      'config/service(/:name)': (name) ->
+        @show 'config', 'service', name
       'signout': 'signout'
     constructor: (options) ->
       super options

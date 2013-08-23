@@ -21,16 +21,26 @@ Publichers
       super options
       @profile = new TenantProfileView el: '#tenant_profile', parent: @
       @manager = new UserManagemerView el: '#user_manager', parent: @, list: @list
+      @connector = new ServiceConnectorView el: '#service_connector', parent: @
       @
-    open: (name) ->
+    open: (name, sub) ->
       switch name
         when 'users'
           @switchTo @manager
         when 'tenant'
           @switchTo @profile
+        when 'service'
+          @switchTo @connector
+          @connector.open sub if sub
         else
           throw 'empty or unknown sub action for config frame ' + name
       @
+
+  class ServiceConnectorView extends InnerFrameView
+    initialize: (options) ->
+      super options
+    open: (service) ->
+      console.log 'connect service details', service
 
   class TenantProfileView extends InnerFrameView
     initialize: (options) ->
