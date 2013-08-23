@@ -285,6 +285,7 @@ Action
         distance: 15
         cancel: '.box-content'
       @_too_many_alert = find '#too_many_actions_alert', @el
+      @on 'actions_update', @_checkActionLimit.bind @
       @
     remove: ->
       $(window).off 'resize', @_fixStyle
@@ -296,7 +297,7 @@ Action
       e.preventDefault()
       target = e.target
       matched = target.href.match /action:(\w+)/i
-      @actions?.add @addAction type: matched[1] if matched
+      @addAction type: matched[1] if matched
       false
     fill: (attributes) ->
       # fill info form
@@ -347,15 +348,17 @@ Action
       @listenTo actionView, 'remove', @removeAction.bind @
       actionView.render()
       actionView.el.scrollIntoView()
-      @_checkActionLimit()
-      actionView
-    removeAction: (view, model) ->
-      model.destroy()
-      @_checkActionLimit()
+      @delayedTrigger 'actions_update', 100
+      #@actions.add actionView
+      @
+    removeAction: (view) ->
+      #@actions.remove view
+      @delayedTrigger 'actions_update', 100
       @
     _checkActionLimit: ->
       cls = @_too_many_alert.classList
-      if @actions.length > @_too_many_actions_limit
+      count = findAll('.action', @actionsEl).length # @actions.length
+      if count > @_too_many_actions_limit
         cls.add 'active'
         @_too_many_alert.scrollIntoView()
       else
