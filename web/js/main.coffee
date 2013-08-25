@@ -15,6 +15,15 @@ do browser_test = ->
     fail 'Your browser is out-of-date!'
   return
 
+require.config
+  shim:
+    'lib/jquery-ui':
+      deps: ['lib/common']
+    'lib/facebook':
+      exports: 'FB'
+  paths:
+    'lib/facebook': '//connect.facebook.net/en_US/all'
+
 require ['console'], ({ConsoleView, SignInView, Router}) ->
   # EP
   window.app = app =

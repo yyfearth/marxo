@@ -1,6 +1,6 @@
 "use strict"
 
-define 'workflow', ['console', 'manager', 'models', 'lib/jquery-ui', 'lib/jquery-jsplumb'],
+define 'workflow', ['console', 'manager', 'models', 'lib/jquery-jsplumb', 'lib/jquery-ui'],
 ({
 find
 findAll
@@ -24,7 +24,7 @@ Node
 Link
 Actions
 Action
-}) ->
+}, jsPlumb) ->
 
   ## Workflow Main Frame
   class WorkflowFrameView extends FrameView
