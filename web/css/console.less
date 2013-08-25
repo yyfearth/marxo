@@ -232,15 +232,14 @@ ul.action-bar {
   }
 
   // Hover Dropdown
-  ul.nav li.dropdown ul.dropdown-menu,
-  &.hide-dropdown ul.nav li.dropdown:hover ul.dropdown-menu {
+  ul.nav li.dropdown ul.dropdown-menu {
     display: block;
     visibility: hidden;
     margin-top: -5px;
     opacity: 0;
     .transition(all, .2s, ease-in-out, .1s)
   }
-  ul.nav li.dropdown:hover ul.dropdown-menu {
+  ul.nav li.dropdown.hover ul.dropdown-menu {
     visibility: visible;
     opacity: 1;
     margin-top: 0;
@@ -390,6 +389,7 @@ ul.action-bar {
     .ellipsis(12em);
     .project-title {
       display: inline-block;
+      vertical-align: middle;
       .ellipsis(5em);
     }
   }
