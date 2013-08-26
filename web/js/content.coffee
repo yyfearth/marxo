@@ -65,6 +65,7 @@ ProjectFilterView
       super options
       @iframe = find 'iframe', @el
       @btnPreview = find '.btn-preview', @el
+      @btnSave = find '.btn-save', @el
       @editor = find '.rich-editor', @el
       @pageDesc = new BoxFormView el: find '#page_desc', @el
       # TODO: desc rich editor support with code which
@@ -100,7 +101,9 @@ ProjectFilterView
         @addSection section for section in sections
       else # add an empty section if sections have never been defined
         @addSection()
-      @showPreview {page_desc, sections} if action is 'preview'
+      if action is 'preview'
+        @showPreview {page_desc, sections}
+        @btnSave.disabled = true
       @
     read: (callback) ->
       read = (formView) ->
@@ -133,6 +136,7 @@ ProjectFilterView
         callback {page_desc, sections, submit_options}
       @
     save: ->
+      @togglePreview() if @iframe.classList.contains 'active'
       @read (data) =>
         if data
           console.log 'save content', data
@@ -151,6 +155,7 @@ ProjectFilterView
       @submitOptions.reset()
       @iframe.classList.remove 'active'
       @btnPreview.classList.remove 'active'
+      @btnSave.disabled = false
       @
     addSection: (data) ->
       view = new SectionEditor idx: @sections.length, parent: @
@@ -191,6 +196,7 @@ ProjectFilterView
         # hide
         cls.remove 'active'
         btnCls.remove 'active'
+        @btnSave.disabled = false
       else
         # gen preview and show
         @btnPreview.disabled = true
@@ -203,6 +209,7 @@ ProjectFilterView
             btnCls.remove 'active'
           @btnPreview.disabled = false
       @
+
     _genPreview: ({page_desc, sections}) ->
       #console.log 'gen preview page', page_desc, sections
       content = ["<h1>#{page_desc.title}</h1>\n<p>#{page_desc.desc or ''}</p>"]
