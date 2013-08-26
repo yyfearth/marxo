@@ -65,13 +65,14 @@ script#preview_html_tpl.tpl(name='html', type='text/html')
   <div class="container">
   <form>
   {{content}}
-  <div class="form-actions">
-  <input type="submit" class="btn btn-primary" disabled value="Submit"/>
-  &nbsp;
-  <input class="btn" type="reset"/>
-  </div>
   </form>
   </div>
   <scrip_tpl_t src="js/lib/preview.js"></scrip_tpl_t>
   </body_tpl>
   </html_tpl>
+script#preview_submit_tpl.tpl(name='submit', type='text/html')
+  <div class="form-actions">
+  <input type="submit" class="btn btn-primary" disabled value="Submit"/>
+  &nbsp;
+  <input class="btn" type="reset"/>
+  </div>

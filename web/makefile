@@ -35,7 +35,7 @@ clean_res:
 clean_html:
 	rm -f "$(dist)/index.html"
 
-lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js
+lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js $(dist)/js/lib/preview.js
 main: $(dist)/js/main.js
 modules: $(DIST_MODULES)
 js: lib main modules
@@ -55,15 +55,15 @@ $(dist)/font: font
 	$(print)
 	cp -r $^/ $@/
 
-$(dist)/js/lib/jquery-ui.js: js/lib/jquery-ui.js
-	$(print)
-	@mkdir -p $(@D)
-	cp $^ $@
-
 $(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js
 	$(print)
 	@mkdir -p $(@D)
 	cat $^ | uglifyjs - --screw-ie8 -o $@
+
+$(dist)/js/lib/%.js: js/lib/%.js
+	$(print)
+	@mkdir -p $(@D)
+	cp $^ $@
 
 $(dist)/js/main.js: js/models.coffee js/console.coffee js/manager.coffee js/main.coffee
 	@echo "$(CWHT)- $(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
@@ -94,11 +94,6 @@ $(dist)/js/report.js: js/report.coffee
 	$(print)
 	@mkdir -p $(@D)
 	coffee -pc $< | cat js/lib/chart.js - | uglifyjs - -mco $@ --screw-ie8
-
-$(dist)/js/preview.js: js/preview.coffee
-	$(print)
-	@mkdir -p $(@D)
-	coffee -pc $< | cat js/lib/preview.js - | uglifyjs - -mco $@ --screw-ie8
 
 $(dist)/js/%.js: js/%.coffee
 	$(print)

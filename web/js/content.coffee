@@ -54,7 +54,8 @@ ProjectFilterView
       'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
       'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
-    _preview_html_tpl: tpl('#preview_html_tpl').trim().replace(/_tpl_?(?=[^<]*>)/g, '')
+    _preview_html_tpl: tpl('#preview_html_tpl').replace(/_tpl_?(?=[^<]*>)/g, '')
+    _preview_submit_tpl: tpl('#preview_submit_tpl')
     goBackOnHidden: '#content'
     events:
       'click #new_section': -> @addSection()
@@ -64,6 +65,7 @@ ProjectFilterView
       super options
       @iframe = find 'iframe', @el
       @btnPreview = find '.btn-preview', @el
+      @btnSave = find '.btn-save', @el
       @editor = find '.rich-editor', @el
       @pageDesc = new BoxFormView el: find '#page_desc', @el
       # TODO: desc rich editor support with code which
@@ -75,6 +77,9 @@ ProjectFilterView
         delay: 150
         distance: 15
         cancel: '.box-content'
+      @on 'sections_update', =>
+        count = (findAll '.section', @sectionsEl).length
+        @submitOptions.$el[if count then 'show' else 'hide']()
       @
     load: (id, action, callback) ->
       if id instanceof Content
@@ -86,17 +91,19 @@ ProjectFilterView
     popup: (data, action, callback) ->
       super data, callback
       #console.log 'content form', data.attributes
-      @pageDesc.fill data.attributes
-      @cfg = data.get 'data'
-      #console.log 'cfg data', @cfg
-      @submitOptions.fill @cfg?.submit_options
-      @cfg?.sections?.forEach (section) =>
-        #console.log 'add section', section
-        @addSection section
+      page_desc =
+        title: data.get 'title'
+        desc: data.get 'desc'
+      @pageDesc.fill page_desc
+      @submitOptions.fill data.get 'options' if data.has 'options'
+      sections = data.get('sections') or []
+      if data.has 'sections'
+        @addSection section for section in sections
+      else # add an empty section if sections have never been defined
+        @addSection()
       if action is 'preview'
-        setTimeout =>
-          @togglePreview()
-        , 500
+        @showPreview {page_desc, sections}
+        @btnSave.disabled = true
       @
     read: (callback) ->
       read = (formView) ->
@@ -129,12 +136,16 @@ ProjectFilterView
         callback {page_desc, sections, submit_options}
       @
     save: ->
+      @togglePreview() if @iframe.classList.contains 'active'
       @read (data) =>
         if data
+          console.log 'save content', data
           @data.set 'title', data.page_desc.title
-          # TODO: deal with desc
+          @data.set 'desc', data.page_desc.desc
+          # TODO: deal with rich desc
           # TODO: deal with invalid settings
-          @data.set 'data', data
+          @data.set 'sections', data.sections
+          @data.set 'options', data.submit_options
           @callback 'save'
           @hide true
     reset: -> # called after close
@@ -144,6 +155,7 @@ ProjectFilterView
       @submitOptions.reset()
       @iframe.classList.remove 'active'
       @btnPreview.classList.remove 'active'
+      @btnSave.disabled = false
       @
     addSection: (data) ->
       view = new SectionEditor idx: @sections.length, parent: @
@@ -152,10 +164,30 @@ ProjectFilterView
       #console.log data
       @sectionsEl.appendChild view.el
       @sections.push view
+      @listenTo view, 'remove', =>
+        @sections[view.id] = null
+        @delayedTrigger 'sections_update', 100
+      @delayedTrigger 'sections_update', 1
       @
     removeSection: (view) ->
-      @sections[view.id] = null
       view.remove()
+      @
+    showPreview: (data) ->
+      #console.log 'read', data
+      throw 'data is empty for gen preview' unless data
+      console.log 'show preview', data
+      cls = @iframe.classList
+      btnCls = @btnPreview.classList
+      iframe = @iframe
+      html = @_genPreview data
+      if html isnt iframe.getAttribute 'srcdoc'
+        iframe.setAttribute 'srcdoc', html
+        unless 'srcdoc' of iframe
+          url = 'javascript: window.frameElement.getAttribute("srcdoc");'
+          iframe.src = url
+          iframe.contentWindow?.location = url
+      cls.add 'active'
+      btnCls.add 'active'
       @
     togglePreview: ->
       cls = @iframe.classList
@@ -164,27 +196,20 @@ ProjectFilterView
         # hide
         cls.remove 'active'
         btnCls.remove 'active'
+        @btnSave.disabled = false
       else
         # gen preview and show
         @btnPreview.disabled = true
         @read (data) =>
           #console.log 'read', data
           if data
-            iframe = @iframe
-            html = @_genPreview data
-            if html isnt iframe.getAttribute 'srcdoc'
-              iframe.setAttribute 'srcdoc', html
-              unless 'srcdoc' of iframe
-                url = 'javascript: window.frameElement.getAttribute("srcdoc");'
-                iframe.src = url
-                iframe.contentWindow?.location = url
-            cls.add 'active'
-            btnCls.add 'active'
+            @showPreview data
           else
             cls.remove 'active'
             btnCls.remove 'active'
           @btnPreview.disabled = false
       @
+
     _genPreview: ({page_desc, sections}) ->
       #console.log 'gen preview page', page_desc, sections
       content = ["<h1>#{page_desc.title}</h1>\n<p>#{page_desc.desc or ''}</p>"]
@@ -192,6 +217,7 @@ ProjectFilterView
         view = new SectionEditor idx: i
         content.push view.genPreview data
       content = content.join '\n'
+      content += @_preview_submit_tpl if sections?.length
       @_preview_html_tpl.replace '{{content}}', content
 
     _renderFonts: ->
