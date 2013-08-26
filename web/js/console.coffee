@@ -74,12 +74,37 @@ define 'console', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) 
   class ConsoleView extends View
     el: '#main'
     events:
-      'click .dropdown-menu li': -> # hide menu after click
-        cls = @navContainer.classList
-        cls.add 'hide-dropdown'
-        $(document.body).one 'mousemove', ->
-          cls.remove 'hide-dropdown'
-        return
+      'touchstart #navbar .dropdown > a': (e) ->
+        $el = $(e.currentTarget).parent()
+        if $el.hasClass 'hover' # if already touched
+          setTimeout ->
+            $el.removeClass 'hover'
+          , 500
+          true
+        else # show menu after 1st touch
+          e.preventDefault()
+          e.stopPropagation()
+          @$dropdowns.not($el).removeClass 'hover'
+          $el.addClass 'hover'
+          @$el.one 'touchstart', (e) ->
+            $el.removeClass 'hover' unless $el.has(e.target).length
+          false
+      'mouseenter #navbar .dropdown': (e) -> # show menu when mouse enter
+        e.currentTarget.classList.add 'hover'
+      'mouseleave #navbar .dropdown': (e) -> # hide menu when mouse out
+        e.currentTarget.classList.remove 'hover'
+      'click #navbar .dropdown-menu li': (e) -> # hide menu when click
+        $(e.currentTarget).parents('.dropdown').removeClass 'hover'
+      'click #navbar .dropdown > a': (e) ->
+        $el = $(e.currentTarget).parent()
+        if $el.hasClass 'hover'
+          _t = setTimeout ->
+            _t = null
+            $el.removeClass 'hover'
+          , 500
+          $(e.currentTarget).one 'mouseleave', ->
+            _t = clearTimeout(_t) if _t
+        true
     @get: -> # singleton
       @instance = new @ unless @instance?
       @instance
@@ -97,7 +122,8 @@ define 'console', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) 
       @_fixStyle = @_fixStyle.bind @
       $(window).on 'resize', @_fixStyle
       @$frames = $('#navbar [data-frame]')
-      # Init tooltips
+      @$dropdowns = $(@navContainer).find('.dropdown')
+      # init tooltips
       @$el.tooltip selector: '[title]'
       return
     _fixStyle: ->
@@ -153,9 +179,9 @@ define 'console', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) 
       return
 
   class InnerFrameView extends View
-    initialize: (options) ->
-      super options
-      return
+    # initialize: (options) ->
+    #   super options
+    #   return
 
   class FrameView extends View
     initialize: (options) ->
