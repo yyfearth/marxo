@@ -65,7 +65,7 @@ $(dist)/js/lib/%.js: js/lib/%.js
 	@mkdir -p $(@D)
 	cp $^ $@
 
-$(dist)/js/main.js: js/models.coffee js/console.coffee js/manager.coffee js/main.coffee
+$(dist)/js/main.js: js/models.coffee js/base.coffee js/console.coffee js/manager.coffee js/main.coffee
 	@echo "$(CWHT)- $(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
 	@mkdir -p $(@D)
 	coffee -pjc $^ | cat js/lib/backgrid.js js/lib/html5-dataset.js - | uglifyjs - -mco $@ --screw-ie8

@@ -1,6 +1,6 @@
 "use strict"
 
-define 'workflow', ['console', 'manager', 'models', 'lib/jquery-jsplumb', 'lib/jquery-ui'],
+define 'workflow', ['base', 'manager', 'models', 'lib/jquery-jsplumb', 'lib/jquery-ui'],
 ({
 find
 findAll

@@ -1,6 +1,6 @@
 'use strict'
 
-define 'report', ['console', 'models', 'manager', 'lib/chart'],
+define 'report', ['base', 'models', 'manager', 'lib/chart'],
 ({
 find
 #findAll

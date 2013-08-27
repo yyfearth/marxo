@@ -1,6 +1,6 @@
 "use strict"
 
-define 'config', ['console', 'manager', 'models'],
+define 'config', ['base', 'manager', 'models'],
 ({
 find
 #findAll

@@ -1,6 +1,6 @@
 "use strict"
 
-define 'profile', ['console'],
+define 'profile', ['base'],
 ({
 #find
 #findAll

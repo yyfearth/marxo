@@ -1,6 +1,6 @@
 "use strict"
 
-define 'manager', ['console', 'models', 'lib/backgrid'],
+define 'manager', ['base', 'models', 'lib/backgrid'],
 ({
 find
 tpl

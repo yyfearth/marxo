@@ -1,6 +1,6 @@
 "use strict"
 
-define 'project', ['console', 'manager', 'models'],
+define 'project', ['base', 'manager', 'models'],
 ({
 #find
 #findAll

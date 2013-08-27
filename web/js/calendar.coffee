@@ -1,6 +1,6 @@
 "use strict"
 
-define 'calendar', ['console', 'lib/jquery-ui', 'lib/fullcalendar'], ({
+define 'calendar', ['base', 'lib/jquery-ui', 'lib/fullcalendar'], ({
 find
 View
 FrameView

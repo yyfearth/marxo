@@ -1,6 +1,6 @@
 "use strict"
 
-define 'home', ['console'],
+define 'home', ['base'],
 ({
 #find
 #findAll
