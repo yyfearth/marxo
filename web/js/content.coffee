@@ -1,7 +1,7 @@
 "use strict"
 
 define 'content', [
-  'console', 'models', 'manager'
+  'base', 'models', 'manager'
   'lib/jquery-ui'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
