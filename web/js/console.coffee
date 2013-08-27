@@ -29,9 +29,12 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       'click #navbar .dropdown > a': (e) ->
         $el = $(e.currentTarget).parent()
         if $el.hasClass 'hover'
-          setTimeout ->
+          _t = setTimeout ->
+            _t = null
             $el.removeClass 'hover'
           , 500
+          $(e.currentTarget).one 'mouseleave', ->
+            _t = clearTimeout(_t) if _t
         true
     @get: -> # singleton
       @instance = new @ unless @instance?
