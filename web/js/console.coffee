@@ -26,6 +26,13 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
         e.currentTarget.classList.remove 'hover'
       'click #navbar .dropdown-menu li': (e) -> # hide menu when click
         $(e.currentTarget).parents('.dropdown').removeClass 'hover'
+      'click #navbar .dropdown > a': (e) ->
+        $el = $(e.currentTarget).parent()
+        if $el.hasClass 'hover'
+          setTimeout ->
+            $el.removeClass 'hover'
+          , 500
+        true
     @get: -> # singleton
       @instance = new @ unless @instance?
       @instance
