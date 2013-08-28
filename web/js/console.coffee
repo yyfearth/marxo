@@ -112,8 +112,12 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       @instance
     events:
       'submit form': 'submit'
+    delay: 500
     initialize: (options) ->
       super options
+      @form = find 'form', @el
+      @form.remember.checked = remember = localStorage.marxo_sign_in_remember is 'true'
+      @form.email.value = localStorage.marxo_sign_in_email if remember
       # auto sign in
       if (sessionStorage.user)
         @signedIn()
@@ -133,8 +137,13 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       ConsoleView.get().show()
       # Router.get().navigate 'home'
       location.hash = '' if /signin/i.test location.hash
+      @_remember()
       @
-    delay: 500
+    _remember: ->
+      localStorage.marxo_sign_in_remember = remember = @form.remember.checked
+      localStorage.marxo_sign_in_email = if remember then @form.email.value else ''
+      unless remember # clean session after leave
+        $(window).unload -> delete sessionStorage.user
     show: ->
       @el.style.opacity = 0
       @el.style.display = 'block'
