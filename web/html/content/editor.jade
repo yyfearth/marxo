@@ -24,10 +24,9 @@ include rich_editor
                 placeholder='The title of the page', maxlength='255', required)
                 span.help-inline(title='Required') *
             .control-group
-              label.control-label(for='page_title') Page Description
+              label.control-label(for='desc') Page Description
               .controls
-                textarea#page_desc_raw.input-block-level(name='desc', maxlength='255')
-                mixin rich_editor('page_desc')
+                mixin rich_editor('desc')
 
       #sections
 

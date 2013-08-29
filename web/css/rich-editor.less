@@ -8,14 +8,22 @@ div[data-role="editor-toolbar"] {
     padding: 3px 5px;
   }
 
+  .rich-editor,
+  .rich-editor-html {
+    margin: 5px 0 0 0;
+    -webkit-user-select: all;
+    -moz-user-select: all;
+    user-select: all;
+    font-size: medium;
+    padding: 4px;
+  }
+
   .rich-editor {
-    margin-top: 5px;
-    max-height: 150px;
     height: 150px;
+    max-height: 150px;
     background-color: #fff;
     border-collapse: separate;
     border: 1px solid #ccc;
-    padding: 4px;
     box-sizing: content-box;
     -webkit-box-shadow: rgba(0, 0, 0, 0.075) 0 1px 1px 0 inset;
     box-shadow: rgba(0, 0, 0, 0.075) 0 1px 1px 0 inset;
@@ -25,10 +33,12 @@ div[data-role="editor-toolbar"] {
     border-top-left-radius: 3px;
     overflow: auto;
     outline: none;
-    font-size: medium;
-    -webkit-user-select: all;
-    -moz-user-select: all;
-    user-select: all;
+  }
+
+  .rich-editor-html {
+    height: 160px;
+    display: none;
+    background-color: #ffe;
   }
 
   ::-webkit-file-upload-button {

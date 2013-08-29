@@ -48,12 +48,6 @@ ProjectFilterView
       @
 
   class ContentEditor extends ModalDialogView
-    _fonts: [
-      'Serif', 'Sans', 'Arial', 'Arial Black'
-      'Courier', 'Courier New', 'Comic Sans MS'
-      'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
-      'Tahoma', 'Times', 'Times New Roman', 'Verdana'
-    ]
     _preview_html_tpl: tpl('#preview_html_tpl').replace(/_tpl_?(?=[^<]*>)/g, '')
     _preview_submit_tpl: tpl('#preview_submit_tpl')
     goBackOnHidden: '#content'
@@ -66,9 +60,7 @@ ProjectFilterView
       @iframe = find 'iframe', @el
       @btnPreview = find '.btn-preview', @el
       @btnSave = find '.btn-save', @el
-      @editor = find '.rich-editor', @el
-      @pageDesc = new BoxFormView el: find '#page_desc', @el
-      # TODO: desc rich editor support with code which
+      @pageDesc = new PageDescView el: find '#page_desc', @el
       @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
       @sections = []
       @sectionsEl = find '#sections', @el
@@ -220,6 +212,49 @@ ProjectFilterView
       content += @_preview_submit_tpl if sections?.length
       @_preview_html_tpl.replace '{{content}}', content
 
+    render: ->
+      super
+      @pageDesc.render()
+      @submitOptions.render()
+      _body = find '.modal-body', @el
+      $(_body).find('.btn[title]').tooltip container: _body
+      @
+
+  class BoxFormView extends BoxView
+    @acts_as FormViewMixin
+    render: ->
+      @initForm()
+    reset: ->
+      @form.reset()
+      @
+
+  class PageDescView extends BoxFormView
+    _fonts: [
+      'Serif', 'Sans', 'Arial', 'Arial Black'
+      'Courier', 'Courier New', 'Comic Sans MS'
+      'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
+      'Tahoma', 'Times', 'Times New Roman', 'Verdana'
+    ]
+    events:
+      'click .btn.hyperlink': (e) ->
+        setTimeout =>
+          $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
+        , 200
+      'click .btn-switch': '_switch'
+    fill: (data) -> # can only be called after rendered
+      super data
+      @$editor.html data.desc or ''
+      @
+    read: ->
+      data = super
+      data.desc = if @$code.is(':visible') then @$code.val() else @$editor.cleanHtml()
+      data
+    reset: ->
+      super
+      @$code.val('')
+      @_switch false
+      @$el.find('.btn-switch').removeClass 'active'
+      @
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
       fontTarget.innerHTML = ''
@@ -235,15 +270,7 @@ ProjectFilterView
       fontTarget.appendChild flagment
     render: ->
       super
-      @pageDesc.render()
-      @submitOptions.render()
-      _body = find '.modal-body', @el
-      $(_body).find('.btn[title]').tooltip container: _body
       @_renderFonts()
-      @$el.find('.btn.hyperlink').click ->
-        setTimeout =>
-          $(@).siblings('.dropdown-menu').find('input').focus()
-        , 200
       @$el.find('.dropdown-menu input').click(-> false).change(->
         $(@).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
       ).keydown (e) ->
@@ -256,16 +283,21 @@ ProjectFilterView
         target = $(overlay.data('target'))
         overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
           .width(target.outerWidth()).height target.outerHeight()
-      @$el.find('.rich-editor').wysiwyg()
+      @$editor = @$el.find('.rich-editor').wysiwyg()
+      @$code = @$editor.siblings('.rich-editor-html')
+      @$edits = @$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit')
       @
-
-  class BoxFormView extends BoxView
-    @acts_as FormViewMixin
-    render: ->
-      @initForm()
-    reset: ->
-      @form.reset()
-      @
+    _switch: (toCode) ->
+      $editor = @$editor
+      $code = @$code
+      toCode = not $code.is ':visible' unless typeof toCode is 'boolean'
+      if toCode
+        $editor.hide()
+        $code.show().val $editor.cleanHtml()
+      else
+        $code.hide()
+        $editor.show().html $code.val()
+      @$edits.prop 'disabled', toCode
 
   class ChangeTypeMixin
     changeType: (type) ->
