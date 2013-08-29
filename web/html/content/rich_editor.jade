@@ -58,7 +58,7 @@ mixin rich_editor(id)
           input(placeholder='URL', type='text', data-edit='createLink')
           button.btn(type='button') Add
     .btn-group
-      button.btn(id='btn_picture_#{id}', title='Insert picture (or just drag & drop)')
+      button.btn.btn-edit(id='btn_picture_#{id}', title='Insert picture (or just drag & drop)')
         i.icon-picture
         input(type='file', data-target='#btn_picture_' + id, data-edit='insertImage')
     .btn-group

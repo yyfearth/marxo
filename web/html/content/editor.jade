@@ -20,11 +20,11 @@ include rich_editor
             .control-group
               label.control-label(for='page_title') Page Title
               .controls
-                input.input-large(type='text', name='title',
+                input#page_title.input-large(type='text', name='title',
                 placeholder='The title of the page', maxlength='255', required)
                 span.help-inline(title='Required') *
             .control-group
-              label.control-label(for='page_title') Page Description
+              label.control-label(for='desc') Page Description
               .controls
                 mixin rich_editor('desc')
 
