@@ -68,7 +68,10 @@ ProjectFilterView
       @btnSave = find '.btn-save', @el
       @editor = find '.rich-editor', @el
       @pageDesc = new BoxFormView el: find '#page_desc', @el
-      # TODO: desc rich editor support with code which
+      # TODO: create a class for page desc and move rich editor control into it
+      #@$richEditor = @$el.find '[data-role="editor-toolbar"]:has(.rich-editor)'
+      @descEditor = find '#desc_editor', @el
+      @$descEditorEl = $(@descEditor).find '.rich-editor'
       @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
       @sections = []
       @sectionsEl = find '#sections', @el
@@ -95,6 +98,7 @@ ProjectFilterView
         title: data.get 'title'
         desc: data.get 'desc'
       @pageDesc.fill page_desc
+      @$descEditorEl.html page_desc.desc
       @submitOptions.fill data.get 'options' if data.has 'options'
       sections = data.get('sections') or []
       if data.has 'sections'
@@ -106,6 +110,9 @@ ProjectFilterView
         @btnSave.disabled = true
       @
     read: (callback) ->
+      $code = @$descEditorEl.siblings('.rich-editor-html')
+      desc = if $code.is(':visible') then $code.val() else @$descEditorEl.cleanHtml()
+
       read = (formView) ->
         deferred = $.Deferred()
         if formView instanceof BoxFormView
@@ -133,6 +140,7 @@ ProjectFilterView
 
       $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections..., submit_options) ->
         #console.log 'save content editor', page_desc, sections, submit_options
+        page_desc.desc = desc
         callback {page_desc, sections, submit_options}
       @
     save: ->
@@ -256,7 +264,18 @@ ProjectFilterView
         target = $(overlay.data('target'))
         overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
           .width(target.outerWidth()).height target.outerHeight()
-      @$el.find('.rich-editor').wysiwyg()
+      $editor = @$descEditorEl
+      $editor.wysiwyg()
+      $(@descEditor).on 'click', '.btn-switch', =>
+        @delayedTrigger 'switch', 100, $editor
+      @on 'switch', ($editor) =>
+        $code = $editor.siblings('.rich-editor-html')
+        if $code.is ':visible'
+          $code.hide()
+          $editor.show().html $code.val()
+        else
+          $editor.hide()
+          $code.show().val $editor.cleanHtml()
       @
 
   class BoxFormView extends BoxView
