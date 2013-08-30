@@ -7,6 +7,7 @@ find
 #View
 FrameView
 InnerFrameView
+FormViewMixin
 #ModalDialogView
 }, {
 ManagerView
@@ -43,16 +44,34 @@ Publichers
       console.log 'connect service details', service
 
   class TenantProfileView extends InnerFrameView
+    @acts_as FormViewMixin
+    model: new Tenant(id: 0) # fake
+    events:
+      'click .btn-reset': 'reset'
     initialize: (options) ->
       super options
-
-  #  class UserActionCell extends Backgrid.ActionsCell
-  #    render: ->
-  #      super
-  #      # TODO: show buttons depend on status
-  #      view_btn = @el.querySelector('a[name="view"]')
-  #      view_btn.href = '#config/users/' + @model.id
-  #      @
+      @initForm()
+      @form.onreset = =>
+        setTimeout =>
+          @fill @model.attributes
+        , 1
+      @on 'submit', @save.bind @
+      @
+    save: ->
+      $btn = $(@_submit_btn)
+      $btn.button 'loading'
+      data = @read()
+      console.log 'save', data
+      @model.save data, success: ->
+        $btn.button 'reset'
+      @
+    render: ->
+      super
+      @model.fetch success: (data) =>
+        console.log 'fetch tenant', data.attributes
+        @model = data
+        @fill data.attributes
+      @
 
   class UserManagemerView extends ManagerView
     columns: [
@@ -61,12 +80,6 @@ Publichers
       'title:users' # TODO: user name, title, email, etc.
       'project' # TODO: multiple projects?
       'status'
-#    ,
-#      name: 'user'
-#      label: ''
-#      editable: false
-#      sortable: false
-#      cell: UserActionCell
     ]
     collection: new Publichers
     initialize: (options) ->

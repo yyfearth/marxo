@@ -3,6 +3,16 @@
 define 'test_data', ['models'], (models) ->
 
   data =
+    tenants: [
+      id: 0
+      name: 'Marxo'
+      desc: 'Marxo dev group'
+      contact: 'Wilson Young'
+      email: 'wilson@gmail.com'
+      tel: '(408) 888-8888'
+      fax: '(408) 888-8888'
+      addr: '1 washington sq, San Jose, CA 95112'
+    ]
     workflows: [
       id: '50447afb4728cb2036cf9ca0'
       title: 'Demo Workflow'
@@ -534,9 +544,17 @@ define 'test_data', ['models'], (models) ->
   for name, list of data
     name = name.toLowerCase()
     cap = name.charAt(0).toUpperCase() + name[1..]
-    throw 'unknown test data name ' + name unless models[cap]
-    col = new models[cap]
-    list.forEach (r) -> col.create r
-    exports[name] = col
+    Collection = models[cap]
+    if Collection
+      col = new Collection
+      col.create r for r in list
+      exports[name] = col
+    else
+      Model = models[cap[...-1]]
+      unless Model
+        throw 'unknown test data name ' + name unless models[cap]
+      else for r in list
+        model = new Model r
+        model.save()
   console.log 'test data loaded'
   exports
