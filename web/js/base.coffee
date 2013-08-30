@@ -186,9 +186,17 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) ->
       throw 'FormViewMixin require a form element in ' + (@el.id or @el.outerHTML) unless @form
       @form.onsubmit = (e) =>
         e.preventDefault()
-        @form._callback? @form
-        @form._callback = null
-        @trigger 'submit', @form, @data
+        pass = true
+        for input in findAll '[required]', @form
+          unless input.value.trim()
+            pass = false
+            input.focus()
+            alert 'This field is required!'
+            break
+        if pass
+          @form._callback? @form
+          @form._callback = null
+          @trigger 'submit', @form, @data
         false
       submit_btn = find '[type="submit"]', @form
       unless submit_btn?

@@ -124,9 +124,20 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       else
         @show()
       @
-    submit: -> # fake
-      console.log 'sign in'
-      @signedIn()
+    submit: (e) -> # fake
+      e.preventDefault()
+      unless @form.email.value.trim()
+        @form.email.focus()
+        alert 'Please fill out the Email!'
+      else unless /.+@.+\..+/.test @form.email.value
+        @form.email.select()
+        alert 'The Email is invalid!'
+      else if @form.password.value.trim().length < 6
+        @form.password.focus()
+        alert 'Please fill out the Password with at least 6 characters!'
+      else
+        console.log 'sign in'
+        @signedIn()
       false
     signedIn: -> # debug only
       user =
