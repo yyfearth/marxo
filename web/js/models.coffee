@@ -40,10 +40,15 @@ define 'models', ['lib/common'], ->
     urlRoot: '/tenants'
 
   class User extends Entity
+    urlRoot: '/users'
+
+# TODO: service: by default, publisher can get the list of members
+# and cannot get list of participant, but can get participant by id
 
 #  class Participant extends User
 
   class Publicher extends User
+    urlRoot: '/users'
 
 #  class Evalutator extends User
 
@@ -53,7 +58,7 @@ define 'models', ['lib/common'], ->
 
   class Publichers extends ManagerCollection
     model: Publicher
-    url: -> '/users'
+    url: Publicher::urlRoot
 
   ## Workflow
 
@@ -145,7 +150,6 @@ define 'models', ['lib/common'], ->
       for link in from.outLinks
         return true if link.nextNode is to
       false
-
 
   class Workflows extends ManagerCollection
     @workflows: new Workflows
