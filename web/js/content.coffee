@@ -50,7 +50,7 @@ ProjectFilterView
   class ContentEditor extends ModalDialogView
     _preview_html_tpl: tpl('#preview_html_tpl').replace(/_tpl_?(?=[^<]*>)/g, '')
     _preview_submit_tpl: tpl('#preview_submit_tpl')
-    goBackOnHidden: '#content'
+    goBackOnHidden: 'content'
     events:
       'click #new_section': -> @addSection()
       'click .btn-save': 'save'

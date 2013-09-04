@@ -137,12 +137,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) ->
           @reset()
       @
     goBack: ->
-      hash = location.hash
-      if @_hash is hash
-        history.go -1
-        if typeof @goBackOnHidden is 'string' then setTimeout ->
-          location.hash = @goBackOnHidden if location.hash is hash
-        , 100
+      if @_hash is location.hash
+        @router.back fallback: @goBackOnHidden
       @
     popup: (data, callback) ->
       if data is @data

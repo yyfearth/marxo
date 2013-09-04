@@ -108,7 +108,7 @@ ProjectFilterView
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'
-    goBackOnHidden: '#report'
+    goBackOnHidden: 'report'
     initialize: (options) ->
       super options
 

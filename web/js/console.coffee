@@ -207,8 +207,27 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
 
         do (frame) => @route frame + '(/:name)(/)', frame, (name) =>
           @show frame, name
-      @
 
+      @on 'route', =>
+        @_last = @_cur
+        @_cur = Backbone.history.fragment
+      @
+    back: (opt = {}) ->
+      opt.trigger ?= true
+      opt.replace ?= false
+      if opt.real
+        hash = location.hash
+        history.go -1
+        if typeof opt.fallback is 'string' then setTimeout ->
+          @navigate opt.fallback, opt if location.hash is hash
+        , 100
+      else if @_last
+        @navigate @_last, opt
+      else if typeof opt.fallback is 'string'
+        @navigate opt.fallback, opt
+      else
+        console.log 'failed to go back for no last record'
+      @
     show: (frame, name, sub) ->
       unless sessionStorage.user
         @navigate 'signin', replace: true
@@ -232,6 +251,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       ConsoleView.get().signout()
       @navigate 'signin', replace: true
       @
+
+  # reg router for all views
+  View::router = Router.get()
 
   { # exports
   ConsoleView
