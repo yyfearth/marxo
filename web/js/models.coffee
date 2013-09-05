@@ -41,13 +41,14 @@ define 'models', ['lib/common'], ->
 
   class User extends Entity
     urlRoot: '/users'
+    idAttribute: 'email'
 
 # TODO: service: by default, publisher can get the list of members
 # and cannot get list of participant, but can get participant by id
 
 #  class Participant extends User
 
-  class Publicher extends User
+  class Publisher extends User
     urlRoot: '/users'
 
 #  class Evalutator extends User
@@ -56,9 +57,9 @@ define 'models', ['lib/common'], ->
 #    model: Participant
 #    url: '/users'
 
-  class Publichers extends ManagerCollection
-    model: Publicher
-    url: Publicher::urlRoot
+  class Publishers extends ManagerCollection
+    model: Publisher
+    url: Publisher::urlRoot
 
   ## Workflow
 
@@ -218,8 +219,8 @@ define 'models', ['lib/common'], ->
   ManagerCollection
   Tenant
   User
-  Publichers
-  Publicher
+  Publishers
+  Publisher
 #  Participants
 #  Participant
 #  Evalutator

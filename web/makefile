@@ -13,7 +13,7 @@ CYEL = \033[33m
 CBLU = \033[34m
 CWHT = \033[37m
 
-MODULES = $(shell find js/*.coffee | grep -v -e /main\. -e /models\. -e /manager\. -e /console\.)
+MODULES = $(shell find js/*.coffee | grep -v -e /main\. -e /base\. -e /models\. -e /manager\. -e /console\.)
 DIST_MODULES = $(addprefix $(dist)/, $(MODULES:.coffee=.js))
 
 print = @echo "$(CWHT)- $(CYEL)$< $(CWHT)> $(CBLU)$@$(CRST)"
@@ -32,13 +32,13 @@ clean_css:
 	rm -rf "$(dist)/css"
 clean_res:
 	rm -rf "$(dist)/font"
+	rm -f "$(dist)/favicon.ico" "$(dist)/robots.txt"
 clean_html:
 	rm -f "$(dist)/index.html"
 
 lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js $(dist)/js/lib/preview.js
-main: $(dist)/js/main.js
 modules: $(DIST_MODULES)
-js: lib main modules
+js: lib modules
 css: $(dist)/css/console.css $(dist)/css/preview.css
 html: $(dist)/index.html
 res: $(dist)/font $(dist)/favicon.ico $(dist)/robots.txt
@@ -55,10 +55,11 @@ $(dist)/font: font
 	$(print)
 	cp -r $^/ $@/
 
-$(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js
+$(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js $(dist)/js/main.js
 	$(print)
 	@mkdir -p $(@D)
 	cat $^ | uglifyjs - --screw-ie8 -o $@
+	rm -f $(dist)/js/main.js
 
 $(dist)/js/lib/%.js: js/lib/%.js
 	$(print)
@@ -94,6 +95,11 @@ $(dist)/js/report.js: js/report.coffee
 	$(print)
 	@mkdir -p $(@D)
 	coffee -pc $< | cat js/lib/chart.js - | uglifyjs - -mco $@ --screw-ie8
+
+$(dist)/js/crypto.js: js/crypto.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/crypto-js.js - | uglifyjs - -mco $@ --screw-ie8
 
 $(dist)/js/%.js: js/%.coffee
 	$(print)

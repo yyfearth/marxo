@@ -24,7 +24,7 @@ require.config
   paths:
     'lib/facebook': '//connect.facebook.net/en_US/all'
 
-require ['console'], ({ConsoleView, SignInView, Router}) ->
+define 'main', ['console'], ({ConsoleView, SignInView, Router}) ->
   # EP
   window.app = app =
     console: ConsoleView.get()

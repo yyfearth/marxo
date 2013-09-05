@@ -11,7 +11,34 @@ define 'test_data', ['models'], (models) ->
       email: 'wilson@gmail.com'
       tel: '(408) 888-8888'
       fax: '(408) 888-8888'
-      addr: '1 washington sq, San Jose, CA 95112'
+      addr: 'One Washington Square, San Jose, CA 95112'
+      created_at: '2013-09-05T02:18:13.621Z'
+      updated_at: '2013-09-05T02:18:13.621Z'
+    ]
+    publishers: [
+      email: 'test@example.com'
+      password: 'PxdGfIXoXI0ZC+IxNJPz8WbC6Cs7ziltNt2UMhd3Hhk'
+      first_name: 'Test'
+      last_name: 'User'
+      tenant_id: 0
+      created_at: '2013-09-05T02:18:13.621Z'
+      updated_at: '2013-09-05T02:18:13.621Z'
+    ,
+      email: 'yyfearth@gmail.com'
+      password: 'UGyzwQz5IkbEsRbziurhbwSPCtGj14hmomNxEAU6mkE'
+      first_name: 'Wilson'
+      last_name: 'Young'
+      tenant_id: 0
+      created_at: '2013-09-05T02:18:13.621Z'
+      updated_at: '2013-09-05T02:18:13.621Z'
+    ,
+      email: 'otaru14204@hotmail.com'
+      password: '0OhYYTpTU3rqawhF7bO93h4BzZ0KffugOwVqhXEGV1A'
+      first_name: 'Leo'
+      last_name: 'Chu'
+      tenant_id: 0
+      created_at: '2013-09-05T02:18:13.621Z'
+      updated_at: '2013-09-05T02:18:13.621Z'
     ]
     workflows: [
       id: '50447afb4728cb2036cf9ca0'
@@ -552,7 +579,8 @@ define 'test_data', ['models'], (models) ->
     else
       Model = models[cap[...-1]]
       unless Model
-        throw 'unknown test data name ' + name unless models[cap]
+        console.dir models
+        throw "unknown test data name #{name} (#{cap})" unless models[cap]
       else for r in list
         model = new Model r
         model.save()

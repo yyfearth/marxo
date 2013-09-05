@@ -1,9 +1,10 @@
 "use strict"
 
-define 'console', ['base'], ({find, findAll, View, FrameView}) ->
+define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
 
   class ConsoleView extends View
     el: '#main'
+    user: sessionStorage.user
     events:
       'touchstart #navbar .dropdown > a': (e) ->
         $el = $(e.currentTarget).parent()
@@ -40,6 +41,16 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       @instance = new @ unless @instance?
       @instance
     initialize: ->
+      # init user
+      user = null
+      try
+        if @user
+          user = new User JSON.parse @user
+          user = null unless user.has 'email'
+      @user = user
+      @avatarEl = find 'img#avatar'
+      @usernameEl = find '#username'
+      # init frames
       @frames = {}
       findAll('.frame', @el).forEach (frame) =>
         @frames[frame.id] =
@@ -86,13 +97,22 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       @$frames.find(".active[data-inner-frame]").not($target).removeClass 'active'
       @
     signout: ->
-      # TODO: sign out
+      # TODO: real sign out
       delete sessionStorage.user
       SignInView.get().show()
       @hide()
       @trigger 'signout'
       @
-
+    signin: (user, remember) ->
+      @user = user
+      if remember
+        sessionStorage.user = JSON.stringify user.toJSON()
+      else
+        delete sessionStorage.user
+      # update avatar
+      @avatarEl.src = "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
+      $(@usernameEl).text "#{user.get 'first_name'} #{user.get 'last_name'}"
+      @show()
     show: ->
       @el.style.visibility = 'visible'
       @el.classList.add 'active'
@@ -119,45 +139,61 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       @form.remember.checked = remember = localStorage.marxo_sign_in_remember is 'true'
       @form.email.value = localStorage.marxo_sign_in_email if remember
       # auto sign in
-      if (sessionStorage.user)
-        @signedIn()
+      user = ConsoleView.get().user
+      if user instanceof User
+        @signedIn user
       else
         @show()
       @
     submit: (e) -> # fake
       e.preventDefault()
-      unless @form.email.value.trim()
+      email = @form.email.value.trim()
+      password = @form.password.value.trim()
+      unless email
         @form.email.focus()
         alert 'Please fill out the Email!'
-      else unless /.+@.+\..+/.test @form.email.value
+      else unless /.+@.+\..+/.test email
         @form.email.select()
         alert 'The Email is invalid!'
-      else if @form.password.value.trim().length < 6
+      else if password.length < 4
         @form.password.focus()
-        alert 'Please fill out the Password with at least 6 characters!'
+        alert 'Please fill out the Password with at least 4 characters!\n\nShort passwords are easy to guess.\nPassword with more than 6 characters is recommended.'
       else
-        console.log 'sign in'
-        @signedIn()
+        @_signIn email, password
       false
-    signedIn: -> # debug only
-      user =
-        id: 'test', name: 'test'
-      sessionStorage.user = JSON.stringify user
+    _disable: (val) -> $(@form.elements).prop 'disabled', val
+    _signIn: (email, password) ->
+      @_disable true
+      # TODO: use real auth
+      user = new User email: email.toLowerCase()
+      user.fetch
+        success: (user) =>
+          require ['crypto'], ({hashPassword, md5Email}) =>
+            # fake validation
+            hash = hashPassword email, password
+            console.log 'login with', email, hash
+            if hash is user?.get 'password'
+              user.set 'email_md5', md5Email email
+              @signedIn user
+            else
+              @form.password.select()
+              @_disable false
+              alert 'User not exist or email and password are not matched.'
+        error: (ignored, response) =>
+          @_disable false
+          alert 'Sign in failed: ' + response
+    signedIn: (user) -> # debug only
       @trigger 'success', user
       @hide()
-      ConsoleView.get().show()
-      # Router.get().navigate 'home'
-      location.hash = '' if /signin/i.test location.hash
-      @_remember()
-      @
-    _remember: ->
       localStorage.marxo_sign_in_remember = remember = @form.remember.checked
       localStorage.marxo_sign_in_email = if remember then @form.email.value else ''
-      unless remember # clean session after leave
-        $(window).unload -> delete sessionStorage.user
+      ConsoleView.get().signin user, remember
+      @router.back fallback: 'home' if /signin/i.test location.hash
+      @
     show: ->
       @el.style.opacity = 0
       @el.style.display = 'block'
+      @_disable false
       setTimeout =>
         @el.classList.add 'active'
         @el.style.opacity = 1
@@ -167,6 +203,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
       @el.classList.remove 'active'
       @el.style.opacity = 0
       setTimeout =>
+        @form.password.value = ''
+        @_disable false
         @el.style.display = 'none'
       , @delay
       @
@@ -229,7 +267,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView}) ->
         console.log 'failed to go back for no last record'
       @
     show: (frame, name, sub) ->
-      unless sessionStorage.user
+      unless ConsoleView.get().user?
         @navigate 'signin', replace: true
       else
         console.log 'route', frame, (name or ''), sub or ''
