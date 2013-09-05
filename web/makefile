@@ -55,7 +55,7 @@ $(dist)/font: font
 	$(print)
 	cp -r $^/ $@/
 
-$(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js
+$(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js js/lib/crypto-js.js
 	$(print)
 	@mkdir -p $(@D)
 	cat $^ | uglifyjs - --screw-ie8 -o $@
