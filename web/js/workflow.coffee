@@ -60,12 +60,7 @@ Action
       'status'
       'created_at'
       'updated_at'
-    ,
-      name: 'workflow'
-      label: ''
-      editable: false
-      sortable: false
-      cell: 'actions'
+      'actions:workflow'
     ]
     collection: new Workflows
     events:

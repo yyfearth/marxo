@@ -39,11 +39,8 @@ Projects
 
   class ProjectActionCell extends Backgrid.ActionsCell
     render: ->
-      super
       # TODO: show buttons depend on status
-      view_btn = @el.querySelector('a[name="view"]')
-      view_btn.href = '#project/' + @model.id
-      @
+      super
 
   class ProjectManagemerView extends ManagerView
     columns: [
