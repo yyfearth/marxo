@@ -14,7 +14,7 @@ ManagerView
 ProjectFilterView
 }, {
 Tenant
-Publichers
+Publishers
 }) ->
 
   class ConfigFrameView extends FrameView
@@ -73,15 +73,31 @@ Publichers
         @fill data.attributes
       @
 
+  class UsernameCell extends Backgrid.StringCell
+    render: ->
+      @$el.text "#{@model.get 'first_name'} #{@model.get 'last_name'}"
+      @
+
   class UserManagemerView extends ManagerView
     columns: [
       'checkbox'
       'id'
-      'title:users' # TODO: user name, title, email, etc.
-      'project' # TODO: multiple projects?
+    ,
+      name: 'email'
+      label: 'Email'
+      cell: 'string'
+      editable: false
+    ,
+      name: 'first_name'
+      label: 'Username'
+      cell: UsernameCell
+      editable: false
+    ,
+      # TODO: support display and filter by multiple projects
       'status'
+      'actions:user'
     ]
-    collection: new Publichers
+    collection: new Publishers
     initialize: (options) ->
       super options
       @projectFilter = new ProjectFilterView

@@ -1,6 +1,6 @@
 "use strict"
 
-define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) ->
+define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User}) ->
 
   ## Utils
 
@@ -369,4 +369,5 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection}) ->
   ModalDialogView
   FormDialogView
   FormViewMixin
+  User
   }
