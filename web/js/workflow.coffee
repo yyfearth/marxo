@@ -60,12 +60,7 @@ Action
       'status'
       'created_at'
       'updated_at'
-    ,
-      name: 'workflow'
-      label: ''
-      editable: false
-      sortable: false
-      cell: 'actions'
+      'actions:workflow'
     ]
     collection: new Workflows
     events:
@@ -84,16 +79,10 @@ Action
     create: (template) ->
       template = '' if not template or /^(?:new|empty)$/i.test template
       @creator.popup template: template, (action, data) =>
-        switch action
-          when 'save'
-            console.log 'create new wf:', data
-            @collection.create data, wait: true
-            # location.hash = '#workflow/' + data.id
-          when 'cancel'
-            location.hash = '#workflow/mgr'
-          else
-            console.error 'unsupported action', action
-            location.hash = '#workflow/mgr'
+        if action is 'save'
+          console.log 'create new wf:', data
+          @collection.create data, wait: true
+          # location.hash = '#workflow/' + data.id
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
@@ -106,6 +95,7 @@ Action
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
+    goBackOnHidden: 'workflow'
     initialize: (options) ->
       super options
     popup: (data, callback) ->

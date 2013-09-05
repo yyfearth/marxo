@@ -47,7 +47,6 @@ ProjectFilterView
       'project'
       'node_action'
       'status'
-    ,
       'created_at'
       'updated_at'
     ,
@@ -56,11 +55,7 @@ ProjectFilterView
       cell: 'readonly-datetime'
       editable: false
     ,
-      name: 'report'
-      label: ''
-      editable: false
-      sortable: false
-      cell: 'actions'
+      'actions:report'
     ]
     collection: new Reports
     initialize: (options) ->
@@ -108,7 +103,7 @@ ProjectFilterView
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'
-    goBackOnHidden: '#report'
+    goBackOnHidden: 'report'
     initialize: (options) ->
       super options
 
