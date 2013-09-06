@@ -205,11 +205,11 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
       , 1
       @
     hide: ->
-      @form.password.value = ''
       @el.classList.remove 'active'
       @el.style.opacity = 0
-      @_disable false
       setTimeout =>
+        @form.password.value = ''
+        @_disable false
         @el.style.display = 'none'
       , @delay
       @
