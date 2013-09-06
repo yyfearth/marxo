@@ -95,6 +95,11 @@ $(dist)/js/report.js: js/report.coffee
 	@mkdir -p $(@D)
 	coffee -pc $< | cat js/lib/chart.js - | uglifyjs - -mco $@ --screw-ie8
 
+$(dist)/js/crypto.js: js/crypto.coffee
+	$(print)
+	@mkdir -p $(@D)
+	coffee -pc $< | cat js/lib/crypto-js.js - | uglifyjs - -mco $@ --screw-ie8
+
 $(dist)/js/%.js: js/%.coffee
 	$(print)
 	@mkdir -p $(@D)

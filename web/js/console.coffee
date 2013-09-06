@@ -162,23 +162,18 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
         @_signIn email, password
       false
     _disable: (val) -> $(@form.elements).prop 'disabled', val
-    _hash: (email, password, CryptoJS) ->
-      salt = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, "MARXO").update(email).finalize()
-      hash = CryptoJS.PBKDF2 password, salt, hasher: CryptoJS.algo.SHA256, keySize: 256/32, iterations: 1024
-      hash = hash.toString CryptoJS.enc.Base64
-      hash[0...-1]
     _signIn: (email, password) ->
       @_disable true
       # TODO: use real auth
       user = new User email: email.toLowerCase()
       user.fetch
         success: (user) =>
-          require ['lib/crypto-js'], (CryptoJS) =>
+          require ['crypto'], ({hashPassword, md5Email}) =>
             # fake validation
-            hash = @_hash email, password, CryptoJS
+            hash = hashPassword email, password
             console.log 'login with', email, hash
             if hash is user?.get 'password'
-              user.set 'email_md5', CryptoJS.MD5(email).toString CryptoJS.enc.Hex
+              user.set 'email_md5', md5Email email
               @signedIn user
             else
               @form.password.select()
