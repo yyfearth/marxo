@@ -155,6 +155,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
       @trigger action, @data, @
       @_callback? action, @data, @
       @_action = action
+      @_callback = null
       #@reset() # move to hidden
       @
     reset: ->

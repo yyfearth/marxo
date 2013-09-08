@@ -357,8 +357,8 @@ Projects
       throw 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
       # add a sequence to models
       _gen_seq = -> collection.fullCollection.each (model, i) -> model._seq = i
-      @listenTo collection.fullCollection, 'reset', _gen_seq
-      @listenTo collection, add: _gen_seq, remove: _gen_seq
+      @listenTo collection.fullCollection, 'reset add remove', _gen_seq
+      @listenTo collection, 'add remove', _gen_seq
       # selection may change after remove
       @listenTo collection, 'remove', @_selection_changed.bind @
       # page size alias
@@ -419,6 +419,9 @@ Projects
       @$el.find('.grid-filter').empty().append @filter.render().$el
       @reload()
       @$enable_if_selected = @$el.find '.enable_if_selected'
+      @
+    refresh: ->
+      @grid.body.refresh()
       @
     reload: ->
       @collection.fetch reset: true

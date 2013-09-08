@@ -42,6 +42,11 @@ define 'models', ['lib/common'], ->
   class User extends Entity
     urlRoot: '/users'
     idAttribute: 'email'
+    fullname: ->
+      if @has('first_name') and @has('last_name')
+        "#{@get 'first_name'} #{@get 'last_name'}"
+      else
+        @get('first_name') or @get('last_name') or null
 
 # TODO: service: by default, publisher can get the list of members
 # and cannot get list of participant, but can get participant by id
