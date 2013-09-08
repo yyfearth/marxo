@@ -21,4 +21,16 @@ public class TestController {
 
 		return list;
 	}
+
+	@RequestMapping("/1")
+	@ResponseBody
+	public int[] get1() {
+		int[] a = new int[10];
+
+		for (int i = 0; i < a.length; i++) {
+			a[i] = i + 1;
+		}
+
+		return a;
+	}
 }
