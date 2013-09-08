@@ -133,7 +133,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
       @$el.on 'hidden', (e) =>
         if e.target is @el and false isnt @trigger 'hidden', @
           @callback()
-          @goBack() if @goBackOnHidden
+          console.log 'backj', location.hash[1..], @goBackOnHidden
+          @goBack() if @goBackOnHidden and location.hash[1..] isnt @goBackOnHidden
           @reset()
       @
     goBack: ->

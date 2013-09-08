@@ -98,7 +98,7 @@ Action
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
-    goBackOnHidden: 'workflow'
+    goBackOnHidden: 'workflow/mgr'
     initialize: (options) ->
       super options
     popup: (data, callback) ->
