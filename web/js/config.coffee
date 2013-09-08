@@ -85,7 +85,7 @@ Publishers
     ,
       name: 'email'
       label: 'Email'
-      cell: 'string'
+      cell: 'email'
       editable: false
     ,
       name: 'first_name'
