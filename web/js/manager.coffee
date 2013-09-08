@@ -107,6 +107,28 @@ Projects
       @delegateEvents()
       @
 
+  # single label tag
+  class Backgrid.LabelCell extends Backgrid.StringCell
+    className: 'label-cell'
+    formatter:
+      fromRaw: (raw) -> raw.toLowerCase()
+      toRaw: (formatted) -> formatted.toUpperCase()
+    render: ->
+      @$el.empty()
+      rawValue = @model.get @column.get 'name'
+      if rawValue
+        val = rawValue.toLowerCase()
+        if @column.has 'cls'
+          cls = @column.get 'cls'
+          cls = cls[val] or '' unless typeof cls is 'string'
+          labelCls = "label #{cls}"
+        else
+          labelCls = "label label-#{val}"
+        formattedValue = @formatter.fromRaw rawValue
+        @$el.append $('<span>', class: labelCls).text formattedValue
+      @delegateEvents()
+      @
+
   ## Paginator
   class ManagerPaginator extends Backgrid.Extension.Paginator
     className: 'pagination'
@@ -296,10 +318,17 @@ Projects
         label: 'Node: Action'
         cell: 'node-action'
         editable: false
-      status: # TODO: change to list cell and editable
+      type:
+        name: 'type'
+        label: 'Type'
+        cell: 'label'
+        cls: 'label-info'
+        editable: false
+      status:
         name: 'status'
         label: 'Status'
-        cell: 'string'
+        cell: 'label'
+        cls: 'label-info'
         editable: false
       created_at:
         name: 'created_at'

@@ -566,12 +566,24 @@ ProjectFilterView
     ,
       name: 'media'
       label: 'Media'
-      cell: 'string'
+      cell: 'label'
+      cls:
+        page: 'label-success icon-page'
+        twitter: 'label-twitter icon-twitter'
+        facebook: 'label-facebook icon-facebook'
+        email: 'icon-mail'
       editable: false
     ,
       'project'
       'node_action'
-      'status'
+    ,
+      name: 'status'
+      label: 'Status'
+      cell: 'label'
+      cls:
+        posted: 'label-success'
+        waiting: 'label-info'
+      editable: false
     ,
       name: 'posted_at'
       label: 'Date Posted'

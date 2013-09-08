@@ -1,7 +1,9 @@
 "use strict"
 
-define 'workflow', ['base', 'manager', 'models', 'lib/jquery-jsplumb', 'lib/jquery-ui'],
-({
+define 'workflow', [
+  'base', 'manager', 'models'
+  'lib/jquery-jsplumb', 'lib/jquery-ui'
+], ({
 find
 findAll
 tpl
@@ -57,6 +59,7 @@ Action
       'id'
       'title:workflow'
       'desc'
+      'type'
       'status'
       'created_at'
       'updated_at'
@@ -107,6 +110,7 @@ Action
       @callback 'save'
       @hide true
       @
+
   ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
   class WorkflowEditorView extends InnerFrameView
@@ -301,11 +305,11 @@ Action
       # save actions
       actions = findAll('.action', @actionsEl).map (el) ->
         action = $(el).data 'model'
+        # TODO: validate each action
         throw 'cannot get action from action.$el' unless action
         action.attributes
       @data.set 'actions', actions
       console.log 'save actions', actions, @data
-      # TODO: read all actions and check
       # save the node
       super
       @
@@ -533,7 +537,7 @@ Action
         @_hidePopover()
         @_popped = null
       return
-      
+
     _action: (action, e) ->
       $target = $ e.target
       $target = $target.parents '.target' unless $target.hasClass 'target'
