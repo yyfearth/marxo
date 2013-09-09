@@ -97,12 +97,14 @@ Publishers
       @
     reset: ->
       @$title.text 'Create User'
+      @form.email.disabled = false
       @_setSex()
       super
     popup: (data, callback) ->
       super data, callback
       @$title.text "User: #{data.first_name} #{data.last_name}" if data.first_name or data.last_name
       @fill data
+      @form.email.disabled = Boolean data.email
       @
     save: ->
       @data = @read()
@@ -123,18 +125,19 @@ Publishers
       'checkbox'
       'id'
     ,
-      name: 'email'
-      label: 'Email'
-      cell: 'email'
-      editable: false
-    ,
       name: 'first_name'
       label: 'Username'
       cell: UsernameCell
       editable: false
     ,
+      name: 'email'
+      label: 'Email'
+      cell: 'email'
+      editable: false
+    ,
       # TODO: support display and filter by multiple projects
       'status'
+      'created_at'
       'actions:user'
     ]
     collection: new Publishers
@@ -145,16 +148,37 @@ Publishers
         el: find('ul.project-list', @el)
         field: 'project.id'
         collection: @collection.fullCollection
-      @on 'create edit', (user) =>
-        user = new Publisher unless user instanceof Publisher
-        # TODO: set tenant
-        @editor.popup user.attributes, (action, data) ->
-          console.log 'user', action, data
-          user.save data if action is 'save'
+      @on 'create edit', @edit.bind @
+      @on 'remove remove_selected', @remove.bind @
+      # logined user
+      @signin_user = JSON.parse sessionStorage.user
       @
     reload: ->
       super
       @projectFilter.clear()
+    edit: (user) ->
+      user = new Publisher unless user instanceof Publisher
+      # TODO: set tenant
+      @editor.popup user.attributes, (action, data) =>
+        console.log 'user', action, data
+        if action is 'save'
+          if user.isNew()
+            @collection.create data
+          else
+            user.save data
+          @refresh()
+      @
+    remove: (users) ->
+      users = [users] unless Array.isArray users
+      @_remove user for user in users
+      @refresh()
+      @
+    _remove: (user) ->
+      email = user.get 'email'
+      if @signin_user.email is email
+        alert 'Cannot remove currently signed in user ' + email
+      else if confirm 'Are you sure to remoe user ' + email + '?\n\nIt cannot be restored after removal!'
+        user.destroy()
     render: ->
       super
       @projectFilter.render()
