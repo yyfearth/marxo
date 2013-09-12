@@ -32,8 +32,8 @@ public class Workflow extends BasicEntity {
 		type = WorkflowType.NONE;
 		status = WorkflowStatus.NONE;
 
-		nodeIdList = new ArrayList<>();
-		linkIdList = new ArrayList<>();
+		nodeIdList = new ArrayList<ObjectId>();
+		linkIdList = new ArrayList<ObjectId>();
 	}
 
 	public String getDescription() {

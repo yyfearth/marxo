@@ -19,7 +19,7 @@ public class Node extends BasicEntity {
 	@JsonIgnore
 	ObjectId workflowId;
 	@JsonIgnore
-	List<ObjectId> actionIds = new ArrayList<>();
+	List<ObjectId> actionIds = new ArrayList<ObjectId>();
 
 	public Node() {
 

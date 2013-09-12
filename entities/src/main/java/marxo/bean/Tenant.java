@@ -7,7 +7,7 @@ import java.util.ArrayList;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class Tenant extends Entity {
 	String name = "";
-	ArrayList<User> users = new ArrayList<>();
+	ArrayList<User> users = new ArrayList<User>();
 
 	public Tenant() {
 

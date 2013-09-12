@@ -21,7 +21,7 @@ public class SimpleGenerator extends BasicGenerator {
 		{
 			mongoTemplate.dropCollection(Tenant.class);
 
-			ArrayList<Tenant> tenants = new ArrayList<>();
+			ArrayList<Tenant> tenants = new ArrayList<Tenant>();
 
 			for (int i = 1; i <= 10; i++) {
 				Tenant t = new Tenant();
@@ -38,7 +38,7 @@ public class SimpleGenerator extends BasicGenerator {
 		{
 			mongoTemplate.dropCollection(User.class);
 
-			ArrayList<User> users = new ArrayList<>();
+			ArrayList<User> users = new ArrayList<User>();
 
 			for (int i = 1; i <= 10; i++) {
 				User u = new User(new ObjectId(), getRandomHumanName());
@@ -54,7 +54,7 @@ public class SimpleGenerator extends BasicGenerator {
 		{
 			mongoTemplate.dropCollection(Workflow.class);
 
-			ArrayList<Workflow> workflows = new ArrayList<>();
+			ArrayList<Workflow> workflows = new ArrayList<Workflow>();
 
 			for (int i = 1; i <= 10; i++) {
 				Workflow w = new Workflow();
@@ -73,7 +73,7 @@ public class SimpleGenerator extends BasicGenerator {
 		{
 			mongoTemplate.dropCollection(Project.class);
 
-			ArrayList<Project> projects = new ArrayList<>();
+			ArrayList<Project> projects = new ArrayList<Project>();
 
 			for (int i = 1; i <= 10; i++) {
 				Project p = new Project();
@@ -92,7 +92,7 @@ public class SimpleGenerator extends BasicGenerator {
 		{
 			mongoTemplate.dropCollection(Node.class);
 
-			ArrayList<Node> nodes = new ArrayList<>();
+			ArrayList<Node> nodes = new ArrayList<Node>();
 
 			for (int i = 1; i <= 10; i++) {
 				Node p = new Node(new ObjectId());

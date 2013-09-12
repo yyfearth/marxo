@@ -13,7 +13,7 @@ public class TestController {
 	@RequestMapping
 	@ResponseBody
 	public List<Integer> getWorkflow() {
-		List<Integer> list = new ArrayList<>(10);
+		List<Integer> list = new ArrayList<Integer>(10);
 
 		for (int i = 0; i < 10; i++) {
 			list.add(i);
