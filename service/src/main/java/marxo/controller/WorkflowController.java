@@ -27,7 +27,7 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		return workflowDao.findAll();
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseBody
 	public Workflow createWorkflow(@PathVariable String id) throws Exception {
 		ObjectId objectId = new ObjectId(id);
@@ -40,7 +40,7 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		return workflow;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	public Workflow readWorkflow(@PathVariable String id) throws Exception {
 		ObjectId objectId = new ObjectId(id);
@@ -53,7 +53,7 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		return workflow;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
+	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	@ResponseBody
 	public Workflow updateWorkflow(@PathVariable String id) throws Exception {
 		ObjectId objectId = new ObjectId(id);
