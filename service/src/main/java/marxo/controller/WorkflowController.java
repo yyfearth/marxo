@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -22,9 +21,15 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 	@Autowired
 	WorkflowDao workflowDao;
 
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	public List<Workflow> getWorkflows() {
+		return workflowDao.findAll();
+	}
+
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public Workflow getWorkflow(@PathVariable String id) throws Exception {
+	public Workflow createWorkflow(@PathVariable String id) throws Exception {
 		ObjectId objectId = new ObjectId(id);
 		Workflow workflow = workflowDao.get(objectId);
 
@@ -35,10 +40,42 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		return workflow;
 	}
 
-	@RequestMapping
+	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	@ResponseBody
-	public List<Workflow> getWorkflow() {
-		System.out.println((new Date()).toString());
-		return workflowDao.findAll();
+	public Workflow readWorkflow(@PathVariable String id) throws Exception {
+		ObjectId objectId = new ObjectId(id);
+		Workflow workflow = workflowDao.get(objectId);
+
+		if (workflow == null) {
+			throw new Exception("Oops");
+		}
+
+		return workflow;
+	}
+
+	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
+	@ResponseBody
+	public Workflow updateWorkflow(@PathVariable String id) throws Exception {
+		ObjectId objectId = new ObjectId(id);
+		Workflow workflow = workflowDao.get(objectId);
+
+		if (workflow == null) {
+			throw new Exception("Oops");
+		}
+
+		return workflow;
+	}
+
+	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	@ResponseBody
+	public Workflow deleteWorkflow(@PathVariable String id) throws Exception {
+		ObjectId objectId = new ObjectId(id);
+		Workflow workflow = workflowDao.get(objectId);
+
+		if (workflow == null) {
+			throw new Exception("Oops");
+		}
+
+		return workflow;
 	}
 }
