@@ -83,12 +83,12 @@ public class SimpleGenerator extends BasicGenerator {
 				projects.add(p);
 			}
 
-			mongoTemplate.insert(projects, Workflow.class);
+			mongoTemplate.insert(projects, Project.class);
 
 			System.out.println("Created " + projects.size() + " documents to Project collection.");
 		}
 
-		// Node TODO
+		// Node
 		{
 			mongoTemplate.dropCollection(Node.class);
 
@@ -102,7 +102,7 @@ public class SimpleGenerator extends BasicGenerator {
 				nodes.add(p);
 			}
 
-			mongoTemplate.insert(nodes, Workflow.class);
+			mongoTemplate.insert(nodes, Node.class);
 
 			System.out.println("Created " + nodes.size() + " documents to Project collection.");
 		}
