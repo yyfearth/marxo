@@ -20,6 +20,28 @@
   overflow: hidden;
 }
 
+.btn-color(@bkg-color, @font-color: #fff, @disabled-font-color: #ccc) {
+  @bkg-from-color: lighten(@bkg-color, 10%);
+  @bkg-to-color: darken(@bkg-color, 10%);
+  color: @font-color;
+  background-color: @bkg-color;
+  background-image: -moz-linear-gradient(top, @bkg-from-color, @bkg-to-color);
+  background-image: -webkit-linear-gradient(top, @bkg-from-color, @bkg-to-color);
+  background-image: linear-gradient(to bottom, @bkg-from-color, @bkg-to-color);
+  background-repeat: repeat-x;
+  border-color: @bkg-from-color @bkg-color @bkg-to-color;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
+    background-color: @bkg-to-color;
+  }
+  &:hover, &:focus, &:active, &.active {
+    color: @font-color;
+  }
+  &.disabled, &[disabled] {
+    color: @disabled-font-color;
+  }
+}
+
 html, body {
   padding: 0;
   margin: 0;
@@ -406,10 +428,30 @@ ul.action-bar {
   .label {
     text-transform: capitalize;
   }
-  .label-twitter {
-    background-color: #00aced;
-  }
-  .label-facebook {
-    background-color: #3B5998;
+}
+
+@facebook-color: #3B5998;
+@twitter-color: #00aced;
+
+.label-twitter {
+  background-color: @twitter-color;
+}
+
+.label-facebook {
+  background-color: @facebook-color;
+}
+
+.btn-twitter {
+  .btn-color(@twitter-color);
+}
+
+.btn-facebook {
+  .btn-color(@facebook-color);
+}
+
+#service_status {
+  padding: 15px;
+  .btn {
+    margin-bottom: 20px;
   }
 }

@@ -1,10 +1,12 @@
 "use strict"
 
+FB_APP_ID = '503617123064248'
+
 define 'config', ['base', 'manager', 'models'],
 ({
 find
 findAll
-#View
+View
 FrameView
 InnerFrameView
 FormViewMixin
@@ -38,12 +40,60 @@ Publishers
           throw 'empty or unknown sub action for config frame ' + name
       @
 
+  # Services
+
   class ServiceConnectorView extends InnerFrameView
     initialize: (options) ->
       super options
+      @facebookView = new FacebookStatusView el: find '.btn-facebook', @el
+      @twitterView = new ServiceStatusView el: find '.btn-twitter', @el
+      @emailView = new ServiceStatusView el: find '.btn-email', @el
     open: (service) ->
       console.log 'connect service details', service
 
+  class ServiceStatusView extends View
+
+  class FacebookStatusView extends ServiceStatusView
+    cfg:
+      appId: FB_APP_ID # App ID
+      status: false # check login status
+      cookie: false # enable cookies to allow the server to access the session
+      xfbml: true
+    events:
+      click: -> @click()
+    click: ->
+      unless @FB? # lazy init
+        require ['lib/facebook'], (@FB) =>
+          @_changed = @_changed.bind @
+          @FB.init @cfg
+          @click()
+      else unless @auth?
+        @connect()
+      else
+        @disconnect()
+    connect: (callback = @_changed) ->
+      @FB.login (response) =>
+        if response.authResponse?.accessToken
+          console.log 'facebook connected', response
+          callback response.authResponse
+          # FB.api '/me', (response) ->
+          #   console.log "Good to see you, " + response.name + "."
+        else
+          console.warn 'User cancelled login or did not fully authorize.', response
+          callback null
+      @
+    disconnect: (callback = @_changed) ->
+      @FB.logout (response) ->
+        # user is now logged out
+        console.log 'logout', response
+        callback null
+      @
+    _changed: (@auth) ->
+      @$el.text if @auth? then 'Facebook Connected' else 'Connect to Facebook'
+      # if @auth? # TODO: save token
+      @
+
+  # Tenant Profile
   class TenantProfileView extends InnerFrameView
     @acts_as FormViewMixin
     model: new Tenant(id: 0) # fake
