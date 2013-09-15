@@ -54,7 +54,6 @@ define 'models', ['lib/common'], ->
 #  class Participant extends User
 
   class Publisher extends User
-    urlRoot: '/users'
 
 #  class Evalutator extends User
 
