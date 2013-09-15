@@ -5,27 +5,27 @@
   .modal-body
     form.form-horizontal
       .control-group
-        label.control-label(for='wf_title') Email
+        label.control-label(for='user_email') Email
         .controls
           input#user_email(type='email', name='email', placeholder='user@company.com', maxlength='255', required)
       .control-group
-        label.control-label(for='wf_name') Full Name
+        label.control-label(for='first_name') Full Name
         .controls
           input#first_name(type='text', name='first_name', placeholder='First Name', maxlength='255', required)
           input#last_name(type='text', name='last_name', placeholder='Last Name', maxlength='255', required)
       .control-group
-        label.control-label(for='wf_title') Sex
+        label.control-label(for='user_sex') Sex
         .controls
-          .btn-group(data-toggle='buttons-radio')
+          .btn-group#user_sex(data-toggle='buttons-radio')
             button.btn(type='button', name='sex', value='male') Male
             button.btn.active(type='button', name='sex', value='') Unspecified
             button.btn(type='button', name='sex', value='female') Female
       .control-group
-        label.control-label(for='wf_title') Title
+        label.control-label(for='user_title') Title
         .controls
           input#user_title(type='text', name='title', placeholder='User Title', maxlength='32')
       .control-group
-        label.control-label(for='wf_desc') Description
+        label.control-label(for='user_desc') Description
         .controls
           textarea#user_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
   .modal-footer
