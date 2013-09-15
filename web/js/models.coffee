@@ -217,6 +217,14 @@ define 'models', ['lib/common'], ->
     model: Report
     url: ROOT + '/reports'
 
+  ## Service
+
+  class Service extends Entity
+    idAttribute: 'service'
+    urlRoot: ROOT + '/services'
+    connected: ->
+      'connected' is @get 'status'
+
   { # exports
   Entity
   Collection
@@ -244,4 +252,5 @@ define 'models', ['lib/common'], ->
   Contents
   Report
   Reports
+  Service
   }

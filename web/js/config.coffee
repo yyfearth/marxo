@@ -18,6 +18,7 @@ ProjectFilterView
 Tenant
 Publisher
 Publishers
+Service
 }) ->
 
   class ConfigFrameView extends FrameView
@@ -50,8 +51,38 @@ Publishers
       @emailView = new ServiceStatusView el: find '.btn-email', @el
     open: (service) ->
       console.log 'connect service details', service
+    render: ->
+      @facebookView.render()
+      @twitterView.render()
+      @emailView.render()
+      @
 
   class ServiceStatusView extends View
+    initialize: (options) ->
+      @events ?= {}
+      @events.click ?= 'click'
+      @render = @render.bind @
+      @_render = @_render.bind @
+      @click = @click.bind @
+      @changed = @changed.bind @
+      super options
+    click: ->
+      if @model.connected?()
+        # TODO: show info with disconnect btn
+        console.log 'show info', @model
+        @disconnect() # tmp
+      else
+        @connect()
+      @
+    changed: (auth = @defaults) ->
+      @model.clear()
+      throw 'default not defined' unless auth
+      @model.save auth, success: @render
+      @
+    render: (model = @model) ->
+      model?.fetch success: @_render, error: @_render
+    _render: ->
+      throw 'not implemented, this needed to be override'
 
   class FacebookStatusView extends ServiceStatusView
     cfg:
@@ -59,38 +90,55 @@ Publishers
       status: false # check login status
       cookie: false # enable cookies to allow the server to access the session
       xfbml: true
-    events:
-      click: -> @click()
-    click: ->
-      unless @FB? # lazy init
-        require ['lib/facebook'], (@FB) =>
-          @_changed = @_changed.bind @
-          @FB.init @cfg
-          @click()
-      else unless @auth?
-        @connect()
-      else
-        @disconnect()
-    connect: (callback = @_changed) ->
-      @FB.login (response) =>
-        if response.authResponse?.accessToken
-          console.log 'facebook connected', response
-          callback response.authResponse
-          # FB.api '/me', (response) ->
-          #   console.log "Good to see you, " + response.name + "."
+    copy_fields: ['username', 'link', 'locale', 'timezone'] # + fullname(name)
+    defaults:
+      service: 'facebook', status: 'disconnected'
+    model: new Service(service: 'facebook')
+    FB: (callback) ->  # lazy init
+      if @_FB?
+        callback.call @, @_FB
+      else require ['lib/facebook'], (@_FB) =>
+        @_FB.init @cfg
+        callback.call @, @_FB
+      @
+    connect: (callback = @changed) ->
+      fields = @copy_fields
+      @FB (FB) -> FB.login (response) ->
+        response = response.authResponse
+        if response?.accessToken
+          auth =
+            user_id: response.userID
+            access_token: response.accessToken
+            expires_in: response.expiresIn
+            service: 'facebook'
+            status: 'connected'
+          FB.api '/me', (response) ->
+            auth[key] = response[key] for key in fields
+            auth.fullname = response.name
+            console.log 'facebook connected', auth
+            #, response
+            callback auth
         else
           console.warn 'User cancelled login or did not fully authorize.', response
           callback null
+          alert 'You cancelled login or did not fully authorize.'
       @
-    disconnect: (callback = @_changed) ->
-      @FB.logout (response) ->
-        # user is now logged out
-        console.log 'logout', response
-        callback null
+    disconnect: (callback = @changed) ->
+      if confirm 'Are you sure to disconnect your facebook account?\n\nIt will cause Marxo Service unable to send messages and track the responses from Facebook!'
+        @FB (FB) -> FB.getLoginStatus (response) ->
+          if response.status is 'connected'
+            FB.logout (response) ->
+              # user is now logged out
+              console.log 'logout', response
+              callback null
+          else
+            callback null
       @
-    _changed: (@auth) ->
-      @$el.text if @auth? then 'Facebook Connected' else 'Connect to Facebook'
-      # if @auth? # TODO: save token
+    _render: (model) ->
+      if model?.connected?()
+        @$el.text 'Facebook Connected as ' + model.get 'fullname'
+      else
+        @$el.text 'Connect to Facebook'
       @
 
   # Tenant Profile
