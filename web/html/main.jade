@@ -29,9 +29,11 @@ html(lang='en-US')
             include workflow/editor
           #workflow_manager.active.row-fluid.inner-frame(name='manager')
             include workflow/manager
-        #calendar.frame.container-fluid
-          .active.row-fluid.inner-frame
-            include calendar
+        #event.frame.container-fluid
+          #event_calendar.active.row-fluid.inner-frame(name='calendar')
+            include event/calendar
+          #event_manager.row-fluid.inner-frame(name='manager')
+            include event/manager
         #content.frame.container-fluid
           .active.row-fluid.inner-frame
             include content/manager

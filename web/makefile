@@ -81,7 +81,7 @@ $(dist)/js/workflow.js: js/workflow.coffee
 	@mkdir -p $(@D)
 	coffee -pc $< | cat js/lib/jquery-jsplumb.js - | uglifyjs - -mco $@ --screw-ie8
 
-$(dist)/js/calendar.js: js/calendar.coffee
+$(dist)/js/event.js: js/event.coffee
 	$(print)
 	@mkdir -p $(@D)
 	coffee -pc $< | cat js/lib/fullcalendar.js - | uglifyjs - -mco $@ --screw-ie8

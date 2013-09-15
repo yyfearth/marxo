@@ -35,10 +35,18 @@ ul.nav
       li.divider
       li(data-inner-frame='mgr', data-default='true')
         a.icon-manager(href='#workflow/mgr') Manage Workflows
+  li.dropdown(data-frame='event')
+    a.icon-calendar(href='#event')
+      | Event
+      b.caret
+    ul.dropdown-menu
+      li(data-inner-frame='calendar', data-default='true')
+        a.icon-calendar(href='#event/calendar') Calendar
+      li.divider
+      li(data-inner-frame='mgr')
+        a.icon-manager(href='#event/mgr') Manage Events
   li(data-frame='content')
     a.icon-page(href='#content') Content
-  li(data-frame='calendar')
-    a.icon-calendar(href='#calendar') Calendar
   li(data-frame='report')
     a.icon-report(href='#report') Report
   li.dropdown(data-frame='config')
