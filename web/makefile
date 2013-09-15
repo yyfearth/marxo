@@ -13,7 +13,7 @@ CYEL = \033[33m
 CBLU = \033[34m
 CWHT = \033[37m
 
-MODULES = $(shell find js/*.coffee | grep -v -e /main\. -e /base\. -e /models\. -e /manager\. -e /console\.)
+MODULES = $(shell find js/*.coffee | grep -v -e /main\. -e /base\. -e /models\. -e /manager\. -e /console\. -e /profile\.)
 DIST_MODULES = $(addprefix $(dist)/, $(MODULES:.coffee=.js))
 
 print = @echo "$(CWHT)- $(CYEL)$< $(CWHT)> $(CBLU)$@$(CRST)"
@@ -66,7 +66,7 @@ $(dist)/js/lib/%.js: js/lib/%.js
 	@mkdir -p $(@D)
 	cp $^ $@
 
-$(dist)/js/main.js: js/models.coffee js/base.coffee js/console.coffee js/manager.coffee js/main.coffee
+$(dist)/js/main.js: js/models.coffee js/base.coffee js/console.coffee js/manager.coffee js/main.coffee js/profile.coffee
 	@echo "$(CWHT)- $(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
 	@mkdir -p $(@D)
 	coffee -pjc $^ | cat js/lib/backgrid.js js/lib/html5-dataset.js - | uglifyjs - -mco $@ --screw-ie8
