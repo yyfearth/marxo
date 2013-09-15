@@ -23,7 +23,7 @@ User
       @model.fetch success: (data) =>
         console.log 'fetch tenant', data.attributes
         @model = data
-        attrs = $.extend {}, data.attributes
+        attrs = data.toJSON()
         sex = attrs.sex
         attrs.sex = unless sex then 'Unspecified' else sex.charAt(0).toUpperCase() + sex[1..]
         console.log attrs
