@@ -99,7 +99,6 @@ define 'models', ['lib/common'], ->
       options.success = (collection, response, options) =>
         @_warp collection
         _success? collection, response, options
-        return
       super options
       @
     save: (attributes = {}, options) -> # override for sync ids
@@ -163,6 +162,7 @@ define 'models', ['lib/common'], ->
   # url: -> @tenant.url() + '/workflows'
 
   class Node extends Entity
+    actions: -> @_actions ?= new Actions @get 'actions'
 
   class Nodes extends Collection
     model: Node
@@ -184,13 +184,69 @@ define 'models', ['lib/common'], ->
 
   ## Project
 
-  class Project extends Entity
+  class Project extends Workflow
     urlRoot: ROOT + '/projects'
+    find: ({nodeId, linkId, actionId, callback}) ->
+      if @loaded()
+        if linkId
+          link = @links.get linkId
+        else if nodeId
+          node = @nodes.get nodeId
+          action = node.actions().get actionId if actionId
+        callback? {node, link, action}
+      else if linkId
+        projectId = @id
+        new Link(id: linkId).fetch
+          error: ->
+            callback? {}
+          success: (link) ->
+            link = null if projectId isnt link.get 'project_id'
+            callback? {link}
+      else if nodeId
+        projectId = @id
+        new Node(id: nodeId).fetch
+          error: ->
+            callback? {}
+          success: (node) ->
+            node = null if projectId isnt node.get 'project_id'
+            action = node.actions().get actionId if node and actionId
+            callback? {node, action}
+      else
+        callback? {}
+      @
 
   class Projects extends ManagerCollection
     @projects: new Projects
+    @find: (options) ->
+      unless @projects.length
+        @projects.fetch success: (projects) =>
+          projects._last_load = Date.now()
+          projects.find options
+      else
+        @projects.find options
+      @projects
     model: Project
     url: Project::urlRoot
+    find: ({projectId, nodeId, linkId, actionId, callback}) ->
+      throw 'projectId is required' unless projectId
+      project = @get projectId
+      _find = (project) ->
+        if nodeId or linkId or actionId
+          project.find {
+            nodeId, linkId, actionId
+            callback: (results) ->
+              results.project = project
+              callback? results
+          }
+        else
+          callback? {project}
+      if project
+        _find project
+      else
+        new Project(id: projectId).fetch
+          success: _find
+          error: -> callback? {}
+      @
 
   ## Home
 
