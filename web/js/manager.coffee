@@ -118,12 +118,13 @@ Projects
       rawValue = @model.get @column.get 'name'
       if rawValue
         val = rawValue.toLowerCase()
+        labelCls = "label capitalized"
         if @column.has 'cls'
           cls = @column.get 'cls'
           cls = cls[val] or '' unless typeof cls is 'string'
-          labelCls = "label #{cls}"
+          labelCls += cls
         else
-          labelCls = "label label-#{val}"
+          labelCls += "label-#{val}"
         formattedValue = @formatter.fromRaw rawValue
         @$el.append $('<span>', class: labelCls).text formattedValue
       @delegateEvents()
