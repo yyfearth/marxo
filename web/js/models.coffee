@@ -200,6 +200,15 @@ define 'models', ['lib/common'], ->
     model: Notification
     url: ROOT + '/notifications'
 
+  ## Events
+
+  class Event extends Entity
+    urlRoot: ROOT + '/events'
+
+  class Events extends ManagerCollection
+    model: Event
+    url: Event::urlRoot
+
   ## Content
 
   class Content extends Entity
@@ -248,6 +257,8 @@ define 'models', ['lib/common'], ->
   Project
   Notifications
   Notification
+  Event
+  Events
   Content
   Contents
   Report

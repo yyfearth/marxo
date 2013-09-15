@@ -1,11 +1,44 @@
 "use strict"
 
-define 'calendar', ['base', 'lib/jquery-ui', 'lib/fullcalendar'], ({
+define 'event', ['base', 'manager', 'models', 'lib/jquery-ui', 'lib/fullcalendar'], ({
 find
 View
 FrameView
+InnerFrameView
+}, {
+ManagerView
+ProjectFilterView
+}, {
+Events
 }) ->
-  class CalendarFrameView extends FrameView
+
+  class EventFrameView extends FrameView
+    collection: new Events
+    initialize: (options) ->
+      super options
+      @calendar = new EventCalendarView el: '#event_calendar', parent: @
+      @manager = new EventManagemerView el: '#event_manager', parent: @
+      # TODO: init @editor
+      @
+    open: (name, sub) ->
+      switch name
+        when 'calendar'
+          @switchTo @calendar
+        when 'mgr'
+          @switchTo @manager
+        else
+          console.log 'open', name, sub
+      # TODO: open @editor
+      # throw 'open project with a name or id is needed' unless name
+      # @switchTo @editor
+      # @viewer.load name
+      # @viewer.popup sub if sub
+      @
+
+  # Event Calendar
+
+  class EventCalendarView extends InnerFrameView
+    collection: EventFrameView::collection
     initialize: (options) ->
       super options
       #@sidebarListEl = find '.sidebar-list', @el
@@ -41,6 +74,7 @@ FrameView
       handleWindowResize: false # handle manually
       editable: true
       droppable: true # this allows things to be dropped onto the calendar !!!
+    collection: EventFrameView::collection
     #initialize: (options) ->
     #  super options
     #  @
@@ -83,4 +117,40 @@ FrameView
       @fullCalendar 'renderEvent', event, true
       @
 
-  CalendarFrameView
+  # Event Manager
+
+  class EventManagemerView extends ManagerView
+    columns: [
+      'checkbox'
+      'id'
+      'title:project'
+      'desc'
+      'created_at'
+      'updated_at'
+      'status'
+    ]
+    collection: EventFrameView::collection
+    initialize: (options) ->
+      super options
+      collection = @collection.fullCollection
+      @projectFilter = new ProjectFilterView
+        el: find('ul.project-list', @el)
+        field: 'project.id'
+        collection: collection
+      _skip = @skip.bind @
+      @on
+        skip: _skip
+        remove_selected: _skip
+      @
+    skip: (models) ->
+      console.log 'skip', models
+      @
+    reload: ->
+      super
+      @projectFilter.clear()
+    render: ->
+      super
+      @projectFilter.render()
+      @
+
+  EventFrameView
