@@ -19,7 +19,7 @@ Projects
       @creator = new ProjectCreatorView el: '#project_creator', parent: @
       @viewer = new ProjectViewerView el: '#project_viewer', parent: @
       @manager = new ProjectManagemerView el: '#project_manager', parent: @
-      return
+      @
     open: (name, sub) ->
       switch name
         when 'new'
@@ -31,10 +31,6 @@ Projects
           @switchTo @viewer
           @viewer.load name
           @viewer.popup sub if sub
-      return
-    render: ->
-      super
-      @manager.render()
       @
 
   class ProjectActionCell extends Backgrid.ActionsCell
