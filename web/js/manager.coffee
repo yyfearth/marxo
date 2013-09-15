@@ -118,7 +118,7 @@ Projects
       rawValue = @model.get @column.get 'name'
       if rawValue
         val = rawValue.toLowerCase()
-        labelCls = "label capitalized"
+        labelCls = 'label capitalized '
         if @column.has 'cls'
           cls = @column.get 'cls'
           cls = cls[val] or '' unless typeof cls is 'string'
@@ -153,6 +153,11 @@ Projects
         e.preventDefault()
         @clear()
         false
+      'keydown input[type=text]': (e) ->
+        if e.which is 27 # ESC
+          e.preventDefault()
+          @clear()
+          false
       'input input[type=text]': 'search'
       'submit': (e) ->
         e.preventDefault()
@@ -204,8 +209,11 @@ Projects
       @lastQuery = query
       @
     clear: ->
-      @$el.find('input[type=text]').val('')
-      @search null
+      $el = @$el.find('input[type=text]')
+      if $el.val()
+        $el.val('')
+        @search null
+      @
     _gen_seq: (col) ->
       col.forEach (model, i) -> model._seq = i
       col
