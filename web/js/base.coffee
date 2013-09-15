@@ -34,6 +34,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
       hash[name] = _html tpl_el
     hash
 
+  # Polyfill
+  Date::now ?= -> +new Date
+
   # Enable CoffeeScript class for Javascript Mixin
   # https://github.com/yi/coffee-acts-as
   # e.g.: class A ...   class B ...
@@ -303,12 +306,12 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
       @fetch false if options.auto
     fetch: (force) ->
       col = @collection
-      ts = new Date().getTime()
+      ts = Date.now()
       if force or not col._last_load or ts - col._last_load > @_reload_timeout
         # TODO: add a refresh button
         console.log 'fetch for list', @headerTitle
         col.fetch reset: true
-        col._last_load = new Date().getTime()
+        col._last_load = Date.now()
         true
       else
         false

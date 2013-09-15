@@ -610,10 +610,7 @@ ProjectFilterView
         el: find('ul.project-list', @el)
         field: 'project.id'
         collection: collection
-      _remove = @remove.bind @
-      @on
-        remove: _remove
-        remove_selected: _remove
+      @on block: @block.bind @
       @
     block: (model) ->
       console.log 'block', model

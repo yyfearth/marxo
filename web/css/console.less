@@ -402,14 +402,17 @@ ul.action-bar {
   margin: 0;
 }
 
-.label-cell {
-  .label {
-    text-transform: capitalize;
-  }
-  .label-twitter {
-    background-color: #00aced;
-  }
-  .label-facebook {
-    background-color: #3B5998;
-  }
+.capitalized {
+  text-transform: capitalize;
+}
+
+@facebook-color: #3B5998;
+@twitter-color: #00aced;
+
+.label-twitter {
+  background-color: @twitter-color;
+}
+
+.label-facebook {
+  background-color: @facebook-color;
 }
