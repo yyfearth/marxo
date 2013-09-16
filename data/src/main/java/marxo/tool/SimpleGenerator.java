@@ -3,6 +3,8 @@ package marxo.tool;
 import marxo.bean.*;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,8 +16,12 @@ import java.util.ArrayList;
  */
 public class SimpleGenerator extends BasicGenerator {
 	public static void main(String[] args) {
+		final Logger logger = LoggerFactory.getLogger(SimpleGenerator.class);
+
 		ApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"mongo-configuration.xml"});
 		MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);
+
+		System.out.println("logger.isInfoEnabled():" + logger.isTraceEnabled());
 
 		// Tenant
 		{
@@ -31,7 +37,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(tenants, Tenant.class);
 
-			System.out.println("Created " + tenants.size() + " documents to Tenant collection.");
+			logger.info("Created " + tenants.size() + " documents to Tenant collection.");
 		}
 
 		// User
@@ -47,7 +53,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(users, User.class);
 
-			System.out.println("Created " + users.size() + " documents to User collection.");
+			logger.info("Created " + users.size() + " documents to User collection.");
 		}
 
 		// Workflow
@@ -66,7 +72,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(workflows, Workflow.class);
 
-			System.out.println("Created " + workflows.size() + " documents to Workflow collection.");
+			logger.info("Created " + workflows.size() + " documents to Workflow collection.");
 		}
 
 		// Project
@@ -85,7 +91,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(projects, Project.class);
 
-			System.out.println("Created " + projects.size() + " documents to Project collection.");
+			logger.info("Created " + projects.size() + " documents to Project collection.");
 		}
 
 		// Node
@@ -104,7 +110,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(nodes, Node.class);
 
-			System.out.println("Created " + nodes.size() + " documents to Project collection.");
+			logger.info("Created " + nodes.size() + " documents to Project collection.");
 		}
 	}
 

@@ -1,16 +1,42 @@
 package marxo.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/test{:s?}")
+@RequestMapping
 public class TestController {
+	final Logger logger = LoggerFactory.getLogger(TestController.class);
+
+	@PostConstruct
+	void report() {
+		logger.info("TestController started");
+	}
+
 	@RequestMapping
+	@ResponseBody
+	public Message get() {
+		return new Message("Hello world");
+	}
+//	public List<Integer> get() {
+//		ArrayList<Integer> list = new ArrayList<>();
+//
+//		for (int i = 0; i < 5; i++) {
+//			list.add(i);
+//		}
+//
+//		return list;
+//	}
+
+	@RequestMapping("/test{:s?}")
 	@ResponseBody
 	public List<Integer> getWorkflow() {
 		List<Integer> list = new ArrayList<>(10);
@@ -22,15 +48,12 @@ public class TestController {
 		return list;
 	}
 
-	@RequestMapping("/1")
-	@ResponseBody
-	public int[] get1() {
-		int[] a = new int[10];
+	@JsonSerialize
+	class Message {
+		String message = "";
 
-		for (int i = 0; i < a.length; i++) {
-			a[i] = i + 1;
+		public Message(String message) {
+			this.message = message;
 		}
-
-		return a;
 	}
 }
