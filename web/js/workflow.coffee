@@ -376,20 +376,25 @@ Action
       model.data = null
       super
     render: ->
-      @el.innerHTML = @_tpl[@type]
-      @el.id = 'action_' + @model.id or 'no_id'
-      #@containerEl.appendChild @el
-      @containerEl.insertBefore @el, find '.alert', @containerEl
-      # get els in super
-      super
-      if /webkit/i.test navigator.userAgent
-        $(@el).disableSelection()
+      _tpl = @_tpl[@type]
+      unless _tpl
+        console.error 'unable to find tpl for action type', @type
+        @remove()
       else
-        $('.box-header, .btn', @el).disableSelection()
-      @form = find 'form', @el
-      @fill @model?.data
-      @$el.data model: @model, view: @
-      @listenTo @model, 'destroy', @remove.bind @
+        @el.innerHTML = @_tpl[@type]
+        @el.id = 'action_' + @model.id or 'no_id'
+        #@containerEl.appendChild @el
+        @containerEl.insertBefore @el, find '.alert', @containerEl
+        # get els in super
+        super
+        if /webkit/i.test navigator.userAgent
+          $(@el).disableSelection()
+        else
+          $('.box-header, .btn', @el).disableSelection()
+        @form = find 'form', @el
+        @fill @model?.data
+        @$el.data model: @model, view: @
+        @listenTo @model, 'destroy', @remove.bind @
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
