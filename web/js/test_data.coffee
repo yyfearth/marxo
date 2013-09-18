@@ -77,7 +77,7 @@ define 'test_data', ['models'], (models) ->
         style: 'left: 26px; top: 43px;'
         actions: [
           id: '50447afb4728cb2036cf9f00'
-          type: 'post_info_page'
+          type: 'post_page'
         ,
           id: '50447afb4728cb2036cf9f01'
           type: 'post_to_multi_social_media'
@@ -95,7 +95,7 @@ define 'test_data', ['models'], (models) ->
         style: 'left: 334px; top: 44px;'
         actions: [
           id: '50447afb4728cb2036cf9f03'
-          type: 'post_info_page'
+          type: 'post_page'
         ,
           id: '50447afb4728cb2036cf9ce4'
           type: 'post_to_multi_social_media'
@@ -125,7 +125,7 @@ define 'test_data', ['models'], (models) ->
         style: 'left: 613px; top: 44px;'
         actions: [
           id: '50447afb4728cb2036cf9f07'
-          type: 'post_form'
+          type: 'post_page'
         ,
           id: '50447afb4728cb2036cf9f08'
           type: 'post_to_multi_social_media'
@@ -143,7 +143,7 @@ define 'test_data', ['models'], (models) ->
         style: 'left: 629px; top: 282px;'
         actions: [
           id: '50447afb4728cb2036cf9f0a'
-          type: 'post_form'
+          type: 'post_page'
         ,
           id: '50447afb4728cb2036cf9f0b'
           type: 'post_to_multi_social_media'
@@ -161,7 +161,7 @@ define 'test_data', ['models'], (models) ->
         style: 'left: 1018px; top: 44px;'
         actions: [
           id: '50447afb4728cb2036cf9f0d'
-          type: 'post_form'
+          type: 'post_page'
         ,
           id: '50447afb4728cb2036cf9f0e'
           type: 'send_email'
@@ -179,7 +179,7 @@ define 'test_data', ['models'], (models) ->
         style: 'left: 1043px; top: 282px;'
         actions: [
           id: '50447afb4728cb2036cf9f10'
-          type: 'post_form'
+          type: 'post_page'
         ,
           id: '50447afb4728cb2036cf9f11'
           type: 'post_to_multi_social_media'
@@ -197,7 +197,7 @@ define 'test_data', ['models'], (models) ->
         style: 'left: 1420px; top: 183px;'
         actions: [
           id: '50447afb4728cb2036cf9f13'
-          type: 'post_info_page'
+          type: 'post_page'
         ,
           id: '50447afb4728cb2036cf9f14'
           type: 'post_to_multi_social_media'

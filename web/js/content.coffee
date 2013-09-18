@@ -29,12 +29,12 @@ ProjectFilterView
     initialize: (options) ->
       super options
       @manager = new ContentManagerView el: @el, parent: @
-      @editor = new ContentEditor el: '#content_editor', parent: @
+      @designer = new PageDesigner el: '#page_designer', parent: @
       @
     open: (name, arg) ->
       if name
-        @editor.render() unless @editor.rendered
-        @editor.load name, arg, (action, data) ->
+        @designer.render() unless @designer.rendered
+        @designer.load name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
@@ -44,10 +44,10 @@ ProjectFilterView
           console.log action, data
       else
         @manager.render() unless @manager.rendered
-        @editor.cancel()
+        @designer.cancel()
       @
 
-  class ContentEditor extends ModalDialogView
+  class PageDesigner extends ModalDialogView
     _preview_html_tpl: tpl('#preview_html_tpl').replace(/_tpl_?(?=[^<]*>)/g, '')
     _preview_submit_tpl: tpl('#preview_submit_tpl')
     goBackOnHidden: 'content'
@@ -134,7 +134,6 @@ ProjectFilterView
           console.log 'save content', data
           @data.set 'title', data.page_desc.title
           @data.set 'desc', data.page_desc.desc
-          # TODO: deal with rich desc
           # TODO: deal with invalid settings
           @data.set 'sections', data.sections
           @data.set 'options', data.submit_options
@@ -538,19 +537,23 @@ ProjectFilterView
   class ContentActionCell extends Backgrid.ActionsCell
     render: ->
       super
+      # view
       view_btn = find 'a[name="view"]', @el
       url = @model.get 'url'
       if url
         view_btn.href = @model.get 'url'
       else
         view_btn.style.display = 'none'
+      # report & block
       report_btn = find 'a[name="report"]', @el
       if 'POSTED' is @model.get 'status'
+        # TODO: report id
         report_btn.href = '#report/test'
-        #"#report/#{@model.id}"
-        @$el.find('.pre-status').hide()
+        @$el.find('a[name="edit"],button[name="block"]').hide()
       else
         report_btn.style.display = 'none'
+        if 'PAGE' isnt @model.get 'media'
+          find('a[name="preview"]', @el)?.style.display = 'none'
       @
 
   class ContentManagerView extends ManagerView
