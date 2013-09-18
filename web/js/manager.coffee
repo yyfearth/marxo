@@ -89,6 +89,12 @@ Projects
       @$el.find('.btn[title]').attr 'data-container': 'body'
       @delegateEvents()
       @
+    _find: (name, tag) ->
+      find "#{tag or ''}[name='#{name}']", @el
+    _hide: (name, tag) ->
+      _btn = if typeof name isnt 'string' then name else @_find name, tag
+      _btn?.style.display = 'none'
+      _btn
 
   class Backgrid.NodeActionCell extends Backgrid.LinkCell
     render: ->

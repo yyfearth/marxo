@@ -599,23 +599,32 @@ ProjectFilterView
   class ContentActionCell extends Backgrid.ActionsCell
     render: ->
       super
+      model = @model
       # view
-      view_btn = find 'a[name="view"]', @el
-      url = @model.get 'url'
-      if url
-        view_btn.href = @model.get 'url'
+      view_btn = @_find 'view', 'a'
+      if model.has 'url'
+        view_btn.href = model.get 'url'
       else
-        view_btn.style.display = 'none'
+        @_hide view_btn
+
       # report & block
-      report_btn = find 'a[name="report"]', @el
-      if 'POSTED' is @model.get 'status'
-        # TODO: report id
-        report_btn.href = '#report/test'
-        @$el.find('a[name="edit"],button[name="block"]').hide()
+      status = model.get 'status'
+      report_btn =  @_find 'report', 'a'
+
+      if 'POSTED' is status
+        if model.has 'report_id'
+          report_btn.href = '#report/' + model.get 'report_id'
+        else
+          @_hide report_btn
+        # buttons pre post
+        @_hide 'edit'
+        @_hide 'block'
+        @_hide 'unblock'
       else
-        report_btn.style.display = 'none'
-        if 'PAGE' isnt @model.get 'media'
-          find('a[name="preview"]', @el)?.style.display = 'none'
+        @_hide report_btn
+        @_hide 'preview' if 'PAGE' isnt model.get 'media'
+        # block / unblock
+        @_hide if 'BLOCKED' is status then 'block' else 'unblock'
       @
 
   class ContentManagerView extends ManagerView
@@ -648,6 +657,7 @@ ProjectFilterView
       cls:
         posted: 'label-success'
         waiting: 'label-info'
+        blocked: 'label-inverse'
       editable: false
     ,
       name: 'posted_at'
@@ -675,10 +685,20 @@ ProjectFilterView
         el: find('ul.project-list', @el)
         field: 'project.id'
         collection: collection
-      @on block: @block.bind @
+      @on
+        block: @block.bind @
+        unblock: @unblock.bind @
       @
     block: (model) ->
-      console.log 'block', model
+      if confirm 'Are you sure to block this content to post to its media?'
+        model.save 'status', 'BLOCKED'
+        @refresh()
+      @
+    unblock: (model) ->
+      # TODO: check if it can be unlocked (it may expired)
+      if confirm 'Are you sure to unblock this content and post to its media?'
+        model.save 'status', 'WAITING'
+        @refresh()
       @
     reload: ->
       super

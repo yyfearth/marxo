@@ -443,6 +443,7 @@ define 'test_data', ['models'], (models) ->
         id: 'f8e39128e0b51ecb5b1e6e40'
         title: 'Post to Multiple Socal Media'
       url: 'about:blank'
+      report_id: '0'
       status: 'POSTED'
       created_at: new Date(1371191307656)
       posted_at: new Date(1371191307656)
@@ -461,6 +462,7 @@ define 'test_data', ['models'], (models) ->
         id: 'f8e39128e0b51ecb5b1e6e40'
         title: 'Post to Multiple Socal Media'
       url: 'about:blank'
+      report_id: '0'
       status: 'POSTED'
       created_at: new Date(1371191307656)
       posted_at: new Date(1371191307656)
@@ -478,6 +480,7 @@ define 'test_data', ['models'], (models) ->
       action:
         id: 'f8e39128e0b51ecb5b1e6e40'
         title: 'Post to Multiple Socal Media'
+      report_id: '0'
       url: 'about:blank'
       status: 'POSTED'
       created_at: new Date(1371191307656)

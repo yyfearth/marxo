@@ -33,7 +33,8 @@
       a.btn.btn-primary.btn-round.icon-edit(title='Edit', name='edit', href='#content/{{id}}')
       a.btn.btn-info.btn-round.icon-view(title='Preview', name='preview', href='#content/{{id}}/preview')
       a.btn.btn-round.icon-link-ext(title='View post in new window', name='view', target='_blank')
-      button.btn.btn-danger.btn-round.icon-block(title='Block', name='block', disabled)
+      button.btn.btn-danger.btn-round.icon-block(title='Block (Stop Posting)', name='block')
+      button.btn.btn-success.btn-round.icon-undo(title='Unblock (Post)', name='unblock')
     .grid-scroller
       table#content_table.grid-table
         caption.loading.icon-spinner.animate-spin
