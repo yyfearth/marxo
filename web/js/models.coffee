@@ -193,7 +193,7 @@ define 'models', ['lib/common'], ->
         else if nodeId
           node = @nodes.get nodeId
           action = node.actions().get actionId if actionId
-        callback {node, link, action}
+        callback? {node, link, action}
       else if linkId
         projectId = @id
         new Link(id: linkId).fetch
@@ -217,15 +217,29 @@ define 'models', ['lib/common'], ->
 
   class Projects extends ManagerCollection
     @projects: new Projects
+    @find: (options) ->
+      unless @projects.length
+        @projects.fetch success: (projects) =>
+          projects._last_load = Date.now()
+          projects.find options
+      else
+        @projects.find options
+      @projects
     model: Project
     url: Project::urlRoot
     find: ({projectId, nodeId, linkId, actionId, callback}) ->
       throw 'projectId is required' unless projectId
       project = @get projectId
       _find = (project) ->
-        results = project.find {nodeId, linkId, actionId}
-        results.project = project
-        callback? results
+        if nodeId or linkId or actionId
+          project.find {
+            nodeId, linkId, actionId
+            callback: (results) ->
+              results.project = project
+              callback? results
+          }
+        else
+          callback? {project}
       if project
         _find project
       else

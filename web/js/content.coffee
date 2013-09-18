@@ -645,7 +645,7 @@ ProjectFilterView
         page: 'label-success icon-page'
         twitter: 'label-twitter icon-twitter'
         facebook: 'label-facebook icon-facebook'
-        email: 'icon-mail'
+        email: 'label-info icon-mail'
       editable: false
     ,
       'project'
@@ -664,8 +664,6 @@ ProjectFilterView
       label: 'Date Posted'
       cell: 'readonly-datetime'
       editable: false
-    ,
-      'created_at'
     ,
       name: 'content'
       label: ''

@@ -96,21 +96,52 @@ Projects
       _btn?.style.display = 'none'
       _btn
 
-  class Backgrid.NodeActionCell extends Backgrid.LinkCell
+  class Backgrid.ProjectCell extends Backgrid.UriCell
+    initialize: (options) ->
+      super options
+      @urlRoot = @column.get('urlRoot') or @urlRoot
+      @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
     render: ->
       @$el.empty()
-      project = @model.get 'project'
-      node = @model.get 'node'
-      action = @model.get 'action'
-      url = "#project/#{project.id}/node/#{node.id}/action/#{action.id}"
-      tooltip = "#{node.title}: #{action.title}"
-      html = "<span class='project-title'>#{_.escape node.title}</span>: #{_.escape action.title}"
-      @$el.addClass('action-link-cell').append $('<a>',
-        tabIndex: -1
-        href: url
-      ).html html
-      @$el.attr title: tooltip, 'data-container': 'body'
-      @delegateEvents()
+      id = @model.get('project_id')
+      Projects.find projectId: id, callback: ({project}) =>
+        if project
+          title = _.escape project.get 'title'
+        else
+          console.warn 'project not found', id
+          title = '(Unknown Project)'
+        url = unless @urlRoot then null else '#' + @urlRoot + id
+        @$el.addClass('project-link-cell').append $('<a>',
+          tabIndex: -1
+          href: url
+        ).attr({title}).text title
+        @delegateEvents()
+      @
+
+  class Backgrid.NodeActionCell extends Backgrid.UriCell
+    render: ->
+      @$el.empty()
+      project_id = @model.get 'project_id'
+      node_id = @model.get 'node_id'
+      action_id = @model.get 'action_id'
+      url = "#project/#{project_id}/node/#{node_id}/action/#{action_id}"
+      Projects.find
+        projectId: project_id
+        nodeId: node_id
+        actionId: action_id
+        callback: ({node, action}) =>
+          if node and action
+            node_title = _.escape node.get 'title'
+            action_title = _.escape action.get('title') or action.get('type')
+            tooltip = "#{node_title}: #{action_title}"
+            html = "<span class='node-title'>#{node_title}</span>: #{action_title}"
+            @$el.addClass('action-link-cell').append $('<a>',
+              tabIndex: -1
+              href: url
+            ).attr(title: tooltip).html html
+            @delegateEvents()
+          else
+            console.warn 'failed to get node action for url', url
       @
 
   # single label tag
@@ -323,10 +354,10 @@ Projects
         cell: 'string'
         editable: false
       project:
-        name: 'project'
+        name: 'project_id'
         label: 'Project'
         urlRoot: 'project'
-        cell: 'link'
+        cell: 'project'
         editable: false
       node_action:
         name: 'action'
