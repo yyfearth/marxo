@@ -1,9 +1,47 @@
 include rich_editor
 
-#content_editor.modal.modal-full.hide.fade(aria-labelledby='content_editor_title', aria-hidden='true')
+#text_editor.modal.hide.fade(aria-labelledby='text_editor_title', aria-hidden='true')
   .modal-header
     button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
-    h3#content_editor_title Content Editor
+    h3#text_editor_title
+      | Text Content&nbsp;
+      small.media.capitalized
+  .modal-body
+    form
+      input.input-block-level(type='text', name='title', maxlength='255', readonly)
+      textarea.input-block-level(id='text_desc', name='desc',
+      rows=3, placeholder='The content ...', maxlength='65535')
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save
+
+#email_composer.modal.modal-full.hide.fade(aria-labelledby='email_composer_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#email_composer_title Email Content
+  .modal-body
+    iframe
+    form.form-horizontal
+      .control-group
+        label.control-label(for='page_title') Title
+        .controls
+          input#page_title.input-large(type='text', name='title',
+          placeholder='Title of Email', maxlength='255', required)
+          span.help-inline(title='Required') *
+      .control-group
+        label.control-label(for='email_desc') Content
+        .controls
+          textarea.input-block-level(id='email_desc', name='desc',
+          rows=15, placeholder='The email content ...', maxlength='65535')
+  .modal-footer
+    button.btn.btn-info.pull-left.btn-preview Preview
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save
+
+#page_designer.modal.modal-full.hide.fade(aria-labelledby='page_designer_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#page_designer_title Page Designer
   .modal-body
 
     iframe

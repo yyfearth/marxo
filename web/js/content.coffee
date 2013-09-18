@@ -16,6 +16,7 @@ FrameView
 InnerFrameView
 ModalDialogView
 FormViewMixin
+FormDialogView
 }, {
 Contents
 Content
@@ -29,28 +30,96 @@ ProjectFilterView
     initialize: (options) ->
       super options
       @manager = new ContentManagerView el: @el, parent: @
-      @editor = new ContentEditor el: '#content_editor', parent: @
+      @editor = new TextEditor el: '#text_editor', parent: @
+      # TODO: email composer
+      @composer = new TextEditor el: '#email_composer', parent: @
+      @designer = new PageDesigner el: '#page_designer', parent: @
       @
     open: (name, arg) ->
       if name
-        @editor.render() unless @editor.rendered
-        @editor.load name, arg, (action, data) ->
+        @load name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
                 console.log 'saved', content
               error: ->
                 console.error 'save failed'
-          console.log action, data
+          else
+            console.log action, data
       else
         @manager.render() unless @manager.rendered
+        @designer.cancel()
         @editor.cancel()
+        @composer.cancel()
+      @
+    load: (id, action, callback) ->
+      if id instanceof Content
+        @popup id, callback
+      else if typeof id is 'string'
+        new Content({id}).fetch success: (data) => @popup data, action, callback
+      else
+        throw 'content editor can only load a content model or an id string'
+    popup: (data, action, callback) ->
+      media = data.get 'media'
+      editor = switch media
+        when 'FACEBOOK', 'TWITTER'
+          @editor
+        when 'PAGE'
+          @designer
+        when 'EMAIL'
+          @composer
+        else
+          throw 'unsupported media type ' + media
+      editor.render() unless editor.rendered
+      editor.popup data, action, callback
       @
 
-  class ContentEditor extends ModalDialogView
+  class ContentEditorMixin
+    goBackOnHidden: 'content'
+    load: (id, action, callback) ->
+      if id instanceof Content
+        @popup id, callback
+      else if typeof id is 'string'
+        new Content({id}).fetch success: (data) => @popup data, action, callback
+      else
+        throw 'content editor can only load a content model or an id string'
+
+  class TextEditor extends FormDialogView
+    @acts_as ContentEditorMixin
+    popup: (data, callback) ->
+      super data, callback
+      @fill data
+      posted = 'POSTED' is data.get 'status'
+      @form.desc.readOnly = posted
+      @btnSave.disabled = posted
+      @
+    fill: (data) ->
+      media = data.get 'media'
+      @$el.find('small.media').text "(#{media.toLowerCase()})"
+      @form.title.value = data.get 'title'
+      @form.desc.value = data.get 'desc'
+      textarea = @form.desc
+      switch media
+        when 'FACEBOOK'
+          textarea.maxLength = 65535
+          textarea.rows = 10
+        when 'TWITTER'
+          textarea.maxLength = 140
+          textarea.rows = 5
+        else
+          console.warn 'text editor is only for socal media, not for page or email!', media
+      @
+    read: -> @form.desc.value
+    save: ->
+      @data.set 'desc', @read()
+      @callback 'save'
+      @hide true
+      @
+
+  class PageDesigner extends ModalDialogView
+    @acts_as ContentEditorMixin
     _preview_html_tpl: tpl('#preview_html_tpl').replace(/_tpl_?(?=[^<]*>)/g, '')
     _preview_submit_tpl: tpl('#preview_submit_tpl')
-    goBackOnHidden: 'content'
     events:
       'click #new_section': -> @addSection()
       'click .btn-save': 'save'
@@ -58,8 +127,8 @@ ProjectFilterView
     initialize: (options) ->
       super options
       @iframe = find 'iframe', @el
-      @btnPreview = find '.btn-preview', @el
       @btnSave = find '.btn-save', @el
+      @btnPreview = find '.btn-preview', @el
       @pageDesc = new PageDescView el: find '#page_desc', @el
       @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
       @sections = []
@@ -73,13 +142,6 @@ ProjectFilterView
         count = (findAll '.section', @sectionsEl).length
         @submitOptions.$el[if count then 'show' else 'hide']()
       @
-    load: (id, action, callback) ->
-      if id instanceof Content
-        @popup id, callback
-      else if typeof id is 'string'
-        new Content({id}).fetch success: (data) => @popup data, action, callback
-      else
-        throw 'content editor can only load a content model or an id string'
     popup: (data, action, callback) ->
       super data, callback
       #console.log 'content form', data.attributes
@@ -134,7 +196,6 @@ ProjectFilterView
           console.log 'save content', data
           @data.set 'title', data.page_desc.title
           @data.set 'desc', data.page_desc.desc
-          # TODO: deal with rich desc
           # TODO: deal with invalid settings
           @data.set 'sections', data.sections
           @data.set 'options', data.submit_options
@@ -213,11 +274,11 @@ ProjectFilterView
       @_preview_html_tpl.replace '{{content}}', content
 
     render: ->
-      super
       @pageDesc.render()
       @submitOptions.render()
       _body = find '.modal-body', @el
       $(_body).find('.btn[title]').tooltip container: _body
+      super
       @
 
   class BoxFormView extends BoxView
@@ -538,19 +599,23 @@ ProjectFilterView
   class ContentActionCell extends Backgrid.ActionsCell
     render: ->
       super
+      # view
       view_btn = find 'a[name="view"]', @el
       url = @model.get 'url'
       if url
         view_btn.href = @model.get 'url'
       else
         view_btn.style.display = 'none'
+      # report & block
       report_btn = find 'a[name="report"]', @el
       if 'POSTED' is @model.get 'status'
+        # TODO: report id
         report_btn.href = '#report/test'
-        #"#report/#{@model.id}"
-        @$el.find('.pre-status').hide()
+        @$el.find('a[name="edit"],button[name="block"]').hide()
       else
         report_btn.style.display = 'none'
+        if 'PAGE' isnt @model.get 'media'
+          find('a[name="preview"]', @el)?.style.display = 'none'
       @
 
   class ContentManagerView extends ManagerView

@@ -30,13 +30,9 @@ mixin track_checkbox_disabled
 mixin actions_thumb
   li.nav-header Content Page
   li
-    a.action-thumb(href='#action:post_info_page', data-placement='bottom'
-    title='Generate a information page using templates and post as a web page')
-      | Post Information Page
-  li
-    a.action-thumb(href='#action:post_form', data-placement='bottom'
-    title='Generate a survey form using templates and post as a web form page')
-      | Post Form
+    a.action-thumb(href='#action:post_page', data-placement='bottom'
+    title='Generate an information page or survey form using templates and post as a web page')
+      | Post Page or Form
   li.nav-header Social Media
   li
     a.action-thumb(href='#action:post_to_multi_social_media',
@@ -74,47 +70,25 @@ mixin actions_thumb
 mixin actions_tpl
   #actions_tpl.tpl
 
-    .tpl(name='post_info_page')
+    .tpl(name='post_page')
       .box-header.well
-        h4 Post Information Page
+        h4 Post Page or Form
         mixin box_icons
       form.box-content
         ul.action-bar
           li
             mixin action_template_select
           li
-            a.btn.btn-primary(href='#page') Design Page
+            a.btn.btn-primary(href='#page') Design
           li
-            a.btn.btn-info(href='about:blank', target='_blank') Preview
+            a.btn.btn-info(href='about:blank') Preview
           li
             mixin track_checkbox
         .info (Page Info)
         .help-block
           | Information Page is a web page to display information.
           br
-          | Click "Design Page" button to design the page.
-          br
-          | Click "Preview" button to preview the generated page.
-
-    .tpl(name='post_form')
-      .box-header.well
-        h4 Post Form
-        mixin box_icons
-      form.box-content
-        ul.action-bar
-          li
-            mixin action_template_select
-          li
-            a.btn.btn-primary(href='#page') Design Form
-          li
-            a.btn.btn-info(href='about:blank', target='_blank') Preview
-          li
-            mixin track_checkbox_disabled
-        .info (Form Info)
-        .help-block
-          | Form is a web page with predefined controlls to allow people to submit.
-          br
-          | Click "Design Form" button to design the form.
+          | Click "Design" button to design the page.
           br
           | Click "Preview" button to preview the generated page.
 
