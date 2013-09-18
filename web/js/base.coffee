@@ -270,7 +270,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
     initialize: (options) ->
       super options
       @initForm()
-      find('button.btn-save', @el)?.onclick = => @submit @save.bind @
+      @btnSave = find 'button.btn-save', @el
+      @btnSave?.onclick = => @submit @save.bind @
       @
     #popup: (data, callback) ->
     #  # already set @data = data
