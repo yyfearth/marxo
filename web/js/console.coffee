@@ -21,9 +21,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
           @$el.one 'touchstart', (e) ->
             $el.removeClass 'hover' unless $el.has(e.target).length
           false
-      'mouseenter #navbar .dropdown': (e) -> # show menu when mouse enter
+      'mouseenter #navbar ul.nav > li': (e) -> # show menu when mouse enter
         e.currentTarget.classList.add 'hover'
-      'mouseleave #navbar .dropdown': (e) -> # hide menu when mouse out
+      'mouseleave #navbar ul.nav > li': (e) -> # hide menu when mouse out
         e.currentTarget.classList.remove 'hover'
       'click #navbar .dropdown-menu li': (e) -> # hide menu when click
         $(e.currentTarget).parents('.dropdown').removeClass 'hover'

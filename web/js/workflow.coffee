@@ -376,20 +376,25 @@ Action
       model.data = null
       super
     render: ->
-      @el.innerHTML = @_tpl[@type]
-      @el.id = 'action_' + @model.id or 'no_id'
-      #@containerEl.appendChild @el
-      @containerEl.insertBefore @el, find '.alert', @containerEl
-      # get els in super
-      super
-      if /webkit/i.test navigator.userAgent
-        $(@el).disableSelection()
+      _tpl = @_tpl[@type]
+      unless _tpl
+        console.error 'unable to find tpl for action type', @type
+        @remove()
       else
-        $('.box-header, .btn', @el).disableSelection()
-      @form = find 'form', @el
-      @fill @model?.data
-      @$el.data model: @model, view: @
-      @listenTo @model, 'destroy', @remove.bind @
+        @el.innerHTML = @_tpl[@type]
+        @el.id = 'action_' + @model.id or 'no_id'
+        #@containerEl.appendChild @el
+        @containerEl.insertBefore @el, find '.alert', @containerEl
+        # get els in super
+        super
+        if /webkit/i.test navigator.userAgent
+          $(@el).disableSelection()
+        else
+          $('.box-header, .btn', @el).disableSelection()
+        @form = find 'form', @el
+        @fill @model?.data
+        @$el.data model: @model, view: @
+        @listenTo @model, 'destroy', @remove.bind @
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
@@ -581,11 +586,52 @@ Action
         @nodeEditor.cancel()
         @linkEditor.cancel()
       @
+    _sortNodeViews: (nodes) ->
+      nodes.lonely = []
+      nodes.start = []
+      nodes.end = []
+      nodes.forEach (node) ->
+        if node.inLinks.length is node.outLinks.length is 0
+          nodes.lonely.push node
+        else if node.inLinks.length is 0
+          nodes.start.push node
+        else if node.outLinks.length is 0
+          nodes.end.push node
+
+      grid = @grid = [nodes.start.concat nodes.lonely]
+      {vertical, padding, spanX, spanY} = @gridDefaults
+
+      do traval = (level = 0) ->
+        nextLevel = []
+        grid[level]?.forEach (node, i) ->
+          node.gridX = i
+          node.gridY = level
+          if vertical
+            node.x = i * spanX
+            node.y = level * spanY
+          else
+            node.x = level * spanX
+            node.y = i * spanY
+          node.x += padding
+          node.y += padding
+          node.outLinks?.forEach (link) ->
+            nextLevel.push link.nextNode unless link.nextNode.gridX?
+            return
+          return
+        if nextLevel.length
+          grid[level + 1] = nextLevel
+          traval level + 1
+        return
+
+      console.log 'grid', grid
+      return
     _renderModel: (wf) ->
       console.log 'render wf', wf
       wf = @model
       throw 'workflow not loaded' unless wf?
       #console.log wf.nodes
+      unless wf.nodes.length and wf.nodes.at(0).has 'style'
+        @_sortNodeViews wf.nodes
       wf.nodes.forEach @_addNode.bind @
       wf.links.forEach @_addLink.bind @
       return
