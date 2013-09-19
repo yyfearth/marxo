@@ -1,3 +1,5 @@
+"use strict"
+
 define 'crypto', ['lib/crypto-js'], (CryptoJS) =>
   COMMON_SALT = 'MARXO'
 
