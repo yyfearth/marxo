@@ -1,32 +1,24 @@
 .span2.sidebar
   .well.sidebar-nav
     ul.sidebar-list.nav.nav-list
-      li.nav-header Project News
+      li.nav-header Notification
       li
-        a(href='#') News 1
+        a(href='#') Notification 1
       li
-        a(href='#') News 2
+        a(href='#') Notification 2
     ul.sidebar-bottom.nav.nav-list
       li.divider
       li.nav-header Tips
       li.tips ...
 .span10.workspace
   #home_view.content-view
-    .row-fluid
-      .well
-        h2 Project 1
-        p
-          | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-          | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-          | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-        p
-          a.btn(href='#') View details &raquo;
-    .row-fluid
-      .well
-        h2 Project 2
-        p
-          | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus
-          | commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.
-          | Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui.
-        p
-          a.btn(href='#') View details &raquo;
+    #project_overview_tpl.tpl
+      .row-fluid
+        .well
+          .page-header
+            h3
+              | {{title}}
+              small {{counts}}
+          p {{desc}}
+          p {{status}}
+          a.btn(href='#project/{{id}}') View details &raquo;
