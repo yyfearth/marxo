@@ -67,9 +67,8 @@ define 'models', ['lib/common'], ->
 
   ## Workflow
 
-  class Workflow extends Entity
-    urlRoot: ROOT + '/workflows'
-    initialize: (model, options) ->
+  class WorkflowProjectBase extends Entity
+    constructor: (model, options) ->
       super model, options
       @_warp model
       @
@@ -80,17 +79,11 @@ define 'models', ['lib/common'], ->
       nodes = if _nodes_loaded then model.nodes else []
       @nodes = new Nodes nodes, url: url + '/nodes'
       @nodes._loaded = _nodes_loaded
-      _createNodeRef = @_createNodeRef.bind @
-      @nodes.forEach _createNodeRef
-      @listenTo @nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
 
       _links_loaded = Array.isArray model.links
       links = if _links_loaded then model.links else []
       @links = new Links links, url: url + '/links'
       @links._loaded = _links_loaded
-      _createLinkRef = @_createLinkRef.bind @
-      @links.forEach _createLinkRef
-      @listenTo @links, add: _createLinkRef, remove: @_removeLinkRef.bind @
 
       @set {}
       @
@@ -101,6 +94,8 @@ define 'models', ['lib/common'], ->
         _success? collection, response, options
       super options
       @
+    loaded: ->
+      Boolean @nodes?._loaded and @links?._loaded
     save: (attributes = {}, options) -> # override for sync ids
       node_ids = @nodes?.map (r) -> r.id
       link_ids = @links?.map (r) -> r.id
@@ -109,11 +104,54 @@ define 'models', ['lib/common'], ->
       # for test only
       if @nodes? then attributes.nodes = @nodes?.map (r) -> r.attributes
       if @links? then attributes.links = @links?.map (r) -> r.attributes
-      console.log 'save workflow', attributes, @
+      console.log 'save', @_name, attributes, @
       super attributes, options
       @
-    loaded: ->
-      @nodes?._loaded and @links?._loaded
+    find: ({nodeId, linkId, actionId, callback}) ->
+      n = @_name
+      if @loaded()
+        if linkId
+          link = @links.get linkId
+        else if nodeId
+          node = @nodes.get nodeId
+          action = node.actions().get actionId if actionId
+        callback? {node, link, action}
+      else if linkId
+        id = @id
+        new Link(id: linkId).fetch
+          error: ->
+            callback? {}
+          success: (link) ->
+            link = null if id isnt link.get n + '_id'
+            callback? {link}
+      else if nodeId
+        projectId = @id
+        new Node(id: nodeId).fetch
+          error: ->
+            callback? {}
+          success: (node) ->
+            node = null if projectId isnt node.get n + '_id'
+            action = node.actions().get actionId if node and actionId
+            callback? {node, action}
+      else
+        callback? {}
+      @
+
+  class Workflow extends WorkflowProjectBase
+    _name: 'workflow'
+    urlRoot: ROOT + '/workflows'
+    _warp: (model = @) ->
+      super model
+
+      _createNodeRef = @_createNodeRef.bind @
+      @nodes.forEach _createNodeRef
+      @listenTo @nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
+
+      _createLinkRef = @_createLinkRef.bind @
+      @links.forEach _createLinkRef
+      @listenTo @links, add: _createLinkRef, remove: @_removeLinkRef.bind @
+
+      @
     createNode: (data) ->
       @nodes.create data, wait: true
       @
@@ -162,21 +200,24 @@ define 'models', ['lib/common'], ->
   # url: -> @tenant.url() + '/workflows'
 
   class Node extends Entity
+    urlRoot: ROOT + '/nodes'
     actions: -> @_actions ?= new Actions @get 'actions'
 
   class Nodes extends Collection
     model: Node
-    url: ROOT + '/nodes'
+    url: Node::urlRoot
   # url: -> @workflow.url() + '/nodes'
 
   class Link extends Entity
+    urlRoot: ROOT + '/links'
 
   class Links extends Collection
     model: Link
-    url: ROOT + '/links'
+    url: Link::urlRoot
   # url: -> @workflow.url() + '/links'
 
   class Action extends Entity
+  # idAttribute: 'index'
 
   class Actions extends Collection
     model: Action
@@ -184,49 +225,55 @@ define 'models', ['lib/common'], ->
 
   ## Project
 
-  class Project extends Workflow
+  class Project extends WorkflowProjectBase
+    _name: 'project'
     urlRoot: ROOT + '/projects'
-    find: ({nodeId, linkId, actionId, callback}) ->
-      if @loaded()
-        if linkId
-          link = @links.get linkId
-        else if nodeId
-          node = @nodes.get nodeId
-          action = node.actions().get actionId if actionId
-        callback? {node, link, action}
-      else if linkId
-        projectId = @id
-        new Link(id: linkId).fetch
-          error: ->
-            callback? {}
-          success: (link) ->
-            link = null if projectId isnt link.get 'project_id'
-            callback? {link}
-      else if nodeId
-        projectId = @id
-        new Node(id: nodeId).fetch
-          error: ->
-            callback? {}
-          success: (node) ->
-            node = null if projectId isnt node.get 'project_id'
-            action = node.actions().get actionId if node and actionId
-            callback? {node, action}
+    copy: (workflow, callback) -> # copy form workflow as template
+      workflow ?= @get 'workflow_id'
+      workflow = new Workflow id: workflow if typeof workflow is 'string'
+      throw 'must be create from a workflow' unless workflow instanceof Workflow
+      unless workflow.loaded()
+        workflow.fetch success: (wf) => @copy wf, callback
       else
-        callback? {}
+        id = @id
+        nodes = []
+        links = []
+        workflow.nodes.forEach (node) ->
+          cloned_node = node.clone()
+          # TODO: for test only, should be null
+          node_id = node.id + 1000000
+          cloned_node.set id: node_id, template_id: node.id, project_id: id
+          # TODO: for test only, should give action id
+          if node.has 'actions'
+            cloned_node.set 'actions', node.get('actions').map (a, i) -> a.set 'id', i
+          nodes.push cloned_node
+        workflow.links.forEach (link) ->
+          cloned_link = link.clone()
+          # TODO: for test only, should be null
+          link_id = link.id + 1000000
+          cloned_link.set id: link_id, template_id: link.id, project_id: id
+          links.push cloned_link
+        @set workflow_id: workflow.id
+          template_id: null
+          node_ids: nodes.map((n) -> n.id)
+          link_ids: links.map((l) -> l.id)
+        @nodes = new Nodes nodes
+        @links = new Links links
+        callback? @, workflow
       @
 
   class Projects extends ManagerCollection
     @projects: new Projects
     @find: (options) ->
       unless @projects.length
-        @projects.fetch success: (projects) =>
-          projects._last_load = Date.now()
+        @projects.load (projects) ->
           projects.find options
       else
         @projects.find options
       @projects
     model: Project
     url: Project::urlRoot
+    _delay: 60000 # 1 min
     find: ({projectId, nodeId, linkId, actionId, callback}) ->
       throw 'projectId is required' unless projectId
       project = @get projectId
@@ -246,6 +293,14 @@ define 'models', ['lib/common'], ->
         new Project(id: projectId).fetch
           success: _find
           error: -> callback? {}
+      @
+    load: (callback, delay = @_delay) ->
+      if not @_last_load or (Date.now() - @_last_load) > delay
+        @fetch reset: true, success: (collection, response, options) =>
+          @_last_load = Date.now()
+          callback? collection, response, options
+      else
+        callback? @, null, options
       @
 
   ## Home
