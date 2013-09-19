@@ -214,13 +214,20 @@ define 'models', ['lib/common'], ->
       else
         callback? {}
       @
+    fetch: (options) ->
+      _success_cb = options.success
+      if options.reset or not @_last_load or (Date.now() - @_last_load < 1000) # 1s
+        options.success = (collection, response, options) =>
+          @_last_load = Date.now()
+          _success_cb? collection, response, options
+      else
+        _success_cb? @, null, options
 
   class Projects extends ManagerCollection
     @projects: new Projects
     @find: (options) ->
       unless @projects.length
-        @projects.fetch success: (projects) =>
-          projects._last_load = Date.now()
+        @projects.fetch success: (projects) ->
           projects.find options
       else
         @projects.find options
