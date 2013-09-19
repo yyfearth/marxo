@@ -34,6 +34,11 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
       hash[name] = _html tpl_el
     hash
 
+  fill = (html, model) ->
+    html.replace /{{\s*\w+\s*}}/g, (name) ->
+      name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
+      model[name] or model.get?(name) or ''
+
   # Polyfill
   Date::now ?= -> +new Date
 
@@ -366,6 +371,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
   findAll
   tpl
   tplAll
+  fill
   View
   BoxView
   FrameView
