@@ -65,7 +65,7 @@ Action
       'updated_at'
       'actions:workflow'
     ]
-    collection: Workflows.workflows
+    collection: new Workflows
     events:
       'click #wf_template_list .wf_tempate a': (e) ->
         e.preventDefault()

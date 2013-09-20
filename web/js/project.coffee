@@ -113,7 +113,7 @@ Projects
       sortable: false
       cell: ProjectActionCell
     ]
-    collection: Projects.projects
+    collection: new Projects
     initialize: (options) ->
       super options
       @list = new WorkflowListView el: find 'ul.workflow-list', @el
