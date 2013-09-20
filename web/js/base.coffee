@@ -309,12 +309,13 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
       @itemClassName = options.itemClassName or @itemClassName
       @targetClassName = options.targetClassName or @targetClassName
       @listenTo @collection, 'reset', @render.bind @
+      @events ?= {}
+      @events['click .btn-refresh'] = => @fetch true
       @fetch false if options.auto
     fetch: (force) ->
       col = @collection
       ts = Date.now()
       if force or not col._last_load or ts - col._last_load > @_reload_timeout
-        # TODO: add a refresh button
         console.log 'fetch for list', @headerTitle
         col.fetch reset: true
         col._last_load = Date.now()
@@ -328,7 +329,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
     _clear: ->
       @el.innerHTML = ''
       @el.appendChild @_renderHeader null
-      @el.appendChild @_renderItem null
+      @el.appendChild @_renderItem null if @defaultItem
     _render: (models = @collection) ->
       #console.log 'render models', models
       fragments = document.createDocumentFragment()
@@ -339,6 +340,11 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
       header = document.createElement 'li'
       header.className = 'nav-header'
       header.textContent = title
+      if title is @headerTitle
+        btn = document.createElement 'button'
+        btn.type = 'button'
+        btn.className = 'btn-refresh icon-refresh'
+        header.insertBefore btn, header.firstChild
       header
     _renderItem: (model = @defaultItem) ->
       #console.log 'render item', model
