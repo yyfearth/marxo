@@ -97,10 +97,6 @@ Projects
       _btn
 
   class Backgrid.ProjectCell extends Backgrid.UriCell
-    initialize: (options) ->
-      super options
-      @urlRoot = @column.get('urlRoot') or @urlRoot
-      @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
     render: ->
       @$el.empty()
       id = @model.get('project_id')
@@ -110,10 +106,9 @@ Projects
         else
           console.warn 'project not found', id
           title = '(Unknown Project)'
-        url = unless @urlRoot then null else '#' + @urlRoot + id
         @$el.addClass('project-link-cell').append $('<a>',
           tabIndex: -1
-          href: url
+          href: '#project/' + id
         ).attr({title}).text title
         @delegateEvents()
       @
@@ -356,7 +351,6 @@ Projects
       project:
         name: 'project_id'
         label: 'Project'
-        urlRoot: 'project'
         cell: 'project'
         editable: false
       node_action:
