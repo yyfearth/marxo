@@ -210,7 +210,7 @@ Action
   class NodeListView extends NavListView
     urlRoot: 'node'
     headerTitle: 'Common Nodes'
-    defaultItem: new Node id: 'new', title: 'Empty Node'
+    defaultItem: new Node(id: 'new', title: 'Empty Node')
     itemClassName: ''
     targetClassName: 'node thumb'
     collection: new Nodes
@@ -304,10 +304,10 @@ Action
       console.log 'save'
       # save actions
       actions = findAll('.action', @actionsEl).map (el) ->
-        action = $(el).data 'model'
+        view = $(el).data 'view'
         # TODO: validate each action
-        throw 'cannot get action from action.$el' unless action
-        action.attributes
+        throw 'cannot get action from action.$el' unless view
+        view.read()
       @data.set 'actions', actions
       console.log 'save actions', actions, @data
       # save the node
@@ -383,6 +383,7 @@ Action
       else
         @el.innerHTML = @_tpl[@type]
         @el.id = 'action_' + @model.id or 'no_id'
+        @_title = @$el.find('.box-header h4').text()
         #@containerEl.appendChild @el
         @containerEl.insertBefore @el, find '.alert', @containerEl
         # get els in super
@@ -392,17 +393,19 @@ Action
         else
           $('.box-header, .btn', @el).disableSelection()
         @form = find 'form', @el
-        @fill @model?.data
+        @fill @model?.toJSON()
         @$el.data model: @model, view: @
         @listenTo @model, 'destroy', @remove.bind @
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
+      data.title = @_title unless data.title
+      data.name = data.type unless data.name
       form = @form
       for name, value of data
         el = form[name]
         #form[key].value = value
-        $(el).val value if el?.getAttribute('name') is name
+        $(el).val value if el?.getAttribute?('name') is name
       # TODO: support customized controls
       @
     read: (data) -> # read form the form to get a json data

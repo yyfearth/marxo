@@ -3,6 +3,11 @@ mixin box_icons
     button.btn.btn-minimize.btn-round.icon-up-open
     button.btn.btn-close.btn-round.icon-close
 
+mixin action_title_name
+  input(type='text', name='title', maxlength='255', title='Action Title', placeholder='Action Title')
+  input.input-medium(type='text', name='name',maxlength='255', title='Action Name', placeholder='action_name')
+  .help-inline (Action Title and Name)
+
 mixin multi_social_media_group_btns
   .btn-group(data-toggle='buttons-checkbox')
     button.btn.active(type='button', value='twitter') Twitter
@@ -13,7 +18,7 @@ mixin post_content(media, max, rows)
   title='Content post to ' + media + ' (' + max + ' max)', rows=rows, maxlength=max)
 
 mixin action_template_select
-  select(name='template', disabled)
+  select(name='template', disabled).tmp
     option (Select from Template)
 
 mixin track_checkbox
@@ -54,14 +59,14 @@ mixin actions_thumb
   li.nav-header Schedule
   li
     a.action-thumb(href='#action:make_schedule',
-    title='Create a schedule in calendar')
+    title='Create an event in calendar')
       | Make Schedule
   li.nav-header Report
   li
     a.action-thumb(href='#action:generate_report',
     title='Generate report from selected tracking data')
       | Generate Report
-  li
+  li.tmp
     a.action-thumb(href='#action:calc_data',
     title='Do some calculation on existing tracking data')
       | Calculate Data
@@ -75,6 +80,7 @@ mixin actions_tpl
         h4 Post Page or Form
         mixin box_icons
       form.box-content
+        mixin action_title_name
         ul.action-bar
           li
             mixin action_template_select
@@ -97,6 +103,7 @@ mixin actions_tpl
         h4 Post to Multiple Social Media
         mixin box_icons
       form.box-content
+        mixin action_title_name
         ul.action-bar
           li
             mixin multi_social_media_group_btns
@@ -115,6 +122,7 @@ mixin actions_tpl
         h4 Post to Twitter
         mixin box_icons
       form.box-content
+        mixin action_title_name
         ul.action-bar
           li
             mixin action_template_select
@@ -128,6 +136,7 @@ mixin actions_tpl
         h4 Post to Facebook
         mixin box_icons
       form.box-content
+        mixin action_title_name
         ul.action-bar
           li
             mixin action_template_select
@@ -141,6 +150,7 @@ mixin actions_tpl
         h4 Send Email
         mixin box_icons
       form.box-content
+        mixin action_title_name
         .input-prepend.input-block-level
           span.add-on To
           input.span11(name="email_to", title='Send To', type='text',
@@ -155,15 +165,20 @@ mixin actions_tpl
         h4 Generate Report
         mixin box_icons
       form.box-content
-        | Generate Report
-        .help-block Generate Report
+        mixin action_title_name
+        label.checkbox
+          input(type='checkbox', name='auto', checked)
+          | Generate form all tracked sources of this node.
+        label Tracked Sources (Input the name of tracked sources in each line)
+          textarea.input-block-level(name='sources')
+        .help-block Generate Report for selected tracked sources
 
     .tpl(name='calc_data')
       .box-header.well
         h4 Calculate Data
         mixin box_icons
       form.box-content
-        | Calculate Data
+        mixin action_title_name
         .help-block Calculate Data
 
     .tpl(name='make_schedule')
@@ -171,5 +186,13 @@ mixin actions_tpl
         h4 Make Schedule
         mixin box_icons
       form.box-content
-        | Make Schedule
-        .help-block Make Schedule
+        mixin action_title_name
+        .btn-group(data-toggle='buttons-radio')
+          button.btn.active(type='button', name='type', value='auto') Starts Automatically
+          button.btn(type='button', name='type', value='manual') Starts Manually
+        label Duration
+          input(type='text', name='duration', placeholder='1 day 2 hours')
+        .help-block
+          | It will create an event in the Calendar, and notifications will be sent before its starts or ends.
+          br
+          | Leave Druation blank or 0 to make it ends manually or schedule it later.
