@@ -693,6 +693,7 @@ define 'test_data', ['models'], (models) ->
       name: 'test_prj'
       title: 'Test Project'
       desc: 'The test project using test workflow'
+      status: 'WAITING'
       nodes: [
         id: '507f81413d070321728ffe10'
         template_id: '507f81413d070321728fde10'
