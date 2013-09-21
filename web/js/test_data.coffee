@@ -917,6 +917,39 @@ define 'test_data', ['models'], (models) ->
       created_at: new Date(1371191309656)
     ]
 
+    events: [
+      id: 'e57bf4f6aae752e9fc37eef0'
+      title: 'Demo Scheduled Event'
+      desc: 'Demo scheduled event test data'
+      status: 'SCHEDULED'
+      type: 'WAIT'
+      project_id: '50447afb4728cc2036cf9ca1'
+      node_id: '507f81413d070321728ffe10'
+      action_id: '50447afb4728cc2036cfaca0' # TODO: should be changed
+      starts_at: new Date(1371191300000)
+      ends_at: new Date(1371104900000)
+      duration: 86400000 # 1 day
+    ,
+      id: 'e57bf4f6aae752e9fc37eef1'
+      title: 'Demo Unscheduled Event'
+      desc: 'Demo unscheduled event test data'
+      status: 'UNSCHEDULED'
+      type: 'NOWAIT'
+      project_id: '50447afb4728cc2036cf9ca1'
+      node_id: '507f81413d070321728ffe10'
+      action_id: '50447afb4728cc2036cfaca0' # TODO: should be changed
+      duration: 86400000 # 1 day
+    ,
+      id: 'e57bf4f6aae752e9fc37eef2'
+      title: 'Demo Manual Event'
+      desc: 'Demo manual event test data'
+      status: 'MANUAL'
+      type: 'NOWAIT'
+      project_id: '50447afb4728cc2036cf9ca1'
+      node_id: '507f81413d070321728ffe10'
+      action_id: '50447afb4728cc2036cfaca0' # TODO: should be changed
+    ]
+
     reports: [
       id: 'e57bf4f6aad752f9fc51fef0'
       title: 'Demo Project Initialization Report'
