@@ -298,7 +298,7 @@ ProjectFilterView
     ]
     events:
       'click .btn.hyperlink': (e) ->
-        setTimeout =>
+        setTimeout ->
           $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
         , 200
       'click .btn-switch': '_switch'
@@ -629,7 +629,7 @@ ProjectFilterView
 
   class ContentManagerView extends ManagerView
     columns: [
-      'checkbox'
+      # 'checkbox'
       'id'
     ,
       name: 'title'
@@ -681,7 +681,6 @@ ProjectFilterView
         collection: collection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
-        field: 'project.id'
         collection: collection
       @on
         block: @block.bind @

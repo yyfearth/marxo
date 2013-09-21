@@ -143,6 +143,10 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
           @callback()
           @goBack() if @goBackOnHidden and location.hash[1..] isnt @goBackOnHidden
           @reset()
+      # cancel dialog if hash changed
+      @listenTo @router, 'route', =>
+        # cancel if current hash isnt start with saved hash while popup
+        @cancel() if @_hash and @_hash isnt location.hash.slice 0, @_hash.length
       @
     goBack: ->
       if @_hash is location.hash
@@ -266,7 +270,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
               when 'checkbox'
                 attributes[name] = input.checked
               else
-                attributes[name] = input.value if input.value or @_attributes[name]?
+                if input.value or @_attributes[name]?
+                  val = input.value
+                  attributes[name] = if typeof val is 'string' then val.trim() else val
         @trigger 'read', attributes, @_attributes
         attributes
 

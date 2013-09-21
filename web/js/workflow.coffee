@@ -346,7 +346,8 @@ Action
       #@actions.add actionView
       @
     removeAction: (view) ->
-      #@actions.remove view
+      console.log 'remove action view', view
+      view.remove?()
       @delayedTrigger 'actions_update', 100
       @
     _checkActionLimit: ->
@@ -374,6 +375,8 @@ Action
       model.type = null
       model.name = null
       model.data = null
+      # remove only once
+      @remove = -> @
       super
     render: ->
       _tpl = @_tpl[@type]

@@ -68,7 +68,6 @@ ProjectFilterView
       console.log 'prj', find('ul.project-list', @el)
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
-        field: 'project.id'
         collection: collection
       _remove = @remove.bind @
       @on
