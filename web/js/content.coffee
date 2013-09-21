@@ -629,7 +629,7 @@ ProjectFilterView
 
   class ContentManagerView extends ManagerView
     columns: [
-      'checkbox'
+      # 'checkbox'
       'id'
     ,
       name: 'title'
