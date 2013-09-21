@@ -124,10 +124,11 @@ Events
       'checkbox'
       'id'
       'title:project'
-      'desc'
-      'created_at'
-      'updated_at'
+      'project'
+      'node_action'
+      'type'
       'status'
+      'actions:event' # TODO: change color for skip btn by status
     ]
     collection: EventFrameView::collection
     initialize: (options) ->

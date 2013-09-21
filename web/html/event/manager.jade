@@ -17,11 +17,9 @@
       button.btn.icon-refresh(name='reload', title='Reload Table') Reload
     li.grid-filter
   #t_event_action_cell.tpl
-    a.btn.btn-info.btn-round.icon-report(title='View report', name='report')
-    a.btn.btn-round.icon-link-ext(title='View post in new window', name='view', target='_blank')
-    .pre-status
-      a.btn.btn-primary.btn-round.icon-edit(title='Edit', name='edit', href='#event/{{id}}')
-      button.tmp.btn.btn-danger.btn-round.icon-block(title='Block', name='block', disabled)
+    a.btn.btn-primary.btn-round.icon-edit(title='Edit', name='edit', href='#event/{{id}}')
+    a.btn.btn-info.btn-round.icon-calendar(title='View in Calendar', name='view', href='#event/{{id}}/view')
+    button.btn.btn-warning.btn-round.icon-right-open(title='Skip', name='skip')
   .grid-scroller
     table#event_table.grid-table
   .grid-paginator
