@@ -28,7 +28,10 @@
         </property>
         <property name="defaultViews">
             <list>
-                <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
+                <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+                    <!-- The following prevents Jackson evilly wrap your JSON. Why the fuck you need that? http://stackoverflow.com/questions/6479712/why-is-jackson-wrapping-my-objects-with-an-extra-layer-named-after-the-class -->
+                    <property name="extractValueFromSingleKeyModel" value="true"/>
+                </bean>
             </list>
         </property>
     </bean>
