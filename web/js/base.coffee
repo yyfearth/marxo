@@ -143,6 +143,10 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
           @callback()
           @goBack() if @goBackOnHidden and location.hash[1..] isnt @goBackOnHidden
           @reset()
+      # cancel dialog if hash changed
+      @listenTo @router, 'route', =>
+        # cancel if current hash isnt start with saved hash while popup
+        @cancel() if @_hash and @_hash isnt location.hash.slice 0, @_hash.length
       @
     goBack: ->
       if @_hash is location.hash
