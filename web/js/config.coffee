@@ -302,7 +302,6 @@ Service
       @editor = new UserEditor el: '#user_editor', parent: @
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
-        field: 'project.id'
         collection: @collection.fullCollection
       @on 'create edit', @edit.bind @
       @on 'remove remove_selected', @remove.bind @

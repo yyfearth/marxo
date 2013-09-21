@@ -681,7 +681,6 @@ ProjectFilterView
         collection: collection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
-        field: 'project.id'
         collection: collection
       @on
         block: @block.bind @

@@ -135,7 +135,6 @@ Events
       collection = @collection.fullCollection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
-        field: 'project.id'
         collection: collection
       _skip = @skip.bind @
       @on
