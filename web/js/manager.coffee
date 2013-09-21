@@ -3,6 +3,7 @@
 define 'manager', ['base', 'models', 'lib/backgrid'],
 ({
 find
+findAll
 tpl
 InnerFrameView
 NavListView
@@ -497,6 +498,13 @@ Projects
       selected = @getSelected()
       @$enable_if_selected.prop 'disabled', not selected?.length
       @delayedTrigger 'selection_changed', 100, selected, @grid, @
+      # reflect to select all
+      checkboxes = findAll '.select-row-cell input[type=checkbox]', @el
+      checked = checkboxes[0]?.checked
+      indeterminate = checkboxes.some (box) -> box.checked isnt checked
+      checkAll = find '.select-all-header-cell input[type=checkbox]', @el
+      checkAll.indeterminate = indeterminate
+      checkAll.checked = checked unless indeterminate
       return
 
   { # exports
