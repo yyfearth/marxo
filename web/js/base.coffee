@@ -270,7 +270,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
               when 'checkbox'
                 attributes[name] = input.checked
               else
-                attributes[name] = input.value if input.value or @_attributes[name]?
+                if input.value or @_attributes[name]?
+                  val = input.value
+                  attributes[name] = if typeof val is 'string' then val.trim() else val
         @trigger 'read', attributes, @_attributes
         attributes
 
