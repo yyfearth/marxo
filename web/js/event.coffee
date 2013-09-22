@@ -5,6 +5,7 @@ find
 View
 FrameView
 InnerFrameView
+FormDialogView
 }, {
 ManagerView
 ProjectFilterView
@@ -16,23 +17,210 @@ Events
     collection: new Events
     initialize: (options) ->
       super options
-      @calendar = new EventCalendarView el: '#event_calendar', parent: @
-      @manager = new EventManagemerView el: '#event_manager', parent: @
-      # TODO: init @editor
+      @calendar = new EventCalendarView
+        el: '#event_calendar'
+        parent: @
+        collection: @collection.fullCollection
+      @manager = new EventManagemerView
+        el: '#event_manager'
+        parent: @
+        collection: @collection
+      @editor = new EventEditorView el: '#event_editor', parent: @
+      @collection.fetch reset: true
       @
     open: (name, sub) ->
       switch name
         when 'calendar'
           @switchTo @calendar
+          @calendar.show sub if sub
         when 'mgr'
           @switchTo @manager
         else
-          console.log 'open', name, sub
-      # TODO: open @editor
-      # throw 'open project with a name or id is needed' unless name
-      # @switchTo @editor
-      # @viewer.load name
-      # @viewer.popup sub if sub
+          throw 'open project with a name or id is needed' unless name
+          @load name
+      @
+    load: (id) ->
+      _load = (event) =>
+        @editor.popup event.toJSON(), (action, data) =>
+          event.save data if action is 'save'
+
+      if event = @collection.get id
+        _load event
+      else
+        new Event(id: id).fetch
+          success: _load
+          error: ->
+            err = "Cannot find event with id #{id} or net work problem"
+            console.error err
+            alert err
+
+  # Util
+
+  DurationConvertor = do ->
+    AUTO_SHORT_MAX = 30
+    _regex = /(?:(\d+)w(?:eek)?s?)?(?:(\d+)d(?:ay)?s?)?(?:(\d+)h(?:our)?s?)?(?:(\d+)m(?:in(?:use?)?s?)?)?(?:(\d+)s(?:ec(?:ond)?)?s?)?(?:(\d+)ms)?/i
+    _delays = [604800000, 86400000, 3600000, 60000, 1000, 1]
+    _units = [
+      # set week to null if only use days
+      ['week', 's'],
+      ['day', 's'],
+      ['hour', 's'],
+      ['minus', 'es'],
+      ['second', 's'],
+      'ms'
+    ]
+    _stringify = (delay, short) ->
+      str = []
+      for ms, i in _delays
+        s = _units[i]
+        continue unless s
+        next = delay % ms
+        d = (delay - next) / ms
+        delay = next
+        if d
+          unless Array.isArray s # is ms
+            str.push if short then "#{d}#{s}" else "#{d} #{s}"
+          else if short
+            str.push "#{d}#{s[0].charAt 0}"
+          else
+            s = if d is 1 then s[0] else s[0] + s[1]
+            str.push "#{d} #{s}"
+      str.join ' '
+
+    parse: (str) ->
+      str = str.trim().replace /\s+|\band\b/ig, ''
+      unless str
+        0
+      else if /^\d+$/.test str
+        # pure number in ms
+        parseInt str
+      else
+        delay = 0
+        match = str.match(_regex).slice(1)
+        for n, i in match
+          delay += n * _delays[i] if n
+        delay
+    stringify: (delay, short) ->
+      throw 'delay should be number >= 0' unless delay >= 0
+      unless delay
+        ''
+      else
+        str = _stringify delay, short
+        if not short? and str.length > AUTO_SHORT_MAX
+          _stringify delay, true
+        else
+          str
+
+  # Event Editor
+
+  class EventEditorView extends FormDialogView
+    goBackOnHidden: 'event/mgr'
+    initialize: (options) ->
+      super options
+      @$info = $ find '.info', @form
+      @_dateToLocale = (date) -> if date then new Date(date).toLocaleString() else ''
+      if @form.starts.type is 'text'
+        # not support datetime type
+        @_dateToString = @_dateToLocale
+      else
+        @_dateToString = (date) -> if date then new Date(date).toISOString() else ''
+      @_changed = @_changed.bind @
+    _changed: (e) ->
+      form = @form
+      _toTS = (date) -> unless date then null else new Date(date).getTime()
+      starts = _toTS form.starts.value.trim()
+      ends = _toTS form.ends.value.trim()
+      duration = DurationConvertor.parse form.duration.value.trim()
+      if starts and ends and duration and duration isnt ends - starts
+        # current changed
+        switch e?.currentTarget?.name
+          when 'starts', 'duration' # if starts or duration changed, keep duration
+            ends = null
+          when 'ends' # if ends changed, change duration
+            duration = null
+          else
+            console.warn 'starts, ends and duration are not matched', starts, ends, duration
+            starts = ends = duration = null
+            invalid = 'Start Date, End Date and Duration are not matched'
+      if starts
+        form.starts = @_dateToString starts
+        if ends
+          unless ends > starts
+            invalid = 'Start Date must before End Date'
+            console.warn 'starts <= ends', starts, ends
+          else unless duration # starts and ends but duration
+            duration = ends - starts
+            form.duration.value = DurationConvertor.stringify duration
+        else if duration # starts and duration but ends
+          ends = new Date starts + duration
+          form.ends.value = @_dateToString ends
+      else if ends and duration # ends and duration but starts
+        starts = new Date ends - duration
+        form.starts.value = @_dateToString starts
+
+      if invalid
+        msg = invalid
+        cls = 'error'
+      else
+        console.log 'starts, ends, duration:', starts, ends, duration
+        cls = ''
+        msg = []
+        if starts
+          msg.push "It will be started at #{@_dateToLocale starts}."
+          msg.push '<small>A notication will be sent if associated action has not been executed yet.</small>'
+        else
+          msg.push 'It will be started automatically when associated action been executed.'
+        if ends
+          msg.push "It will be ended at #{@_dateToLocale ends}."
+        else
+          cls = 'warning'
+          msg.push 'It will be ended only after trigger "skip" manually.'
+        msg.push "Duration between starts and ends is #{form.duration.value}." if duration
+        msg.push '<small>4 Notifications will be sent before and after event starts and ends.</small>'
+        msg = msg.join '<br/>'
+
+      @$info.html(msg).parents('.control-group')
+        .removeClass('success error').addClass cls
+      @
+
+    fill: (data) ->
+      if data.starts
+        data.starts = new Date data.starts
+        starts = data.starts.getTime()
+        if data.duration and not data.ends
+          data.ends = new Date starts + data.duration if data.duration
+        else if data.ends
+          data.ends = new Date data.ends
+          data.duration ?= data.ends.getTime() - starts
+      data.duration = unless data.duration then '' else DurationConvertor.stringify data.duration
+      console.log JSON.stringify data
+      data.starts = @_dateToString data.starts
+      data.ends = @_dateToString data.ends
+      console.log JSON.stringify data
+      console.log 'fill event data', data
+      super data
+      @_changed()
+      @
+    read: ->
+      data = super
+      data.starts = unless data.starts?.length then null else new Date data.starts
+      data.ends = if data.ends?.length then null else new Date data.ends
+      data.duration = DurationConvertor.parse data.duration
+      data.duration = null unless data.duration
+      data
+    reset: ->
+      @$info.empty()
+      super
+    popup: (data, callback) ->
+      super data, callback
+      $(@form).off 'change', '[name=starts],[name=ends],[name=duration]', @_changed
+      @fill data
+      $(@form).on 'change', '[name=starts],[name=ends],[name=duration]', @_changed
+      @
+    save: ->
+      @data = @read()
+      @callback 'save'
+      @hide true
       @
 
   # Event Calendar
@@ -42,7 +230,11 @@ Events
     initialize: (options) ->
       super options
       #@sidebarListEl = find '.sidebar-list', @el
-      @calView = new CalendarView parent: @, el: find '#calendar_view', @el
+      @calView = new FullCalendarView parent: @, el: find '#calendar_view', @el
+      @
+    show: (event) ->
+      # TODO: show focus for event
+      console.log 'focus event', event
       @
     render: ->
       @calView.render()
@@ -65,7 +257,7 @@ Events
 
       @
 
-  class CalendarView extends View
+  class FullCalendarView extends View
     cfg:
       header:
         left: 'prev,next today'
@@ -74,10 +266,10 @@ Events
       handleWindowResize: false # handle manually
       editable: true
       droppable: true # this allows things to be dropped onto the calendar !!!
-    collection: EventFrameView::collection
-    #initialize: (options) ->
-    #  super options
-    #  @
+    initialize: (options) ->
+      super options
+      @collection = options.collection
+      @
     remove: ->
       $(window).off 'resize', @_resize
       @
@@ -123,15 +315,16 @@ Events
     columns: [
       'checkbox'
       'id'
-      'title:project'
-      'desc'
-      'created_at'
-      'updated_at'
+      'title:event'
+      'project'
+      'node_action'
+      'type'
       'status'
+      'actions:event' # TODO: change color for skip btn by status
     ]
-    collection: EventFrameView::collection
     initialize: (options) ->
       super options
+      @collection = options.collection
       collection = @collection.fullCollection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
