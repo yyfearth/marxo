@@ -45,17 +45,25 @@ res: $(dist)/font $(dist)/favicon.ico $(dist)/robots.txt
 
 $(dist)/favicon.ico: favicon.ico
 	$(print)
-	cp -r $^ $@
+	cp $^ $@
 
 $(dist)/robots.txt: robots.txt
 	$(print)
-	cp -r $^ $@
+	cp $^ $@
 
 $(dist)/font: font
 	$(print)
 	cp -r $^/ $@/
 
-$(dist)/js/lib/require.js: js/lib/require.js js/lib/common.js $(dist)/js/main.js
+js/lib/common.min.js: js/lib/common.js
+	$(print)
+	uglifyjs $^ -mco $@ --screw-ie8
+
+js/lib/backgrid.min.js: js/lib/backgrid.js
+	$(print)
+	uglifyjs $^ -mco $@ --screw-ie8
+
+$(dist)/js/lib/require.js: js/lib/require.js js/lib/common.min.js js/lib/backgrid.min.js js/lib/html5-dataset.js $(dist)/js/main.js
 	$(print)
 	@mkdir -p $(@D)
 	cat $^ | uglifyjs - --screw-ie8 -o $@
@@ -69,7 +77,7 @@ $(dist)/js/lib/%.js: js/lib/%.js
 $(dist)/js/main.js: js/models.coffee js/base.coffee js/console.coffee js/manager.coffee js/main.coffee js/profile.coffee
 	@echo "$(CWHT)- $(CYEL)$^ $(CWHT)> $(CBLU)$@$(CRST)"
 	@mkdir -p $(@D)
-	coffee -pjc $^ | cat js/lib/backgrid.js js/lib/html5-dataset.js - | uglifyjs - -mco $@ --screw-ie8
+	coffee -pjc $^ | uglifyjs - -mco $@ --screw-ie8
 
 $(dist)/js/test.js: js/test.coffee
 	$(print)

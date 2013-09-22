@@ -298,7 +298,7 @@ ProjectFilterView
     ]
     events:
       'click .btn.hyperlink': (e) ->
-        setTimeout =>
+        setTimeout ->
           $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
         , 200
       'click .btn-switch': '_switch'

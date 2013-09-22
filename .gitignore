@@ -23,6 +23,7 @@ Icon
 web/index.html
 web/html/*.html
 web/js/*.js
+web/js/lib/*.min.js
 web/css/*.css
 web/out/
 service/src/main/webapp/console/
