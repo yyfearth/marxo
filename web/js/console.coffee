@@ -224,6 +224,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
         @show 'content', id, action
       'config/service(/:name)': (name) ->
         @show 'config', 'service', name
+      'event/calendar(/:id)': (id) ->
+        @show 'event', 'calendar', id
       'signout': 'signout'
     constructor: (options) ->
       super options
