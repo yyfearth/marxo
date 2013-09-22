@@ -35,6 +35,63 @@ Events
       # @viewer.popup sub if sub
       @
 
+  # Util
+
+  DurationConvertor = do ->
+    AUTO_SHORT_MAX = 30
+    _regex = /(?:(\d+)w(?:eek)?s?)?(?:(\d+)d(?:ay)?s?)?(?:(\d+)h(?:our)?s?)?(?:(\d+)m(?:in(?:use?)?s?)?)?(?:(\d+)s(?:ec(?:ond)?)?s?)?(?:(\d+)ms)?/i
+    _delays = [604800000, 86400000, 3600000, 60000, 1000, 1]
+    _units = [
+      # set week to null if only use days
+      ['week', 's'],
+      ['day', 's'],
+      ['hour', 's'],
+      ['minus', 'es'],
+      ['second', 's'],
+      'ms'
+    ]
+    _stringify = (delay, short) ->
+      str = []
+      for ms, i in _delays
+        s = _units[i]
+        continue unless s
+        next = delay % ms
+        d = (delay - next) / ms
+        delay = next
+        if d
+          unless Array.isArray s # is ms
+            str.push if short then "#{d}#{s}" else "#{d} #{s}"
+          else if short
+            str.push "#{d}#{s[0].charAt 0}"
+          else
+            s = if d is 1 then s[0] else s[0] + s[1]
+            str.push "#{d} #{s}"
+      str.join ' '
+
+    parse: (str) ->
+      str = str.trim().replace /\s+|\band\b/ig, ''
+      unless str
+        0
+      else if /^\d+$/.test str
+        # pure number in ms
+        parseInt str
+      else
+        delay = 0
+        match = str.match(_regex).slice(1)
+        for n, i in match
+          delay += n * _delays[i] if n
+        delay
+    stringify: (delay, short) ->
+      throw 'delay should be number >= 0' unless delay >= 0
+      unless delay
+        ''
+      else
+        str = _stringify delay, short
+        if not short? and str.length > AUTO_SHORT_MAX
+          _stringify delay, true
+        else
+          str
+
   # Event Calendar
 
   class EventCalendarView extends InnerFrameView
