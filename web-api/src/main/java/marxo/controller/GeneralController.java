@@ -13,8 +13,8 @@ import java.util.List;
 
 @Controller
 @RequestMapping
-public class TestController {
-	final Logger logger = LoggerFactory.getLogger(TestController.class);
+public class GeneralController {
+	final Logger logger = LoggerFactory.getLogger(GeneralController.class);
 
 	@PostConstruct
 	void report() {
