@@ -62,6 +62,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			for (int i = 1; i <= 10; i++) {
 				Workflow w = new Workflow();
+				w.setId(new ObjectId());
 				w.setTitle("Workflow " + i);
 				w.setName(getRandomProjectName());
 				w.setDescription(RandomStringUtils.randomAlphanumeric(10));

@@ -1,6 +1,7 @@
 package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -11,20 +12,17 @@ import java.util.Date;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links", "created", "createdBy", "modified", "modifiedBy", "objectType"})
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Entity {
-
 	@Id
 	@JsonIgnore
 	ObjectId id;
 	@JsonProperty("created")
-	Date createdDate;
+	Date createdDate = new Date();
 	@JsonProperty("modified")
-	Date modifiedDate;
+	Date modifiedDate = new Date();
 
 	public Entity() {
-		id = new ObjectId();
-		createdDate = new Date();
-		modifiedDate = new Date();
 	}
 
 	public ObjectId getId() {
@@ -70,5 +68,10 @@ public abstract class Entity {
 		}
 
 		return aClass.getSimpleName();
+	}
+
+	public void reset() {
+		createdDate = new Date();
+		modifiedDate = new Date();
 	}
 }

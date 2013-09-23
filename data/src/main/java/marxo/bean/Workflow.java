@@ -2,17 +2,13 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import marxo.tool.TypeTool;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Workflow extends BasicEntity {
-
 	@JsonProperty("desc")
 	String description;
 	WorkflowType type = null;
@@ -25,15 +21,11 @@ public class Workflow extends BasicEntity {
 	List<ObjectId> linkIdList = null;
 
 	public Workflow() {
-		id = new ObjectId();
-		createdDate = new Date();
-		modifiedDate = new Date();
-
 		type = WorkflowType.NONE;
 		status = WorkflowStatus.NONE;
 
-		nodeIdList = new ArrayList<ObjectId>();
-		linkIdList = new ArrayList<ObjectId>();
+		nodeIdList = new ArrayList<>();
+		linkIdList = new ArrayList<>();
 	}
 
 	public String getDescription() {
@@ -112,5 +104,14 @@ public class Workflow extends BasicEntity {
 	@JsonProperty("tenantId")
 	public void setJsonTenantId(String tenantId) {
 		this.tenantId = (tenantId == null) ? null : new ObjectId(tenantId);
+	}
+
+	public void reset() {
+		super.reset();
+		type = WorkflowType.NONE;
+		status = WorkflowStatus.NONE;
+
+		nodeIdList = new ArrayList<>();
+		linkIdList = new ArrayList<>();
 	}
 }

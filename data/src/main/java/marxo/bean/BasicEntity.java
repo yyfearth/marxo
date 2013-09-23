@@ -2,11 +2,9 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.bson.types.ObjectId;
 
 public abstract class BasicEntity extends Entity {
-
 	String name;
 	String title;
 	@JsonIgnore
@@ -76,5 +74,11 @@ public abstract class BasicEntity extends Entity {
 	@JsonProperty("modifiedBy")
 	public void setJsonModifiedByUserId(String modifiedByUserId) {
 		this.modifiedByUserId = new ObjectId(modifiedByUserId);
+	}
+
+	public void reset() {
+		super.reset();
+		createdByUserId = null;
+		modifiedByUserId = null;
 	}
 }
