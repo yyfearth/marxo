@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.bson.types.ObjectId;
 
-@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public abstract class BasicEntity extends Entity {
 
 	String name;

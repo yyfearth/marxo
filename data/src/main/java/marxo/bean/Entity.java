@@ -2,6 +2,7 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import java.util.Date;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+@JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public abstract class Entity {
 
 	@Id
