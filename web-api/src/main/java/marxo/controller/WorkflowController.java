@@ -2,16 +2,18 @@ package marxo.controller;
 
 import marxo.bean.Workflow;
 import marxo.dao.WorkflowDao;
+import marxo.exception.EntityExistsException;
+import marxo.exception.EntityNotFoundException;
+import marxo.exception.InvalidObjectIdException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -35,25 +37,41 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
 	@ResponseBody
-	public Workflow createWorkflow(@PathVariable String id) throws Exception {
-		ObjectId objectId = new ObjectId(id);
-		Workflow workflow = workflowDao.get(objectId);
-
-		if (workflow == null) {
-			throw new Exception("Oops");
+	@ResponseStatus(HttpStatus.CREATED)
+	// TODO: Validate the given id
+	public Workflow createWorkflow(@Valid @PathVariable String id, @Valid @RequestBody Workflow workflow) throws Exception {
+		if (!ObjectId.isValid(id)) {
+			throw new InvalidObjectIdException(id);
 		}
+
+		ObjectId objectId = new ObjectId(id);
+
+		if (workflowDao.exists(objectId)) {
+			throw new EntityExistsException(objectId);
+		}
+
+		workflow.setId(objectId);
+		workflow.reset();
+
+		// TODO: validate the workflow (or do it in the dao?)
+		workflowDao.save(workflow);
 
 		return workflow;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public Workflow readWorkflow(@PathVariable String id) throws Exception {
+	@ResponseStatus(HttpStatus.OK)
+	public Workflow readWorkflow(@PathVariable String id) {
+		if (!ObjectId.isValid(id)) {
+			throw new InvalidObjectIdException(id);
+		}
+
 		ObjectId objectId = new ObjectId(id);
 		Workflow workflow = workflowDao.get(objectId);
 
 		if (workflow == null) {
-			throw new Exception("Oops");
+			throw new EntityNotFoundException(objectId);
 		}
 
 		return workflow;
@@ -61,25 +79,43 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	@ResponseBody
-	public Workflow updateWorkflow(@PathVariable String id) throws Exception {
-		ObjectId objectId = new ObjectId(id);
-		Workflow workflow = workflowDao.get(objectId);
-
-		if (workflow == null) {
-			throw new Exception("Oops");
+	@ResponseStatus(HttpStatus.OK)
+	public Workflow updateWorkflow(@Valid @PathVariable String id, @Valid @RequestBody Workflow workflow) {
+		if (!ObjectId.isValid(id)) {
+			throw new InvalidObjectIdException(id);
 		}
+
+		ObjectId objectId = new ObjectId(id);
+		Workflow oldWorkflow = workflowDao.get(objectId);
+
+		if (oldWorkflow == null) {
+			throw new EntityNotFoundException(objectId);
+		}
+
+		oldWorkflow.setName(workflow.getName());
+		oldWorkflow.setTitle(workflow.getTitle());
+		oldWorkflow.setCreatedByUserId(workflow.getCreatedByUserId());
+		oldWorkflow.setModifiedByUserId(workflow.getModifiedByUserId());
+
+		// TODO: validate the workflow, to maintain the consistency of the data.
+		workflowDao.save(oldWorkflow);
 
 		return workflow;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseBody
-	public Workflow deleteWorkflow(@PathVariable String id) throws Exception {
+	@ResponseStatus(HttpStatus.OK)
+	public Workflow deleteWorkflow(@PathVariable String id) {
+		if (!ObjectId.isValid(id)) {
+			throw new InvalidObjectIdException(id);
+		}
+
 		ObjectId objectId = new ObjectId(id);
-		Workflow workflow = workflowDao.get(objectId);
+		Workflow workflow = workflowDao.deleteById(objectId);
 
 		if (workflow == null) {
-			throw new Exception("Oops");
+			throw new EntityNotFoundException(objectId);
 		}
 
 		return workflow;
