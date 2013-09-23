@@ -35,4 +35,8 @@
             </list>
         </property>
     </bean>
+
+    <bean class="java.lang.Boolean" id="isDebug">
+        <constructor-arg type="boolean" value="true"/>
+    </bean>
 </beans>
