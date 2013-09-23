@@ -205,7 +205,7 @@ Service
     model: new Tenant(id: 0) # fake
     events:
       'click .btn-reset': 'reset'
-    # TODO: reload button
+      'click .btn-reload': 'reload'
     initialize: (options) ->
       super options
       @initForm()
@@ -214,21 +214,31 @@ Service
           @fill @model.attributes
         , 1
       @on 'submit', @save.bind @
+      $btnReload = $ find '.btn-reload', @el
+      @on 'reload', =>
+        $btnReload.button 'loading'
+        @load -> $btnReload.button 'reset'
       @
     save: ->
       $btn = $(@_submit_btn)
       $btn.button 'loading'
       data = @read()
       console.log 'save', data
-      @model.save data, success: ->
+      @model.save data, success: =>
         $btn.button 'reset'
+        @reload()
       @
     render: ->
+      @reload()
       super
+    reload: ->
+      @delayedTrigger 'reload', 100
+    load: (callback) ->
       @model.fetch success: (data) =>
         console.log 'fetch tenant', data.attributes
         @model = data
         @fill data.attributes
+        callback? data
       @
 
   # User Editor
