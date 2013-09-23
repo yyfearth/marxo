@@ -12,8 +12,8 @@
     </bean>
 
     <!--Data Access Objects-->
-    <bean id="workflowDao" class="marxo.dao.WorkflowDao"/>
-    <bean id="nodeDao" class="marxo.dao.NodeDao"/>
-    <bean id="linkDao" class="marxo.dao.LinkDao"/>
+    <bean id="workflowDao" class="marxo.dao.WorkflowDao" lazy-init="true"/>
+    <bean id="nodeDao" class="marxo.dao.NodeDao" lazy-init="true"/>
+    <bean id="linkDao" class="marxo.dao.LinkDao" lazy-init="true"/>
 
 </beans>
