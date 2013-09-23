@@ -21,8 +21,6 @@ public class SimpleGenerator extends BasicGenerator {
 		ApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"mongo-configuration.xml"});
 		MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);
 
-		System.out.println("logger.isInfoEnabled():" + logger.isTraceEnabled());
-
 		// Tenant
 		{
 			mongoTemplate.dropCollection(Tenant.class);
@@ -37,7 +35,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(tenants, Tenant.class);
 
-			logger.info("Created " + tenants.size() + " documents to Tenant collection.");
+			logger.debug("Created " + tenants.size() + " documents to Tenant collection.");
 		}
 
 		// User
@@ -53,7 +51,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(users, User.class);
 
-			logger.info("Created " + users.size() + " documents to User collection.");
+			logger.debug("Created " + users.size() + " documents to User collection.");
 		}
 
 		// Workflow
@@ -72,7 +70,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(workflows, Workflow.class);
 
-			logger.info("Created " + workflows.size() + " documents to Workflow collection.");
+			logger.debug("Created " + workflows.size() + " documents to Workflow collection.");
 		}
 
 		// Project
@@ -91,7 +89,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(projects, Project.class);
 
-			logger.info("Created " + projects.size() + " documents to Project collection.");
+			logger.debug("Created " + projects.size() + " documents to Project collection.");
 		}
 
 		// Node
@@ -110,7 +108,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			mongoTemplate.insert(nodes, Node.class);
 
-			logger.info("Created " + nodes.size() + " documents to Project collection.");
+			logger.debug("Created " + nodes.size() + " documents to Project collection.");
 		}
 	}
 
