@@ -321,10 +321,11 @@ Service
       @projectFilter.clear()
     edit: (user) ->
       user = new Publisher unless user instanceof Publisher
-      # TODO: set tenant
-      @editor.popup user.attributes, (action, data) =>
+      @editor.popup user.toJSON(), (action, data) =>
         console.log 'user', action, data
         if action is 'save'
+          # enforce tenant id
+          data.tenant_id = @signin_user.get 'tenant_id'
           if user.isNew()
             @collection.create data
           else
