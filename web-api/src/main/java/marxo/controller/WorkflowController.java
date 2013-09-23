@@ -53,7 +53,6 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		workflow.setId(objectId);
 		workflow.reset();
 
-		// TODO: validate the workflow (or do it in the dao?)
 		workflowDao.save(workflow);
 
 		return workflow;
@@ -97,7 +96,6 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		oldWorkflow.setCreatedByUserId(workflow.getCreatedByUserId());
 		oldWorkflow.setModifiedByUserId(workflow.getModifiedByUserId());
 
-		// TODO: validate the workflow, to maintain the consistency of the data.
 		workflowDao.save(oldWorkflow);
 
 		return workflow;
