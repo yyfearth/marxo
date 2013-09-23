@@ -17,24 +17,23 @@ public abstract class BasicDao<E extends BasicEntity> {
 	@Qualifier("mongoTemplate")
 	@Autowired
 	MongoTemplate mongoTemplate;
-	Class<E> clazz;
+	Class<E> eClass;
 
 	public BasicDao() {
 		//noinspection unchecked
-		Class<E> clazz = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-		this.clazz = clazz;
+		this.eClass = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 
 	public boolean exists(ObjectId id) {
-		return mongoTemplate.findById(id, clazz) != null;
+		return mongoTemplate.findById(id, eClass) != null;
 	}
 
 	public void count(Query query) {
-		mongoTemplate.count(query, clazz);
+		mongoTemplate.count(query, eClass);
 	}
 
 	public void count() {
-		mongoTemplate.count(new BasicQuery(""), clazz);
+		mongoTemplate.count(new BasicQuery(""), eClass);
 	}
 
 	public void insert(E entity) {
@@ -42,19 +41,19 @@ public abstract class BasicDao<E extends BasicEntity> {
 	}
 
 	public void insert(List<E> entities) {
-		mongoTemplate.insert(entities, clazz);
+		mongoTemplate.insert(entities, eClass);
 	}
 
 	public List<E> findAll() {
-		return mongoTemplate.findAll(clazz);
+		return mongoTemplate.findAll(eClass);
 	}
 
 	public E get(ObjectId id) {
-		return mongoTemplate.findById(id, clazz);
+		return mongoTemplate.findById(id, eClass);
 	}
 
 	public List<E> find(Query query) {
-		return mongoTemplate.find(query, clazz);
+		return mongoTemplate.find(query, eClass);
 	}
 
 	public void save(E entity) {
@@ -66,6 +65,6 @@ public abstract class BasicDao<E extends BasicEntity> {
 	}
 
 	public E deleteById(ObjectId id) {
-		return mongoTemplate.findAndRemove(Query.query(Criteria.where("id").is(id)), clazz);
+		return mongoTemplate.findAndRemove(Query.query(Criteria.where("id").is(id)), eClass);
 	}
 }
