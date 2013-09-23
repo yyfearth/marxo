@@ -26,22 +26,22 @@
             | Auto start when the Start Date reached, or when action start to execution without Start Date.
             | Otherwise only notification will be sent, and require to start manually.
       .control-group
-        label.control-label(for='event_duration') Start Date
+        label.control-label(for='event_starts') Start Date
         .controls
-          input#event_duration(type='datetime', name='starts',
+          input#event_starts(type='datetime', name='starts',
           data-container='#event_editor .modal-body',
           title='Format like "01/01/2010 01:01 AM"', placeholder='The Date of Execution')
           small.help-block Blank means it will be set to the date of execution automatically.
       .control-group
-        label.control-label(for='event_starts') End Date
+        label.control-label(for='event_ends') End Date
         .controls
-          input#event_starts(type='datetime', name='ends',
+          input#event_ends(type='datetime', name='ends',
           data-container='#event_editor .modal-body',
           title='Format like "01/01/2010 01:01 AM"', placeholder='Manual')
       .control-group
-        label.control-label(for='event_ends') Duration
+        label.control-label(for='event_duration') Duration
         .controls
-          input#event_ends(type='text', name='duration',
+          input#event_duration(type='text', name='duration',
           placeholder='e.g. 10 days 4 hours', data-container='#event_editor .modal-body',
           title='Format in "10 days 4 hours" from weeks to ms, or pure number in ms')
           small.help-block Leave Druation and End Date blank needs end it manually or schedule it later.

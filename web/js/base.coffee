@@ -96,6 +96,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, User
           console.log 'switch inner-frame', innerframe.el?.id
           find('.inner-frame.active[name]', @el)?.classList.remove 'active'
           innerframe.el.classList.add 'active'
+          #innerframe.trigger 'activate'
         unless innerframe.rendered
           innerframe.render()
           innerframe.rendered = true
