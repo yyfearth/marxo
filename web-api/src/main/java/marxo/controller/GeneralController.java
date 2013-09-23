@@ -1,6 +1,6 @@
 package marxo.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,14 +30,15 @@ public class GeneralController {
 		isDebug = (isDebug == null) ? false : isDebug;
 
 		if (isDebug) {
+			// Prevent the JVM to prompt OutOfMemory while IntelliJ redeploys the app. (fuck dat JVM)
 			System.gc();
 		}
 	}
 
 	@RequestMapping
 	@ResponseBody
-	public Message get() {
-		return new Message("Hello world");
+	public Message get(HttpServletRequest request) {
+		return new Message(request);
 	}
 
 	@RequestMapping("/test{:s?}")
@@ -51,19 +53,17 @@ public class GeneralController {
 		return list;
 	}
 
-//	@ExceptionHandler({BindException.class})
-//	@ResponseStatus(HttpStatus.NOT_FOUND)
-//	public ErrorJson handleNotFound() {
-//		return new ErrorJson("Your shit is not here");
-//	}
-
 	@JsonSerialize
+	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 	class Message {
-		@JsonProperty
-		String message = "";
+		String ip;
+		String host;
+		int port;
 
-		public Message(String message) {
-			this.message = message;
+		public Message(HttpServletRequest request) {
+			ip = request.getRemoteAddr();
+			host = request.getRemoteHost();
+			port = request.getRemotePort();
 		}
 	}
 }
