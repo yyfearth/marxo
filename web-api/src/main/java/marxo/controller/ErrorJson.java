@@ -5,14 +5,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize
 public class ErrorJson {
-	String errorMessage = "I forget to put message for this error :P";
+	@JsonProperty("errors")
+	String[] messages;
 
-	public ErrorJson(String errorMessage) {
-		this.errorMessage = errorMessage;
-	}
-
-	@JsonProperty("error")
-	public String getErrorMessage() {
-		return errorMessage;
+	public ErrorJson(String... messages) {
+		this.messages = messages;
 	}
 }
