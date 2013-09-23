@@ -1,10 +1,11 @@
 "use strict"
 
-define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
+define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
 
   class ConsoleView extends View
     el: '#main'
     user: sessionStorage.user
+    tenant: sessionStorage.tenant
     events:
       'touchstart #navbar .dropdown > a': (e) ->
         $el = $(e.currentTarget).parent()
@@ -42,12 +43,16 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
       @instance
     initialize: ->
       # init user
-      user = null
+      user = tenant = null
       try
         if @user
           user = new User JSON.parse @user
           user = null unless user.has 'email'
+        if @tenant
+          tenant = new Tenant JSON.parse @tenant
+          tenant = null unless tenant.has 'name'
       @user = user
+      @tenant = tenant
       @avatarEl = find 'img#avatar'
       @usernameEl = find '#username'
       # init frames
@@ -99,16 +104,25 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
     signout: ->
       # TODO: real sign out
       delete sessionStorage.user
+      delete sessionStorage.tenant
+      @user = @tenant = null
       SignInView.get().show()
       @hide()
       @trigger 'signout'
       @
-    signin: (user, remember) ->
+    signin: (user, tenant, remember) ->
       @user = user
+      @tenant = tenant
       if remember
-        sessionStorage.user = JSON.stringify user.toJSON()
+        u = user.toJSON()
+        # test data only
+        delete u.password
+        sessionStorage.user = JSON.stringify u
+        sessionStorage.tenant = JSON.stringify tenant.toJSON()
+        console.log 'logged in', u
       else
         delete sessionStorage.user
+        delete sessionStorage.tenant
       # update avatar
       @avatarEl.src = "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
       $(@usernameEl).text "#{user.get 'first_name'} #{user.get 'last_name'}"
@@ -139,9 +153,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
       @form.remember.checked = remember = localStorage.marxo_sign_in_remember is 'true'
       @form.email.value = localStorage.marxo_sign_in_email if remember
       # auto sign in
-      user = ConsoleView.get().user
-      if user instanceof User
-        @signedIn user
+      {user, tenant} = ConsoleView.get()
+      if (user instanceof User) and (tenant instanceof Tenant)
+        @signedIn user, tenant
       else
         @show()
       @
@@ -172,9 +186,19 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
             # fake validation
             hash = hashPassword email, password
             console.log 'login with', email, hash
-            if hash is user?.get 'password'
+            if user.has('tenant_id') and hash is user?.get 'password'
               user.set 'email_md5', md5Email email
-              @signedIn user
+              tenantId = user.get 'tenant_id'
+              new Tenant(id: tenantId).fetch
+                success: (tenant) =>
+                  if tenant.id is tenantId
+                    @signedIn user, tenant
+                  else
+                    @_disable false
+                    alert 'Failed to get tenant profile of this user'
+                error: ->
+                  @_disable false
+                  alert 'Failed to get tenant profile'
             else
               @form.password.select()
               @_disable false
@@ -182,12 +206,12 @@ define 'console', ['base'], ({find, findAll, View, FrameView, User}) ->
         error: (ignored, response) =>
           @_disable false
           alert 'Sign in failed: ' + response
-    signedIn: (user) -> # debug only
-      @trigger 'success', user
+    signedIn: (user, tenant) -> # test data only
+      @trigger 'success', user, tenant
       @hide()
       localStorage.marxo_sign_in_remember = remember = @form.remember.checked
       localStorage.marxo_sign_in_email = if remember then @form.email.value else ''
-      ConsoleView.get().signin user, remember
+      ConsoleView.get().signin user, tenant, remember
       @router.back fallback: 'home' if /signin/i.test location.hash
       @
     show: ->
