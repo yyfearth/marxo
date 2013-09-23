@@ -1,5 +1,7 @@
 package marxo.controller;
 
+import marxo.exception.EntityExistsException;
+import marxo.exception.EntityNotFoundException;
 import marxo.exception.InvalidObjectIdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +27,17 @@ import java.net.BindException;
 public class ControllerExceptionHandler {
 	final Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
 
+	// Spring built-in
 	@ExceptionHandler({BindException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, TypeMismatchException.class})
 	public ResponseEntity<ErrorJson> handleBadRequest(Exception ex) {
 		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(String.format("The shit you gave is bad (%s)", ex.getMessage())), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ErrorJson(String.format("The shit you gave is bad (%s)", ex.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({ConversionNotSupportedException.class, HttpMessageNotWritableException.class})
 	public ResponseEntity<ErrorJson> handleInternalServerError(Exception ex) {
 		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson("Conversion!?"), HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(new ErrorJson("Sorry, I don't know how to translate your shit"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
@@ -64,6 +67,18 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler({InvalidObjectIdException.class})
 	public ResponseEntity<ErrorJson> handleInvalidObjectIdException(InvalidObjectIdException ex) {
 		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(String.format("The given ID is invalid (%s)", ex.id)), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler({EntityExistsException.class})
+	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityExistsException ex) {
+		logger.debug(ex.getMessage());
+		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler({EntityNotFoundException.class})
+	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityNotFoundException ex) {
+		logger.debug(ex.getMessage());
+		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
 	}
 }
