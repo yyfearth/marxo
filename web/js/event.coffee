@@ -11,6 +11,7 @@ ManagerView
 ProjectFilterView
 }, {
 Events
+Event
 }) ->
 
   class EventFrameView extends FrameView
@@ -32,7 +33,7 @@ Events
       switch name
         when 'calendar'
           @switchTo @calendar
-          @calendar.show sub if sub
+          @calendar.goto sub
         when 'mgr'
           @switchTo @manager
         else
@@ -44,7 +45,9 @@ Events
         @editor.popup event.toJSON(), (action, data) =>
           event.save data if action is 'save'
 
-      if event = @collection.get id
+      if id instanceof Event
+        _load id
+      else if event = @collection.get id
         _load event
       else
         new Event(id: id).fetch
@@ -118,6 +121,7 @@ Events
     initialize: (options) ->
       super options
       @$info = $ find '.info', @form
+      @$form = $ @form
       @_dateToLocale = (date) -> if date then new Date(date).toLocaleString() else ''
       if @form.starts.type is 'text'
         # not support datetime type
@@ -213,9 +217,10 @@ Events
       super
     popup: (data, callback) ->
       super data, callback
-      $(@form).off 'change', '[name=starts],[name=ends],[name=duration]', @_changed
+      q = ['change', '[name=starts],[name=ends],[name=duration]', @_changed]
+      @$form.off q...
       @fill data
-      $(@form).on 'change', '[name=starts],[name=ends],[name=duration]', @_changed
+      @$form.on q...
       @
     save: ->
       @data = @read()
@@ -230,12 +235,58 @@ Events
     initialize: (options) ->
       super options
       #@sidebarListEl = find '.sidebar-list', @el
+      update = @update.bind @
       @calView = new FullCalendarView parent: @, el: find '#calendar_view', @el
+      @listenTo @collection, 'reset add remove change', =>
+        update() if @$el.is ':visible'
+      @listenTo @calView, 'modify', (event) -> # (event, revertFunc)
+        console.log 'modify event', event.start, event.end, event
+        if event.model and event.start
+          unless event.end
+            end = new Date event.start
+            # set to next midnight
+            end.setHours 24, 0, 0, 0
+            event.end = end
+            console.log 'fix end', end
+          # TODO: deal with allDay
+          # TODO: validation and revert
+          # TODO: start date limits
+          event.model.save
+            starts: event.start
+            ends: event.end
+            duration: event.end.getTime() - event.start.getTime()
+      #@on 'activate', update # use show instead
+      @on 'update', @_update.bind @
+      # TODO: events sidebar list
       @
-    show: (event) ->
-      # TODO: show focus for event
-      console.log 'focus event', event
+    _update: (event) ->
+      id = event?.id or event
+      cal = @calView
+      col = @collection
+      cal.render() unless cal.rendered
+      events = []
+      col.forEach (evt) ->
+        event = evt if id and id is evt.id
+        if evt.has('starts') and evt.has('ends')
+          # TODO: depend on status
+          events.push
+            id: evt.id
+            url: "#event/#{evt.id}"
+            title: evt.get('title')
+            start: new Date evt.get('starts')
+            end: new Date evt.get('ends')
+            color: (if event is evt then '#468847' else null)
+            allDay: false
+            model: evt
+      cal.setEvents editable: true, events: events
+      if event instanceof Event and event.has 'starts'
+        @_curEvent = event
+        cal.goto new Date event.get 'starts'
       @
+    goto: (event) ->
+      @delayedTrigger 'update', 100, event
+    update: ->
+      @delayedTrigger 'update', 100, @_curEvent
     render: ->
       @calView.render()
 
@@ -269,37 +320,60 @@ Events
     initialize: (options) ->
       super options
       @collection = options.collection
-      @
-    remove: ->
-      $(window).off 'resize', @_resize
-      @
-    render: ->
-      fullCalendar = @fullCalendar ?= @$el.fullCalendar.bind @$el
+      $el = @$el
+      fullCalendar = @fullCalendar ?= $el.fullCalendar.bind $el
 
-      @$el.empty()
-
-      @cfg.drop ?= (date, allDay, e) =>
+      @cfg.drop = (date, allDay, e) =>
         # this function is called when something is dropped
         $thumb = $(e.target)
         @addEvent $.extend({}, $thumb.data('event'), {date, allDay})
         $thumb.remove()
-      fullCalendar @cfg
 
-      unless @rendered
-        # auto delayed resize
-        @_resize = => @delayedTrigger 'resize', 150
-        @on 'resize', =>
-          console.log 'resized cal'
-          h = @$el.parents('.inner-frame').innerHeight()
-          fullCalendar 'option', 'height', h
-        $(window).resize(@_resize).resize()
+      @cfg.eventResize = (event, dayDelta, minuteDelta, revertFunc) =>
+        @trigger 'modify', event, revertFunc
+      @cfg.eventDrop = (event, dayDelta, minuteDelta, allDay, revertFunc) =>
+        @trigger 'modify', event, revertFunc
 
-        # mouse scroll to nav monthes
-        @$el.on 'mousewheel DOMMouseScroll', (e) =>
+      # auto delayed resize
+      @_resize = => @delayedTrigger 'resize', 150
+      @on 'resize', ->
+        h = $el.parents('.inner-frame').innerHeight()
+        fullCalendar 'option', 'height', h
+      $(window).resize(@_resize).resize()
+
+      # mouse scroll to nav monthes
+      @$el.on 'mousewheel DOMMouseScroll', (e) ->
+        if e.shiftKey or fullCalendar('getView').name is 'month'
           e.preventDefault()
           e = e.originalEvent
           fullCalendar if e.wheelDelta > 0 or e.detail < 0 then 'prev' else 'next'
           false
+
+      @
+    _view_map:
+      month: 'month', week: 'agendaWeek', day: 'agendaDay'
+      agendaWeek: 'agendaWeek', agendaDay: 'agendaDay'
+    goto: (date, view) ->
+      if view and @_view_map.hasOwnProperty view
+        @fullCalendar 'changeView', @_view_map[view]
+      @fullCalendar 'gotoDate', date.getFullYear(), date.getMonth(), date.getDate()
+      @
+    remove: ->
+      $(window).off 'resize', @_resize
+      @fullCalendar 'destory'
+      @
+    render: ->
+      @$el.empty()
+      @fullCalendar @cfg
+      @
+
+    setEvents: (events) ->
+      # clear
+      @fullCalendar 'removeEvents'
+      console.log 'set events', events
+      setTimeout =>
+        @fullCalendar 'addEventSource', events
+      , 100
       @
 
     addEvent: (event) -> # this function is called when something is dropped
@@ -329,10 +403,7 @@ Events
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
         collection: collection
-      _skip = @skip.bind @
-      @on
-        skip: _skip
-        remove_selected: _skip
+      @on 'skip remove_selected', @skip.bind @
       @
     skip: (models) ->
       console.log 'skip', models
