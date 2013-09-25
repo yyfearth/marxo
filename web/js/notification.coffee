@@ -16,7 +16,6 @@ NavFilterView
 ProjectFilterView
 }, {
 Projects
-Notifications
 }) ->
   class NotificationFrameView extends FrameView
     initialize: (options) ->
@@ -111,5 +110,30 @@ Notifications
       # logined user
       @signin_user = JSON.parse sessionStorage.user
       @
+
+  class NotificationListView extends NavListView
+    auto: false
+    urlRoot: 'notification'
+    headerTitle: 'Notification'
+    itemClassName: 'notification-list-item'
+    collection: Notifications.notifications
+    defaultItem: null
+    events:
+      'click': (e) ->
+        el = e.target
+        if el.tagName is 'A' and el.dataset.id
+          e.preventDefault()
+          @trigger 'select', el.dataset.id, $(el).data 'model'
+          false
+    render: ->
+      @_clear()
+      @_render()
+      @el.appendChild @_renderItem
+        title: 'View All >'
+        href: '#notification'
+      @
+
+  # exporet
+  NotificationFrameView.NotificationListView = NotificationListView
 
   NotificationFrameView

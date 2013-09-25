@@ -1,6 +1,6 @@
 "use strict"
 
-define 'home', ['base', 'models'],
+define 'home', ['base', 'models', 'notification'],
 ({
 find
 #findAll
@@ -14,6 +14,8 @@ NavListView
 Project
 Projects
 Notifications
+}, {
+NotificationListView
 }) ->
   class HomeFrameView extends FrameView
     initialize: (options) ->
@@ -30,28 +32,6 @@ Notifications
           html.push fill _tpl, obj
         find('#home_view', @el).innerHTML = html.join '\n'
       @notificationList.fetch()
-      @
-
-  class NotificationListView extends NavListView
-    auto: false
-    urlRoot: 'notification'
-    headerTitle: 'Notification'
-    itemClassName: 'notification-list-item'
-    collection: Notifications.notifications
-    defaultItem: null
-    events:
-      'click': (e) ->
-        el = e.target
-        if el.tagName is 'A' and el.dataset.id
-          e.preventDefault()
-          @trigger 'select', el.dataset.id, $(el).data 'model'
-          false
-    render: ->
-      @_clear()
-      @_render()
-      @el.appendChild @_renderItem
-        title: 'View All >'
-        href: '#notification'
       @
 
   HomeFrameView
