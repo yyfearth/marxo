@@ -338,6 +338,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @el.appendChild @_renderHeader null
       @el.appendChild @_renderItem null if @defaultItem
     _render: (models = @collection) ->
+      models = models.fullCollection if models.fullCollection
       #console.log 'render models', models
       fragments = document.createDocumentFragment()
       models.forEach (model) =>
