@@ -974,6 +974,42 @@ define 'test_data', ['models'], (models) ->
       ended_at: new Date(1373457155000)
     ]
 
+    notifications: [
+      id: 'e57bf4e6aad752f9ec51eee0'
+      title: 'Test Notification'
+      desc: 'Notification Content'
+      type: 'ROUTINE' # ROUTINE/REQUISITE/EMERGENT (imply priority)
+      scope: 'PROJECT' # PROJECT/TENANT
+      status: 'ACTIVE' # ACTIVE/PROCESSED/EXPIRED
+      project_id: '50447afb4728cc2036cf9ca1'
+      created_at: new Date(1380127473000)
+      updated_at: new Date(1380127473000)
+      expires_at: new Date(1380213873000)
+    ,
+      id: 'e57bf4e6aad752f9ec51eee1'
+      title: 'Project Start'
+      desc: 'Demo Project started at {{date}}'
+      project_id: '50447afb4728cc2036cf9ca0'
+      type: 'ROUTINE'
+      scope: 'PROJECT'
+      status: 'EXPIRED'
+      date: new Date(1379528126251)
+      target_url: '#project/50447afb4728cc2036cf9ca0'
+      expires_at: new Date(1379614526000)
+      created_at: new Date(1379528126000)
+      updated_at: new Date(1379614526000)
+    ,
+      id: 'e57bf4e6aad752f9ec51eee2'
+      title: 'Facebook login expired'
+      desc: 'The Facebook account binding was expired, please login again from Facebook Connector!'
+      type: 'EMERGENT'
+      scope: 'TENANT'
+      status: 'ACTIVE'
+      target_url: '#config/service/facebook'
+      created_at: new Date(1379528126000)
+      updated_at: new Date(1379614526000)
+    ]
+
   exports = {}
   for name, list of data
     name = name.toLowerCase()

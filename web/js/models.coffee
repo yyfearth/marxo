@@ -294,10 +294,12 @@ define 'models', ['lib/common'], ->
   ## Home
 
   class Notification extends Entity
+    urlRoot: ROOT + '/notifications'
 
   class Notifications extends ManagerCollection
+    @notifications: new Notifications
     model: Notification
-    url: ROOT + '/notifications'
+    url: Notification::urlRoot
 
   ## Events
 
