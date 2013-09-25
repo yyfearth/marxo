@@ -16,13 +16,14 @@ NavFilterView
 ProjectFilterView
 }, {
 Projects
+Notifications
 }) ->
   class NotificationFrameView extends FrameView
     initialize: (options) ->
       super options
-      @manager = new NotificationManagemerView el: @el, parent: @
+      @center = new NotificationCenterView el: @el, parent: @
     render: ->
-      @manager.render()
+      @center.render()
       @
 
   # TODO: auto mute expired
@@ -40,7 +41,7 @@ Projects
       @_hide 'mute' if status is 'EXPIRED'
       @
 
-  class NotificationManagemerView extends ManagerView
+  class NotificationCenterView extends ManagerView
     columns: [
       'checkbox'
       'id'
@@ -110,6 +111,8 @@ Projects
       # logined user
       @signin_user = JSON.parse sessionStorage.user
       @
+
+  # TODO: auto reload
 
   class NotificationListView extends NavListView
     auto: false
