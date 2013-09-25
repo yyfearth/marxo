@@ -71,7 +71,6 @@ define 'models', ['lib/common'], ->
     constructor: (model, options) ->
       super model, options
       @_warp model
-      @
     _warp: (model = @) ->
       model = model.attributes if model instanceof @constructor
       url = @url?() or @url or ''

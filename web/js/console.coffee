@@ -275,7 +275,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @on 'route', =>
         @_last = @_cur
         @_cur = Backbone.history.fragment
-      @
+
     back: (opt = {}) ->
       opt.trigger ?= true
       opt.replace ?= false
