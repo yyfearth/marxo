@@ -37,7 +37,7 @@ Event
         when 'mgr'
           @switchTo @manager
         else
-          throw 'open project with a name or id is needed' unless name
+          throw new Error 'open project with a name or id is needed' unless name
           @load name
       @
     load: (id) ->
@@ -104,7 +104,7 @@ Event
           delay += n * _delays[i] if n
         delay
     stringify: (delay, short) ->
-      throw 'delay should be number >= 0' unless delay >= 0
+      throw new Error 'delay should be number >= 0' unless delay >= 0
       unless delay
         ''
       else

@@ -45,7 +45,7 @@ Action
           console.log 'show workflow mgr'
           @switchTo @manager
         else
-          throw 'open workflow with a name or id is needed' unless name
+          throw new Error 'open workflow with a name or id is needed' unless name
           console.log 'show workflow editor for', name
           @switchTo @editor
           @editor.load name, sub
@@ -195,7 +195,7 @@ Action
           else
             wf.fetch success: _load
       else
-        throw 'load neigher workflow id string nor workflow object'
+        throw new Error 'load neigher workflow id string nor workflow object'
       @
     reload: ->
       @load @id, reload: true
@@ -251,7 +251,7 @@ Action
 
   class EditorView extends FormDialogView
     popup: (data, callback) ->
-      throw 'data must be an model entity' unless data instanceof Entity
+      throw new Error 'data must be an model entity' unless data instanceof Entity
       same = data is @data
       super data, callback
       @fill data.attributes unless same
@@ -306,7 +306,7 @@ Action
       actions = findAll('.action', @actionsEl).map (el) ->
         view = $(el).data 'view'
         # TODO: validate each action
-        throw 'cannot get action from action.$el' unless view
+        throw new Error 'cannot get action from action.$el' unless view
         view.read()
       @data.set 'actions', actions
       console.log 'save actions', actions, @data
@@ -368,7 +368,7 @@ Action
       @model = options.model
       @model.view = @
       @type = @model.get?('type') or options.model.type or options.type
-      throw 'need action model and type' unless @model and @type
+      throw new Error 'need action model and type' unless @model and @type
       @
     remove: ->
       model = @model
@@ -412,7 +412,7 @@ Action
       # TODO: support customized controls
       @
     read: (data) -> # read form the form to get a json data
-      throw 'cannot find the form, may not rendered yet' unless @form
+      throw new Error 'cannot find the form, may not rendered yet' unless @form
       data ?= {}
       els = [].slice.call @form.elements
       els.forEach (el) ->
@@ -568,8 +568,8 @@ Action
       @stopListening @model
       @
     load: (wf, {link, node, action, reload} = {}) ->
-      throw 'cannot open a action without given a node' if action and not node
-      throw 'node and link cannot be open together' if link and node
+      throw new Error 'cannot open a action without given a node' if action and not node
+      throw new Error 'node and link cannot be open together' if link and node
 
       if wf isnt @model or reload
         @clear()
@@ -634,7 +634,7 @@ Action
     _renderModel: (wf) ->
       console.log 'render wf', wf
       wf = @model
-      throw 'workflow not loaded' unless wf?
+      throw new Error 'workflow not loaded' unless wf?
       #console.log wf.nodes
       unless wf.nodes.length and wf.nodes.at(0).has 'style'
         @_sortNodeViews wf.nodes
@@ -647,7 +647,7 @@ Action
         return @createNode()
       else unless node instanceof Node
         console.error 'add a invalid node', node
-        throw 'add a invalid node'
+        throw new Error 'add a invalid node'
       console.log 'add node', node
       #@model.nodes.add node
       @model.createNode node

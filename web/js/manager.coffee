@@ -258,7 +258,7 @@ Projects
         false
     initialize: (options) ->
       field = options?.field or @field
-      throw 'nav filter only accept one options.field' unless typeof field is 'string'
+      throw new Error 'nav filter only accept one options.field' unless typeof field is 'string'
       @fields = [field]
       @keys = field.split '.'
       root = options.urlRoot or @urlRoot or field
@@ -417,7 +417,7 @@ Projects
 
       @collection = options.collection if options.collection instanceof ManagerCollection
       collection = @collection
-      throw 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
+      throw new Error 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
       # add a sequence to models
       _gen_seq = -> collection.fullCollection.each (model, i) -> model._seq = i
       @listenTo collection.fullCollection, 'reset add remove', _gen_seq

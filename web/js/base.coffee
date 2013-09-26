@@ -17,7 +17,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
 
   tpl = (selector, returnDom) ->
     tpl_el = find selector
-    throw 'cannot load template from ' + selector unless tpl_el
+    throw new Error 'cannot load template from ' + selector unless tpl_el
     tpl_el.parentNode.removeChild tpl_el
     if returnDom then tpl_el else _html tpl_el
 
@@ -27,10 +27,10 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       tpl_els = findAll '.tpl[name]', tpl selector, true
     else
       tpl_els = findAll selector
-    throw 'unable to find tpl elements or empty in ' + selector unless tpl_els.length
+    throw new Error 'unable to find tpl elements or empty in ' + selector unless tpl_els.length
     for tpl_el in tpl_els
       name = tpl_el.getAttribute 'name'
-      throw 'to get a tpl dict, tpl element must have a "name" attribute' unless name
+      throw new Error 'to get a tpl dict, tpl element must have a "name" attribute' unless name
       hash[name] = _html tpl_el
     hash
 
@@ -101,7 +101,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           innerframe.render()
           innerframe.rendered = true
       else
-        console.warn 'inner frame cannot find', frameName
+        console.warn 'inner frame cannot find'
       @
   #open: (name) -> # should be override
 
@@ -184,8 +184,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
     cancel: ->
       @callback() if @_callback
       @hide true
-    show: (@shown = true) ->
-      @$el.modal if @shown then 'show' else 'hide'
+    show: (shown = true) ->
+      @$el.modal if shown then 'show' else 'hide'
+      @shown = shown
       @
     hide: (hide = true) ->
       @show not hide
@@ -193,7 +194,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
   class FormViewMixin
     initForm: ->
       @form = find 'form', @el
-      throw 'FormViewMixin require a form element in ' + (@el.id or @el.outerHTML) unless @form
+      throw new Error 'FormViewMixin require a form element in ' + (@el.id or @el.outerHTML) unless @form
       @form.onsubmit = (e) =>
         e.preventDefault()
         pass = true
@@ -311,7 +312,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
     initialize: (options) ->
       super options
       @collection = options.collection or @collection
-      throw 'collection must be given' unless @collection instanceof Collection
+      throw new Error 'collection must be given' unless @collection instanceof Collection
       @urlRoot = options.urlRoot or @urlRoot
       @headerTitle = options.headerTitle or @headerTitle
       @defaultItem = options.defaultItem or @defaultItem
@@ -380,7 +381,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         a.href = "##{@urlRoot}:#{@emptyItem}"
         a.textContent = 'Empty'
       else
-        throw 'unsupported item for list ' + model
+        throw new Error 'unsupported item for list ' + model
       li.className += ' active' if model is @defaultItem
       li.appendChild a
       li

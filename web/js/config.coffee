@@ -39,7 +39,7 @@ Service
           @switchTo @connector
           @connector.open sub if sub
         else
-          throw 'empty or unknown sub action for config frame ' + name
+          throw new Error 'empty or unknown sub action for config frame ' + name
       @
 
   # Services
@@ -58,7 +58,7 @@ Service
         # TODO: click twitter and show email
           console.log 'connect service details', service
         else
-          throw 'unknown service'
+          throw new Error 'unknown service'
     render: ->
       @facebookView.render()
       @twitterView.render()

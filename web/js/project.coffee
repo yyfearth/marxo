@@ -30,7 +30,7 @@ Projects
         when 'mgr'
           @switchTo @manager
         else
-          throw 'open project with a name or id is needed' unless name
+          throw new Error 'open project with a name or id is needed' unless name
           @switchTo @viewer
           @viewer.load name
           @viewer.popup sub if sub
@@ -136,8 +136,8 @@ Projects
       console.log 'load project', name
       @
     popup: ({link, node, action} = {}) ->
-      throw 'cannot open a action without given a node' if action and not node
-      throw 'node and link cannot be open together' if link and node
+      throw new Error 'cannot open a action without given a node' if action and not node
+      throw new Error 'node and link cannot be open together' if link and node
       console.log 'popup node/link viewer', {link, node, action}
       @
 
