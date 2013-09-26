@@ -987,7 +987,7 @@ define 'test_data', ['models'], (models) ->
       Model = models[cap[...-1]]
       unless Model
         console.dir models
-        throw "unknown test data name #{name} (#{cap})" unless models[cap]
+        throw new Error "unknown test data name #{name} (#{cap})" unless models[cap]
       else for r in list
         model = new Model r
         model.save()

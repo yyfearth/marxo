@@ -155,7 +155,7 @@ define 'models', ['lib/common'], ->
       @nodes.create data, wait: true
       @
     _createNodeRef: (node) ->
-      throw 'it must be a Node object' unless node instanceof Node
+      throw new Error 'it must be a Node object' unless node instanceof Node
       node.workflow = @
       node.inLinks = []
       node.outLinks = []
@@ -168,9 +168,9 @@ define 'models', ['lib/common'], ->
       @links.create data, wait: true
       @
     _createLinkRef: (link) ->
-      throw 'it must be a Link object' unless link instanceof Link
+      throw new Error 'it must be a Link object' unless link instanceof Link
       unless link.has('prev_node_id') and link.has('next_node_id')
-        throw 'link ' + (link.name or link.id) + 'is broken, prev/next node missing'
+        throw new Error 'link ' + (link.name or link.id) + 'is broken, prev/next node missing'
       link.workflow = @
       link.prevNode = @nodes.get link.get 'prev_node_id'
       link.nextNode = @nodes.get link.get 'next_node_id'
@@ -230,7 +230,7 @@ define 'models', ['lib/common'], ->
     copy: (workflow, callback) -> # copy form workflow as template
       workflow ?= @get 'workflow_id'
       workflow = new Workflow id: workflow if typeof workflow is 'string'
-      throw 'must be create from a workflow' unless workflow instanceof Workflow
+      throw new Error 'must be create from a workflow' unless workflow instanceof Workflow
       unless workflow.loaded()
         workflow.fetch success: (wf) => @copy wf, callback
       else
@@ -274,7 +274,7 @@ define 'models', ['lib/common'], ->
     url: Project::urlRoot
     _delay: 60000 # 1 min
     find: ({projectId, nodeId, linkId, actionId, callback}) ->
-      throw 'projectId is required' unless projectId
+      throw new Error 'projectId is required' unless projectId
       project = @get projectId
       _find = (project) ->
         if nodeId or linkId or actionId

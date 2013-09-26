@@ -14,7 +14,7 @@ User
     @acts_as FormViewMixin
     initialize: (options) ->
       super options
-      throw 'not signed in yet' unless sessionStorage.user
+      throw new Error 'not signed in yet' unless sessionStorage.user
       @model = new User JSON.parse sessionStorage.user
       @initForm()
       @btn = find '#update_user', @el

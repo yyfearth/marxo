@@ -58,7 +58,7 @@ ProjectFilterView
       else if typeof id is 'string'
         new Content({id}).fetch success: (data) => @popup data, action, callback
       else
-        throw 'content editor can only load a content model or an id string'
+        throw new Error 'content editor can only load a content model or an id string'
     popup: (data, action, callback) ->
       media = data.get 'media'
       editor = switch media
@@ -69,7 +69,7 @@ ProjectFilterView
         when 'EMAIL'
           @composer
         else
-          throw 'unsupported media type ' + media
+          throw new Error 'unsupported media type ' + media
       editor.render() unless editor.rendered
       editor.popup data, action, callback
       @
@@ -82,7 +82,7 @@ ProjectFilterView
       else if typeof id is 'string'
         new Content({id}).fetch success: (data) => @popup data, action, callback
       else
-        throw 'content editor can only load a content model or an id string'
+        throw new Error 'content editor can only load a content model or an id string'
 
   class TextEditor extends FormDialogView
     @acts_as ContentEditorMixin
@@ -176,7 +176,7 @@ ProjectFilterView
           deferred.reject formView
         deferred.promise()
 
-      throw 'content editor read is async, callback is needed' unless typeof callback is 'function'
+      throw new Error 'content editor read is async, callback is needed' unless typeof callback is 'function'
 
       defered = [read @pageDesc]
       for el in findAll '.box.section', @el
@@ -227,7 +227,7 @@ ProjectFilterView
       @
     showPreview: (data) ->
       #console.log 'read', data
-      throw 'data is empty for gen preview' unless data
+      throw new Error 'data is empty for gen preview' unless data
       console.log 'show preview', data
       cls = @iframe.classList
       btnCls = @btnPreview.classList
@@ -401,7 +401,7 @@ ProjectFilterView
       @idx = options.idx
       @id ?= options.id or @idx
       @id = 'section_' + @id if typeof @id is 'number'
-      throw 'id must be given for a section' unless @id
+      throw new Error 'id must be given for a section' unless @id
       @
     _bind: ->
       # bind title change
@@ -473,7 +473,7 @@ ProjectFilterView
       @
     _preview_tpl: do ->
       tpls = tplAll '#preview_tpl'
-      throw 'cannot find preview tpl with name section' unless tpls.section
+      throw new Error 'cannot find preview tpl with name section' unless tpls.section
       tpls
     genPreview: (data) ->
       #console.log 'gen preview', @id, data
@@ -502,7 +502,7 @@ ProjectFilterView
             accept = unless accept then '' else "accept='#{accept}' "
             body = tpl.file.replace /accept(?:=['"]{2})?/, accept
         else
-          throw 'unknown section type ' + type
+          throw new Error 'unknown section type ' + type
       tpl.section
         .replace('{{title}}', data.section_title or '(Need a Title)')
         .replace('{{desc}}', data.section_desc or '')
@@ -540,7 +540,7 @@ ProjectFilterView
     initialize: (options) ->
       super options
       tpl = find '.manual_option', @el
-      throw 'cannot find manual option tpl' unless tpl
+      throw new Error 'cannot find manual option tpl' unless tpl
       @_tpl = tpl.cloneNode true
       dataset = find('input.manual_option_text[data-option-required]', @_tpl).dataset
       delete dataset.optionRequired
