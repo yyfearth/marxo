@@ -128,6 +128,31 @@ Notifications
           e.preventDefault()
           @trigger 'select', el.dataset.id, $(el).data 'model'
           false
+    _render: (models = @collection) ->
+      models = models.fullCollection if models.fullCollection
+      #console.log 'render models', models
+      fragments = document.createDocumentFragment()
+      col = models.filter (model) ->
+        model._date = new Date(model.get('updated_at') or model.get('created_at')).getTime()
+        model._before = Date.now() - model._date
+        switch model.get 'status'
+          when 'EXPIRED'
+            false
+          when 'PROCESSED'
+            model._before < 86400000 # 1d
+          else
+            model._before < 2592000000 # 30d
+      _.sortBy(col, (model) ->
+        t = model._before
+        switch model.get 'type'
+          when 'EMERGENT'
+            t
+          when 'REQUISITE'
+            10000000000 + t
+          else
+            20000000000 + t
+      ).forEach (model) => fragments.appendChild @_renderItem model
+      @el.appendChild fragments
     render: ->
       @_clear()
       @_render()
