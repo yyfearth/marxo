@@ -17,6 +17,7 @@ User
       throw new Error 'not signed in yet' unless sessionStorage.user
       @model = new User JSON.parse sessionStorage.user
       @initForm()
+      @btn = find '#update_user', @el
       @avatar = find '#user_avatar img', @el
     render: ->
       super
@@ -29,5 +30,8 @@ User
         console.log attrs
         @fill attrs
         @avatar.src = "https://secure.gravatar.com/avatar/#{attrs.email_md5}?s=200&d=mm"
+        @btn.href = '#config/users/' + data.id
+        $(@btn).removeAttr 'disabled'
+        return
 
   ProfileFrameView
