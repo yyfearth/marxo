@@ -196,14 +196,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       throw 'FormViewMixin require a form element in ' + (@el.id or @el.outerHTML) unless @form
       @form.onsubmit = (e) =>
         e.preventDefault()
-        pass = true
-        for input in findAll '[required]', @form
-          unless input.value.trim()
-            pass = false
-            input.focus()
-            alert 'This field is required!'
-            break
-        if pass
+        if @validate @form
           @form._callback? @form
           @form._callback = null
           @trigger 'submit', @form, @data
@@ -227,6 +220,18 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           input: => matched = @form.name.value is cached
           change: => @form.name.value = @form.name.value.toLowerCase()
       @
+    validate: (form) ->
+      for input in findAll '[required]', form
+        unless input.value.trim()
+          input.focus()
+          alert 'This field is required!'
+          return false
+      try
+        for input in findAll ':invalid', form
+          input.focus()
+          alert 'This field is invalid!'
+          return false
+      true
     submit: (callback) ->
       @form._callback = callback if typeof callback is 'function'
       @_submit_btn.click()

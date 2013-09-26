@@ -246,8 +246,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         @show 'project', id, {link, node, action}
       'content/:id(/:action)': (id, action) ->
         @show 'content', id, action
-      'config/service(/:name)': (name) ->
-        @show 'config', 'service', name
+      'config/:name(/:sub)': (name, sub) ->
+        @show 'config', name, sub
       'event/calendar(/:id)': (id) ->
         @show 'event', 'calendar', id
       'signout': 'signout'
