@@ -33,6 +33,7 @@ Service
       switch name
         when 'users'
           @switchTo @manager
+          @manager.open sub
         when 'tenant'
           @switchTo @profile
         when 'service'
@@ -243,11 +244,13 @@ Service
 
   # User Editor
   class UserEditor extends FormDialogView
-    el: '#user_editor'
+    goBackOnHidden: 'config/users'
     initialize: (options) ->
       super options
       @$title = $ find '.modal-title', @el
       @$sex = $ findAll '[name=sex]', @form
+      @$editOnly = @$el.find '.edit-only'
+      @passwords = findAll '[type=password]', @form
       @
     _setSex: (sex = '') ->
       $sex = @$sex.filter "[value='#{sex}']"
@@ -261,22 +264,51 @@ Service
       super data
       @_setSex data.sex
       @
+    read: ->
+      data = super
+      password = @passwords[0].value
+      data.password = password unless password
+      data.sex = @_getSex()
+      data
     reset: ->
       @$title.text 'Create User'
+      @$editOnly.hide()
       @form.email.disabled = false
+      $(@passwords).removeAttr 'required'
       @_setSex()
       super
     popup: (data, callback) ->
       super data, callback
-      @$title.text "User: #{data.first_name} #{data.last_name}" if data.first_name or data.last_name
+      if data.email # edit mode
+        @form.email.disabled = true
+        @$editOnly.show()
+        if data.first_name or data.last_name
+          @$title.text "User: #{data.first_name} #{data.last_name}"
+        else
+          @$title.text "User: #{data.email}"
+      else
+        $(@passwords).attr 'required', 'required'
       @fill data
-      @form.email.disabled = Boolean data.email
       @
+    validate: ->
+      psw = @passwords[0].value
+      psw2 = @passwords[1].value
+      if (psw or psw2) and psw isnt psw2
+        @passwords[1].select()
+        alert 'Passwords are not matched!'
+        return false
+      super
     save: ->
-      @data = @read()
-      @data.sex = @_getSex()
-      @callback 'save'
-      @hide true
+      data = @data = @read()
+      email = @form.email.value.trim()
+      unless data.password
+        @callback 'save'
+        @hide true
+      else require ['crypto'], (crypto) =>
+        console.log 'crypto', email, data.password
+        data.password = crypto.hashPassword email, data.password
+        @callback 'save'
+        @hide true
       @
 
   # User Manager
@@ -313,19 +345,32 @@ Service
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
         collection: @collection.fullCollection
-      @on 'create edit', @edit.bind @
-      @on 'remove remove_selected', @remove.bind @
+      @edit = @edit.bind @
+      @remove = @remove.bind @
+      @on 'remove remove_selected', @remove
       @
     reload: ->
-      super
       @projectFilter.clear()
+      super
+    open: (id) ->
+      unless id
+        @editor.cancel()
+      else if id is 'new'
+        @edit null
+      else
+        user = @collection.get id
+        if user?.has 'email'
+          @edit user
+        else
+          new Publisher({id}).fetch success: @edit
+      @
     edit: (user) ->
       user = new Publisher unless user instanceof Publisher
       @editor.popup user.toJSON(), (action, data) =>
         console.log 'user', action, data
         if action is 'save'
           # enforce tenant id
-          data.tenant_id = @signin_user.get 'tenant_id'
+          data.tenant_id = @signin_user.tenant_id
           if user.isNew()
             @collection.create data
           else

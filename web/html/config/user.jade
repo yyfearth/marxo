@@ -9,10 +9,20 @@
         .controls
           input#user_email(type='email', name='email', placeholder='user@company.com', maxlength='255', required)
       .control-group
+        label.control-label(for='user_password') Password
+        .controls
+          input#user_password(type='password', placeholder='********',
+          title='Length from 6 to 2048 characters', data-placement='right', pattern='.{6,2048}', maxlength='2048')
+          input#user_password_confirm(type='password', placeholder='********',
+          title='Repeat Password', data-placement='right', pattern='.{6,2048}', maxlength='2048')
+          .help-inline.edit-only Leave then blank to keep current password.
+      .control-group
         label.control-label(for='first_name') Full Name
         .controls
-          input#first_name(type='text', name='first_name', placeholder='First Name', maxlength='255', required)
-          input#last_name(type='text', name='last_name', placeholder='Last Name', maxlength='255', required)
+          input#first_name(type='text', name='first_name', placeholder='First Name',
+          title='First Name', data-placement='right', maxlength='255', required)
+          input#last_name(type='text', name='last_name', placeholder='Last Name',
+          title='Last Name', data-placement='right', maxlength='255', required)
       .control-group
         label.control-label(for='user_sex') Sex
         .controls
