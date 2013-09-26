@@ -169,9 +169,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       else unless /.+@.+\..+/.test email
         @form.email.select()
         alert 'The Email is invalid!'
-      else if password.length < 4
+      else if not password
         @form.password.focus()
-        alert 'Please fill out the Password with at least 4 characters!\n\nShort passwords are easy to guess.\nPassword with more than 6 characters is recommended.'
+        alert 'Password is required!'
       else
         @_signIn email, password
       false
