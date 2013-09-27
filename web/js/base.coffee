@@ -305,6 +305,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
     defaultItem: 'all'
     itemClassName: ''
     targetClassName: ''
+    emptyItem: 'new'
+    allowEmpty: false
     _reload_timeout: 60000 # 1min
     initialize: (options) ->
       super options
@@ -315,6 +317,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @defaultItem = options.defaultItem or @defaultItem
       @itemClassName = options.itemClassName or @itemClassName
       @targetClassName = options.targetClassName or @targetClassName
+      @emptyItem = options.emptyItem or @emptyItem
+      @allowEmpty = options.allowEmpty or @allowEmpty
       @listenTo @collection, 'reset', @render.bind @
       @events ?= {}
       @events['click .btn-refresh'] = => @fetch true
@@ -336,8 +340,10 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
     _clear: ->
       @el.innerHTML = ''
       @el.appendChild @_renderHeader null
-      @el.appendChild @_renderItem null if @defaultItem
+      @el.appendChild @_renderItem @defaultItem if @defaultItem
+      @el.appendChild @_renderItem @emptyItem if @allowEmpty and @defaultItem isnt @emptyItem
     _render: (models = @collection) ->
+      models = models.fullCollection if models.fullCollection
       #console.log 'render models', models
       fragments = document.createDocumentFragment()
       models.forEach (model) =>
@@ -371,7 +377,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         a.href = "##{@urlRoot}:all"
         a.textContent = 'All'
       else if model is 'new' or model is 'empty'
-        a.href = "##{@urlRoot}:new"
+        a.href = "##{@urlRoot}:#{@emptyItem}"
         a.textContent = 'Empty'
       else
         throw 'unsupported item for list ' + model

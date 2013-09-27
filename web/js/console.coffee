@@ -169,9 +169,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       else unless /.+@.+\..+/.test email
         @form.email.select()
         alert 'The Email is invalid!'
-      else if password.length < 4
+      else if not password
         @form.password.focus()
-        alert 'Please fill out the Password with at least 4 characters!\n\nShort passwords are easy to guess.\nPassword with more than 6 characters is recommended.'
+        alert 'Password is required!'
       else
         @_signIn email, password
       false
@@ -275,7 +275,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @on 'route', =>
         @_last = @_cur
         @_cur = Backbone.history.fragment
-      @
+
     back: (opt = {}) ->
       opt.trigger ?= true
       opt.replace ?= false

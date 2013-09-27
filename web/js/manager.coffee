@@ -101,7 +101,7 @@ Projects
     render: ->
       @$el.empty()
       id = @model.get('project_id')
-      Projects.find projectId: id, callback: ({project}) =>
+      if id then Projects.find projectId: id, callback: ({project}) =>
         if project
           title = _.escape project.get 'title'
         else
@@ -209,7 +209,7 @@ Projects
           _matchers.splice i, 1
           break
       #console.log 'existing other _matchers', _matchers
-      if query
+      if query?
         matcher = @getMatcher query
         matcher._filter = @
         _matchers.push matcher
@@ -227,7 +227,6 @@ Projects
     search: ->
       @_search @$el.find('input[type=text]').val()
     _search: (query) ->
-      query = null unless query
       console.log 'search', query
       col = @collection
       col.pageableCollection?.getFirstPage silent: true
@@ -269,14 +268,32 @@ Projects
     getMatcher: (query) ->
       @_matchers[query] ?= @makeMatcher query
     makeMatcher: (query) ->
-      regexp = new RegExp query.trim(), 'i'
+      console.log 'q', query
       keys = @keys
-      (model) ->
-        i = 0
-        value = model.get keys[i]
-        while value and key = keys[++i]
-          value = value[key]
-        regexp.test value
+      if keys.length is 1
+        if query is ''
+          (model) ->
+            value = model.get keys[0]
+            value is '' or not value?
+        else
+          regexp = new RegExp query.trim(), 'i'
+          (model) ->
+            regexp.test model.get keys[0]
+      else
+        if query is ''
+          (model) ->
+            value = model.get keys[0]
+            while value and key = keys[++i]
+              value = value[key]
+            value is '' or not value?
+        else
+          regexp = new RegExp query.trim(), 'i'
+          (model) ->
+            i = 0
+            value = model.get keys[0]
+            while value and key = keys[++i]
+              value = value[key]
+            regexp.test value
     search: (query) ->
       @_search query
     render: ->
@@ -292,8 +309,10 @@ Projects
         matched = a.href.match @_regex
         query = matched?[1]
         console.log 'filter', @fields[0], query
-        query = null if query is 'all'
-        @search query
+        @search switch query
+          when 'all' then null
+          when 'empty' then ''
+          else query
         last?.classList.remove 'active'
         a.parentElement.classList.add 'active'
       @
@@ -304,6 +323,7 @@ Projects
     headerTitle: 'Projects'
     initialize: (options) ->
       super options
+      @allowEmpty = options.allowEmpty
       @headerTitle = options.headerTitle or @headerTitle
       @list = new NavListView
         el: @el
@@ -312,6 +332,8 @@ Projects
         urlRoot: @urlRoot
         headerTitle: @headerTitle
         defaultItem: 'all'
+        emptyItem: 'empty'
+        allowEmpty: @allowEmpty
         itemClassName: 'project-list-item'
     render: ->
       super
