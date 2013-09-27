@@ -82,19 +82,28 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       frame = @frames[frame]
       return unless frame?
       # console.log 'frame', frame
+      unless frame.el.classList.contains 'active'
+        oldFrame = find '.frame.active', @el
+        if oldFrame
+          oldFrame.classList.remove 'active'
+          view = $.data oldFrame, 'view'
+          if view then setTimeout ->
+            view.trigger 'deactivate'
+          , 10
+        find('#navbar li.active')?.classList.remove 'active'
+        frame.el.classList.add 'active'
+        $(window).resize()
+        console.log 'frame', frame
       if frame instanceof FrameView
+        frame.trigger 'activate'
         frame.open? name, sub
       else
         console.log 'load module:', frame.id
         require [frame.id], (TheFrameView) =>
           frame = @frames[frame.id] = new TheFrameView frame
           frame.render()
+          frame.trigger 'activate'
           frame.open? name, sub
-      unless frame.el.classList.contains 'active'
-        find('#main .frame.active')?.classList.remove 'active'
-        find('#navbar li.active')?.classList.remove 'active'
-        frame.el.classList.add 'active'
-        $(window).resize()
 
       $frame = @$frames.filter("[data-frame='#{frame.id}']").addClass 'active'
       $target = $frame.find("[data-inner-frame='#{name}']").addClass 'active'
