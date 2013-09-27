@@ -1,0 +1,1 @@
+(function(){"use strict";require(["console"],function(t){var n,e,i,r;n=t.ConsoleView,i=t.SignInView,e=t.Router,window.app=r={console:n.get(),signin:i.get(),router:e.get()},Backbone.history.start()})}).call(this);
