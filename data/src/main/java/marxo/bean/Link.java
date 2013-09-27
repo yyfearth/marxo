@@ -65,6 +65,7 @@ public class Link extends BasicEntity {
 		this.nextNodeId = nextNodeId;
 	}
 
+	// fixme: embedded condition, hide it for now
 	public Condition getCondition() {
 		return condition;
 	}
@@ -72,7 +73,6 @@ public class Link extends BasicEntity {
 	public void setCondition(Condition condition) {
 		this.condition = condition;
 	}
-	// TODO: embedded condition, hide it for now
 
 	@JsonProperty("prevNodeId")
 	public String getJsonPreviousNodeId() {
