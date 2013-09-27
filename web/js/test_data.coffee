@@ -42,8 +42,8 @@ define 'test_data', ['models'], (models) ->
     ]
     workflows: [
       id: '50447afb4728cb2036cf9ca0'
-      title: 'Demo Workflow'
-      name: 'demo_workflow'
+      name: 'Demo Workflow'
+      key: 'demo_workflow'
       desc: 'Demo Workflow for App Dev and Logo Desgin'
       node_ids: [
         '50447afb4728cb2036cf9cb0'
@@ -69,8 +69,8 @@ define 'test_data', ['models'], (models) ->
       ]
       nodes: [
         id: '50447afb4728cb2036cf9cb0'
-        title: 'Post Idea'
-        name: 'post_idea'
+        name: 'Post Idea'
+        key: 'post_idea'
         desc: 'Post project idea'
         created_at: '2013-06-27T00:23:31.747Z'
         updated_at: '2013-06-27T00:23:31.747Z'
@@ -87,8 +87,8 @@ define 'test_data', ['models'], (models) ->
         ]
       ,
         id: '50447afb4728cb2036cf9cb1'
-        title: 'Post Requirements'
-        name: 'post_requirements'
+        name: 'Post Requirements'
+        key: 'post_requirements'
         desc: 'Post requirements'
         created_at: '2013-06-27T00:24:55.070Z'
         updated_at: '2013-06-27T00:24:55.070Z'
@@ -105,8 +105,8 @@ define 'test_data', ['models'], (models) ->
         ]
       ,
         id: '50447afb4728cb2036cf9cb2'
-        title: 'Cancel Notification'
-        name: 'cancel_notification'
+        name: 'Cancel Notification'
+        key: 'cancel_notification'
         desc: 'Cancel project for less response than expected'
         created_at: '2013-06-27T00:25:58.702Z'
         updated_at: '2013-06-27T00:25:58.702Z'
@@ -117,8 +117,8 @@ define 'test_data', ['models'], (models) ->
         ]
       ,
         id: '50447afb4728cb2036cf9cb3'
-        title: 'Retrieve App Submissions'
-        name: 'retrieve_app_submissions'
+        name: 'Retrieve App Submissions'
+        key: 'retrieve_app_submissions'
         desc: 'Retrieve app submissions'
         created_at: '2013-06-27T00:32:46.817Z'
         updated_at: '2013-06-27T00:32:46.817Z'
@@ -135,8 +135,8 @@ define 'test_data', ['models'], (models) ->
         ]
       ,
         id: '50447afb4728cb2036cf9cb4'
-        title: 'Retrieve Logo Design'
-        name: 'retrieve_logo_design'
+        name: 'Retrieve Logo Design'
+        key: 'retrieve_logo_design'
         desc: 'Retrieve logo design'
         created_at: '2013-06-27T00:35:36.856Z'
         updated_at: '2013-06-27T00:35:36.856Z'
@@ -153,8 +153,8 @@ define 'test_data', ['models'], (models) ->
         ]
       ,
         id: '50447afb4728cb2036cf9cb5'
-        title: 'Email to Evaluators'
-        name: 'email_to_evaluators'
+        name: 'Email to Evaluators'
+        key: 'email_to_evaluators'
         desc: 'Email to evaluators'
         created_at: '2013-06-27T00:36:21.950Z'
         updated_at: '2013-06-27T00:36:21.950Z'
@@ -171,8 +171,8 @@ define 'test_data', ['models'], (models) ->
         ]
       ,
         id: '50447afb4728cb2036cf9cb6'
-        title: 'Post and Vote'
-        name: 'post_and_vote'
+        name: 'Post and Vote'
+        key: 'post_and_vote'
         desc: 'Post and vote'
         created_at: '2013-06-27T00:36:47.097Z'
         updated_at: '2013-06-27T00:36:47.097Z'
@@ -189,8 +189,8 @@ define 'test_data', ['models'], (models) ->
         ]
       ,
         id: '50447afb4728cb2036cf9cb7'
-        title: 'Post Final Result and Reward'
-        name: 'post_final_result_and_reward'
+        name: 'Post Final Result and Reward'
+        key: 'post_final_result_and_reward'
         desc: 'Post final result and reward'
         created_at: '2013-06-27T00:39:04.602Z'
         updated_at: '2013-06-27T00:39:04.602Z'
@@ -211,54 +211,54 @@ define 'test_data', ['models'], (models) ->
       ]
       links: [
         id: '50447afb4728cb2036cf9cc0'
-        name: '10_days_likes_gte_300'
+        key: '10_days_likes_gte_300'
         prev_node_id: '50447afb4728cb2036cf9cb0'
         next_node_id: '50447afb4728cb2036cf9cb1'
-        title: '10 Days & Likes >= 300'
+        name: '10 Days & Likes >= 300'
         created_at: '2013-06-27T00:27:31.946Z'
         updated_at: '2013-06-27T00:27:31.946Z'
       ,
         id: '50447afb4728cb2036cf9cc1'
-        name: '10_days_likes_lt_300'
+        key: '10_days_likes_lt_300'
         prev_node_id: '50447afb4728cb2036cf9cb0'
         next_node_id: '50447afb4728cb2036cf9cb2'
-        title: '10 Days & Likes < 300'
+        name: '10 Days & Likes < 300'
         created_at: '2013-06-27T00:28:58.636Z'
         updated_at: '2013-06-27T00:28:58.636Z'
       ,
         id: '50447afb4728cb2036cf9cc2'
-        name: 'post_req_to_retrieve_app'
+        key: 'post_req_to_retrieve_app'
         prev_node_id: '50447afb4728cb2036cf9cb1'
         next_node_id: '50447afb4728cb2036cf9cb3'
         created_at: '2013-06-27T00:33:01.670Z'
         updated_at: '2013-06-27T00:33:01.670Z'
       ,
         id: '50447afb4728cb2036cf9cc3'
-        name: 'post_req_to_retrieve_logo'
+        key: 'post_req_to_retrieve_logo'
         prev_node_id: '50447afb4728cb2036cf9cb1'
         next_node_id: '50447afb4728cb2036cf9cb4'
         created_at: '2013-06-27T00:35:45.912Z'
         updated_at: '2013-06-27T00:35:45.912Z'
       ,
         id: '50447afb4728cb2036cf9cc4'
-        name: 'retrieve_app_to_evaluate'
+        key: 'retrieve_app_to_evaluate'
         prev_node_id: '50447afb4728cb2036cf9cb3'
         next_node_id: '50447afb4728cb2036cf9cb5'
-        title: '15 Days & > 80% Response'
+        name: '15 Days & > 80% Response'
         created_at: '2013-06-27T00:37:24.163Z'
         updated_at: '2013-06-27T00:37:24.163Z'
       ,
         id: '50447afb4728cb2036cf9cc5'
-        name: 'retrieve_logo_to_post_and_vote'
+        key: 'retrieve_logo_to_post_and_vote'
         prev_node_id: '50447afb4728cb2036cf9cb4'
         next_node_id: '50447afb4728cb2036cf9cb6'
-        title: '10 Days & Submissions >= 3'
+        name: '10 Days & Submissions >= 3'
         created_at: '2013-06-27T00:37:43.706Z'
         updated_at: '2013-06-27T00:37:43.706Z'
       ,
         id: '50447afb4728cb2036cf9cc6'
-        title: '(fallback)'
-        name: 'faild_to_evaluate'
+        name: '(fallback)'
+        key: 'faild_to_evaluate'
         desc: 'Manual trigger back if failed to evaluate'
         prev_node_id: '50447afb4728cb2036cf9cb5'
         next_node_id: '50447afb4728cb2036cf9cb3'
@@ -266,8 +266,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: '2013-06-27T00:37:51.943Z'
       ,
         id: '50447afb4728cb2036cf9cc7'
-        title: '(fallback)'
-        name: 'failed_to_vote'
+        name: '(fallback)'
+        key: 'failed_to_vote'
         desc: 'Manual trigger back if failed to vote'
         prev_node_id: '50447afb4728cb2036cf9cb6'
         next_node_id: '50447afb4728cb2036cf9cb4'
@@ -275,14 +275,14 @@ define 'test_data', ['models'], (models) ->
         updated_at: '2013-06-27T00:38:05.360Z'
       ,
         id: '50447afb4728cb2036cf9cc8'
-        name: 'evaluate_to_post_final'
+        key: 'evaluate_to_post_final'
         prev_node_id: '50447afb4728cb2036cf9cb5'
         next_node_id: '50447afb4728cb2036cf9cb7'
         created_at: '2013-06-27T00:39:22.841Z'
         updated_at: '2013-06-27T00:39:22.841Z'
       ,
         id: '50447afb4728cb2036cf9cc9'
-        name: 'post_and_vote_to_post_final'
+        key: 'post_and_vote_to_post_final'
         prev_node_id: '50447afb4728cb2036cf9cb6'
         next_node_id: '50447afb4728cb2036cf9cb7'
         created_at: '2013-06-27T00:39:26.674Z'
@@ -292,15 +292,15 @@ define 'test_data', ['models'], (models) ->
       updated_at: '2013-06-27T00:22:20.272Z'
     ,
       id: '50447afb4728cb2036cf9ca1'
-      name: 'test_wf'
-      title: 'Test Workflow'
+      key: 'test_wf'
+      name: 'Test Workflow'
       desc: 'The test workflow'
       created_at: new Date(1363879373649)
       updated_at: new Date(1363879373649)
       nodes: [
         id: '507f81413d070321728fde10'
-        name: 'post_idea'
-        title: 'Post Idea'
+        key: 'post_idea'
+        name: 'Post Idea'
         desc: 'Post software project ideas'
         workflow_id: '50447afb4728cb2036cf9ca1'
         actions: []
@@ -308,8 +308,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde11'
-        name: 'post_cancel'
-        title: 'Post Cancel'
+        key: 'post_cancel'
+        name: 'Post Cancel'
         desc: 'Post cancel notification'
         workflow_id: '50447afb4728cb2036cf9ca1'
         actions: []
@@ -317,8 +317,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde12'
-        name: 'post_req'
-        title: 'Post Requirement'
+        key: 'post_req'
+        name: 'Post Requirement'
         desc: 'Post project requirement'
         workflow_id: '50447afb4728cb2036cf9ca1'
         actions: []
@@ -326,8 +326,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde13'
-        name: 'submit_design'
-        title: 'Submit Design'
+        key: 'submit_design'
+        name: 'Submit Design'
         desc: 'Retrieve theme design submissions & e-mail to stackholders'
         workflow_id: '50447afb4728cb2036cf9ca1'
         actions: []
@@ -335,8 +335,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde14'
-        name: 'notification'
-        title: 'Notification'
+        key: 'notification'
+        name: 'Notification'
         desc: 'Notification'
         workflow_id: '50447afb4728cb2036cf9ca1'
         actions: []
@@ -344,8 +344,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde15'
-        name: 'post_result'
-        title: 'Post Result'
+        key: 'post_result'
+        name: 'Post Result'
         desc: 'Post & e-mail result everyone'
         workflow_id: '50447afb4728cb2036cf9ca1'
         actions: []
@@ -354,7 +354,7 @@ define 'test_data', ['models'], (models) ->
       ]
       links: [
         id: '507f81413d070321728fde22'
-        name: 'post_req_to_submit_design'
+        key: 'post_req_to_submit_design'
         workflow_id: '50447afb4728cb2036cf9ca1'
         prev_node_id: '507f81413d070321728fde12'
         next_node_id: '507f81413d070321728fde13'
@@ -362,7 +362,7 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde24'
-        name: 'pass_to_post'
+        key: 'pass_to_post'
         desc: 'Post & e-mail to everyone if pass rate > 50%'
         workflow_id: '50447afb4728cb2036cf9ca1'
         prev_node_id: '507f81413d070321728fde13'
@@ -371,8 +371,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde20'
-        name: 'to_cancel'
-        title: 'Like < 300'
+        key: 'to_cancel'
+        name: 'Like < 300'
         desc: 'Cancel if like count < 300'
         workflow_id: '50447afb4728cb2036cf9ca1'
         prev_node_id: '507f81413d070321728fde10'
@@ -381,8 +381,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879373649)
       ,
         id: '507f81413d070321728fde21'
-        name: 'continue_to_req'
-        title: 'Like >= 300'
+        key: 'continue_to_req'
+        name: 'Like >= 300'
         desc: 'Continue to post requirement if like count >= 300'
         workflow_id: '50447afb4728cb2036cf9ca1'
         prev_node_id: '507f81413d070321728fde10'
@@ -391,8 +391,8 @@ define 'test_data', ['models'], (models) ->
         updated_at: new Date(1363879402429)
       ,
         id: '507f81413d070321728fde23'
-        name: 'not_pass_to_notify'
-        title: 'Pass rate <= 50%'
+        key: 'not_pass_to_notify'
+        name: 'Pass rate <= 50%'
         desc: 'Notification if pass rate <= 50%'
         workflow_id: '50447afb4728cb2036cf9ca1'
         prev_node_id: '507f81413d070321728fde13'
@@ -420,8 +420,8 @@ define 'test_data', ['models'], (models) ->
     projects: [
       id: '50447afb4728cc2036cf9ca0'
       workflow_id: '50447afb4728cb2036cf9ca0'
-      title: 'Demo Project'
-      name: 'demo_prj'
+      name: 'Demo Project'
+      key: 'demo_prj'
       desc: 'Demo Project from Demo Workflow'
       status: 'RUNNING'
       node_ids: [
@@ -449,8 +449,8 @@ define 'test_data', ['models'], (models) ->
       nodes: [
         id: '50447afb4728cc2036cf9cb0'
         template_id: '50447afb4728cb2036cf9cb0'
-        title: 'Post Idea'
-        name: 'post_idea'
+        name: 'Post Idea'
+        key: 'post_idea'
         desc: 'Post project idea'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -468,8 +468,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cb1'
         template_id: '50447afb4728cb2036cf9cb1'
-        title: 'Post Requirements'
-        name: 'post_requirements'
+        name: 'Post Requirements'
+        key: 'post_requirements'
         desc: 'Post requirements'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -487,8 +487,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cb2'
         template_id: '50447afb4728cb2036cf9cb2'
-        title: 'Cancel Notification'
-        name: 'cancel_notification'
+        name: 'Cancel Notification'
+        key: 'cancel_notification'
         desc: 'Cancel project for less response than expected'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -500,8 +500,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cb3'
         template_id: '50447afb4728cb2036cf9cb3'
-        title: 'Retrieve App Submissions'
-        name: 'retrieve_app_submissions'
+        name: 'Retrieve App Submissions'
+        key: 'retrieve_app_submissions'
         desc: 'Retrieve app submissions'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -519,8 +519,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cb4'
         template_id: '50447afb4728cb2036cf9cb4'
-        title: 'Retrieve Logo Design'
-        name: 'retrieve_logo_design'
+        name: 'Retrieve Logo Design'
+        key: 'retrieve_logo_design'
         desc: 'Retrieve logo design'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -538,8 +538,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cb5'
         template_id: '50447afb4728cb2036cf9cb5'
-        title: 'Email to Evaluators'
-        name: 'email_to_evaluators'
+        name: 'Email to Evaluators'
+        key: 'email_to_evaluators'
         desc: 'Email to evaluators'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -557,8 +557,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cb6'
         template_id: '50447afb4728cb2036cf9cb6'
-        title: 'Post and Vote'
-        name: 'post_and_vote'
+        name: 'Post and Vote'
+        key: 'post_and_vote'
         desc: 'Post and vote'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -576,8 +576,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cb7'
         template_id: '50447afb4728cb2036cf9cb7'
-        title: 'Post Final Result and Reward'
-        name: 'post_final_result_and_reward'
+        name: 'Post Final Result and Reward'
+        key: 'post_final_result_and_reward'
         desc: 'Post final result and reward'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -599,25 +599,25 @@ define 'test_data', ['models'], (models) ->
       links: [
         id: '50447afb4728cc2036cf9cc0'
         template_id: '50447afb4728cb2036cf9cc0'
-        name: '10_days_likes_gte_300'
+        key: '10_days_likes_gte_300'
         prev_node_id: '50447afb4728cc2036cf9cb0'
         next_node_id: '50447afb4728cc2036cf9cb1'
-        title: '10 Days & Likes >= 300'
+        name: '10 Days & Likes >= 300'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
         id: '50447afb4728cc2036cf9cc1'
         template_id: '50447afb4728cb2036cf9cc1'
-        name: '10_days_likes_lt_300'
+        key: '10_days_likes_lt_300'
         prev_node_id: '50447afb4728cc2036cf9cb0'
         next_node_id: '50447afb4728cc2036cf9cb2'
-        title: '10 Days & Likes < 300'
+        name: '10 Days & Likes < 300'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
         id: '50447afb4728cc2036cf9cc2'
         template_id: '50447afb4728cb2036cf9cc2'
-        name: 'post_req_to_retrieve_app'
+        key: 'post_req_to_retrieve_app'
         prev_node_id: '50447afb4728cc2036cf9cb1'
         next_node_id: '50447afb4728cc2036cf9cb3'
         created_at: new Date(1379528126251)
@@ -625,7 +625,7 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cc3'
         template_id: '50447afb4728cb2036cf9cc3'
-        name: 'post_req_to_retrieve_logo'
+        key: 'post_req_to_retrieve_logo'
         prev_node_id: '50447afb4728cc2036cf9cb1'
         next_node_id: '50447afb4728cc2036cf9cb4'
         created_at: new Date(1379528126251)
@@ -633,26 +633,26 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cc4'
         template_id: '50447afb4728cb2036cf9cc4'
-        name: 'retrieve_app_to_evaluate'
+        key: 'retrieve_app_to_evaluate'
         prev_node_id: '50447afb4728cc2036cf9cb3'
         next_node_id: '50447afb4728cc2036cf9cb5'
-        title: '15 Days & > 80% Response'
+        name: '15 Days & > 80% Response'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
         id: '50447afb4728cc2036cf9cc5'
         template_id: '50447afb4728cb2036cf9cc5'
-        name: 'retrieve_logo_to_post_and_vote'
+        key: 'retrieve_logo_to_post_and_vote'
         prev_node_id: '50447afb4728cc2036cf9cb4'
         next_node_id: '50447afb4728cc2036cf9cb6'
-        title: '10 Days & Submissions >= 3'
+        name: '10 Days & Submissions >= 3'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
         id: '50447afb4728cc2036cf9cc6'
         template_id: '50447afb4728cb2036cf9cc6'
-        title: '(fallback)'
-        name: 'faild_to_evaluate'
+        name: '(fallback)'
+        key: 'faild_to_evaluate'
         desc: 'Manual trigger back if failed to evaluate'
         prev_node_id: '50447afb4728cc2036cf9cb5'
         next_node_id: '50447afb4728cc2036cf9cb3'
@@ -661,8 +661,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cc7'
         template_id: '50447afb4728cb2036cf9cc7'
-        title: '(fallback)'
-        name: 'failed_to_vote'
+        name: '(fallback)'
+        key: 'failed_to_vote'
         desc: 'Manual trigger back if failed to vote'
         prev_node_id: '50447afb4728cc2036cf9cb6'
         next_node_id: '50447afb4728cc2036cf9cb4'
@@ -671,7 +671,7 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cc8'
         template_id: '50447afb4728cb2036cf9cc8'
-        name: 'evaluate_to_post_final'
+        key: 'evaluate_to_post_final'
         prev_node_id: '50447afb4728cc2036cf9cb5'
         next_node_id: '50447afb4728cc2036cf9cb7'
         created_at: new Date(1379528126251)
@@ -679,7 +679,7 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '50447afb4728cc2036cf9cc9'
         template_id: '50447afb4728cb2036cf9cc9'
-        name: 'post_and_vote_to_post_final'
+        key: 'post_and_vote_to_post_final'
         prev_node_id: '50447afb4728cc2036cf9cb6'
         next_node_id: '50447afb4728cc2036cf9cb7'
         created_at: new Date(1379528126251)
@@ -690,15 +690,15 @@ define 'test_data', ['models'], (models) ->
     ,
       id: '50447afb4728cc2036cf9ca1'
       workflow_id: '50447afb4728cb2036cf9ca1'
-      name: 'test_prj'
-      title: 'Test Project'
+      key: 'test_prj'
+      name: 'Test Project'
       desc: 'The test project using test workflow'
       status: 'WAITING'
       nodes: [
         id: '507f81413d070321728ffe10'
         template_id: '507f81413d070321728fde10'
-        name: 'post_idea'
-        title: 'Post Idea'
+        key: 'post_idea'
+        name: 'Post Idea'
         desc: 'Post software project ideas'
         workflow_id: '50447afb4728cc2036cf9ca1'
         actions: [
@@ -713,8 +713,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe11'
         template_id: '507f81413d070321728fde11'
-        name: 'post_cancel'
-        title: 'Post Cancel'
+        key: 'post_cancel'
+        name: 'Post Cancel'
         desc: 'Post cancel notification'
         workflow_id: '50447afb4728cc2036cf9ca1'
         actions: []
@@ -723,8 +723,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe12'
         template_id: '507f81413d070321728fde12'
-        name: 'post_req'
-        title: 'Post Requirement'
+        key: 'post_req'
+        name: 'Post Requirement'
         desc: 'Post project requirement'
         workflow_id: '50447afb4728cc2036cf9ca1'
         actions: []
@@ -733,8 +733,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe13'
         template_id: '507f81413d070321728fde13'
-        name: 'submit_design'
-        title: 'Submit Design'
+        key: 'submit_design'
+        name: 'Submit Design'
         desc: 'Retrieve theme design submissions & e-mail to stackholders'
         workflow_id: '50447afb4728cc2036cf9ca1'
         actions: []
@@ -743,8 +743,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe14'
         template_id: '507f81413d070321728fde14'
-        name: 'notification'
-        title: 'Notification'
+        key: 'notification'
+        name: 'Notification'
         desc: 'Notification'
         workflow_id: '50447afb4728cc2036cf9ca1'
         actions: []
@@ -753,8 +753,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe15'
         template_id: '507f81413d070321728fde15'
-        name: 'post_result'
-        title: 'Post Result'
+        key: 'post_result'
+        name: 'Post Result'
         desc: 'Post & e-mail result everyone'
         workflow_id: '50447afb4728cc2036cf9ca1'
         actions: []
@@ -764,7 +764,7 @@ define 'test_data', ['models'], (models) ->
       links: [
         id: '507f81413d070321728ffe22'
         template_id: '507f81413d070321728fde22'
-        name: 'post_req_to_submit_design'
+        key: 'post_req_to_submit_design'
         workflow_id: '50447afb4728cc2036cf9ca1'
         prev_node_id: '507f81413d070321728ffe12'
         next_node_id: '507f81413d070321728ffe13'
@@ -773,7 +773,7 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe24'
         template_id: '507f81413d070321728fde24'
-        name: 'pass_to_post'
+        key: 'pass_to_post'
         desc: 'Post & e-mail to everyone if pass rate > 50%'
         workflow_id: '50447afb4728cc2036cf9ca1'
         prev_node_id: '507f81413d070321728ffe13'
@@ -783,8 +783,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe20'
         template_id: '507f81413d070321728fde20'
-        name: 'to_cancel'
-        title: 'Like < 300'
+        key: 'to_cancel'
+        name: 'Like < 300'
         desc: 'Cancel if like count < 300'
         workflow_id: '50447afb4728cc2036cf9ca1'
         prev_node_id: '507f81413d070321728ffe10'
@@ -794,8 +794,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe21'
         template_id: '507f81413d070321728fde21'
-        name: 'continue_to_req'
-        title: 'Like >= 300'
+        key: 'continue_to_req'
+        name: 'Like >= 300'
         desc: 'Continue to post requirement if like count >= 300'
         workflow_id: '50447afb4728cc2036cf9ca1'
         prev_node_id: '507f81413d070321728ffe10'
@@ -805,8 +805,8 @@ define 'test_data', ['models'], (models) ->
       ,
         id: '507f81413d070321728ffe23'
         template_id: '507f81413d070321728fde23'
-        name: 'not_pass_to_notify'
-        title: 'Pass rate <= 50%'
+        key: 'not_pass_to_notify'
+        name: 'Pass rate <= 50%'
         desc: 'Notification if pass rate <= 50%'
         workflow_id: '50447afb4728cc2036cf9ca1'
         prev_node_id: '507f81413d070321728ffe13'
@@ -952,7 +952,7 @@ define 'test_data', ['models'], (models) ->
 
     reports: [
       id: 'e57bf4f6aad752f9fc51fef0'
-      title: 'Demo Project Initialization Report'
+      name: 'Demo Project Initialization Report'
       desc: 'Demo Project Initialization Report'
       project_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
@@ -963,7 +963,7 @@ define 'test_data', ['models'], (models) ->
       ended_at: new Date(1373457155000)
     ,
       id: 'e57bf4f6aad752f9fc51fef1'
-      title: 'Demo Project Post Requirements Report'
+      name: 'Demo Project Post Requirements Report'
       desc: 'Demo Project Post Requirements Report'
       project_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'

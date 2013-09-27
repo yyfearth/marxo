@@ -3,10 +3,10 @@ mixin box_icons
     button.btn.btn-minimize.btn-round.icon-up-open
     button.btn.btn-close.btn-round.icon-close
 
-mixin action_title_name
-  input(type='text', name='title', maxlength='255', title='Action Title', placeholder='Action Title')
-  input.input-medium(type='text', name='name',maxlength='255', title='Action Name', placeholder='action_name')
-  .help-inline (Action Title and Name)
+mixin action_name_key
+  input(type='text', name='name', maxlength='255', title='Action Name', placeholder='Action Name')
+  input.input-medium(type='text', name='key',maxlength='255', title='Action Key', placeholder='action_name')
+  .help-inline (Action Name and Key)
 
 mixin multi_social_media_group_btns
   .btn-group(data-toggle='buttons-checkbox')
@@ -80,7 +80,7 @@ mixin actions_tpl
         h4 Post Page or Form
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         ul.action-bar
           li
             mixin action_template_select
@@ -103,7 +103,7 @@ mixin actions_tpl
         h4 Post to Multiple Social Media
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         ul.action-bar
           li
             mixin multi_social_media_group_btns
@@ -122,7 +122,7 @@ mixin actions_tpl
         h4 Post to Twitter
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         ul.action-bar
           li
             mixin action_template_select
@@ -136,7 +136,7 @@ mixin actions_tpl
         h4 Post to Facebook
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         ul.action-bar
           li
             mixin action_template_select
@@ -150,7 +150,7 @@ mixin actions_tpl
         h4 Send Email
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         .input-prepend.input-block-level
           span.add-on To
           input.span11(name="email_to", title='Send To', type='text',
@@ -165,7 +165,7 @@ mixin actions_tpl
         h4 Generate Report
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         label.checkbox
           input(type='checkbox', name='auto', checked)
           | Generate form all tracked sources of this node.
@@ -178,7 +178,7 @@ mixin actions_tpl
         h4 Calculate Data
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         .help-block Calculate Data
 
     .tpl(name='make_schedule')
@@ -186,7 +186,7 @@ mixin actions_tpl
         h4 Make Schedule
         mixin box_icons
       form.box-content
-        mixin action_title_name
+        mixin action_name_key
         .btn-group(data-toggle='buttons-radio')
           button.btn.active(type='button', name='type', value='auto') Starts Automatically
           button.btn(type='button', name='type', value='manual') Starts Manually

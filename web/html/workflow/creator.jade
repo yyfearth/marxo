@@ -10,13 +10,13 @@
           select#wf_template(name='template')
             option(value='') Empty Workflow
       .control-group
-        label.control-label(for='wf_title') Title
-        .controls
-          input#wf_title(type='text', name='title', placeholder='Workflow Name', maxlength='32', required)
-      .control-group
         label.control-label(for='wf_name') Name
         .controls
-          input#wf_name(type='text', name='name', placeholder='wf_name', pattern='[a-z0-9_\\-]{3,32}', maxlength='32', required)
+          input#wf_name(type='text', name='name', placeholder='Workflow Name', maxlength='32', required)
+      .control-group
+        label.control-label(for='wf_key') Key
+        .controls
+          input#wf_key(type='text', name='key', placeholder='wf_name', pattern='[a-z0-9_\\-]{3,32}', maxlength='32', required)
       .control-group
         label.control-label(for='wf_desc') Description
         .controls

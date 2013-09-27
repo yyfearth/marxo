@@ -32,17 +32,13 @@ Projects
       @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
     render: ->
       @$el.empty()
-      key = @column.get 'name'
-      title = @model.get key
-      if title.id and title.title
-        id = title.id
-        title = title.title
-        tooltip = _.escape title
-      else
-        id = @model.id
-        tooltip = @model.escape(@column.get('tooltip') or @column.get('name') or 'title')
+      field = @column.get 'name'
+      title = @model.get field
+      id = @model.id
+      tooltip_field = @column.get('tooltip') or @column.get('name') or 'title'
+      tooltip = @model.escape(tooltip_field) or @model.escape('name')
       url = unless @urlRoot then null else '#' + @urlRoot + id
-      @$el.addClass(key + '-link-cell').append $('<a>',
+      @$el.addClass(field + '-link-cell').append $('<a>',
         tabIndex: -1
         href: url
       ).text title
@@ -103,14 +99,14 @@ Projects
       id = @model.get('project_id')
       if id then Projects.find projectId: id, callback: ({project}) =>
         if project
-          title = _.escape project.get 'title'
+          name = _.escape project.get 'name'
         else
           console.warn 'project not found', id
-          title = '(Unknown Project)'
+          name = '(Unknown Project)'
         @$el.addClass('project-link-cell').append $('<a>',
           tabIndex: -1
           href: '#project/' + id
-        ).attr({title}).text title
+        ).attr('title', name).text name
         @delegateEvents()
       @
 
@@ -127,10 +123,10 @@ Projects
         actionId: action_id
         callback: ({node, action}) =>
           if node and action
-            node_title = _.escape node.get 'title'
-            action_title = _.escape action.get('title') or action.get('type')
-            tooltip = "#{node_title}: #{action_title}"
-            html = "<span class='node-title'>#{node_title}</span>: #{action_title}"
+            node_name = _.escape node.get 'name'
+            action_name = _.escape action.get('name') or action.get('type')
+            tooltip = "#{node_name}: #{action_name}"
+            html = "<span class='node-title'>#{node_name}</span>: #{action_name}"
             @$el.addClass('action-link-cell').append $('<a>',
               tabIndex: -1
               href: url
@@ -359,7 +355,7 @@ Projects
       name:
         name: 'name'
         label: 'Name'
-        cell: 'string'
+        cell: 'tooltip'
         editable: false
       title:
         name: 'title'
@@ -458,6 +454,12 @@ Projects
               when 'title'
                 name: 'title'
                 label: 'Title'
+                cell: 'link'
+                urlRoot: cfgs[1]
+                editable: false
+              when 'name'
+                name: 'name'
+                label: 'Name'
                 cell: 'link'
                 urlRoot: cfgs[1]
                 editable: false

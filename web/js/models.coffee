@@ -7,17 +7,6 @@ define 'models', ['lib/common'], ->
   ## Common
 
   Entity = Backbone.Model
-  #class Entity extends Backbone.Model
-  #  set: (attrs, options) ->
-  #    @_name = attrs.name.tolowerCase().replace /\W+/g, '_' if attrs.name
-  #    super attrs, options
-  #  validate: (attrs) ->
-  #    unless attrs.name and attrs.id
-  #      'id and name are required'
-  #    else unless /\w{,10}/.test attrs.name
-  #      'name max len is 10 and must be consist of alphabetic char or _'
-  #    else
-  #      return
 
   # just a alias, otherwise PageableCollection will not extends Collection
   Collection = Backbone.Collection
@@ -170,7 +159,7 @@ define 'models', ['lib/common'], ->
     _createLinkRef: (link) ->
       throw new Error 'it must be a Link object' unless link instanceof Link
       unless link.has('prev_node_id') and link.has('next_node_id')
-        throw new Error 'link ' + (link.name or link.id) + 'is broken, prev/next node missing'
+        throw new Error 'link ' + (link.key or link.id) + 'is broken, prev/next node missing'
       link.workflow = @
       link.prevNode = @nodes.get link.get 'prev_node_id'
       link.nextNode = @nodes.get link.get 'next_node_id'

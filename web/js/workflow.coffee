@@ -57,7 +57,7 @@ Action
     columns: [
       'checkbox'
       'id'
-      'title:workflow'
+      'name:workflow'
       'desc'
       'type'
       'status'
@@ -120,8 +120,8 @@ Action
       'click #workflow_header': ->
         @renamer.popup @model, (action, wf) =>
           if action is 'save'
-            console.log 'save title', wf
-            @titleEl.textContent = wf.get 'title'
+            console.log 'save name', wf
+            @nameEl.textContent = wf.get 'name'
             @descEl.textContent = wf.get 'desc'
     initialize: (options) ->
       super options
@@ -133,10 +133,10 @@ Action
         el: find('#node_list', @el)
         parent: @
       @renamer = new EditorView
-        el: find('#workflow_title_editor', @el)
+        el: find('#workflow_name_editor', @el)
 
       @btnSave = find '.wf-save', @el
-      @titleEl = find '.editable-title', @el
+      @nameEl = find '.editable-name', @el
       @descEl = find '.editable-desc', @el
 
       @listenTo @nodeList, 'select', (id, node) =>
@@ -174,7 +174,7 @@ Action
       if not wf
         @id = null
         @model = null
-        @titleEl.textContent = ''
+        @nameEl.textContent = ''
         @descEl.textContent = ''
         @view.clear()
       else if typeof wf is 'string'
@@ -187,7 +187,7 @@ Action
           _load wf
         else
           @id = wf.id
-          @titleEl.textContent = wf.get 'title'
+          @nameEl.textContent = wf.get 'name'
           @descEl.textContent = wf.get 'desc'
           @model = wf
           if wf.loaded()
@@ -210,7 +210,7 @@ Action
   class NodeListView extends NavListView
     urlRoot: 'node'
     headerTitle: 'Common Nodes'
-    defaultItem: new Node(id: 'new', title: 'Empty Node')
+    defaultItem: new Node(id: 'new', name: 'Empty Node')
     itemClassName: ''
     targetClassName: 'node thumb'
     collection: new Nodes
@@ -284,7 +284,7 @@ Action
     remove: ->
       $(window).off 'resize', @_fixStyle
       super
-    _fixStyle: -> # make sure the top of action box will below the title, name and desc
+    _fixStyle: -> # make sure the top of action box will below the name, key and desc
       @actionsEl.style.top = 20 + $(@form).height() + 'px'
       return
     _addAction: (e) ->
@@ -386,7 +386,7 @@ Action
       else
         @el.innerHTML = @_tpl[@type]
         @el.id = 'action_' + @model.id or 'no_id'
-        @_title = @$el.find('.box-header h4').text()
+        @_name = @$el.find('.box-header h4').text()
         #@containerEl.appendChild @el
         @containerEl.insertBefore @el, find '.alert', @containerEl
         # get els in super
@@ -402,8 +402,8 @@ Action
       @
     fill: (data) -> # filling the form with data
       return unless data and @form
-      data.title = @_title unless data.title
-      data.name = data.type unless data.name
+      data.name = @_name unless data.name
+      data.key = data.type unless data.key
       form = @form
       for name, value of data
         el = form[name]
@@ -663,12 +663,12 @@ Action
         node = new Node
       else if node instanceof Node and node.id
         node = node.clone()
-        title = node.get 'title'
+        name = node.get 'name'
         desc = node.get 'desc'
         node.set
           template_id: node.id
-          name: node.get('name') + '_clone'
-          title: title + ' (Clone)'
+          key: node.get('key') + '_clone'
+          name: name + ' (Clone)'
           desc: if desc then desc + ' (Clone)' else null
         node.unset 'style'
         node.unset 'id'
@@ -702,7 +702,7 @@ Action
     removeNode: (node) ->
       return @ unless node?.id
       # use confirm since no support for undo
-      if confirm "Delete the node: #{node.get 'title'}?"
+      if confirm "Delete the node: #{node.get 'name'}?"
         console.log 'remove node', node
         #@model.nodes.remove node
         node.destroy()
@@ -744,7 +744,7 @@ Action
     removeLink: (link) ->
       return @ unless link?.id
       # use confirm since no support for undo
-      if confirm "Delete the link: #{link.get('title') or '(No Name)'}?"
+      if confirm "Delete the link: #{link.get('name') or '(No Name)'}?"
         console.log 'remove node', link
         link.destroy()
       @
@@ -806,8 +806,8 @@ Action
       jsPlumb.repaint @el.id
       @
     _renderModel: (node = @model) ->
-      @el.innerHTML = node.escape 'title'
-      title = node.get 'title'
+      @el.innerHTML = node.escape 'name'
+      name = node.get 'name'
       if node.has 'style'
         @el.setAttribute 'style', node.get 'style'
       else
@@ -818,7 +818,7 @@ Action
         container: @parentEl
         trigger: 'manual'
         placement: 'bottom'
-        title: title
+        name: name
         html: true
         content: @_popover_tpl.replace '{desc}', node.get('desc') or ''
       @$popover = @$el.data('popover').tip()
@@ -855,13 +855,13 @@ Action
       @
     _renderLabel: (link) ->
       label$el = $(@labelEl)
-      # _desc = "#{link.prevNode.get 'title'} to #{link.nextNode.get 'title'}"
-      title = link.get 'title'
-      @label.setLabel title or ''
-      label$el.css 'visibility', if title then 'visible' else 'hidden'
+      # _desc = "#{link.prevNode.get 'name'} to #{link.nextNode.get 'name'}"
+      name = link.get 'name'
+      @label.setLabel name or ''
+      label$el.css 'visibility', if name then 'visible' else 'hidden'
       label$el.popover
         container: @parentEl
-        title: title or 'Link'
+        name: name or 'Link'
         trigger: 'manual'
         placement: 'bottom'
         html: true

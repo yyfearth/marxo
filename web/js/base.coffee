@@ -209,17 +209,17 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         submit_btn.style.display = 'none'
         @form.appendChild submit_btn
       @_submit_btn = submit_btn
-      if @form.title and @form.name
+      if @form.key and title = (@form.name or @form.title)
         matched = false
         cached = ''
-        $(@form.title).on 'input', =>
-          cached = @form.title.value.trim().replace(/\W+/g, '_')[0..32].toLowerCase()
-          matched or= not @form.name.value
-          @form.name.value = cached if matched
+        $(title).on 'input', =>
+          cached = title.value.trim().replace(/\W+/g, '_')[0..32].toLowerCase()
+          matched or= not @form.key.value
+          @form.key.value = cached if matched
           true
-        $(@form.name).on
-          input: => matched = @form.name.value is cached
-          change: => @form.name.value = @form.name.value.toLowerCase()
+        $(@form.key).on
+          input: => matched = @form.key.value is cached
+          change: => @form.key.value = @form.key.value.toLowerCase()
       @
     validate: (form) ->
       for input in findAll '[required]', form
@@ -373,7 +373,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       a.className = @targetClassName if @targetClassName
       if model.id
         a.href = "##{@urlRoot}:#{model.id}"
-        a.textContent = model.get 'title'
+        a.textContent = model.get('title') or model.get('name')
         a.dataset.id = model.id
         $(a).data 'model', model
       else if model.href
