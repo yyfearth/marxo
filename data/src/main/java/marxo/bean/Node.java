@@ -2,7 +2,6 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import marxo.tool.TypeTool;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Document
-@JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "actions", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Node extends BasicEntity {
 
 	@JsonProperty("desc")

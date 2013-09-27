@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 
 import java.util.Date;
 
+// review: it's fucking weird that the entities are coupled with Jackson annotation.
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @JsonPropertyOrder({"id", "tenantId", "name", "title", "desc", "type", "status", "nodes", "links", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -70,8 +71,17 @@ public abstract class Entity {
 		return aClass.getSimpleName();
 	}
 
-	public void reset() {
-		createdDate = new Date();
-		modifiedDate = new Date();
+	public void fillWithDefaultValues() {
+		if (id == null) {
+			id = new ObjectId();
+		}
+
+		if (createdDate == null) {
+			createdDate = new Date();
+		}
+
+		if (modifiedDate == null) {
+			modifiedDate = new Date();
+		}
 	}
 }
