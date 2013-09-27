@@ -122,4 +122,4 @@ $(dist)/css/%.css: css/%.less
 $(dist)/index.html: index.jade
 	$(print)
 	@mkdir -p $(@D)
-	jade -D -p . $< -o $(@D)
+	jade -Dp . < $< | tr '\n' ' ' | sed -e "s/> </></g" > $@
