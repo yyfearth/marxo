@@ -20,7 +20,7 @@
       button.btn.btn-danger.wf-reset(title='Reset workflow to previous save', data-placement='bottom') Reset
       button.btn.btn-primary.wf-save(title='Save the workflow', data-placement='bottom') Save
     h3#workflow_header(title='Change Workflow Title and Description', data-placement='bottom')
-      span.editable-title
+      span.editable-name
       small.editable-desc
   #workflow_view.content-view
   div.tpl#t_popover
@@ -31,20 +31,20 @@
 include editor/node_editor
 include editor/link_editor
 
-#workflow_title_editor.modal.hide.fade(aria-labelledby='workflow_title_editor_header', aria-hidden='true')
+#workflow_name_editor.modal.hide.fade(aria-labelledby='workflow_name_editor_header', aria-hidden='true')
   .modal-header
     button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
-    h3#workflow_title_editor_header Rename Workflow
+    h3#workflow_name_editor_header Rename Workflow
   .modal-body
     form.form-horizontal
       .control-group
-        label.control-label(for='wf_rename_title') Title
-        .controls
-          input#wf_rename_title(type='text', name='title', placeholder='Workflow Name')
-      .control-group
         label.control-label(for='wf_rename_name') Name
         .controls
-          input#wf_rename_name(type='text', name='name', placeholder='workflow_name', required)
+          input#wf_rename_name(type='text', name='name', placeholder='Workflow Name')
+      .control-group
+        label.control-label(for='wf_rename_key') Key
+        .controls
+          input#wf_rename_key(type='text', name='key', placeholder='workflow_name', required)
       .control-group
         label.control-label(for='wf_rename_desc') Description
         .controls

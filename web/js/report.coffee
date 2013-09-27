@@ -37,7 +37,7 @@ ProjectFilterView
     columns: [
       'checkbox'
       'id'
-      'title:report'
+      'name:report'
     ,
 #      name: 'media'
 #      label: 'Media'

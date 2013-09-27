@@ -676,7 +676,7 @@ ProjectFilterView
       super options
       collection = @collection.fullCollection
       @mediaFilter = new NavFilterView
-        el: '#media-filter'
+        el: find('.media-filter', @el)
         field: 'media'
         collection: collection
       @projectFilter = new ProjectFilterView

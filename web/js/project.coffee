@@ -46,11 +46,11 @@ Projects
       @$el.empty()
       id = @model.get('workflow_id')
       _render = (wf) =>
-        title = _.escape wf.get 'title'
+        name = _.escape wf.get 'name'
         @$el.addClass('workflow-link-cell').append $('<a>',
           tabIndex: -1
           href: '#workflow/' + id
-        ).attr({title}).text title
+        ).attr('title', name).text name
         @delegateEvents()
       _callback = (wfs) ->
         wf = wfs.get id
@@ -95,7 +95,7 @@ Projects
     columns: [
       'checkbox'
       'id'
-      'title:project'
+      'name:project'
       'desc'
     ,
       name: 'workflow_id'
