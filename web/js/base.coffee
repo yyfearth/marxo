@@ -37,7 +37,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
   fill = (html, model) ->
     html.replace /{{\s*\w+\s*}}/g, (name) ->
       name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
-      model[name] or model.get?(name) or ''
+      model[name] or model.escape?(name) or ''
 
   # Polyfill
   Date::now ?= -> +new Date
@@ -59,7 +59,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
 
   class View extends Backbone.View
     initialize: (options) ->
-      @el.view = @
+      if @el?.tagName
+        @el.view = @
+        @$el.data 'view', @
       if options?.parent
         @parent = options.parent
         @parentEl = @parent.el
@@ -74,6 +76,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @
     render: ->
       @rendered = true
+      @el.view = @
+      @$el.data 'view', @
       @
     remove: ->
       @trigger 'remove', @
@@ -92,14 +96,18 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
     switchTo: (innerframe) ->
       innerframe = @[innerframe] if typeof innerframe is 'string'
       if innerframe and innerframe instanceof InnerFrameView
-        unless innerframe.el.classList.contains 'active'
-          console.log 'switch inner-frame', innerframe.el?.id
-          find('.inner-frame.active[name]', @el)?.classList.remove 'active'
-          innerframe.el.classList.add 'active'
-          #innerframe.trigger 'activate'
         unless innerframe.rendered
           innerframe.render()
           innerframe.rendered = true
+        unless innerframe.el.classList.contains 'active'
+          console.log 'switch inner-frame', innerframe.el?.id
+          oldFrame = find '.inner-frame.active[name]', @el
+          if oldFrame
+            oldFrame.classList.remove 'active'
+            view = $.data oldFrame, 'view'
+            view?.trigger 'deactivate'
+          innerframe.el.classList.add 'active'
+          innerframe.trigger 'activate'
       else
         console.warn 'inner frame cannot find'
       @
@@ -193,7 +201,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
 
   class FormViewMixin
     initForm: ->
-      @form = find 'form', @el
+      @form = find 'form', @el # 1st
       throw new Error 'FormViewMixin require a form element in ' + (@el.id or @el.outerHTML) unless @form
       @form.onsubmit = (e) =>
         e.preventDefault()
