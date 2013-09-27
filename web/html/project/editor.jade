@@ -1,47 +1,39 @@
-.span2.sidebar
-  .well
-    ul.sidebar-list.nav.nav-list
-      li.nav-header Project
-      li
-        a(href='#project:new') Project Info
-      li.nav-header Nodes
-      li.nav-header Links
-    ul.sidebar-bottom.nav.nav-list
-      li.divider
-      li.nav-header Tips
-      li.tips
-        | Click a Node above
-        | or Drag a Node from Sidebar to Workflow Editor
-        | to Add a new Node.
-.span10.workspace
-  .page-header
-    .action-buttons.pull-right
-      button.btn.btn-warn.prj-reset(title='Discard changes and go back to previous', data-placement='bottom') Cancel
-      button.btn.btn-primary.prj-save(title='Save the project to apply the changes', data-placement='bottom') Save
-    h3
-      span.title Create Project
-      small.desc from Workflow
-  section#project_info
-
-    form.form-horizontal
-      .control-group
-        label.control-label(for='workflow_id') Workflow
-        .controls
-          select#workflow_id(name='workflow_id')
-            option(value='') (Please Select)
-      .control-group
-        label.control-label(for='project_title') Title
-        .controls
-          input#project_title(type='text', name='title', placeholder='Project Name', maxlength='32', required)
-      .control-group
-        label.control-label(for='project_name') Name
-        .controls
-          input#project_name(type='text', name='name', placeholder='project_name', pattern='[a-z0-9_\\-]{3,32}', maxlength='32', required)
-      .control-group
-        label.control-label(for='project_desc') Description
-        .controls
-          textarea#project_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
-      .form-actions
-        input.btn.btn-primary(type='submit', value='Create', data-loading-text='Creating...')
-        | &nbsp;
-        input.btn(type='reset', value='Reset')
+#project_editor.modal.modal-full.hide.fade(aria-labelledby='project_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#project_editor_title Project Editor
+  .modal-body
+    .sidebar.well
+      ul.sidebar-list.nav.nav-list
+        li.nav-header Project
+        li
+          a(href='#project:new') Project Info
+        li.nav-header Nodes
+        li.nav-header Links
+      ul.sidebar-bottom.nav.nav-list
+        li.divider
+        li.nav-header Tips
+        li.tips ...
+    .content
+      form.form-horizontal
+        .control-group
+          label.control-label(for='workflow_id') Workflow
+          .controls
+            select#workflow_id(name='workflow_id')
+              option(value='') (Please Select)
+        .control-group
+          label.control-label(for='project_name') Name
+          .controls
+            input#project_name(type='text', name='name', placeholder='Project Name', maxlength='255', required)
+        .control-group
+          label.control-label(for='project_key') Key
+          .controls
+            input#project_key(type='text', name='key', placeholder='project_name', pattern='[a-z0-9_\\-]{3,32}', maxlength='32', required)
+        .control-group
+          label.control-label(for='project_desc') Description
+          .controls
+            textarea#project_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
+  .modal-footer
+    a.btn.btn-info.pull-left.btn-view(disabled) View
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save

@@ -8,7 +8,7 @@ find
 FrameView
 InnerFrameView
 NavListView
-#ModalDialogView
+FormDialogView
 }, {
 ManagerView
 WorkflowFilterView
@@ -19,14 +19,14 @@ Projects
   class ProjectFrameView extends FrameView
     initialize: (options) ->
       super options
-      @creator = new ProjectCreatorView el: '#project_creator', parent: @
+      @editor = new ProjectEditorView el: '#project_editor', parent: @
       @viewer = new ProjectViewerView el: '#project_viewer', parent: @
       @manager = new ProjectManagemerView el: '#project_manager', parent: @
       @
     open: (name, sub) ->
       switch name
         when 'new'
-          @switchTo @creator
+          @editor.popup {}
         when 'mgr'
           @switchTo @manager
         else
@@ -125,9 +125,18 @@ Projects
       @list.fetch()
       super
 
-  class ProjectCreatorView extends InnerFrameView
+  class ProjectEditorView extends FormDialogView
+    goBackOnHidden: 'project/mgr'
     #    initialize: (options) ->
     #      super options
+    popup: (data, callback) ->
+      super data, callback
+      #@fill data
+      @
+    #save: ->
+    #  @callback 'save'
+    #  @hide true
+    #  @
 
   class ProjectViewerView extends InnerFrameView
     #    initialize: (options) ->
