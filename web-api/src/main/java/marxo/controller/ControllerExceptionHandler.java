@@ -1,12 +1,11 @@
 package marxo.controller;
 
-import marxo.exception.EntityExistsException;
-import marxo.exception.EntityNotFoundException;
-import marxo.exception.InvalidObjectIdException;
+import marxo.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -70,15 +69,15 @@ public class ControllerExceptionHandler {
 		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
 	}
 
-	@ExceptionHandler({EntityExistsException.class})
-	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityExistsException ex) {
+	@ExceptionHandler({EntityInvalidException.class, EntityExistsException.class, EntityNotFoundException.class})
+	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityException ex) {
 		logger.debug(ex.getMessage());
 		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
 	}
 
-	@ExceptionHandler({EntityNotFoundException.class})
-	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityNotFoundException ex) {
+	@ExceptionHandler({DataAccessResourceFailureException.class})
+	public ResponseEntity<ErrorJson> handleDataAccessResourceFailureException(DataAccessResourceFailureException ex) {
 		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ErrorJson("Cannot connect to the database"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }
