@@ -2,9 +2,7 @@ package marxo.controller;
 
 import marxo.bean.Workflow;
 import marxo.dao.WorkflowDao;
-import marxo.exception.EntityExistsException;
-import marxo.exception.EntityNotFoundException;
-import marxo.exception.InvalidObjectIdException;
+import marxo.exception.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -35,25 +33,20 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		return workflowDao.findAll();
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
-	// TODO: Validate the given id
-	public Workflow createWorkflow(@Valid @PathVariable String id, @Valid @RequestBody Workflow workflow) throws Exception {
-		if (!ObjectId.isValid(id)) {
-			throw new InvalidObjectIdException(id);
+	public Workflow createWorkflow(@Valid @RequestBody Workflow workflow) throws Exception {
+		if (workflowDao.exists(workflow.getId())) {
+			throw new EntityExistsException(workflow.getId());
 		}
 
-		ObjectId objectId = new ObjectId(id);
-
-		if (workflowDao.exists(objectId)) {
-			throw new EntityExistsException(objectId);
+		try {
+			workflowDao.save(workflow);
+		} catch (ValidationException ex) {
+			// todo: add error message
+			throw new EntityInvalidException(workflow.getId(), "not implemented");
 		}
-
-		workflow.setId(objectId);
-		workflow.reset();
-
-		workflowDao.save(workflow);
 
 		return workflow;
 	}
@@ -79,31 +72,52 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
+	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
+	// review: is the parameter 'id' necessary?
 	public Workflow updateWorkflow(@Valid @PathVariable String id, @Valid @RequestBody Workflow workflow) {
 		if (!ObjectId.isValid(id)) {
 			throw new InvalidObjectIdException(id);
 		}
 
 		ObjectId objectId = new ObjectId(id);
+
+		// todo: check consistency of given id and workflow id.
 		Workflow oldWorkflow = workflowDao.get(objectId);
 
 		if (oldWorkflow == null) {
 			throw new EntityNotFoundException(objectId);
 		}
 
-		oldWorkflow.setName(workflow.getName());
-		oldWorkflow.setTitle(workflow.getTitle());
-		oldWorkflow.setCreatedByUserId(workflow.getCreatedByUserId());
-		oldWorkflow.setModifiedByUserId(workflow.getModifiedByUserId());
+		if (workflow.getName() != null) {
+			oldWorkflow.setName(workflow.getName());
+		}
 
-		workflowDao.save(oldWorkflow);
+		if (workflow.getTitle() != null) {
+			oldWorkflow.setTitle(workflow.getTitle());
+		}
 
-		return workflow;
+		if (workflow.getCreatedByUserId() != null) {
+			oldWorkflow.setCreatedByUserId(workflow.getCreatedByUserId());
+		}
+
+		if (workflow.getModifiedByUserId() != null) {
+			oldWorkflow.setModifiedByUserId(workflow.getModifiedByUserId());
+		}
+
+		try {
+			workflowDao.save(oldWorkflow);
+		} catch (ValidationException e) {
+//			e.reasons.toString()
+//			throw new EntityInvalidException(objectId, );
+		}
+
+		return oldWorkflow;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
+	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
 	public Workflow deleteWorkflow(@PathVariable String id) {
 		if (!ObjectId.isValid(id)) {
 			throw new InvalidObjectIdException(id);
