@@ -30,6 +30,7 @@ public class SimpleGenerator extends BasicGenerator {
 			for (int i = 1; i <= 10; i++) {
 				Tenant t = new Tenant();
 				t.setName(getRandomProjectName());
+				t.fillWithDefaultValues();
 				tenants.add(t);
 			}
 
@@ -46,6 +47,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			for (int i = 1; i <= 10; i++) {
 				User u = new User(new ObjectId(), getRandomHumanName());
+				u.fillWithDefaultValues();
 				users.add(u);
 			}
 
@@ -66,6 +68,7 @@ public class SimpleGenerator extends BasicGenerator {
 				w.setTitle("Workflow " + i);
 				w.setName(getRandomProjectName());
 				w.setDescription(RandomStringUtils.randomAlphanumeric(10));
+				w.fillWithDefaultValues();
 				workflows.add(w);
 			}
 
@@ -85,6 +88,7 @@ public class SimpleGenerator extends BasicGenerator {
 				p.setTitle("Project " + i);
 				p.setName(getRandomProjectName());
 				p.setDescription(RandomStringUtils.randomAlphanumeric(10));
+				p.fillWithDefaultValues();
 				projects.add(p);
 			}
 
@@ -104,6 +108,7 @@ public class SimpleGenerator extends BasicGenerator {
 				p.setTitle("Node " + i);
 				p.setName(getRandomProjectName());
 				p.setDescription(RandomStringUtils.randomAlphanumeric(10));
+				p.fillWithDefaultValues();
 				nodes.add(p);
 			}
 

@@ -1,6 +1,7 @@
 package marxo.dao;
 
-import marxo.bean.BasicEntity;
+import marxo.bean.Entity;
+import marxo.exception.ValidationException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,7 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
-public abstract class BasicDao<E extends BasicEntity> {
+public abstract class BasicDao<E extends Entity> {
 
 	@Qualifier("mongoTemplate")
 	@Autowired
@@ -36,14 +37,16 @@ public abstract class BasicDao<E extends BasicEntity> {
 		mongoTemplate.count(new BasicQuery(""), eClass);
 	}
 
-	public void insert(E entity) {
+	// Create
+	public void insert(E entity) throws ValidationException {
 		mongoTemplate.insert(entity);
 	}
 
-	public void insert(List<E> entities) {
+	public void insert(List<E> entities) throws ValidationException {
 		mongoTemplate.insert(entities, eClass);
 	}
 
+	// Read
 	public List<E> findAll() {
 		return mongoTemplate.findAll(eClass);
 	}
@@ -56,10 +59,12 @@ public abstract class BasicDao<E extends BasicEntity> {
 		return mongoTemplate.find(query, eClass);
 	}
 
-	public void save(E entity) {
+	// Update
+	public void save(E entity) throws ValidationException {
 		mongoTemplate.save(entity);
 	}
 
+	// Delete
 	public E delete(E entity) {
 		return deleteById(entity.getId());
 	}

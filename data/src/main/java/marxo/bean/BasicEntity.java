@@ -15,6 +15,11 @@ public abstract class BasicEntity extends Entity {
 	public BasicEntity() {
 	}
 
+	protected BasicEntity(String name, String title) {
+		this.name = name;
+		this.title = title;
+	}
+
 	protected BasicEntity(String name, String title, ObjectId createdByUserId, ObjectId modifiedByUserId) {
 		this.name = name;
 		this.title = title;
@@ -76,9 +81,15 @@ public abstract class BasicEntity extends Entity {
 		this.modifiedByUserId = new ObjectId(modifiedByUserId);
 	}
 
-	public void reset() {
-		super.reset();
-		createdByUserId = null;
-		modifiedByUserId = null;
+	public void fillWithDefaultValues() {
+		super.fillWithDefaultValues();
+
+		if (name == null) {
+			name = "";
+		}
+
+		if (title == null) {
+			title = "";
+		}
 	}
 }

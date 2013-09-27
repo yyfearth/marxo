@@ -21,11 +21,6 @@ public class Workflow extends BasicEntity {
 	List<ObjectId> linkIdList = null;
 
 	public Workflow() {
-		type = WorkflowType.NONE;
-		status = WorkflowStatus.NONE;
-
-		nodeIdList = new ArrayList<>();
-		linkIdList = new ArrayList<>();
 	}
 
 	public String getDescription() {
@@ -106,12 +101,27 @@ public class Workflow extends BasicEntity {
 		this.tenantId = (tenantId == null) ? null : new ObjectId(tenantId);
 	}
 
-	public void reset() {
-		super.reset();
-		type = WorkflowType.NONE;
-		status = WorkflowStatus.NONE;
+	public void fillWithDefaultValues() {
+		super.fillWithDefaultValues();
 
-		nodeIdList = new ArrayList<>();
-		linkIdList = new ArrayList<>();
+		if (description == null) {
+			description = "";
+		}
+
+		if (type == null) {
+			type = WorkflowType.NONE;
+		}
+
+		if (status == null) {
+			status = WorkflowStatus.NONE;
+		}
+
+		if (nodeIdList == null) {
+			nodeIdList = new ArrayList<>();
+		}
+
+		if (linkIdList == null) {
+			linkIdList = new ArrayList<>();
+		}
 	}
 }
