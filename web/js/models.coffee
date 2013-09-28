@@ -200,6 +200,7 @@ define 'models', ['lib/common'], ->
       @
 
   class Node extends Entity
+    _name: 'node'
     urlRoot: ROOT + '/nodes'
     actions: -> @_actions ?= new Actions @get 'actions'
 
@@ -209,6 +210,7 @@ define 'models', ['lib/common'], ->
   # url: -> @workflow.url() + '/nodes'
 
   class Link extends Entity
+    _name: 'link'
     urlRoot: ROOT + '/links'
 
   class Links extends Collection
@@ -245,7 +247,7 @@ define 'models', ['lib/common'], ->
           cloned_node.set id: node_id, template_id: node.id, project_id: id
           # TODO: for test only, should give action id
           if node.has 'actions'
-            cloned_node.set 'actions', node.get('actions').map (a, i) -> a.set 'id', i
+            cloned_node.set 'actions', node.get('actions').map (a, i) -> a.id = i
           nodes.push cloned_node
         workflow.links.forEach (link) ->
           cloned_link = link.clone()
@@ -253,12 +255,14 @@ define 'models', ['lib/common'], ->
           link_id = link.id + 1000000
           cloned_link.set id: link_id, template_id: link.id, project_id: id
           links.push cloned_link
-        @set workflow_id: workflow.id
+        @set
+          workflow_id: workflow.id
           template_id: null
           node_ids: nodes.map((n) -> n.id)
           link_ids: links.map((l) -> l.id)
         @nodes = new Nodes nodes
         @links = new Links links
+        @nodes._loaded = @links._loaded = true
         callback? @, workflow
       @
 
