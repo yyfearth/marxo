@@ -6,21 +6,24 @@
     .sidebar.well
       ul.sidebar-list.nav.nav-list
         li.nav-header Project
-        li
-          a(href='#project:new') Project Info
-        li.nav-header Nodes
-        li.nav-header Links
+        li.sidebar-item.project-item
+          a Project Info
+        li.nav-header.node-header Nodes
+        li.nav-header.link-header Links
       ul.sidebar-bottom.nav.nav-list
         li.divider
         li.nav-header Tips
         li.tips ...
     .content
-      form.form-horizontal
+      form.form-project.form-horizontal
         .control-group
           label.control-label(for='workflow_id') Workflow
           .controls
             select#workflow_id(name='workflow_id', required)
               option(value='') (Please Select)
+            button.btn.btn-primary.btn-select.hide(type='button') Select
+            button.btn.btn-revert.hide(type='button') Revert
+        #wf_preview.well.hide
         .control-group
           label.control-label(for='project_name') Name
           .controls
@@ -34,6 +37,6 @@
           .controls
             textarea#project_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
   .modal-footer
-    a.btn.btn-info.pull-left.btn-view(disabled) View
+    a.btn.btn-info.pull-left.btn-view.hide View
     button.btn(data-dismiss='modal', aria-hidden='true') Close
-    button.btn.btn-primary.btn-save Save
+    button.btn.btn-primary.btn-save(disabled) Save

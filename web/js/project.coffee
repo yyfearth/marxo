@@ -45,8 +45,39 @@ Projects
   class ProjectEditorView extends FormDialogView
     goBackOnHidden: 'project/mgr'
     collection: Workflows.workflows
+    events:
+      'change select[name=workflow_id]': (e) ->
+        wf = e.currentTarget.value
+        cur = @model.get 'workflow_id'
+        @$wfbtns.hide()
+        @sidebar.classList.remove 'active'
+        @btnSave.disabled = true
+        if wf and cur
+          if wf is cur
+            @sidebar.classList.add 'active'
+            @btnSave.disabled = false
+          else
+            @$wfbtns.show()
+        else if cur and not wf
+          @$wfbtns.not(@$btnSelect).show()
+        else if wf and not cur
+          @$btnSelect.show()
+        return
+      'click .btn-select': '_selectWorkflow'
+      'click .btn-revert': ->
+        @form.workflow_id.value = @model.get('workflow_id') or ''
+        $(@form.workflow_id).change()
+        return
+      'click li.sidebar-item > a': (e) ->
+        e.preventDefault()
+        model = $(e.currentTarget).data 'model'
+        @_showForm model, e.currentTarget
+        false
     initialize: (options) ->
       super options
+      @sidebar = find '.sidebar', @el
+      @$btnSelect = $ find '.btn-select', @form
+      @$wfbtns = @$btnSelect.add find '.btn-revert', @form
       @
     create: (wf) ->
       wf = wf?.id or wf
@@ -62,17 +93,72 @@ Projects
       select = @form.workflow_id
       select.disabled = true
       @collection.load (ignored, ret) =>
-        select.disabled = false
         @_renderSelect() if 'loaded' is ret
         @fill data
+        select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
+        @_selectWorkflow()
+        # auto foucs
+        setTimeout =>
+          if select.value
+            @form.name.focus()
+          else
+            select.focus()
+        , 550
       @
+    _showForm: (model) ->
+      unless model
+        console.log 'show project info'
+      else if model._name is 'node'
+        console.log 'show node', model.id
+      else if model._name is 'link'
+        console.log 'show link', model.id
+      return
+    _selectWorkflow: ->
+      wf = @form.workflow_id.value
+      return unless wf
+      wf = @collection.get wf unless wf instanceof Workflow
+      project = @model
+      if project.nodes?.length or project.has 'node_ids'
+        # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
+        # clear nodes and links
+        project.set node_ids: null, nodes: null, link_ids: null, links: null
+        project._warp()
+      project.copy wf, =>
+        console.log 'selected wf for project', wf.name
+        @sidebar.classList.add 'active'
+        @$wfbtns.hide()
+        @btnSave.disabled = false
+        # update sidebar
+        $sidebar = $ @sidebar
+        $sidebar.find('li.node-item, li.link-item').remove()
+        nodes = document.createDocumentFragment()
+        _renderSidebarItem = @_renderSidebarItem.bind @
+        project.nodes.forEach (node) ->
+          nodes.appendChild _renderSidebarItem node
+        links = document.createDocumentFragment()
+        project.links.forEach (link) ->
+          links.appendChild _renderSidebarItem link
+        $sidebar.find('.node-header').after nodes
+        $sidebar.find('.link-header').after links
+      return
+    _renderSidebarItem: (model) ->
+      el = document.createElement 'li'
+      el.className = "sidebar-item #{model._name}-item"
+      a = document.createElement 'a'
+      name = model.get('name') or model.get('desc') or '(No Name)'
+      a.textContent = name
+      a.dataset.id = model.id
+      $a = $(a).data 'model', model
+      $a.tooltip title: name, placement: 'right', container: @el if name.length > 15
+      el.appendChild a
+      el
     render: ->
-      select = @form.workflow_id
-      select.disabled = true
-      @collection.load =>
-        select.disabled = false
-        @_renderSelect()
-      @
+      @collection.load => @_renderSelect()
+      super
+    reset: ->
+      @$wfbtns.hide()
+      $(@sidebar).find('li.node-item, li.link-item').remove()
+      super
     _renderSelect: ->
       select = @form.workflow_id
       wfs = @collection.fullCollection
@@ -98,10 +184,10 @@ Projects
         select.appendChild owned if owned.childElementCount
         select.appendChild shared if shared.childElementCount
       return
-  #save: ->
-  #  @callback 'save'
-  #  @hide true
-  #  @
+    save: ->
+      @callback 'save'
+      @hide true
+      @
 
   # Viewer
 
