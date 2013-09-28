@@ -13,20 +13,24 @@ FormDialogView
 ManagerView
 WorkflowFilterView
 }, {
+Workflow
 Workflows
+Project
 Projects
 }) ->
+
   class ProjectFrameView extends FrameView
     initialize: (options) ->
       super options
       @editor = new ProjectEditorView el: '#project_editor', parent: @
       @viewer = new ProjectViewerView el: '#project_viewer', parent: @
       @manager = new ProjectManagemerView el: '#project_manager', parent: @
+      @listenTo @manager, 'create', (id) => @editor.create id
       @
     open: (name, sub) ->
       switch name
         when 'new'
-          @editor.popup {}
+          @editor.create sub
         when 'mgr'
           @switchTo @manager
         else
@@ -34,6 +38,105 @@ Projects
           @switchTo @viewer
           @viewer.load name
           @viewer.popup sub if sub
+      @
+
+  # Editor
+
+  class ProjectEditorView extends FormDialogView
+    goBackOnHidden: 'project/mgr'
+    collection: Workflows.workflows
+    initialize: (options) ->
+      super options
+      @
+    create: (wf) ->
+      wf = wf?.id or wf
+      wf = null unless typeof wf is 'string'
+      @popup new Project(workflow_id: wf), (action, data) =>
+        console.log 'wf created', action, data
+      @
+    popup: (model, callback) ->
+      data = model.toJSON()
+      @model = model
+      @render() unless @rendered
+      super data, callback
+      select = @form.workflow_id
+      select.disabled = true
+      @collection.load (ignored, ret) =>
+        select.disabled = false
+        @_renderSelect() if 'loaded' is ret
+        @fill data
+      @
+    render: ->
+      select = @form.workflow_id
+      select.disabled = true
+      @collection.load =>
+        select.disabled = false
+        @_renderSelect()
+      @
+    _renderSelect: ->
+      select = @form.workflow_id
+      wfs = @collection.fullCollection
+      if wfs.length
+        owned = document.createElement 'optgroup'
+        owned.label = 'Owned Workflows'
+        shared = document.createElement 'optgroup'
+        shared.label = 'Shared Workflows'
+        wfs.forEach (wf) ->
+          # TODO: the id should be current logined
+          op = document.createElement 'option'
+          op.value = wf.id
+          op.textContent = wf.get 'name'
+          unless wf.has 'tanent_id'
+            shared.appendChild op
+          else
+            owned.appendChild op
+        select.innerHTML = ''
+        op = document.createElement 'option'
+        op.value = ''
+        op.textContent = '(Please Select)'
+        select.appendChild op
+        select.appendChild owned if owned.childElementCount
+        select.appendChild shared if shared.childElementCount
+      return
+  #save: ->
+  #  @callback 'save'
+  #  @hide true
+  #  @
+
+  # Viewer
+
+  class ProjectViewerView extends InnerFrameView
+    initialize: (options) ->
+      super options
+    load: (name) ->
+      console.log 'load project', name
+      @
+    popup: (opt = {}) ->
+      {link, node, action} = opt
+      throw new Error 'cannot open a action without given a node' if action and not node
+      throw new Error 'node and link cannot be open together' if link and node
+      console.log 'popup node/link viewer', {link, node, action}
+      @
+
+  # Manager
+
+  class WorkflowListView extends NavListView
+    auto: false
+    urlRoot: 'worklfow'
+    headerTitle: 'Workflows'
+    itemClassName: 'workflow-list-item'
+    collection: Workflows.workflows
+    defaultItem: null
+    events:
+      'click': (e) ->
+        el = e.target
+        if el.tagName is 'A' and el.dataset.id
+          e.preventDefault()
+          @trigger 'select', el.dataset.id, $(el).data 'model'
+          false
+    render: ->
+      @_clear()
+      @_render()
       @
 
   class WorkflowCell extends Backgrid.UriCell
@@ -72,25 +175,6 @@ Projects
       # TODO: show buttons depend on status
       super
 
-  class WorkflowListView extends NavListView
-    auto: false
-    urlRoot: 'worklfow'
-    headerTitle: 'Workflows'
-    itemClassName: 'workflow-list-item'
-    collection: Workflows.workflows
-    defaultItem: null
-    events:
-      'click': (e) ->
-        el = e.target
-        if el.tagName is 'A' and el.dataset.id
-          e.preventDefault()
-          @trigger 'select', el.dataset.id, $(el).data 'model'
-          false
-    render: ->
-      @_clear()
-      @_render()
-      @
-
   class ProjectManagemerView extends ManagerView
     columns: [
       'checkbox'
@@ -119,35 +203,11 @@ Projects
       @list = new WorkflowListView el: find 'ul.workflow-list', @el
       @listenTo @list, 'select', (id, model) ->
         console.log 'create project from workflow', id, model
-        # TODO: create project from workflow
+        @trigger 'create', id, model
+      # TODO: create project from workflow
       @
     render: ->
       @list.fetch()
       super
-
-  class ProjectEditorView extends FormDialogView
-    goBackOnHidden: 'project/mgr'
-    #    initialize: (options) ->
-    #      super options
-    popup: (data, callback) ->
-      super data, callback
-      #@fill data
-      @
-    #save: ->
-    #  @callback 'save'
-    #  @hide true
-    #  @
-
-  class ProjectViewerView extends InnerFrameView
-    #    initialize: (options) ->
-    #      super options
-    load: (name) ->
-      console.log 'load project', name
-      @
-    popup: ({link, node, action} = {}) ->
-      throw new Error 'cannot open a action without given a node' if action and not node
-      throw new Error 'node and link cannot be open together' if link and node
-      console.log 'popup node/link viewer', {link, node, action}
-      @
 
   ProjectFrameView

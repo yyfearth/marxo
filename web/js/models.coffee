@@ -185,7 +185,19 @@ define 'models', ['lib/common'], ->
     @workflows: new Workflows
     model: Workflow
     url: Workflow::urlRoot
-  # url: -> @tenant.url() + '/workflows'
+    _delay: 600000 # 10 min
+    load: (callback, delay = @_delay) ->
+      if not @_last_load or (Date.now() - @_last_load) > delay
+        @fetch
+          reset: true
+          success: (collection, response, options) =>
+            @_last_load = Date.now()
+            callback? collection, 'loaded', response, options
+          error: (collection, response, options)->
+            callback? @, 'error', response, options
+      else
+        callback? @, 'skipped'
+      @
 
   class Node extends Entity
     urlRoot: ROOT + '/nodes'
