@@ -37,7 +37,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
   fill = (html, model) ->
     html.replace /{{\s*\w+\s*}}/g, (name) ->
       name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
-      model[name] or model.get?(name) or ''
+      model[name] or model.escape?(name) or ''
 
   # Polyfill
   Date::now ?= -> +new Date

@@ -33,16 +33,17 @@ Projects
     render: ->
       @$el.empty()
       field = @column.get 'name'
+      placement = @column.get 'placement'
       title = @model.get field
       id = @model.id
       tooltip_field = @column.get('tooltip') or @column.get('name') or 'title'
-      tooltip = @model.escape(tooltip_field) or @model.escape('name')
+      tooltip = @model.get(tooltip_field) or @model.get('name') # do not need escape here
       url = unless @urlRoot then null else '#' + @urlRoot + id
       @$el.addClass(field + '-link-cell').append $('<a>',
         tabIndex: -1
         href: url
       ).text title
-      @$el.attr title: tooltip, 'data-container': 'body'
+      @$el.attr title: tooltip, 'data-placement': placement, 'data-container': 'body'
       @delegateEvents()
       @
 
@@ -50,9 +51,10 @@ Projects
     className: 'tooltip-cell'
     render: ->
       super
+      placement = @column.get 'placement'
       key = @column.get('tooltip') or @column.get('name') or 'title'
-      tooltip = @model.escape key
-      @$el.attr title: tooltip, 'data-container': 'body'
+      tooltip = @model.get key # do not need escape here
+      @$el.attr title: tooltip, 'data-placement': placement, 'data-container': 'body'
       @
 
   class Backgrid.ReadonlyDatetimeCell extends Backgrid.StringCell
