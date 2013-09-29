@@ -167,3 +167,28 @@
     }
   }
 }
+
+// Project Frame
+
+#project_editor {
+  .sidebar {
+    left: -200px;
+    opacity: 0;
+    .transition(all);
+    &.active {
+      left: 0;
+      opacity: 1;
+    }
+    li.sidebar-item > a {
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+  }
+  #wf_preview {
+    height: 300px;
+    margin-bottom: 10px;
+  }
+}
