@@ -50,7 +50,8 @@ html, body {
   .transition;
 }
 
-.tpl, .tmp { // template or tmp hide
+.tpl, .tmp {
+  // template or tmp hide
   display: none !important;
 }
 
@@ -71,7 +72,8 @@ a.pointer {
   margin: 0 2px;
   text-align: center;
   overflow: hidden;
-  button& { // add border and padding
+  button& {
+    // add border and padding
     width: 27px;
     height: 27px;
   }
@@ -391,7 +393,8 @@ ul.action-bar {
   width: 90%;
   margin: 0;
 
-  &.fade, &.fade.in { // override
+  &.fade, &.fade.in {
+    // override
     top: 5%;
   }
 
@@ -524,12 +527,16 @@ ul.action-bar {
 #report_viewer {
   .modal-header {
     border-bottom: none;
-  }
-  .modal-header > .nav {
-    margin-bottom: 0;
+    > .nav {
+      margin-bottom: 0;
+      h3 {
+        margin: 0 10px 0 0;
+      }
+    }
   }
   .chart svg {
-    width: 500px;
-    height: 500px;
+    min-width: 400px;
+    min-height: 300px;
+    height: auto;
   }
 }
