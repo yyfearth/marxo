@@ -45,7 +45,14 @@ Notifications
     columns: [
       'checkbox'
       'id'
-      'title'
+    ,
+      name: 'title'
+      label: 'Title'
+      cell: 'tooltip'
+      placement: 'right'
+      tooltip: 'desc'
+      editable: false
+    ,
       'project'
     ,
       name: 'type'
@@ -121,13 +128,53 @@ Notifications
     itemClassName: 'notification-list-item'
     collection: Notifications.notifications
     defaultItem: null
-    events:
-      'click': (e) ->
-        el = e.target
-        if el.tagName is 'A' and el.dataset.id
-          e.preventDefault()
-          @trigger 'select', el.dataset.id, $(el).data 'model'
-          false
+    initialize: (options) ->
+      super options
+      # popover details
+      _renderPopover = @_renderPopover.bind @
+      @$el.popover
+        html: true
+        selector: 'a.pointer'
+        container: 'body'
+        placement: 'right'
+        trigger: 'click'
+        title: -> @innerHTML
+        content: ->
+          $el = $(@).addClass 'active'
+          popover = $el.data 'popover'
+          setTimeout ->
+            # hide after click anywhere after shown
+            $el.removeClass 'active'
+            $(document.body).one 'click', -> popover.hide()
+          , 100
+          _renderPopover $el.data 'model'
+      @
+    _renderPopover: (model) ->
+      console.log 'render popover', model
+      # html details
+      div = document.createElement 'div'
+      div.className = 'notification-content'
+      p = document.createElement 'p'
+      p.innerHTML = model.escape 'desc'
+      div.appendChild p
+      if 'ACTIVE' is model.get 'status'
+        if model.has 'expires_at'
+          small = document.createElement 'small'
+          expires_at = new Date(model.get 'expires_at').toLocaleString()
+          small.innerHTML = "Expected expires at #{expires_at}"
+          div.appendChild small
+        if model.has 'target_url'
+          type = model.get 'type'
+          btn = document.createElement 'a'
+          btn.href = model.get 'target_url'
+          btn.className = 'btn btn-small'
+          if type is 'ROUTINE'
+            btn.innerHTML = 'View &raquo;'
+          else
+            btn.className += ' btn-primary icon-right-open'
+            btn.innerHTML = 'Process'
+          div.appendChild btn
+      div
     _render: (models = @collection) ->
       models = models.fullCollection if models.fullCollection
       #console.log 'render models', models
@@ -153,6 +200,33 @@ Notifications
             20000000000 + t
       ).forEach (model) => fragments.appendChild @_renderItem model
       @el.appendChild fragments
+    _statusCls:
+      'ROUTINE': 'text-info'
+      'REQUISITE': 'text-warning'
+      'EMERGENT': 'text-error'
+    _renderItem: (model = @defaultItem) ->
+      #console.log 'render item', model
+      li = document.createElement 'li'
+      li.className = @itemClassName if @itemClassName
+      a = document.createElement 'a'
+      if model.id
+        a.className = "pointer #{cls}"
+        a.dataset.id = model.id
+        $.data a, 'model', model
+        cls = @_statusCls[model.get('type')] or ''
+        span = document.createElement 'span'
+        span.textContent = model.get 'title'
+        span.className = cls
+        # TODO: only new notification add icon
+        i = document.createElement 'i'
+        i.className = "icon-notify #{cls}"
+        a.appendChild i
+        a.appendChild span
+      else if model.href
+        a.href = model.href
+        a.textContent = model.title
+      li.appendChild a
+      li
     render: ->
       @_clear()
       @_render()
