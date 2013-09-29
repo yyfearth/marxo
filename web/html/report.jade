@@ -58,12 +58,14 @@
       li
         a(href='') Submitted Files
   .modal-body
-    .span12
-      div
-        h1 Pie Chart
-        canvas#chart1(width='800', height='400')
-      div
-        h1 Line Chart
-        canvas#chart2(width='800', height='400')
+    div.chart#pie
+      h4 Pie Chart
+      svg
+    div.chart#bar
+      h4 Bar Chart
+      svg
+    div.chart#stacked
+      h4 Stacked Area Chart
+      svg
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close

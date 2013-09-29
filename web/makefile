@@ -102,7 +102,7 @@ $(dist)/js/content.js: js/content.coffee
 $(dist)/js/report.js: js/report.coffee
 	$(print)
 	@mkdir -p $(@D)
-	coffee -pc $< | cat js/lib/chart.js - | uglifyjs - -mco $@ --screw-ie8
+	coffee -pc $< | uglifyjs - -mc --screw-ie8 | cat js/lib/d3v3.js js/lib/nvd3.js - > $@
 
 $(dist)/js/crypto.js: js/crypto.coffee
 	$(print)

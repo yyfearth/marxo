@@ -1,6 +1,6 @@
 'use strict'
 
-define 'report', ['base', 'models', 'manager', 'lib/chart'],
+define 'report', ['base', 'models', 'manager', 'lib/d3v3', 'lib/nvd3'],
 ({
 find
 #findAll
@@ -16,7 +16,7 @@ Report
 ManagerView
 # NavFilterView
 ProjectFilterView
-}) ->
+}, d3, nv) ->
 
   class ReportFrameView extends FrameView
     initialize: (options) ->
@@ -61,17 +61,17 @@ ProjectFilterView
     initialize: (options) ->
       super options
       collection = @collection.fullCollection
-#      @mediaFilter = new NavFilterView
-#        el: '#media-filter'
-#        field: 'media'
-#        collection: collection
+      #      @mediaFilter = new NavFilterView
+      #        el: '#media-filter'
+      #        field: 'media'
+      #        collection: collection
       console.log 'prj', find('ul.project-list', @el)
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
         collection: collection
       _remove = @remove.bind @
       @on
-        #edit: @edit.bind @
+      #edit: @edit.bind @
         remove: _remove
         remove_selected: _remove
       @
@@ -103,69 +103,101 @@ ProjectFilterView
   class ReportView extends ModalDialogView
     el: '#report_viewer'
     goBackOnHidden: 'report'
-    initialize: (options) ->
-      super options
+    popup: (model, callback) ->
+      @render() unless @rendered
+      super model, callback
+    render: ->
+      setTimeout => # after shown (test only)
 
-      data = [
-        value: 30,
-        color: '#D41400'
-      ,
-        value: 50,
-        color: '#00C0F7'
-      ,
-        value: 100,
-        color: '#3B5998'
-      ]
-
-      options =
-        segmentShowStroke: true
-        segmentStrokeColor: '#fff'
-        segmentStrokeWidth: 2
-        animation: true
-        animationSteps: 100
-        animationEasing: 'easeOutElastic'
-        animateRotate: true
-        animateScale: true
-
-      context = document.getElementById('chart1').getContext('2d')
-      chart = new Chart(context).Pie(data, options)
-
-      data =
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July']
-        datasets: [
-          fillColor: 'rgba(220,220,220,0.5)'
-          strokeColor: '#D41400'
-          pointColor: '#D41400'
-          pointStrokeColor: '#fff'
-          data: [19, 83, 48, 45, 32, 72, 30]
+        vote = [
+          name: 'Submission 1'
+          value: 30
         ,
-          fillColor: 'rgba(220,220,220,0.5)'
-          strokeColor: '#00C0F7'
-          pointColor: '#00C0F7'
-          pointStrokeColor: '#fff'
-          data: [64, 73, 28, 64, 15, 12, 50]
+          name: 'Submission 2'
+          value: 50
         ,
-          fillColor: 'rgba(220,220,220,0.5)'
-          strokeColor: '#3B5998'
-          pointColor: '#3B5998'
-          pointStrokeColor: '#fff'
-          data: [80, 83, 51, 88, 102, 99, 100]
+          name: 'Submission 3'
+          value: 100
         ]
 
-      options =
-        scaleOverlay: off
-        scaleShowLabels: on
-      #  scaleOverride: on
-        scalesSteps: 10
-        onAnimationComplete: ->
-          console.log 'hi'
+        @pieChart '#pie', vote, 'percent'
 
-      element = document.getElementById('chart2')
+        @barChart '#bar', vote
 
-      if element
-        context = element.getContext('2d')
-        chart = new Chart(context).Line(data, options)
-
+      , 550
       @
+    pieChart: (el, data, labelType) ->
+      nv.addGraph ->
+        width = 500
+        height = 500
+        chart = nv.models.pieChart()
+        .x((d) -> d.name).y((d) -> d.value)
+        .color(d3.scale.category10().range())
+        .width(width).height(height).labelType(labelType)
+        d3.select("#{el} svg").datum(data).transition().duration(1200)
+        .attr("width", width).attr("height", height).call chart
+        nv.utils.windowResize chart.update
+        chart
+      @
+    barChart: (el, data) ->
+      nv.addGraph ->
+        chart = nv.models.discreteBarChart()
+        .x((d) -> d.name).y((d) -> d.value)
+        .staggerLabels(true).showValues(true).transitionDuration(250)
+        d3.select("#{el} svg").datum([
+          values: data
+        ]).call chart
+        nv.utils.windowResize chart.update
+        chart
+      @
+
+  #
+  #      options =
+  #        segmentShowStroke: true
+  #        segmentStrokeColor: '#fff'
+  #        segmentStrokeWidth: 2
+  #        animation: true
+  #        animationSteps: 100
+  #        animationEasing: 'easeOutElastic'
+  #        animateRotate: true
+  #        animateScale: true
+  #
+  #      data =
+  #        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July']
+  #        datasets: [
+  #          fillColor: 'rgba(220,220,220,0.5)'
+  #          strokeColor: '#D41400'
+  #          pointColor: '#D41400'
+  #          pointStrokeColor: '#fff'
+  #          data: [19, 83, 48, 45, 32, 72, 30]
+  #        ,
+  #          fillColor: 'rgba(220,220,220,0.5)'
+  #          strokeColor: '#00C0F7'
+  #          pointColor: '#00C0F7'
+  #          pointStrokeColor: '#fff'
+  #          data: [64, 73, 28, 64, 15, 12, 50]
+  #        ,
+  #          fillColor: 'rgba(220,220,220,0.5)'
+  #          strokeColor: '#3B5998'
+  #          pointColor: '#3B5998'
+  #          pointStrokeColor: '#fff'
+  #          data: [80, 83, 51, 88, 102, 99, 100]
+  #        ]
+  #
+  #      options =
+  #        scaleOverlay: off
+  #        scaleShowLabels: on
+  #      #  scaleOverride: on
+  #        scalesSteps: 10
+  #        onAnimationComplete: ->
+  #          console.log 'hi'
+  #
+  #      element = document.getElementById('chart2')
+  #
+  #      if element
+  #        context = element.getContext('2d')
+  #        chart = new Chart(context).Line(data, options)
+
+  #      @
 
   ReportFrameView
