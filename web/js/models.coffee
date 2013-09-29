@@ -311,6 +311,12 @@ define 'models', ['lib/common'], ->
 
   class Notification extends Entity
     urlRoot: ROOT + '/notifications'
+    get: (attribute) ->
+      value = super attribute
+      if attribute is 'desc' and @has 'date'
+        value.replace '{{date}}', new Date(@get 'date').toLocaleString()
+      else
+        value
 
   class Notifications extends ManagerCollection
     @notifications: new Notifications
