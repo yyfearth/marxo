@@ -3,6 +3,7 @@
 @import 'backgrid';
 @import 'font-icon';
 @import 'jquery-ui';
+@import 'nvd3';
 @import 'workflow';
 @import 'content';
 @import 'event';
@@ -49,7 +50,8 @@ html, body {
   .transition;
 }
 
-.tpl, .tmp { // template or tmp hide
+.tpl, .tmp {
+  // template or tmp hide
   display: none !important;
 }
 
@@ -70,7 +72,8 @@ a.pointer {
   margin: 0 2px;
   text-align: center;
   overflow: hidden;
-  button& { // add border and padding
+  button& {
+    // add border and padding
     width: 27px;
     height: 27px;
   }
@@ -310,7 +313,7 @@ ul.action-bar {
       position: relative;
       height: 100%;
       padding: 0;
-      margin: 0;
+      margin: -1px;
     }
 
     .sidebar-list {
@@ -390,7 +393,8 @@ ul.action-bar {
   width: 90%;
   margin: 0;
 
-  &.fade, &.fade.in { // override
+  &.fade, &.fade.in {
+    // override
     top: 5%;
   }
 
@@ -410,9 +414,6 @@ ul.action-bar {
     right: 0;
   }
 
-  .modal-body {
-    overflow: hidden;
-  }
   .sidebar {
     float: left;
     width: 175px;
@@ -520,5 +521,22 @@ ul.action-bar {
     margin: 0;
     margin-right: 20px;
     padding: .4em .5em;
+  }
+}
+
+#report_viewer {
+  .modal-header {
+    border-bottom: none;
+    > .nav {
+      margin-bottom: 0;
+      h3 {
+        margin: 0 10px 0 0;
+      }
+    }
+  }
+  .chart svg {
+    min-width: 400px;
+    min-height: 300px;
+    height: auto;
   }
 }
