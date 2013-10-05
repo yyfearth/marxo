@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Workflow extends BasicEntity {
-	@JsonProperty("desc")
-	String description;
 	WorkflowType type = null;
 	WorkflowStatus status = null;
 	@JsonIgnore
@@ -45,14 +43,6 @@ public class Workflow extends BasicEntity {
 
 	public void setNodeIdList(List<ObjectId> nodeIdList) {
 		this.nodeIdList = nodeIdList;
-	}
-
-	public ObjectId getTenantId() {
-		return tenantId;
-	}
-
-	public void setTenantId(ObjectId tenantId) {
-		this.tenantId = tenantId;
 	}
 
 	public WorkflowType getType() {
@@ -91,12 +81,12 @@ public class Workflow extends BasicEntity {
 		linkIdList = (links == null) ? new ArrayList<ObjectId>() : TypeTool.toIdList(links);
 	}
 
-	@JsonProperty("tenantId")
+	@JsonProperty("tenant_id")
 	public String getJsonTenantId() {
 		return (tenantId == null) ? null : tenantId.toString();
 	}
 
-	@JsonProperty("tenantId")
+	@JsonProperty("tenant_id")
 	public void setJsonTenantId(String tenantId) {
 		this.tenantId = (tenantId == null) ? null : new ObjectId(tenantId);
 	}

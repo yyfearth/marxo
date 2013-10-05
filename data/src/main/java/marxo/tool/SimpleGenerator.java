@@ -29,7 +29,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			for (int i = 1; i <= 10; i++) {
 				Tenant t = new Tenant();
-				t.setName(getRandomProjectName());
+				t.name = getRandomProjectName();
 				t.fillWithDefaultValues();
 				tenants.add(t);
 			}

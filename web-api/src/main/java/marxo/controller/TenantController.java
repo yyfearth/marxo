@@ -1,7 +1,7 @@
 package marxo.controller;
 
-import marxo.bean.Workflow;
-import marxo.dao.WorkflowDao;
+import marxo.bean.Tenant;
+import marxo.dao.TenantDao;
 import marxo.exception.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,27 +13,27 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Controller
-@RequestMapping("workflow{:s?}")
-public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
+@RequestMapping("tenant{:s?}")
+public class TenantController extends BasicController<Tenant, TenantDao> {
 	@Autowired
-	WorkflowDao workflowDao;
+	TenantDao tenantDao;
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public List<Workflow> getAll() {
-		return workflowDao.findAll();
+	public List<Tenant> getAll() {
+		return tenantDao.findAll();
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
-	public Workflow create(@Valid @RequestBody Workflow entity) throws Exception {
-		if (workflowDao.exists(entity.getId())) {
+	public Tenant create(@Valid @RequestBody Tenant entity) throws Exception {
+		if (tenantDao.exists(entity.getId())) {
 			throw new EntityExistsException(entity.getId());
 		}
 
 		try {
-			workflowDao.save(entity);
+			tenantDao.save(entity);
 		} catch (ValidationException ex) {
 			// todo: add error message
 			throw new EntityInvalidException(entity.getId(), "not implemented");
@@ -45,19 +45,19 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public Workflow read(@PathVariable String id) {
+	public Tenant read(@PathVariable String id) {
 		if (!ObjectId.isValid(id)) {
 			throw new InvalidObjectIdException(id);
 		}
 
 		ObjectId objectId = new ObjectId(id);
-		Workflow workflow = workflowDao.get(objectId);
+		Tenant tenant = tenantDao.get(objectId);
 
-		if (workflow == null) {
+		if (tenant == null) {
 			throw new EntityNotFoundException(objectId);
 		}
 
-		return workflow;
+		return tenant;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
@@ -65,7 +65,7 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 	@ResponseStatus(HttpStatus.OK)
 	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
 	// review: is the parameter 'id' necessary?
-	public Workflow update(@Valid @PathVariable String id, @Valid @RequestBody Workflow workflow) {
+	public Tenant update(@Valid @PathVariable String id, @Valid @RequestBody Tenant Tenant) {
 		if (!ObjectId.isValid(id)) {
 			throw new InvalidObjectIdException(id);
 		}
@@ -73,54 +73,38 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 		ObjectId objectId = new ObjectId(id);
 
 		// todo: check consistency of given id and entity id.
-		Workflow oldWorkflow = workflowDao.get(objectId);
+		Tenant oldTenant = tenantDao.get(objectId);
 
-		if (oldWorkflow == null) {
+		if (oldTenant == null) {
 			throw new EntityNotFoundException(objectId);
 		}
 
-		if (workflow.getName() != null) {
-			oldWorkflow.setName(workflow.getName());
-		}
-
-		if (workflow.getTitle() != null) {
-			oldWorkflow.setTitle(workflow.getTitle());
-		}
-
-		if (workflow.getCreatedByUserId() != null) {
-			oldWorkflow.setCreatedByUserId(workflow.getCreatedByUserId());
-		}
-
-		if (workflow.getModifiedByUserId() != null) {
-			oldWorkflow.setModifiedByUserId(workflow.getModifiedByUserId());
-		}
-
 		try {
-			workflowDao.save(oldWorkflow);
+			tenantDao.save(oldTenant);
 		} catch (ValidationException e) {
 //			e.reasons.toString()
 //			throw new EntityInvalidException(objectId, );
 		}
 
-		return oldWorkflow;
+		return oldTenant;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	public Workflow delete(@PathVariable String id) {
+	public Tenant delete(@PathVariable String id) {
 		if (!ObjectId.isValid(id)) {
 			throw new InvalidObjectIdException(id);
 		}
 
 		ObjectId objectId = new ObjectId(id);
-		Workflow workflow = workflowDao.deleteById(objectId);
+		Tenant tenant = tenantDao.deleteById(objectId);
 
-		if (workflow == null) {
+		if (tenant == null) {
 			throw new EntityNotFoundException(objectId);
 		}
 
-		return workflow;
+		return tenant;
 	}
 }
