@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("/")
@@ -59,11 +58,18 @@ public class GeneralController {
 		String ip;
 		String host;
 		int port;
+		Map<String, String> headers;
 
 		public Message(HttpServletRequest request) {
 			ip = request.getRemoteAddr();
 			host = request.getRemoteHost();
 			port = request.getRemotePort();
+
+			headers = new HashMap<>();
+			List<String> headerNames = Collections.list(request.getHeaderNames());
+			for (String headerName : headerNames) {
+				headers.put(headerName, request.getHeader(headerName));
+			}
 		}
 	}
 }
