@@ -7,6 +7,8 @@ import org.bson.types.ObjectId;
 public abstract class BasicEntity extends Entity {
 	String name;
 	String title;
+    @JsonProperty("desc")
+    String description;
 	@JsonIgnore
 	ObjectId createdByUserId;
 	@JsonIgnore
@@ -61,22 +63,22 @@ public abstract class BasicEntity extends Entity {
 
 	////////// For JSON output
 
-	@JsonProperty("createdBy")
+	@JsonProperty("created_by")
 	public String getJsonCreatedByUserId() {
 		return (createdByUserId == null) ? null : createdByUserId.toString();
 	}
 
-	@JsonProperty("createdBy")
+	@JsonProperty("created_by")
 	public void setJsonCreatedByUserId(String createdByUserId) {
 		this.createdByUserId = new ObjectId(createdByUserId);
 	}
 
-	@JsonProperty("modifiedBy")
+	@JsonProperty("modified_by")
 	public String getJsonModifiedByUserId() {
 		return (modifiedByUserId == null) ? null : modifiedByUserId.toString();
 	}
 
-	@JsonProperty("modifiedBy")
+	@JsonProperty("modified_by")
 	public void setJsonModifiedByUserId(String modifiedByUserId) {
 		this.modifiedByUserId = new ObjectId(modifiedByUserId);
 	}
