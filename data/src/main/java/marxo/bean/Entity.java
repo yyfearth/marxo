@@ -21,7 +21,7 @@ public abstract class Entity {
 	@JsonProperty("created_at")
 	public Date createdDate = new Date();
 	@JsonProperty("updated_at")
-    public Date modifiedDate = new Date();
+	public Date modifiedDate = new Date();
 
 	public Entity() {
 	}

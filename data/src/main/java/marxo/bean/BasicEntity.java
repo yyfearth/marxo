@@ -7,8 +7,8 @@ import org.bson.types.ObjectId;
 public abstract class BasicEntity extends Entity {
 	String name;
 	String title;
-    @JsonProperty("desc")
-    String description;
+	@JsonProperty("desc")
+	String description;
 	@JsonIgnore
 	ObjectId createdByUserId;
 	@JsonIgnore
