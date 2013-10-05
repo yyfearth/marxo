@@ -79,22 +79,6 @@ public class NodeController extends BasicController<Node, NodeDao> {
 			throw new EntityNotFoundException(objectId);
 		}
 
-		if (node.getName() != null) {
-			oldWorkflow.setName(node.getName());
-		}
-
-		if (node.getTitle() != null) {
-			oldWorkflow.setTitle(node.getTitle());
-		}
-
-		if (node.getCreatedByUserId() != null) {
-			oldWorkflow.setCreatedByUserId(node.getCreatedByUserId());
-		}
-
-		if (node.getModifiedByUserId() != null) {
-			oldWorkflow.setModifiedByUserId(node.getModifiedByUserId());
-		}
-
 		try {
 			nodeDao.save(oldWorkflow);
 		} catch (ValidationException e) {
