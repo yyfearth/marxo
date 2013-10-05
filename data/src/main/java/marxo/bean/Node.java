@@ -18,6 +18,7 @@ public class Node extends BasicEntity {
 	ObjectId workflowId;
 	@JsonIgnore
 	List<ObjectId> actionIds = new ArrayList<ObjectId>();
+	public Position positoin;
 
 	public Node() {
 
@@ -71,4 +72,8 @@ public class Node extends BasicEntity {
 		this.workflowId = (workflowId == null) ? null : new ObjectId(workflowId);
 	}
 
+	class Position {
+		public double x;
+		public double y;
+	}
 }
