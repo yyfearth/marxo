@@ -17,5 +17,6 @@
     <bean id="workflowDao" class="marxo.dao.WorkflowDao" lazy-init="true"/>
     <bean id="nodeDao" class="marxo.dao.NodeDao" lazy-init="true"/>
     <bean id="linkDao" class="marxo.dao.LinkDao" lazy-init="true"/>
+    <bean id="tenantDao" class="marxo.dao.TenantDao" lazy-init="true"/>
 
 </beans>
