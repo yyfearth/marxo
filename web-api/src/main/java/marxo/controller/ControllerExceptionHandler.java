@@ -63,7 +63,7 @@ public class ControllerExceptionHandler {
 		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit (%s)", ex.getMessage())), HttpStatus.NOT_FOUND);
 	}
 
-    // This application only
+	// This application only
 	@ExceptionHandler({InvalidObjectIdException.class})
 	public ResponseEntity<ErrorJson> handleInvalidObjectIdException(InvalidObjectIdException ex) {
 		logger.debug(ex.getMessage());
@@ -82,9 +82,9 @@ public class ControllerExceptionHandler {
 		return new ResponseEntity<>(new ErrorJson("Cannot connect to the database"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-    @ExceptionHandler({Exception.class})
-    public ResponseEntity<ErrorJson> handleOtherException(Exception ex) {
-        logger.debug(ex.getMessage());
-        return new ResponseEntity<>(new ErrorJson("Something is really wrong: " + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+	@ExceptionHandler({Exception.class})
+	public ResponseEntity<ErrorJson> handleOtherException(Exception ex) {
+		logger.debug(ex.getMessage());
+		return new ResponseEntity<>(new ErrorJson("Something is really wrong: " + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 }
