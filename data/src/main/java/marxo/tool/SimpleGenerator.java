@@ -65,9 +65,9 @@ public class SimpleGenerator extends BasicGenerator {
 			for (int i = 1; i <= 10; i++) {
 				Workflow w = new Workflow();
 				w.setId(new ObjectId());
-				w.setTitle("Workflow " + i);
-				w.setName(getRandomProjectName());
-				w.setDescription(RandomStringUtils.randomAlphanumeric(10));
+				w.title = "Workflow " + i;
+				w.name = getRandomProjectName();
+				w.description = RandomStringUtils.randomAlphabetic(10);
 				w.fillWithDefaultValues();
 				workflows.add(w);
 			}
@@ -85,9 +85,9 @@ public class SimpleGenerator extends BasicGenerator {
 
 			for (int i = 1; i <= 10; i++) {
 				Project p = new Project();
-				p.setTitle("Project " + i);
-				p.setName(getRandomProjectName());
-				p.setDescription(RandomStringUtils.randomAlphanumeric(10));
+				p.title = "Project " + i;
+				p.name = getRandomProjectName();
+				p.description = RandomStringUtils.randomAlphanumeric(10);
 				p.fillWithDefaultValues();
 				projects.add(p);
 			}
@@ -105,8 +105,8 @@ public class SimpleGenerator extends BasicGenerator {
 
 			for (int i = 1; i <= 10; i++) {
 				Node p = new Node(new ObjectId());
-				p.setTitle("Node " + i);
-				p.setName(getRandomProjectName());
+				p.title = "Node " + i;
+				p.name = getRandomProjectName();
 				p.setDescription(RandomStringUtils.randomAlphanumeric(10));
 				p.fillWithDefaultValues();
 				nodes.add(p);

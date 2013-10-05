@@ -79,20 +79,20 @@ public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
 			throw new EntityNotFoundException(objectId);
 		}
 
-		if (workflow.getName() != null) {
-			oldWorkflow.setName(workflow.getName());
+		if (workflow.name != null) {
+			oldWorkflow.name = workflow.name;
 		}
 
-		if (workflow.getTitle() != null) {
-			oldWorkflow.setTitle(workflow.getTitle());
+		if (workflow.title != null) {
+			oldWorkflow.title = workflow.title;
 		}
 
 		if (workflow.getCreatedByUserId() != null) {
-			oldWorkflow.setCreatedByUserId(workflow.getCreatedByUserId());
+			oldWorkflow.createdByUserId = workflow.createdByUserId;
 		}
 
 		if (workflow.getModifiedByUserId() != null) {
-			oldWorkflow.setModifiedByUserId(workflow.getModifiedByUserId());
+			oldWorkflow.modifiedByUserId = workflow.modifiedByUserId;
 		}
 
 		try {
