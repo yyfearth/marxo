@@ -12,58 +12,64 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("/")
 public class GeneralController {
-	final Logger logger = LoggerFactory.getLogger(GeneralController.class);
-	@Autowired
-	ApplicationContext applicationContext;
+    final Logger logger = LoggerFactory.getLogger(GeneralController.class);
+    @Autowired
+    ApplicationContext applicationContext;
 
-	@PostConstruct
-	void report() {
-		logger.debug(GeneralController.class.getSimpleName() + " started");
+    @PostConstruct
+    void report() {
+        logger.debug(GeneralController.class.getSimpleName() + " started");
 
-		Boolean isDebug = applicationContext.getBean("isDebug", Boolean.class);
-		isDebug = (isDebug == null) ? false : isDebug;
+        Boolean isDebug = applicationContext.getBean("isDebug", Boolean.class);
+        isDebug = (isDebug == null) ? false : isDebug;
 
-		if (isDebug) {
-			// Prevent the JVM to prompt OutOfMemory while IntelliJ redeploys the app. (fuck dat JVM)
-			System.gc();
-		}
-	}
+        if (isDebug) {
+            // Prevent the JVM to prompt OutOfMemory while IntelliJ redeploys the app. (fuck dat JVM)
+            System.gc();
+        }
+    }
 
-	@RequestMapping
-	@ResponseBody
-	public Message get(HttpServletRequest request) {
-		return new Message(request);
-	}
+    @RequestMapping
+    @ResponseBody
+    public Message get(HttpServletRequest request) {
+        return new Message(request);
+    }
 
-	@RequestMapping("/test{:s?}")
-	@ResponseBody
-	public List<Double> getWorkflow() {
-		List<Double> list = new ArrayList<>();
+    @RequestMapping("/test{:s?}")
+    @ResponseBody
+    public List<Double> getWorkflow() {
+        List<Double> list = new ArrayList<>();
 
-		for (int i = 0; i < 10; i++) {
-			list.add(Math.random());
-		}
+        for (int i = 0; i < 10; i++) {
+            list.add(Math.random());
+        }
 
-		return list;
-	}
+        return list;
+    }
 
-	@JsonSerialize
-	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-	class Message {
-		String ip;
-		String host;
-		int port;
+    @JsonSerialize
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    class Message {
+        String ip;
+        String host;
+        int port;
+        Map<String, String> headers;
 
-		public Message(HttpServletRequest request) {
-			ip = request.getRemoteAddr();
-			host = request.getRemoteHost();
-			port = request.getRemotePort();
-		}
-	}
+        public Message(HttpServletRequest request) {
+            ip = request.getRemoteAddr();
+            host = request.getRemoteHost();
+            port = request.getRemotePort();
+
+            headers = new HashMap<>();
+            List<String> headerNames = Collections.list(request.getHeaderNames());
+            for (String headerName : headerNames) {
+                headers.put(headerName, request.getHeader(headerName));
+            }
+        }
+    }
 }
