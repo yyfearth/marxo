@@ -2,38 +2,16 @@ package marxo.controller;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Controller
 @RequestMapping("/")
-public class GeneralController {
-	final Logger logger = LoggerFactory.getLogger(GeneralController.class);
-	@Autowired
-	ApplicationContext applicationContext;
-
-	@PostConstruct
-	void report() {
-		logger.debug(GeneralController.class.getSimpleName() + " started");
-
-		Boolean isDebug = applicationContext.getBean("isDebug", Boolean.class);
-		isDebug = (isDebug == null) ? false : isDebug;
-
-		if (isDebug) {
-			// Prevent the JVM to prompt OutOfMemory while IntelliJ redeploys the app. (fuck dat JVM)
-			System.gc();
-		}
-	}
-
+public class TestController extends BasicController {
 	@RequestMapping
 	@ResponseBody
 	public Message get(HttpServletRequest request) {
