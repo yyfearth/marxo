@@ -12,8 +12,6 @@ import java.util.List;
 @JsonPropertyOrder({"id", "name", "title", "desc", "tenantId", "workflowId", "prevNodeId", "nextNodeId", "condition", "type", "status", "created", "createdBy", "modified", "modifiedBy", "objectType"})
 public class Link extends BasicEntity {
 
-	@JsonProperty("desc")
-	String description;
 	@JsonIgnore
 	ObjectId workflowId;
 	@JsonIgnore
@@ -24,14 +22,6 @@ public class Link extends BasicEntity {
 	ObjectId nextNodeId;
 	@JsonIgnore
 	Condition condition;
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
 
 	public ObjectId getWorkflowId() {
 		return workflowId;
