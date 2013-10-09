@@ -66,7 +66,7 @@ public abstract class BasicDao<E extends Entity> {
 
 	// Delete
 	public E delete(E entity) {
-		return deleteById(entity.getId());
+		return deleteById(entity.id);
 	}
 
 	public E deleteById(ObjectId id) {

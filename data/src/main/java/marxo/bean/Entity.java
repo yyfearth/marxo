@@ -17,7 +17,7 @@ import java.util.Date;
 public abstract class Entity {
 	@Id
 	@JsonIgnore
-	ObjectId id;
+	public ObjectId id;
 	@JsonProperty("created_at")
 	public Date createdDate = new Date();
 	@JsonProperty("updated_at")
@@ -26,13 +26,13 @@ public abstract class Entity {
 	public Entity() {
 	}
 
-	public ObjectId getId() {
-		return id;
-	}
-
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
+//	public ObjectId getId() {
+//		return id;
+//	}
+//
+//	public void setId(ObjectId id) {
+//		this.id = id;
+//	}
 
 //	public Date getCreatedDate() {
 //		return createdDate;

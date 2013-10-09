@@ -35,15 +35,15 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public E create(@Valid @RequestBody E entity) throws Exception {
-		if (dao.exists(entity.getId())) {
-			throw new EntityExistsException(entity.getId());
+		if (dao.exists(entity.id)) {
+			throw new EntityExistsException(entity.id);
 		}
 
 		try {
 			dao.save(entity);
 		} catch (ValidationException ex) {
 			// todo: add error message
-			throw new EntityInvalidException(entity.getId(), "not implemented");
+			throw new EntityInvalidException(entity.id, "not implemented");
 		}
 
 		return entity;
