@@ -18,27 +18,11 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Service
-public abstract class GenericController<E extends Entity, Dao extends BasicDao<E>> {
-	final Logger logger = LoggerFactory.getLogger(GenericController.class);
-	@Autowired
-	ApplicationContext applicationContext;
+public abstract class GenericController<E extends Entity, Dao extends BasicDao<E>> extends BasicController {
 	Dao dao;
 
 	protected GenericController(Dao dao) {
 		this.dao = dao;
-	}
-
-	@PostConstruct
-	void report() {
-		logger.debug(GeneralController.class.getSimpleName() + " started");
-
-		Boolean isDebug = applicationContext.getBean("isDebug", Boolean.class);
-		isDebug = (isDebug == null) ? false : isDebug;
-
-		if (isDebug) {
-			// Prevent the JVM to prompt OutOfMemory while IntelliJ redeploys the app. (fuck dat JVM)
-			System.gc();
-		}
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
