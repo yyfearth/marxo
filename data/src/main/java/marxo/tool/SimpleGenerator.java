@@ -64,7 +64,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 			for (int i = 1; i <= 10; i++) {
 				Workflow w = new Workflow();
-				w.setId(new ObjectId());
+				w.id = new ObjectId();
 				w.title = "Workflow " + i;
 				w.name = getRandomProjectName();
 				w.description = RandomStringUtils.randomAlphabetic(10);
@@ -114,6 +114,26 @@ public class SimpleGenerator extends BasicGenerator {
 			mongoTemplate.insert(nodes, Node.class);
 
 			logger.debug("Created " + nodes.size() + " documents to Project collection.");
+		}
+
+		// Link
+		{
+			mongoTemplate.dropCollection(Node.class);
+
+			ArrayList<Link> links = new ArrayList<Link>();
+
+			for (int i = 1; i <= 10; i++) {
+				Link link = new Link();
+				link.id = new ObjectId();
+				link.title = "Link " + i;
+				link.name = getRandomProjectName();
+				link.fillWithDefaultValues();
+				links.add(link);
+			}
+
+			mongoTemplate.insert(links, Link.class);
+
+			logger.debug("Created " + links.size() + " documents to Project collection.");
 		}
 	}
 
