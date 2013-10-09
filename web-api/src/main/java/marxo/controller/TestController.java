@@ -20,7 +20,7 @@ public class TestController extends BasicController {
 
 	@RequestMapping("/test{:s?}")
 	@ResponseBody
-	public List<Double> getWorkflow() {
+	public List<Double> getRandomNumbers() {
 		List<Double> list = new ArrayList<>();
 
 		for (int i = 0; i < 10; i++) {
