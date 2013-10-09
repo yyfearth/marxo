@@ -14,50 +14,32 @@ public class Node extends BasicEntity {
 
 	public Position positoin;
 	@JsonIgnore
-	ObjectId workflowId;
-	@JsonIgnore
-	List<ObjectId> actionIds = new ArrayList<ObjectId>();
+	public ObjectId workflowId;
+	public List<Action> actions;
 
 	public Node() {
-
 	}
 
 	public Node(ObjectId workflowId) {
 		this.workflowId = workflowId;
 	}
 
-	public ObjectId getWorkflowId() {
-		return workflowId;
-	}
+//	@JsonProperty("actions")
+//	public Action[] getActions() {
+//		return TypeTool.toEntities(Action.class, actionIds);
+//	}
+//
+//	@JsonProperty("actions")
+//	public void setActions(Action[] actions) {
+//		this.actionIds = (actions == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(actions);
+//	}
 
-	public void setWorkflowId(ObjectId workflowId) {
-		this.workflowId = workflowId;
-	}
-
-	public List<ObjectId> getActionIds() {
-		return actionIds;
-	}
-
-	public void setActionIds(List<ObjectId> actionIds) {
-		this.actionIds = actionIds;
-	}
-
-	@JsonProperty("actions")
-	public Action[] getActions() {
-		return TypeTool.toEntities(Action.class, actionIds);
-	}
-
-	@JsonProperty("actions")
-	public void setActions(Action[] actions) {
-		this.actionIds = (actions == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(actions);
-	}
-
-	@JsonProperty("workflowId")
+	@JsonProperty("workflow_id")
 	public String getJsonWorkflowId() {
 		return workflowId == null ? null : workflowId.toString();
 	}
 
-	@JsonProperty("workflowId")
+	@JsonProperty("workflow_id")
 	public void setJsonWorkflowId(String workflowId) {
 		this.workflowId = (workflowId == null) ? null : new ObjectId(workflowId);
 	}
@@ -65,5 +47,14 @@ public class Node extends BasicEntity {
 	class Position {
 		public double x;
 		public double y;
+	}
+
+	@Override
+	public void fillWithDefaultValues() {
+		super.fillWithDefaultValues();
+
+		if (actions == null) {
+			actions = new ArrayList<>();
+		}
 	}
 }

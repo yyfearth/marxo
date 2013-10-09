@@ -12,7 +12,7 @@ import java.util.Date;
 
 // review: it's fucking weird that the entities are coupled with Jackson annotation.
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-@JsonPropertyOrder({"id", "tenant_id", "name", "title", "desc", "type", "status", "nodes", "links", "created_at", "created_by", "updated_at", "modified_by", "object_type"})
+@JsonPropertyOrder({"id", "object_type", "tenant_id", "workflow_id", "name", "title", "desc", "type", "status", "nodes", "links", "created_at", "created_by", "updated_at", "modified_by"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Entity {
 	@Id

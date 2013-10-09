@@ -1,45 +1,17 @@
 package marxo.bean;
 
-public class Condition {
-	String leftOperand, leftOperandType, rightOperand, rightOperandType, operator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-	public String getLeftOperand() {
-		return leftOperand;
-	}
-
-	public void setLeftOperand(String leftOperand) {
-		this.leftOperand = leftOperand;
-	}
-
-	public String getLeftOperandType() {
-		return leftOperandType;
-	}
-
-	public void setLeftOperandType(String leftOperandType) {
-		this.leftOperandType = leftOperandType;
-	}
-
-	public String getRightOperand() {
-		return rightOperand;
-	}
-
-	public void setRightOperand(String rightOperand) {
-		this.rightOperand = rightOperand;
-	}
-
-	public String getRightOperandType() {
-		return rightOperandType;
-	}
-
-	public void setRightOperandType(String rightOperandType) {
-		this.rightOperandType = rightOperandType;
-	}
-
-	public String getOperator() {
-		return operator;
-	}
-
-	public void setOperator(String operator) {
-		this.operator = operator;
-	}
+@Document
+public class Condition extends BasicEntity {
+	@JsonProperty("left_operand")
+	public String leftOperand;
+	@JsonProperty("left_operand_type")
+	public String leftOperandType;
+	@JsonProperty("right_operand")
+	public String rightOperand;
+	@JsonProperty("right_operand_type")
+	public String rightOperandType;
+	public String operator;
 }
