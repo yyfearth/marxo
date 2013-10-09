@@ -107,7 +107,6 @@ public class SimpleGenerator extends BasicGenerator {
 				Node p = new Node(new ObjectId());
 				p.title = "Node " + i;
 				p.name = getRandomProjectName();
-				p.setDescription(RandomStringUtils.randomAlphanumeric(10));
 				p.fillWithDefaultValues();
 				nodes.add(p);
 			}

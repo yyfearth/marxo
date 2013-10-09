@@ -12,13 +12,11 @@ import java.util.List;
 @Document
 public class Node extends BasicEntity {
 
-	@JsonProperty("desc")
-	String description;
+	public Position positoin;
 	@JsonIgnore
 	ObjectId workflowId;
 	@JsonIgnore
 	List<ObjectId> actionIds = new ArrayList<ObjectId>();
-	public Position positoin;
 
 	public Node() {
 
@@ -26,14 +24,6 @@ public class Node extends BasicEntity {
 
 	public Node(ObjectId workflowId) {
 		this.workflowId = workflowId;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	public ObjectId getWorkflowId() {
