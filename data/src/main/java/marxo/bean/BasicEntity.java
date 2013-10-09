@@ -5,14 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 
 public abstract class BasicEntity extends Entity {
-	String name;
-	String title;
+	public String name;
+	public String title;
+	public String key;
 	@JsonProperty("desc")
-	String description;
+	public String description;
 	@JsonIgnore
-	ObjectId createdByUserId;
+	public ObjectId createdByUserId;
 	@JsonIgnore
-	ObjectId modifiedByUserId;
+	public ObjectId modifiedByUserId;
 
 	public BasicEntity() {
 	}
@@ -37,21 +38,21 @@ public abstract class BasicEntity extends Entity {
 		this.createdByUserId = createdByUserId;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
+//	public String getName() {
+//		return name;
+//	}
+//
+//	public void setName(String name) {
+//		this.name = name;
+//	}
+//
+//	public String getTitle() {
+//		return title;
+//	}
+//
+//	public void setTitle(String title) {
+//		this.title = title;
+//	}
 
 	public ObjectId getModifiedByUserId() {
 		return modifiedByUserId;

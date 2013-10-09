@@ -21,13 +21,13 @@ public class Workflow extends BasicEntity {
 	public Workflow() {
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
+//	public String getDescription() {
+//		return description;
+//	}
+//
+//	public void setDescription(String description) {
+//		this.description = description;
+//	}
 
 	public List<ObjectId> getLinkIdList() {
 		return linkIdList;

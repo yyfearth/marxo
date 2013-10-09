@@ -12,8 +12,7 @@ import java.util.List;
 @Document
 public class Node extends BasicEntity {
 
-	@JsonProperty("desc")
-	String description;
+	public Position positoin;
 	@JsonIgnore
 	ObjectId workflowId;
 	@JsonIgnore
@@ -25,14 +24,6 @@ public class Node extends BasicEntity {
 
 	public Node(ObjectId workflowId) {
 		this.workflowId = workflowId;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	public ObjectId getWorkflowId() {
@@ -71,4 +62,8 @@ public class Node extends BasicEntity {
 		this.workflowId = (workflowId == null) ? null : new ObjectId(workflowId);
 	}
 
+	class Position {
+		public double x;
+		public double y;
+	}
 }
