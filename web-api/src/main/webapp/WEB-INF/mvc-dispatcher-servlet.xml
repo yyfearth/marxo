@@ -8,6 +8,7 @@
     <import resource="mongo-configuration.xml"/>
 
     <context:component-scan base-package="marxo.controller"/>
+    <context:component-scan base-package="marxo.exception"/>
 
     <mvc:annotation-driven/>
 

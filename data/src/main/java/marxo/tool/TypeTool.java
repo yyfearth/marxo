@@ -58,7 +58,7 @@ public class TypeTool {
 
 			for (int i = 0; i < entities.length; i++) {
 				T entity = targetClass.newInstance();
-				entity.setId(idList.get(i));
+				entity.id = idList.get(i);
 				entities[i] = entity;
 			}
 
@@ -80,7 +80,7 @@ public class TypeTool {
 		ArrayList<ObjectId> idList = new ArrayList<ObjectId>(entities.length);
 
 		for (int i = 0; i < entities.length; i++) {
-			idList.add(i, entities[i].getId());
+			idList.add(i, entities[i].id);
 		}
 
 		return idList;

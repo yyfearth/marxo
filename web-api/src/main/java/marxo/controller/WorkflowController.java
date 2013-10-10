@@ -1,126 +1,99 @@
 package marxo.controller;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.sun.istack.internal.Nullable;
+import marxo.bean.Link;
+import marxo.bean.Node;
 import marxo.bean.Workflow;
+import marxo.bean.WorkflowChildEntity;
+import marxo.dao.LinkDao;
+import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
-import marxo.exception.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 @RequestMapping("workflow{:s?}")
-public class WorkflowController extends BasicController<Workflow, WorkflowDao> {
+public class WorkflowController extends GenericController<Workflow, WorkflowDao> {
 	@Autowired
-	WorkflowDao workflowDao;
+	NodeDao nodeDao;
+	@Autowired
+	LinkDao linkDao;
 
-	@RequestMapping(method = RequestMethod.GET)
-	@ResponseBody
+	@Autowired
+	public WorkflowController(WorkflowDao dao) {
+		super(dao);
+	}
+
+	@Override
 	public List<Workflow> getAll() {
-		return workflowDao.findAll();
-	}
-
-	@RequestMapping(value = "/", method = RequestMethod.POST)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.CREATED)
-	public Workflow create(@Valid @RequestBody Workflow entity) throws Exception {
-		if (workflowDao.exists(entity.getId())) {
-			throw new EntityExistsException(entity.getId());
+		List<Workflow> workflows = dao.findAll();
+		ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
+		for (Workflow workflow : workflows) {
+			workflowIds.add(workflow.id);
 		}
 
-		try {
-			workflowDao.save(entity);
-		} catch (ValidationException ex) {
-			// todo: add error message
-			throw new EntityInvalidException(entity.getId(), "not implemented");
+		List<Node> nodes = nodeDao.searchByWorkflows(workflowIds);
+		List<Link> links = linkDao.searchByWorkflows(workflowIds);
+
+		// Java really needs a kick-ass collection library for the following.
+		for (Workflow workflow : workflows) {
+			WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
+			Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
+			workflow.nodes = Lists.newArrayList(workflowNodes);
+			Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
+			workflow.links = Lists.newArrayList(workflowLinks);
 		}
 
-		return entity;
+		return workflows;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
+	@Override
 	public Workflow read(@PathVariable String id) {
-		if (!ObjectId.isValid(id)) {
-			throw new InvalidObjectIdException(id);
-		}
+		Workflow workflow = super.read(id);
 
-		ObjectId objectId = new ObjectId(id);
-		Workflow workflow = workflowDao.get(objectId);
-
-		if (workflow == null) {
-			throw new EntityNotFoundException(objectId);
-		}
+		List<Node> nodes = nodeDao.searchByWorkflow(workflow.id);
+		List<Link> links = linkDao.searchByWorkflow(workflow.id);
+		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
+		Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
+		workflow.nodes = Lists.newArrayList(workflowNodes);
+		Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
+		workflow.links = Lists.newArrayList(workflowLinks);
 
 		return workflow;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	/**
+	 * Why use hyphens rather then underscores? See https://support.google.com/webmasters/answer/76329?hl=en
+	 */
+	@RequestMapping(value = "/search", method = RequestMethod.GET)
 	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
-	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	// review: is the parameter 'id' necessary?
-	public Workflow update(@Valid @PathVariable String id, @Valid @RequestBody Workflow workflow) {
-		if (!ObjectId.isValid(id)) {
-			throw new InvalidObjectIdException(id);
-		}
+	public List<Workflow> search(@RequestParam(value = "tenant-id", required = false) String tenantId, @RequestParam(required = false) String name) {
+		// todo: add more parameters if required and verify them.
+//		if (!ObjectId.isValid(tenantId)) {
+//			throw new InvalidObjectIdException(tenantId, "Tenant ID is not valid.");
+//		}
 
-		ObjectId objectId = new ObjectId(id);
+		return dao.searchByName(name);
+	}
+}
 
-		// todo: check consistency of given id and entity id.
-		Workflow oldWorkflow = workflowDao.get(objectId);
+class WorkflowPredicate<E extends WorkflowChildEntity> implements Predicate<E> {
+	ObjectId workflowId;
 
-		if (oldWorkflow == null) {
-			throw new EntityNotFoundException(objectId);
-		}
-
-		if (workflow.getName() != null) {
-			oldWorkflow.setName(workflow.getName());
-		}
-
-		if (workflow.getTitle() != null) {
-			oldWorkflow.setTitle(workflow.getTitle());
-		}
-
-		if (workflow.getCreatedByUserId() != null) {
-			oldWorkflow.setCreatedByUserId(workflow.getCreatedByUserId());
-		}
-
-		if (workflow.getModifiedByUserId() != null) {
-			oldWorkflow.setModifiedByUserId(workflow.getModifiedByUserId());
-		}
-
-		try {
-			workflowDao.save(oldWorkflow);
-		} catch (ValidationException e) {
-//			e.reasons.toString()
-//			throw new EntityInvalidException(objectId, );
-		}
-
-		return oldWorkflow;
+	WorkflowPredicate(ObjectId workflowId) {
+		this.workflowId = workflowId;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
-	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	public Workflow delete(@PathVariable String id) {
-		if (!ObjectId.isValid(id)) {
-			throw new InvalidObjectIdException(id);
-		}
-
-		ObjectId objectId = new ObjectId(id);
-		Workflow workflow = workflowDao.deleteById(objectId);
-
-		if (workflow == null) {
-			throw new EntityNotFoundException(objectId);
-		}
-
-		return workflow;
+	@Override
+	public boolean apply(@Nullable E entity) {
+		return (entity != null) && workflowId.equals(entity.workflowId);
 	}
 }

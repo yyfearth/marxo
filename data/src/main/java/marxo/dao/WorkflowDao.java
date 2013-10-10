@@ -1,13 +1,17 @@
 package marxo.dao;
 
+import com.google.common.base.Strings;
 import marxo.bean.Workflow;
 import marxo.bean.WorkflowValidator;
 import marxo.exception.ValidationException;
+import marxo.tool.StringTool;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WorkflowDao extends BasicDao<Workflow> {
-
 	public void insert(Workflow workflow) {
 		mongoTemplate.insert(workflow);
 	}
@@ -25,5 +29,13 @@ public class WorkflowDao extends BasicDao<Workflow> {
 		}
 
 		mongoTemplate.save(workflow);
+	}
+
+	public List<Workflow> searchByName(String name) {
+		if (Strings.isNullOrEmpty(name)) {
+			return new ArrayList<>();
+		}
+		String escapedName = StringTool.escapePatternCharacters(name);
+		return mongoTemplate.find(Query.query(Criteria.where("name").regex(".*" + escapedName + ".*")), Workflow.class);
 	}
 }

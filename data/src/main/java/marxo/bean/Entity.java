@@ -12,12 +12,12 @@ import java.util.Date;
 
 // review: it's fucking weird that the entities are coupled with Jackson annotation.
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-@JsonPropertyOrder({"id", "tenant_id", "name", "title", "desc", "type", "status", "nodes", "links", "created_at", "created_by", "updated_at", "modified_by", "object_type"})
+@JsonPropertyOrder({"id", "object_type", "tenant_id", "workflow_id", "name", "title", "desc", "type", "status", "nodes", "node_ids", "links", "link_ids", "created_at", "created_by", "updated_at", "modified_by"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class Entity {
 	@Id
 	@JsonIgnore
-	ObjectId id;
+	public ObjectId id;
 	@JsonProperty("created_at")
 	public Date createdDate = new Date();
 	@JsonProperty("updated_at")
@@ -25,30 +25,6 @@ public abstract class Entity {
 
 	public Entity() {
 	}
-
-	public ObjectId getId() {
-		return id;
-	}
-
-	public void setId(ObjectId id) {
-		this.id = id;
-	}
-
-//	public Date getCreatedDate() {
-//		return createdDate;
-//	}
-//
-//	public void setCreatedDate(Date createdDate) {
-//		this.createdDate = createdDate;
-//	}
-
-//	public Date getModifiedDate() {
-//		return modifiedDate;
-//	}
-
-//	public void setModifiedDate(Date modifiedDate) {
-//		this.modifiedDate = modifiedDate;
-//	}
 
 	@JsonProperty("id")
 	public String getJsonId() {

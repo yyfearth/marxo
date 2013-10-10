@@ -1,6 +1,5 @@
-package marxo.controller;
+package marxo.exception;
 
-import marxo.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.ConversionNotSupportedException;
@@ -73,7 +72,7 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler({EntityInvalidException.class, EntityExistsException.class, EntityNotFoundException.class})
 	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityException ex) {
 		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ErrorJson(ex.messages.toArray(new String[ex.messages.size()])), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({DataAccessResourceFailureException.class})

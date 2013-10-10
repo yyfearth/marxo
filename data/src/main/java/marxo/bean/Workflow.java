@@ -2,31 +2,22 @@ package marxo.bean;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import marxo.tool.TypeTool;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Workflow extends BasicEntity {
-	WorkflowType type = null;
-	WorkflowStatus status = null;
+public class Workflow extends TenantChildEntity {
+	public WorkflowType type = null;
+	public WorkflowStatus status = null;
 	@JsonIgnore
-	ObjectId tenantId;
+	public List<ObjectId> nodeIdList = null;
 	@JsonIgnore
-	List<ObjectId> nodeIdList = null;
-	@JsonIgnore
-	List<ObjectId> linkIdList = null;
+	public List<ObjectId> linkIdList = null;
+	public List<Node> nodes;
+	public List<Link> links;
 
 	public Workflow() {
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	public List<ObjectId> getLinkIdList() {
@@ -61,34 +52,22 @@ public class Workflow extends BasicEntity {
 		this.status = status;
 	}
 
-	@JsonProperty("nodes")
-	public Node[] getJsonNodes() {
-		return TypeTool.toEntities(Node.class, nodeIdList);
+	@JsonProperty("node_ids")
+	public String[] getJsonNodeIds() {
+		String[] ids = new String[nodeIdList.size()];
+		for (int i = 0; i < nodeIdList.size(); i++) {
+			ids[i] = nodeIdList.get(i).toString();
+		}
+		return ids;
 	}
 
-	@JsonProperty("nodes")
-	public void setJsonNodes(Node[] nodes) {
-		nodeIdList = (nodes == null) ? new ArrayList<ObjectId>(0) : TypeTool.toIdList(nodes);
-	}
-
-	@JsonProperty("links")
-	public Link[] getJsonLinks() {
-		return TypeTool.toEntities(Link.class, linkIdList);
-	}
-
-	@JsonProperty("links")
-	public void setJsonLinks(Link[] links) {
-		linkIdList = (links == null) ? new ArrayList<ObjectId>() : TypeTool.toIdList(links);
-	}
-
-	@JsonProperty("tenant_id")
-	public String getJsonTenantId() {
-		return (tenantId == null) ? null : tenantId.toString();
-	}
-
-	@JsonProperty("tenant_id")
-	public void setJsonTenantId(String tenantId) {
-		this.tenantId = (tenantId == null) ? null : new ObjectId(tenantId);
+	@JsonProperty("link_ids")
+	public String[] getJsonLinkIds() {
+		String[] ids = new String[linkIdList.size()];
+		for (int i = 0; i < linkIdList.size(); i++) {
+			ids[i] = linkIdList.get(i).toString();
+		}
+		return ids;
 	}
 
 	public void fillWithDefaultValues() {
@@ -112,6 +91,14 @@ public class Workflow extends BasicEntity {
 
 		if (linkIdList == null) {
 			linkIdList = new ArrayList<>();
+		}
+
+		if (nodes == null) {
+			nodes = new ArrayList<>();
+		}
+
+		if (links == null) {
+			links = new ArrayList<>();
 		}
 	}
 }

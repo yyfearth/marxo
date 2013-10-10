@@ -29,10 +29,6 @@ public abstract class BasicDao<E extends Entity> {
 		return mongoTemplate.findById(id, eClass) != null;
 	}
 
-	public void count(Query query) {
-		mongoTemplate.count(query, eClass);
-	}
-
 	public void count() {
 		mongoTemplate.count(new BasicQuery(""), eClass);
 	}
@@ -55,10 +51,6 @@ public abstract class BasicDao<E extends Entity> {
 		return mongoTemplate.findById(id, eClass);
 	}
 
-	public List<E> find(Query query) {
-		return mongoTemplate.find(query, eClass);
-	}
-
 	// Update
 	public void save(E entity) throws ValidationException {
 		mongoTemplate.save(entity);
@@ -66,10 +58,21 @@ public abstract class BasicDao<E extends Entity> {
 
 	// Delete
 	public E delete(E entity) {
-		return deleteById(entity.getId());
+		return deleteById(entity.id);
 	}
 
 	public E deleteById(ObjectId id) {
 		return mongoTemplate.findAndRemove(Query.query(Criteria.where("id").is(id)), eClass);
+	}
+
+	// Search
+	public List<E> searchByWorkflow(ObjectId workflowId) {
+		List<E> entities = mongoTemplate.find(Query.query(Criteria.where("workflowId").is(workflowId)), eClass);
+		return entities;
+	}
+
+	public List<E> searchByWorkflows(List<ObjectId> workflowIds) {
+		List<E> entities = mongoTemplate.find(Query.query(Criteria.where("workflowId").in(workflowIds)), eClass);
+		return entities;
 	}
 }
