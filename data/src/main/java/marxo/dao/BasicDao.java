@@ -29,10 +29,6 @@ public abstract class BasicDao<E extends Entity> {
 		return mongoTemplate.findById(id, eClass) != null;
 	}
 
-	public void count(Query query) {
-		mongoTemplate.count(query, eClass);
-	}
-
 	public void count() {
 		mongoTemplate.count(new BasicQuery(""), eClass);
 	}
@@ -53,10 +49,6 @@ public abstract class BasicDao<E extends Entity> {
 
 	public E get(ObjectId id) {
 		return mongoTemplate.findById(id, eClass);
-	}
-
-	public List<E> find(Query query) {
-		return mongoTemplate.find(query, eClass);
 	}
 
 	// Update
