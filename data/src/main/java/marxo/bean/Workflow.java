@@ -7,11 +7,9 @@ import org.bson.types.ObjectId;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Workflow extends BasicEntity {
+public class Workflow extends TenantChildEntity {
 	public WorkflowType type = null;
 	public WorkflowStatus status = null;
-	@JsonIgnore
-	public ObjectId tenantId;
 	@JsonIgnore
 	public List<ObjectId> nodeIdList = null;
 	@JsonIgnore
@@ -70,16 +68,6 @@ public class Workflow extends BasicEntity {
 			ids[i] = linkIdList.get(i).toString();
 		}
 		return ids;
-	}
-
-	@JsonProperty("tenant_id")
-	public String getJsonTenantId() {
-		return (tenantId == null) ? null : tenantId.toString();
-	}
-
-	@JsonProperty("tenant_id")
-	public void setJsonTenantId(String tenantId) {
-		this.tenantId = (tenantId == null) ? null : new ObjectId(tenantId);
 	}
 
 	public void fillWithDefaultValues() {
