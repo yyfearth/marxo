@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -28,18 +29,19 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
-	public E create(@Valid @RequestBody E entity) throws Exception {
+	public E create(@Valid @RequestBody E entity, HttpServletResponse response) throws Exception {
 		if (dao.exists(entity.id)) {
 			throw new EntityExistsException(entity.id);
 		}
 
 		try {
+			entity.fillWithDefaultValues();
 			dao.save(entity);
 		} catch (ValidationException ex) {
-			// todo: add error message
-			throw new EntityInvalidException(entity.id, "not implemented");
+			throw new EntityInvalidException(entity.id, ex.reasons);
 		}
 
+		response.setHeader("Location", String.format("/%s/%s", entity.getClass().getSimpleName().toLowerCase(), entity.id));
 		return entity;
 	}
 
