@@ -14,12 +14,12 @@ public class WorkflowValidator {
 		}
 
 		if (workflow.tenantId == null) {
-			reasons.add("tenantId cannot be null");
+			reasons.add("Tenant ID cannot be null");
 		}
 
-		if (StringUtils.isEmpty(workflow.title)) {
-			reasons.add("title cannot be empty.");
-		}
+//		if (StringUtils.isEmpty(workflow.title)) {
+//			reasons.add("Title cannot be empty.");
+//		}
 
 		reasons.addAll(validateGraph(workflow));
 		reasons.addAll(validateUsers(workflow));
