@@ -26,30 +26,6 @@ public abstract class Entity {
 	public Entity() {
 	}
 
-//	public ObjectId getId() {
-//		return id;
-//	}
-//
-//	public void setId(ObjectId id) {
-//		this.id = id;
-//	}
-
-//	public Date getCreatedDate() {
-//		return createdDate;
-//	}
-//
-//	public void setCreatedDate(Date createdDate) {
-//		this.createdDate = createdDate;
-//	}
-
-//	public Date getModifiedDate() {
-//		return modifiedDate;
-//	}
-
-//	public void setModifiedDate(Date modifiedDate) {
-//		this.modifiedDate = modifiedDate;
-//	}
-
 	@JsonProperty("id")
 	public String getJsonId() {
 		return (id == null) ? null : id.toString();
