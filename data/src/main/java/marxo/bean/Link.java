@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Document
-public class Link extends BasicEntity {
+public class Link extends WorkflowChildEntity {
 
 	@JsonIgnore
 	public ObjectId tenantId;
-	@JsonIgnore
-	public ObjectId workflowId;
 	@JsonIgnore
 	public ObjectId previousNodeId;
 	@JsonIgnore
@@ -40,16 +38,6 @@ public class Link extends BasicEntity {
 	@JsonProperty("next_node_id")
 	public void setJsonNextNodeId(String next_node_id) {
 		this.nextNodeId = (next_node_id == null) ? null : new ObjectId(next_node_id);
-	}
-
-	@JsonProperty("workflow_id")
-	public String getJsonWorkflowId() {
-		return workflowId == null ? null : workflowId.toString();
-	}
-
-	@JsonProperty("workflow_id")
-	public void setJsonWorkflowId(String workflowId) {
-		this.workflowId = (workflowId == null) ? null : new ObjectId(workflowId);
 	}
 
 	@Override
