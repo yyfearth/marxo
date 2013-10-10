@@ -16,6 +16,8 @@ public class Workflow extends BasicEntity {
 	public List<ObjectId> nodeIdList = null;
 	@JsonIgnore
 	public List<ObjectId> linkIdList = null;
+	public List<Node> nodes;
+	public List<Link> links;
 
 	public Workflow() {
 	}
@@ -101,6 +103,14 @@ public class Workflow extends BasicEntity {
 
 		if (linkIdList == null) {
 			linkIdList = new ArrayList<>();
+		}
+
+		if (nodes == null) {
+			nodes = new ArrayList<>();
+		}
+
+		if (links == null) {
+			links = new ArrayList<>();
 		}
 	}
 }

@@ -72,4 +72,15 @@ public abstract class BasicDao<E extends Entity> {
 	public E deleteById(ObjectId id) {
 		return mongoTemplate.findAndRemove(Query.query(Criteria.where("id").is(id)), eClass);
 	}
+
+	// Search
+	public List<E> searchByWorkflow(ObjectId workflowId) {
+		List<E> entities = mongoTemplate.find(Query.query(Criteria.where("workflowId").is(workflowId)), eClass);
+		return entities;
+	}
+
+	public List<E> searchByWorkflows(List<ObjectId> workflowIds) {
+		List<E> entities = mongoTemplate.find(Query.query(Criteria.where("workflowId").in(workflowIds)), eClass);
+		return entities;
+	}
 }
