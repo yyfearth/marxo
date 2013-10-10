@@ -11,11 +11,11 @@ import marxo.bean.WorkflowChildEntity;
 import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
+import marxo.exception.InvalidObjectIdException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +69,20 @@ public class WorkflowController extends GenericController<Workflow, WorkflowDao>
 		workflow.links = Lists.newArrayList(workflowLinks);
 
 		return workflow;
+	}
+
+	/**
+	 * Why use hyphens rather then underscores? See https://support.google.com/webmasters/answer/76329?hl=en
+	 */
+	@RequestMapping(value = "/search", method = RequestMethod.GET)
+	@ResponseBody
+	public List<Workflow> search(@RequestParam(value = "tenant-id", required = false) String tenantId, @RequestParam(required = false) String name) {
+		// todo: add more parameters if required and verify them.
+//		if (!ObjectId.isValid(tenantId)) {
+//			throw new InvalidObjectIdException(tenantId, "Tenant ID is not valid.");
+//		}
+
+		return dao.searchByName(name);
 	}
 }
 
