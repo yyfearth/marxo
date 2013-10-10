@@ -1,19 +1,13 @@
 package marxo.controller;
 
 import marxo.bean.Entity;
-import marxo.bean.Node;
 import marxo.dao.BasicDao;
 import marxo.exception.*;
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 import java.util.List;
 

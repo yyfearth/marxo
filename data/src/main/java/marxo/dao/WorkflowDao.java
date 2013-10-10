@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WorkflowDao extends BasicDao<Workflow> {
-
 	public void insert(Workflow workflow) {
 		mongoTemplate.insert(workflow);
 	}
