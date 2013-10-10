@@ -72,7 +72,7 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler({EntityInvalidException.class, EntityExistsException.class, EntityNotFoundException.class})
 	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityException ex) {
 		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ErrorJson(ex.messages.toArray(new String[ex.messages.size()])), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({DataAccessResourceFailureException.class})
