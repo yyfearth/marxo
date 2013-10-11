@@ -34,33 +34,17 @@ public abstract class BasicEntity extends Entity {
 		return createdByUserId;
 	}
 
-	public void setCreatedByUserId(ObjectId createdByUserId) {
-		this.createdByUserId = createdByUserId;
-	}
-
-//	public String getName() {
-//		return name;
-//	}
-//
-//	public void setName(String name) {
-//		this.name = name;
-//	}
-//
-//	public String getTitle() {
-//		return title;
-//	}
-//
-//	public void setTitle(String title) {
-//		this.title = title;
+//	public void setCreatedByUserId(ObjectId createdByUserId) {
+//		this.createdByUserId = createdByUserId;
 //	}
 
 	public ObjectId getModifiedByUserId() {
 		return modifiedByUserId;
 	}
 
-	public void setModifiedByUserId(ObjectId modifiedByUserId) {
-		this.modifiedByUserId = modifiedByUserId;
-	}
+//	public void setModifiedByUserId(ObjectId modifiedByUserId) {
+//		this.modifiedByUserId = modifiedByUserId;
+//	}
 
 	////////// For JSON output
 
@@ -69,20 +53,20 @@ public abstract class BasicEntity extends Entity {
 		return (createdByUserId == null) ? null : createdByUserId.toString();
 	}
 
-	@JsonProperty("created_by")
-	public void setJsonCreatedByUserId(String createdByUserId) {
-		this.createdByUserId = new ObjectId(createdByUserId);
-	}
+//	@JsonProperty("created_by")
+//	public void setJsonCreatedByUserId(String createdByUserId) {
+//		this.createdByUserId = new ObjectId(createdByUserId);
+//	}
 
 	@JsonProperty("modified_by")
 	public String getJsonModifiedByUserId() {
 		return (modifiedByUserId == null) ? null : modifiedByUserId.toString();
 	}
 
-	@JsonProperty("modified_by")
-	public void setJsonModifiedByUserId(String modifiedByUserId) {
-		this.modifiedByUserId = new ObjectId(modifiedByUserId);
-	}
+//	@JsonProperty("modified_by")
+//	public void setJsonModifiedByUserId(String modifiedByUserId) {
+//		this.modifiedByUserId = new ObjectId(modifiedByUserId);
+//	}
 
 	public void fillWithDefaultValues() {
 		super.fillWithDefaultValues();

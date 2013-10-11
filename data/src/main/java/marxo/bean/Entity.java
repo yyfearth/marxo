@@ -31,10 +31,10 @@ public abstract class Entity {
 		return (id == null) ? null : id.toString();
 	}
 
-	@JsonProperty("id")
-	public void setJsonId(String id) {
-		this.id = new ObjectId(id);
-	}
+//	@JsonProperty("id")
+//	public void setJsonId(String id) {
+//		this.id = new ObjectId(id);
+//	}
 
 	@JsonProperty("object_type")
 	public String getObjectType() {
