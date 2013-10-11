@@ -34,7 +34,7 @@ public class ControllerExceptionHandler {
 
 	@ExceptionHandler({ConversionNotSupportedException.class, HttpMessageNotWritableException.class})
 	public ResponseEntity<ErrorJson> handleInternalServerError(Exception ex) {
-		logger.debug(ex.getMessage());
+		logger.error(ex.getMessage());
 		return new ResponseEntity<>(new ErrorJson("Sorry, I don't know how to translate your shit"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
@@ -58,7 +58,6 @@ public class ControllerExceptionHandler {
 
 	@ExceptionHandler({NoSuchRequestHandlingMethodException.class})
 	public ResponseEntity<ErrorJson> handleNotFound(Exception ex) {
-		logger.debug(ex.getMessage());
 		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit (%s)", ex.getMessage())), HttpStatus.NOT_FOUND);
 	}
 
@@ -77,13 +76,13 @@ public class ControllerExceptionHandler {
 
 	@ExceptionHandler({DataAccessResourceFailureException.class})
 	public ResponseEntity<ErrorJson> handleDataAccessResourceFailureException(DataAccessResourceFailureException ex) {
-		logger.debug(ex.getMessage());
+		logger.error(ex.getMessage());
 		return new ResponseEntity<>(new ErrorJson("Cannot connect to the database"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@ExceptionHandler({Exception.class})
 	public ResponseEntity<ErrorJson> handleOtherException(Exception ex) {
-		logger.debug(ex.getMessage());
+		logger.error(ex.getMessage());
 		return new ResponseEntity<>(new ErrorJson("Something is really wrong: " + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }
