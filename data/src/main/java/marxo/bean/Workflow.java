@@ -54,6 +54,10 @@ public class Workflow extends TenantChildEntity {
 
 	@JsonProperty("node_ids")
 	public String[] getJsonNodeIds() {
+		if (nodeIdList == null) {
+			return new String[0];
+		}
+
 		String[] ids = new String[nodeIdList.size()];
 		for (int i = 0; i < nodeIdList.size(); i++) {
 			ids[i] = nodeIdList.get(i).toString();
@@ -63,6 +67,9 @@ public class Workflow extends TenantChildEntity {
 
 	@JsonProperty("link_ids")
 	public String[] getJsonLinkIds() {
+		if (linkIdList == null) {
+			return new String[0];
+		}
 		String[] ids = new String[linkIdList.size()];
 		for (int i = 0; i < linkIdList.size(); i++) {
 			ids[i] = linkIdList.get(i).toString();

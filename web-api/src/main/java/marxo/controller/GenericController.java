@@ -5,14 +5,13 @@ import marxo.dao.BasicDao;
 import marxo.exception.*;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Date;
 import java.util.List;
 
-@Service
 public abstract class GenericController<E extends Entity, Dao extends BasicDao<E>> extends BasicController {
 	Dao dao;
 
@@ -82,17 +81,18 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 			throw new EntityNotFoundException(objectId);
 		}
 
+		entity.modifiedDate = new Date();
+
 		try {
-			dao.save(oldEntity);
-		} catch (ValidationException e) {
-			for (int i = 0; i < e.reasons.size(); i++) {
-				logger.error(e.reasons.get(i));
+			dao.save(entity);
+		} catch (ValidationException ex) {
+			for (int i = 0; i < ex.reasons.size(); i++) {
+				logger.error(ex.reasons.get(i));
 			}
-			// todo: find a way to generate multiple reason messages to client.
-//			throw new EntityInvalidException(objectId, );
+			throw new EntityInvalidException(objectId, ex.reasons);
 		}
 
-		return oldEntity;
+		return entity;
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
