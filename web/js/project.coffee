@@ -35,16 +35,21 @@ Projects
           @switchTo @manager
         else
           throw new Error 'open project with a name or id is needed' unless name
-          @switchTo @viewer
-          @viewer.load name
-          @viewer.popup sub if sub
+          Projects.find projectId: name, callback: ({project}) =>
+            throw new Error "project with id #{name} cannot found" unless project
+            if sub
+              @editor.edit project, sub
+            else
+              @switchTo @viewer
+              @viewer.load project
+              # @viewer.focus sub
       @
 
   # Editor
 
   class ProjectEditorView extends FormDialogView
     goBackOnHidden: 'project/mgr'
-    collection: Workflows.workflows
+    workflows: Workflows.workflows
     events:
       'change select[name=workflow_id]': (e) ->
         wf = e.currentTarget.value
@@ -85,6 +90,14 @@ Projects
       @popup new Project(workflow_id: wf), (action, data) =>
         console.log 'wf created', action, data
       @
+    edit: (project, opt = {}) ->
+      {link, node, action} = opt
+      throw new Error 'cannot open a action without given a node' if action and not node
+      throw new Error 'node and link cannot be open together' if link and node
+      console.log 'popup node/link editor', {link, node, action}
+      @popup project, (action, data) =>
+        console.log 'project saved', action, data
+      @
     popup: (model, callback) ->
       data = model.toJSON()
       @model = model
@@ -92,7 +105,7 @@ Projects
       super data, callback
       select = @form.workflow_id
       select.disabled = true
-      @collection.load (ignored, ret) =>
+      @workflows.load (ignored, ret) =>
         @_renderSelect() if 'loaded' is ret
         @fill data
         select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
@@ -116,7 +129,7 @@ Projects
     _selectWorkflow: ->
       wf = @form.workflow_id.value
       return unless wf
-      wf = @collection.get wf unless wf instanceof Workflow
+      wf = @workflows.get wf unless wf instanceof Workflow
       project = @model
       if project.nodes?.length or project.has 'node_ids'
         # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
@@ -153,7 +166,7 @@ Projects
       el.appendChild a
       el
     render: ->
-      @collection.load => @_renderSelect()
+      @workflows.load => @_renderSelect()
       super
     reset: ->
       @$wfbtns.hide()
@@ -161,7 +174,7 @@ Projects
       super
     _renderSelect: ->
       select = @form.workflow_id
-      wfs = @collection.fullCollection
+      wfs = @workflows.fullCollection
       if wfs.length
         owned = document.createElement 'optgroup'
         owned.label = 'Owned Workflows'
@@ -197,12 +210,11 @@ Projects
     load: (name) ->
       console.log 'load project', name
       @
-    popup: (opt = {}) ->
+    focus: (opt = {}) ->
       {link, node, action} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
       throw new Error 'node and link cannot be open together' if link and node
-      console.log 'popup node/link viewer', {link, node, action}
-      @
+      console.log 'focus node/link', {link, node, action}
 
   # Manager
 
