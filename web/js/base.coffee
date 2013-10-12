@@ -230,7 +230,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           change: => @form.key.value = @form.key.value.toLowerCase()
       @
     validate: (form) ->
-      for input in findAll '[required]', form
+      for input in $(form).find '[required]:visible:enabled'
         unless input.value.trim()
           input.focus()
           alert 'This field is required!'
