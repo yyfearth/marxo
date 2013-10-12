@@ -638,8 +638,10 @@ Action
       #console.log wf.nodes
       unless wf.nodes.length and wf.nodes.at(0).has 'style'
         @_sortNodeViews wf.nodes
-      wf.nodes.forEach @_addNode.bind @
-      wf.links.forEach @_addLink.bind @
+      jsPlumb.ready =>
+        wf.nodes.forEach @_addNode.bind @
+        wf.links.forEach @_addLink.bind @
+        return
       return
     addNode: (node = 'emtpy') ->
       if node is 'new' or node is 'empty'
@@ -793,12 +795,12 @@ Action
       jsPlumb.draggable @$el, stack: '.node'
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
-      @srcEndpoint ?= jsPlumb.addEndpoint @el, @sourceEndpointStyle, parameters:
-        model: @model
-        view: @
-      jsPlumb.makeTarget @$el, @targetEndpointStyle, parameters:
-        node: node
-        view: @
+      param =
+        parameters:
+          node: node
+          view: @
+      @srcEndpoint = jsPlumb.addEndpoint @$el, @sourceEndpointStyle, param
+      jsPlumb.makeTarget @$el, @targetEndpointStyle, param
       @
     update: (node = @model) ->
       @$el.popover 'destroy'
