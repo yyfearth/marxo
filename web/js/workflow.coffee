@@ -818,7 +818,7 @@ Action
         container: @parentEl
         trigger: 'manual'
         placement: 'bottom'
-        name: name
+        title: name
         html: true
         content: @_popover_tpl.replace '{desc}', node.get('desc') or ''
       @$popover = @$el.data('popover').tip()
@@ -861,7 +861,7 @@ Action
       label$el.css 'visibility', if name then 'visible' else 'hidden'
       label$el.popover
         container: @parentEl
-        name: name or 'Link'
+        title: name or 'Link'
         trigger: 'manual'
         placement: 'bottom'
         html: true
