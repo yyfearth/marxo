@@ -21,7 +21,7 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public List<E> getAll() {
+	public List<E> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
 		return dao.findAll();
 	}
 
