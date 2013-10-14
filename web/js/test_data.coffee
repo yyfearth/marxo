@@ -17,7 +17,7 @@ define 'test_data', ['models'], (models) ->
     ]
     publishers: [
       email: 'test@example.com'
-      password: 'PxdGfIXoXI0ZC+IxNJPz8WbC6Cs7ziltNt2UMhd3Hhk'
+      password: 'B4driGpKjDrtdKaAoA8nUmm+D2Pl3kxoF5POX0sGSk4' # test
       first_name: 'Test'
       last_name: 'User'
       tenant_id: 0
@@ -25,7 +25,7 @@ define 'test_data', ['models'], (models) ->
       updated_at: '2013-09-05T02:18:13.621Z'
     ,
       email: 'yyfearth@gmail.com'
-      password: 'UGyzwQz5IkbEsRbziurhbwSPCtGj14hmomNxEAU6mkE'
+      password: '2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8' # asdfasdf
       first_name: 'Wilson'
       last_name: 'Young'
       tenant_id: 0
@@ -33,7 +33,7 @@ define 'test_data', ['models'], (models) ->
       updated_at: '2013-09-05T02:18:13.621Z'
     ,
       email: 'otaru14204@hotmail.com'
-      password: '0OhYYTpTU3rqawhF7bO93h4BzZ0KffugOwVqhXEGV1A'
+      password: 'XELXdnuv/p7QeCzPM7Pl7TLfd6o2NZSaPb/sGtYUg5Q' # @qwer123
       first_name: 'Leo'
       last_name: 'Chu'
       tenant_id: 0
