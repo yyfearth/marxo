@@ -20,7 +20,7 @@ Icon
 # Source Map
 *.map
 # Compiled Source
-web/index.html
+web/*.html
 web/html/*.html
 web/js/*.js
 web/js/lib/*.min.js
