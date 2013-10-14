@@ -1,1 +1,1387 @@
-(function(){"use strict";var t={}.hasOwnProperty,e=function(e,n){function i(){this.constructor=e}for(var o in n)t.call(n,o)&&(e[o]=n[o]);return i.prototype=n.prototype,e.prototype=new i,e.__super__=n.prototype,e};define("workflow",["console","workflow_models","lib/jquery-ui","lib/jquery-jsplumb"],function(t,n){var i,o,r,s,l,a,u,c,p,h,d,f,_,y,m,g,v,w,b,k,E,C,z,L,S,N,T,P,x,V,j,M,F,D;return C=t.async,z=t.find,L=t.findAll,v=t.View,o=t.FrameView,r=t.InnerFrameView,a=t.ModalDialogView,g=n.TenantWorkflows,m=n.TenantWorkflow,y=n.TenantNodes,_=n.TenantNode,u=n.Node,f=n.TenantLinks,d=n.TenantLink,b=function(t){function n(){return S=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.initialize=function(t){n.__super__.initialize.call(this,t),this.editor=new w({el:"#workflow_editor",parent:this}),this.manager=new k({el:"#workflow_manager",parent:this})},n.prototype.open=function(t){"new"===t?(console.log("show workflow editor with create mode"),this.switchTo(this.manager)):"mgr"===t?(console.log("show workflow mgr"),this.switchTo(this.manager)):t&&(console.log("show workflow editor for",t),this.switchTo(this.editor),this.editor.load(t))},n}(o),w=function(t){function n(){return N=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.initialize=function(t){n.__super__.initialize.call(this,t),this.view=new E({el:z("#workflow_view",this.el),nodeEditor:new c,linkEditor:new s}),this.nodeList=new p({el:z("#node_list",this.el),workflowView:this.view})},n.prototype.load=function(t){var e=this;this.fetch(t,function(t,n){return n?e.view.load(n):e.view.clear()})},n.prototype.render=function(){this.nodeList.render()},n.prototype.fetch=function(t,e){var n;n=this.workflow=new m({id:t}),n.fetch({success:function(){C.parallel([function(t){return n.nodes.fetch({success:function(e){return t(null,e)},error:function(){return t("fetch nodes failed")}})},function(t){return n.links.fetch({success:function(e){return t(null,e)},error:function(){return t("fetch links failed")}})}],function(t){t?(console.error(t),"function"==typeof e&&e(t)):(console.log("workflow",n),"function"==typeof e&&e(null,n))})}})},n}(r),p=function(t){function n(){return T=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.initialize=function(t){var e=this;return n.__super__.initialize.call(this,t),this.workflowView=t.workflowView,this.el.onclick=function(t){var n;n=t.target,n.tagName==="A"&&n.dataset.node&&(t.preventDefault(),e.workflowView.addNode(n.dataset.node))}},n.prototype.render=function(){var t;return this.el.innerHTML="",t=document.createDocumentFragment(),t.appendChild(this.renderHeader("Common Nodes")),t.appendChild(this.renderItem("common",new u({id:"new",name:"Empty Node"}))),t.appendChild(this.renderHeader("Shared Nodes")),this.el.appendChild(t),this},n.prototype.renderHeader=function(t){var e;return e=document.createElement("li"),e.className="nav-header",e.innerHTML=t,e},n.prototype.renderItem=function(t,e){var n,i;return i=document.createElement("li"),n=document.createElement("a"),n.className="node",n.href="#node:"+e.id,n.dataset.list=t,n.dataset.node=e.id,n.innerHTML=e.get("name"),i.appendChild(n),i},n}(v),k=function(t){function n(){return P=n.__super__.constructor.apply(this,arguments)}return e(n,t),n}(r),i=function(t){function n(){return x=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.initialize=function(t){n.__super__.initialize.call(this,t),this.form=z("form",this.el)},n.prototype.popup=function(t,e){return n.__super__.popup.call(this,t,e),this.fill(t),this},n.prototype.fill=function(t){var e,n,i,o;this._attributes={},o=t.attributes;for(n in o)i=o[n],e=this.form[n],(null!=e?e.name:void 0)===n&&e.value!=null&&(e.value=i,this._attributes[n]=i);return this},n.prototype.save=function(){var t,e,n,i;if(this._attributes!=null){i=this._attributes;for(e in i)n=i[e],t=this.form[e],t.value!==n&&(this._attributes[e]=t.value),this.data.set(this._attributes)}return this.callback("save"),this.hide(!0)},n}(a),c=function(t){function n(){return V=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.el="#node_editor",n.prototype.initialize=function(t){var e;n.__super__.initialize.call(this,t),this.actionsEl=z("#actions",this.el),e=this._fixStyle.bind(this),$(window).resize(e),$(this.el).on("shown",e)},n.prototype._fixStyle=function(){this.actionsEl.style.top=20+$(this.form).height()+"px"},n}(i),s=function(t){function n(){return j=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.el="#link_editor",n.prototype.initialize=function(t){n.__super__.initialize.call(this,t)},n.prototype.popup=function(t,e){return n.__super__.popup.call(this,t,e),this},n}(i),E=function(t){function n(){return M=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.jsPlumbDefaults={DragOptions:{zIndex:2e3},Endpoint:["Dot",{radius:3,cssClass:"endpoint"}],ConnectionsDetachable:!0,ReattachConnections:!0,HoverPaintStyle:{strokeStyle:"#42a62c",lineWidth:2,zIndex:2e3},Connector:["Flowchart",{stub:[40,60],gap:10,cssClass:"link"}],ConnectionOverlays:[["Arrow",{location:1,id:"arrow"}],["Label",{location:.5,label:"new link",id:"label",cssClass:"link-label"}]]},n.prototype.gridDefaults={padding:30,spanX:300,spanY:150,vertical:!1},n.prototype.initialize=function(t){n.__super__.initialize.call(this,t),this.nodeEditor=t.nodeEditor,this.linkEditor=t.linkEditor,jsPlumb.importDefaults(this.jsPlumbDefaults),this.render()},n.prototype._bind=function(){var t,e,n;t=this,jsPlumb.bind("jsPlumbConnection",function(t){var e,n,i;e=t.connection,i=e.getParameter("link"),n=e.getOverlay("label"),null==i||i.has("title")&&n.setLabel(i.get("title"))}),jsPlumb.bind("jsPlumbConnectionDetached",function(t){var e,n;e=t.connection,n=e.getParameter("link"),n.prevNode.view.buildSrcEndpoint()}),e=function(){t._popped&&(t._popped._delay?t._popped._delay=clearTimeout(t._popped._delay):$(t._popped).popover("hide"))},n=function(){var n=this;t._popped===this||this._hidding?(e(),t._popped=null):(this._delay=setTimeout(function(){return(t._popped=n)&&$(n).popover("show"),n._delay=null},100),t._popped=this)},jsPlumb.bind("click",function(t){var e;e=t.getOverlay("label"),n.call(e.canvas)}),jsPlumb.bind("dblclick",function(e){t.editLink(e.getParameter("link"))}),this.$el.on("click",".node",n),this.$el.on("dblclick",".node",function(){t.editNode(this.node)}),this.$el.on("mousedown",function(n){var i;t._popped&&!t.$el.find(".popover").has(n.target).length&&(e(),i=t._popped,t._popped=null,i._hidding=!0,setTimeout(function(){return delete i._hidding},300))})},n.prototype.clear=function(){return this.el.innerHTML="",this},n.prototype.load=function(t){return this.clear(),this._processModel(t),this._renderModel(t),this},n.prototype._processModel=function(t){var e;this.model=t,t.nodes.forEach(function(e){e.workflow=t,e.inLinks=[],e.outLinks=[]}),t.links.forEach(function(e){e.workflow=t,e.prevNode=t.nodes.get(e.get("prevNodeId")),e.nextNode=t.nodes.get(e.get("nextNodeId")),e.prevNode&&e.nextNode||console.error("link",e.name||e.id,"is broken, prev/next node missing"),e.prevNode.outLinks.push(e),e.nextNode.inLinks.push(e)}),e=t.nodes,e.lonely=[],e.start=[],e.end=[],e.forEach(function(t){var n;t.inLinks.length===(n=t.outLinks.length)&&0===n?e.lonely.push(t):t.inLinks.length===0?e.start.push(t):t.outLinks.length===0&&e.end.push(t)}),this._sortNodeViews(e)},n.prototype._sortNodeViews=function(t){var e,n,i,o,r,s,l;e=this.grid=[t.start.concat(t.lonely)],l=this.gridDefaults,s=l.vertical,n=l.padding,i=l.spanX,o=l.spanY,(r=function(t){var l,a;l=[],(a=e[t])!=null&&a.forEach(function(e,r){var a;e.gridX=r,e.gridY=t,s?(e.x=r*i,e.y=t*o):(e.x=t*i,e.y=r*o),e.x+=n,e.y+=n,(a=e.outLinks)!=null&&a.forEach(function(t){t.nextNode.gridX==null&&l.push(t.nextNode)})}),l.length&&(e[t+1]=l,r(t+1))})(0),console.log("grid",e)},n.prototype._renderModel=function(t){var e=this;if(console.log("render wf",t),t=this.model,null==t)throw"workflow not loaded";this._bind(),t.nodes.forEach(function(t){e._addNode(t)}),t.links.forEach(function(t){e._addLink(t)})},n.prototype.addNode=function(t){if(null==t&&(t="emtpy"),"new"===t||"empty"===t)return console.log("add a empty node"),this.createNode();if("string"==typeof t)console.log("add node by id",t);else if(!(t instanceof u))throw console.error("add a invalid node",t),"add a invalid node";return console.log("add node",t),this._addNode(t),this},n.prototype._addNode=function(t){var e;e=t.view=new h({model:t,parent:this}),e.render(),this.el.appendChild(e.el)},n.prototype.createNode=function(){var t=this;return this.nodeEditor.popup(new _,function(e,n){return"save"===e?t._addNode(n):console.log("canceled create node")}),this},n.prototype.editNode=function(t){return this.nodeEditor.popup(t,function(t,e){return"save"===t?(e.view.update(e),console.log("saved node",e)):console.log("canceled edit node")}),this},n.prototype.removeNode=function(){return this},n.prototype.addLink=function(){return this},n.prototype._addLink=function(t){var e;e=t.view=new l({model:t,parent:this}),e.render()},n.prototype.editLink=function(t){return this.linkEditor.popup(t,function(t,e){return"save"===t?console.log("saved link",e):console.log("canceled edit link")}),this},n.prototype.removeLink=function(){return this},n.prototype.render=function(){return this.el.onselectstart=function(){return!1},this},n}(v),h=function(t){function n(){return F=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.tagName="div",n.prototype.className="node",n.prototype.sourceEndpointStyle={isSource:!0,uniqueEndpoint:!0,anchor:"RightMiddle",paintStyle:{fillStyle:"#225588",radius:9},connectorStyle:{strokeStyle:"#346789",lineWidth:2,outlineColor:"#fff",outlineWidth:1},connectorHoverStyle:{strokeStyle:"#42a62c",outlineWidth:2},maxConnections:-1},n.prototype.targetEndpointStyle={isTarget:!0,anchor:["LeftMiddle","BottomCenter"],paintStyle:{fillStyle:"#225588",radius:5},dropOptions:{hoverClass:"hover",activeClass:"active"}},n.prototype.render=function(){var t,e;return e=this.el.node=this.model,t=this.el.id=e.get("name"),this._renderModel(e),jsPlumb.draggable(this.$el),this.parentEl.appendChild(this.el),this.buildSrcEndpoint(),jsPlumb.makeTarget(this.$el,this.targetEndpointStyle,{parameters:{node:e,view:this}})},n.prototype.update=function(t){return null==t&&(t=this.model),this.$el.popover("destroy"),this._renderModel(t),jsPlumb.repaint(this.el.id),this},n.prototype._renderModel=function(t){var e;null==t&&(t=this.model),this.el.innerHTML=t.escape("title"),e=this.el.title=t.get("title"),this.el.style.left=t.x+"px",this.el.style.top=t.y+"px",this.$el.popover({container:this.parentEl,trigger:"manual",placement:"bottom",title:e})},n.prototype.buildSrcEndpoint=function(){return this.srcEndpoint!=null&&jsPlumb.deleteEndpoint(this.srcEndpoint),this.srcEndpoint=jsPlumb.addEndpoint(this.el,this.sourceEndpointStyle,{parameters:{model:this.model,view:this}}),this},n}(v),l=function(t){function n(){return D=n.__super__.constructor.apply(this,arguments)}return e(n,t),n.prototype.render=function(){var t,e,n,i;return n=this.model,t=this.conn=jsPlumb.connect({source:n.prevNode.view.srcEndpoint,target:n.nextNode.view.el,cssClass:"link",hoverClass:"hover",parameters:{link:n,view:this}}),this.setElement(t.canvas),this.label=t.getOverlay("label"),this.labelEl=this.label.canvas,i=n.get("title"),e=$(this.labelEl),i?this.labelEl.title="Link: "+i:(e.css("visibility","hidden"),this.labelEl.title="Link"),e.popover({container:this.parentEl,trigger:"manual",placement:"bottom"}),this},n}(v),b})}).call(this);
+// Generated by CoffeeScript 1.6.3
+(function() {
+  "use strict";
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  define('workflow', ['base', 'manager', 'models', 'lib/jquery-jsplumb', 'lib/jquery-ui'], function(_arg, _arg1, _arg2, jsPlumb) {
+    var Action, ActionView, Actions, BoxView, EditorView, Entity, FormDialogView, FrameView, InnerFrameView, Link, LinkEditorView, LinkView, ManagerView, ModalDialogView, NavListView, Node, NodeEditorView, NodeListView, NodeView, Nodes, View, Workflow, WorkflowCreatorView, WorkflowEditorView, WorkflowFrameView, WorkflowManagerView, WorkflowView, Workflows, find, findAll, tpl, tplAll, _ref, _ref1, _ref10, _ref11, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    find = _arg.find, findAll = _arg.findAll, tpl = _arg.tpl, tplAll = _arg.tplAll, View = _arg.View, BoxView = _arg.BoxView, FrameView = _arg.FrameView, InnerFrameView = _arg.InnerFrameView, ModalDialogView = _arg.ModalDialogView, FormDialogView = _arg.FormDialogView, NavListView = _arg.NavListView;
+    ManagerView = _arg1.ManagerView;
+    Entity = _arg2.Entity, Workflows = _arg2.Workflows, Workflow = _arg2.Workflow, Nodes = _arg2.Nodes, Node = _arg2.Node, Link = _arg2.Link, Actions = _arg2.Actions, Action = _arg2.Action;
+    WorkflowFrameView = (function(_super) {
+      __extends(WorkflowFrameView, _super);
+
+      function WorkflowFrameView() {
+        _ref = WorkflowFrameView.__super__.constructor.apply(this, arguments);
+        return _ref;
+      }
+
+      WorkflowFrameView.prototype.initialize = function(options) {
+        WorkflowFrameView.__super__.initialize.call(this, options);
+        this.editor = new WorkflowEditorView({
+          el: '#workflow_editor',
+          parent: this
+        });
+        this.manager = new WorkflowManagerView({
+          el: '#workflow_manager',
+          parent: this
+        });
+        return this;
+      };
+
+      WorkflowFrameView.prototype.open = function(name, sub) {
+        switch (name) {
+          case 'new':
+            console.log('show workflow editor with create mode');
+            this.switchTo(this.manager);
+            this.manager.create(name);
+            break;
+          case 'mgr':
+            console.log('show workflow mgr');
+            this.switchTo(this.manager);
+            break;
+          default:
+            if (!name) {
+              throw new Error('open workflow with a name or id is needed');
+            }
+            console.log('show workflow editor for', name);
+            this.switchTo(this.editor);
+            this.editor.load(name, sub);
+        }
+        return this;
+      };
+
+      return WorkflowFrameView;
+
+    })(FrameView);
+    WorkflowManagerView = (function(_super) {
+      __extends(WorkflowManagerView, _super);
+
+      function WorkflowManagerView() {
+        _ref1 = WorkflowManagerView.__super__.constructor.apply(this, arguments);
+        return _ref1;
+      }
+
+      WorkflowManagerView.prototype.columns = ['checkbox', 'id', 'name:workflow', 'desc', 'type', 'status', 'created_at', 'updated_at', 'actions:workflow'];
+
+      WorkflowManagerView.prototype.collection = new Workflows;
+
+      WorkflowManagerView.prototype.events = {
+        'click #wf_template_list .wf_tempate a': function(e) {
+          var wf;
+          e.preventDefault();
+          wf = e.target.href.match(/#workflow:(\w+)/);
+          console.log('wf template clicked', wf);
+          if (wf.length === 2) {
+            this.create(wf[1]);
+          }
+          return false;
+        }
+      };
+
+      WorkflowManagerView.prototype.initialize = function(options) {
+        var _remove;
+        WorkflowManagerView.__super__.initialize.call(this, options);
+        this.creator = new WorkflowCreatorView({
+          el: '#workflow_creator',
+          parent: this
+        });
+        _remove = this.remove.bind(this);
+        this.on({
+          remove: _remove,
+          remove_selected: _remove
+        });
+        return this;
+      };
+
+      WorkflowManagerView.prototype.create = function(template) {
+        var _this = this;
+        if (!template || /^(?:new|empty)$/i.test(template)) {
+          template = '';
+        }
+        this.creator.popup({
+          template: template
+        }, function(action, data) {
+          if (action === 'save') {
+            console.log('create new wf:', data);
+            return _this.collection.create(data, {
+              wait: true
+            });
+          }
+        });
+        return this;
+      };
+
+      WorkflowManagerView.prototype.remove = function(models) {
+        var model, _i, _len;
+        if (!Array.isArray(models)) {
+          models = [models];
+        }
+        if (confirm('Make sure these selected workflows is not in use!\nDo you realy want to remove selected workflows?')) {
+          for (_i = 0, _len = models.length; _i < _len; _i++) {
+            model = models[_i];
+            if (model != null) {
+              model.destroy();
+            }
+          }
+          if (models.length >= this.pageSize / 2) {
+            this.reload();
+          }
+        }
+        return this;
+      };
+
+      return WorkflowManagerView;
+
+    })(ManagerView);
+    WorkflowCreatorView = (function(_super) {
+      __extends(WorkflowCreatorView, _super);
+
+      function WorkflowCreatorView() {
+        _ref2 = WorkflowCreatorView.__super__.constructor.apply(this, arguments);
+        return _ref2;
+      }
+
+      WorkflowCreatorView.prototype.el = '#workflow_creator';
+
+      WorkflowCreatorView.prototype.goBackOnHidden = 'workflow/mgr';
+
+      WorkflowCreatorView.prototype.popup = function(data, callback) {
+        WorkflowCreatorView.__super__.popup.call(this, data, callback);
+        this.fill(data);
+        return this;
+      };
+
+      WorkflowCreatorView.prototype.save = function() {
+        this.data = this.read();
+        this.callback('save');
+        this.hide(true);
+        return this;
+      };
+
+      return WorkflowCreatorView;
+
+    })(FormDialogView);
+    WorkflowEditorView = (function(_super) {
+      __extends(WorkflowEditorView, _super);
+
+      function WorkflowEditorView() {
+        _ref3 = WorkflowEditorView.__super__.constructor.apply(this, arguments);
+        return _ref3;
+      }
+
+      WorkflowEditorView.prototype.events = {
+        'click .wf-save': 'save',
+        'click .wf-reset': 'reset',
+        'click #workflow_header': function() {
+          var _this = this;
+          return this.renamer.popup(this.model, function(action, wf) {
+            if (action === 'save') {
+              console.log('save name', wf);
+              _this.nameEl.textContent = wf.get('name');
+              return _this.descEl.textContent = wf.get('desc');
+            }
+          });
+        }
+      };
+
+      WorkflowEditorView.prototype.initialize = function(options) {
+        var _this = this;
+        WorkflowEditorView.__super__.initialize.call(this, options);
+        this.view = new WorkflowView({
+          el: find('#workflow_view', this.el),
+          nodeEditor: new NodeEditorView,
+          linkEditor: new LinkEditorView
+        });
+        this.nodeList = new NodeListView({
+          el: find('#node_list', this.el),
+          parent: this
+        });
+        this.renamer = new EditorView({
+          el: find('#workflow_name_editor', this.el)
+        });
+        this.btnSave = find('.wf-save', this.el);
+        this.nameEl = find('.editable-name', this.el);
+        this.descEl = find('.editable-desc', this.el);
+        this.listenTo(this.nodeList, 'select', function(id, node) {
+          console.log('select from node list', id, node);
+          if (id === 'new') {
+            node = null;
+          } else if (id) {
+            if (node == null) {
+              node = _this.model.nodes.get(id);
+            }
+          }
+          return _this.view.createNode(node);
+        });
+        return this;
+      };
+
+      WorkflowEditorView.prototype.reset = function() {
+        if (confirm('All changes will be descarded since last save, are you sure to do that?')) {
+          this.reload();
+        }
+        return this;
+      };
+
+      WorkflowEditorView.prototype.save = function() {
+        console.log('save', this.model.attributes);
+        this.model.nodes.forEach(function(node) {
+          var style;
+          node.view.el.style.zIndex = '';
+          style = node.view.el.getAttribute('style');
+          if (style !== node.get('style')) {
+            node.set('style', style);
+            return console.log('node style', node.id, style);
+          }
+        });
+        this.model.save({}, {
+          success: function(wf) {
+            return console.log('saved', wf);
+          },
+          error: function() {
+            return console.error('save failed');
+          }
+        });
+        return this;
+      };
+
+      WorkflowEditorView.prototype.load = function(wf, sub) {
+        var _load,
+          _this = this;
+        _load = function(wf) {
+          _this.view.load(wf, sub);
+          _this.nodeList.setNodes(wf.nodes);
+        };
+        if (!wf) {
+          this.id = null;
+          this.model = null;
+          this.nameEl.textContent = '';
+          this.descEl.textContent = '';
+          this.view.clear();
+        } else if (typeof wf === 'string') {
+          if (this.id === wf && !(sub != null ? sub.reload : void 0)) {
+            this.load(this.model, sub);
+          } else {
+            this.fetch(wf, function(err, wf) {
+              return _this.load(wf, sub);
+            });
+          }
+        } else if (wf.id) {
+          if (this.id === wf.id) {
+            _load(wf);
+          } else {
+            this.id = wf.id;
+            this.nameEl.textContent = wf.get('name');
+            this.descEl.textContent = wf.get('desc');
+            this.model = wf;
+            if (wf.loaded()) {
+              _load(wf);
+            } else {
+              wf.fetch({
+                success: _load
+              });
+            }
+          }
+        } else {
+          throw new Error('load neigher workflow id string nor workflow object');
+        }
+        return this;
+      };
+
+      WorkflowEditorView.prototype.reload = function() {
+        return this.load(this.id, {
+          reload: true
+        });
+      };
+
+      WorkflowEditorView.prototype.render = function() {
+        this.nodeList.render();
+        return this;
+      };
+
+      WorkflowEditorView.prototype.fetch = function(id, callback) {
+        var wf;
+        wf = this.workflow = new Workflow({
+          id: id
+        });
+        wf.fetch({
+          success: function() {
+            return callback(null, wf);
+          }
+        });
+        return this;
+      };
+
+      return WorkflowEditorView;
+
+    })(InnerFrameView);
+    NodeListView = (function(_super) {
+      __extends(NodeListView, _super);
+
+      function NodeListView() {
+        _ref4 = NodeListView.__super__.constructor.apply(this, arguments);
+        return _ref4;
+      }
+
+      NodeListView.prototype.urlRoot = 'node';
+
+      NodeListView.prototype.headerTitle = 'Common Nodes';
+
+      NodeListView.prototype.defaultItem = new Node({
+        id: 'new',
+        name: 'Empty Node'
+      });
+
+      NodeListView.prototype.itemClassName = '';
+
+      NodeListView.prototype.targetClassName = 'node thumb';
+
+      NodeListView.prototype.collection = new Nodes;
+
+      NodeListView.prototype.events = {
+        'click': function(e) {
+          var el;
+          el = e.target;
+          if (el.tagName === 'A' && el.dataset.id) {
+            e.preventDefault();
+            this.trigger('select', el.dataset.id, $(el).data('model'));
+            return false;
+          }
+        },
+        'mouseenter .node': function(e) {
+          if (!$.data(e.target, 'is-draggable')) {
+            $(e.target).draggable({
+              containment: this.parent.el,
+              helper: 'clone',
+              zIndex: 999
+            }).data('is-draggable', true);
+          }
+        }
+      };
+
+      NodeListView.prototype.setNodes = function(nodes) {
+        var render;
+        if (this.nodes !== nodes) {
+          if (this.nodes) {
+            this.stopListening(this.nodes);
+          }
+          this.nodes = nodes;
+          if (nodes) {
+            render = this.render.bind(this);
+            this.listenTo(nodes, 'reset', render);
+            this.listenTo(nodes, 'add', render);
+            this.listenTo(nodes, 'remove', render);
+          }
+          this.render();
+        }
+        return this;
+      };
+
+      NodeListView.prototype.render = function() {
+        this._clear();
+        this.el.appendChild(this._renderHeader('Shared Nodes'));
+        this._render();
+        if (this.nodes) {
+          this.el.appendChild(this._renderHeader('Used Nodes'));
+          this._render(this.nodes);
+        }
+        return this;
+      };
+
+      return NodeListView;
+
+    })(NavListView);
+    EditorView = (function(_super) {
+      __extends(EditorView, _super);
+
+      function EditorView() {
+        _ref5 = EditorView.__super__.constructor.apply(this, arguments);
+        return _ref5;
+      }
+
+      EditorView.prototype.popup = function(data, callback) {
+        var same;
+        if (!(data instanceof Entity)) {
+          throw new Error('data must be an model entity');
+        }
+        same = data === this.data;
+        EditorView.__super__.popup.call(this, data, callback);
+        if (!same) {
+          this.fill(data.attributes);
+        }
+        return this;
+      };
+
+      EditorView.prototype.save = function() {
+        this.data.set(this.read());
+        this.callback('save');
+        this.hide(true);
+        return this;
+      };
+
+      return EditorView;
+
+    })(FormDialogView);
+    NodeEditorView = (function(_super) {
+      __extends(NodeEditorView, _super);
+
+      function NodeEditorView() {
+        _ref6 = NodeEditorView.__super__.constructor.apply(this, arguments);
+        return _ref6;
+      }
+
+      NodeEditorView.prototype.el = '#node_editor';
+
+      NodeEditorView.prototype.events = {
+        'click a.action-thumb': '_addAction',
+        'shown': '_fixStyle'
+      };
+
+      NodeEditorView.prototype._too_many_actions_limit = 7;
+
+      NodeEditorView.prototype.initialize = function(options) {
+        NodeEditorView.__super__.initialize.call(this, options);
+        this.actionsEl = find('#actions', this.el);
+        this._fixStyle = this._fixStyle.bind(this);
+        $(window).on('resize', this._fixStyle);
+        $(this.actionsEl).sortable({
+          axis: 'y',
+          delay: 150,
+          distance: 15,
+          cancel: '.box-content'
+        });
+        this._too_many_alert = find('#too_many_actions_alert', this.el);
+        this.on('actions_update', this._checkActionLimit.bind(this));
+        return this;
+      };
+
+      NodeEditorView.prototype.remove = function() {
+        $(window).off('resize', this._fixStyle);
+        return NodeEditorView.__super__.remove.apply(this, arguments);
+      };
+
+      NodeEditorView.prototype._fixStyle = function() {
+        this.actionsEl.style.top = 20 + $(this.form).height() + 'px';
+      };
+
+      NodeEditorView.prototype._addAction = function(e) {
+        var matched, target;
+        e.preventDefault();
+        target = e.target;
+        matched = target.href.match(/action:(\w+)/i);
+        if (matched) {
+          this.addAction({
+            type: matched[1]
+          });
+        }
+        return false;
+      };
+
+      NodeEditorView.prototype.fill = function(attributes) {
+        NodeEditorView.__super__.fill.call(this, attributes);
+        this.clearActions();
+        this.actions = new Actions(attributes.actions || []);
+        this.actions.forEach(this.addAction.bind(this));
+        return this;
+      };
+
+      NodeEditorView.prototype.save = function() {
+        var actions;
+        console.log('save');
+        actions = findAll('.action', this.actionsEl).map(function(el) {
+          var view;
+          view = $(el).data('view');
+          if (!view) {
+            throw new Error('cannot get action from action.$el');
+          }
+          return view.read();
+        });
+        this.data.set('actions', actions);
+        console.log('save actions', actions, this.data);
+        NodeEditorView.__super__.save.apply(this, arguments);
+        return this;
+      };
+
+      NodeEditorView.prototype.reset = function() {
+        NodeEditorView.__super__.reset.apply(this, arguments);
+        return this.clearActions();
+      };
+
+      NodeEditorView.prototype.clearActions = function() {
+        var _ref7;
+        if ((_ref7 = this.actions) != null) {
+          _ref7.forEach(function(model) {
+            var _ref8;
+            return (_ref8 = model.view) != null ? _ref8.remove() : void 0;
+          });
+        }
+        this.actions = null;
+        $(findAll('.action', this.actionsEl)).remove();
+        return this;
+      };
+
+      NodeEditorView.prototype.viewAction = function(id) {
+        var el, hidden;
+        console.log('view action id:', id);
+        el = this.actionsEl.querySelector('#action_' + id);
+        if (el != null) {
+          console.log('dataset5', this.el.dataset['aria-hidden']);
+          hidden = this.el.getAttribute('aria-hidden');
+          if (hidden === 'true') {
+            this.$el.one('shown', function() {
+              return el.scrollIntoView();
+            });
+          } else if (hidden === 'false') {
+            el.scrollIntoView();
+          } else {
+            setTimeout(function() {
+              return el.scrollIntoView();
+            }, 600);
+          }
+        }
+        return el;
+      };
+
+      NodeEditorView.prototype.addAction = function(model) {
+        var actionView;
+        if (!(model instanceof Action)) {
+          model = new Action(model);
+        }
+        actionView = new ActionView({
+          model: model,
+          parent: this,
+          container: this.actionsEl
+        });
+        this.listenTo(actionView, 'remove', this.removeAction.bind(this));
+        actionView.render();
+        actionView.el.scrollIntoView();
+        this.delayedTrigger('actions_update', 100);
+        return this;
+      };
+
+      NodeEditorView.prototype.removeAction = function(view) {
+        console.log('remove action view', view);
+        if (typeof view.remove === "function") {
+          view.remove();
+        }
+        this.delayedTrigger('actions_update', 100);
+        return this;
+      };
+
+      NodeEditorView.prototype._checkActionLimit = function() {
+        var cls, count;
+        cls = this._too_many_alert.classList;
+        count = findAll('.action', this.actionsEl).length;
+        if (count > this._too_many_actions_limit) {
+          cls.add('active');
+          return this._too_many_alert.scrollIntoView();
+        } else {
+          return cls.remove('active');
+        }
+      };
+
+      return NodeEditorView;
+
+    })(EditorView);
+    ActionView = (function(_super) {
+      __extends(ActionView, _super);
+
+      function ActionView() {
+        _ref7 = ActionView.__super__.constructor.apply(this, arguments);
+        return _ref7;
+      }
+
+      ActionView.prototype.className = 'box action';
+
+      ActionView.prototype._tpl = tplAll('#actions_tpl');
+
+      ActionView.prototype.initialize = function(options) {
+        var _base;
+        ActionView.__super__.initialize.call(this, options);
+        this.containerEl = options.container;
+        this.model = options.model;
+        this.model.view = this;
+        this.type = (typeof (_base = this.model).get === "function" ? _base.get('type') : void 0) || options.model.type || options.type;
+        if (!(this.model && this.type)) {
+          throw new Error('need action model and type');
+        }
+        return this;
+      };
+
+      ActionView.prototype.remove = function() {
+        var model;
+        model = this.model;
+        model.type = null;
+        model.name = null;
+        model.data = null;
+        this.remove = function() {
+          return this;
+        };
+        return ActionView.__super__.remove.apply(this, arguments);
+      };
+
+      ActionView.prototype.render = function() {
+        var _ref8, _tpl;
+        _tpl = this._tpl[this.type];
+        if (!_tpl) {
+          console.error('unable to find tpl for action type', this.type);
+          this.remove();
+        } else {
+          this.el.innerHTML = this._tpl[this.type];
+          this.el.id = 'action_' + this.model.id || 'no_id';
+          this._name = this.$el.find('.box-header h4').text();
+          this.containerEl.insertBefore(this.el, find('.alert', this.containerEl));
+          ActionView.__super__.render.apply(this, arguments);
+          if (/webkit/i.test(navigator.userAgent)) {
+            $(this.el).disableSelection();
+          } else {
+            $('.box-header, .btn', this.el).disableSelection();
+          }
+          this.form = find('form', this.el);
+          this.fill((_ref8 = this.model) != null ? _ref8.toJSON() : void 0);
+          this.$el.data({
+            model: this.model,
+            view: this
+          });
+          this.listenTo(this.model, 'destroy', this.remove.bind(this));
+        }
+        return this;
+      };
+
+      ActionView.prototype.fill = function(data) {
+        var el, form, name, value;
+        if (!(data && this.form)) {
+          return;
+        }
+        if (!data.name) {
+          data.name = this._name;
+        }
+        if (!data.key) {
+          data.key = data.type;
+        }
+        form = this.form;
+        for (name in data) {
+          value = data[name];
+          el = form[name];
+          if ((el != null ? typeof el.getAttribute === "function" ? el.getAttribute('name') : void 0 : void 0) === name) {
+            $(el).val(value);
+          }
+        }
+        return this;
+      };
+
+      ActionView.prototype.read = function(data) {
+        var els;
+        if (!this.form) {
+          throw new Error('cannot find the form, may not rendered yet');
+        }
+        if (data == null) {
+          data = {};
+        }
+        els = [].slice.call(this.form.elements);
+        els.forEach(function(el) {
+          var $el, name;
+          $el = $(el);
+          name = $el.attr('name');
+          if (name) {
+            return data[name] = $el.val();
+          }
+        });
+        return data;
+      };
+
+      return ActionView;
+
+    })(BoxView);
+    LinkEditorView = (function(_super) {
+      __extends(LinkEditorView, _super);
+
+      function LinkEditorView() {
+        _ref8 = LinkEditorView.__super__.constructor.apply(this, arguments);
+        return _ref8;
+      }
+
+      LinkEditorView.prototype.el = '#link_editor';
+
+      return LinkEditorView;
+
+    })(EditorView);
+    WorkflowView = (function(_super) {
+      __extends(WorkflowView, _super);
+
+      function WorkflowView() {
+        _ref9 = WorkflowView.__super__.constructor.apply(this, arguments);
+        return _ref9;
+      }
+
+      WorkflowView.prototype.jsPlumbDefaults = {
+        DragOptions: {
+          zIndex: 2000
+        },
+        Endpoint: [
+          'Dot', {
+            radius: 3,
+            cssClass: 'endpoint'
+          }
+        ],
+        ConnectionsDetachable: true,
+        ReattachConnections: true,
+        HoverPaintStyle: {
+          strokeStyle: '#42a62c',
+          lineWidth: 2,
+          zIndex: 2000
+        },
+        Connector: [
+          'Flowchart', {
+            stub: [40, 60],
+            gap: 10,
+            cssClass: 'link'
+          }
+        ],
+        ConnectionOverlays: [
+          [
+            'Arrow', {
+              location: -5,
+              id: 'arrow'
+            }
+          ], [
+            'Label', {
+              location: 0.5,
+              label: 'new link',
+              id: 'label',
+              cssClass: 'link-label'
+            }
+          ]
+        ]
+      };
+
+      WorkflowView.prototype.gridDefaults = {
+        padding: 30,
+        spanX: 300,
+        spanY: 150,
+        vertical: false
+      };
+
+      WorkflowView.prototype.events = {
+        'click .node': '_togglePopover',
+        'mousedown': '_cancelPopover',
+        'click .popover .btn-delete': function(e) {
+          return this._action('remove', e);
+        },
+        'click .popover .btn-edit': function(e) {
+          return this._action('edit', e);
+        },
+        'dblclick .node': function(e) {
+          return this._action('edit', e);
+        }
+      };
+
+      WorkflowView.prototype.initialize = function(options) {
+        WorkflowView.__super__.initialize.call(this, options);
+        this.nodeEditor = options.nodeEditor;
+        this.linkEditor = options.linkEditor;
+        jsPlumb.importDefaults(this.jsPlumbDefaults);
+        this.render();
+        return this;
+      };
+
+      WorkflowView.prototype._bind = function() {
+        var view,
+          _this = this;
+        view = this;
+        jsPlumb.bind('beforeDrop', function(info) {
+          var sourceId, targetId;
+          sourceId = info.sourceId.slice(5);
+          targetId = info.targetId.slice(5);
+          if (!view.model.hasLink(sourceId, targetId)) {
+            view.createLink(sourceId, targetId);
+          }
+          return false;
+        });
+        jsPlumb.bind('dblclick', function(conn) {
+          view.editLink(conn.getParameter('link'));
+        });
+        jsPlumb.bind('click', function(conn) {
+          var label;
+          label = conn.getOverlay('label');
+          _this._togglePopover({
+            target: label.canvas
+          });
+        });
+        this.$el.droppable({
+          accept: '.node.thumb',
+          drop: function(e, ui) {
+            var node;
+            node = ui.draggable.data('model');
+            if (node instanceof Node) {
+              _this.createNode(node, function(node) {
+                var $el_offset, x, y;
+                $el_offset = _this.$el.offset();
+                x = ui.offset.left - $el_offset.left;
+                y = ui.offset.top - $el_offset.top;
+                node.set('style', "left:" + (x < 0 ? 0 : x) + "px;top:" + (y < 0 ? 0 : y) + "px");
+                return true;
+              });
+              return true;
+            } else {
+              return false;
+            }
+          }
+        });
+      };
+
+      WorkflowView.prototype._hidePopover = function() {
+        var _popped;
+        _popped = this._popped;
+        if (_popped) {
+          if (_popped._delay) {
+            _popped._delay = clearTimeout(_popped._delay);
+          }
+          $(_popped).popover('hide');
+        }
+      };
+
+      WorkflowView.prototype._cancelPopover = function(e) {
+        var org_popped;
+        if (this._popped && !this.$el.find('.popover').has(e.target).length) {
+          this._hidePopover();
+          org_popped = this._popped;
+          this._popped = null;
+          org_popped._hidding = true;
+          setTimeout(function() {
+            return delete org_popped._hidding;
+          }, 300);
+        }
+      };
+
+      WorkflowView.prototype._togglePopover = function(e) {
+        var el,
+          _this = this;
+        el = e.target;
+        if (this._popped !== el && !el._hidding) {
+          el._delay = setTimeout(function() {
+            if (_this._popped = el) {
+              $(el).popover('show');
+            }
+            return el._delay = null;
+          }, 100);
+          this._popped = el;
+        } else {
+          this._hidePopover();
+          this._popped = null;
+        }
+      };
+
+      WorkflowView.prototype._action = function(action, e) {
+        var $target, func, model;
+        $target = $(e.target);
+        if (!$target.hasClass('target')) {
+          $target = $target.parents('.target');
+        }
+        if (model = $target.data('node')) {
+          func = this[action + 'Node'];
+        } else if (model = $target.data('link')) {
+          func = this[action + 'Link'];
+        } else {
+          console.error('no node or link in data', $target, e);
+          return;
+        }
+        if (func != null) {
+          func.call(this, model);
+        }
+      };
+
+      WorkflowView.prototype.clear = function() {
+        this.el.innerHTML = '';
+        this.stopListening(this.model);
+        return this;
+      };
+
+      WorkflowView.prototype.load = function(wf, _arg3) {
+        var action, link, node, reload, _ref10;
+        _ref10 = _arg3 != null ? _arg3 : {}, link = _ref10.link, node = _ref10.node, action = _ref10.action, reload = _ref10.reload;
+        if (action && !node) {
+          throw new Error('cannot open a action without given a node');
+        }
+        if (link && node) {
+          throw new Error('node and link cannot be open together');
+        }
+        if (wf !== this.model || reload) {
+          this.clear();
+          this.model = wf;
+          this.listenTo(this.model.nodes, 'add', this._addNode.bind(this));
+          this.listenTo(this.model.links, 'add', this._addLink.bind(this));
+          this._renderModel(wf);
+          this.hash = "#workflow/" + wf.id;
+        }
+        if (node) {
+          this.editNode(wf.nodes.get(node));
+          if (action) {
+            this.nodeEditor.viewAction(action);
+          }
+        } else if (link) {
+          this.editLink(wf.links.get(link));
+        } else {
+          this.nodeEditor.cancel();
+          this.linkEditor.cancel();
+        }
+        return this;
+      };
+
+      WorkflowView.prototype._sortNodeViews = function(nodes) {
+        var grid, padding, spanX, spanY, traval, vertical, _ref10;
+        nodes.lonely = [];
+        nodes.start = [];
+        nodes.end = [];
+        nodes.forEach(function(node) {
+          var _ref10;
+          if ((node.inLinks.length === (_ref10 = node.outLinks.length) && _ref10 === 0)) {
+            return nodes.lonely.push(node);
+          } else if (node.inLinks.length === 0) {
+            return nodes.start.push(node);
+          } else if (node.outLinks.length === 0) {
+            return nodes.end.push(node);
+          }
+        });
+        grid = this.grid = [nodes.start.concat(nodes.lonely)];
+        _ref10 = this.gridDefaults, vertical = _ref10.vertical, padding = _ref10.padding, spanX = _ref10.spanX, spanY = _ref10.spanY;
+        (traval = function(level) {
+          var nextLevel, _ref11;
+          nextLevel = [];
+          if ((_ref11 = grid[level]) != null) {
+            _ref11.forEach(function(node, i) {
+              var _ref12;
+              node.gridX = i;
+              node.gridY = level;
+              if (vertical) {
+                node.x = i * spanX;
+                node.y = level * spanY;
+              } else {
+                node.x = level * spanX;
+                node.y = i * spanY;
+              }
+              node.x += padding;
+              node.y += padding;
+              if ((_ref12 = node.outLinks) != null) {
+                _ref12.forEach(function(link) {
+                  if (link.nextNode.gridX == null) {
+                    nextLevel.push(link.nextNode);
+                  }
+                });
+              }
+            });
+          }
+          if (nextLevel.length) {
+            grid[level + 1] = nextLevel;
+            traval(level + 1);
+          }
+        })(0);
+        console.log('grid', grid);
+      };
+
+      WorkflowView.prototype._renderModel = function(wf) {
+        var _this = this;
+        console.log('render wf', wf);
+        wf = this.model;
+        if (wf == null) {
+          throw new Error('workflow not loaded');
+        }
+        if (!(wf.nodes.length && wf.nodes.at(0).has('style'))) {
+          this._sortNodeViews(wf.nodes);
+        }
+        jsPlumb.ready(function() {
+          wf.nodes.forEach(_this._addNode.bind(_this));
+          wf.links.forEach(_this._addLink.bind(_this));
+        });
+      };
+
+      WorkflowView.prototype.addNode = function(node) {
+        if (node == null) {
+          node = 'emtpy';
+        }
+        if (node === 'new' || node === 'empty') {
+          console.log('add a empty node');
+          return this.createNode();
+        } else if (!(node instanceof Node)) {
+          console.error('add a invalid node', node);
+          throw new Error('add a invalid node');
+        }
+        console.log('add node', node);
+        this.model.createNode(node);
+        return this;
+      };
+
+      WorkflowView.prototype._addNode = function(node) {
+        var view;
+        view = node.view = new NodeView({
+          model: node,
+          parent: this
+        });
+        view.render();
+        this.el.appendChild(view.el);
+      };
+
+      WorkflowView.prototype.createNode = function(node, callback) {
+        var desc, name,
+          _this = this;
+        if (!node || node.id === 'new') {
+          node = new Node;
+        } else if (node instanceof Node && node.id) {
+          node = node.clone();
+          name = node.get('name');
+          desc = node.get('desc');
+          node.set({
+            template_id: node.id,
+            key: node.get('key') + '_clone',
+            name: name + ' (Clone)',
+            desc: desc ? desc + ' (Clone)' : null
+          });
+          node.unset('style');
+          node.unset('id');
+        } else if (node.name) {
+          node = new Node(node);
+        } else {
+          console.error('invalid node to create', node);
+          return;
+        }
+        this.nodeEditor.popup(node, function(action, node) {
+          if (action === 'save') {
+            if (false !== (typeof callback === "function" ? callback(node) : void 0)) {
+              return _this.model.createNode(node);
+            }
+          } else {
+            return console.log('canceled or ignored create node', action);
+          }
+        });
+        return this;
+      };
+
+      WorkflowView.prototype.editNode = function(node) {
+        var hash,
+          _this = this;
+        if (!(node != null ? node.id : void 0)) {
+          return this;
+        }
+        this.nodeEditor.popup(node, function(action, node) {
+          if (action === 'save') {
+            node.view.update(node);
+            console.log('saved node', node);
+          } else {
+            console.log('canceled or ignored edit node', action);
+          }
+          if (action !== 'ignored') {
+            return location.hash = _this.hash;
+          }
+        });
+        hash = "" + this.hash + "/node/" + node.id;
+        if (location.hash.indexOf(hash) === -1) {
+          this.nodeEditor.$el.one('shown', function() {
+            return location.hash = hash;
+          });
+        }
+        return this;
+      };
+
+      WorkflowView.prototype.removeNode = function(node) {
+        if (!(node != null ? node.id : void 0)) {
+          return this;
+        }
+        if (confirm("Delete the node: " + (node.get('name')) + "?")) {
+          console.log('remove node', node);
+          node.destroy();
+        }
+        return this;
+      };
+
+      WorkflowView.prototype.createLink = function(from, to, callback) {
+        var data, name,
+          _this = this;
+        if (!(from.id && from.has('name'))) {
+          from = this.model.nodes.get(from);
+        }
+        if (!(to.id && to.has('name'))) {
+          to = this.model.nodes.get(to);
+        }
+        name = "" + (from.get('name')) + "_to_" + (to.get('name'));
+        data = new Link({
+          name: name.slice(0, 33).toLowerCase(),
+          prev_node_id: from.id,
+          next_node_id: to.id
+        });
+        this.linkEditor.popup(data, function(action, link) {
+          if (action === 'save') {
+            if (false !== (typeof callback === "function" ? callback(link) : void 0)) {
+              return _this.model.createLink(link);
+            }
+          } else {
+            return console.log('canceled or ignored create link', action);
+          }
+        });
+        return this;
+      };
+
+      WorkflowView.prototype._addLink = function(link) {
+        var view;
+        view = link.view = new LinkView({
+          model: link,
+          parent: this
+        });
+        view.render();
+      };
+
+      WorkflowView.prototype.editLink = function(link) {
+        var hash,
+          _this = this;
+        if (!(link != null ? link.id : void 0)) {
+          return this;
+        }
+        this.linkEditor.popup(link, function(action, link) {
+          if (action === 'save') {
+            link.view.update(link);
+            console.log('saved link', link);
+          } else {
+            console.log('canceled or ignored edit link', action);
+          }
+          if (action !== 'ignored') {
+            return location.hash = _this.hash;
+          }
+        });
+        hash = "" + this.hash + "/link/" + link.id;
+        if (location.hash.indexOf(hash) === -1) {
+          this.linkEditor.$el.one('shown', function() {
+            return location.hash = hash;
+          });
+        }
+        return this;
+      };
+
+      WorkflowView.prototype.removeLink = function(link) {
+        if (!(link != null ? link.id : void 0)) {
+          return this;
+        }
+        if (confirm("Delete the link: " + (link.get('name') || '(No Name)') + "?")) {
+          console.log('remove node', link);
+          link.destroy();
+        }
+        return this;
+      };
+
+      WorkflowView.prototype.render = function() {
+        this._bind();
+        this.el.onselectstart = function() {
+          return false;
+        };
+        return this;
+      };
+
+      return WorkflowView;
+
+    })(View);
+    NodeView = (function(_super) {
+      __extends(NodeView, _super);
+
+      function NodeView() {
+        _ref10 = NodeView.__super__.constructor.apply(this, arguments);
+        return _ref10;
+      }
+
+      NodeView.prototype.tagName = 'div';
+
+      NodeView.prototype.className = 'node';
+
+      NodeView.prototype.sourceEndpointStyle = {
+        isSource: true,
+        uniqueEndpoint: true,
+        anchor: 'RightMiddle',
+        paintStyle: {
+          fillStyle: '#225588',
+          radius: 9
+        },
+        connectorStyle: {
+          strokeStyle: '#346789',
+          lineWidth: 2,
+          outlineColor: '#fff',
+          outlineWidth: 1
+        },
+        connectorHoverStyle: {
+          strokeStyle: '#42a62c',
+          outlineWidth: 2
+        },
+        maxConnections: -1
+      };
+
+      NodeView.prototype.targetEndpointStyle = {
+        isTarget: true,
+        anchor: ['LeftMiddle', 'BottomCenter'],
+        paintStyle: {
+          fillStyle: '#225588',
+          radius: 5
+        },
+        dropOptions: {
+          hoverClass: 'hover',
+          activeClass: 'active'
+        }
+      };
+
+      NodeView.prototype._popover_tpl = tpl('#t_popover');
+
+      NodeView.prototype.render = function() {
+        var node, param;
+        node = this.el.node = this.model;
+        this.el.id = 'node_' + node.id;
+        this.listenTo(node, 'destroy', this.remove.bind(this));
+        this._renderModel(node);
+        jsPlumb.draggable(this.$el, {
+          stack: '.node'
+        });
+        this.parentEl.appendChild(this.el);
+        param = {
+          parameters: {
+            node: node,
+            view: this
+          }
+        };
+        this.srcEndpoint = jsPlumb.addEndpoint(this.$el, this.sourceEndpointStyle, param);
+        jsPlumb.makeTarget(this.$el, this.targetEndpointStyle, param);
+        return this;
+      };
+
+      NodeView.prototype.update = function(node) {
+        if (node == null) {
+          node = this.model;
+        }
+        this.$el.popover('destroy');
+        this._renderModel(node);
+        jsPlumb.repaint(this.el.id);
+        return this;
+      };
+
+      NodeView.prototype._renderModel = function(node) {
+        var name, _ref11;
+        if (node == null) {
+          node = this.model;
+        }
+        this.el.innerHTML = node.escape('name');
+        name = node.get('name');
+        if (node.has('style')) {
+          this.el.setAttribute('style', node.get('style'));
+        } else {
+          this.el.style.left = node.x + 'px';
+          this.el.style.top = node.y + 'px';
+        }
+        this.$el.addClass('target').data({
+          node: node,
+          view: this
+        });
+        this.$el.popover({
+          container: this.parentEl,
+          trigger: 'manual',
+          placement: 'bottom',
+          title: name,
+          html: true,
+          content: this._popover_tpl.replace('{desc}', node.get('desc') || '')
+        });
+        this.$popover = this.$el.data('popover').tip();
+        if ((_ref11 = this.$popover) != null) {
+          _ref11.addClass('target').data({
+            node: node,
+            view: this
+          });
+        }
+      };
+
+      NodeView.prototype.remove = function() {
+        this.$el.popover('destroy');
+        jsPlumb.deleteEndpoint(this.srcEndpoint);
+        jsPlumb.deleteEndpoint(this);
+        return NodeView.__super__.remove.apply(this, arguments);
+      };
+
+      return NodeView;
+
+    })(View);
+    LinkView = (function(_super) {
+      __extends(LinkView, _super);
+
+      function LinkView() {
+        _ref11 = LinkView.__super__.constructor.apply(this, arguments);
+        return _ref11;
+      }
+
+      LinkView.prototype._popover_tpl = NodeView.prototype._popover_tpl;
+
+      LinkView.prototype.render = function() {
+        var conn, link;
+        link = this.model;
+        link.view = this;
+        conn = this.conn = jsPlumb.connect({
+          source: link.prevNode.view.srcEndpoint,
+          target: link.nextNode.view.el,
+          cssClass: 'link',
+          hoverClass: 'hover',
+          parameters: {
+            link: link,
+            view: this
+          }
+        });
+        this.setElement(conn.canvas);
+        this.listenTo(link, 'destroy', this.remove.bind(this));
+        this.label = conn.getOverlay('label');
+        this.labelEl = this.label.canvas;
+        this._renderLabel(link);
+        return this;
+      };
+
+      LinkView.prototype.update = function(link) {
+        if (link == null) {
+          link = this.model;
+        }
+        this._destroyPopover();
+        this._renderLabel(link);
+        return this;
+      };
+
+      LinkView.prototype._renderLabel = function(link) {
+        var label$el, name, _ref12;
+        label$el = $(this.labelEl);
+        name = link.get('name');
+        this.label.setLabel(name || '');
+        label$el.css('visibility', name ? 'visible' : 'hidden');
+        label$el.popover({
+          container: this.parentEl,
+          title: name || 'Link',
+          trigger: 'manual',
+          placement: 'bottom',
+          html: true,
+          content: this._popover_tpl.replace('{desc}', link.get('desc') || '')
+        });
+        this.$popover = label$el.data('popover').tip();
+        if ((_ref12 = this.$popover) != null) {
+          _ref12.addClass('target').data({
+            link: link,
+            view: this
+          });
+        }
+        return this;
+      };
+
+      LinkView.prototype._destroyPopover = function() {
+        return $(this.labelEl).popover('destroy');
+      };
+
+      LinkView.prototype.remove = function() {
+        console.log('remove', this.conn, this.model, this);
+        jsPlumb.detach(this.conn);
+        this._destroyPopover();
+        return LinkView.__super__.remove.apply(this, arguments);
+      };
+
+      return LinkView;
+
+    })(View);
+    return WorkflowFrameView;
+  });
+
+}).call(this);

@@ -1,1 +1,518 @@
-(function(){"use strict";var t={}.hasOwnProperty,n=function(n,e){function i(){this.constructor=n}for(var r in e)t.call(e,r)&&(n[r]=e[r]);return i.prototype=e.prototype,n.prototype=new i,n.__super__=e.prototype,n};define("console",["lib/common"],function(t){var e,i,r,o,s,a,u,c,l,p,h,f,_,y,d,m,g,v,w,b,z,k,E,L,V,S,T,F,P,x,O,I,B,q,C;return v=function(t,n){return null==n&&(n=document),n.querySelector(t)},w=function(t,n){return null==n&&(n=document),[].slice.call(n.querySelectorAll(t))},m=function(t){function e(){return b=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.initialize=function(t){this.el.view=this,(null!=t?t.parent:void 0)&&(this.parent=t.parent,this.parentEl=this.parent.el)},e}(Backbone.View),e=function(t){function e(){return z=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.el="#main",e.get=function(){return this.instance==null&&(this.instance=new this),this.instance},e.prototype.initialize=function(){var t=this;this.frames={},w(".frame",this.el).forEach(function(n){var e;e=v('#navbar a[href="#'+n.id+'"]'),t.frames[n.id]={id:n.id,el:n,parent:t,navEl:null!=e?e.parentElement:void 0}}),["home","content","profile"].forEach(function(n){return t.frames[n]=new o(t.frames[n])}),this.fixStyles()},e.prototype.fixStyles=function(){var t,n;n=v("#navbar",this.el),t=v("#frames",this.el),(window.onresize=function(){var e;e=n.clientHeight||41,t.style.top=e+"px"})()},e.prototype.showFrame=function(t,n){var e,i,r=this;t=this.frames[t],null!=t&&(console.log("frame",t),t instanceof o?typeof t.open=="function"&&t.open(n):require([t.id],function(e){t=r.frames[t.id]=new e(t),t.render(),typeof t.open=="function"&&t.open(n)}),t.el.classList.contains("active")||((e=v("#main .frame.active"))!=null&&e.classList.remove("active"),(i=v("#navbar li.active"))!=null&&i.classList.remove("active"),t.el.classList.add("active"),t.navEl.classList.add("active"),$(window).resize()))},e.prototype.signout=function(){delete sessionStorage.user,f.get().show(),this.hide(),this.trigger("signout")},e.prototype.show=function(){this.el.style.visibility="visible",this.el.classList.add("active"),this.el.style.opacity=1},e.prototype.hide=function(){var t=this;this.el.classList.remove("active"),setTimeout(function(){t.el.style.visibility="hidden"},f.prototype.delay)},e}(m),s=function(t){function e(){return F=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.initialize=function(t){e.__super__.initialize.call(this,t)},e}(m),o=function(t){function e(){return P=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.initialize=function(t){var n;e.__super__.initialize.call(this,t),this.navEl=t.navEl||((n=v('#navbar a[href="#'+this.id+'"]'))!=null?n.parentElement:void 0)},e.prototype.switchTo=function(t){var n,e;"string"==typeof t&&(t=this[t]),t&&t instanceof s?(t.el.classList.contains("active")||(console.log("switch inner-frame",(n=t.el)!=null?n.id:void 0),(e=v(".inner-frame.active[name]",this.el))!=null&&e.classList.remove("active"),t.el.classList.add("active")),t.rendered||(t.render(),t.rendered=!0)):console.warn("inner frame cannot find",frameName)},e}(m),a=function(t){function e(){return x=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.initialize=function(t){var n=this;e.__super__.initialize.call(this,t),this.$el.modal({show:!1,backdrop:"static"}),this.$el.on("hidden",this.callback.bind(this)),w("button[data-action]",this.el).forEach(function(t){var e;return e=n[t.dataset.action],"function"==typeof e?t.onclick=e.bind(n):console.warn("unknow action",t.dataset.action,t)})},e.prototype.popup=function(t,n){return this.data=t,this._callback=n,this.show(!0)},e.prototype.callback=function(t){null==t&&(t="cancel"),this._callback!=null&&(typeof this._callback=="function"&&this._callback(t,this.data),this.reset())},e.prototype.reset=function(){return this.data=null,this._callback=null,this},e.prototype.cencel=function(){return this.hide(!0)},e.prototype.show=function(t){return this.shown=null!=t?t:!0,this.$el.modal(this.shown?"show":"hide"),this},e.prototype.hide=function(t){return null==t&&(t=!0),this.show(!t)},e}(m),f=function(t){function i(){return O=i.__super__.constructor.apply(this,arguments)}return n(i,t),i.prototype.el="#signin",i.get=function(){return this.instance==null&&(this.instance=new this),this.instance},i.prototype.events={"submit form":"submit"},i.prototype.initialize=function(t){i.__super__.initialize.call(this,t),sessionStorage.user?this.signedIn():this.show()},i.prototype.submit=function(){return console.log("sign in"),this.signedIn(),!1},i.prototype.signedIn=function(){var t;t={id:"test",name:"test"},sessionStorage.user=JSON.stringify(t),this.trigger("success",t),this.hide(),e.get().show(),/signin/i.test(location.hash)&&(location.hash="")},i.prototype.delay=500,i.prototype.show=function(){var t=this;this.el.style.opacity=0,this.el.style.display="block",setTimeout(function(){t.el.classList.add("active"),t.el.style.opacity=1},1)},i.prototype.hide=function(){var t=this;this.el.classList.remove("active"),this.el.style.opacity=0,setTimeout(function(){t.el.style.display="none"},this.delay)},i}(m),g=function(t){function e(){return I=e.__super__.constructor.apply(this,arguments)}return n(e,t),e}(s),i=function(t){function e(){return B=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.set=function(t){return e.__super__.set.call(this,t)},e.prototype.validate=function(t){return t.name&&t.id?/\w{,10}/.test(t.name)?void 0:"name max len is 10 and must be consist of alphabetic char or _":"id and name are required"},e}(Backbone.Model),y=function(t){function e(){return q=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.model=_,e.prototype.url="/",e}(Backbone.Collection),_=function(t){function e(){return C=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.url=function(){return ROOT+"/"+this.name+"/profile"},e}(i),d=function(t){function e(){return k=e.__super__.constructor.apply(this,arguments)}return n(e,t),e}(i),c=function(t){function e(){return E=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.model=u,e.prototype.url="/users",e}(Backbone.Collection),p=function(t){function e(){return L=e.__super__.constructor.apply(this,arguments)}return n(e,t),e.prototype.model=l,e.prototype.url=function(){return this.tenant.url()+"/users"},e}(Backbone.Collection),u=function(t){function e(){return V=e.__super__.constructor.apply(this,arguments)}return n(e,t),e}(d),l=function(t){function e(){return S=e.__super__.constructor.apply(this,arguments)}return n(e,t),e}(d),r=function(t){function e(){return T=e.__super__.constructor.apply(this,arguments)}return n(e,t),e}(d),h=function(t){function i(t){var n=this;i.__super__.constructor.call(this,t),this.route("","home",function(){return n.navigate("home",{replace:!0}),n.show("home")}),this.frames.forEach(function(t){n.route(t+"(/:name)",t,function(e){return n.show(t,e)})}),this.route("signin","signin",function(){}),this.route("signout","signout")}return n(i,t),i.get=function(){return this.instance==null&&(this.instance=new this),this.instance},i.prototype.frames=["home","project","workflow","calendar","content","report","config","profile"],i.prototype.show=function(t,n){var i,r;return sessionStorage.user?(console.log("route",t,n||""),(r=e.get())!=null&&r.showFrame(t,n),i=this[t],null!=i&&i.call(this,n),void 0):(this.navigate("signin",{replace:!0}),void 0)},i.prototype.signout=function(){console.log("sign out"),e.get().signout(),this.navigate("signin",{replace:!0})},i}(Backbone.Router),{async:t,find:v,findAll:w,View:m,ConsoleView:e,FrameView:o,InnerFrameView:s,ModalDialogView:a,SignInView:f,Entity:i,Tenants:y,Tenant:_,User:d,Participants:c,Publichers:p,Participant:u,Publicher:l,Evalutator:r,Router:h}})}).call(this);
+// Generated by CoffeeScript 1.6.3
+(function() {
+  "use strict";
+  var __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  define('console', ['base'], function(_arg) {
+    var ConsoleView, FrameView, Router, SignInView, Tenant, User, View, find, findAll, _ref, _ref1;
+    find = _arg.find, findAll = _arg.findAll, View = _arg.View, FrameView = _arg.FrameView, Tenant = _arg.Tenant, User = _arg.User;
+    ConsoleView = (function(_super) {
+      __extends(ConsoleView, _super);
+
+      function ConsoleView() {
+        _ref = ConsoleView.__super__.constructor.apply(this, arguments);
+        return _ref;
+      }
+
+      ConsoleView.prototype.el = '#main';
+
+      ConsoleView.prototype.user = sessionStorage.user;
+
+      ConsoleView.prototype.tenant = sessionStorage.tenant;
+
+      ConsoleView.prototype.events = {
+        'touchstart #navbar .dropdown > a': function(e) {
+          var $el;
+          $el = $(e.currentTarget).parent();
+          if ($el.hasClass('hover')) {
+            setTimeout(function() {
+              return $el.removeClass('hover');
+            }, 500);
+            return true;
+          } else {
+            e.preventDefault();
+            e.stopPropagation();
+            this.$dropdowns.not($el).removeClass('hover');
+            $el.addClass('hover');
+            this.$el.one('touchstart', function(e) {
+              if (!$el.has(e.target).length) {
+                return $el.removeClass('hover');
+              }
+            });
+            return false;
+          }
+        },
+        'mouseenter #navbar ul.nav > li': function(e) {
+          return e.currentTarget.classList.add('hover');
+        },
+        'mouseleave #navbar ul.nav > li': function(e) {
+          return e.currentTarget.classList.remove('hover');
+        },
+        'click #navbar .dropdown-menu li': function(e) {
+          return $(e.currentTarget).parents('.dropdown').removeClass('hover');
+        },
+        'click #navbar .dropdown > a': function(e) {
+          var $el, _t;
+          $el = $(e.currentTarget).parent();
+          if ($el.hasClass('hover')) {
+            _t = setTimeout(function() {
+              _t = null;
+              return $el.removeClass('hover');
+            }, 500);
+            $(e.currentTarget).one('mouseleave', function() {
+              if (_t) {
+                return _t = clearTimeout(_t);
+              }
+            });
+          }
+          return true;
+        }
+      };
+
+      ConsoleView.get = function() {
+        if (this.instance == null) {
+          this.instance = new this;
+        }
+        return this.instance;
+      };
+
+      ConsoleView.prototype.initialize = function() {
+        var tenant, user,
+          _this = this;
+        user = tenant = null;
+        try {
+          if (this.user) {
+            user = new User(JSON.parse(this.user));
+            if (!user.has('email')) {
+              user = null;
+            }
+          }
+          if (this.tenant) {
+            tenant = new Tenant(JSON.parse(this.tenant));
+            if (!tenant.has('name')) {
+              tenant = null;
+            }
+          }
+        } catch (_error) {}
+        this.user = user;
+        this.tenant = tenant;
+        this.avatarEl = find('img#avatar');
+        this.usernameEl = find('#username');
+        this.frames = {};
+        findAll('.frame', this.el).forEach(function(frame) {
+          return _this.frames[frame.id] = {
+            id: frame.id,
+            el: frame,
+            parent: _this
+          };
+        });
+        this.navContainer = find('#navbar', this.el);
+        this.framesContainer = find('#frames', this.el);
+        this._fixStyle = this._fixStyle.bind(this);
+        $(window).on('resize', this._fixStyle);
+        this.$frames = $('#navbar [data-frame]');
+        this.$dropdowns = $(this.navContainer).find('.dropdown');
+        this.$el.tooltip({
+          selector: '[title]'
+        });
+        return this;
+      };
+
+      ConsoleView.prototype._fixStyle = function() {
+        var h;
+        h = this.navContainer.clientHeight || 41;
+        return this.framesContainer.style.top = h + 'px';
+      };
+
+      ConsoleView.prototype.remove = function() {
+        $(window).off('resize', this._fixStyle);
+        return ConsoleView.__super__.remove.apply(this, arguments);
+      };
+
+      ConsoleView.prototype.showFrame = function(frame, name, sub) {
+        var $frame, $target, oldFrame, view, _ref1,
+          _this = this;
+        frame = this.frames[frame];
+        if (frame == null) {
+          return;
+        }
+        if (!frame.el.classList.contains('active')) {
+          oldFrame = find('.frame.active', this.el);
+          if (oldFrame) {
+            oldFrame.classList.remove('active');
+            view = $.data(oldFrame, 'view');
+            if (view) {
+              setTimeout(function() {
+                return view.trigger('deactivate');
+              }, 10);
+            }
+          }
+          if ((_ref1 = find('#navbar li.active')) != null) {
+            _ref1.classList.remove('active');
+          }
+          frame.el.classList.add('active');
+          $(window).resize();
+          console.log('frame', frame);
+        }
+        if (frame instanceof FrameView) {
+          frame.trigger('activate');
+          if (typeof frame.open === "function") {
+            frame.open(name, sub);
+          }
+        } else {
+          console.log('load module:', frame.id);
+          require([frame.id], function(TheFrameView) {
+            frame = _this.frames[frame.id] = new TheFrameView(frame);
+            frame.render();
+            frame.trigger('activate');
+            return typeof frame.open === "function" ? frame.open(name, sub) : void 0;
+          });
+        }
+        $frame = this.$frames.filter("[data-frame='" + frame.id + "']").addClass('active');
+        $target = $frame.find("[data-inner-frame='" + name + "']").addClass('active');
+        this.$frames.not($frame).removeClass('active');
+        this.$frames.find(".active[data-inner-frame]").not($target).removeClass('active');
+        return this;
+      };
+
+      ConsoleView.prototype.signout = function() {
+        delete sessionStorage.user;
+        delete sessionStorage.tenant;
+        this.user = this.tenant = null;
+        SignInView.get().show();
+        this.hide();
+        this.trigger('signout');
+        return this;
+      };
+
+      ConsoleView.prototype.signin = function(user, tenant, remember) {
+        var u;
+        this.user = user;
+        this.tenant = tenant;
+        if (remember) {
+          u = user.toJSON();
+          delete u.password;
+          sessionStorage.user = JSON.stringify(u);
+          sessionStorage.tenant = JSON.stringify(tenant.toJSON());
+          console.log('logged in', u);
+        } else {
+          delete sessionStorage.user;
+          delete sessionStorage.tenant;
+        }
+        this.avatarEl.src = "https://secure.gravatar.com/avatar/" + (user.get('email_md5')) + "?s=20&d=mm";
+        $(this.usernameEl).text("" + (user.get('first_name')) + " " + (user.get('last_name')));
+        return this.show();
+      };
+
+      ConsoleView.prototype.show = function() {
+        this.el.style.visibility = 'visible';
+        this.el.classList.add('active');
+        this.el.style.opacity = 1;
+        return this;
+      };
+
+      ConsoleView.prototype.hide = function() {
+        var _this = this;
+        this.el.classList.remove('active');
+        setTimeout(function() {
+          return _this.el.style.visibility = 'hidden';
+        }, SignInView.prototype.delay);
+        return this;
+      };
+
+      return ConsoleView;
+
+    })(View);
+    SignInView = (function(_super) {
+      __extends(SignInView, _super);
+
+      function SignInView() {
+        _ref1 = SignInView.__super__.constructor.apply(this, arguments);
+        return _ref1;
+      }
+
+      SignInView.prototype.el = '#signin';
+
+      SignInView.get = function() {
+        if (this.instance == null) {
+          this.instance = new this;
+        }
+        return this.instance;
+      };
+
+      SignInView.prototype.events = {
+        'submit form': 'submit'
+      };
+
+      SignInView.prototype.delay = 500;
+
+      SignInView.prototype.initialize = function(options) {
+        var remember, tenant, user, _ref2;
+        SignInView.__super__.initialize.call(this, options);
+        this.form = find('form', this.el);
+        this.form.remember.checked = remember = localStorage.marxo_sign_in_remember === 'true';
+        if (remember) {
+          this.form.email.value = localStorage.marxo_sign_in_email;
+        }
+        _ref2 = ConsoleView.get(), user = _ref2.user, tenant = _ref2.tenant;
+        if ((user instanceof User) && (tenant instanceof Tenant)) {
+          this.signedIn(user, tenant);
+        } else {
+          this.show();
+        }
+        return this;
+      };
+
+      SignInView.prototype.submit = function(e) {
+        var email, password;
+        e.preventDefault();
+        email = this.form.email.value.trim();
+        password = this.form.password.value.trim();
+        if (!email) {
+          this.form.email.focus();
+          alert('Please fill out the Email!');
+        } else if (!/.+@.+\..+/.test(email)) {
+          this.form.email.select();
+          alert('The Email is invalid!');
+        } else if (!password) {
+          this.form.password.focus();
+          alert('Password is required!');
+        } else {
+          this._signIn(email);
+        }
+        return false;
+      };
+
+      SignInView.prototype._disable = function(val) {
+        return $(this.form.elements).prop('disabled', val);
+      };
+
+      SignInView.prototype._signIn = function(email) {
+        var tenant, user;
+        this._disable(true);
+        user = new User({
+          email: email,
+          first_name: 'Test',
+          last_name: 'User',
+          tenant_id: 0
+        });
+        tenant = new Tenant({
+          id: 0,
+          name: 'Marxo',
+          desc: 'Marxo dev group',
+          contact: 'Wilson Young',
+          email: 'wilson@gmail.com',
+          tel: '(408) 888-8888',
+          fax: '(408) 888-8888',
+          addr: 'One Washington Square, San Jose, CA 95112'
+        });
+        return this.signedIn(user, tenant);
+      };
+
+      SignInView.prototype.signedIn = function(user, tenant) {
+        var remember;
+        this.trigger('success', user, tenant);
+        this.hide();
+        localStorage.marxo_sign_in_remember = remember = this.form.remember.checked;
+        localStorage.marxo_sign_in_email = remember ? this.form.email.value : '';
+        ConsoleView.get().signin(user, tenant, remember);
+        if (/signin/i.test(location.hash)) {
+          this.router.back({
+            fallback: 'home'
+          });
+        }
+        return this;
+      };
+
+      SignInView.prototype.show = function() {
+        var _this = this;
+        this.el.style.opacity = 0;
+        this.el.style.display = 'block';
+        this._disable(false);
+        setTimeout(function() {
+          _this.el.classList.add('active');
+          return _this.el.style.opacity = 1;
+        }, 1);
+        return this;
+      };
+
+      SignInView.prototype.hide = function() {
+        var _this = this;
+        this.el.classList.remove('active');
+        this.el.style.opacity = 0;
+        setTimeout(function() {
+          _this.form.password.value = '';
+          _this._disable(false);
+          return _this.el.style.display = 'none';
+        }, this.delay);
+        return this;
+      };
+
+      return SignInView;
+
+    })(View);
+    Router = (function(_super) {
+      __extends(Router, _super);
+
+      Router.get = function() {
+        if (this.instance == null) {
+          this.instance = new this;
+        }
+        return this.instance;
+      };
+
+      Router.prototype.routes = {
+        'workflow/:id(/link/:link)(/node/:node)(/action/:action)': function(id, link, node, action) {
+          return this.show('workflow', id, {
+            link: link,
+            node: node,
+            action: action
+          });
+        },
+        'project/:id(/link/:link)(/node/:node)(/action/:action)': function(id, link, node, action) {
+          return this.show('project', id, {
+            link: link,
+            node: node,
+            action: action
+          });
+        },
+        'content/:id(/:action)': function(id, action) {
+          return this.show('content', id, action);
+        },
+        'config/:name(/:sub)': function(name, sub) {
+          return this.show('config', name, sub);
+        },
+        'event/calendar(/:id)': function(id) {
+          return this.show('event', 'calendar', id);
+        },
+        'signout': 'signout'
+      };
+
+      function Router(options) {
+        var frame, frameMenu, innerFrame, innerMenu, _fn, _frame, _i, _inner, _j, _len, _len1, _ref2, _ref3,
+          _this = this;
+        Router.__super__.constructor.call(this, options);
+        this.route('', 'home', function() {
+          _this.navigate('home', {
+            replace: true
+          });
+          return _this.show('home');
+        });
+        this.route('signin', 'signin', function() {});
+        this.frames = {};
+        _ref2 = findAll('[data-frame]', find('#navbar'));
+        _fn = function(frame) {
+          return _this.route(frame + '(/:name)(/)', frame, function(name) {
+            return _this.show(frame, name);
+          });
+        };
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          frameMenu = _ref2[_i];
+          frame = frameMenu.dataset.frame;
+          _frame = this.frames[frame] = {
+            _name: frame
+          };
+          _ref3 = findAll('[data-inner-frame]', frameMenu);
+          for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+            innerMenu = _ref3[_j];
+            innerFrame = innerMenu.dataset.innerFrame;
+            _inner = _frame[innerFrame] = {
+              _name: innerFrame
+            };
+            if (innerMenu.dataset["default"]) {
+              _frame._cur = _inner;
+            }
+          }
+          _fn(frame);
+        }
+        this.on('route', function() {
+          _this._last = _this._cur;
+          return _this._cur = Backbone.history.fragment;
+        });
+      }
+
+      Router.prototype.back = function(opt) {
+        var hash;
+        if (opt == null) {
+          opt = {};
+        }
+        if (opt.trigger == null) {
+          opt.trigger = true;
+        }
+        if (opt.replace == null) {
+          opt.replace = false;
+        }
+        if (opt.real) {
+          hash = location.hash;
+          history.go(-1);
+          if (typeof opt.fallback === 'string') {
+            setTimeout(function() {
+              if (location.hash === hash) {
+                return this.navigate(opt.fallback, opt);
+              }
+            }, 100);
+          }
+        } else if (this._last) {
+          this.navigate(this._last, opt);
+        } else if (typeof opt.fallback === 'string') {
+          this.navigate(opt.fallback, opt);
+        } else {
+          console.log('failed to go back for no last record');
+        }
+        return this;
+      };
+
+      Router.prototype.show = function(frame, name, sub) {
+        var handler, _frame, _ref2, _ref3;
+        if (ConsoleView.get().user == null) {
+          this.navigate('signin', {
+            replace: true
+          });
+        } else {
+          console.log('route', frame, name || '', sub || '');
+          _frame = this.frames[frame];
+          if ((_frame._cur != null) && !name) {
+            name = (_ref2 = _frame._cur) != null ? _ref2._name : void 0;
+            if (name) {
+              this.navigate("#" + frame + "/" + name, {
+                replace: true
+              });
+            }
+          }
+          if (name) {
+            _frame._cur = _frame[name];
+          }
+          this.frames._cur = _frame;
+          if ((_ref3 = ConsoleView.get()) != null) {
+            _ref3.showFrame(frame, name, sub);
+          }
+          handler = this[frame];
+          if (handler != null) {
+            handler.call(this, name);
+          }
+        }
+        return this;
+      };
+
+      Router.prototype.signout = function() {
+        console.log('sign out');
+        ConsoleView.get().signout();
+        this.navigate('signin', {
+          replace: true
+        });
+        return this;
+      };
+
+      return Router;
+
+    })(Backbone.Router);
+    View.prototype.router = Router.get();
+    return {
+      ConsoleView: ConsoleView,
+      SignInView: SignInView,
+      Router: Router
+    };
+  });
+
+}).call(this);

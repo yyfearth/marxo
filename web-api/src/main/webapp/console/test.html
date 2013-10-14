@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>Loading... - MARXO Console</title>
+    <link href="css/console.css" rel="stylesheet" media="screen">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head>
+  <body style="opacity:0">
+    <div id="signin" class="mask">
+      <div class="container-fluid">
+        <form class="form-signin">
+          <h2 class="form-signin-heading">Please sign in</h2>
+          <input type="email" name="email" placeholder="Email" maxlength="255" required class="input-block-level">
+          <input type="password" name="password" placeholder="Password" maxlength="2048" required class="input-block-level">
+          <label class="checkbox">
+            <input type="checkbox" name="remember">Remember me
+          </label>
+          <button type="submit" class="btn btn-large btn-primary">Sign in</button>
+        </form>
+      </div>
+    </div>
+    <div id="main">
+      <div id="navbar" class="navbar navbar-static-top">
+        <div class="navbar-inner container-fluid"><a href="#" class="brand">MARXO</a>
+          <ul class="nav pull-right">
+            <li data-frame="profile" class="dropdown"><a href="#profile"><img id="avatar" src="https://secure.gravatar.com/avatar?s=20&amp;d=mm"><span id="username">(Username)</span><b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li data-frame="profile"><a href="#profile" class="icon-user">Profile</a></li>
+                <li data-frame="notification"><a href="#notification" class="icon-notify">Notifications</a></li>
+                <li class="divider"></li>
+                <li><a href="#signout" class="icon-logout">Sign Out</a></li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav">
+            <li data-frame="home"><a href="#home" class="icon-home">Home</a></li>
+            <li data-frame="project" class="dropdown"><a href="#project" class="icon-project">Project<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li data-inner-frame="wiz" class="tmp"><a href="#project/wiz" class="icon-wizard">New Project Wizard</a></li>
+                <li data-inner-frame="new"><a href="#project/new" class="icon-new">Create new Project</a></li>
+                <li class="divider"></li>
+                <li data-inner-frame="mgr" data-default="true"><a href="#project/mgr" class="icon-manager">Manage Projects</a></li>
+              </ul>
+            </li>
+            <li data-frame="workflow" class="dropdown"><a href="#workflow" class="icon-workflow">Workflow<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li data-inner-frame="new"><a href="#workflow/new" class="icon-new">Create new Workflow</a></li>
+                <li class="divider"></li>
+                <li data-inner-frame="mgr" data-default="true"><a href="#workflow/mgr" class="icon-manager">Manage Workflows</a></li>
+              </ul>
+            </li>
+            <li data-frame="event" class="dropdown"><a href="#event" class="icon-calendar">Event<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li data-inner-frame="calendar" data-default="true"><a href="#event/calendar" class="icon-calendar">Calendar</a></li>
+                <li class="divider"></li>
+                <li data-inner-frame="mgr"><a href="#event/mgr" class="icon-manager">Manage Events</a></li>
+              </ul>
+            </li>
+            <li data-frame="content"><a href="#content" class="icon-page">Content</a></li>
+            <li data-frame="report"><a href="#report" class="icon-report">Report</a></li>
+            <li data-frame="config" class="dropdown"><a href="#config" class="icon-config">Configuration<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li data-inner-frame="tenant" data-default="true"><a href="#config/tenant" class="icon-config">Tenant Profile</a></li>
+                <li data-inner-frame="service"><a href="#config/service" class="icon-connect">Connect Services</a></li>
+                <li class="divider"></li>
+                <li data-inner-frame="users"><a href="#config/users" class="icon-users">Manage Members</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div id="frames">
+        <div id="home" class="frame container-fluid">
+          <div class="active row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="sidebar-list nav nav-list">
+                  <li class="nav-header">Notification</li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">...</li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <div id="home_view" class="content-view">
+                <div id="project_overview_tpl" class="tpl">
+                  <div class="row-fluid">
+                    <div class="well">
+                      <div class="page-header">
+                        <h3>{{name}}<small>{{counts}}</small></h3>
+                      </div>
+                      <p>{{desc}}</p>
+                      <p>{{status}}</p><a href="#project/{{id}}" class="btn">View details &raquo;</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="project" class="frame container-fluid">
+          <div id="project_editor" aria-labelledby="project_editor_title" aria-hidden="true" class="modal modal-full hide fade">
+            <div class="modal-header">
+              <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+              <h3 id="project_editor_title">Project Editor</h3>
+            </div>
+            <div class="modal-body">
+              <div class="sidebar well">
+                <ul class="sidebar-list nav nav-list">
+                  <li class="nav-header">Project</li>
+                  <li class="sidebar-item project-item"><a>Project Info</a></li>
+                  <li class="nav-header node-header">Nodes</li>
+                  <li class="nav-header link-header">Links</li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">...</li>
+                </ul>
+              </div>
+              <div class="content">
+                <form class="form-project form-horizontal">
+                  <div class="control-group">
+                    <label for="workflow_id" class="control-label">Workflow</label>
+                    <div class="controls">
+                      <select id="workflow_id" name="workflow_id" required>
+                        <option value="">(Please Select)</option>
+                      </select>
+                      <button type="button" class="btn btn-primary btn-select hide">Select</button>
+                      <button type="button" class="btn btn-revert hide">Revert</button>
+                    </div>
+                  </div>
+                  <div id="wf_preview" class="well hide"></div>
+                  <div class="control-group">
+                    <label for="project_name" class="control-label">Name</label>
+                    <div class="controls">
+                      <input id="project_name" type="text" name="name" placeholder="Project Name" maxlength="255" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="project_key" class="control-label">Key</label>
+                    <div class="controls">
+                      <input id="project_key" type="text" name="key" placeholder="project_name" pattern="[a-z0-9_\-]{3,32}" maxlength="32" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="project_desc" class="control-label">Description</label>
+                    <div class="controls">
+                      <textarea id="project_desc" name="desc" cols="30" rows="3" maxlength="2048" placeholder="Description"></textarea>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="modal-footer"><a class="btn btn-info pull-left btn-view hide">View</a>
+              <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+              <button disabled class="btn btn-primary btn-save">Save</button>
+            </div>
+          </div>
+          <div id="project_viewer" name="viewer" class="row-fluid inner-frame">
+            <h4>Project Viewer</h4>
+          </div>
+          <div id="project_manager" name="manager" class="active row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div id="wf_template_list" class="well">
+                <ul class="workflow-list sidebar-list nav nav-list">
+                  <li class="nav-header">Workflows</li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">
+                    Click a Workflow above
+                    to Add a new Project based on the selected Workflow.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <ul class="action-bar">
+                <li class="head">Project Manager</li>
+                <li class="action-buttons pull-right">
+                  <button name="reload" title="Reload Table" class="btn icon-refresh">Reload</button>
+                  <button title="Batch Control Selected" disabled class="btn btn-danger enable_if_selected">Operation</button>
+                </li>
+                <li class="grid-filter"></li>
+              </ul>
+              <div id="t_project_action_cell" class="tpl"><a title="View" name="view" href="#project/{{id}}" class="btn btn-info btn-round icon-search"></a>
+                <button title="Remove" name="remove" class="btn btn-danger btn-round icon-close"></button>
+              </div>
+              <div class="grid-scroller">
+                <table class="grid-table">
+                  <caption class="loading icon-spinner animate-spin"></caption>
+                </table>
+              </div>
+              <div class="grid-paginator"></div>
+            </div>
+          </div>
+        </div>
+        <div id="workflow" class="frame container-fluid">
+          <div id="workflow_editor" name="editor" class="row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well">
+                <ul id="node_list" class="sidebar-list nav">
+                  <li class="nav-header">Common Nodes</li>
+                  <li><a href="#node:new" class="node">Empty Node</a></li>
+                  <li class="nav-header">Used Nodes</li>
+                  <li class="nav-header">Shared Nodes</li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">
+                    Click a Node above
+                    or Drag a Node from Sidebar to Workflow Editor
+                    to Add a new Node.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <div class="page-header">
+                <div class="action-buttons pull-right"><a href="#workflow/mgr" title="Go back to Workflow Manager" data-placement="bottom" class="btn">Back to List</a>
+                  <button title="Reset workflow to previous save" data-placement="bottom" class="btn btn-danger wf-reset">Reset</button>
+                  <button title="Save the workflow" data-placement="bottom" class="btn btn-primary wf-save">Save</button>
+                </div>
+                <h3 id="workflow_header" title="Change Workflow Title and Description" data-placement="bottom"><span class="editable-name"></span><small class="editable-desc"></small></h3>
+              </div>
+              <div id="workflow_view" class="content-view"></div>
+              <div id="t_popover" class="tpl">
+                <div class="popover-desc">{desc}</div>
+                <div class="popover-buttons">
+                  <button class="btn btn-danger btn-delete pull-left">Delete</button>
+                  <button class="btn btn-primary btn-edit">Edit</button>
+                </div>
+              </div>
+            </div>
+            <div id="node_editor" aria-labelledby="node_editor_title" aria-hidden="true" class="modal modal-full hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="node_editor_title">Node Editor</h3>
+              </div>
+              <div class="modal-body">
+                <div class="sidebar well">
+                  <ul id="action_list" class="sidebar-list nav nav-list">
+                                <li class="nav-header">Content Page</li>
+                                <li><a href="#action:post_page" data-placement="bottom" title="Generate an information page or survey form using templates and post as a web page" class="action-thumb">Post Page or Form</a></li>
+                                <li class="nav-header">Social Media</li>
+                                <li><a href="#action:post_to_multi_social_media" title="Post the same message to multiple selected social media" class="action-thumb">Post to Social Media</a></li>
+                                <li><a href="#action:post_to_twitter" title="Post message to Twitter" class="action-thumb">Post to Twitter</a></li>
+                                <li><a href="#action:post_to_facebook" title="Post message to Facebook" class="action-thumb">Post to Facebook</a></li>
+                                <li class="nav-header">Email</li>
+                                <li><a href="#action:send_email" title="Send email to selected email addresses" class="action-thumb">Send Email</a></li>
+                                <li class="nav-header">Schedule</li>
+                                <li><a href="#action:make_schedule" title="Create an event in calendar" class="action-thumb">Make Schedule</a></li>
+                                <li class="nav-header">Report</li>
+                                <li><a href="#action:generate_report" title="Generate report from selected tracking data" class="action-thumb">Generate Report</a></li>
+                                <li class="tmp"><a href="#action:calc_data" title="Do some calculation on existing tracking data" class="action-thumb">Calculate Data</a></li>
+                  </ul>
+                  <ul class="sidebar-bottom nav nav-list">
+                    <li class="divider"></li>
+                    <li class="nav-header">Tips</li>
+                    <li class="tips">Click a item above to add a Action to the list in the right.</li>
+                  </ul>
+                </div>
+                <form class="form-horizontal">
+                  <div class="control-group">
+                    <label for="node_title" class="control-label">Name</label>
+                    <div class="controls">
+                      <input id="node_title" type="text" name="name" placeholder="Node Name" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="node_name" class="control-label">Key</label>
+                    <div class="controls">
+                      <input id="node_name" type="text" name="key" placeholder="node_name" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="node_desc" class="control-label">Description</label>
+                    <div class="controls">
+                      <textarea id="node_desc" name="desc" rows="1" placeholder="Description" class="input-xlarge"></textarea>
+                    </div>
+                  </div>
+                </form>
+                <div class="action_tpls tpl">
+                              <div id="actions_tpl" class="tpl">
+                                <div name="post_page" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Post Page or Form</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <ul class="action-bar">
+                                      <li>
+                                                    <select name="template" disabled class="tmp">
+                                                      <option>(Select from Template)</option>
+                                                    </select>
+                                      </li>
+                                      <li><a href="#page" class="btn btn-primary">Design</a></li>
+                                      <li><a href="about:blank" class="btn btn-info">Preview</a></li>
+                                      <li>
+                                                    <label class="checkbox inline">
+                                                      <input type="checkbox" name="track" checked>Track
+                                                    </label>
+                                      </li>
+                                    </ul>
+                                    <div class="info">(Page Info)</div>
+                                    <div class="help-block">Information Page is a web page to display information.<br>Click "Design" button to design the page.<br>Click "Preview" button to preview the generated page.</div>
+                                  </form>
+                                </div>
+                                <div name="post_to_multi_social_media" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Post to Multiple Social Media</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <ul class="action-bar">
+                                      <li>
+                                                    <div data-toggle="buttons-checkbox" class="btn-group">
+                                                      <button type="button" value="twitter" class="btn active">Twitter</button>
+                                                      <button type="button" value="facebook" class="btn active">Facebook</button>
+                                                    </div>
+                                      </li>
+                                      <li>
+                                                    <select name="template" disabled class="tmp">
+                                                      <option>(Select from Template)</option>
+                                                    </select>
+                                      </li>
+                                      <li>
+                                                    <label class="checkbox inline">
+                                                      <input type="checkbox" name="track" checked>Track
+                                                    </label>
+                                      </li>
+                                    </ul>
+                                                <textarea name="post_content" placeholder="Post Content..." title="Content post to social media (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
+                                    <div class="help-block">The maximium content length is 140, which is limited by Twitter.<br>Use "Post to Facebook" action instead for longer content length.</div>
+                                  </form>
+                                </div>
+                                <div name="post_to_twitter" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Post to Twitter</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <ul class="action-bar">
+                                      <li>
+                                                    <select name="template" disabled class="tmp">
+                                                      <option>(Select from Template)</option>
+                                                    </select>
+                                      </li>
+                                      <li>
+                                                    <label class="checkbox inline">
+                                                      <input type="checkbox" name="track" checked>Track
+                                                    </label>
+                                      </li>
+                                    </ul>
+                                                <textarea name="post_content" placeholder="Post Content..." title="Content post to Twitter (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
+                                    <div class="help-block">The maximium content length is 140, which is limited by Twitter.</div>
+                                  </form>
+                                </div>
+                                <div name="post_to_facebook" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Post to Facebook</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <ul class="action-bar">
+                                      <li>
+                                                    <select name="template" disabled class="tmp">
+                                                      <option>(Select from Template)</option>
+                                                    </select>
+                                      </li>
+                                      <li>
+                                                    <label class="checkbox inline">
+                                                      <input type="checkbox" name="track" checked>Track
+                                                    </label>
+                                      </li>
+                                    </ul>
+                                                <textarea name="post_content" placeholder="Post Content..." title="Content post to Facebook (63206 max)" rows="3" maxlength="63206" class="input-block-level"></textarea>
+                                    <div class="help-block">The maximium content length is 63206, which is limited by Facebook.</div>
+                                  </form>
+                                </div>
+                                <div name="send_email" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Send Email</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <div class="input-prepend input-block-level"><span class="add-on">To</span>
+                                      <input name="email_to" title="Send To" type="text" placeholder="email_1@example.com; email_2@example.com" class="span11">
+                                    </div>
+                                                <select name="template" disabled class="tmp">
+                                                  <option>(Select from Template)</option>
+                                                </select>
+                                                <label class="checkbox inline">
+                                                  <input type="checkbox" name="track" checked>Track
+                                                </label>
+                                    <textarea name="email_content" placeholder="Email Content..." title="Content for email (1000 max)" rows="5" maxlength="1000" class="input-block-level"></textarea>
+                                  </form>
+                                </div>
+                                <div name="generate_report" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Generate Report</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <label class="checkbox">
+                                      <input type="checkbox" name="auto" checked>Generate form all tracked sources of this node.
+                                    </label>
+                                    <label>Tracked Sources (Input the name of tracked sources in each line)
+                                      <textarea name="sources" class="input-block-level"></textarea>
+                                    </label>
+                                    <div class="help-block">Generate Report for selected tracked sources</div>
+                                  </form>
+                                </div>
+                                <div name="calc_data" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Calculate Data</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <div class="help-block">Calculate Data</div>
+                                  </form>
+                                </div>
+                                <div name="make_schedule" class="tpl">
+                                  <div class="box-header well">
+                                    <h4>Make Schedule</h4>
+                                                <div class="box-icon">
+                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
+                                                  <button class="btn btn-close btn-round icon-close"></button>
+                                                </div>
+                                  </div>
+                                  <form class="box-content">
+                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                                                <div class="help-inline">(Action Name and Key)</div>
+                                    <div data-toggle="buttons-radio" class="btn-group">
+                                      <button type="button" name="type" value="auto" class="btn active">Starts Automatically</button>
+                                      <button type="button" name="type" value="manual" class="btn">Starts Manually</button>
+                                    </div>
+                                    <label>Duration
+                                      <input type="text" name="duration" placeholder="1 day 2 hours">
+                                    </label>
+                                    <div class="help-block">It will create an event in the Calendar, and notifications will be sent before its starts or ends.<br>Leave Druation blank or 0 to make it ends manually or schedule it later.</div>
+                                  </form>
+                                </div>
+                              </div>
+                </div>
+                <div id="actions" class="well">
+                  <div id="too_many_actions_alert" class="alert"><strong>Too many actions!&nbsp;</strong>Keep the logic of a node simple to understand and excute.</div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Save</button>
+              </div>
+            </div>
+            <div id="link_editor" aria-labelledby="link_editor_title" aria-hidden="true" class="modal hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="link_editor_title">Link Editor</h3>
+              </div>
+              <div class="modal-body">
+                <form class="form-horizontal">
+                  <div class="control-group">
+                    <label for="link_title" class="control-label">Name</label>
+                    <div class="controls">
+                      <input id="link_title" type="text" name="title" placeholder="Link Name">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="link_name" class="control-label">Key</label>
+                    <div class="controls">
+                      <input id="link_name" type="text" name="key" placeholder="link_name" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="link_desc" class="control-label">Description</label>
+                    <div class="controls">
+                      <textarea id="link_desc" name="desc" cols="30" rows="3" placeholder="Description"></textarea>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="link_conditional" class="control-label">Condition</label>
+                    <div class="controls">
+                      <label id="link_conditional" title="Wait until the condition is fulfilled" class="checkbox">
+                        <input type="checkbox" name="conditional">Enable
+                      </label>
+                      <select disabled>
+                        <option>(Select Option)</option>
+                      </select>
+                      <div class="block">
+                        <button type="button" title="Add another OR condition" class="btn btn-round">or</button>
+                        <button type="button" title="Add another AND condition" class="btn btn-info btn-round">and</button>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Save</button>
+              </div>
+            </div>
+            <div id="workflow_name_editor" aria-labelledby="workflow_name_editor_header" aria-hidden="true" class="modal hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="workflow_name_editor_header">Rename Workflow</h3>
+              </div>
+              <div class="modal-body">
+                <form class="form-horizontal">
+                  <div class="control-group">
+                    <label for="wf_rename_name" class="control-label">Name</label>
+                    <div class="controls">
+                      <input id="wf_rename_name" type="text" name="name" placeholder="Workflow Name">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="wf_rename_key" class="control-label">Key</label>
+                    <div class="controls">
+                      <input id="wf_rename_key" type="text" name="key" placeholder="workflow_name" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="wf_rename_desc" class="control-label">Description</label>
+                    <div class="controls">
+                      <textarea id="wf_rename_desc" name="desc" cols="30" rows="3" placeholder="Description"></textarea>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Save</button>
+              </div>
+            </div>
+          </div>
+          <div id="workflow_manager" name="manager" class="active row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div id="wf_template_list" class="well">
+                <ul class="sidebar-list nav nav-list">
+                  <li class="nav-header">Templates</li>
+                  <li class="wf_tempate"><a href="#workflow:new">Empty Workflow</a></li>
+                  <li class="nav-header">Workflows</li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">
+                    Click a Template above
+                    to Add a new Workflow based on the selected template.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <ul class="action-bar">
+                <li class="head">Workflow Manager</li>
+                <li class="action-buttons pull-right">
+                  <button name="reload" title="Reload Table" class="btn icon-refresh">Reload</button>
+                  <button name="remove_selected" title="Remove Selected" disabled class="btn btn-danger icon-close enable_if_selected">Remove</button>
+                </li>
+                <li class="grid-filter"></li>
+              </ul>
+              <div id="t_workflow_action_cell" class="tpl"><a title="Edit" name="edit" href="#workflow/{{id}}" class="btn btn-primary btn-round icon-edit"></a>
+                <button title="Remove" name="remove" class="btn btn-danger btn-round icon-close"></button>
+              </div>
+              <div class="grid-scroller">
+                <table class="grid-table">
+                  <caption class="loading icon-spinner animate-spin"></caption>
+                </table>
+              </div>
+              <div class="grid-paginator"></div>
+            </div>
+            <div id="workflow_creator" aria-labelledby="wf_creator_title" aria-hidden="true" class="modal hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="wf_creator_title">Create Workflow</h3>
+              </div>
+              <div class="modal-body">
+                <form class="form-horizontal">
+                  <div class="control-group">
+                    <label for="wf_template" class="control-label">Template</label>
+                    <div class="controls">
+                      <select id="wf_template" name="template">
+                        <option value="">Empty Workflow</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="wf_name" class="control-label">Name</label>
+                    <div class="controls">
+                      <input id="wf_name" type="text" name="name" placeholder="Workflow Name" maxlength="32" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="wf_key" class="control-label">Key</label>
+                    <div class="controls">
+                      <input id="wf_key" type="text" name="key" placeholder="wf_name" pattern="[a-z0-9_\-]{3,32}" maxlength="32" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="wf_desc" class="control-label">Description</label>
+                    <div class="controls">
+                      <textarea id="wf_desc" name="desc" cols="30" rows="3" maxlength="2048" placeholder="Description"></textarea>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Create</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="event" class="frame container-fluid">
+          <div id="event_editor" aria-labelledby="event_editor_title" aria-hidden="true" class="modal hide fade">
+            <div class="modal-header">
+              <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+              <h3 id="event_editor_title">Event Editor</h3>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="control-group">
+                  <label for="event_title" class="control-label">Title</label>
+                  <div class="controls">
+                    <input id="event_title" type="text" name="title" placeholder="Event Name" required>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="event_name" class="control-label">Name</label>
+                  <div class="controls">
+                    <input id="event_name" type="text" name="name" placeholder="event_name" required>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="event_desc" class="control-label">Description</label>
+                  <div class="controls">
+                    <textarea id="event_desc" name="desc" cols="30" rows="2" placeholder="Description"></textarea>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label class="control-label">Date Info</label>
+                  <div class="controls">
+                    <p class="info help-block"></p>
+                  </div>
+                </div>
+                <div class="control-group tmp">
+                  <label for="event_duration" class="control-label">Auto Start</label>
+                  <div class="controls">
+                    <label class="checkbox">
+                      <input type="checkbox" name="auto_start" disabled>Auto Start at Start Date
+                    </label>
+                    <div class="help-block">
+                      Auto start when the Start Date reached, or when action start to execution without Start Date.
+                      Otherwise only notification will be sent, and require to start manually.
+                    </div>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="event_starts" class="control-label">Start Date</label>
+                  <div class="controls">
+                    <input id="event_starts" type="datetime" name="starts" placeholder="The Date of Execution"><small class="help-block"><em>Format like "01/01/2010 01:01 AM"</em><br>Blank means it will be set to the date of execution automatically.</small>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="event_ends" class="control-label">End Date</label>
+                  <div class="controls">
+                    <input id="event_ends" type="datetime" name="ends" placeholder="Manual"><small class="help-block"><em>Format like "01/01/2010 01:01 AM"</em></small>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="event_duration" class="control-label">Duration</label>
+                  <div class="controls">
+                    <input id="event_duration" type="text" name="duration" placeholder="e.g. 10 days 4 hours"><small class="help-block"><em>Format in "10 days 4 hours" from weeks to ms</em><br>Leave Druation and End Date blank needs end it manually or schedule it later.</small>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="event_status" class="control-label">Status</label>
+                  <div class="controls">
+                    <input id="event_status" type="text" name="status" readonly>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button title="View event in Calendar" class="btn btn-info pull-left btn-view">View</button>
+              <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+              <button class="btn btn-primary btn-save">Save</button>
+            </div>
+          </div>
+          <div id="event_calendar" name="calendar" class="active row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well">
+                <ul class="sidebar-list nav">
+                  <li class="nav-header">Events</li>
+                  <li><a href="#" class="external-event">Empty</a></li>
+                  <li><a href="#" class="external-event">Empty</a></li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">...</li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <div id="calendar_view" class="content-view">
+                <div class="loading icon-spinner animate-spin"></div>
+              </div>
+            </div>
+          </div>
+          <div id="event_manager" name="manager" class="row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="project-list sidebar-list nav nav-list">
+                  <li class="nav-header">Projects</li>
+                  <li><a href="#project:all">All</a></li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">Click Project List above to filter by project.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <ul class="action-bar">
+                <li class="head">Event Manager</li>
+                <li class="action-buttons pull-right"><a href="#event/calendar" title="View Events in Calendar" class="btn btn-info icon-calendar">Calendar</a>
+                  <button name="reload" title="Reload Table" class="btn icon-refresh">Reload</button>
+                </li>
+                <li class="grid-filter"></li>
+              </ul>
+              <div id="t_event_action_cell" class="tpl"><a title="Edit" name="edit" href="#event/{{id}}" class="btn btn-primary btn-round icon-edit"></a><a title="View in Calendar" name="view" href="#event/calendar/{{id}}" class="btn btn-info btn-round icon-calendar"></a>
+                <button title="Skip" name="skip" class="btn btn-warning btn-round icon-right-open"></button>
+              </div>
+              <div class="grid-scroller">
+                <table id="event_table" class="grid-table"></table>
+              </div>
+              <div class="grid-paginator"></div>
+            </div>
+          </div>
+        </div>
+        <div id="content" class="frame container-fluid">
+          <div class="active row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="project-list sidebar-list nav nav-list">
+                  <li class="nav-header">Projects</li>
+                  <li><a href="#project:all">All</a></li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">
+                    Click Project List above to filter by project,
+                    or click Tabs above to filter by media.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <div id="content_view" class="content-view">
+                <ul class="action-bar">
+                  <li class="action-buttons pull-right">
+                    <button name="reload" title="Reload Table" class="btn icon-refresh">Reload</button>
+                  </li>
+                  <li class="pull-left">
+                    <ul class="media-filter nav nav-pills">
+                      <li class="active"><a href="#media:all">All</a></li>
+                      <li><a href="#media:page" class="icon-page">Page</a></li>
+                      <li><a href="#media:facebook" class="icon-facebook">Facebook</a></li>
+                      <li><a href="#media:twitter" class="icon-twitter">Twitter</a></li>
+                      <li><a href="#media:email" class="icon-mail">Email</a></li>
+                    </ul>
+                  </li>
+                  <li class="grid-filter"></li>
+                </ul>
+                <div id="t_content_action_cell" class="tpl"><a title="View report" name="report" class="btn btn-success btn-round icon-report"></a><a title="Edit" name="edit" href="#content/{{id}}" class="btn btn-primary btn-round icon-edit"></a><a title="Preview" name="preview" href="#content/{{id}}/preview" class="btn btn-info btn-round icon-view"></a><a title="View post in new window" name="view" target="_blank" class="btn btn-round icon-link-ext"></a>
+                  <button title="Block (Stop Posting)" name="block" class="btn btn-danger btn-round icon-block"></button>
+                  <button title="Unblock (Post)" name="unblock" class="btn btn-success btn-round icon-undo"></button>
+                </div>
+                <div class="grid-scroller">
+                  <table id="content_table" class="grid-table">
+                    <caption class="loading icon-spinner animate-spin"></caption>
+                  </table>
+                </div>
+                <div class="grid-paginator"></div>
+              </div>
+            </div>
+            <div id="text_editor" aria-labelledby="text_editor_title" aria-hidden="true" class="modal hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="text_editor_title">Text Content&nbsp;<small class="media capitalized"></small></h3>
+              </div>
+              <div class="modal-body">
+                <form>
+                  <input type="text" name="title" maxlength="255" readonly class="input-block-level">
+                  <textarea id="text_desc" name="desc" rows="3" placeholder="The content ..." maxlength="65535" class="input-block-level"></textarea>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Save</button>
+              </div>
+            </div>
+            <div id="email_composer" aria-labelledby="email_composer_title" aria-hidden="true" class="modal modal-full hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="email_composer_title">Email Content</h3>
+              </div>
+              <div class="modal-body">
+                <iframe></iframe>
+                <form class="form-horizontal">
+                  <div class="control-group">
+                    <label for="page_title" class="control-label">Title</label>
+                    <div class="controls">
+                      <input id="page_title" type="text" name="title" placeholder="Title of Email" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="email_desc" class="control-label">Content</label>
+                    <div class="controls">
+                      <textarea id="email_desc" name="desc" rows="15" placeholder="The email content ..." maxlength="65535" class="input-block-level"></textarea>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-info pull-left btn-preview">Preview</button>
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Save</button>
+              </div>
+            </div>
+            <div id="page_designer" aria-labelledby="page_designer_title" aria-hidden="true" class="modal modal-full hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="page_designer_title">Page Designer</h3>
+              </div>
+              <div class="modal-body">
+                <iframe></iframe>
+                <article>
+                  <section id="page_desc" class="box">
+                    <div class="box-header well">
+                      <h4>Page Description</h4>
+                      <div class="box-icon">
+                        <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
+                      </div>
+                    </div>
+                    <div class="box-content">
+                      <form id="page_desc_form" class="form-horizontal">
+                        <div class="control-group">
+                          <label for="page_title" class="control-label">Page Title</label>
+                          <div class="controls">
+                            <input id="page_title" type="text" name="title" placeholder="The title of the page" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
+                          </div>
+                        </div>
+                        <div class="control-group">
+                          <label for="desc" class="control-label">Page Description</label>
+                          <div class="controls">
+                                        <div id="desc_editor" data-role="editor-toolbar" data-target="#desc" class="btn-toolbar">
+                                          <div class="btn-group pull-right">
+                                            <button title="Switch to Code" data-toggle="button" class="btn btn-info icon-code btn-switch"></button>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button data-toggle="dropdown" title="Font" class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></button>
+                                            <ul class="fonts-select dropdown-menu"></ul>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button data-toggle="dropdown" title="Font Size" class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></button>
+                                            <ul class="dropdown-menu">
+                                              <li><a data-edit="fontSize 5"><font size="5">Large</font></a></li>
+                                              <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
+                                              <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
+                                            </ul>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button data-edit="bold" title="Bold (Ctrl/Cmd+B)" class="btn"><i class="icon-bold"></i></button>
+                                            <button data-edit="italic" title="Italic (Ctrl/Cmd+I)" class="btn"><i class="icon-italic"></i></button>
+                                            <button data-edit="strikethrough" title="Strikethrough" class="btn"><i class="icon-strike"></i></button>
+                                            <button data-edit="underline" title="Underline (Ctrl/Cmd+U)" class="btn"><i class="icon-underline"></i></button>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button data-edit="insertunorderedlist" title="Bullet list" class="btn"><i class="icon-list-bullet"></i></button>
+                                            <button data-edit="insertorderedlist" title="Number list" class="btn"><i class="icon-list-numbered"></i></button>
+                                            <button data-edit="outdent" title="Reduce indent (Shift+Tab)" class="btn"><i class="icon-indent-left"></i></button>
+                                            <button data-edit="indent" title="Indent (Tab)" class="btn"><i class="icon-indent-right"></i></button>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button data-edit="justifyleft" title="Align Left" class="btn"><i class="icon-align-left"></i></button>
+                                            <button data-edit="justifycenter" title="Center" class="btn"><i class="icon-align-center"></i></button>
+                                            <button data-edit="justifyright" title="Align Right" class="btn"><i class="icon-align-right"></i></button>
+                                            <button data-edit="justifyfull" title="Justify" class="btn"><i class="icon-align-justify"></i></button>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button data-edit="unlink" title="Remove Hyperlink" class="btn"><i class="icon-unlink"></i></button>
+                                            <button data-toggle="dropdown" title="Hyperlink" class="btn hyperlink dropdown-toggle"><i class="icon-link"></i></button>
+                                            <ul class="dropdown-menu">
+                                              <li class="input-append">
+                                                <input placeholder="URL" type="text" data-edit="createLink">
+                                                <button type="button" class="btn">Add</button>
+                                              </li>
+                                            </ul>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button id="btn_picture_desc" title="Insert picture (or just drag &amp; drop)" class="btn btn-edit"><i class="icon-picture"></i>
+                                              <input type="file" data-target="#btn_picture_desc" data-edit="insertImage">
+                                            </button>
+                                          </div>
+                                          <div class="btn-group">
+                                            <button data-edit="undo" title="Undo (Ctrl/Cmd+Z)" class="btn"><i class="icon-undo"></i></button>
+                                            <button data-edit="redo" title="Redo (Ctrl/Cmd+Y)" class="btn"><i class="icon-redo"></i></button>
+                                          </div>
+                                          <div id="desc" class="rich-editor"></div>
+                                          <textarea id="desc_html" class="rich-editor-html input-block-level"></textarea>
+                                        </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </section>
+                  <div id="sections"></div>
+                  <div id="preview_tpl" class="tpl">
+                    <div name="section" class="tpl">
+                      <section>
+                        <legend class="preview-title">{{title}}</legend>
+                        <p class="preview-desc">{{desc}}</p>
+                        <div class="preview-body">{{body}}</div>
+                      </section>
+                    </div>
+                    <div name="text" class="tpl">
+                      <input type="text" placeholder="Simple Text (Single Line)" class="input-block-level">
+                    </div>
+                    <div name="textarea" class="tpl">
+                      <textarea rows="3" placeholder="Simple Text (Multiple Line)" class="input-block-level"></textarea>
+                    </div>
+                    <div name="html" class="tpl">
+                      <div data-role="editor-toolbar" class="btn-toolbar">
+                        <div class="btn-group">
+                          <button data-toggle="dropdown" disabled class="btn dropdown-toggle"><i class="icon-font"></i><b class="caret"></b></button>
+                        </div>
+                        <div class="btn-group">
+                          <button data-toggle="dropdown" disabled class="btn dropdown-toggle"><i class="icon-text-height"></i><b class="caret"></b></button>
+                        </div>
+                        <div class="btn-group">
+                          <button disabled class="btn"><i class="icon-bold"></i></button>
+                          <button disabled class="btn"><i class="icon-italic"></i></button>
+                          <button disabled class="btn"><i class="icon-strike"></i></button>
+                          <button disabled class="btn"><i class="icon-underline"></i></button>
+                        </div>
+                        <div contenteditable="true" class="rich-editor"><em>Rich</em>&nbsp;<strong>Text</strong></div>
+                      </div>
+                    </div>
+                    <div name="radio" class="tpl">
+                      <label class="radio">
+                        <input type="radio" name="{{name}}">{{text}}
+                      </label>
+                    </div>
+                    <div name="image" class="tpl">
+                      <div data-provides="fileupload" class="fileupload fileupload-new">
+                        <div style="width: 200px; height: 150px;" class="fileupload-preview thumbnail"></div>
+                        <div><span class="btn btn-file"><span class="fileupload-new">Select</span><span class="fileupload-exists">Change</span>
+                            <input type="file" accept="image/*"></span><a href="#" data-dismiss="fileupload" class="btn fileupload-exists">Remove</a></div>
+                      </div>
+                    </div>
+                    <div name="file" class="tpl">
+                      <div data-provides="fileupload" class="fileupload fileupload-new"><span class="btn btn-file"><span class="fileupload-new">Select</span><span class="fileupload-exists">Change</span>
+                          <input type="file" accept></span>&nbsp;<span class="fileupload-preview"></span>
+                        <button data-dismiss="fileupload" class="close fileupload-exists">&times;</button>
+                      </div>
+                    </div>
+                  </div>
+                  <script id="preview_html_tpl" name="html" type="text/html" class="tpl">
+                    <!doctype html>
+                    <html_tpl lang="en-US">
+                    <head>
+                    <meta charset="utf-8"/>
+                    <link href="css/preview.css" rel="stylesheet" media="screen"/>
+                    </head>
+                    <body_tpl>
+                    <div class="container">
+                    <form>
+                    {{content}}
+                    </form>
+                    </div>
+                    <scrip_tpl_t src="js/lib/preview.js"></scrip_tpl_t>
+                    </body_tpl>
+                    </html_tpl>
+                  </script>
+                  <script id="preview_submit_tpl" name="submit" type="text/html" class="tpl">
+                    <div class="form-actions">
+                    <input type="submit" class="btn btn-primary" disabled value="Submit"/>
+                    &nbsp;
+                    <input class="btn" type="reset"/>
+                    </div>
+                  </script>
+                  <section id="section_tpl" class="tpl">
+                    <div class="box-header well">
+                      <h4 class="box-title">New Section</h4>
+                      <div class="box-icon">
+                        <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button type="button" class="btn btn-close btn-round icon-close"></button>
+                      </div>
+                    </div>
+                    <div class="box-content">
+                      <form id="section_#_form" class="form-horizontal">
+                        <div class="control-group">
+                          <label for="section_#_title" class="control-label">Section Title</label>
+                          <div class="controls">
+                            <input id="section_#_title" name="section_title" type="text" placeholder="The title of the section" maxlength="255" required class="input-large"><span title="Required" class="help-inline">*</span>
+                          </div>
+                        </div>
+                        <div class="control-group">
+                          <label for="section_#_desc" class="control-label">Section Description</label>
+                          <div class="controls">
+                            <textarea id="section_#_desc" name="section_desc" rows="3" placeholder="The description of the section" maxlength="65535" class="input-block-level"></textarea>
+                          </div>
+                        </div>
+                        <div class="control-group">
+                          <label for="section_#_type" class="control-label">Section Type</label>
+                          <div class="controls">
+                            <select id="section_#_type" name="section_type" class="input-xlarge">
+                              <option value="" checked>Description Only (No Question)</option>
+                              <option value="text">Simple Text</option>
+                              <option value="html">Rich Text</option>
+                              <option value="radio">Multiple Selection</option>
+                              <option value="file">File Upload</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="control-group hide option-field text-option">
+                          <label for="section_#_multiline" class="control-label">Simple Text Option</label>
+                          <div class="controls">
+                            <label class="checkbox">
+                              <input id="section_#_multiline" name="text_multiline" type="checkbox">Support Multiple Line
+                            </label>
+                          </div>
+                        </div>
+                        <div class="control-group hide option-field file-option">
+                          <label for="section_#_file_accept" class="control-label">File Type</label>
+                          <div class="controls">
+                            <select id="section_#_file_accept" name="file_accept">
+                              <option value="" checked>Any</option>
+                              <option value="image/*">Image Only</option>
+                              <option value="video/*">Video Only</option>
+                              <option value="audio/*">Audio Only</option>
+                              <option value="audio/*|video/*|image/*">Image, Video or Audio</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="control-group hide option-field radio-option">
+                          <label for="section_#_gen_from_list" class="control-label">Auto Generate Rows</label>
+                          <div class="controls">
+                            <input id="section_#_gen_from_list" name="gen_from_list" type="checkbox" title="Generate rows from a list" checked>&nbsp;
+                            <input id="section_#_gen_list_key" name="gen_list_key" type="text" title="Context Key for the List" placeholder="Context Key for the List" data-option-required>
+                          </div>
+                        </div>
+                        <div id="section_#_manual_options" class="control-group hide option-field">
+                          <label class="control-label">Manual Set Options</label>
+                          <ul class="controls">
+                            <li class="manual_option"><i class="fake-radio"></i>
+                              <input type="text" data-option-required class="manual_option_text new">
+                              <button type="button" tabindex="-1" class="close">&times;</button>
+                            </li>
+                          </ul>
+                        </div>
+                      </form>
+                      <div class="preview well"></div>
+                    </div>
+                  </section>
+                  <button id="new_section" type="button" title="Add a new section" class="btn btn-info btn-round">+</button>
+                  <section id="submit_options" class="box">
+                    <div class="box-header well">
+                      <h4>Submit Options</h4>
+                      <div class="box-icon">
+                        <button type="button" class="btn btn-minimize btn-round icon-up-open"></button>
+                      </div>
+                    </div>
+                    <div class="box-content">
+                      <form id="submit_options_form" class="form-horizontal">
+                        <div class="control-group">
+                          <label for="next_page_type" class="control-label">Next Page Type</label>
+                          <div class="controls">
+                            <label class="radio">
+                              <input type="radio" name="next_page_type" value="thanks" checked>Thanks Only
+                            </label>
+                            <label class="radio">
+                              <input type="radio" name="next_page_type" value="results" disabled>Results Page
+                            </label>
+                            <label class="radio">
+                              <input type="radio" name="next_page_type" value="page">Another Page
+                            </label>
+                            <label class="radio">
+                              <input type="radio" name="next_page_type" value="url">Jump to URL
+                            </label>
+                          </div>
+                        </div>
+                        <div class="control-group option-field thanks-option results-option">
+                          <label for="another_response" class="control-label">Next Page Option</label>
+                          <div class="controls">
+                            <label class="checkbox">
+                              <input id="another_response" type="checkbox" name="another_response">Allow Another Response
+                            </label>
+                          </div>
+                        </div>
+                        <div class="control-group option-field page-option hide">
+                          <label for="next_page_key" class="control-label">Next Page Key</label>
+                          <div class="controls">
+                            <input id="next_page_key" type="text" name="next_page_key" data-option-required><span title="Required" class="help-inline">*</span>
+                          </div>
+                        </div>
+                        <div class="control-group option-field url-option hide">
+                          <label for="next_page_url" class="control-label">Next Page URL</label>
+                          <div class="controls">
+                            <input id="next_page_url" type="url" name="next_page_url" data-option-required><span title="Required" class="help-inline">*</span>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </section>
+                </article>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-info pull-left btn-preview">Preview</button>
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="report" class="frame container-fluid">
+          <div class="active row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="project-list sidebar-list nav nav-list">
+                  <li class="nav-header">Projects</li>
+                  <li><a href="#project:all">All</a></li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">
+                    Click Project List above to filter by project,
+                    Click the link in the right table to view detailed report.
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <div id="report_view" class="report-view">
+                <ul class="action-bar">
+                  <li class="head">Report</li>
+                  <li class="pull-left tmp">
+                    <ul id="media-filter" class="nav nav-pills">
+                      <li class="active"><a href="#media:all">All</a></li>
+                      <li><a href="#media:page">Page</a></li>
+                      <li><a href="#media:facebook">Facebook</a></li>
+                      <li><a href="#media:twitter">Twitter</a></li>
+                      <li class="disabled"><a href="#media:email">Email</a></li>
+                    </ul>
+                  </li>
+                  <li class="action-buttons pull-right">
+                    <button name="reload" title="Reload Table" class="btn">Reload</button>
+                    <button name="remove_selected" title="Remove Selected" disabled class="tmp btn btn-danger enable_if_selected">Remove</button>
+                  </li>
+                  <li class="grid-filter"></li>
+                </ul>
+                <div id="t_report_action_cell" class="tpl"><a title="View post in new window" name="view" href="#report/{{id}}" class="btn btn-info btn-round icon-report"></a>
+                  <button title="Edit" name="edit" class="btn btn-primary btn-round icon-edit tmp"></button>
+                  <button title="Remove" name="remove" class="tmp btn btn-danger btn-round icon-close"></button>
+                </div>
+                <div class="grid-scroller">
+                  <table id="report_table" class="grid-table">
+                    <caption class="loading icon-spinner animate-spin"></caption>
+                  </table>
+                </div>
+                <div class="grid-paginator"></div>
+              </div>
+            </div>
+            <div id="report_viewer" aria-labelledby="report_viewer_title" aria-hidden="true" class="modal modal-full hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <ul class="nav nav-tabs">
+                  <li>
+                    <h3>Report Details</h3>
+                  </li>
+                  <li><a class="pointer">Overview</a></li>
+                  <li class="active"><a class="pointer">Evaluated Charts</a></li>
+                  <li><a class="pointer">Feedback Collection</a></li>
+                  <li><a class="pointer">Submitted Results</a></li>
+                </ul>
+              </div>
+              <div class="modal-body">
+                <div id="stacked" class="chart with-3d-shadow with-transitions">
+                  <h4>Stacked Area Chart</h4>
+                  <svg></svg>
+                </div>
+                <div id="pie" class="span5 chart">
+                  <h4>Pie Chart</h4>
+                  <svg></svg>
+                </div>
+                <div id="bar" class="span6 chart">
+                  <h4>Bar Chart</h4>
+                  <svg></svg>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="config" class="frame container-fluid">
+          <div id="tenant_profile" name="tenant" class="row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="sidebar-list nav nav-list">
+                  <li class="nav-header">Configuration</li>
+                  <li><a href="#config/tenant">Tenant Profile</a></li>
+                  <li class="nav-header">Connection</li>
+                  <li><a href="#config/service">Services Status</a></li>
+                  <li class="nav-header">Members</li>
+                  <li><a href="#config/users">Member List</a></li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">...</li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <div class="page-header">
+                <h3>Tenant Profile</h3>
+              </div>
+              <form class="form-horizontal">
+                <div class="control-group">
+                  <label for="tenant_id" class="control-label">ID</label>
+                  <div class="controls">
+                    <input id="tenant_id" type="text" placeholder="tenant_id" name="id" maxlength="64" disabled class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="tenant_name" class="control-label">Name</label>
+                  <div class="controls">
+                    <input id="tenant_name" type="text" placeholder="Organization Name" name="name" maxlength="255" disabled class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="tenant_desc" class="control-label">Description</label>
+                  <div class="controls">
+                    <textarea id="tenant_desc" placeholder="Description about the organization ..." rows="4" name="desc"></textarea>
+                  </div>
+                </div>
+                <hr>
+                <div class="control-group">
+                  <label for="contact_name" class="control-label">Contact Name</label>
+                  <div class="controls">
+                    <input id="contact_name" type="text" name="contact" placeholder="Contact Name" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_email" class="control-label">E-mail</label>
+                  <div class="controls">
+                    <input id="contact_email" type="text" name="email" placeholder="contact@email.org" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_tel" class="control-label">Tel #</label>
+                  <div class="controls">
+                    <input id="contact_tel" type="text" name="tel" placeholder="(408) 888-8888" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_fax" class="control-label">Fax</label>
+                  <div class="controls">
+                    <input id="contact_fax" type="text" name="fax" placeholder="(408) 888-9999" class="input-large">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="contact_addr" class="control-label">Address</label>
+                  <div class="controls">
+                    <input id="contact_addr" type="text" name="addr" placeholder="Contact Street Address" class="input-xxlarge">
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <input type="submit" value="Save" data-loading-text="Saving..." class="btn btn-primary">&nbsp;
+                  <input type="reset" value="Reset" class="btn">&nbsp;
+                  <input type="reset" value="Reload" title="Reset and Reload" data-loading-text="Loading..." class="btn btn-warning btn-reload">
+                </div>
+              </form>
+            </div>
+          </div>
+          <div id="service_connector" name="connector" class="row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="sidebar-list nav nav-list">
+                  <li class="nav-header">Configuration</li>
+                  <li><a href="#config/tenant">Tenant Profile</a></li>
+                  <li class="nav-header">Connection</li>
+                  <li><a href="#config/service">Services Status</a></li>
+                  <li><a href="#config/service/facebook">Facebook</a></li>
+                  <li><a href="#config/service/twitter">Twitter</a></li>
+                  <li><a href="#config/service/email">Email</a></li>
+                  <li class="nav-header">Members</li>
+                  <li><a href="#config/users">Member List</a></li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">...</li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <h3>Service Connector</h3>
+              <div id="service_status">
+                <button class="btn btn-block btn-large btn-facebook icon-facebook">Connect to Facebook</button>
+                <button disabled class="btn btn-block btn-large btn-twitter icon-twitter">Connect to Twitter</button>
+                <button disabled class="btn btn-block btn-large icon-mail">Email Service</button>
+                <div id="facebook_status" aria-hidden="true" class="modal hide fade">
+                  <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                    <h3 name="title" class="modal-title">Facebook</h3>
+                  </div>
+                  <div class="modal-body">
+                    <form class="form-horizontal">
+                      <div class="control-group">
+                        <label class="control-label">User ID</label>
+                        <div class="controls">
+                          <pre name="user_id">?</pre>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">Full Name</label>
+                        <div class="controls">
+                          <pre name="fullname">?</pre>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">User Name</label>
+                        <div class="controls">
+                          <pre name="username">?</pre>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">Locale</label>
+                        <div class="controls">
+                          <pre name="locale">?</pre>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">Home Page</label>
+                        <div class="controls">
+                          <pre><a name="link" href="?">?</a></pre>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">Expect Expires At</label>
+                        <div class="controls">
+                          <pre name="expires_at">?</pre>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">Status</label>
+                        <div class="controls">
+                          <pre name="status" class="capitalized">?</pre>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-danger btn-disconnect pull-left">Disconnect</button>
+                    <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="user_manager" name="manager" class="row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="project-list sidebar-list nav nav-list"></ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">Click Project List above to filter members by project.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <ul class="action-bar">
+                <li class="head">Member Manager</li>
+                <li class="action-buttons pull-right">
+                  <button name="reload" title="Reload Table" class="btn icon-refresh">Reload</button>
+                  <button name="remove_selected" title="Remove Selected" disabled class="btn btn-danger enable_if_selected">Remove</button><a name="create" title="Add Member" href="#config/users/new" class="btn btn-primary">Add</a>
+                </li>
+                <li class="grid-filter"></li>
+              </ul>
+              <div id="t_user_action_cell" class="tpl"><a title="Edit" name="edit" href="#config/users/{{id}}" class="btn btn-primary btn-round icon-edit"></a>
+                <button title="Remove" name="remove" class="hide btn btn-danger btn-round icon-close"></button>
+              </div>
+              <div class="grid-scroller">
+                <table class="grid-table">
+                  <caption class="loading icon-spinner animate-spin"></caption>
+                </table>
+              </div>
+              <div class="grid-paginator"></div>
+            </div>
+            <div id="user_editor" aria-labelledby="user_editor_title" aria-hidden="true" class="modal hide fade">
+              <div class="modal-header">
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close">&times;</button>
+                <h3 id="user_editor_title" class="modal-title">Create User</h3>
+              </div>
+              <div class="modal-body">
+                <form class="form-horizontal">
+                  <div class="control-group">
+                    <label for="user_email" class="control-label">Email</label>
+                    <div class="controls">
+                      <input id="user_email" type="email" name="email" placeholder="user@company.com" maxlength="255" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="user_password" class="control-label">Password</label>
+                    <div class="controls">
+                      <input id="user_password" type="password" placeholder="********" title="Length from 6 to 2048 characters" data-placement="right" pattern=".{6,2048}" maxlength="2048">
+                      <input id="user_password_confirm" type="password" placeholder="********" title="Repeat Password" data-placement="right" pattern=".{6,2048}" maxlength="2048">
+                      <div class="help-inline edit-only">Leave then blank to keep current password.</div>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="first_name" class="control-label">Full Name</label>
+                    <div class="controls">
+                      <input id="first_name" type="text" name="first_name" placeholder="First Name" title="First Name" data-placement="right" maxlength="255" required>
+                      <input id="last_name" type="text" name="last_name" placeholder="Last Name" title="Last Name" data-placement="right" maxlength="255" required>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="user_sex" class="control-label">Sex</label>
+                    <div class="controls">
+                      <div id="user_sex" data-toggle="buttons-radio" class="btn-group">
+                        <button type="button" name="sex" value="male" class="btn">Male</button>
+                        <button type="button" name="sex" value="" class="btn active">Unspecified</button>
+                        <button type="button" name="sex" value="female" class="btn">Female</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="user_title" class="control-label">Title</label>
+                    <div class="controls">
+                      <input id="user_title" type="text" name="title" placeholder="User Title" maxlength="32">
+                    </div>
+                  </div>
+                  <div class="control-group">
+                    <label for="user_desc" class="control-label">Description</label>
+                    <div class="controls">
+                      <textarea id="user_desc" name="desc" cols="30" rows="3" maxlength="2048" placeholder="Description"></textarea>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
+                <button class="btn btn-primary btn-save">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="notification" class="frame container-fluid">
+          <div class="active row-fluid inner-frame">
+            <div class="span2 sidebar">
+              <div class="well sidebar-nav">
+                <ul class="project-list sidebar-list nav nav-list">
+                  <li class="nav-header">Project Filter</li>
+                  <li><a href="#project:all">All</a></li>
+                </ul>
+                <ul class="sidebar-bottom nav nav-list">
+                  <li class="divider"></li>
+                  <li class="nav-header">Tips</li>
+                  <li class="tips">Click Project List above to filter by project.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="span10 workspace">
+              <div id="notification_view" class="notification-view">
+                <ul class="action-bar">
+                  <li class="pull-left">
+                    <ul class="status-filter nav nav-pills">
+                      <li class="active"><a href="#status:all">All</a></li>
+                      <li><a href="#status:active">Active</a></li>
+                      <li><a href="#status:processed">Processed</a></li>
+                      <li><a href="#status:expired">Expired</a></li>
+                    </ul>
+                  </li>
+                  <li class="action-buttons pull-right">
+                    <button name="reload" title="Reload Table" class="btn">Reload</button>
+                    <button name="mute_selected" title="Mute Selected" disabled class="btn btn-warning enable_if_selected icon-ok">Mute</button>
+                  </li>
+                  <li class="grid-filter"></li>
+                </ul>
+                <div id="t_notification_action_cell" class="tpl"><a title="Process" name="process" class="btn btn-primary btn-round icon-right-open"></a>
+                  <button title="Mute" name="mute" disabled class="btn btn-warning btn-round icon-ok"></button>
+                </div>
+                <div class="grid-scroller">
+                  <table id="notification_table" class="grid-table">
+                    <caption class="loading icon-spinner animate-spin"></caption>
+                  </table>
+                </div>
+                <div class="grid-paginator"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="profile" class="frame container-fluid">
+          <div class="active row-fluid inner-frame">
+            <form id="user_profile" class="form-horizontal">
+              <section>
+                <legend>User Profile<a id="update_user" title="Update Your Profile" data-placement="bottom" href="#config/users" disabled class="btn btn-primary pull-right">Update</a></legend>
+                <div class="control-group">
+                  <label for="user_avatar" class="control-label">Avatar</label>
+                  <div class="controls"><a id="user_avatar" href="http://gravatar.com/emails/" target="_blank" title="Change your avatar at gravatar.com" class="thumbnail"><img alt="Avatar"></a></div>
+                </div>
+                <div class="control-group">
+                  <label for="user_email" class="control-label">Email</label>
+                  <div class="controls">
+                    <input id="user_email" type="email" name="email" placeholder="user@company.com" maxlength="255" disabled>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="first_name" class="control-label">First Name</label>
+                  <div class="controls">
+                    <input id="first_name" type="text" name="first_name" placeholder="First Name" maxlength="255" readonly>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="last_name" class="control-label">Last Name</label>
+                  <div class="controls">
+                    <input id="last_name" type="text" name="last_name" placeholder="Last Name" maxlength="255" readonly>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="user_sex" class="control-label">Sex</label>
+                  <div class="controls">
+                    <input id="user_sex" type="text" name="sex" placeholder="Unspecified" readonly>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="user_title" class="control-label">Title</label>
+                  <div class="controls">
+                    <input id="user_title" type="text" name="title" placeholder="User Title" maxlength="32" readonly>
+                  </div>
+                </div>
+                <div class="control-group">
+                  <label for="user_desc" class="control-label">Description</label>
+                  <div class="controls">
+                    <textarea id="user_desc" name="desc" cols="30" rows="3" maxlength="2048" placeholder="Description" readonly></textarea>
+                  </div>
+                </div>
+              </section>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script data-main="js/test" src="js/lib/require.js" async></script>
+  </body>
+</html>
