@@ -1,8 +1,8 @@
 "use strict"
 
 define 'models', ['lib/common'], ->
-  # ROOT = 'https://marxo.cloudfoundry.com/api'
-  ROOT = '/api'
+  ROOT = 'http://tomcat.masonwan.com/api'
+  # ROOT = '/api'
 
   ## Common
 
