@@ -159,8 +159,12 @@ define 'models', ['lib/common'], ->
       unless link.has('prev_node_id') and link.has('next_node_id')
         throw new Error 'link ' + (link.key or link.id) + 'is broken, prev/next node missing'
       link.workflow = @
-      link.prevNode = @nodes.get link.get 'prev_node_id'
-      link.nextNode = @nodes.get link.get 'next_node_id'
+      prevNodeId = link.get 'prev_node_id'
+      nextNodeId = link.get 'next_node_id'
+      link.prevNode = @nodes.get prevNodeId
+      throw new Error "cannot find prev node with id #{prevNodeId} for link #{link.id}" unless link.prevNode
+      link.nextNode = @nodes.get nextNodeId
+      throw new Error "cannot find next node with id #{prevNodeId} for link #{link.id}" unless link.nextNode
       link.prevNode.outLinks.push link
       link.nextNode.inLinks.push link
       return
