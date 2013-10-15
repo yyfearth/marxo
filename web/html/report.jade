@@ -13,7 +13,7 @@
 .span10.workspace
   #report_view.report-view
     ul.action-bar
-      li.head Report
+      li.head Reports
       li.pull-left.tmp
         ul#media-filter.nav.nav-pills
           li.active
@@ -48,23 +48,30 @@
       li
         h3 Report Details
       li
-        a.pointer Overview
+        a(href='#report_overview', data-toggle='tab') Overview
       li.active
-        a.pointer Evaluated Charts
+        a(href='#report_charts', data-toggle='tab') Evaluated Charts
       li
-        a.pointer Feedback Collection
+        a(href='#report_feedback', data-toggle='tab') Feedback Collection
       li
-        a.pointer Submitted Results
-  .modal-body
-    //- stacked area chart must be in top for tooltip position
-    div.chart.with-3d-shadow.with-transitions#stacked
-      h4 Stacked Area Chart
-      svg
-    div.span5.chart#pie
-      h4 Pie Chart
-      svg
-    div.span6.chart#bar
-      h4 Bar Chart
-      svg
+        a(href='#report_files', data-toggle='tab') Submitted Results
+  .modal-body.tab-content
+    #report_overview.tab-pane
+      h4 Report Overview
+    #report_charts.tab-pane.active
+      //- stacked area chart must be in top for tooltip position
+      div.chart.with-3d-shadow.with-transitions#stacked
+        h4 Stacked Area Chart
+        svg
+      div.span5.chart#pie
+        h4 Pie Chart
+        svg
+      div.span6.chart#bar
+        h4 Bar Chart
+        svg
+    #report_feedback.tab-pane
+      h4 Feedback Collection
+    #report_files.tab-pane
+      h4 Submitted Results
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close
