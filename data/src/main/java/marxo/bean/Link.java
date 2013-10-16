@@ -7,9 +7,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Link extends WorkflowChildEntity {
-
-	@JsonIgnore
-	public ObjectId tenantId;
 	@JsonIgnore
 	public ObjectId previousNodeId;
 	@JsonIgnore
@@ -34,10 +31,5 @@ public class Link extends WorkflowChildEntity {
 	@JsonProperty("next_node_id")
 	public void setJsonNextNodeId(String next_node_id) {
 		this.nextNodeId = (next_node_id == null) ? null : new ObjectId(next_node_id);
-	}
-
-	@Override
-	public void fillWithDefaultValues() {
-		super.fillWithDefaultValues();
 	}
 }

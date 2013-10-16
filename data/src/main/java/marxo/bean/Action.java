@@ -1,6 +1,6 @@
 package marxo.bean;
 
-public class Action extends BasicEntity {
+public class Action extends TenantChildEntity {
 	public String type;
 	public String content;
 
