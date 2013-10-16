@@ -1,4 +1,3 @@
-include node_editor_actions
 #node_editor.modal.modal-full.hide.fade(aria-labelledby='node_editor_title', aria-hidden='true')
   .modal-header
     button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
@@ -24,9 +23,7 @@ include node_editor_actions
         label.control-label(for='node_desc') Description
         .controls
           textarea#node_desc.input-xlarge(name='desc', rows='1', placeholder='Description')
-    .action_tpls.tpl
-      mixin actions_tpl
-    #actions.well
+    .node-actions.well
       #too_many_actions_alert.alert
         strong Too many actions!&nbsp;
         | Keep the logic of a node simple to understand and excute.
