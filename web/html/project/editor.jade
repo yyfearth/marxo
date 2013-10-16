@@ -15,15 +15,16 @@
         li.nav-header Tips
         li.tips ...
     .content
+      #wf_preview.well
+        h1.muted Workflow Preview
       form.form-project.form-horizontal
         .control-group
-          label.control-label(for='workflow_id') Workflow
+          label.control-label(for='project_workflow_id') Workflow
           .controls
-            select#workflow_id(name='workflow_id', required)
+            select#project_workflow_id(name='workflow_id', required)
               option(value='') (Please Select)
             button.btn.btn-primary.btn-select.hide(type='button') Select
             button.btn.btn-revert.hide(type='button') Revert
-        #wf_preview.well.hide
         .control-group
           label.control-label(for='project_name') Name
           .controls
@@ -36,6 +37,38 @@
           label.control-label(for='project_desc') Description
           .controls
             textarea#project_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
+      section.node-link.hide
+        legend
+          span.node-link-name
+          | &nbsp;
+          small.node-link-key(title='key')
+        form.form-horizontal
+          .name-desc
+            .control-group
+              label.control-label(for='node_link_title') Name
+              .controls
+                input#node_link_title(type='text', name='name', placeholder='Node or Link Name', required)
+            .control-group
+              label.control-label(for='node_link_desc') Description
+              .controls
+                textarea#node_link_desc.input-xlarge(name='desc', rows='1', placeholder='Description')
+          .node-options.hide
+            .control-group
+              label.control-label Income Links
+              .controls(name='in_links')
+            .control-group
+              label.control-label Outgoing Links
+              .controls(name='out_links')
+          .link-options.hide
+            .control-group
+              label.control-label Linked From Node
+              .controls(name='prev_node')
+            .control-group
+              label.control-label Linked To Node
+              .controls(name='next_node')
+            em TODO: conditions
+        .node-actions
+
   .modal-footer
     a.btn.btn-info.pull-left.btn-view.hide View
     button.btn(data-dismiss='modal', aria-hidden='true') Close

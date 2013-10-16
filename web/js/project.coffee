@@ -1,6 +1,6 @@
 "use strict"
 
-define 'project', ['base', 'manager', 'models'],
+define 'project', ['base', 'manager', 'models', 'actions'],
 ({
 find
 #findAll
@@ -8,6 +8,7 @@ find
 FrameView
 InnerFrameView
 NavListView
+FormView
 FormDialogView
 }, {
 ManagerView
@@ -17,7 +18,7 @@ Workflow
 Workflows
 Project
 Projects
-}) ->
+}, ActionsMixin) ->
 
   class ProjectFrameView extends FrameView
     initialize: (options) ->
@@ -37,12 +38,10 @@ Projects
           throw new Error 'open project with a name or id is needed' unless name
           Projects.find projectId: name, callback: ({project}) =>
             throw new Error "project with id #{name} cannot found" unless project
-            if sub
-              @editor.edit project, sub
-            else
-              @switchTo @viewer
-              @viewer.load project
-              # @viewer.focus sub
+            @editor.edit project, sub
+      # @switchTo @viewer
+      # @viewer.load project
+      # @viewer.focus sub
       @
 
   # Editor
@@ -73,16 +72,20 @@ Projects
         @form.workflow_id.value = @model.get('workflow_id') or ''
         $(@form.workflow_id).change()
         return
-      'click li.sidebar-item > a': (e) ->
+      'click li.sidebar-item > a, a.linked-item': (e) ->
         e.preventDefault()
-        model = $(e.currentTarget).data 'model'
-        @_showForm model, e.currentTarget
+        @navTo $(e.currentTarget).data 'model'
         false
     initialize: (options) ->
       super options
       @sidebar = find '.sidebar', @el
       @$btnSelect = $ find '.btn-select', @form
       @$wfbtns = @$btnSelect.add find '.btn-revert', @form
+      @$wfPreview = $ find '#wf_preview', @el
+      @$nodeLinkSection = $ find 'section.node-link', @el
+      @$projectForm = $ @form
+      @$actions = $ find '.node-actions', @el
+      @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
       @
     create: (wf) ->
       wf = wf?.id or wf
@@ -109,7 +112,10 @@ Projects
         @_renderSelect() if 'loaded' is ret
         @fill data
         select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
-        @_selectWorkflow()
+        if select.disabled
+          @_renderProject model
+        else
+          @_selectWorkflow()
         # auto foucs
         setTimeout =>
           if select.value
@@ -118,14 +124,36 @@ Projects
             select.focus()
         , 550
       @
-    _showForm: (model) ->
-      unless model
-        console.log 'show project info'
-      else if model._name is 'node'
-        console.log 'show node', model.id
-      else if model._name is 'link'
-        console.log 'show link', model.id
-      return
+    navTo: (model) ->
+      type = model?._name or 'project'
+      if @_cur_type isnt type
+        @$projectForm.hide()
+        @$actions.hide()
+        $section = @$nodeLinkSection.hide()
+        $nodeOptions = $section.find('.node-options').hide()
+        $linkOptions = $section.find('.link-options').hide()
+        if type is 'project'
+          @$projectForm.show()
+        else
+          $section.show()
+          if type is 'node'
+            @$wfPreview.show()
+            @$actions.show()
+            $nodeOptions.show()
+          else if type is 'link'
+            $linkOptions.show()
+          else
+            throw new Error "unknown type to nav #{type}"
+        @_cur_type = type
+      else if @_cur_model is model
+        return @
+      @_cur_model = model
+      console.log 'nav to', type, model
+      @dataEditor.fill model if model
+      # TODO: select nothing in flow
+      # TODO: select node with id in flow
+      # TODO: select link with id in flow
+      @
     _selectWorkflow: ->
       wf = @form.workflow_id.value
       return unless wf
@@ -136,30 +164,31 @@ Projects
         # clear nodes and links
         project.set node_ids: null, nodes: null, link_ids: null, links: null
         project._warp()
-      project.copy wf, =>
-        console.log 'selected wf for project', wf.name
-        @sidebar.classList.add 'active'
-        @$wfbtns.hide()
-        @btnSave.disabled = false
-        # update sidebar
-        $sidebar = $ @sidebar
-        $sidebar.find('li.node-item, li.link-item').remove()
-        nodes = document.createDocumentFragment()
-        _renderSidebarItem = @_renderSidebarItem.bind @
-        project.nodes.forEach (node) ->
-          nodes.appendChild _renderSidebarItem node
-        links = document.createDocumentFragment()
-        project.links.forEach (link) ->
-          links.appendChild _renderSidebarItem link
-        $sidebar.find('.node-header').after nodes
-        $sidebar.find('.link-header').after links
+      console.log 'selected wf for project', wf.name
+      project.copy wf, @_renderProject.bind @
+      return
+    _renderProject: (project) ->
+      @sidebar.classList.add 'active'
+      @$wfbtns.hide()
+      @btnSave.disabled = false
+      # update sidebar
+      $sidebar = $ @sidebar
+      $sidebar.find('li.node-item, li.link-item').remove()
+      nodes = document.createDocumentFragment()
+      _renderSidebarItem = @_renderSidebarItem.bind @
+      project.nodes.forEach (node) ->
+        nodes.appendChild _renderSidebarItem node
+      links = document.createDocumentFragment()
+      project.links.forEach (link) ->
+        links.appendChild _renderSidebarItem link
+      $sidebar.find('.node-header').after nodes
+      $sidebar.find('.link-header').after links
       return
     _renderSidebarItem: (model) ->
       el = document.createElement 'li'
       el.className = "sidebar-item #{model._name}-item"
       a = document.createElement 'a'
-      name = model.get('name') or model.get('desc') or '(No Name)'
-      a.textContent = name
+      name = a.textContent = model.name()
       a.dataset.id = model.id
       $a = $(a).data 'model', model
       $a.tooltip title: name, placement: 'right', container: @el if name.length > 15
@@ -171,6 +200,7 @@ Projects
     reset: ->
       @$wfbtns.hide()
       $(@sidebar).find('li.node-item, li.link-item').remove()
+      @navTo null
       super
     _renderSelect: ->
       select = @form.workflow_id
@@ -201,6 +231,63 @@ Projects
       @callback 'save'
       @hide true
       @
+
+  class NodeLinkDataEditor extends FormView
+    @acts_as ActionsMixin
+    initialize: (options) ->
+      super options
+      options.projectMode = true
+      @initActions options
+      @nameEl = find '.node-link-name', @el
+      @keyEl = find '.node-link-key', @el
+      @$inLinks = $ find '[name=in_links]', @form
+      @$outLinks = $ find '[name=out_links]', @form
+      @$prevNode = $ find '[name=prev_node]', @form
+      @$nextNode = $ find '[name=next_node]', @form
+      @$linkedNodeLinks = @$inLinks.add @$outLinks.add @$prevNode.add @$nextNode
+      @
+    fill: (model) ->
+      @reset()
+      super model.attributes
+      _renderLinked = @_renderLinked.bind @
+      if model.actions? # is node
+        name = model.name()
+        if model.inLinks?.length
+          @$inLinks.append model.inLinks.map _renderLinked
+        else
+          @$inLinks.append _renderLinked null
+        if model.outLinks?.length
+          @$outLinks.append model.outLinks.map _renderLinked
+        else
+          @$outLinks.append _renderLinked null
+        @fillActions model.actions()
+      else # is link
+        name = "Link: #{model.name()}"
+        @$prevNode.append _renderLinked model.prevNode
+        @$nextNode.append _renderLinked model.nextNode
+      @nameEl.textContent = name
+      @keyEl.textContent = model.get 'key'
+      @
+    _renderLinked: (model) ->
+      if model
+        btn = document.createElement 'a'
+        btn.className = 'btn btn-link linked-item'
+        btn.textContent = model.name()
+        $.data btn, 'model', model
+      else
+        btn = document.createElement 'button'
+        btn.className = 'btn btn-link'
+        btn.disabled = true
+        btn.textContent = '(None)'
+      btn
+    read: ->
+      data = super
+      data.actions = @readActions()
+      data
+    reset: ->
+      @clearActions()
+      @$linkedNodeLinks.empty()
+      super
 
   # Viewer
 
