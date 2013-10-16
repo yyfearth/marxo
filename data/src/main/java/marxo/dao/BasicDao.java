@@ -1,6 +1,6 @@
 package marxo.dao;
 
-import marxo.bean.Entity;
+import marxo.bean.BasicEntity;
 import marxo.exception.ValidationException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
-public abstract class BasicDao<E extends Entity> {
+public abstract class BasicDao<E extends BasicEntity> {
 
 	@Qualifier("mongoTemplate")
 	@Autowired
