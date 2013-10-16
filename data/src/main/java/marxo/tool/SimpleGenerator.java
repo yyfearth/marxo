@@ -46,7 +46,8 @@ public class SimpleGenerator extends BasicGenerator {
 		// User
 		{
 			for (int i = 1; i <= 10; i++) {
-				User u = new User(new ObjectId(), getRandomHumanName());
+				User u = new User();
+				u.name = getRandomHumanName();
 				u.fillWithDefaultValues();
 				users.add(u);
 			}
@@ -57,7 +58,7 @@ public class SimpleGenerator extends BasicGenerator {
 			for (int i = 1; i <= 3; i++) {
 				Workflow w = new Workflow();
 				w.name = "Workflow " + i;
-				w.description = RandomStringUtils.randomAlphabetic(10);
+				w.description = StringTool.getRandomString(120);
 				w.fillWithDefaultValues();
 				workflows.add(w);
 
@@ -77,7 +78,7 @@ public class SimpleGenerator extends BasicGenerator {
 				Project p = new Project();
 				p.tenantId = tenant.id;
 				p.name = "Project " + i;
-				p.description = RandomStringUtils.randomAlphanumeric(10);
+				p.description = StringTool.getRandomString(120);
 				p.fillWithDefaultValues();
 				projects.add(p);
 
@@ -102,7 +103,7 @@ public class SimpleGenerator extends BasicGenerator {
 
 				Node node = new Node();
 				node.name = "Node " + i;
-				node.description = getRandomProjectName();
+				node.description = StringTool.getRandomString(120);
 				node.fillWithDefaultValues();
 				nodes.add(node);
 
@@ -134,8 +135,7 @@ public class SimpleGenerator extends BasicGenerator {
 			for (int i = 1; i <= 10; i++) {
 				Link link = new Link();
 				link.id = new ObjectId();
-				link.title = "Link " + i;
-				link.name = getRandomProjectName();
+				link.name = "Link " + i;
 				link.fillWithDefaultValues();
 				links.add(link);
 
@@ -186,9 +186,4 @@ public class SimpleGenerator extends BasicGenerator {
 		mongoTemplate.dropCollection(Link.class);
 		mongoTemplate.insert(links, Link.class);
 	}
-
-//	static <T extends BasicEntity> ArrayList<T> getList(Class<T> tClass, int number) {
-//		ArrayList<T> list = new ArrayList<>(number);
-//		return list;
-//	}
 }
