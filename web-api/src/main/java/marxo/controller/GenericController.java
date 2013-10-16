@@ -1,6 +1,6 @@
 package marxo.controller;
 
-import marxo.bean.Entity;
+import marxo.bean.BasicEntity;
 import marxo.dao.BasicDao;
 import marxo.exception.*;
 import org.bson.types.ObjectId;
@@ -12,7 +12,7 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
-public abstract class GenericController<E extends Entity, Dao extends BasicDao<E>> extends BasicController {
+public abstract class GenericController<E extends BasicEntity, Dao extends BasicDao<E>> extends BasicController {
 	Dao dao;
 
 	protected GenericController(Dao dao) {
@@ -35,6 +35,9 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 
 		try {
 			entity.fillWithDefaultValues();
+			// todo: use validation.
+			entity.createdByUserId = new ObjectId("000000000000000000000000");
+			entity.modifiedByUserId = new ObjectId("000000000000000000000000");
 			dao.save(entity);
 		} catch (ValidationException ex) {
 			throw new EntityInvalidException(entity.id, ex.reasons);
@@ -44,15 +47,21 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 		return entity;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}(?:\\.json)?}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public E read(@PathVariable String id) {
-		if (!ObjectId.isValid(id)) {
-			throw new InvalidObjectIdException(id);
+	public E read(@PathVariable String idString) {
+		int extensionIndex = idString.lastIndexOf(".json");
+		boolean isJson = extensionIndex > 0;
+		if (isJson) {
+			idString = idString.substring(0, extensionIndex);
 		}
 
-		ObjectId objectId = new ObjectId(id);
+		if (!ObjectId.isValid(idString)) {
+			throw new InvalidObjectIdException(idString);
+		}
+
+		ObjectId objectId = new ObjectId(idString);
 		E entity = dao.get(objectId);
 
 		if (entity == null) {
@@ -62,17 +71,23 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 		return entity;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}(?:\\.json)?}", method = RequestMethod.PUT)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
 	// review: is the parameter 'id' necessary?
-	public E update(@Valid @PathVariable String id, @Valid @RequestBody E entity) {
-		if (!ObjectId.isValid(id)) {
-			throw new InvalidObjectIdException(id);
+	public E update(@Valid @PathVariable String idString, @Valid @RequestBody E entity) {
+		int extensionIndex = idString.lastIndexOf(".json");
+		boolean isJson = extensionIndex > 0;
+		if (isJson) {
+			idString = idString.substring(0, extensionIndex);
 		}
 
-		ObjectId objectId = new ObjectId(id);
+		if (!ObjectId.isValid(idString)) {
+			throw new InvalidObjectIdException(idString);
+		}
+
+		ObjectId objectId = new ObjectId(idString);
 
 		// todo: check consistency of given id and entity id.
 		E oldEntity = dao.get(objectId);
@@ -84,6 +99,12 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 		entity.modifiedDate = new Date();
 
 		try {
+			// todo: use validation.
+			entity.id = oldEntity.id;
+			entity.createdByUserId = oldEntity.createdByUserId;
+			entity.createdDate = oldEntity.createdDate;
+			entity.modifiedByUserId = new ObjectId("000000000000000000000000");
+			entity.modifiedDate = new Date();
 			dao.save(entity);
 		} catch (ValidationException ex) {
 			for (int i = 0; i < ex.reasons.size(); i++) {
@@ -95,16 +116,22 @@ public abstract class GenericController<E extends Entity, Dao extends BasicDao<E
 		return entity;
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}(?:\\.json)?}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	public E delete(@PathVariable String id) {
-		if (!ObjectId.isValid(id)) {
-			throw new InvalidObjectIdException(id);
+	public E delete(@PathVariable String idString) {
+		int extensionIndex = idString.lastIndexOf(".json");
+		boolean isJson = extensionIndex > 0;
+		if (isJson) {
+			idString = idString.substring(0, extensionIndex);
 		}
 
-		ObjectId objectId = new ObjectId(id);
+		if (!ObjectId.isValid(idString)) {
+			throw new InvalidObjectIdException(idString);
+		}
+
+		ObjectId objectId = new ObjectId(idString);
 		E entity = dao.deleteById(objectId);
 
 		if (entity == null) {

@@ -77,8 +77,8 @@ public class WorkflowController extends GenericController<Workflow, WorkflowDao>
 	}
 
 	@Override
-	public Workflow read(@PathVariable String id) {
-		Workflow workflow = super.read(id);
+	public Workflow read(@PathVariable String idString) {
+		Workflow workflow = super.read(idString);
 
 		List<Node> nodes = nodeDao.searchByWorkflow(workflow.id);
 		List<Link> links = linkDao.searchByWorkflow(workflow.id);
