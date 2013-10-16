@@ -21,7 +21,6 @@ public abstract class BasicDao<E extends Entity> {
 	Class<E> eClass;
 
 	public BasicDao() {
-		//noinspection unchecked
 		this.eClass = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 
