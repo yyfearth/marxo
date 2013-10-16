@@ -54,7 +54,9 @@ define 'models', ['lib/common'], ->
 
   ## Workflow
 
-  class WorkflowProjectBase extends Entity
+  class Workflow extends Entity
+    _name: 'workflow'
+    urlRoot: ROOT + '/workflows'
     constructor: (model, options) ->
       super model, options
       @_warp model
@@ -71,7 +73,16 @@ define 'models', ['lib/common'], ->
       @links = new Links links, url: url + '/links'
       @links._loaded = _links_loaded
 
+      _createNodeRef = @_createNodeRef.bind @
+      @nodes.forEach _createNodeRef
+      @listenTo @nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
+
+      _createLinkRef = @_createLinkRef.bind @
+      @links.forEach _createLinkRef
+      @listenTo @links, add: _createLinkRef, remove: @_removeLinkRef.bind @
+
       @set {}
+
       @
     fetch: (options = {}) -> # override for warp
       _success = options.success?.bind @
@@ -121,22 +132,6 @@ define 'models', ['lib/common'], ->
             callback? {node, action}
       else
         callback? {}
-      @
-
-  class Workflow extends WorkflowProjectBase
-    _name: 'workflow'
-    urlRoot: ROOT + '/workflows'
-    _warp: (model = @) ->
-      super model
-
-      _createNodeRef = @_createNodeRef.bind @
-      @nodes.forEach _createNodeRef
-      @listenTo @nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
-
-      _createLinkRef = @_createLinkRef.bind @
-      @links.forEach _createLinkRef
-      @listenTo @links, add: _createLinkRef, remove: @_removeLinkRef.bind @
-
       @
     createNode: (data) ->
       @nodes.create data, wait: true
@@ -204,6 +199,7 @@ define 'models', ['lib/common'], ->
   class Node extends Entity
     _name: 'node'
     urlRoot: ROOT + '/nodes'
+    name: -> @get 'name'
     actions: -> @_actions ?= new Actions @get 'actions'
 
   class Nodes extends Collection
@@ -214,6 +210,7 @@ define 'models', ['lib/common'], ->
   class Link extends Entity
     _name: 'link'
     urlRoot: ROOT + '/links'
+    name: -> @get('name') or @get('desc') or @get('key')
 
   class Links extends Collection
     model: Link
@@ -229,7 +226,7 @@ define 'models', ['lib/common'], ->
 
   ## Project
 
-  class Project extends WorkflowProjectBase
+  class Project extends Workflow
     _name: 'project'
     urlRoot: ROOT + '/projects'
     copy: (workflow, callback) -> # copy form workflow as template
@@ -249,23 +246,40 @@ define 'models', ['lib/common'], ->
           cloned_node.set id: node_id, template_id: node.id, project_id: id
           # TODO: for test only, should give action id
           if node.has 'actions'
-            cloned_node.set 'actions', node.get('actions').map (a, i) -> a.id = i
+            cloned_node.set 'actions', node.get('actions').map (action, i) ->
+              action.id = i
+              action
           nodes.push cloned_node
         workflow.links.forEach (link) ->
           cloned_link = link.clone()
           # TODO: for test only, should be null
           link_id = link.id + 1000000
-          cloned_link.set id: link_id, template_id: link.id, project_id: id
+          cloned_link.set
+            id: link_id
+            template_id: link.id
+            project_id: id
+            # TODO: for test only, should be auto updated
+            prev_node_id: link.get('prev_node_id') + 1000000
+            next_node_id: link.get('next_node_id') + 1000000
           links.push cloned_link
         @set
           workflow_id: workflow.id
           template_id: null
           node_ids: nodes.map((n) -> n.id)
           link_ids: links.map((l) -> l.id)
-        @nodes = new Nodes nodes
-        @links = new Links links
-        @nodes._loaded = @links._loaded = true
+          nodes: nodes
+          links: links
+        @_warp @
+        console.log @
         callback? @, workflow
+      @
+    _createNodeRef: (node) ->
+      super node
+      node.project = @
+      @
+    _createLinkRef: (link) ->
+      super link
+      link.project = @
       @
 
   class Projects extends ManagerCollection
