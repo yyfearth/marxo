@@ -291,6 +291,15 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         @trigger 'read', attributes, @_attributes
         attributes
 
+  class FormView extends View
+    @acts_as FormViewMixin
+    initialize: (options) ->
+      super options
+      @initForm()
+    reset: ->
+      @form.reset()
+      @
+
   class FormDialogView extends ModalDialogView
     @acts_as FormViewMixin
     initialize: (options) ->
@@ -413,6 +422,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
   ModalDialogView
   FormDialogView
   FormViewMixin
+  FormView
   Tenant
   User
   }

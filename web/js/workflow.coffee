@@ -1,8 +1,7 @@
 "use strict"
 
 define 'workflow', [
-  'base', 'manager', 'models'
-  'lib/jquery-jsplumb', 'lib/jquery-ui'
+  'base', 'manager', 'models', 'actions', 'lib/jquery-jsplumb'
 ], ({
 find
 findAll
@@ -26,7 +25,7 @@ Node
 Link
 Actions
 Action
-}, jsPlumb) ->
+}, ActionsMixin, jsPlumb) ->
 
   ## Workflow Main Frame
   class WorkflowFrameView extends FrameView
@@ -263,6 +262,7 @@ Action
       @
 
   class NodeEditorView extends EditorView
+    @acts_as ActionsMixin
     el: '#node_editor'
     events:
       'click a.action-thumb': '_addAction'
@@ -270,14 +270,9 @@ Action
     _too_many_actions_limit: 7
     initialize: (options) ->
       super options
-      @actionsEl = find '#actions', @el
+      @initActions options
       @_fixStyle = @_fixStyle.bind @
       $(window).on 'resize', @_fixStyle
-      $(@actionsEl).sortable
-        axis: 'y'
-        delay: 150
-        distance: 15
-        cancel: '.box-content'
       @_too_many_alert = find '#too_many_actions_alert', @el
       @on 'actions_update', @_checkActionLimit.bind @
       @
@@ -291,65 +286,23 @@ Action
       e.preventDefault()
       target = e.target
       matched = target.href.match /action:(\w+)/i
-      @addAction type: matched[1] if matched
+      @addAction {type: matched[1]}, {scrollIntoView: true} if matched
       false
     fill: (attributes) ->
       # fill info form
       super attributes
-      @clearActions()
-      @actions = new Actions attributes.actions or []
-      @actions.forEach @addAction.bind @
+      @fillActions attributes
       @
     save: ->
       console.log 'save'
-      # save actions
-      actions = findAll('.action', @actionsEl).map (el) ->
-        view = $(el).data 'view'
-        # TODO: validate each action
-        throw new Error 'cannot get action from action.$el' unless view
-        view.read()
-      @data.set 'actions', actions
+      @data.set 'actions', @readActions()
       console.log 'save actions', actions, @data
       # save the node
       super
       @
     reset: ->
-      super
       @clearActions()
-    clearActions: ->
-      @actions?.forEach (model) -> model.view?.remove()
-      @actions = null
-      $(findAll('.action', @actionsEl)).remove()
-      @
-    viewAction: (id) ->
-      console.log 'view action id:', id
-      el = @actionsEl.querySelector '#action_' + id
-      if el?
-        console.log 'dataset5', @el.dataset['aria-hidden']
-        hidden = @el.getAttribute 'aria-hidden'
-        if hidden is 'true'
-          @$el.one 'shown', -> el.scrollIntoView()
-        else if hidden is 'false'
-          el.scrollIntoView()
-        else
-          setTimeout ->
-            el.scrollIntoView()
-          , 600
-      el
-    addAction: (model) ->
-      model = new Action model unless model instanceof Action
-      actionView = new ActionView model: model, parent: @, container: @actionsEl
-      @listenTo actionView, 'remove', @removeAction.bind @
-      actionView.render()
-      actionView.el.scrollIntoView()
-      @delayedTrigger 'actions_update', 100
-      #@actions.add actionView
-      @
-    removeAction: (view) ->
-      console.log 'remove action view', view
-      view.remove?()
-      @delayedTrigger 'actions_update', 100
-      @
+      super
     _checkActionLimit: ->
       cls = @_too_many_alert.classList
       count = findAll('.action', @actionsEl).length # @actions.length
@@ -358,69 +311,6 @@ Action
         @_too_many_alert.scrollIntoView()
       else
         cls.remove 'active'
-
-  class ActionView extends BoxView
-    className: 'box action'
-    _tpl: tplAll '#actions_tpl'
-    initialize: (options) ->
-      super options
-      @containerEl = options.container
-      @model = options.model
-      @model.view = @
-      @type = @model.get?('type') or options.model.type or options.type
-      throw new Error 'need action model and type' unless @model and @type
-      @
-    remove: ->
-      model = @model
-      model.type = null
-      model.name = null
-      model.data = null
-      # remove only once
-      @remove = -> @
-      super
-    render: ->
-      _tpl = @_tpl[@type]
-      unless _tpl
-        console.error 'unable to find tpl for action type', @type
-        @remove()
-      else
-        @el.innerHTML = @_tpl[@type]
-        @el.id = 'action_' + @model.id or 'no_id'
-        @_name = @$el.find('.box-header h4').text()
-        #@containerEl.appendChild @el
-        @containerEl.insertBefore @el, find '.alert', @containerEl
-        # get els in super
-        super
-        if /webkit/i.test navigator.userAgent
-          $(@el).disableSelection()
-        else
-          $('.box-header, .btn', @el).disableSelection()
-        @form = find 'form', @el
-        @fill @model?.toJSON()
-        @$el.data model: @model, view: @
-        @listenTo @model, 'destroy', @remove.bind @
-      @
-    fill: (data) -> # filling the form with data
-      return unless data and @form
-      data.name = @_name unless data.name
-      data.key = data.type unless data.key
-      form = @form
-      for name, value of data
-        el = form[name]
-        #form[key].value = value
-        $(el).val value if el?.getAttribute?('name') is name
-      # TODO: support customized controls
-      @
-    read: (data) -> # read form the form to get a json data
-      throw new Error 'cannot find the form, may not rendered yet' unless @form
-      data ?= {}
-      els = [].slice.call @form.elements
-      els.forEach (el) ->
-        $el = $ el
-        name = $el.attr 'name'
-        data[name] = $el.val() if name
-      # TODO: support customized controls
-      data
 
   class LinkEditorView extends EditorView
     el: '#link_editor'
