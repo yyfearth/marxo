@@ -8,7 +8,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -62,19 +64,22 @@ public class AdvancedGenerator extends BasicGenerator {
 
 				workflow.fillWithDefaultValues();
 				workflow.tenantId = tenant.id;
-
-				if (i <= 2) {
-					workflow.name = "Alpha";
-				} else {
-					workflow.name = "Beta";
-				}
-				workflow.name += " Workflow " + i;
-
 				workflow.description = StringTool.getRandomString(120);
 				ObjectId modifyingUserId = users.get(threadLocalRandom.nextInt(users.size())).id;
 				workflow.modifiedByUserId = modifyingUserId;
 				ObjectId creatingUserId = users.get(threadLocalRandom.nextInt(users.size())).id;
 				workflow.createdByUserId = creatingUserId;
+
+				if (i <= 2) {
+					workflow.name = "Alpha";
+				} else {
+					workflow.name = "Beta";
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(workflow.modifiedDate);
+					calendar.add(Calendar.HOUR, threadLocalRandom.nextInt(-12, 13));
+					workflow.modifiedDate = calendar.getTime();
+				}
+				workflow.name += " Workflow " + i;
 
 				// Nodes
 				int numNodes = threadLocalRandom.nextInt(2, 8);

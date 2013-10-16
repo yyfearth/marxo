@@ -19,13 +19,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("workflow{:s?}")
 public class WorkflowController extends GenericController<Workflow, WorkflowDao> {
+	static final ModifiedDateComparator modifiedDateComparator = new ModifiedDateComparator();
 	@Autowired
 	NodeDao nodeDao;
 	@Autowired
@@ -44,9 +43,10 @@ public class WorkflowController extends GenericController<Workflow, WorkflowDao>
 		boolean hasName = !Strings.isNullOrEmpty(name);
 		boolean hasCreated = created != null;
 		boolean hasModified = modified != null;
+		List<Workflow> workflows;
 
 		if (!hasName && !hasCreated && !hasModified) {
-			List<Workflow> workflows = dao.findAll();
+			workflows = dao.findAll();
 			ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
 			for (Workflow workflow : workflows) {
 				workflowIds.add(workflow.id);
@@ -65,11 +65,14 @@ public class WorkflowController extends GenericController<Workflow, WorkflowDao>
 				workflow.links = Lists.newArrayList(workflowLinks);
 			}
 
+			Collections.sort(workflows, modifiedDateComparator);
 			return workflows;
 		}
 
 		if (hasName) {
-			return dao.searchByName(name);
+			workflows = dao.searchByName(name);
+			Collections.sort(workflows, modifiedDateComparator);
+			return workflows;
 		}
 
 		// todo: implemented created and modified search APIs
@@ -92,6 +95,7 @@ public class WorkflowController extends GenericController<Workflow, WorkflowDao>
 	}
 }
 
+// todo: move the following under proper packages.
 class WorkflowPredicate<E extends WorkflowChildEntity> implements Predicate<E> {
 	ObjectId workflowId;
 
@@ -102,5 +106,12 @@ class WorkflowPredicate<E extends WorkflowChildEntity> implements Predicate<E> {
 	@Override
 	public boolean apply(@Nullable E entity) {
 		return (entity != null) && workflowId.equals(entity.workflowId);
+	}
+}
+
+class ModifiedDateComparator implements Comparator<Workflow> {
+	@Override
+	public int compare(Workflow w1, Workflow w2) {
+		return w1.modifiedDate.compareTo(w2.modifiedDate);
 	}
 }
