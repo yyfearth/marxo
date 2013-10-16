@@ -2,7 +2,7 @@ package marxo.controller;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import marxo.tool.SimpleGenerator;
+import marxo.tool.AdvancedGenerator;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -34,7 +34,7 @@ public class TestController extends BasicController {
 	@RequestMapping("/reset")
 	@ResponseBody
 	public String resetDatabase() {
-		SimpleGenerator.main(null);
+		AdvancedGenerator.main(new String[0]);
 		return "Database reset";
 	}
 
