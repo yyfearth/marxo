@@ -14,14 +14,13 @@ public abstract class BasicController {
 
 	@PostConstruct
 	void report() {
-		logger.debug(TestController.class.getSimpleName() + " started");
-
 		Boolean isDebug = applicationContext.getBean("isDebug", Boolean.class);
 		isDebug = (isDebug == null) ? false : isDebug;
 
 		if (isDebug) {
+			logger.debug(TestController.class.getSimpleName() + " started");
 			// Prevent the JVM to prompt OutOfMemory while IntelliJ redeploys the app. (fuck dat JVM)
-			System.gc();
+//			System.gc();
 		}
 	}
 }
