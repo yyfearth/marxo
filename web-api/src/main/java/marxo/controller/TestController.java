@@ -2,12 +2,16 @@ package marxo.controller;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import marxo.exception.ErrorJson;
 import marxo.tool.AdvancedGenerator;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @Controller
@@ -15,8 +19,16 @@ import java.util.*;
 public class TestController extends BasicController {
 	@RequestMapping
 	@ResponseBody
-	public Message get(HttpServletRequest request) {
-		return new Message(request);
+	public RemoteInfomation get(HttpServletRequest request) {
+		return new RemoteInfomation(request);
+	}
+
+	@RequestMapping("error404")
+	@ResponseBody
+	public ResponseEntity<ErrorJson> handleError404(HttpServletRequest request, HttpServletResponse response) {
+		String requestedUri = (String) request.getAttribute("javax.servlet.error.request_uri");
+		ErrorJson errorJson = new ErrorJson("The path (" + requestedUri + ") cannot be found");
+		return new ResponseEntity<>(errorJson, HttpStatus.NOT_FOUND);
 	}
 
 	@RequestMapping("/test{:s?}")
@@ -40,13 +52,13 @@ public class TestController extends BasicController {
 
 	@JsonSerialize
 	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-	class Message {
+	class RemoteInfomation {
 		String ip;
 		String host;
 		int port;
 		Map<String, String> headers;
 
-		public Message(HttpServletRequest request) {
+		public RemoteInfomation(HttpServletRequest request) {
 			ip = request.getRemoteAddr();
 			host = request.getRemoteHost();
 			port = request.getRemotePort();
