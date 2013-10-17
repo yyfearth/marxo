@@ -83,6 +83,6 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler({Exception.class})
 	public ResponseEntity<ErrorJson> handleOtherException(Exception ex) {
 		logger.error(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson("Something is really wrong: " + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(new ErrorJson("Congratulations! You broke the server: [" + ex.getClass().getSimpleName() + "]" + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }
