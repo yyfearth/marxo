@@ -103,8 +103,21 @@ ul.action-bar {
   }
 }
 
-.action-buttons > .btn {
-  margin-left: 5px;
+.page-header {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  h3 {
+    display: inline;
+  }
+}
+
+.action-buttons {
+  position: relative;
+  > .btn {
+    margin-left: 5px;
+  }
 }
 
 .box {
