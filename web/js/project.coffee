@@ -233,6 +233,7 @@ Projects
         select.appendChild shared if shared.childElementCount
       return
     save: ->
+      # TODO: read from nodes/links
       @data = @read()
       @callback 'save'
       @hide true

@@ -74,10 +74,6 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       throw new Error 'need action model and type' unless @model and @type
       @
     remove: ->
-      model = @model
-      model.type = null
-      model.name = null
-      model.data = null
       # remove only once
       @remove = -> @
       super
@@ -116,9 +112,10 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         $(el).val value if el?.getAttribute?('name') is name
       # TODO: support customized controls
       @
-    read: (data) -> # read form the form to get a json data
+    read: -> # read form the form to get a json data
       throw new Error 'cannot find the form, may not rendered yet' unless @form
-      data ?= {}
+      data = @model.toJSON()
+      data.type ?= @type
       els = [].slice.call @form.elements
       els.forEach (el) ->
         $el = $ el
