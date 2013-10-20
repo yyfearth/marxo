@@ -6054,7 +6054,6 @@ svg .title {
   text-align: right;
 }
 #workflow_header {
-  display: inline-block;
   cursor: pointer;
 }
 #node_editor {
@@ -6748,8 +6747,13 @@ ul.action-bar .nav {
   margin-bottom: 0;
 }
 .page-header {
-  text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+.page-header h3 {
+  display: inline;
 }
 .action-buttons {
   position: relative;
