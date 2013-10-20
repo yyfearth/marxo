@@ -49,25 +49,25 @@ public class TestController extends BasicController {
 		AdvancedGenerator.main(new String[0]);
 		return "Database reset";
 	}
+}
 
-	@JsonSerialize
-	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-	class RemoteInfomation {
-		String ip;
-		String host;
-		int port;
-		Map<String, String> headers;
+@JsonSerialize
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+class RemoteInfomation {
+	String ip;
+	String host;
+	int port;
+	Map<String, String> headers;
 
-		public RemoteInfomation(HttpServletRequest request) {
-			ip = request.getRemoteAddr();
-			host = request.getRemoteHost();
-			port = request.getRemotePort();
+	public RemoteInfomation(HttpServletRequest request) {
+		ip = request.getRemoteAddr();
+		host = request.getRemoteHost();
+		port = request.getRemotePort();
 
-			headers = new HashMap<>();
-			List<String> headerNames = Collections.list(request.getHeaderNames());
-			for (String headerName : headerNames) {
-				headers.put(headerName, request.getHeader(headerName));
-			}
+		headers = new HashMap<>();
+		List<String> headerNames = Collections.list(request.getHeaderNames());
+		for (String headerName : headerNames) {
+			headers.put(headerName, request.getHeader(headerName));
 		}
 	}
 }
