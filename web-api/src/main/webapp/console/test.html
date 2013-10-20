@@ -103,6 +103,210 @@
             </div>
           </div>
         </div>
+        <div id="actions_tpl" class="tpl">
+          <div name="post_page" class="tpl">
+            <div class="box-header well">
+              <h4>Post Page or Form</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <ul class="action-bar">
+                <li>
+                          <select name="template" disabled class="tmp">
+                            <option>(Select from Template)</option>
+                          </select>
+                </li>
+                <li><a href="#page" class="btn btn-primary">Design</a></li>
+                <li><a href="about:blank" class="btn btn-info">Preview</a></li>
+                <li>
+                          <label class="checkbox inline">
+                            <input type="checkbox" name="track" checked>Track
+                          </label>
+                </li>
+              </ul>
+              <div class="info">(Page Info)</div>
+              <div class="help-block">Information Page is a web page to display information.<br>Click "Design" button to design the page.<br>Click "Preview" button to preview the generated page.</div>
+            </form>
+          </div>
+          <div name="post_to_multi_social_media" class="tpl">
+            <div class="box-header well">
+              <h4>Post to Multiple Social Media</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <ul class="action-bar">
+                <li>
+                          <div data-toggle="buttons-checkbox" class="btn-group">
+                            <button type="button" value="twitter" class="btn active">Twitter</button>
+                            <button type="button" value="facebook" class="btn active">Facebook</button>
+                          </div>
+                </li>
+                <li>
+                          <select name="template" disabled class="tmp">
+                            <option>(Select from Template)</option>
+                          </select>
+                </li>
+                <li>
+                          <label class="checkbox inline">
+                            <input type="checkbox" name="track" checked>Track
+                          </label>
+                </li>
+              </ul>
+                      <textarea name="post_content" placeholder="Post Content..." title="Content post to social media (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
+              <div class="help-block">The maximium content length is 140, which is limited by Twitter.<br>Use "Post to Facebook" action instead for longer content length.</div>
+            </form>
+          </div>
+          <div name="post_to_twitter" class="tpl">
+            <div class="box-header well">
+              <h4>Post to Twitter</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <ul class="action-bar">
+                <li>
+                          <select name="template" disabled class="tmp">
+                            <option>(Select from Template)</option>
+                          </select>
+                </li>
+                <li>
+                          <label class="checkbox inline">
+                            <input type="checkbox" name="track" checked>Track
+                          </label>
+                </li>
+              </ul>
+                      <textarea name="post_content" placeholder="Post Content..." title="Content post to Twitter (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
+              <div class="help-block">The maximium content length is 140, which is limited by Twitter.</div>
+            </form>
+          </div>
+          <div name="post_to_facebook" class="tpl">
+            <div class="box-header well">
+              <h4>Post to Facebook</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <ul class="action-bar">
+                <li>
+                          <select name="template" disabled class="tmp">
+                            <option>(Select from Template)</option>
+                          </select>
+                </li>
+                <li>
+                          <label class="checkbox inline">
+                            <input type="checkbox" name="track" checked>Track
+                          </label>
+                </li>
+              </ul>
+                      <textarea name="post_content" placeholder="Post Content..." title="Content post to Facebook (63206 max)" rows="3" maxlength="63206" class="input-block-level"></textarea>
+              <div class="help-block">The maximium content length is 63206, which is limited by Facebook.</div>
+            </form>
+          </div>
+          <div name="send_email" class="tpl">
+            <div class="box-header well">
+              <h4>Send Email</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <div class="input-prepend input-block-level"><span class="add-on">To</span>
+                <input name="email_to" title="Send To" type="text" placeholder="email_1@example.com; email_2@example.com" class="span11">
+              </div>
+                      <select name="template" disabled class="tmp">
+                        <option>(Select from Template)</option>
+                      </select>
+                      <label class="checkbox inline">
+                        <input type="checkbox" name="track" checked>Track
+                      </label>
+              <textarea name="email_content" placeholder="Email Content..." title="Content for email (1000 max)" rows="5" maxlength="1000" class="input-block-level"></textarea>
+            </form>
+          </div>
+          <div name="generate_report" class="tpl">
+            <div class="box-header well">
+              <h4>Generate Report</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <label class="checkbox">
+                <input type="checkbox" name="auto" checked>Generate form all tracked sources of this node.
+              </label>
+              <label>Tracked Sources (Input the name of tracked sources in each line)
+                <textarea name="sources" class="input-block-level"></textarea>
+              </label>
+              <div class="help-block">Generate Report for selected tracked sources</div>
+            </form>
+          </div>
+          <div name="calc_data" class="tpl">
+            <div class="box-header well">
+              <h4>Calculate Data</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <div class="help-block">Calculate Data</div>
+            </form>
+          </div>
+          <div name="make_schedule" class="tpl">
+            <div class="box-header well">
+              <h4>Make Schedule</h4>
+                      <div class="box-icon">
+                        <button class="btn btn-minimize btn-round icon-up-open"></button>
+                        <button class="btn btn-close btn-round icon-close"></button>
+                      </div>
+            </div>
+            <form class="box-content">
+                      <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
+                      <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
+                      <div class="help-inline">(Action Name and Key)</div>
+              <div data-toggle="buttons-radio" class="btn-group">
+                <button type="button" name="type" value="auto" class="btn active">Starts Automatically</button>
+                <button type="button" name="type" value="manual" class="btn">Starts Manually</button>
+              </div>
+              <label>Duration
+                <input type="text" name="duration" placeholder="1 day 2 hours">
+              </label>
+              <div class="help-block">It will create an event in the Calendar, and notifications will be sent before its starts or ends.<br>Leave Druation blank or 0 to make it ends manually or schedule it later.</div>
+            </form>
+          </div>
+        </div>
         <div id="project" class="frame container-fluid">
           <div id="project_editor" aria-labelledby="project_editor_title" aria-hidden="true" class="modal modal-full hide fade">
             <div class="modal-header">
@@ -124,18 +328,20 @@
                 </ul>
               </div>
               <div class="content">
+                <div id="wf_preview" class="well">
+                  <h1 class="muted">Workflow Preview</h1>
+                </div>
                 <form class="form-project form-horizontal">
                   <div class="control-group">
-                    <label for="workflow_id" class="control-label">Workflow</label>
+                    <label for="project_workflow_id" class="control-label">Workflow</label>
                     <div class="controls">
-                      <select id="workflow_id" name="workflow_id" required>
+                      <select id="project_workflow_id" name="workflow_id" required>
                         <option value="">(Please Select)</option>
                       </select>
                       <button type="button" class="btn btn-primary btn-select hide">Select</button>
                       <button type="button" class="btn btn-revert hide">Revert</button>
                     </div>
                   </div>
-                  <div id="wf_preview" class="well hide"></div>
                   <div class="control-group">
                     <label for="project_name" class="control-label">Name</label>
                     <div class="controls">
@@ -155,6 +361,46 @@
                     </div>
                   </div>
                 </form>
+                <section class="node-link hide">
+                  <legend><span class="node-link-name"></span>&nbsp;<small title="key" class="node-link-key"></small></legend>
+                  <form class="form-horizontal">
+                    <div class="name-desc">
+                      <div class="control-group">
+                        <label for="node_link_title" class="control-label">Name</label>
+                        <div class="controls">
+                          <input id="node_link_title" type="text" name="name" placeholder="Node or Link Name" required>
+                        </div>
+                      </div>
+                      <div class="control-group">
+                        <label for="node_link_desc" class="control-label">Description</label>
+                        <div class="controls">
+                          <textarea id="node_link_desc" name="desc" rows="1" placeholder="Description" class="input-xlarge"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="node-options hide">
+                      <div class="control-group">
+                        <label class="control-label">Income Links</label>
+                        <div name="in_links" class="controls"></div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">Outgoing Links</label>
+                        <div name="out_links" class="controls"></div>
+                      </div>
+                    </div>
+                    <div class="link-options hide">
+                      <div class="control-group">
+                        <label class="control-label">Linked From Node</label>
+                        <div name="prev_node" class="controls"></div>
+                      </div>
+                      <div class="control-group">
+                        <label class="control-label">Linked To Node</label>
+                        <div name="next_node" class="controls"></div>
+                      </div><em>TODO: conditions</em>
+                    </div>
+                  </form>
+                  <div class="node-actions"></div>
+                </section>
               </div>
             </div>
             <div class="modal-footer"><a class="btn btn-info pull-left btn-view hide">View</a>
@@ -248,19 +494,19 @@
               <div class="modal-body">
                 <div class="sidebar well">
                   <ul id="action_list" class="sidebar-list nav nav-list">
-                                <li class="nav-header">Content Page</li>
-                                <li><a href="#action:post_page" data-placement="bottom" title="Generate an information page or survey form using templates and post as a web page" class="action-thumb">Post Page or Form</a></li>
-                                <li class="nav-header">Social Media</li>
-                                <li><a href="#action:post_to_multi_social_media" title="Post the same message to multiple selected social media" class="action-thumb">Post to Social Media</a></li>
-                                <li><a href="#action:post_to_twitter" title="Post message to Twitter" class="action-thumb">Post to Twitter</a></li>
-                                <li><a href="#action:post_to_facebook" title="Post message to Facebook" class="action-thumb">Post to Facebook</a></li>
-                                <li class="nav-header">Email</li>
-                                <li><a href="#action:send_email" title="Send email to selected email addresses" class="action-thumb">Send Email</a></li>
-                                <li class="nav-header">Schedule</li>
-                                <li><a href="#action:make_schedule" title="Create an event in calendar" class="action-thumb">Make Schedule</a></li>
-                                <li class="nav-header">Report</li>
-                                <li><a href="#action:generate_report" title="Generate report from selected tracking data" class="action-thumb">Generate Report</a></li>
-                                <li class="tmp"><a href="#action:calc_data" title="Do some calculation on existing tracking data" class="action-thumb">Calculate Data</a></li>
+                            <li class="nav-header">Content Page</li>
+                            <li><a href="#action:post_page" data-placement="bottom" title="Generate an information page or survey form using templates and post as a web page" class="action-thumb">Post Page or Form</a></li>
+                            <li class="nav-header">Social Media</li>
+                            <li><a href="#action:post_to_multi_social_media" title="Post the same message to multiple selected social media" class="action-thumb">Post to Social Media</a></li>
+                            <li><a href="#action:post_to_twitter" title="Post message to Twitter" class="action-thumb">Post to Twitter</a></li>
+                            <li><a href="#action:post_to_facebook" title="Post message to Facebook" class="action-thumb">Post to Facebook</a></li>
+                            <li class="nav-header">Email</li>
+                            <li><a href="#action:send_email" title="Send email to selected email addresses" class="action-thumb">Send Email</a></li>
+                            <li class="nav-header">Schedule</li>
+                            <li><a href="#action:make_schedule" title="Create an event in calendar" class="action-thumb">Make Schedule</a></li>
+                            <li class="nav-header">Report</li>
+                            <li><a href="#action:generate_report" title="Generate report from selected tracking data" class="action-thumb">Generate Report</a></li>
+                            <li class="tmp"><a href="#action:calc_data" title="Do some calculation on existing tracking data" class="action-thumb">Calculate Data</a></li>
                   </ul>
                   <ul class="sidebar-bottom nav nav-list">
                     <li class="divider"></li>
@@ -288,213 +534,7 @@
                     </div>
                   </div>
                 </form>
-                <div class="action_tpls tpl">
-                              <div id="actions_tpl" class="tpl">
-                                <div name="post_page" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Post Page or Form</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <ul class="action-bar">
-                                      <li>
-                                                    <select name="template" disabled class="tmp">
-                                                      <option>(Select from Template)</option>
-                                                    </select>
-                                      </li>
-                                      <li><a href="#page" class="btn btn-primary">Design</a></li>
-                                      <li><a href="about:blank" class="btn btn-info">Preview</a></li>
-                                      <li>
-                                                    <label class="checkbox inline">
-                                                      <input type="checkbox" name="track" checked>Track
-                                                    </label>
-                                      </li>
-                                    </ul>
-                                    <div class="info">(Page Info)</div>
-                                    <div class="help-block">Information Page is a web page to display information.<br>Click "Design" button to design the page.<br>Click "Preview" button to preview the generated page.</div>
-                                  </form>
-                                </div>
-                                <div name="post_to_multi_social_media" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Post to Multiple Social Media</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <ul class="action-bar">
-                                      <li>
-                                                    <div data-toggle="buttons-checkbox" class="btn-group">
-                                                      <button type="button" value="twitter" class="btn active">Twitter</button>
-                                                      <button type="button" value="facebook" class="btn active">Facebook</button>
-                                                    </div>
-                                      </li>
-                                      <li>
-                                                    <select name="template" disabled class="tmp">
-                                                      <option>(Select from Template)</option>
-                                                    </select>
-                                      </li>
-                                      <li>
-                                                    <label class="checkbox inline">
-                                                      <input type="checkbox" name="track" checked>Track
-                                                    </label>
-                                      </li>
-                                    </ul>
-                                                <textarea name="post_content" placeholder="Post Content..." title="Content post to social media (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
-                                    <div class="help-block">The maximium content length is 140, which is limited by Twitter.<br>Use "Post to Facebook" action instead for longer content length.</div>
-                                  </form>
-                                </div>
-                                <div name="post_to_twitter" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Post to Twitter</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <ul class="action-bar">
-                                      <li>
-                                                    <select name="template" disabled class="tmp">
-                                                      <option>(Select from Template)</option>
-                                                    </select>
-                                      </li>
-                                      <li>
-                                                    <label class="checkbox inline">
-                                                      <input type="checkbox" name="track" checked>Track
-                                                    </label>
-                                      </li>
-                                    </ul>
-                                                <textarea name="post_content" placeholder="Post Content..." title="Content post to Twitter (140 max)" rows="2" maxlength="140" class="input-block-level"></textarea>
-                                    <div class="help-block">The maximium content length is 140, which is limited by Twitter.</div>
-                                  </form>
-                                </div>
-                                <div name="post_to_facebook" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Post to Facebook</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <ul class="action-bar">
-                                      <li>
-                                                    <select name="template" disabled class="tmp">
-                                                      <option>(Select from Template)</option>
-                                                    </select>
-                                      </li>
-                                      <li>
-                                                    <label class="checkbox inline">
-                                                      <input type="checkbox" name="track" checked>Track
-                                                    </label>
-                                      </li>
-                                    </ul>
-                                                <textarea name="post_content" placeholder="Post Content..." title="Content post to Facebook (63206 max)" rows="3" maxlength="63206" class="input-block-level"></textarea>
-                                    <div class="help-block">The maximium content length is 63206, which is limited by Facebook.</div>
-                                  </form>
-                                </div>
-                                <div name="send_email" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Send Email</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <div class="input-prepend input-block-level"><span class="add-on">To</span>
-                                      <input name="email_to" title="Send To" type="text" placeholder="email_1@example.com; email_2@example.com" class="span11">
-                                    </div>
-                                                <select name="template" disabled class="tmp">
-                                                  <option>(Select from Template)</option>
-                                                </select>
-                                                <label class="checkbox inline">
-                                                  <input type="checkbox" name="track" checked>Track
-                                                </label>
-                                    <textarea name="email_content" placeholder="Email Content..." title="Content for email (1000 max)" rows="5" maxlength="1000" class="input-block-level"></textarea>
-                                  </form>
-                                </div>
-                                <div name="generate_report" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Generate Report</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <label class="checkbox">
-                                      <input type="checkbox" name="auto" checked>Generate form all tracked sources of this node.
-                                    </label>
-                                    <label>Tracked Sources (Input the name of tracked sources in each line)
-                                      <textarea name="sources" class="input-block-level"></textarea>
-                                    </label>
-                                    <div class="help-block">Generate Report for selected tracked sources</div>
-                                  </form>
-                                </div>
-                                <div name="calc_data" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Calculate Data</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <div class="help-block">Calculate Data</div>
-                                  </form>
-                                </div>
-                                <div name="make_schedule" class="tpl">
-                                  <div class="box-header well">
-                                    <h4>Make Schedule</h4>
-                                                <div class="box-icon">
-                                                  <button class="btn btn-minimize btn-round icon-up-open"></button>
-                                                  <button class="btn btn-close btn-round icon-close"></button>
-                                                </div>
-                                  </div>
-                                  <form class="box-content">
-                                                <input type="text" name="name" maxlength="255" title="Action Name" placeholder="Action Name">
-                                                <input type="text" name="key" maxlength="255" title="Action Key" placeholder="action_name" class="input-medium">
-                                                <div class="help-inline">(Action Name and Key)</div>
-                                    <div data-toggle="buttons-radio" class="btn-group">
-                                      <button type="button" name="type" value="auto" class="btn active">Starts Automatically</button>
-                                      <button type="button" name="type" value="manual" class="btn">Starts Manually</button>
-                                    </div>
-                                    <label>Duration
-                                      <input type="text" name="duration" placeholder="1 day 2 hours">
-                                    </label>
-                                    <div class="help-block">It will create an event in the Calendar, and notifications will be sent before its starts or ends.<br>Leave Druation blank or 0 to make it ends manually or schedule it later.</div>
-                                  </form>
-                                </div>
-                              </div>
-                </div>
-                <div id="actions" class="well">
+                <div class="node-actions well">
                   <div id="too_many_actions_alert" class="alert"><strong>Too many actions!&nbsp;</strong>Keep the logic of a node simple to understand and excute.</div>
                 </div>
               </div>
@@ -1199,7 +1239,7 @@
             <div class="span10 workspace">
               <div id="report_view" class="report-view">
                 <ul class="action-bar">
-                  <li class="head">Report</li>
+                  <li class="head">Reports</li>
                   <li class="pull-left tmp">
                     <ul id="media-filter" class="nav nav-pills">
                       <li class="active"><a href="#media:all">All</a></li>
@@ -1234,24 +1274,35 @@
                   <li>
                     <h3>Report Details</h3>
                   </li>
-                  <li><a class="pointer">Overview</a></li>
-                  <li class="active"><a class="pointer">Evaluated Charts</a></li>
-                  <li><a class="pointer">Feedback Collection</a></li>
-                  <li><a class="pointer">Submitted Results</a></li>
+                  <li><a href="#report_overview" data-toggle="tab">Overview</a></li>
+                  <li class="active"><a href="#report_charts" data-toggle="tab">Evaluated Charts</a></li>
+                  <li><a href="#report_feedback" data-toggle="tab">Feedback Collection</a></li>
+                  <li><a href="#report_files" data-toggle="tab">Submitted Results</a></li>
                 </ul>
               </div>
-              <div class="modal-body">
-                <div id="stacked" class="chart with-3d-shadow with-transitions">
-                  <h4>Stacked Area Chart</h4>
-                  <svg></svg>
+              <div class="modal-body tab-content">
+                <div id="report_overview" class="tab-pane">
+                  <h4>Report Overview</h4>
                 </div>
-                <div id="pie" class="span5 chart">
-                  <h4>Pie Chart</h4>
-                  <svg></svg>
+                <div id="report_charts" class="tab-pane active">
+                  <div id="stacked" class="chart with-3d-shadow with-transitions">
+                    <h4>Stacked Area Chart</h4>
+                    <svg></svg>
+                  </div>
+                  <div id="pie" class="span5 chart">
+                    <h4>Pie Chart</h4>
+                    <svg></svg>
+                  </div>
+                  <div id="bar" class="span6 chart">
+                    <h4>Bar Chart</h4>
+                    <svg></svg>
+                  </div>
                 </div>
-                <div id="bar" class="span6 chart">
-                  <h4>Bar Chart</h4>
-                  <svg></svg>
+                <div id="report_feedback" class="tab-pane">
+                  <h4>Feedback Collection</h4>
+                </div>
+                <div id="report_files" class="tab-pane">
+                  <h4>Submitted Results</h4>
                 </div>
               </div>
               <div class="modal-footer">

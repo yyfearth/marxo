@@ -6,7 +6,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   define('base', ['models', 'lib/common', 'lib/html5-dataset'], function(_arg) {
-    var BoxView, Collection, FormDialogView, FormViewMixin, FrameView, InnerFrameView, ModalDialogView, NavListView, Tenant, User, View, fill, find, findAll, tpl, tplAll, _base, _html, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+    var BoxView, Collection, FormDialogView, FormView, FormViewMixin, FrameView, InnerFrameView, ModalDialogView, NavListView, Tenant, User, View, fill, find, findAll, tpl, tplAll, _base, _html, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
     Collection = _arg.Collection, Tenant = _arg.Tenant, User = _arg.User;
     find = function(selector, parent) {
       if (parent == null) {
@@ -500,24 +500,47 @@
       return FormViewMixin;
 
     })();
+    FormView = (function(_super) {
+      __extends(FormView, _super);
+
+      function FormView() {
+        _ref5 = FormView.__super__.constructor.apply(this, arguments);
+        return _ref5;
+      }
+
+      FormView.acts_as(FormViewMixin);
+
+      FormView.prototype.initialize = function(options) {
+        FormView.__super__.initialize.call(this, options);
+        return this.initForm();
+      };
+
+      FormView.prototype.reset = function() {
+        this.form.reset();
+        return this;
+      };
+
+      return FormView;
+
+    })(View);
     FormDialogView = (function(_super) {
       __extends(FormDialogView, _super);
 
       function FormDialogView() {
-        _ref5 = FormDialogView.__super__.constructor.apply(this, arguments);
-        return _ref5;
+        _ref6 = FormDialogView.__super__.constructor.apply(this, arguments);
+        return _ref6;
       }
 
       FormDialogView.acts_as(FormViewMixin);
 
       FormDialogView.prototype.initialize = function(options) {
-        var _ref6,
+        var _ref7,
           _this = this;
         FormDialogView.__super__.initialize.call(this, options);
         this.initForm();
         this.btnSave = find('button.btn-save', this.el);
-        if ((_ref6 = this.btnSave) != null) {
-          _ref6.onclick = function() {
+        if ((_ref7 = this.btnSave) != null) {
+          _ref7.onclick = function() {
             return _this.submit(_this.save.bind(_this));
           };
         }
@@ -537,8 +560,8 @@
       __extends(NavListView, _super);
 
       function NavListView() {
-        _ref6 = NavListView.__super__.constructor.apply(this, arguments);
-        return _ref6;
+        _ref7 = NavListView.__super__.constructor.apply(this, arguments);
+        return _ref7;
       }
 
       NavListView.prototype.urlRoot = '';
@@ -703,6 +726,7 @@
       ModalDialogView: ModalDialogView,
       FormDialogView: FormDialogView,
       FormViewMixin: FormViewMixin,
+      FormView: FormView,
       Tenant: Tenant,
       User: User
     };

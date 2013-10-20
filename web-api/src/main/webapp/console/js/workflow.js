@@ -4,8 +4,8 @@
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  define('workflow', ['base', 'manager', 'models', 'lib/jquery-jsplumb', 'lib/jquery-ui'], function(_arg, _arg1, _arg2, jsPlumb) {
-    var Action, ActionView, Actions, BoxView, EditorView, Entity, FormDialogView, FrameView, InnerFrameView, Link, LinkEditorView, LinkView, ManagerView, ModalDialogView, NavListView, Node, NodeEditorView, NodeListView, NodeView, Nodes, View, Workflow, WorkflowCreatorView, WorkflowEditorView, WorkflowFrameView, WorkflowManagerView, WorkflowView, Workflows, find, findAll, tpl, tplAll, _ref, _ref1, _ref10, _ref11, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+  define('workflow', ['base', 'manager', 'models', 'actions', 'lib/jquery-jsplumb'], function(_arg, _arg1, _arg2, ActionsMixin, jsPlumb) {
+    var Action, Actions, BoxView, EditorView, Entity, FormDialogView, FrameView, InnerFrameView, Link, LinkEditorView, LinkView, ManagerView, ModalDialogView, NavListView, Node, NodeEditorView, NodeListView, NodeView, Nodes, View, Workflow, WorkflowCreatorView, WorkflowEditorView, WorkflowFrameView, WorkflowManagerView, WorkflowView, Workflows, find, findAll, tpl, tplAll, _ref, _ref1, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
     find = _arg.find, findAll = _arg.findAll, tpl = _arg.tpl, tplAll = _arg.tplAll, View = _arg.View, BoxView = _arg.BoxView, FrameView = _arg.FrameView, InnerFrameView = _arg.InnerFrameView, ModalDialogView = _arg.ModalDialogView, FormDialogView = _arg.FormDialogView, NavListView = _arg.NavListView;
     ManagerView = _arg1.ManagerView;
     Entity = _arg2.Entity, Workflows = _arg2.Workflows, Workflow = _arg2.Workflow, Nodes = _arg2.Nodes, Node = _arg2.Node, Link = _arg2.Link, Actions = _arg2.Actions, Action = _arg2.Action;
@@ -432,6 +432,8 @@
         return _ref6;
       }
 
+      NodeEditorView.acts_as(ActionsMixin);
+
       NodeEditorView.prototype.el = '#node_editor';
 
       NodeEditorView.prototype.events = {
@@ -443,15 +445,9 @@
 
       NodeEditorView.prototype.initialize = function(options) {
         NodeEditorView.__super__.initialize.call(this, options);
-        this.actionsEl = find('#actions', this.el);
+        this.initActions(options);
         this._fixStyle = this._fixStyle.bind(this);
         $(window).on('resize', this._fixStyle);
-        $(this.actionsEl).sortable({
-          axis: 'y',
-          delay: 150,
-          distance: 15,
-          cancel: '.box-content'
-        });
         this._too_many_alert = find('#too_many_actions_alert', this.el);
         this.on('actions_update', this._checkActionLimit.bind(this));
         return this;
@@ -474,6 +470,8 @@
         if (matched) {
           this.addAction({
             type: matched[1]
+          }, {
+            scrollIntoView: true
           });
         }
         return false;
@@ -481,93 +479,21 @@
 
       NodeEditorView.prototype.fill = function(attributes) {
         NodeEditorView.__super__.fill.call(this, attributes);
-        this.clearActions();
-        this.actions = new Actions(attributes.actions || []);
-        this.actions.forEach(this.addAction.bind(this));
+        this.fillActions(attributes);
         return this;
       };
 
       NodeEditorView.prototype.save = function() {
-        var actions;
         console.log('save');
-        actions = findAll('.action', this.actionsEl).map(function(el) {
-          var view;
-          view = $(el).data('view');
-          if (!view) {
-            throw new Error('cannot get action from action.$el');
-          }
-          return view.read();
-        });
-        this.data.set('actions', actions);
+        this.data.set('actions', this.readActions());
         console.log('save actions', actions, this.data);
         NodeEditorView.__super__.save.apply(this, arguments);
         return this;
       };
 
       NodeEditorView.prototype.reset = function() {
-        NodeEditorView.__super__.reset.apply(this, arguments);
-        return this.clearActions();
-      };
-
-      NodeEditorView.prototype.clearActions = function() {
-        var _ref7;
-        if ((_ref7 = this.actions) != null) {
-          _ref7.forEach(function(model) {
-            var _ref8;
-            return (_ref8 = model.view) != null ? _ref8.remove() : void 0;
-          });
-        }
-        this.actions = null;
-        $(findAll('.action', this.actionsEl)).remove();
-        return this;
-      };
-
-      NodeEditorView.prototype.viewAction = function(id) {
-        var el, hidden;
-        console.log('view action id:', id);
-        el = this.actionsEl.querySelector('#action_' + id);
-        if (el != null) {
-          console.log('dataset5', this.el.dataset['aria-hidden']);
-          hidden = this.el.getAttribute('aria-hidden');
-          if (hidden === 'true') {
-            this.$el.one('shown', function() {
-              return el.scrollIntoView();
-            });
-          } else if (hidden === 'false') {
-            el.scrollIntoView();
-          } else {
-            setTimeout(function() {
-              return el.scrollIntoView();
-            }, 600);
-          }
-        }
-        return el;
-      };
-
-      NodeEditorView.prototype.addAction = function(model) {
-        var actionView;
-        if (!(model instanceof Action)) {
-          model = new Action(model);
-        }
-        actionView = new ActionView({
-          model: model,
-          parent: this,
-          container: this.actionsEl
-        });
-        this.listenTo(actionView, 'remove', this.removeAction.bind(this));
-        actionView.render();
-        actionView.el.scrollIntoView();
-        this.delayedTrigger('actions_update', 100);
-        return this;
-      };
-
-      NodeEditorView.prototype.removeAction = function(view) {
-        console.log('remove action view', view);
-        if (typeof view.remove === "function") {
-          view.remove();
-        }
-        this.delayedTrigger('actions_update', 100);
-        return this;
+        this.clearActions();
+        return NodeEditorView.__super__.reset.apply(this, arguments);
       };
 
       NodeEditorView.prototype._checkActionLimit = function() {
@@ -585,122 +511,12 @@
       return NodeEditorView;
 
     })(EditorView);
-    ActionView = (function(_super) {
-      __extends(ActionView, _super);
-
-      function ActionView() {
-        _ref7 = ActionView.__super__.constructor.apply(this, arguments);
-        return _ref7;
-      }
-
-      ActionView.prototype.className = 'box action';
-
-      ActionView.prototype._tpl = tplAll('#actions_tpl');
-
-      ActionView.prototype.initialize = function(options) {
-        var _base;
-        ActionView.__super__.initialize.call(this, options);
-        this.containerEl = options.container;
-        this.model = options.model;
-        this.model.view = this;
-        this.type = (typeof (_base = this.model).get === "function" ? _base.get('type') : void 0) || options.model.type || options.type;
-        if (!(this.model && this.type)) {
-          throw new Error('need action model and type');
-        }
-        return this;
-      };
-
-      ActionView.prototype.remove = function() {
-        var model;
-        model = this.model;
-        model.type = null;
-        model.name = null;
-        model.data = null;
-        this.remove = function() {
-          return this;
-        };
-        return ActionView.__super__.remove.apply(this, arguments);
-      };
-
-      ActionView.prototype.render = function() {
-        var _ref8, _tpl;
-        _tpl = this._tpl[this.type];
-        if (!_tpl) {
-          console.error('unable to find tpl for action type', this.type);
-          this.remove();
-        } else {
-          this.el.innerHTML = this._tpl[this.type];
-          this.el.id = 'action_' + this.model.id || 'no_id';
-          this._name = this.$el.find('.box-header h4').text();
-          this.containerEl.insertBefore(this.el, find('.alert', this.containerEl));
-          ActionView.__super__.render.apply(this, arguments);
-          if (/webkit/i.test(navigator.userAgent)) {
-            $(this.el).disableSelection();
-          } else {
-            $('.box-header, .btn', this.el).disableSelection();
-          }
-          this.form = find('form', this.el);
-          this.fill((_ref8 = this.model) != null ? _ref8.toJSON() : void 0);
-          this.$el.data({
-            model: this.model,
-            view: this
-          });
-          this.listenTo(this.model, 'destroy', this.remove.bind(this));
-        }
-        return this;
-      };
-
-      ActionView.prototype.fill = function(data) {
-        var el, form, name, value;
-        if (!(data && this.form)) {
-          return;
-        }
-        if (!data.name) {
-          data.name = this._name;
-        }
-        if (!data.key) {
-          data.key = data.type;
-        }
-        form = this.form;
-        for (name in data) {
-          value = data[name];
-          el = form[name];
-          if ((el != null ? typeof el.getAttribute === "function" ? el.getAttribute('name') : void 0 : void 0) === name) {
-            $(el).val(value);
-          }
-        }
-        return this;
-      };
-
-      ActionView.prototype.read = function(data) {
-        var els;
-        if (!this.form) {
-          throw new Error('cannot find the form, may not rendered yet');
-        }
-        if (data == null) {
-          data = {};
-        }
-        els = [].slice.call(this.form.elements);
-        els.forEach(function(el) {
-          var $el, name;
-          $el = $(el);
-          name = $el.attr('name');
-          if (name) {
-            return data[name] = $el.val();
-          }
-        });
-        return data;
-      };
-
-      return ActionView;
-
-    })(BoxView);
     LinkEditorView = (function(_super) {
       __extends(LinkEditorView, _super);
 
       function LinkEditorView() {
-        _ref8 = LinkEditorView.__super__.constructor.apply(this, arguments);
-        return _ref8;
+        _ref7 = LinkEditorView.__super__.constructor.apply(this, arguments);
+        return _ref7;
       }
 
       LinkEditorView.prototype.el = '#link_editor';
@@ -712,8 +528,8 @@
       __extends(WorkflowView, _super);
 
       function WorkflowView() {
-        _ref9 = WorkflowView.__super__.constructor.apply(this, arguments);
-        return _ref9;
+        _ref8 = WorkflowView.__super__.constructor.apply(this, arguments);
+        return _ref8;
       }
 
       WorkflowView.prototype.jsPlumbDefaults = {
@@ -900,8 +716,8 @@
       };
 
       WorkflowView.prototype.load = function(wf, _arg3) {
-        var action, link, node, reload, _ref10;
-        _ref10 = _arg3 != null ? _arg3 : {}, link = _ref10.link, node = _ref10.node, action = _ref10.action, reload = _ref10.reload;
+        var action, link, node, reload, _ref9;
+        _ref9 = _arg3 != null ? _arg3 : {}, link = _ref9.link, node = _ref9.node, action = _ref9.action, reload = _ref9.reload;
         if (action && !node) {
           throw new Error('cannot open a action without given a node');
         }
@@ -931,13 +747,13 @@
       };
 
       WorkflowView.prototype._sortNodeViews = function(nodes) {
-        var grid, padding, spanX, spanY, traval, vertical, _ref10;
+        var grid, padding, spanX, spanY, traval, vertical, _ref9;
         nodes.lonely = [];
         nodes.start = [];
         nodes.end = [];
         nodes.forEach(function(node) {
-          var _ref10;
-          if ((node.inLinks.length === (_ref10 = node.outLinks.length) && _ref10 === 0)) {
+          var _ref9;
+          if ((node.inLinks.length === (_ref9 = node.outLinks.length) && _ref9 === 0)) {
             return nodes.lonely.push(node);
           } else if (node.inLinks.length === 0) {
             return nodes.start.push(node);
@@ -946,13 +762,13 @@
           }
         });
         grid = this.grid = [nodes.start.concat(nodes.lonely)];
-        _ref10 = this.gridDefaults, vertical = _ref10.vertical, padding = _ref10.padding, spanX = _ref10.spanX, spanY = _ref10.spanY;
+        _ref9 = this.gridDefaults, vertical = _ref9.vertical, padding = _ref9.padding, spanX = _ref9.spanX, spanY = _ref9.spanY;
         (traval = function(level) {
-          var nextLevel, _ref11;
+          var nextLevel, _ref10;
           nextLevel = [];
-          if ((_ref11 = grid[level]) != null) {
-            _ref11.forEach(function(node, i) {
-              var _ref12;
+          if ((_ref10 = grid[level]) != null) {
+            _ref10.forEach(function(node, i) {
+              var _ref11;
               node.gridX = i;
               node.gridY = level;
               if (vertical) {
@@ -964,8 +780,8 @@
               }
               node.x += padding;
               node.y += padding;
-              if ((_ref12 = node.outLinks) != null) {
-                _ref12.forEach(function(link) {
+              if ((_ref11 = node.outLinks) != null) {
+                _ref11.forEach(function(link) {
                   if (link.nextNode.gridX == null) {
                     nextLevel.push(link.nextNode);
                   }
@@ -1183,8 +999,8 @@
       __extends(NodeView, _super);
 
       function NodeView() {
-        _ref10 = NodeView.__super__.constructor.apply(this, arguments);
-        return _ref10;
+        _ref9 = NodeView.__super__.constructor.apply(this, arguments);
+        return _ref9;
       }
 
       NodeView.prototype.tagName = 'div';
@@ -1259,7 +1075,7 @@
       };
 
       NodeView.prototype._renderModel = function(node) {
-        var name, _ref11;
+        var name, _ref10;
         if (node == null) {
           node = this.model;
         }
@@ -1284,8 +1100,8 @@
           content: this._popover_tpl.replace('{desc}', node.get('desc') || '')
         });
         this.$popover = this.$el.data('popover').tip();
-        if ((_ref11 = this.$popover) != null) {
-          _ref11.addClass('target').data({
+        if ((_ref10 = this.$popover) != null) {
+          _ref10.addClass('target').data({
             node: node,
             view: this
           });
@@ -1306,8 +1122,8 @@
       __extends(LinkView, _super);
 
       function LinkView() {
-        _ref11 = LinkView.__super__.constructor.apply(this, arguments);
-        return _ref11;
+        _ref10 = LinkView.__super__.constructor.apply(this, arguments);
+        return _ref10;
       }
 
       LinkView.prototype._popover_tpl = NodeView.prototype._popover_tpl;
@@ -1344,7 +1160,7 @@
       };
 
       LinkView.prototype._renderLabel = function(link) {
-        var label$el, name, _ref12;
+        var label$el, name, _ref11;
         label$el = $(this.labelEl);
         name = link.get('name');
         this.label.setLabel(name || '');
@@ -1358,8 +1174,8 @@
           content: this._popover_tpl.replace('{desc}', link.get('desc') || '')
         });
         this.$popover = label$el.data('popover').tip();
-        if ((_ref12 = this.$popover) != null) {
-          _ref12.addClass('target').data({
+        if ((_ref11 = this.$popover) != null) {
+          _ref11.addClass('target').data({
             link: link,
             view: this
           });

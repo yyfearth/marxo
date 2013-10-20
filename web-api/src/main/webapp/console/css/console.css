@@ -6075,7 +6075,7 @@ svg .title {
 #node_editor form.form-horizontal .controls {
   margin-left: 90px;
 }
-#node_editor #actions {
+#node_editor .node-actions {
   position: absolute;
   top: 100px;
   left: 200px;
@@ -6135,7 +6135,7 @@ svg .title {
   vertical-align: middle;
 }
 #project_editor #wf_preview {
-  height: 300px;
+  height: 150px;
   margin-bottom: 10px;
 }
 div[data-role="editor-toolbar"] {
@@ -6746,6 +6746,13 @@ ul.action-bar > li > * {
 }
 ul.action-bar .nav {
   margin-bottom: 0;
+}
+.page-header {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.action-buttons {
+  position: relative;
 }
 .action-buttons > .btn {
   margin-left: 5px;

@@ -5,7 +5,7 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  FB_APP_ID = '503617123064248';
+  FB_APP_ID = '213527892138380';
 
   define('config', ['base', 'manager', 'models'], function(_arg, _arg1, _arg2) {
     var ConfigFrameView, FacebookStatusPopup, FacebookStatusView, FormDialogView, FormViewMixin, FrameView, InnerFrameView, ManagerView, ModalDialogView, ProjectFilterView, Publisher, Publishers, Service, ServiceConnectorView, ServiceStatusView, Tenant, TenantProfileView, UserEditor, UserManagemerView, UsernameCell, View, find, findAll, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;

@@ -17,32 +17,35 @@
         return _ref;
       }
 
+      HomeFrameView.prototype.collection = Projects.projects;
+
       HomeFrameView.prototype.initialize = function(options) {
         HomeFrameView.__super__.initialize.call(this, options);
-        return this.notificationList = new NotificationListView({
+        this.notificationList = new NotificationListView({
           el: find('.sidebar-list', this.el),
           parent: this
         });
+        this._render = this._render.bind(this);
+        this.listenTo(this.collection, 'reset add remove', this._render);
       };
 
       HomeFrameView.prototype._tpl = tpl('#project_overview_tpl');
 
-      HomeFrameView.prototype.render = function() {
-        var html, _tpl,
-          _this = this;
+      HomeFrameView.prototype._render = function() {
+        var html, _tpl;
         _tpl = this._tpl;
         html = [];
-        Projects.projects.fetch({
-          success: function(projects) {
-            projects.forEach(function(project) {
-              var obj, _ref1, _ref2;
-              obj = project.toJSON();
-              obj.counts = "(" + ((_ref1 = project.get('node_ids')) != null ? _ref1.length : void 0) + " Nodes, " + ((_ref2 = project.get('link_ids')) != null ? _ref2.length : void 0) + " Links)";
-              return html.push(fill(_tpl, obj));
-            });
-            return find('#home_view', _this.el).innerHTML = html.join('\n');
-          }
+        this.collection.forEach(function(project) {
+          var obj, _ref1, _ref2;
+          obj = project.toJSON();
+          obj.counts = "(" + ((_ref1 = project.get('node_ids')) != null ? _ref1.length : void 0) + " Nodes, " + ((_ref2 = project.get('link_ids')) != null ? _ref2.length : void 0) + " Links)";
+          return html.push(fill(_tpl, obj));
         });
+        find('#home_view', this.el).innerHTML = html.join('\n');
+      };
+
+      HomeFrameView.prototype.render = function() {
+        this.collection.load(this._render);
         this.notificationList.fetch();
         return this;
       };

@@ -4,9 +4,9 @@
   var __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  define('project', ['base', 'manager', 'models'], function(_arg, _arg1, _arg2) {
-    var FormDialogView, FrameView, InnerFrameView, ManagerView, NavListView, Project, ProjectActionCell, ProjectEditorView, ProjectFrameView, ProjectManagemerView, ProjectViewerView, Projects, Workflow, WorkflowCell, WorkflowFilterView, WorkflowListView, Workflows, find, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
-    find = _arg.find, FrameView = _arg.FrameView, InnerFrameView = _arg.InnerFrameView, NavListView = _arg.NavListView, FormDialogView = _arg.FormDialogView;
+  define('project', ['base', 'manager', 'models', 'actions'], function(_arg, _arg1, _arg2, ActionsMixin) {
+    var FormDialogView, FormView, FrameView, InnerFrameView, ManagerView, NavListView, NodeLinkDataEditor, Project, ProjectActionCell, ProjectEditorView, ProjectFrameView, ProjectManagemerView, ProjectViewerView, Projects, Workflow, WorkflowCell, WorkflowFilterView, WorkflowListView, Workflows, find, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+    find = _arg.find, FrameView = _arg.FrameView, InnerFrameView = _arg.InnerFrameView, NavListView = _arg.NavListView, FormView = _arg.FormView, FormDialogView = _arg.FormDialogView;
     ManagerView = _arg1.ManagerView, WorkflowFilterView = _arg1.WorkflowFilterView;
     Workflow = _arg2.Workflow, Workflows = _arg2.Workflows, Project = _arg2.Project, Projects = _arg2.Projects;
     ProjectFrameView = (function(_super) {
@@ -59,12 +59,7 @@
                 if (!project) {
                   throw new Error("project with id " + name + " cannot found");
                 }
-                if (sub) {
-                  return _this.editor.edit(project, sub);
-                } else {
-                  _this.switchTo(_this.viewer);
-                  return _this.viewer.load(project);
-                }
+                return _this.editor.edit(project, sub);
               }
             });
         }
@@ -85,6 +80,8 @@
       ProjectEditorView.prototype.goBackOnHidden = 'project/mgr';
 
       ProjectEditorView.prototype.workflows = Workflows.workflows;
+
+      ProjectEditorView.prototype.projects = Projects.projects;
 
       ProjectEditorView.prototype.events = {
         'change select[name=workflow_id]': function(e) {
@@ -112,11 +109,9 @@
           this.form.workflow_id.value = this.model.get('workflow_id') || '';
           $(this.form.workflow_id).change();
         },
-        'click li.sidebar-item > a': function(e) {
-          var model;
+        'click li.sidebar-item > a, a.linked-item': function(e) {
           e.preventDefault();
-          model = $(e.currentTarget).data('model');
-          this._showForm(model, e.currentTarget);
+          this.navTo($(e.currentTarget).data('model'));
           return false;
         }
       };
@@ -126,10 +121,18 @@
         this.sidebar = find('.sidebar', this.el);
         this.$btnSelect = $(find('.btn-select', this.form));
         this.$wfbtns = this.$btnSelect.add(find('.btn-revert', this.form));
+        this.$wfPreview = $(find('#wf_preview', this.el));
+        this.$nodeLinkSection = $(find('section.node-link', this.el));
+        this.$projectForm = $(this.form);
+        this.$actions = $(find('.node-actions', this.el));
+        this.dataEditor = new NodeLinkDataEditor({
+          el: this.$nodeLinkSection[0],
+          actionEl: this.$actions[0]
+        });
         return this;
       };
 
-      ProjectEditorView.prototype.create = function(wf) {
+      ProjectEditorView.prototype.create = function(wf, callback) {
         var _this = this;
         wf = (wf != null ? wf.id : void 0) || wf;
         if (typeof wf !== 'string') {
@@ -138,18 +141,22 @@
         this.popup(new Project({
           workflow_id: wf
         }), function(action, data) {
-          return console.log('wf created', action, data);
+          if (action === 'save') {
+            console.log('wf created', action, data);
+            _this.projects.create(data);
+            return typeof callback === "function" ? callback(_this.model, _this) : void 0;
+          }
         });
         return this;
       };
 
       ProjectEditorView.prototype.edit = function(project, opt) {
-        var action, link, node,
+        var action, callback, link, node,
           _this = this;
         if (opt == null) {
           opt = {};
         }
-        link = opt.link, node = opt.node, action = opt.action;
+        link = opt.link, node = opt.node, action = opt.action, callback = opt.callback;
         if (action && !node) {
           throw new Error('cannot open a action without given a node');
         }
@@ -162,7 +169,11 @@
           action: action
         });
         this.popup(project, function(action, data) {
-          return console.log('project saved', action, data);
+          if (action === 'save') {
+            console.log('project saved', action, data);
+            _this.model.save(data);
+            return typeof callback === "function" ? callback(_this.model, _this) : void 0;
+          }
         });
         return this;
       };
@@ -185,7 +196,11 @@
           }
           _this.fill(data);
           select.disabled = !model.isNew() || model.has('node_ids') || ((_ref2 = model.nodes) != null ? _ref2.length : void 0);
-          _this._selectWorkflow();
+          if (select.disabled) {
+            _this._renderProject(model);
+          } else {
+            _this._selectWorkflow();
+          }
           return setTimeout(function() {
             if (select.value) {
               return _this.form.name.focus();
@@ -197,19 +212,43 @@
         return this;
       };
 
-      ProjectEditorView.prototype._showForm = function(model) {
-        if (!model) {
-          console.log('show project info');
-        } else if (model._name === 'node') {
-          console.log('show node', model.id);
-        } else if (model._name === 'link') {
-          console.log('show link', model.id);
+      ProjectEditorView.prototype.navTo = function(model) {
+        var $linkOptions, $nodeOptions, $section, type;
+        type = (model != null ? model._name : void 0) || 'project';
+        if (this._cur_type !== type) {
+          this.$projectForm.hide();
+          this.$actions.hide();
+          $section = this.$nodeLinkSection.hide();
+          $nodeOptions = $section.find('.node-options').hide();
+          $linkOptions = $section.find('.link-options').hide();
+          if (type === 'project') {
+            this.$projectForm.show();
+          } else {
+            $section.show();
+            if (type === 'node') {
+              this.$wfPreview.show();
+              this.$actions.show();
+              $nodeOptions.show();
+            } else if (type === 'link') {
+              $linkOptions.show();
+            } else {
+              throw new Error("unknown type to nav " + type);
+            }
+          }
+          this._cur_type = type;
+        } else if (this._cur_model === model) {
+          return this;
         }
+        this._cur_model = model;
+        console.log('nav to', type, model);
+        if (model) {
+          this.dataEditor.fill(model);
+        }
+        return this;
       };
 
       ProjectEditorView.prototype._selectWorkflow = function() {
-        var project, wf, _ref2,
-          _this = this;
+        var project, wf, _ref2;
         wf = this.form.workflow_id.value;
         if (!wf) {
           return;
@@ -227,26 +266,28 @@
           });
           project._warp();
         }
-        project.copy(wf, function() {
-          var $sidebar, links, nodes, _renderSidebarItem;
-          console.log('selected wf for project', wf.name);
-          _this.sidebar.classList.add('active');
-          _this.$wfbtns.hide();
-          _this.btnSave.disabled = false;
-          $sidebar = $(_this.sidebar);
-          $sidebar.find('li.node-item, li.link-item').remove();
-          nodes = document.createDocumentFragment();
-          _renderSidebarItem = _this._renderSidebarItem.bind(_this);
-          project.nodes.forEach(function(node) {
-            return nodes.appendChild(_renderSidebarItem(node));
-          });
-          links = document.createDocumentFragment();
-          project.links.forEach(function(link) {
-            return links.appendChild(_renderSidebarItem(link));
-          });
-          $sidebar.find('.node-header').after(nodes);
-          return $sidebar.find('.link-header').after(links);
+        console.log('selected wf for project', wf.name);
+        project.copy(wf, this._renderProject.bind(this));
+      };
+
+      ProjectEditorView.prototype._renderProject = function(project) {
+        var $sidebar, links, nodes, _renderSidebarItem;
+        this.sidebar.classList.add('active');
+        this.$wfbtns.hide();
+        this.btnSave.disabled = false;
+        $sidebar = $(this.sidebar);
+        $sidebar.find('li.node-item, li.link-item').remove();
+        nodes = document.createDocumentFragment();
+        _renderSidebarItem = this._renderSidebarItem.bind(this);
+        project.nodes.forEach(function(node) {
+          return nodes.appendChild(_renderSidebarItem(node));
         });
+        links = document.createDocumentFragment();
+        project.links.forEach(function(link) {
+          return links.appendChild(_renderSidebarItem(link));
+        });
+        $sidebar.find('.node-header').after(nodes);
+        $sidebar.find('.link-header').after(links);
       };
 
       ProjectEditorView.prototype._renderSidebarItem = function(model) {
@@ -254,8 +295,7 @@
         el = document.createElement('li');
         el.className = "sidebar-item " + model._name + "-item";
         a = document.createElement('a');
-        name = model.get('name') || model.get('desc') || '(No Name)';
-        a.textContent = name;
+        name = a.textContent = model.name();
         a.dataset.id = model.id;
         $a = $(a).data('model', model);
         if (name.length > 15) {
@@ -280,6 +320,7 @@
       ProjectEditorView.prototype.reset = function() {
         this.$wfbtns.hide();
         $(this.sidebar).find('li.node-item, li.link-item').remove();
+        this.navTo(null);
         return ProjectEditorView.__super__.reset.apply(this, arguments);
       };
 
@@ -318,6 +359,7 @@
       };
 
       ProjectEditorView.prototype.save = function() {
+        this.data = this.read();
         this.callback('save');
         this.hide(true);
         return this;
@@ -326,12 +368,96 @@
       return ProjectEditorView;
 
     })(FormDialogView);
+    NodeLinkDataEditor = (function(_super) {
+      __extends(NodeLinkDataEditor, _super);
+
+      function NodeLinkDataEditor() {
+        _ref2 = NodeLinkDataEditor.__super__.constructor.apply(this, arguments);
+        return _ref2;
+      }
+
+      NodeLinkDataEditor.acts_as(ActionsMixin);
+
+      NodeLinkDataEditor.prototype.initialize = function(options) {
+        NodeLinkDataEditor.__super__.initialize.call(this, options);
+        options.projectMode = true;
+        this.initActions(options);
+        this.nameEl = find('.node-link-name', this.el);
+        this.keyEl = find('.node-link-key', this.el);
+        this.$inLinks = $(find('[name=in_links]', this.form));
+        this.$outLinks = $(find('[name=out_links]', this.form));
+        this.$prevNode = $(find('[name=prev_node]', this.form));
+        this.$nextNode = $(find('[name=next_node]', this.form));
+        this.$linkedNodeLinks = this.$inLinks.add(this.$outLinks.add(this.$prevNode.add(this.$nextNode)));
+        return this;
+      };
+
+      NodeLinkDataEditor.prototype.fill = function(model) {
+        var name, _ref3, _ref4, _renderLinked;
+        this.reset();
+        NodeLinkDataEditor.__super__.fill.call(this, model.attributes);
+        _renderLinked = this._renderLinked.bind(this);
+        if (model.actions != null) {
+          name = model.name();
+          if ((_ref3 = model.inLinks) != null ? _ref3.length : void 0) {
+            this.$inLinks.append(model.inLinks.map(_renderLinked));
+          } else {
+            this.$inLinks.append(_renderLinked(null));
+          }
+          if ((_ref4 = model.outLinks) != null ? _ref4.length : void 0) {
+            this.$outLinks.append(model.outLinks.map(_renderLinked));
+          } else {
+            this.$outLinks.append(_renderLinked(null));
+          }
+          this.fillActions(model.actions());
+        } else {
+          name = "Link: " + (model.name());
+          this.$prevNode.append(_renderLinked(model.prevNode));
+          this.$nextNode.append(_renderLinked(model.nextNode));
+        }
+        this.nameEl.textContent = name;
+        this.keyEl.textContent = model.get('key');
+        return this;
+      };
+
+      NodeLinkDataEditor.prototype._renderLinked = function(model) {
+        var btn;
+        if (model) {
+          btn = document.createElement('a');
+          btn.className = 'btn btn-link linked-item';
+          btn.textContent = model.name();
+          $.data(btn, 'model', model);
+        } else {
+          btn = document.createElement('button');
+          btn.className = 'btn btn-link';
+          btn.disabled = true;
+          btn.textContent = '(None)';
+        }
+        return btn;
+      };
+
+      NodeLinkDataEditor.prototype.read = function() {
+        var data;
+        data = NodeLinkDataEditor.__super__.read.apply(this, arguments);
+        data.actions = this.readActions();
+        return data;
+      };
+
+      NodeLinkDataEditor.prototype.reset = function() {
+        this.clearActions();
+        this.$linkedNodeLinks.empty();
+        return NodeLinkDataEditor.__super__.reset.apply(this, arguments);
+      };
+
+      return NodeLinkDataEditor;
+
+    })(FormView);
     ProjectViewerView = (function(_super) {
       __extends(ProjectViewerView, _super);
 
       function ProjectViewerView() {
-        _ref2 = ProjectViewerView.__super__.constructor.apply(this, arguments);
-        return _ref2;
+        _ref3 = ProjectViewerView.__super__.constructor.apply(this, arguments);
+        return _ref3;
       }
 
       ProjectViewerView.prototype.initialize = function(options) {
@@ -369,8 +495,8 @@
       __extends(WorkflowListView, _super);
 
       function WorkflowListView() {
-        _ref3 = WorkflowListView.__super__.constructor.apply(this, arguments);
-        return _ref3;
+        _ref4 = WorkflowListView.__super__.constructor.apply(this, arguments);
+        return _ref4;
       }
 
       WorkflowListView.prototype.auto = false;
@@ -410,8 +536,8 @@
       __extends(WorkflowCell, _super);
 
       function WorkflowCell() {
-        _ref4 = WorkflowCell.__super__.constructor.apply(this, arguments);
-        return _ref4;
+        _ref5 = WorkflowCell.__super__.constructor.apply(this, arguments);
+        return _ref5;
       }
 
       WorkflowCell.prototype.collection = Workflows.workflows;
@@ -472,8 +598,8 @@
       __extends(ProjectActionCell, _super);
 
       function ProjectActionCell() {
-        _ref5 = ProjectActionCell.__super__.constructor.apply(this, arguments);
-        return _ref5;
+        _ref6 = ProjectActionCell.__super__.constructor.apply(this, arguments);
+        return _ref6;
       }
 
       ProjectActionCell.prototype.render = function() {
@@ -487,8 +613,8 @@
       __extends(ProjectManagemerView, _super);
 
       function ProjectManagemerView() {
-        _ref6 = ProjectManagemerView.__super__.constructor.apply(this, arguments);
-        return _ref6;
+        _ref7 = ProjectManagemerView.__super__.constructor.apply(this, arguments);
+        return _ref7;
       }
 
       ProjectManagemerView.prototype.columns = [

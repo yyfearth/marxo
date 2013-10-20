@@ -120,6 +120,11 @@
         return ReportView.__super__.popup.call(this, model, callback);
       };
 
+      ReportView.prototype.reset = function() {
+        this.$el.find('.nav-tabs a[data-toggle=tab]:eq(1)').tab('show');
+        return this;
+      };
+
       ReportView.prototype.render = function() {
         var _this = this;
         setTimeout(function() {
