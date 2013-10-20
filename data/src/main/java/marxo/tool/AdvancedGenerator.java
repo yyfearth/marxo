@@ -91,6 +91,7 @@ public class AdvancedGenerator extends BasicGenerator {
 					node.fillWithDefaultValues();
 					workflow.nodeIdList.add(node.id);
 
+					node.workflowId = workflow.id;
 					node.tenantId = tenant.id;
 					node.name = "Node " + (j + 1);
 					node.key = "node" + (j + 1);
@@ -124,6 +125,7 @@ public class AdvancedGenerator extends BasicGenerator {
 
 					link.fillWithDefaultValues();
 					workflow.linkIdList.add(link.id);
+					link.workflowId = workflow.id;
 					link.tenantId = tenant.id;
 					link.name = "Link " + (j + 1);
 					link.key = "link" + (j + 1);
