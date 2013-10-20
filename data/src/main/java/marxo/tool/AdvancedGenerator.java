@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -117,8 +116,8 @@ public class AdvancedGenerator extends BasicGenerator {
 
 				workflow.linkIdList = new ArrayList<>();
 				for (int j = 0; j < numNodes - 1; j++) {
-					Node previousNode = nodes.get(j);
-					Node nextNode = nodes.get(j + 1);
+					Node previousNode = nodes.get(threadLocalRandom.nextInt(nodes.size() - numNodes, nodes.size()));
+					Node nextNode = nodes.get(threadLocalRandom.nextInt(nodes.size() - numNodes, nodes.size()));
 
 					Link link = new Link();
 					links.add(link);
