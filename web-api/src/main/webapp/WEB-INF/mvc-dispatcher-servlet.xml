@@ -36,6 +36,16 @@
             </list>
         </property>
     </bean>
+    <!-- review: check whether the following works -->
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="contentNegotiationManager">
+            <bean class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+                <property name="defaultContentType" value="application/json"/>
+                <property name="favorPathExtension" value="true"/>
+                <property name="favorParameter" value="true"/>
+            </bean>
+        </property>
+    </bean>
 
     <bean class="java.lang.Boolean" id="isDebug">
         <constructor-arg type="boolean" value="true"/>
