@@ -294,9 +294,8 @@ Action
       @fillActions attributes
       @
     save: ->
-      console.log 'save'
       @data.set 'actions', @readActions()
-      console.log 'save actions', actions, @data
+      console.log 'save node', @data
       # save the node
       super
       @
