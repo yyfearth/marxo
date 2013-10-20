@@ -49,6 +49,7 @@ Projects
   class ProjectEditorView extends FormDialogView
     goBackOnHidden: 'project/mgr'
     workflows: Workflows.workflows
+    projects: Projects.projects
     events:
       'change select[name=workflow_id]': (e) ->
         wf = e.currentTarget.value
@@ -87,19 +88,23 @@ Projects
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
       @
-    create: (wf) ->
+    create: (wf, callback) ->
       wf = wf?.id or wf
       wf = null unless typeof wf is 'string'
-      @popup new Project(workflow_id: wf), (action, data) =>
+      @popup new Project(workflow_id: wf), (action, data) => if action is 'save'
         console.log 'wf created', action, data
+        @projects.create data
+        callback? @model, @
       @
     edit: (project, opt = {}) ->
-      {link, node, action} = opt
+      {link, node, action, callback} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
       throw new Error 'node and link cannot be open together' if link and node
       console.log 'popup node/link editor', {link, node, action}
-      @popup project, (action, data) =>
+      @popup project, (action, data) => if action is 'save'
         console.log 'project saved', action, data
+        @model.save data
+        callback? @model, @
       @
     popup: (model, callback) ->
       data = model.toJSON()
@@ -228,6 +233,8 @@ Projects
         select.appendChild shared if shared.childElementCount
       return
     save: ->
+      # TODO: read from nodes/links
+      @data = @read()
       @callback 'save'
       @hide true
       @
