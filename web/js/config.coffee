@@ -1,6 +1,6 @@
 "use strict"
 
-FB_APP_ID = '503617123064248'
+FB_APP_ID = '213527892138380'
 
 define 'config', ['base', 'manager', 'models'],
 ({

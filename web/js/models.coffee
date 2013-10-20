@@ -1,7 +1,8 @@
 "use strict"
 
 define 'models', ['lib/common'], ->
-  ROOT = 'http://tomcat.masonwan.com/api'
+
+  ROOT = 'http://marxo.masonwan.com/api'
   # ROOT = '/api'
 
   ## Common
