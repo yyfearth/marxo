@@ -150,7 +150,7 @@ Projects
       if rawValue
         val = rawValue.toLowerCase()
         labelCls = 'label capitalized '
-        if @column.has 'cls'
+        if val isnt 'none' and @column.has 'cls'
           cls = @column.get 'cls'
           cls = cls[val] or '' unless typeof cls is 'string'
           labelCls += cls
