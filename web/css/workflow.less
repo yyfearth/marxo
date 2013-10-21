@@ -6,12 +6,12 @@
   -moz-border-radius: 0.5em;
   border-radius: 0.5em;
   opacity: 0.8;
-  white-space: nowrap;
   text-align: center;
   background-color: #eeeeef;
   color: black;
   font-family: helvetica;
-  padding: 0.5em 1em;
+  padding: 0.5em;
+  min-width: 5em;
   margin: 10px;
   font-size: 0.9em;
 
@@ -25,21 +25,25 @@
 
 #workflow_view {
   position: absolute;
-  top: 0;
+  top: 40px;
   left: 0;
   right: 0;
   bottom: 0; // 100px;
   overflow: auto;
 
   .node {
-    min-width: 5em;
     height: 5em;
     line-height: 5em;
-    z-index: 20;
     position: absolute;
+    white-space: nowrap;
     padding: 0.5em 1em;
     cursor: pointer;
     margin: 0;
+    z-index: 20;
+
+    &:hover {
+      z-index: 21 !important;
+    }
 
     &.active {
       border: 1px dotted green;
@@ -55,26 +59,135 @@
 
   }
 
-  ._jsPlumb_connector {
+  .link {
     z-index: 4;
-    &:hover {
+    cursor: pointer;
+    &.hover, &:hover {
       z-index: 10;
     }
   }
 
-  ._jsPlumb_endpoint {
-    z-index: 21;
+  .endpoint {
+    z-index: 22;
     cursor: move;
+    &:after { // for padding
+      position: absolute;
+      visibility: hidden;
+      content: ' ';
+      padding: 30px;
+    }
   }
 
-  .aLabel {
-    background-color: white;
+  .link-label {
+    background-color: #fff;
     padding: 0.4em;
     font: 12px sans-serif;
     color: #444;
     z-index: 21;
-    border: 1px dotted gray;
+    border: 1px dotted #999;
     opacity: 0.8;
+    cursor: pointer;
   }
 
+  .popover-buttons {
+    min-width: 125px;
+    overflow: hidden;
+    margin: 10px 0 5px;
+    text-align: right;
+  }
+
+}
+
+#workflow_header {
+  cursor: pointer;
+}
+
+#node_editor {
+  min-width: 600px;
+
+  form.form-horizontal {
+    display: block;
+    margin-bottom: 0;
+    .control-group {
+      display: inline-block;
+      vertical-align: top;
+      margin-bottom: 10px;
+    }
+    .control-label {
+      width: 80px;
+    }
+    .controls {
+      margin-left: 90px;
+    }
+  }
+
+  .node-actions {
+    position: absolute;
+    top: 100px;
+    left: 200px;
+    right: 10px;
+    bottom: 13px;
+    padding: 0;
+    margin-bottom: 0;
+    overflow-y: auto;
+  }
+
+  .action.box {
+    .box-header {
+      cursor: move;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    form.box-content {
+      margin: 0;
+
+      > * {
+        margin-bottom: 10px;
+      }
+    }
+  }
+
+  #too_many_actions_alert {
+    margin: 0;
+    margin-top: -10px;
+    height: 0;
+    opacity: 0;
+    padding: 0;
+    border: none;
+    .transition;
+    &.active {
+      margin-top: 0;
+      height: auto;
+      opacity: 1;
+      padding: 8px 35px 8px 14px;
+      border: 1px solid #fbeed5;
+    }
+  }
+}
+
+// Project Frame
+
+#project_editor {
+  .sidebar {
+    left: -200px;
+    opacity: 0;
+    .transition(all);
+    &.active {
+      left: 0;
+      opacity: 1;
+    }
+    li.sidebar-item > a {
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+  }
+  #wf_preview {
+    height: 150px;
+    margin-bottom: 10px;
+  }
 }

@@ -1,0 +1,63 @@
+#event_editor.modal.hide.fade(aria-labelledby='event_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#event_editor_title Event Editor
+  .modal-body
+    form.form-horizontal
+      .control-group
+        label.control-label(for='event_title') Title
+        .controls
+          input#event_title(type='text', name='title', placeholder='Event Name', required)
+      .control-group
+        label.control-label(for='event_name') Name
+        .controls
+          input#event_name(type='text', name='name', placeholder='event_name', required)
+      .control-group
+        label.control-label(for='event_desc') Description
+        .controls
+          textarea#event_desc(name='desc', cols='30', rows='2', placeholder='Description')
+      .control-group
+        label.control-label Date Info
+        .controls
+          p.info.help-block
+      .control-group.tmp
+        label.control-label(for='event_duration') Auto Start
+        .controls
+          label.checkbox
+            input(type='checkbox', name='auto_start', disabled)
+            | Auto Start at Start Date
+          .help-block
+            | Auto start when the Start Date reached, or when action start to execution without Start Date.
+            | Otherwise only notification will be sent, and require to start manually.
+      .control-group
+        label.control-label(for='event_starts') Start Date
+        .controls
+          input#event_starts(type='datetime', name='starts', placeholder='The Date of Execution')
+          small.help-block
+            em Format like "01/01/2010 01:01 AM"
+            br
+            | Blank means it will be set to the date of execution automatically.
+      .control-group
+        label.control-label(for='event_ends') End Date
+        .controls
+          input#event_ends(type='datetime', name='ends', placeholder='Manual')
+          small.help-block
+            em Format like "01/01/2010 01:01 AM"
+      .control-group
+        label.control-label(for='event_duration') Duration
+        .controls
+          input#event_duration(type='text', name='duration', placeholder='e.g. 10 days 4 hours')
+          small.help-block
+            em Format in "10 days 4 hours" from weeks to ms
+            br
+            | Leave Druation and End Date blank needs end it manually or schedule it later.
+      .control-group
+        label.control-label(for='event_status') Status
+        .controls
+          input#event_status(type='text', name='status', readonly)
+  .modal-footer
+    button.btn.btn-info.pull-left.btn-view(title='View event in Calendar') View
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save
+
+//- TODO: use Auto Start or not

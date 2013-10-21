@@ -1,0 +1,65 @@
+ul.nav.pull-right
+  li.dropdown(data-frame='profile')
+    a(href='#profile')
+      img#avatar(src='https://secure.gravatar.com/avatar?s=20&d=mm')
+      span#username (Username)
+      b.caret
+    ul.dropdown-menu
+      li(data-frame='profile')
+        a.icon-user(href='#profile') Profile
+      li(data-frame='notification')
+        a.icon-notify(href='#notification') Notifications
+      li.divider
+      li
+        a.icon-logout(href='#signout') Sign Out
+ul.nav
+  li(data-frame='home')
+    a.icon-home(href='#home') Home
+  li.dropdown(data-frame='project')
+    a.icon-project(href='#project')
+      | Project
+      b.caret
+    ul.dropdown-menu
+      li.tmp(data-inner-frame='wiz')
+        a.icon-wizard(href='#project/wiz') New Project Wizard
+      li(data-inner-frame='new')
+        a.icon-new(href='#project/new') Create new Project
+      li.divider
+      li(data-inner-frame='mgr', data-default='true')
+        a.icon-manager(href='#project/mgr') Manage Projects
+  li.dropdown(data-frame='workflow')
+    a.icon-workflow(href='#workflow')
+      | Workflow
+      b.caret
+    ul.dropdown-menu
+      li(data-inner-frame='new')
+        a.icon-new(href='#workflow/new') Create new Workflow
+      li.divider
+      li(data-inner-frame='mgr', data-default='true')
+        a.icon-manager(href='#workflow/mgr') Manage Workflows
+  li.dropdown(data-frame='event')
+    a.icon-calendar(href='#event')
+      | Event
+      b.caret
+    ul.dropdown-menu
+      li(data-inner-frame='calendar', data-default='true')
+        a.icon-calendar(href='#event/calendar') Calendar
+      li.divider
+      li(data-inner-frame='mgr')
+        a.icon-manager(href='#event/mgr') Manage Events
+  li(data-frame='content')
+    a.icon-page(href='#content') Content
+  li(data-frame='report')
+    a.icon-report(href='#report') Report
+  li.dropdown(data-frame='config')
+    a.icon-config(href='#config')
+      | Configuration
+      b.caret
+    ul.dropdown-menu
+      li(data-inner-frame='tenant', data-default='true')
+        a.icon-config(href='#config/tenant') Tenant Profile
+      li(data-inner-frame='service')
+        a.icon-connect(href='#config/service') Connect Services
+      li.divider
+      li(data-inner-frame='users')
+        a.icon-users(href='#config/users') Manage Members
