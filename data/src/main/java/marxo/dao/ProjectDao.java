@@ -1,6 +1,8 @@
 package marxo.dao;
 
-import marxo.bean.Project;
+import marxo.entity.Project;
+import org.springframework.stereotype.Repository;
 
+@Repository("projectDao")
 public class ProjectDao extends BasicDao<Project> {
 }

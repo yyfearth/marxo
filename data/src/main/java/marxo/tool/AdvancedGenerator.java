@@ -1,6 +1,6 @@
 package marxo.tool;
 
-import marxo.bean.*;
+import marxo.entity.*;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +27,6 @@ public class AdvancedGenerator extends BasicGenerator {
 		ArrayList<Project> projects = new ArrayList<>();
 		ArrayList<Workflow> workflows = new ArrayList<>();
 		ArrayList<Node> nodes = new ArrayList<>();
-		ArrayList<Action> actions = new ArrayList<>();
-		ArrayList<Link> links = new ArrayList<>();
-		ArrayList<Condition> conditions = new ArrayList<>();
 
 		// Tenant
 		{
@@ -102,7 +99,6 @@ public class AdvancedGenerator extends BasicGenerator {
 					int numActions = threadLocalRandom.nextInt(1, 3);
 					for (int k = 0; k < numActions; k++) {
 						Action action = new Action();
-						actions.add(action);
 						action.fillWithDefaultValues();
 						node.actions.add(action);
 						action.tenantId = tenant.id;
@@ -120,7 +116,6 @@ public class AdvancedGenerator extends BasicGenerator {
 					Node nextNode = nodes.get(threadLocalRandom.nextInt(nodes.size() - numNodes, nodes.size()));
 
 					Link link = new Link();
-					links.add(link);
 
 					link.fillWithDefaultValues();
 					workflow.linkIdList.add(link.id);
@@ -149,7 +144,6 @@ public class AdvancedGenerator extends BasicGenerator {
 		map.put(Workflow.class, workflows);
 		map.put(Project.class, projects);
 		map.put(Node.class, nodes);
-		map.put(Link.class, links);
 
 		for (Class aClass : map.keySet()) {
 			mongoTemplate.dropCollection(aClass);

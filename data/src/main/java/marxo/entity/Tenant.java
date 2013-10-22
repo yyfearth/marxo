@@ -1,4 +1,4 @@
-package marxo.bean;
+package marxo.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,4 +9,5 @@ public class Tenant extends BasicEntity {
 	public String phoneNumber;
 	public String fax;
 	public String address;
+	FacebookData facebookData;
 }

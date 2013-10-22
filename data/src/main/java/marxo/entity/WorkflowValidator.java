@@ -1,6 +1,4 @@
-package marxo.bean;
-
-import org.springframework.util.StringUtils;
+package marxo.entity;
 
 import java.util.ArrayList;
 import java.util.List;

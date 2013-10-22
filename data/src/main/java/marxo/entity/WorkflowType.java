@@ -1,4 +1,4 @@
-package marxo.bean;
+package marxo.entity;
 
 public enum WorkflowType {
 	NONE,

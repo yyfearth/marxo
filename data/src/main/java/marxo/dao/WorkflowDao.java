@@ -1,16 +1,18 @@
 package marxo.dao;
 
 import com.google.common.base.Strings;
-import marxo.bean.Workflow;
-import marxo.bean.WorkflowValidator;
+import marxo.entity.Workflow;
+import marxo.entity.WorkflowValidator;
 import marxo.exception.ValidationException;
 import marxo.tool.StringTool;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository("workflowDao")
 public class WorkflowDao extends BasicDao<Workflow> {
 	public void insert(Workflow workflow) {
 		mongoTemplate.insert(workflow);

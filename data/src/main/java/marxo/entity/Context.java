@@ -1,4 +1,4 @@
-package marxo.bean;
+package marxo.entity;
 
 public class Context {
 	String key;

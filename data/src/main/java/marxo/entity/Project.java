@@ -1,4 +1,4 @@
-package marxo.bean;
+package marxo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.bson.types.ObjectId;

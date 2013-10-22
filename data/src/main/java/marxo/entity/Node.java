@@ -1,4 +1,4 @@
-package marxo.bean;
+package marxo.entity;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;

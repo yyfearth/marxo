@@ -1,4 +1,4 @@
-package marxo.bean;
+package marxo.entity;
 
 public class Action extends TenantChildEntity {
 	public String type;

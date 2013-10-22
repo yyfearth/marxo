@@ -1,6 +1,6 @@
 package marxo.tool;
 
-import marxo.bean.BasicEntity;
+import marxo.entity.BasicEntity;
 import org.bson.types.ObjectId;
 
 import java.lang.reflect.Array;

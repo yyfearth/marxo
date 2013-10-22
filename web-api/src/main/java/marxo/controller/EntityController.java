@@ -12,10 +12,10 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
-public abstract class GenericController<E extends BasicEntity, Dao extends BasicDao<E>> extends BasicController {
+public abstract class EntityController<E extends BasicEntity, Dao extends BasicDao<E>> extends BasicController {
 	Dao dao;
 
-	protected GenericController(Dao dao) {
+	protected EntityController(Dao dao) {
 		this.dao = dao;
 	}
 

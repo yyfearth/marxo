@@ -1,6 +1,8 @@
 package marxo.dao;
 
-import marxo.bean.Link;
+import marxo.entity.Link;
+import org.springframework.stereotype.Repository;
 
+@Repository("linkDao")
 public class LinkDao extends BasicDao<Link> {
 }

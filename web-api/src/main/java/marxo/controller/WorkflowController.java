@@ -5,10 +5,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.sun.istack.internal.Nullable;
-import marxo.bean.Link;
-import marxo.bean.Node;
-import marxo.bean.Workflow;
-import marxo.bean.WorkflowChildEntity;
+import marxo.entity.Link;
+import marxo.entity.Node;
+import marxo.entity.Workflow;
+import marxo.entity.WorkflowChildEntity;
 import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
@@ -23,7 +23,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("workflow{:s?}")
-public class WorkflowController extends GenericController<Workflow, WorkflowDao> {
+public class WorkflowController extends EntityController<Workflow, WorkflowDao> {
 	static final ModifiedDateComparator modifiedDateComparator = new ModifiedDateComparator();
 	@Autowired
 	NodeDao nodeDao;

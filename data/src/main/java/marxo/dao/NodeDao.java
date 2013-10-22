@@ -1,6 +1,6 @@
 package marxo.dao;
 
-import marxo.bean.Node;
+import marxo.entity.Node;
 
 public class NodeDao extends BasicDao<Node> {
 }
