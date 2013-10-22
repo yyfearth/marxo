@@ -66,21 +66,25 @@ define 'models', ['lib/common'], ->
       url = @url?() or @url or ''
       _nodes_loaded = Array.isArray model.nodes
       nodes = if _nodes_loaded then model.nodes else []
-      @nodes = new Nodes nodes, url: url + '/nodes'
-      @nodes._loaded = _nodes_loaded
+      nodes = @nodes = new Nodes nodes, url: url + '/nodes'
+      nodes._loaded = _nodes_loaded
+      nodes.sync = @sync # for test only
 
       _links_loaded = Array.isArray model.links
       links = if _links_loaded then model.links else []
-      @links = new Links links, url: url + '/links'
-      @links._loaded = _links_loaded
+      links = @links = new Links links, url: url + '/links'
+      links._loaded = _links_loaded
+      links.sync = @sync # for test only
 
       _createNodeRef = @_createNodeRef.bind @
-      @nodes.forEach _createNodeRef
-      @listenTo @nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
+      nodes.forEach _createNodeRef
+      @listenTo nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
 
       _createLinkRef = @_createLinkRef.bind @
-      @links.forEach _createLinkRef
-      @listenTo @links, add: _createLinkRef, remove: @_removeLinkRef.bind @
+      links.forEach _createLinkRef
+      @listenTo links, add: _createLinkRef, remove: @_removeLinkRef.bind @
+
+      # TODO: listenTo changes from this, nodes, links
 
       @set {}
 
@@ -94,14 +98,16 @@ define 'models', ['lib/common'], ->
       @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
+    sync: Backbone.ajaxSync or Backbone.sync # for test only
     save: (attributes = {}, options) -> # override for sync ids
       node_ids = @nodes?.map (r) -> r.id
       link_ids = @links?.map (r) -> r.id
       attributes.node_ids = node_ids if node_ids?.join(',') isnt @get('node_ids')?.join(',')
       attributes.link_ids = link_ids if link_ids?.join(',') isnt @get('link_ids')?.join(',')
-      # for test only
-      if @nodes? then attributes.nodes = @nodes?.map (r) -> r.attributes
-      if @links? then attributes.links = @links?.map (r) -> r.attributes
+      if Backbone.LocalStorage? and @sync isnt Backbone.ajaxSync # for test only
+        if @nodes? then attributes.nodes = @nodes?.map (r) -> r.attributes
+        if @links? then attributes.links = @links?.map (r) -> r.attributes
+      # TODO: save nodes and links
       console.log 'save', @_name, attributes, @
       super attributes, options
       @
@@ -139,7 +145,7 @@ define 'models', ['lib/common'], ->
       @
     _createNodeRef: (node) ->
       throw new Error 'it must be a Node object' unless node instanceof Node
-      node.workflow = @
+      node.workflow = @ if @_name is 'workflow'
       node.inLinks = []
       node.outLinks = []
       return
@@ -154,7 +160,7 @@ define 'models', ['lib/common'], ->
       throw new Error 'it must be a Link object' unless link instanceof Link
       unless link.has('prev_node_id') and link.has('next_node_id')
         throw new Error 'link ' + (link.key or link.id) + 'is broken, prev/next node missing'
-      link.workflow = @
+      link.workflow = @ if @_name is 'workflow'
       prevNodeId = link.get 'prev_node_id'
       nextNodeId = link.get 'next_node_id'
       link.prevNode = @nodes.get prevNodeId
@@ -184,6 +190,7 @@ define 'models', ['lib/common'], ->
     model: Workflow
     url: Workflow::urlRoot
     _delay: 600000 # 10 min
+    sync: Workflow::sync # for test only
     load: (callback, delay = @_delay) ->
       if not @_last_load or (Date.now() - @_last_load) > delay
         @fetch
@@ -230,6 +237,7 @@ define 'models', ['lib/common'], ->
   class Project extends Workflow
     _name: 'project'
     urlRoot: ROOT + '/projects'
+    sync: Backbone.sync # reset from workflow, for test only
     copy: (workflow, callback) -> # copy form workflow as template
       workflow ?= @get 'workflow_id'
       workflow = new Workflow id: workflow if typeof workflow is 'string'
@@ -294,6 +302,7 @@ define 'models', ['lib/common'], ->
       @projects
     model: Project
     url: Project::urlRoot
+    sync: Project::sync # for test only
     _delay: 60000 # 1 min
     find: ({projectId, nodeId, linkId, actionId, callback}) ->
       throw new Error 'projectId is required' unless projectId
