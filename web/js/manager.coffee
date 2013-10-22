@@ -197,11 +197,18 @@ Projects
     initialize: (options) ->
       super options
       @_shared_matchers = @collection._matchers ?= []
+      return
     getMatcher: (query) ->
-      @makeMatcher(query).bind @
+      if @fields.length > 1
+        @makeMatcher(query).bind @
+      else
+        field = @fields[0]
+        regexp = new RegExp query.trim(), 'i'
+        (model) -> regexp.test model.get field
     mergeMatcher: (query) ->
       _matchers = @_shared_matchers
       #console.log 'old _matchers', _matchers
+      # remove the old same matcher
       for matcher, i in _matchers
         if matcher._filter is @
           _matchers.splice i, 1
@@ -210,6 +217,7 @@ Projects
       if query?
         matcher = @getMatcher query
         matcher._filter = @
+        #console.log 'add matcher', matcher
         _matchers.push matcher
       #console.log 'add matcher', _matchers
       if _matchers.length > 1
@@ -269,17 +277,19 @@ Projects
       console.log 'q', query
       keys = @keys
       if keys.length is 1
+        keys = keys[0]
         if query is ''
-          (model) ->
-            value = model.get keys[0]
+          (model) -> # for value is null or empty
+            value = model.get keys
             value is '' or not value?
         else
           regexp = new RegExp query.trim(), 'i'
           (model) ->
-            regexp.test model.get keys[0]
+            regexp.test model.get keys
       else
         if query is ''
           (model) ->
+            i = 0
             value = model.get keys[0]
             while value and key = keys[++i]
               value = value[key]
