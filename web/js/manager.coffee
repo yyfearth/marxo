@@ -341,6 +341,7 @@ Projects
   ## Manager View
 
   class ManagerView extends InnerFrameView
+    defaultFilterField: 'title'
     _predefinedColumns: {
       checkbox:
       # name is a required parameter, but you don't really want one on a select all column
@@ -415,6 +416,7 @@ Projects
 
       @collection = options.collection if options.collection instanceof ManagerCollection
       collection = @collection
+      fullCollection = collection.fullCollection
       throw new Error 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
       # add a sequence to models
       _gen_seq = -> collection.fullCollection.each (model, i) -> model._seq = i
@@ -433,8 +435,8 @@ Projects
       @paginator = new ManagerPaginator
         collection: collection
       @filter = new MergeableFilter
-        collection: collection.fullCollection,
-        fields: ['title']
+        collection: fullCollection,
+        fields: [@defaultFilterField]
         wait: 300
 
       # tooltip on bottom
