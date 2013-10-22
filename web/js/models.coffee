@@ -16,11 +16,25 @@ define 'models', ['lib/common'], ->
     mode: 'client'
     defaultState:
       pageSize: 15
+    _delay: 1000 # 1s
     constructor: (options...) ->
       @state ?= {}
       for key, value of @defaultState
         @state[key] = value
       super options...
+    load: (callback, delay = @_delay) ->
+      if not @_last_load or (Date.now() - @_last_load) > delay
+        @fetch
+          reset: true
+          success: (collection, response, options) =>
+            @_last_load = Date.now()
+            #@trigger 'loaded', collection
+            callback? collection, 'loaded', response, options
+          error: (collection, response, options)->
+            callback? @, 'error', response, options
+      else
+        callback? @, 'skipped'
+      @
 
   ## Tenant / User
 
@@ -68,13 +82,13 @@ define 'models', ['lib/common'], ->
       nodes = if _nodes_loaded then model.nodes else []
       nodes = @nodes = new Nodes nodes, url: url + '/nodes'
       nodes._loaded = _nodes_loaded
-      nodes.sync = @sync # for test only
 
       _links_loaded = Array.isArray model.links
       links = if _links_loaded then model.links else []
       links = @links = new Links links, url: url + '/links'
       links._loaded = _links_loaded
-      links.sync = @sync # for test only
+
+      nodes.sync = links.sync = @sync # for test only
 
       _createNodeRef = @_createNodeRef.bind @
       nodes.forEach _createNodeRef
@@ -191,18 +205,6 @@ define 'models', ['lib/common'], ->
     url: Workflow::urlRoot
     _delay: 600000 # 10 min
     sync: Workflow::sync # for test only
-    load: (callback, delay = @_delay) ->
-      if not @_last_load or (Date.now() - @_last_load) > delay
-        @fetch
-          reset: true
-          success: (collection, response, options) =>
-            @_last_load = Date.now()
-            callback? collection, 'loaded', response, options
-          error: (collection, response, options)->
-            callback? @, 'error', response, options
-      else
-        callback? @, 'skipped'
-      @
 
   class Node extends Entity
     _name: 'node'
@@ -323,14 +325,6 @@ define 'models', ['lib/common'], ->
         new Project(id: projectId).fetch
           success: _find
           error: -> callback? {}
-      @
-    load: (callback, delay = @_delay) ->
-      if not @_last_load or (Date.now() - @_last_load) > delay
-        @fetch reset: true, success: (collection, response, options) =>
-          @_last_load = Date.now()
-          callback? collection, response, options
-      else
-        callback? @, null, options
       @
 
   ## Home
