@@ -6,17 +6,14 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <config:annotation-config/>
+    <config:component-scan base-package="marxo.dao"/>
 
     <mongo:db-factory id="mongoDbFactory" host="dharma.mongohq.com" port="10047" dbname="Marxo" username="web" password="web"/>
+    <!-- The following is the backup MongoDB server -->
     <!--<mongo:db-factory id="mongoDbFactory" host="ds041167.mongolab.com" port="41167" dbname="marxo" username="web" password="web"/>-->
 
     <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
         <constructor-arg index="0" ref="mongoDbFactory"/>
     </bean>
-
-    <bean id="workflowDao" class="marxo.dao.WorkflowDao" lazy-init="true"/>
-    <bean id="nodeDao" class="marxo.dao.NodeDao" lazy-init="true"/>
-    <bean id="linkDao" class="marxo.dao.LinkDao" lazy-init="true"/>
-    <bean id="tenantDao" class="marxo.dao.TenantDao" lazy-init="true"/>
 
 </beans>
