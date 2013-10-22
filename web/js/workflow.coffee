@@ -81,7 +81,7 @@ Action
       @
     create: (template) ->
       template = '' if not template or /^(?:new|empty)$/i.test template
-      @creator.popup template: template, (action, data) =>
+      @creator.popup template_id: template, (action, data) =>
         if action is 'save'
           console.log 'create new wf:', data
           @collection.create data, wait: true
@@ -123,6 +123,8 @@ Action
             console.log 'save name', wf
             @nameEl.textContent = wf.get 'name'
             @descEl.textContent = wf.get 'desc'
+            @model.trigger 'changed', 'rename_workflow', @model
+          return
     initialize: (options) ->
       super options
       @view = new WorkflowView
@@ -136,6 +138,7 @@ Action
         el: find('#workflow_name_editor', @el)
 
       @btnSave = find '.wf-save', @el
+      @btnReset = find '.wf-reset', @el
       @nameEl = find '.editable-name', @el
       @descEl = find '.editable-desc', @el
 
@@ -146,54 +149,64 @@ Action
         else if id
           node ?= @model.nodes.get id
         @view.createNode node
+
+      @_changed = @_changed.bind @
       @
     reset: ->
       @reload() if confirm 'All changes will be descarded since last save, are you sure to do that?'
       @
     save: ->
-      #if @model?.hasChanged()
       console.log 'save', @model.attributes
-      @model.nodes.forEach (node) ->
-        node.view.el.style.zIndex = ''
-        style = node.view.el.getAttribute 'style'
-        if style isnt node.get 'style'
-          node.set 'style', style
-          #node.save()
-          console.log 'node style', node.id, style
       @model.save {},
         success: (wf) ->
           console.log 'saved', wf
         error: ->
           console.error 'save failed'
       @
+    _changed: ->
+      @btnSave.disabled = false
+      @btnReset.disabled = false
+      return
+    _loaded: (wf, sub) ->
+      @id = wf.id
+      @nameEl.textContent = wf.get 'name'
+      @descEl.textContent = wf.get 'desc'
+      @model = wf
+      @view.load wf, sub
+      @nodeList.setNodes wf.nodes
+      @listenToOnce wf, 'changed', @_changed
+      # for test only
+      @listenTo wf, 'changed', (action, entity) ->
+        console.log 'workflow changed', action, entity
+      return
+    _clear: ->
+      @stopListening @model
+      @id = null
+      @model = null
+      @nameEl.textContent = ''
+      @descEl.textContent = ''
+      @btnSave.disabled = true
+      @btnReset.disabled = true
+      @view.clear()
+      return
     load: (wf, sub) ->
-      _load = (wf) =>
-        @view.load wf, sub
-        @nodeList.setNodes wf.nodes
-        return
       if not wf
-        @id = null
-        @model = null
-        @nameEl.textContent = ''
-        @descEl.textContent = ''
-        @view.clear()
+        @_clear()
       else if typeof wf is 'string'
         if @id is wf and not sub?.reload
           @load @model, sub
         else
-          @fetch wf, (err, wf) => @load wf, sub
+          @_clear()
+          @load new Workflow(id: wf), sub
       else if wf.id
         if @id is wf.id
-          _load wf
+          @_loaded wf, sub
         else
-          @id = wf.id
-          @nameEl.textContent = wf.get 'name'
-          @descEl.textContent = wf.get 'desc'
-          @model = wf
           if wf.loaded()
-            _load wf
+            @_loaded wf, sub
           else
-            wf.fetch success: _load
+            @_clear()
+            wf.fetch silent: true, success: (wf) => @_loaded wf, sub
       else
         throw new Error 'load neigher workflow id string nor workflow object'
       @
@@ -201,10 +214,6 @@ Action
       @load @id, reload: true
     render: ->
       @nodeList.render()
-      @
-    fetch: (id, callback) ->
-      wf = @workflow = new Workflow id: id
-      wf.fetch success: -> callback null, wf
       @
 
   class NodeListView extends NavListView
@@ -573,6 +582,7 @@ Action
         if action is 'save'
           # prevent create if callback return false
           @model.createNode node if false isnt callback? node
+          @model.trigger 'changed', 'create_node', node
         else # canceled
           console.log 'canceled or ignored create node', action
       @
@@ -581,7 +591,7 @@ Action
       @nodeEditor.popup node, (action, node) =>
         if action is 'save'
           node.view.update node
-          console.log 'saved node', node
+          @model.trigger 'changed', 'edit_node', node
         else
           console.log 'canceled or ignored edit node', action
         # restore url to workflow only
@@ -595,9 +605,9 @@ Action
       return @ unless node?.id
       # use confirm since no support for undo
       if confirm "Delete the node: #{node.get 'name'}?"
-        console.log 'remove node', node
         #@model.nodes.remove node
         node.destroy()
+        @model.trigger 'changed', 'remove_node', node
       @
     createLink: (from, to, callback) ->
       from = @model.nodes.get from unless from.id and from.has 'name'
@@ -611,6 +621,7 @@ Action
         if action is 'save'
           #@model.links.add link
           @model.createLink link if false isnt callback? link
+          @model.trigger 'changed', 'create_link', link
         else # canceled
           console.log 'canceled or ignored create link', action
       @
@@ -623,7 +634,7 @@ Action
       @linkEditor.popup link, (action, link) =>
         if action is 'save'
           link.view.update link
-          console.log 'saved link', link
+          @model.trigger 'changed', 'edit_link', link
         else # canceled
           console.log 'canceled or ignored edit link', action
         # restore url to workflow only
@@ -637,8 +648,8 @@ Action
       return @ unless link?.id
       # use confirm since no support for undo
       if confirm "Delete the link: #{link.get('name') or '(No Name)'}?"
-        console.log 'remove node', link
         link.destroy()
+        @model.trigger 'changed', 'remove_link', link
       @
     render: ->
       @_bind()
@@ -682,7 +693,14 @@ Action
       @el.id = 'node_' + node.id
       @listenTo node, 'destroy', @remove.bind @
       @_renderModel node
-      jsPlumb.draggable @$el, stack: '.node'
+      jsPlumb.draggable @$el, stack: '.node', stop: =>
+        node.view.el.style.zIndex = ''
+        style = node.view.el.getAttribute 'style'
+        if style isnt node.get 'style'
+          node.set 'style', style
+          #node.save()
+          console.log 'node style', node.id, style
+          node.workflow?.trigger 'changed', 'move_node', node
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
       param =

@@ -98,8 +98,6 @@ define 'models', ['lib/common'], ->
       links.forEach _createLinkRef
       @listenTo links, add: _createLinkRef, remove: @_removeLinkRef.bind @
 
-      # TODO: listenTo changes from this, nodes, links
-
       @set {}
 
       @
@@ -112,7 +110,7 @@ define 'models', ['lib/common'], ->
       @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
-    sync: Backbone.ajaxSync or Backbone.sync # for test only
+    #sync: Backbone.ajaxSync or Backbone.sync # for test only
     save: (attributes = {}, options) -> # override for sync ids
       node_ids = @nodes?.map (r) -> r.id
       link_ids = @links?.map (r) -> r.id

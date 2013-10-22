@@ -445,7 +445,7 @@ Projects
       _body = @grid.body
       _render = _body.render.bind _body
       _body.render = ->
-        console.log 'render'
+        #console.log 'render'
         fullCollection.forEach (model, i) -> model._seq = i + 1
         _render()
 
