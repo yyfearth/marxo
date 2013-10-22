@@ -1,7 +1,7 @@
 package marxo.controller;
 
-import marxo.bean.BasicEntity;
 import marxo.dao.BasicDao;
+import marxo.entity.BasicEntity;
 import marxo.exception.*;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
