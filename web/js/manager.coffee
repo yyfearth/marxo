@@ -15,14 +15,11 @@ Projects
   ## Cells
 
   class SeqCell extends Backgrid.StringCell
-    formatter: null
     initialize: (options) ->
-      @formatter ?=
-        fromRaw: =>
-          seq = @model._seq
-          if seq? then seq + 1 else ''
-        toRaw: =>
-          @model.id
+      @formatter =
+        model: @model
+        fromRaw: -> @model._seq or ''
+        toRaw: -> @model.id
       super options
 
   class Backgrid.LinkCell extends Backgrid.UriCell
@@ -150,7 +147,7 @@ Projects
       if rawValue
         val = rawValue.toLowerCase()
         labelCls = 'label capitalized '
-        if @column.has 'cls'
+        if val isnt 'none' and @column.has 'cls'
           cls = @column.get 'cls'
           cls = cls[val] or '' unless typeof cls is 'string'
           labelCls += cls
@@ -197,11 +194,18 @@ Projects
     initialize: (options) ->
       super options
       @_shared_matchers = @collection._matchers ?= []
+      return
     getMatcher: (query) ->
-      @makeMatcher(query).bind @
+      if @fields.length > 1
+        @makeMatcher(query).bind @
+      else
+        field = @fields[0]
+        regexp = new RegExp query.trim(), 'i'
+        (model) -> regexp.test model.get field
     mergeMatcher: (query) ->
       _matchers = @_shared_matchers
       #console.log 'old _matchers', _matchers
+      # remove the old same matcher
       for matcher, i in _matchers
         if matcher._filter is @
           _matchers.splice i, 1
@@ -210,6 +214,7 @@ Projects
       if query?
         matcher = @getMatcher query
         matcher._filter = @
+        #console.log 'add matcher', matcher
         _matchers.push matcher
       #console.log 'add matcher', _matchers
       if _matchers.length > 1
@@ -230,11 +235,12 @@ Projects
       col.pageableCollection?.getFirstPage silent: true
       matcher = @mergeMatcher query
       if matcher
-        shadow = @_gen_seq @shadowCollection.filter matcher
+        #console.log 'matcher', matcher
+        shadow = @shadowCollection.filter matcher
         col.reset shadow, reindex: false
         col._filtered = true
       else if col._filtered # query is null and no other matchers
-        col.reset @_gen_seq(@shadowCollection.models), reindex: false
+        col.reset @shadowCollection.models, reindex: false
         col._filtered = false
       @lastQuery = query
       @
@@ -244,9 +250,6 @@ Projects
         $el.val('')
         @search null
       @
-    _gen_seq: (col) ->
-      col.forEach (model, i) -> model._seq = i
-      col
 
   class NavFilterView extends MergeableFilter
     events:
@@ -269,17 +272,19 @@ Projects
       console.log 'q', query
       keys = @keys
       if keys.length is 1
+        keys = keys[0]
         if query is ''
-          (model) ->
-            value = model.get keys[0]
+          (model) -> # for value is null or empty
+            value = model.get keys
             value is '' or not value?
         else
           regexp = new RegExp query.trim(), 'i'
           (model) ->
-            regexp.test model.get keys[0]
+            regexp.test model.get keys
       else
         if query is ''
           (model) ->
+            i = 0
             value = model.get keys[0]
             while value and key = keys[++i]
               value = value[key]
@@ -341,6 +346,7 @@ Projects
   ## Manager View
 
   class ManagerView extends InnerFrameView
+    defaultFilterField: 'title'
     _predefinedColumns: {
       checkbox:
       # name is a required parameter, but you don't really want one on a select all column
@@ -415,11 +421,9 @@ Projects
 
       @collection = options.collection if options.collection instanceof ManagerCollection
       collection = @collection
+      fullCollection = collection.fullCollection
       throw new Error 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
-      # add a sequence to models
-      _gen_seq = -> collection.fullCollection.each (model, i) -> model._seq = i
-      @listenTo collection.fullCollection, 'reset add remove', _gen_seq
-      @listenTo collection, 'add remove', _gen_seq
+
       # selection may change after remove
       @listenTo collection, 'remove', @_selection_changed.bind @
       # page size alias
@@ -433,9 +437,17 @@ Projects
       @paginator = new ManagerPaginator
         collection: collection
       @filter = new MergeableFilter
-        collection: collection.fullCollection,
-        fields: ['title']
+        collection: fullCollection,
+        fields: [@defaultFilterField]
         wait: 300
+
+      # override grid body render (refresh)
+      _body = @grid.body
+      _render = _body.render.bind _body
+      _body.render = ->
+        #console.log 'render'
+        fullCollection.forEach (model, i) -> model._seq = i + 1
+        _render()
 
       # tooltip on bottom
       $('.action-buttons .btn[title]').attr 'data-placement': 'bottom', 'data-container': 'body'
@@ -491,9 +503,11 @@ Projects
       @grid.body.refresh()
       @
     reload: ->
-      @collection.fetch reset: true
-      @collection.getPage 1
-      @filter.clear()
+      @collection.fullCollection.set null
+      @collection.load =>
+        @collection.getFirstPage silent: true
+        @filter.clear()
+      , 100
       @
     getSelected: ->
       @grid.getSelectedModels().filter (r) -> r?

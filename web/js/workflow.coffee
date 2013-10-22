@@ -65,6 +65,7 @@ Action
       'actions:workflow'
     ]
     collection: new Workflows
+    defaultFilterField: 'name'
     events:
       'click #wf_template_list .wf_tempate a': (e) ->
         e.preventDefault()

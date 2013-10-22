@@ -390,6 +390,7 @@ Projects
       cell: ProjectActionCell
     ]
     collection: new Projects
+    defaultFilterField: 'name'
     initialize: (options) ->
       super options
       @list = new WorkflowListView el: find 'ul.workflow-list', @el
