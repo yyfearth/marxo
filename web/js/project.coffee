@@ -88,23 +88,23 @@ Projects
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
       @
-    create: (wf, callback) ->
+    create: (wf) ->
       wf = wf?.id or wf
       wf = null unless typeof wf is 'string'
       @popup new Project(workflow_id: wf), (action, data) => if action is 'save'
         console.log 'wf created', action, data
-        @projects.create data
-        callback? @model, @
+        @projects.create data, wait: true
+        @trigger 'create', @model, @
       @
     edit: (project, opt = {}) ->
-      {link, node, action, callback} = opt
+      {link, node, action} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
       throw new Error 'node and link cannot be open together' if link and node
       console.log 'popup node/link editor', {link, node, action}
       @popup project, (action, data) => if action is 'save'
         console.log 'project saved', action, data
         @model.save data
-        callback? @model, @
+        @trigger 'edit', @model, @
       @
     popup: (model, callback) ->
       data = model.toJSON()
@@ -397,7 +397,25 @@ Projects
       @listenTo @list, 'select', (id, model) ->
         console.log 'create project from workflow', id, model
         @trigger 'create', id, model
-      # TODO: create project from workflow
+      @on 'remove', @remove.bind @
+      # sync collections
+      projects = Projects.projects.fullCollection
+      @listenTo projects, 'add', (model) =>
+        @collection.add model
+        @refresh()
+        return
+      @listenTo @collection, 'remove', (model) =>
+        projects.remove model
+        return
+      @
+    remove: (models) ->
+      models = [models] unless Array.isArray models
+      names = models.map (model) -> model.get 'name'
+      # TODO: project life cycle (engine)
+      # TODO: started projects cannot be deleted
+      if confirm "Are you sure to remove these projects: #{names.join ', '}?\n\nThis action cannot be undone!"
+        models.forEach (model) -> model.destroy()
+        # TODO: remove related data?
       @
     render: ->
       @list.fetch()
