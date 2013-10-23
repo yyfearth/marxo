@@ -94,6 +94,7 @@ Projects
       @popup new Project(workflow_id: wf), (action, data) => if action is 'save'
         console.log 'wf created', action, data
         @projects.create data, wait: true
+        # TODO: save all nodes and links?
         @trigger 'create', @model, @
       @
     edit: (project, opt = {}) ->
@@ -152,6 +153,9 @@ Projects
         @_cur_type = type
       else if @_cur_model is model
         return @
+      # read prev model
+      @_readData()
+      # fill new model
       @_cur_model = model
       console.log 'nav to', type, model
       @dataEditor.fill model if model
@@ -159,6 +163,13 @@ Projects
       # TODO: select node with id in flow
       # TODO: select link with id in flow
       @
+    _readData: ->
+      if model = @_cur_model
+        data = @dataEditor.read()
+        console.log 'data', data, 'for', model
+        model.set data
+        model._changed = true
+      return
     _selectWorkflow: ->
       wf = @form.workflow_id.value
       return unless wf
@@ -233,7 +244,7 @@ Projects
         select.appendChild shared if shared.childElementCount
       return
     save: ->
-      # TODO: read from nodes/links
+      @_readData() # read last modified
       @data = @read()
       @callback 'save'
       @hide true
