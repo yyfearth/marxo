@@ -1,18 +1,30 @@
 package marxo.entity;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class User extends TenantChildEntity {
-	static {
+	public final static Pattern emailPattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
+	public String password;
+	protected String email;
 
+	public String getEmail() {
+		return email;
 	}
 
-	protected String password;
-
-	public String getPassword() {
-		return password;
+	public void setEmail(String email) throws InvalidArgumentException {
+		// todo: move the verification to other places.
+		Matcher matcher = emailPattern.matcher(email);
+		if (matcher.find()) {
+			this.email = email;
+		} else {
+			throw new InvalidArgumentException(new String[]{"email"});
+		}
 	}
 
-	public void setPassword(String password) {
-
-		this.password = password;
+	public boolean checkPassword(String password) {
+		return this.password.equals(password);
 	}
 }
