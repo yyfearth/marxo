@@ -1,5 +1,7 @@
 package marxo.tool;
 
+import com.google.common.collect.Iterables;
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import marxo.entity.*;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -8,13 +10,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.xml.bind.DatatypeConverter;
+import java.math.BigInteger;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AdvancedGenerator extends BasicGenerator {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InvalidKeySpecException {
 		final Logger logger = LoggerFactory.getLogger(SimpleGenerator.class);
 
 		ApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"mongo-configuration.xml"});
@@ -40,13 +49,34 @@ public class AdvancedGenerator extends BasicGenerator {
 
 		// User
 		{
-			for (int i = 1; i <= 3; i++) {
+			Map<String, String> credentials = new HashMap<>();
+			credentials.put("test@example.com", "test");
+			credentials.put("yyfearth@gmail.com", "yyfearth");
+			credentials.put("otaru14204@hotmail.com", "otaru14204");
+			byte[] salt = DatatypeConverter.parseHexBinary((String) context.getBean("passwordSaltHexString"));
+			SecretKeyFactory secretKeyFactory = (SecretKeyFactory) context.getBean("secretKeyFactory");
+
+			for (int i = 0; i < credentials.size(); i++) {
+				String email = Iterables.get(credentials.keySet(), i);
+				String password = Iterables.get(credentials.values(), i);
 				Tenant tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
 				User user = new User();
 				user.tenantId = tenant.id;
 				user.name = getRandomHumanName();
 				user.fillWithDefaultValues();
 				users.add(user);
+
+				try {
+					user.setEmail(email);
+				} catch (InvalidArgumentException e) {
+					logger.error("The email " + email + " is invalid.");
+					return;
+				}
+
+				KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 256);
+				byte[] secret = secretKeyFactory.generateSecret(spec).getEncoded();
+				String encryptedPassword = DatatypeConverter.printHexBinary(secret);
+				user.password = encryptedPassword;
 			}
 		}
 
