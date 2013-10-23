@@ -16,4 +16,11 @@
         <constructor-arg index="0" ref="mongoDbFactory"/>
     </bean>
 
+    <bean id="passwordSaltHexString" class="java.lang.String">
+        <constructor-arg type="java.lang.String" value="D6991BF10B940C1801E81F16F90C3EB917A9BF65E1E3D7D9F5B441B1EB3B8670"/>
+    </bean>
+    <bean id="secretKeyFactory" class="javax.crypto.SecretKeyFactory">
+        <constructor-arg type="java.lang.String" value="PBKDF2WithHmacSHA1"/>
+    </bean>
+
 </beans>
