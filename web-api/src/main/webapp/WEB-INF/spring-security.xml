@@ -17,12 +17,10 @@
 
     <authentication-manager>
         <authentication-provider user-service-ref="myUserDetailService"/>
-        <!--<authentication-provider>-->
-        <!--<user-service>-->
-        <!--<user name="mason" password="hacker" authorities="IS_AUTHENTICATED_REMEMBERED, IS_AUTHENTICATED_FULLY"/>-->
-        <!--<user name="wilson" password="meow" authorities="IS_AUTHENTICATED_REMEMBERED, IS_AUTHENTICATED_FULLY"/>-->
-        <!--</user-service>-->
-        <!--</authentication-provider>-->
     </authentication-manager>
+
+    <beans:bean id="passwordSaltHexString" class="java.lang.String">
+        <beans:constructor-arg type="java.lang.String" value="D6991BF10B940C1801E81F16F90C3EB917A9BF65E1E3D7D9F5B441B1EB3B8670"/>
+    </beans:bean>
 
 </beans:beans>
