@@ -47,7 +47,7 @@ public class TestController extends BasicController {
 	@ResponseBody
 	public String resetDatabase() {
 		AdvancedGenerator.main(new String[0]);
-		return "Database reset";
+		return "Database reset with " + AdvancedGenerator.class.getSimpleName();
 	}
 }
 
