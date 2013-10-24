@@ -5,31 +5,46 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Strings;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
+import java.util.regex.Pattern;
 
 // review: it's fucking weird that the entities are coupled with Jackson annotation.
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @JsonPropertyOrder({"id", "object_type", "tenant_id", "workflow_id", "name", "key", "desc", "type", "status", "content", "nodes", "node_ids", "links", "link_ids", "created_at", "created_by", "updated_at", "modified_by"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BasicEntity {
+	static Pattern pattern = Pattern.compile("");
 	@Id
 	@JsonIgnore
 	public ObjectId id;
+	@Field(order = 3)
 	public String name;
-	@JsonProperty("created_at")
-	public Date createdDate = new Date();
-	@JsonProperty("updated_at")
-	public Date modifiedDate = new Date();
+	@JsonIgnore
+	@Field(order = 4)
 	public String key;
+	@JsonProperty("created_at")
+	@Field(order = 50)
+	public Date createdDate = new Date();
+	@JsonIgnore
+	@Field(order = 51)
+	public ObjectId createdByUserId;
+	@JsonProperty("updated_at")
+	@Field(order = 52)
+	public Date modifiedDate = new Date();
+	@JsonIgnore
+	@Field(order = 53)
+	public ObjectId modifiedByUserId;
 	@JsonProperty("desc")
 	public String description;
-	@JsonIgnore
-	public ObjectId createdByUserId;
-	@JsonIgnore
-	public ObjectId modifiedByUserId;
+
+	public String getKey() {
+		return key;
+	}
 
 	@JsonProperty("id")
 	public String getJsonId() {
@@ -83,7 +98,9 @@ public abstract class BasicEntity {
 		}
 
 		if (key == null) {
-			key = "";
+			if (!Strings.isNullOrEmpty(name)) {
+				key = name.replaceAll("[^\\w]+", "_").toLowerCase();
+			}
 		}
 	}
 }
