@@ -10,7 +10,8 @@
     </listener>
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring-security.xml</param-value>
+        <!-- WARNING: Do not try to import Spring configuration inside another configuration file. It loads the context but not the beans. It spent me fucking several hours to figure the fucking thing out. -->
+        <param-value>WEB-INF/spring-security.xml, classpath*:mongo-configuration.xml</param-value>
     </context-param>
 
     <servlet>
