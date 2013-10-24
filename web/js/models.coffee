@@ -90,13 +90,21 @@ define 'models', ['lib/common'], ->
 
       nodes.sync = links.sync = @sync # for test only
 
+      _deleted = @_deleted = []
+
       _createNodeRef = @_createNodeRef.bind @
       nodes.forEach _createNodeRef
-      @listenTo nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
+      @listenTo nodes, add: _createNodeRef, remove: (node) =>
+        @_removeNodeRef node
+        _deleted.push node unless node.isNew()
+        return
 
       _createLinkRef = @_createLinkRef.bind @
       links.forEach _createLinkRef
-      @listenTo links, add: _createLinkRef, remove: @_removeLinkRef.bind @
+      @listenTo links, add: _createLinkRef, remove: (link) =>
+        @_removeLinkRef link
+        _deleted.push link unless link.isNew()
+        return
 
       @set {}
 
@@ -116,12 +124,23 @@ define 'models', ['lib/common'], ->
       link_ids = @links?.map (r) -> r.id
       attributes.node_ids = node_ids if node_ids?.join(',') isnt @get('node_ids')?.join(',')
       attributes.link_ids = link_ids if link_ids?.join(',') isnt @get('link_ids')?.join(',')
-      if Backbone.LocalStorage? and @sync isnt Backbone.ajaxSync # for test only
+      if isLocalTest = Backbone.LocalStorage? and @sync isnt Backbone.ajaxSync # for test only
         if @nodes? then attributes.nodes = @nodes?.map (r) -> r.attributes
         if @links? then attributes.links = @links?.map (r) -> r.attributes
-      # TODO: save nodes and links
+      else # save nodes and links
+        @nodes?.forEach (node) =>
+          # TODO: save updated node
+          @nodes.create node if node.isNew()
+        @links?.forEach (link) =>
+          # TODO: save updated link
+          @links.create link if link.isNew()
+
       console.log 'save', @_name, attributes, @
       super attributes, options
+
+      unless isLocalTest # or never delete, until any bkg task to achieve them
+        @_deleted.forEach (model) -> model.destroy()
+
       @
     find: ({nodeId, linkId, actionId, callback}) ->
       n = @_name
