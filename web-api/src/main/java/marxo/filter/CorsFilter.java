@@ -1,4 +1,4 @@
-package marxo.controller;
+package marxo.filter;
 
 import org.springframework.web.filter.OncePerRequestFilter;
 
