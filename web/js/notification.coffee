@@ -26,8 +26,6 @@ Notifications
       @center.render()
       @
 
-  # TODO: auto mute expired
-
   class NotificationActionCell extends Backgrid.ActionsCell
     render: ->
       super
@@ -38,12 +36,10 @@ Notifications
         btn?.href = model.get 'target_url'
       else
         @_hide btn
-      @_hide 'mute' if status is 'EXPIRED'
       @
 
   class NotificationCenterView extends ManagerView
     columns: [
-      'checkbox'
       'id'
     ,
       name: 'title'
