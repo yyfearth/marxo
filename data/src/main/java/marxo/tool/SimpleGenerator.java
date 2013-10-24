@@ -18,7 +18,7 @@ public class SimpleGenerator extends BasicGenerator {
 	public static void main(String[] args) {
 		final Logger logger = LoggerFactory.getLogger(SimpleGenerator.class);
 
-		ApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"mongo-configuration.xml"});
+		ApplicationContext context = new ClassPathXmlApplicationContext("classpath*:marxo/mongo-configuration.xml");
 		MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);
 
 		Random random = new Random();
