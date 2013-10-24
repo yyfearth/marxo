@@ -22,11 +22,13 @@ public class AdvancedGenerator extends BasicGenerator {
 	static final Logger logger = LoggerFactory.getLogger(AdvancedGenerator.class);
 
 	public static void main(String[] args) {
-		ApplicationContext context = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-		byte[] salt = DatatypeConverter.parseHexBinary((String) context.getBean("passwordSaltHexString"));
-		SecretKeyFactory secretKeyFactory = (SecretKeyFactory) context.getBean("secretKeyFactory");
+		ApplicationContext dataContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+		MongoTemplate mongoTemplate = dataContext.getBean(MongoTemplate.class);
 
-		MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);
+		ApplicationContext securityContext = new ClassPathXmlApplicationContext("classpath*:security.xml");
+		byte[] salt = DatatypeConverter.parseHexBinary((String) securityContext.getBean("passwordSaltHexString"));
+		SecretKeyFactory secretKeyFactory = (SecretKeyFactory) securityContext.getBean("secretKeyFactory");
+
 		ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
 
 		ArrayList<Tenant> tenants = new ArrayList<>();
