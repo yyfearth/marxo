@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
-public class Condition extends BasicEntity {
+public class Condition extends TenantChildEntity {
 	@JsonProperty("left_operand")
 	public String leftOperand;
 	@JsonProperty("left_operand_type")
