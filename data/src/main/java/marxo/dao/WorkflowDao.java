@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository("workflowDao")
+@Repository
 public class WorkflowDao extends BasicDao<Workflow> {
 	public void insert(Workflow workflow) {
 		mongoTemplate.insert(workflow);

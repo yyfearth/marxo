@@ -15,7 +15,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 public abstract class BasicDao<E extends BasicEntity> {
-
 	@Qualifier("mongoTemplate")
 	@Autowired
 	MongoTemplate mongoTemplate;
