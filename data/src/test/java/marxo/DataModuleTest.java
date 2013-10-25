@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
-public class DataModule {
+public class DataModuleTest {
 	@Test
 	public void canGenerateSampleData() throws Exception {
 		AdvancedGenerator.main(new String[0]);

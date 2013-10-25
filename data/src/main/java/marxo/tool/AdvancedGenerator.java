@@ -9,10 +9,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.xml.bind.DatatypeConverter;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -28,6 +25,7 @@ public class AdvancedGenerator extends BasicGenerator {
 		ApplicationContext securityContext = new ClassPathXmlApplicationContext("classpath*:security.xml");
 		byte[] salt = DatatypeConverter.parseHexBinary((String) securityContext.getBean("passwordSaltHexString"));
 		SecretKeyFactory secretKeyFactory = (SecretKeyFactory) securityContext.getBean("secretKeyFactory");
+		PasswordEncryptor passwordEncryptor = new PasswordEncryptor(salt, secretKeyFactory);
 
 		ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
 
@@ -53,34 +51,29 @@ public class AdvancedGenerator extends BasicGenerator {
 			User user;
 			Tenant tenant;
 
-			try {
-				user = new User();
-				users.add(user);
-				tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
-				user.tenantId = tenant.id;
-				user.name = "Tester";
-				user.email = "test@example.com";
-				user.password = encrptPassword(secretKeyFactory, salt, "test");
+			user = new User();
+			users.add(user);
+			tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
+			user.tenantId = tenant.id;
+			user.name = "Tester";
+			user.email = "test@example.com";
+			user.password = passwordEncryptor.encrypt("test");
 
-				user = new User();
-				users.add(user);
-				tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
-				user.tenantId = tenant.id;
-				user.name = "Wilson";
-				user.email = "yyfearth@gmail.com";
-				user.password = encrptPassword(secretKeyFactory, salt, "yyfearth");
+			user = new User();
+			users.add(user);
+			tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
+			user.tenantId = tenant.id;
+			user.name = "Wilson";
+			user.email = "yyfearth@gmail.com";
+			user.password = passwordEncryptor.encrypt("yyfearth");
 
-				user = new User();
-				users.add(user);
-				tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
-				user.tenantId = tenant.id;
-				user.name = "Leo";
-				user.email = "otaru14204@hotmail.com";
-				user.password = encrptPassword(secretKeyFactory, salt, "otaru14204");
-			} catch (InvalidKeySpecException ex) {
-				logger.error(ex.getMessage());
-				return;
-			}
+			user = new User();
+			users.add(user);
+			tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
+			user.tenantId = tenant.id;
+			user.name = "Leo";
+			user.email = "otaru14204@hotmail.com";
+			user.password = passwordEncryptor.encrypt("otaru14204");
 
 			for (User u : users) {
 				u.fillWithDefaultValues();
@@ -187,11 +180,5 @@ public class AdvancedGenerator extends BasicGenerator {
 			mongoTemplate.dropCollection(aClass);
 			mongoTemplate.insert(map.get(aClass), aClass);
 		}
-	}
-
-	static String encrptPassword(SecretKeyFactory secretKeyFactory, byte[] salt, String password) throws InvalidKeySpecException {
-		KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, 65536, 256);
-		byte[] secret = secretKeyFactory.generateSecret(spec).getEncoded();
-		return DatatypeConverter.printHexBinary(secret);
 	}
 }
