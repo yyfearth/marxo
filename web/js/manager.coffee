@@ -500,7 +500,7 @@ Projects
       @$enable_if_selected = @$el.find '.enable_if_selected'
       @
     refresh: ->
-      @grid.body.refresh()
+      @grid.body.refresh() if @rendered
       @
     reload: ->
       @collection.fullCollection.set null

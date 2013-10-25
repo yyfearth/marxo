@@ -342,7 +342,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @targetClassName = options.targetClassName or @targetClassName
       @emptyItem = options.emptyItem or @emptyItem
       @allowEmpty = options.allowEmpty or @allowEmpty
-      @listenTo @collection, 'reset', @render.bind @
+      @listenTo @collection, 'reset add remove', @render.bind @
       @events ?= {}
       @events['click .btn-refresh'] = => @fetch true
       @fetch false if options.auto
@@ -403,7 +403,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         a.href = "##{@urlRoot}:#{@emptyItem}"
         a.textContent = 'Empty'
       else
-        throw new Error 'unsupported item for list ' + model
+        console.dir model
+        throw new Error 'unsupported item for list'
       li.className += ' active' if model is @defaultItem
       li.appendChild a
       li
