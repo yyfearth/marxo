@@ -90,17 +90,25 @@ define 'models', ['lib/common'], ->
 
       nodes.sync = links.sync = @sync # for test only
 
+      _deleted = @_deleted = []
+
       _createNodeRef = @_createNodeRef.bind @
       nodes.forEach _createNodeRef
-      @listenTo nodes, add: _createNodeRef, remove: @_removeNodeRef.bind @
+      @listenTo nodes, add: _createNodeRef, remove: (node) =>
+        @_removeNodeRef node
+        _deleted.push node unless node.isNew()
+        return
 
       _createLinkRef = @_createLinkRef.bind @
       links.forEach _createLinkRef
-      @listenTo links, add: _createLinkRef, remove: @_removeLinkRef.bind @
+      @listenTo links, add: _createLinkRef, remove: (link) =>
+        @_removeLinkRef link
+        _deleted.push link unless link.isNew()
+        return
 
       @set {}
 
-      @
+      return
     fetch: (options = {}) -> # override for warp
       _success = options.success?.bind @
       options.success = (collection, response, options) =>
@@ -116,12 +124,29 @@ define 'models', ['lib/common'], ->
       link_ids = @links?.map (r) -> r.id
       attributes.node_ids = node_ids if node_ids?.join(',') isnt @get('node_ids')?.join(',')
       attributes.link_ids = link_ids if link_ids?.join(',') isnt @get('link_ids')?.join(',')
-      if Backbone.LocalStorage? and @sync isnt Backbone.ajaxSync # for test only
+      if isLocalTest = Backbone.LocalStorage? and @sync isnt Backbone.ajaxSync # for test only
         if @nodes? then attributes.nodes = @nodes?.map (r) -> r.attributes
         if @links? then attributes.links = @links?.map (r) -> r.attributes
-      # TODO: save nodes and links
+      #else # save nodes and links
+      @nodes?.forEach (node) =>
+        if node.isNew()
+          @nodes.create node, wait: true
+        else if node._changed
+          node.resetChangeFlag()
+          node.save()
+      @links?.forEach (link) =>
+        if link.isNew()
+          @links.create link, wait: true
+        else if link._changed
+          link.resetChangeFlag()
+          link.save()
+
       console.log 'save', @_name, attributes, @
       super attributes, options
+
+      unless isLocalTest # or never delete, until any bkg task to achieve them
+        @_deleted.forEach (model) -> model.destroy()
+
       @
     find: ({nodeId, linkId, actionId, callback}) ->
       n = @_name
@@ -204,7 +229,26 @@ define 'models', ['lib/common'], ->
     _delay: 600000 # 10 min
     sync: Workflow::sync # for test only
 
-  class Node extends Entity
+  class ChangeObserableEntity extends Entity
+    constructor: (model, options) ->
+      super model, options
+      @setChangeFlag = @setChangeFlag.bind @
+      @resetChangeFlag()
+    resetChangeFlag: ->
+      @setChangeFlag false
+    setChangeFlag: (val) ->
+      if val?
+        @_changed = Boolean val
+        @off 'change', @setChangeFlag
+        unless val
+          @set {}
+          @on 'change', @setChangeFlag
+      else if not @_changed and @hasChanged() and not @isNew()
+        @_changed = true
+        @off 'change', @setChangeFlag
+      @
+
+  class Node extends ChangeObserableEntity
     _name: 'node'
     urlRoot: ROOT + '/nodes'
     name: -> @get 'name'
@@ -215,7 +259,7 @@ define 'models', ['lib/common'], ->
     url: Node::urlRoot
   # url: -> @workflow.url() + '/nodes'
 
-  class Link extends Entity
+  class Link extends ChangeObserableEntity
     _name: 'link'
     urlRoot: ROOT + '/links'
     name: -> @get('name') or @get('desc') or @get('key')
