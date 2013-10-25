@@ -387,7 +387,7 @@ Event
 
   class EventManagemerView extends ManagerView
     columns: [
-      'checkbox'
+      # 'checkbox'
       'id'
       'title:event'
       'project'
