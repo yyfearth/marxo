@@ -41,7 +41,7 @@
     <!-- Cross origin solution if the browser client is under another domain -->
     <filter>
         <filter-name>CrossOriginFilter</filter-name>
-        <filter-class>marxo.controller.CorsFilter</filter-class>
+        <filter-class>marxo.filter.CorsFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>CrossOriginFilter</filter-name>
@@ -50,7 +50,7 @@
 
     <filter>
         <filter-name>GlobalFilter</filter-name>
-        <filter-class>marxo.controller.GlobalFilter</filter-class>
+        <filter-class>marxo.filter.GlobalFilter</filter-class>
     </filter>
     <filter-mapping>
         <filter-name>GlobalFilter</filter-name>
