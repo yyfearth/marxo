@@ -6,5 +6,5 @@ This is a school project for a web application which allows users to post rich c
 Demo
 ----
 
-* Console <http://marxo.masonwan.com/console/>
+* Console <http://marxo.masonwan.com/console/#signin>
 * API <http://marxo.masonwan.com>
