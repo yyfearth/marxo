@@ -153,19 +153,22 @@ Action
       @_changed = @_changed.bind @
       @
     reset: ->
-      @reload() if confirm 'All changes will be descarded since last save, are you sure to do that?'
+      if confirm 'All changes will be descarded since last save, are you sure to do that?'
+        @reload()
+        @btnSave.disabled = @btnReset.disabled = true
       @
     save: ->
       console.log 'save', @model.attributes
+      @btnSave.disabled = @btnReset.disabled = true
       @model.save {},
         success: (wf) ->
           console.log 'saved', wf
         error: ->
-          console.error 'save failed'
+          @_changed()
+          console.error 'save failed', @model
       @
     _changed: ->
-      @btnSave.disabled = false
-      @btnReset.disabled = false
+      @btnSave.disabled = @btnReset.disabled = false
       return
     _loaded: (wf, sub) ->
       @id = wf.id
