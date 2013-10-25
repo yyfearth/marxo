@@ -449,6 +449,8 @@ Projects
         fullCollection.forEach (model, i) -> model._seq = i + 1
         _render()
 
+      @$enable_if_selected = @$el.find '.enable_if_selected'
+
       # tooltip on bottom
       $('.action-buttons .btn[title]').attr 'data-placement': 'bottom', 'data-container': 'body'
       @
@@ -497,7 +499,6 @@ Projects
       @$el.find('.grid-paginator').replaceWith @paginator.render().$el.addClass 'grid-paginator'
       @$el.find('.grid-filter').empty().append @filter.render().$el
       @reload()
-      @$enable_if_selected = @$el.find '.enable_if_selected'
       @
     refresh: ->
       @grid.body.refresh() if @rendered
@@ -540,11 +541,12 @@ Projects
       @delayedTrigger 'selection_changed', 100, selected, @grid, @
       # reflect to select all
       checkboxes = findAll '.select-row-cell input[type=checkbox]', @el
-      checked = checkboxes[0]?.checked
-      indeterminate = checkboxes.some (box) -> box.checked isnt checked
-      checkAll = find '.select-all-header-cell input[type=checkbox]', @el
-      checkAll.indeterminate = indeterminate
-      checkAll.checked = checked unless indeterminate
+      if checkAll?
+        checked = checkboxes[0]?.checked
+        indeterminate = checkboxes.some (box) -> box.checked isnt checked
+        checkAll = find '.select-all-header-cell input[type=checkbox]', @el
+        checkAll.indeterminate = indeterminate
+        checkAll.checked = checked unless indeterminate
       return
 
   { # exports
