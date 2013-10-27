@@ -36,7 +36,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider {
 		if (users.size() == 0) {
 			throw new UsernameNotFoundException(email + " is not found");
 		} else if (users.size() > 1) {
-			// review: ask whether this is a bug.
+			// review: consider whether this is a bug.
 			logger.warn("There are " + users.size() + " have email as " + email);
 		}
 
@@ -44,7 +44,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider {
 		String plainPassword = authentication.getCredentials().toString();
 		String encryptedPassword = passwordEncryptor.encrypt(plainPassword);
 
-		if (encryptedPassword.equals(user.getPassword())) {
+		if (encryptedPassword.toLowerCase().equals(user.getPassword().toLowerCase())) {
 			List<GrantedAuthority> grantedAuths = new ArrayList<>();
 			grantedAuths.add(new SimpleGrantedAuthority("user"));
 			return new MarxoAuthentication(user, grantedAuths);
