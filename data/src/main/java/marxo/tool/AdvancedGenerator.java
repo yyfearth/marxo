@@ -57,7 +57,7 @@ public class AdvancedGenerator extends BasicGenerator {
 			user.tenantId = tenant.id;
 			user.name = "Tester";
 			user.setEmail("test@example.com");
-			user.setPassword(passwordEncryptor.encrypt("B4driGpKjDrtdKaAoA8nUmm+D2Pl3kxoF5POX0sGSk4"));   // Fucking ugly.
+			user.setPassword(passwordEncryptor.encrypt("test"));   // Fucking ugly.
 
 			user = new User();
 			users.add(user);
@@ -65,7 +65,7 @@ public class AdvancedGenerator extends BasicGenerator {
 			user.tenantId = tenant.id;
 			user.name = "Wilson";
 			user.setEmail("yyfearth@gmail.com");
-			user.setPassword(passwordEncryptor.encrypt("2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8"));   // Yuck!
+			user.setPassword(passwordEncryptor.encrypt("yyfearth"));   // Yuck!
 
 			user = new User();
 			users.add(user);
@@ -73,7 +73,7 @@ public class AdvancedGenerator extends BasicGenerator {
 			user.tenantId = tenant.id;
 			user.name = "Leo";
 			user.setEmail("otaru14204@hotmail.com");
-			user.setPassword(passwordEncryptor.encrypt("XELXdnuv/p7QeCzPM7Pl7TLfd6o2NZSaPb/sGtYUg5Q"));   // Damn
+			user.setPassword(passwordEncryptor.encrypt("otaru14204"));   // Damn
 
 			user = new User();
 			users.add(user);
