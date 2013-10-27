@@ -1,26 +1,31 @@
 package marxo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.regex.Pattern;
 
 public class User extends TenantChildEntity {
 	public final static Pattern emailPattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
-	public String password;
-	public String email;
+	@JsonIgnore
+	String password;
+	String email;
 	UserType userType;
 
-//	public String getEmail() {
-//		return email;
-//	}
-//
-//	public void setEmail(String email) throws InvalidArgumentException {
-//		// todo: move the verification to other places.
-//		Matcher matcher = emailPattern.matcher(email);
-//		if (matcher.find()) {
-//			this.email = email;
-//		} else {
-//			throw new InvalidArgumentException(new String[]{"email"});
-//		}
-//	}
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
