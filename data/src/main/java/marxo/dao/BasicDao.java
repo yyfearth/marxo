@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
@@ -66,12 +65,14 @@ public abstract class BasicDao<E extends BasicEntity> {
 
 	// Search
 	public List<E> searchByWorkflow(ObjectId workflowId) {
-		List<E> entities = mongoTemplate.find(Query.query(Criteria.where("workflowId").is(workflowId)), eClass);
-		return entities;
+		return mongoTemplate.find(Query.query(Criteria.where("workflowId").is(workflowId)), eClass);
 	}
 
 	public List<E> searchByWorkflows(List<ObjectId> workflowIds) {
-		List<E> entities = mongoTemplate.find(Query.query(Criteria.where("workflowId").in(workflowIds)), eClass);
-		return entities;
+		return mongoTemplate.find(Query.query(Criteria.where("workflowId").in(workflowIds)), eClass);
+	}
+
+	public List<E> searchByTenantId(ObjectId tenantId) {
+		return mongoTemplate.find(Query.query(Criteria.where("tenantId").in(tenantId)), eClass);
 	}
 }
