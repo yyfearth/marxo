@@ -5,13 +5,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.sun.istack.internal.Nullable;
-import marxo.entity.Link;
-import marxo.entity.Node;
-import marxo.entity.Workflow;
-import marxo.entity.WorkflowChildEntity;
 import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
+import marxo.entity.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Controller
@@ -35,18 +33,16 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 		super(dao);
 	}
 
-	/**
-	 * Why should we use hyphens rather then underscores for the query parameters? See https://support.google.com/webmasters/answer/76329?hl=en
-	 */
 	@Override
-	public List<Workflow> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
+	public List<Workflow> getAll(HttpServletRequest request, @RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
+		User user = (User) request.getAttribute("user");
 		boolean hasName = !Strings.isNullOrEmpty(name);
 		boolean hasCreated = created != null;
 		boolean hasModified = modified != null;
 		List<Workflow> workflows;
 
 		if (!hasName && !hasCreated && !hasModified) {
-			workflows = dao.findAll();
+			workflows = dao.searchByTenantId(user.tenantId);
 			ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
 			for (Workflow workflow : workflows) {
 				workflowIds.add(workflow.id);
@@ -80,8 +76,8 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 	}
 
 	@Override
-	public Workflow read(@PathVariable String idString) {
-		Workflow workflow = super.read(idString);
+	public Workflow read(HttpServletRequest request, @PathVariable String idString) {
+		Workflow workflow = super.read(request, idString);
 
 		List<Node> nodes = nodeDao.searchByWorkflow(workflow.id);
 		List<Link> links = linkDao.searchByWorkflow(workflow.id);

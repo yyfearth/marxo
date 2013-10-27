@@ -11,7 +11,7 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <!-- WARNING: Do not try to import Spring configuration inside another configuration file. It loads the context but not the beans. It spent me fucking several hours to figure the fucking thing out. -->
-        <param-value>WEB-INF/spring-security.xml, classpath*:mongo-configuration.xml</param-value>
+        <param-value>WEB-INF/spring-security.xml, classpath*:mongo-configuration.xml, classpath*:security.xml</param-value>
     </context-param>
 
     <servlet>
@@ -38,6 +38,15 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <filter>
+        <filter-name>GlobalFilter</filter-name>
+        <filter-class>marxo.filter.GlobalFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>GlobalFilter</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+
     <!-- Cross origin solution if the browser client is under another domain -->
     <filter>
         <filter-name>CrossOriginFilter</filter-name>
@@ -45,15 +54,6 @@
     </filter>
     <filter-mapping>
         <filter-name>CrossOriginFilter</filter-name>
-        <url-pattern>*</url-pattern>
-    </filter-mapping>
-
-    <filter>
-        <filter-name>GlobalFilter</filter-name>
-        <filter-class>marxo.filter.GlobalFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>GlobalFilter</filter-name>
         <url-pattern>*</url-pattern>
     </filter-mapping>
 

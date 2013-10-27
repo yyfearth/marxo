@@ -2,11 +2,13 @@ package marxo.controller;
 
 import marxo.dao.BasicDao;
 import marxo.entity.BasicEntity;
+import marxo.entity.User;
 import marxo.exception.*;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
@@ -21,17 +23,20 @@ public abstract class EntityController<E extends BasicEntity, Dao extends BasicD
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public List<E> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
-		return dao.findAll();
+	public List<E> getAll(HttpServletRequest request, @RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
+		User user = (User) request.getAttribute("user");
+		return dao.searchByTenantId(user.tenantId);
 	}
 
 	@RequestMapping(value = "/", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
-	public E create(@Valid @RequestBody E entity, HttpServletResponse response) throws Exception {
+	public E create(HttpServletRequest request, @Valid @RequestBody E entity, HttpServletResponse response) throws Exception {
 		if (dao.exists(entity.id)) {
 			throw new EntityExistsException(entity.id);
 		}
+
+		User user = (User) request.getAttribute("user");
 
 		try {
 			entity.fillWithDefaultValues();
@@ -47,15 +52,11 @@ public abstract class EntityController<E extends BasicEntity, Dao extends BasicD
 		return entity;
 	}
 
-	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}(?:\\.json)?}", method = RequestMethod.GET)
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public E read(@PathVariable String idString) {
-		int extensionIndex = idString.lastIndexOf(".json");
-		boolean isJson = extensionIndex > 0;
-		if (isJson) {
-			idString = idString.substring(0, extensionIndex);
-		}
+	public E read(HttpServletRequest request, @PathVariable String idString) {
+		User user = (User) request.getAttribute("user");
 
 		if (!ObjectId.isValid(idString)) {
 			throw new InvalidObjectIdException(idString);
@@ -71,17 +72,13 @@ public abstract class EntityController<E extends BasicEntity, Dao extends BasicD
 		return entity;
 	}
 
-	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}(?:\\.json)?}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
 	// review: is the parameter 'id' necessary?
-	public E update(@Valid @PathVariable String idString, @Valid @RequestBody E entity) {
-		int extensionIndex = idString.lastIndexOf(".json");
-		boolean isJson = extensionIndex > 0;
-		if (isJson) {
-			idString = idString.substring(0, extensionIndex);
-		}
+	public E update(HttpServletRequest request, @Valid @PathVariable String idString, @Valid @RequestBody E entity) {
+		User user = (User) request.getAttribute("user");
 
 		if (!ObjectId.isValid(idString)) {
 			throw new InvalidObjectIdException(idString);
@@ -116,17 +113,11 @@ public abstract class EntityController<E extends BasicEntity, Dao extends BasicD
 		return entity;
 	}
 
-	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}(?:\\.json)?}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	public E delete(@PathVariable String idString) {
-		int extensionIndex = idString.lastIndexOf(".json");
-		boolean isJson = extensionIndex > 0;
-		if (isJson) {
-			idString = idString.substring(0, extensionIndex);
-		}
-
+	public E delete(HttpServletRequest request, @PathVariable String idString) {
 		if (!ObjectId.isValid(idString)) {
 			throw new InvalidObjectIdException(idString);
 		}

@@ -3,10 +3,14 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <bean id="secretKeyFactory" class="javax.crypto.SecretKeyFactory" factory-method="getInstance">
+        <constructor-arg type="java.lang.String" value="PBKDF2WithHmacSHA1"/>
+    </bean>
     <bean id="passwordSaltHexString" class="java.lang.String">
         <constructor-arg type="java.lang.String" value="D6991BF10B940C1801E81F16F90C3EB917A9BF65E1E3D7D9F5B441B1EB3B8670"/>
     </bean>
-    <bean id="secretKeyFactory" class="javax.crypto.SecretKeyFactory" factory-method="getInstance">
-        <constructor-arg type="java.lang.String" value="PBKDF2WithHmacSHA1"/>
+    <bean class="marxo.tool.PasswordEncryptor">
+        <constructor-arg name="salt" ref="passwordSaltHexString"/>
+        <constructor-arg name="secretKeyFactory" ref="secretKeyFactory"/>
     </bean>
 </beans>
