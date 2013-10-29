@@ -53,7 +53,7 @@ public class AdvancedGenerator extends BasicGenerator {
 
 			user = new User();
 			users.add(user);
-			tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
+			tenant = tenants.get(0);
 			user.tenantId = tenant.id;
 			user.name = "Tester";
 			user.setEmail("test@example.com");
@@ -61,7 +61,7 @@ public class AdvancedGenerator extends BasicGenerator {
 
 			user = new User();
 			users.add(user);
-			tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
+			tenant = tenants.get(0);
 			user.tenantId = tenant.id;
 			user.name = "Wilson";
 			user.setEmail("yyfearth@gmail.com");
@@ -69,7 +69,7 @@ public class AdvancedGenerator extends BasicGenerator {
 
 			user = new User();
 			users.add(user);
-			tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
+			tenant = tenants.get(1);
 			user.tenantId = tenant.id;
 			user.name = "Leo";
 			user.setEmail("otaru14204@hotmail.com");
@@ -77,7 +77,7 @@ public class AdvancedGenerator extends BasicGenerator {
 
 			user = new User();
 			users.add(user);
-			tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
+			tenant = tenants.get(1);
 			user.tenantId = tenant.id;
 			user.name = "Mason";
 			user.setEmail("masonwan@gmail.com");
