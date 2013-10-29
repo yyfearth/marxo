@@ -5,13 +5,9 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <!--<import resource="classpath*:**/mongo-configuration.xml"/>-->
-    <!--<context:component-scan base-package="marxo.dao"/>-->
-
     <context:annotation-config/>
     <context:component-scan base-package="marxo.controller"/>
     <context:component-scan base-package="marxo.exception"/>
-
 
     <mvc:annotation-driven/>
 
@@ -39,6 +35,7 @@
             </list>
         </property>
     </bean>
+
     <!-- review: check whether the following works -->
     <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
         <property name="contentNegotiationManager">
@@ -48,9 +45,5 @@
                 <property name="favorParameter" value="true"/>
             </bean>
         </property>
-    </bean>
-
-    <bean class="java.lang.Boolean" id="isDebug">
-        <constructor-arg type="boolean" value="true"/>
     </bean>
 </beans>
