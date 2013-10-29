@@ -8,31 +8,22 @@
            http://www.springframework.org/schema/security/spring-security-3.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:component-scan base-package="marxo.security"/>
-    <context:component-scan base-package="marxo.filter"/>
 
-    <security:http use-expressions="true" authentication-manager-ref="authenticationManager" entry-point-ref="basicAuthenticationEntryPoint">
+    <security:http use-expressions="true" entry-point-ref="marxoAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
         <security:intercept-url pattern="/api/**" requires-channel="any" access="isAuthenticated()"/>
-        <security:custom-filter ref="marxoBasicAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
-        <security:access-denied-handler ref="accessDeniedHandler"/>
+        <security:session-management>
+            <!-- review: decide the value. -->
+            <security:concurrency-control max-sessions="4"/>
+        </security:session-management>
+        <security:custom-filter ref="basicAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
     </security:http>
-
-    <bean id="basicAuthenticationEntryPoint"
-          class="org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint">
-        <property name="realmName" value="chamge-me"/>
-    </bean>
 
     <security:authentication-manager id="authenticationManager">
         <security:authentication-provider ref="marxoAuthenticationProvider"/>
     </security:authentication-manager>
 
-    <bean id="exceptionTranslationFilter"
-          class="org.springframework.security.web.access.ExceptionTranslationFilter">
-        <property name="authenticationEntryPoint" ref="basicAuthenticationEntryPoint"/>
-        <property name="accessDeniedHandler" ref="accessDeniedHandler"/>
-    </bean>
-
-    <bean id="accessDeniedHandler"
-          class="marxo.security.MarxoAccessDeniedHandler">
-        <property name="errorPage" value="/accessDenied.htm"/>
+    <bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
+        <constructor-arg ref="authenticationManager"/>
+        <constructor-arg ref="marxoAuthenticationEntryPoint"/>
     </bean>
 </beans>

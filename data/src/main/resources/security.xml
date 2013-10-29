@@ -13,4 +13,8 @@
         <constructor-arg name="salt" ref="passwordSaltHexString"/>
         <constructor-arg name="secretKeyFactory" ref="secretKeyFactory"/>
     </bean>
+
+    <bean id="isDebug" class="java.lang.Boolean">
+        <constructor-arg type="boolean" value="true"/>
+    </bean>
 </beans>

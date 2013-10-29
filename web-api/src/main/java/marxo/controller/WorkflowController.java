@@ -9,8 +9,10 @@ import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
 import marxo.entity.*;
+import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +37,9 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 
 	@Override
 	public List<Workflow> getAll(HttpServletRequest request, @RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
-		User user = (User) request.getAttribute("user");
+		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
+		User user = marxoAuthentication.getUser();
+
 		boolean hasName = !Strings.isNullOrEmpty(name);
 		boolean hasCreated = created != null;
 		boolean hasModified = modified != null;
