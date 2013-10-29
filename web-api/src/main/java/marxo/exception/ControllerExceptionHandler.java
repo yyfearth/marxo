@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.net.BindException;
 
 @ControllerAdvice
@@ -27,62 +30,70 @@ public class ControllerExceptionHandler {
 
 	// Spring built-in
 	@ExceptionHandler({BindException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, TypeMismatchException.class})
-	public ResponseEntity<ErrorJson> handleBadRequest(Exception ex) {
-		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(String.format("The shit you gave is bad (%s)", ex.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
+	public ResponseEntity<ErrorJson> handleBadRequest(Exception e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(String.format("The shit you gave is bad (%s)", e.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({ConversionNotSupportedException.class, HttpMessageNotWritableException.class})
-	public ResponseEntity<ErrorJson> handleInternalServerError(Exception ex) {
-		logger.error(ex.getMessage());
+	public ResponseEntity<ErrorJson> handleInternalServerError(Exception e) {
+		logger.error(e.getMessage());
 		return new ResponseEntity<>(new ErrorJson("Sorry, I don't know how to translate your shit"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
-	public ResponseEntity<ErrorJson> handleNotAcceptable(Exception ex) {
-		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(String.format("Cannot accept your shit (%s)", ex.getMessage())), HttpStatus.NOT_ACCEPTABLE);
+	public ResponseEntity<ErrorJson> handleNotAcceptable(Exception e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(String.format("Cannot accept your shit (%s)", e.getMessage())), HttpStatus.NOT_ACCEPTABLE);
 	}
 
 	@ExceptionHandler({HttpMediaTypeNotSupportedException.class})
-	public ResponseEntity<ErrorJson> handleUnsupportedMediaType(Exception ex) {
-		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(String.format("Doesn't support your shit (%s)", ex.getMessage())), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+	public ResponseEntity<ErrorJson> handleUnsupportedMediaType(Exception e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(String.format("Doesn't support your shit (%s)", e.getMessage())), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 	}
 
 	@ExceptionHandler({HttpRequestMethodNotSupportedException.class})
-	public ResponseEntity<ErrorJson> handleMethodNotAllowed(Exception ex) {
-		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(String.format("Your shit is not allowed (%s)", ex.getMessage())), HttpStatus.METHOD_NOT_ALLOWED);
+	public ResponseEntity<ErrorJson> handleMethodNotAllowed(Exception e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(String.format("Your shit is not allowed (%s)", e.getMessage())), HttpStatus.METHOD_NOT_ALLOWED);
 	}
 
 	@ExceptionHandler({NoSuchRequestHandlingMethodException.class})
-	public ResponseEntity<ErrorJson> handleNotFound(Exception ex) {
-		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit (%s)", ex.getMessage())), HttpStatus.NOT_FOUND);
+	public ResponseEntity<ErrorJson> handleNotFound(Exception e) {
+		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit (%s)", e.getMessage())), HttpStatus.NOT_FOUND);
 	}
 
 	// This application only
 	@ExceptionHandler({InvalidObjectIdException.class})
-	public ResponseEntity<ErrorJson> handleInvalidObjectIdException(InvalidObjectIdException ex) {
-		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(ex.message), HttpStatus.BAD_REQUEST);
+	public ResponseEntity<ErrorJson> handleInvalidObjectIdException(InvalidObjectIdException e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(e.message), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({EntityInvalidException.class, EntityExistsException.class, EntityNotFoundException.class})
-	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityException ex) {
-		logger.debug(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson(ex.messages.toArray(new String[ex.messages.size()])), HttpStatus.BAD_REQUEST);
+	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityException e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(e.messages.toArray(new String[e.messages.size()])), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({DataAccessResourceFailureException.class})
-	public ResponseEntity<ErrorJson> handleDataAccessResourceFailureException(DataAccessResourceFailureException ex) {
-		logger.error(ex.getMessage());
+	public ResponseEntity<ErrorJson> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
+		logger.error(e.getMessage());
 		return new ResponseEntity<>(new ErrorJson("Cannot connect to the database"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	@ExceptionHandler({NotImplementedException.class})
+	public ResponseEntity<ErrorJson> handleNotImplementedException(NotImplementedException e) {
+		return new ResponseEntity<>(new ErrorJson("Well... you are using a working-in-progress project. This part isn't done yet."), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 	@ExceptionHandler({Exception.class})
-	public ResponseEntity<ErrorJson> handleOtherException(Exception ex) {
-		logger.error(ex.getMessage());
-		return new ResponseEntity<>(new ErrorJson("Congratulations! You broke the server: [" + ex.getClass().getSimpleName() + "]" + ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+	public ResponseEntity<ErrorJson> handleOtherException(Exception e) {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		PrintStream printStream = new PrintStream(byteArrayOutputStream);
+		e.printStackTrace(printStream);
+		logger.error(byteArrayOutputStream.toString());
+		return new ResponseEntity<>(new ErrorJson("Congratulations! You broke the server: [" + e.getClass().getSimpleName() + "] " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }
