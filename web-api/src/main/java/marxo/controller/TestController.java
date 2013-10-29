@@ -49,6 +49,12 @@ public class TestController extends BasicController {
 		AdvancedGenerator.main(new String[0]);
 		return "Database reset with " + AdvancedGenerator.class.getSimpleName();
 	}
+
+	@RequestMapping("/logout")
+	@ResponseBody
+	public ResponseEntity<String> logout() {
+		return new ResponseEntity<String>("You are signed out", HttpStatus.UNAUTHORIZED);
+	}
 }
 
 @JsonSerialize
