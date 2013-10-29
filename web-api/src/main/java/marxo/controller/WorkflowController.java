@@ -1,10 +1,8 @@
 package marxo.controller;
 
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.sun.istack.internal.Nullable;
 import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
@@ -92,20 +90,6 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 		workflow.links = Lists.newArrayList(workflowLinks);
 
 		return workflow;
-	}
-}
-
-// todo: move the following under proper packages.
-class WorkflowPredicate<E extends WorkflowChildEntity> implements Predicate<E> {
-	ObjectId workflowId;
-
-	WorkflowPredicate(ObjectId workflowId) {
-		this.workflowId = workflowId;
-	}
-
-	@Override
-	public boolean apply(@Nullable E entity) {
-		return (entity != null) && workflowId.equals(entity.workflowId);
 	}
 }
 
