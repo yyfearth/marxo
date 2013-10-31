@@ -55,6 +55,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @tenant = tenant
       @avatarEl = find 'img#avatar'
       @usernameEl = find '#username'
+      @avatarEl.dataset.src ?= @avatarEl.src
+      @avatarEl.onerror = -> @src = @dataset.src
       # init frames
       @frames = {}
       findAll('.frame', @el).forEach (frame) =>
