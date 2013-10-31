@@ -39,14 +39,20 @@ define 'models', ['lib/common'], ->
   ## Tenant / User
 
   class Tenant extends Entity
-    urlRoot: '/tenants'
+    urlRoot: ROOT + '/tenants'
+    #sync: Backbone.ajaxSync or Backbone.sync # for test only
 
   class User extends Entity
-    urlRoot: '/users'
+    urlRoot: ROOT + '/users'
     idAttribute: 'email'
+    #sync: Backbone.ajaxSync or Backbone.sync # for test only
     fullname: ->
-      if @has('first_name') and @has('last_name')
+      if @has 'full_name'
+        @get 'full_name'
+      else if @has('first_name') and @has('last_name')
         "#{@get 'first_name'} #{@get 'last_name'}"
+      else if @has 'name'
+        @get 'name'
       else
         @get('first_name') or @get('last_name') or null
 
@@ -66,6 +72,7 @@ define 'models', ['lib/common'], ->
   class Publishers extends ManagerCollection
     model: Publisher
     url: Publisher::urlRoot
+    sync: Publisher::sync
 
   ## Workflow
 
