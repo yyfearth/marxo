@@ -7,7 +7,9 @@
       ul.sidebar-list.nav.nav-list
         li.nav-header Project
         li.sidebar-item.project-item
-          a Project Info
+          a(data-item='project') Project Info
+        li.sidebar-item.users-item
+          a.muted(data-item='users') Members
         li.nav-header.node-header Nodes
         li.nav-header.link-header Links
       ul.sidebar-bottom.nav.nav-list
@@ -37,6 +39,14 @@
           label.control-label(for='project_desc') Description
           .controls
             textarea#project_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
+        .control-group.hide
+          label.control-label Created By
+          .controls
+            input#project_created_by(type='text', readonly)
+        .control-group.hide
+          label.control-label Created At
+          .controls
+            input#project_created_at(type='text', readonly)
       section.node-link.hide
         legend
           span.node-link-name

@@ -75,7 +75,7 @@ Projects
         return
       'click li.sidebar-item > a, a.linked-item': (e) ->
         e.preventDefault()
-        @navTo $(e.currentTarget).data 'model'
+        @navTo $(e.currentTarget).data('model') or e.currentTarget.dataset.item
         false
     initialize: (options) ->
       super options
@@ -117,6 +117,12 @@ Projects
       @workflows.load (ignored, ret) =>
         @_renderSelect() if 'loaded' is ret
         @fill data
+        unless model.isNew()
+          if model.has 'created_by'
+            @$el.find('#project_created_by').val(model.get 'created_by')
+            .parents('.control-group').show()
+          @$el.find('#project_created_at').val(new Date(model.get 'created_at').toLocaleString())
+          .parents('.control-group').show()
         select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
         if select.disabled
           @_renderProject model
@@ -131,7 +137,7 @@ Projects
         , 550
       @
     navTo: (model) ->
-      type = model?._name or 'project'
+      type = (if typeof model is 'string' then model else model?._name) or 'project'
       if @_cur_type isnt type
         @$projectForm.hide()
         @$actions.hide()
@@ -140,6 +146,11 @@ Projects
         $linkOptions = $section.find('.link-options').hide()
         if type is 'project'
           @$projectForm.show()
+          model = null
+        else if type is 'users'
+          # TODO: user list
+          @$projectForm.show()
+          model = null
         else
           $section.show()
           if type is 'node'
@@ -215,6 +226,7 @@ Projects
       super
     reset: ->
       @$wfbtns.hide()
+      $(@_find('created_at')).parents('.control-group').hide()
       $(@sidebar).find('li.node-item, li.link-item').remove()
       @navTo null
       super
