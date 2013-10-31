@@ -82,7 +82,6 @@ Notifications
     initialize: (options) ->
       super options
       collection = @collection.fullCollection
-      #@editor = new NotificationEditor el: '#user_editor', parent: @
       @statusFilter = new NavFilterView
         el: find('.status-filter', @el)
         field: 'status'
@@ -91,28 +90,13 @@ Notifications
         el: find('ul.project-list', @el)
         collection: collection
         allowEmpty: true
-      #@on 'create edit', @edit.bind @
-      #@on 'remove remove_selected', @remove.bind @
       @
     reload: ->
       super
       @projectFilter.clear()
-    #remove: (users) ->
-    #  users = [users] unless Array.isArray users
-    #  @_remove user for user in users
-    #  @refresh()
-    #  @
-    #_remove: (user) ->
-    #  email = user.get 'email'
-    #  if @signin_user.email is email
-    #    alert 'Cannot remove currently signed in user ' + email
-    #  else if confirm 'Are you sure to remoe user ' + email + '?\n\nIt cannot be restored after removal!'
-    #    user.destroy()
     render: ->
       super
       @projectFilter.render()
-      # logined user
-      @signin_user = JSON.parse sessionStorage.user
       @
 
   # TODO: auto reload
