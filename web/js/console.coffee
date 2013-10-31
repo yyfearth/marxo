@@ -116,17 +116,16 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       # TODO: real sign out
       delete sessionStorage.user
       delete sessionStorage.tenant
-      @user = @tenant = null
+      @user = @tenant = User.current = Tenant.current = null
       SignInView.get().show()
       @hide()
       @trigger 'signout'
       @
     signin: (user, tenant, remember) ->
-      @user = user
-      @tenant = tenant
+      @user = User.current = user
+      @tenant = Tenant.current = tenant
       if remember
         u = user.toJSON()
-        # test data only
         delete u.password
         sessionStorage.user = JSON.stringify u
         sessionStorage.tenant = JSON.stringify tenant.toJSON()
@@ -199,6 +198,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
             console.log 'login with', email, hash
             if user.has('tenant_id') and hash is user?.get 'password'
               user.set 'email_md5', md5Email email
+              user.email = email
+              user.password = hash
               tenantId = user.get 'tenant_id'
               new Tenant(id: tenantId).fetch
                 success: (tenant) =>

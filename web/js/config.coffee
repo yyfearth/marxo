@@ -17,6 +17,7 @@ ManagerView
 ProjectFilterView
 }, {
 Tenant
+User
 Publisher
 Publishers
 Service
@@ -392,7 +393,7 @@ Service
       super
       @projectFilter.render()
       # logined user
-      @signin_user = JSON.parse sessionStorage.user
+      @signin_user = User.current.toJSON()
       @
 
   ConfigFrameView
