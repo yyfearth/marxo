@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:security="http://www.springframework.org/schema/security"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
            http://www.springframework.org/schema/security
            http://www.springframework.org/schema/security/spring-security-3.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
-
+    <context:annotation-config/>
     <context:component-scan base-package="marxo.security"/>
+    <context:component-scan base-package="marxo.dao"/>
 
-    <security:http use-expressions="true" entry-point-ref="marxoAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
-        <security:intercept-url pattern="/api/**" requires-channel="any" access="isAuthenticated()"/>
-        <security:session-management>
+    <http use-expressions="true" entry-point-ref="marxoAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
+        <intercept-url pattern="/api/**" requires-channel="any" access="isAuthenticated()"/>
+        <session-management>
             <!-- review: decide the value. -->
-            <security:concurrency-control max-sessions="4"/>
-        </security:session-management>
-        <security:custom-filter ref="basicAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
-    </security:http>
+            <concurrency-control max-sessions="4"/>
+        </session-management>
+        <custom-filter ref="basicAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
+    </http>
 
-    <security:authentication-manager id="authenticationManager">
-        <security:authentication-provider ref="marxoAuthenticationProvider"/>
-    </security:authentication-manager>
+    <authentication-manager id="authenticationManager">
+        <authentication-provider ref="marxoAuthenticationProvider"/>
+    </authentication-manager>
 
-    <bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
-        <constructor-arg ref="authenticationManager"/>
-        <constructor-arg ref="marxoAuthenticationEntryPoint"/>
-    </bean>
-</beans>
+    <beans:bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
+        <beans:constructor-arg ref="authenticationManager"/>
+        <beans:constructor-arg ref="marxoAuthenticationEntryPoint"/>
+    </beans:bean>
+</beans:beans>
