@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @Controller
@@ -29,14 +28,15 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 	LinkDao linkDao;
 
 	@Autowired
-	public WorkflowController(WorkflowDao dao) {
-		super(dao);
+	public WorkflowController(WorkflowDao workflowDao) {
+		super(workflowDao);
 	}
 
 	@Override
-	public List<Workflow> getAll(HttpServletRequest request, @RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
+	public List<Workflow> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		User user = marxoAuthentication.getUser();
+		dao.setTenantId(user.tenantId);
 
 		boolean hasName = !Strings.isNullOrEmpty(name);
 		boolean hasCreated = created != null;
@@ -44,14 +44,14 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 		List<Workflow> workflows;
 
 		if (!hasName && !hasCreated && !hasModified) {
-			workflows = dao.searchByTenantId(user.tenantId);
+			workflows = dao.findAll();
 			ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
 			for (Workflow workflow : workflows) {
 				workflowIds.add(workflow.id);
 			}
 
-			List<Node> nodes = nodeDao.searchByWorkflows(workflowIds);
-			List<Link> links = linkDao.searchByWorkflows(workflowIds);
+			List<Node> nodes = nodeDao.searchByWorkflowIds(workflowIds);
+			List<Link> links = linkDao.searchByWorkflowIds(workflowIds);
 
 			// Java really needs a kick-ass collection library for the following. I have used Guava for this, it still looks as bad as it could.
 			// The following is for getting all nodes and links which match the workflow's ID.
@@ -78,11 +78,11 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 	}
 
 	@Override
-	public Workflow read(HttpServletRequest request, @PathVariable String idString) {
-		Workflow workflow = super.read(request, idString);
+	public Workflow read(@PathVariable String idString) {
+		Workflow workflow = super.read(idString);
 
-		List<Node> nodes = nodeDao.searchByWorkflow(workflow.id);
-		List<Link> links = linkDao.searchByWorkflow(workflow.id);
+		List<Node> nodes = nodeDao.searchByWorkflowId(workflow.id);
+		List<Link> links = linkDao.searchByWorkflowId(workflow.id);
 		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
 		Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
 		workflow.nodes = Lists.newArrayList(workflowNodes);
