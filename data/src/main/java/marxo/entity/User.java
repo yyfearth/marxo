@@ -2,9 +2,13 @@ package marxo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 
-public class User extends TenantChildEntity {
+/**
+ * Note that it implements Serializable since it seems that Spring Security will serialize it. And it pops out warning even it's fully serializable without the interfact.
+ */
+public class User extends TenantChildEntity implements Serializable {
 	public final static Pattern emailPattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
 	@JsonIgnore
 	String password;
