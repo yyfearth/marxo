@@ -6,7 +6,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <config:annotation-config/>
-    <config:component-scan base-package="marxo.dao"/>
 
     <mongo:db-factory id="mongoDbFactory" host="dharma.mongohq.com" port="10047" dbname="Marxo" username="web" password="web"/>
     <!-- The following is the backup MongoDB server -->
