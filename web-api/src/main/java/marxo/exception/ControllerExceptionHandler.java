@@ -59,7 +59,7 @@ public class ControllerExceptionHandler {
 		return new ResponseEntity<>(new ErrorJson(String.format("Your shit is not allowed (%s)", e.getMessage())), HttpStatus.METHOD_NOT_ALLOWED);
 	}
 
-	@ExceptionHandler({NoSuchRequestHandlingMethodException.class})
+	@ExceptionHandler({NoSuchRequestHandlingMethodException.class, IllegalArgumentException.class})
 	public ResponseEntity<ErrorJson> handleNotFound(Exception e) {
 		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit (%s)", e.getMessage())), HttpStatus.NOT_FOUND);
 	}
