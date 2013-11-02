@@ -129,6 +129,14 @@ Notifications
           , 100
           _renderPopover $el.data 'model'
       @
+    autoUpdate: (val) ->
+      #console.log 'set auto update notifications', val
+      @_auto_update = clearInterval @_auto_update if @_auto_update
+      if val then @_auto_update = setInterval =>
+        console.log 'auto update notifications'
+        @fetch()
+      , @_reload_timeout + 1
+      @
     _renderPopover: (model) ->
       console.log 'render popover', model
       # html details
