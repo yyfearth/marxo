@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 // review: it's fucking weird that the entities are coupled with Jackson annotation.
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-@JsonPropertyOrder({"id", "object_type", "tenant_id", "workflow_id", "name", "key", "desc", "type", "status", "content", "nodes", "node_ids", "links", "link_ids", "created_at", "created_by", "updated_at", "modified_by"})
+@JsonPropertyOrder({"id", "email", "object_type", "tenant_id", "workflow_id", "name", "key", "desc", "type", "status", "content", "nodes", "node_ids", "links", "link_ids", "created_at", "created_by", "updated_at", "modified_by"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BasicEntity {
 	static Pattern pattern = Pattern.compile("");
