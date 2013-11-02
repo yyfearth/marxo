@@ -2,8 +2,6 @@ package marxo.tool;
 
 import marxo.entity.*;
 import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -15,9 +13,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AdvancedGenerator extends BasicGenerator {
-	static final Logger logger = LoggerFactory.getLogger(AdvancedGenerator.class);
-
+public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 	public static void main(String[] args) {
 		ApplicationContext dataContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 		MongoTemplate mongoTemplate = dataContext.getBean(MongoTemplate.class);
@@ -91,17 +87,16 @@ public class AdvancedGenerator extends BasicGenerator {
 		// Workflow
 		{
 			for (int i = 1; i <= 5; i++) {
-				Tenant tenant = tenants.get(threadLocalRandom.nextInt(tenants.size()));
-
 				Workflow workflow = new Workflow();
 				workflows.add(workflow);
 
-				workflow.tenantId = tenant.id;
 				workflow.description = StringTool.getRandomString(120);
-				ObjectId modifyingUserId = users.get(threadLocalRandom.nextInt(users.size())).id;
+				User user = users.get(threadLocalRandom.nextInt(users.size()));
+				ObjectId modifyingUserId = user.id;
 				workflow.modifiedByUserId = modifyingUserId;
-				ObjectId creatingUserId = users.get(threadLocalRandom.nextInt(users.size())).id;
+				ObjectId creatingUserId = user.id;
 				workflow.createdByUserId = creatingUserId;
+				workflow.tenantId = user.tenantId;
 
 				if (i <= 2) {
 					workflow.name = "Alpha";
@@ -122,7 +117,7 @@ public class AdvancedGenerator extends BasicGenerator {
 					nodes.add(node);
 
 					node.workflowId = workflow.id;
-					node.tenantId = tenant.id;
+					node.tenantId = user.tenantId;
 					node.name = "Node " + (j + 1);
 					node.description = StringTool.getRandomString(60);
 					node.createdByUserId = creatingUserId;
@@ -133,7 +128,7 @@ public class AdvancedGenerator extends BasicGenerator {
 					for (int k = 0; k < numActions; k++) {
 						Action action = new Action();
 						node.actions.add(action);
-						action.tenantId = tenant.id;
+						action.tenantId = user.tenantId;
 						action.name = "Action " + (k + 1);
 						action.createdByUserId = creatingUserId;
 						action.modifiedByUserId = modifyingUserId;
@@ -154,7 +149,7 @@ public class AdvancedGenerator extends BasicGenerator {
 					links.add(link);
 
 					link.workflowId = workflow.id;
-					link.tenantId = tenant.id;
+					link.tenantId = user.tenantId;
 					link.name = "Link " + (j + 1);
 					link.createdByUserId = creatingUserId;
 					link.modifiedByUserId = modifyingUserId;
@@ -164,7 +159,7 @@ public class AdvancedGenerator extends BasicGenerator {
 					workflow.linkIdList.add(link.id);
 
 					Condition condition = new Condition();
-					condition.tenantId = tenant.id;
+					condition.tenantId = user.tenantId;
 					condition.leftOperandType = null;
 					condition.leftOperand = null;
 					condition.rightOperandType = null;

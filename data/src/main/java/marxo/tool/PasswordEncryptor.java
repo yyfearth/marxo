@@ -9,8 +9,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
-public class PasswordEncryptor {
-	static final Logger logger = LoggerFactory.getLogger(PasswordEncryptor.class);
+public class PasswordEncryptor implements ILoggable {
 	// review: increase the following numbers in production, in order to better secure the users.
 	static final int iterationCount = 64;
 	static final int keyLength = 128;

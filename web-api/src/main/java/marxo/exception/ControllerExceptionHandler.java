@@ -1,5 +1,6 @@
 package marxo.exception;
 
+import marxo.tool.ILoggable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.ConversionNotSupportedException;
@@ -25,9 +26,7 @@ import java.io.PrintStream;
 import java.net.BindException;
 
 @ControllerAdvice
-public class ControllerExceptionHandler {
-	final Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
-
+public class ControllerExceptionHandler implements ILoggable {
 	// Spring built-in
 	@ExceptionHandler({BindException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, TypeMismatchException.class})
 	public ResponseEntity<ErrorJson> handleBadRequest(Exception e) {

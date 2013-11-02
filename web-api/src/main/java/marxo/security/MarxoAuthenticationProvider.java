@@ -2,9 +2,8 @@ package marxo.security;
 
 import marxo.dao.UserDao;
 import marxo.entity.User;
+import marxo.tool.ILoggable;
 import marxo.tool.PasswordEncryptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,8 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class MarxoAuthenticationProvider implements AuthenticationProvider {
-	static final Logger logger = LoggerFactory.getLogger(MarxoAuthenticationProvider.class);
+public class MarxoAuthenticationProvider implements AuthenticationProvider, ILoggable {
 	@Autowired
 	UserDao userDao;
 	@Autowired

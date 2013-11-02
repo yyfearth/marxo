@@ -14,10 +14,8 @@ import java.util.Random;
 /**
  * It generates entities without the relationship.
  */
-public class SimpleGenerator extends BasicGenerator {
+public class SimpleGenerator extends BasicGenerator implements ILoggable {
 	public static void main(String[] args) {
-		final Logger logger = LoggerFactory.getLogger(SimpleGenerator.class);
-
 		ApplicationContext context = new ClassPathXmlApplicationContext("classpath*:marxo/mongo-configuration.xml");
 		MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);
 
@@ -114,7 +112,6 @@ public class SimpleGenerator extends BasicGenerator {
 				int workflowIndex = random.nextInt(workflows.size());
 				Workflow workflow = workflows.get(workflowIndex);
 				workflow.nodeIdList.add(node.id);
-				node.workflowId = workflows.get(workflowIndex).id;
 
 				int actionNum = random.nextInt(4);
 				for (int j = 0; j < actionNum; j++) {

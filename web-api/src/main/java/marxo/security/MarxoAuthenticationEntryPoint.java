@@ -2,8 +2,6 @@ package marxo.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import marxo.exception.ErrorJson;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -17,7 +15,6 @@ import java.io.IOException;
 
 @Component
 public class MarxoAuthenticationEntryPoint implements AuthenticationEntryPoint {
-	static final Logger logger = LoggerFactory.getLogger(MarxoAuthenticationEntryPoint.class);
 	static ObjectMapper objectMapper = new ObjectMapper();
 
 	@Override

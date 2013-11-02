@@ -5,8 +5,8 @@ import marxo.entity.TenantChildEntity;
 import marxo.security.MarxoAuthentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class RestrictedEntityController<E extends TenantChildEntity, Dao extends TenantChildDao<E>> extends EntityController<E, Dao> {
-	protected RestrictedEntityController(TenantChildDao dao) {
+public class TenantChildController<E extends TenantChildEntity, Dao extends TenantChildDao<E>> extends EntityController<E, Dao> {
+	protected TenantChildController(TenantChildDao dao) {
 		super((Dao) dao);
 	}
 
