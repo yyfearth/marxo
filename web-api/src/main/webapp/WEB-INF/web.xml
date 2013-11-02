@@ -28,14 +28,14 @@
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
-    <!-- Spring Security -->
+    <!-- Cross origin solution if the browser client is under another domain -->
     <filter>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <filter-name>CrossOriginFilter</filter-name>
+        <filter-class>marxo.filter.CorsFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>springSecurityFilterChain</filter-name>
-        <url-pattern>/*</url-pattern>
+        <filter-name>CrossOriginFilter</filter-name>
+        <url-pattern>*</url-pattern>
     </filter-mapping>
 
     <filter>
@@ -47,14 +47,14 @@
         <url-pattern>*</url-pattern>
     </filter-mapping>
 
-    <!-- Cross origin solution if the browser client is under another domain -->
+    <!-- Spring Security -->
     <filter>
-        <filter-name>CrossOriginFilter</filter-name>
-        <filter-class>marxo.filter.CorsFilter</filter-class>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>CrossOriginFilter</filter-name>
-        <url-pattern>*</url-pattern>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <error-page>
