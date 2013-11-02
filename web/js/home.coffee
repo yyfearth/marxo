@@ -22,9 +22,16 @@ NotificationListView
     collection: Projects.projects
     initialize: (options) ->
       super options
-      @notificationList = new NotificationListView el: find('.sidebar-list', @el), parent: @
+      list = @notificationList = new NotificationListView el: find('.sidebar-list', @el), parent: @
       @_render = @_render.bind @
       @listenTo @collection, 'reset add remove', @_render
+      _auto_update = list.autoUpdate.bind list
+      _auto_update true
+      @on 'activate', =>
+        @render()
+        _auto_update true
+      @on 'deactivate', =>
+        _auto_update false
       return
     _tpl: tpl('#project_overview_tpl')
     _render: ->
@@ -37,7 +44,8 @@ NotificationListView
       find('#home_view', @el).innerHTML = html.join '\n'
       return
     render: ->
-      @collection.load @_render
+      @collection.load (ignored, resp) =>
+        @_render() unless @rendered and resp isnt 'loaded'
       @notificationList.fetch()
       @
 
