@@ -11,6 +11,7 @@
     <context:component-scan base-package="marxo.dao"/>
 
     <http use-expressions="true" entry-point-ref="marxoAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
+        <intercept-url pattern="/api/**" requires-channel="any" access="true" method="OPTIONS"/>
         <intercept-url pattern="/api/**" requires-channel="any" access="isAuthenticated()"/>
         <session-management>
             <!-- review: decide the value. -->
