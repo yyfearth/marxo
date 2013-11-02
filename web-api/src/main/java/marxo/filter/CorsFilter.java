@@ -17,7 +17,8 @@ public class CorsFilter extends OncePerRequestFilter {
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		if (request.getHeader("Access-Control-Request-Method") != null && "OPTIONS".equals(request.getMethod())) {
 			response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, HEAD");
-			response.addHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Location");
+			// Chrome send Authentication header during Basic Authentication preflight.
+			response.addHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Location, Authorization");
 			response.addHeader("Access-Control-Max-Age", "1800");
 		}
 		filterChain.doFilter(request, response);
