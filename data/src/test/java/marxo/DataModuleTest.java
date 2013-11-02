@@ -29,7 +29,7 @@ public class DataModuleTest {
 		};
 
 		for (Class aClass : classes) {
-			List<BasicEntity> list = mongoTemplate.findAll(aClass);
+			List<Class> list = mongoTemplate.findAll(aClass);
 			long count = list.size();
 			String message = "Collection " + aClass + " has only " + count + " record(s)";
 			assert count >= 2 : message;
