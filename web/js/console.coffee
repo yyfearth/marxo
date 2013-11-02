@@ -117,6 +117,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       delete sessionStorage.user
       delete sessionStorage.tenant
       @user = @tenant = User.current = Tenant.current = null
+      $.ajaxSetup
+        headers:
+          Authorization: null
       SignInView.get().show()
       @hide()
       @trigger 'signout'
@@ -133,6 +136,11 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       else
         delete sessionStorage.user
         delete sessionStorage.tenant
+      # set ajax basic auth
+      $.ajaxSetup
+        headers:
+          Accept: 'application/json'
+          Authorization: 'Basic ' + user.get 'credential'
       # update avatar
       @avatarEl.src = "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
       $(@usernameEl).text "#{user.get 'first_name'} #{user.get 'last_name'}"
@@ -198,8 +206,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
             console.log 'login with', email, hash
             if user.has('tenant_id') and hash is user?.get 'password'
               user.set 'email_md5', md5Email email
-              user.email = email
-              user.password = hash
+              user.set 'credential', btoa "#{email}:#{hash}"
               tenantId = user.get 'tenant_id'
               new Tenant(id: tenantId).fetch
                 success: (tenant) =>

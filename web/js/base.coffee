@@ -55,12 +55,6 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         @::[key] = value
     @
 
-  ## Ajax Sync (Basic Auth)
-  $.ajaxPrefilter 'json', (options) ->
-    throw new Error 'no login user' unless user = User.current
-    options.username = user.email
-    options.password = user.password
-    return
   ## Common Views
 
   class View extends Backbone.View
