@@ -25,7 +25,10 @@ public abstract class TenantChildDao<E extends TenantChildEntity> extends BasicD
 
 	public void setTenantId(ObjectId tenantId) {
 		this.tenantId = tenantId;
-		filterCriteria = (tenantId == null) ? new Criteria() : Criteria.where("tenantId").is(tenantId);
+	}
+
+	public Criteria getFilterCriteria() {
+		return Criteria.where("tenantId").is(tenantId);
 	}
 
 	@Override
