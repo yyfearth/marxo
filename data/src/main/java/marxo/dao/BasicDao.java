@@ -1,6 +1,7 @@
 package marxo.dao;
 
 import com.google.common.base.Strings;
+import com.mongodb.BasicDBObject;
 import marxo.entity.BasicEntity;
 import marxo.entity.Workflow;
 import marxo.tool.StringTool;
@@ -8,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
@@ -22,7 +24,6 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 	/**
 	 * The pre-defined filter which will constrain the results.
 	 */
-	protected Criteria filterCriteria = new Criteria();
 	// review: find a way to autowire this. Currently, when a DAO is loaded, it has no info about mongo-configuration.xml. Changing context order doesn't help.
 	MongoTemplate mongoTemplate;
 	ApplicationContext context;
@@ -33,14 +34,18 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		this.entityClass = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 
+	public Criteria getFilterCriteria() {
+		return new Criteria();
+	}
+
 	@Override
 	public boolean exists(ObjectId id) {
-		return mongoTemplate.exists(Query.query(filterCriteria.and("id").is(id)), entityClass);
+		return mongoTemplate.exists(Query.query(getFilterCriteria().and("id").is(id)), entityClass);
 	}
 
 	@Override
 	public long count() {
-		return mongoTemplate.count(Query.query(filterCriteria), entityClass);
+		return mongoTemplate.count(Query.query(getFilterCriteria()), entityClass);
 	}
 
 	// Create
@@ -57,12 +62,14 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 	// Read
 	@Override
 	public List<E> findAll() {
-		return mongoTemplate.find(Query.query(filterCriteria), entityClass);
+		return mongoTemplate.find(Query.query(getFilterCriteria()), entityClass);
 	}
 
 	@Override
 	public E get(ObjectId id) {
-		return mongoTemplate.findOne(Query.query(filterCriteria.and("id").is(id)), entityClass);
+		Criteria criteria = getFilterCriteria();
+		Query query = Query.query(criteria.and("id").is(id));
+		return mongoTemplate.findOne(query, entityClass);
 	}
 
 	// Update
@@ -74,17 +81,16 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 	// Delete
 	@Override
 	public E deleteById(ObjectId id) {
-		return mongoTemplate.findAndRemove(Query.query(filterCriteria.and("id").is(id)), entityClass);
+		return mongoTemplate.findAndRemove(Query.query(getFilterCriteria().and("id").is(id)), entityClass);
 	}
 
 	// Search
 	public List<E> searchByWorkflowId(ObjectId workflowId) {
-		return mongoTemplate.find(Query.query(filterCriteria.and("workflowId").is(workflowId)), entityClass);
+		return mongoTemplate.find(Query.query(getFilterCriteria().and("workflowId").is(workflowId)), entityClass);
 	}
 
 	public List<E> searchByWorkflowIds(List<ObjectId> workflowIds) {
-		filterCriteria.
-		return mongoTemplate.find(Query.query(filterCriteria.and("workflowId").in(workflowIds)), entityClass);
+		return mongoTemplate.find(Query.query(getFilterCriteria().and("workflowId").in(workflowIds)), entityClass);
 	}
 
 	/**
@@ -96,6 +102,6 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 			return new ArrayList<>();
 		}
 		String escapedName = StringTool.escapePatternCharacters(name);
-		return mongoTemplate.find(Query.query(filterCriteria.and("name").regex(".*" + escapedName + ".*")), Workflow.class);
+		return mongoTemplate.find(Query.query(getFilterCriteria().and("name").regex(".*" + escapedName + ".*")), Workflow.class);
 	}
 }
