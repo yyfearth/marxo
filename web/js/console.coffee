@@ -144,7 +144,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
           Authorization: 'Basic ' + user.get 'credential'
       # update avatar
       @avatarEl.src = "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
-      $(@usernameEl).text "#{user.get 'first_name'} #{user.get 'last_name'}"
+      $(@usernameEl).text user.fullname()
       @show()
     show: ->
       @el.style.visibility = 'visible'
