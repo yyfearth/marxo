@@ -40,10 +40,12 @@ define 'models', ['lib/common'], ->
 
   class Tenant extends Entity
     urlRoot: ROOT + '/tenants'
+    #sync: Backbone.ajaxSync or Backbone.sync # for test only
 
   class User extends Entity
     urlRoot: ROOT + '/users'
     idAttribute: 'email'
+    #sync: Backbone.ajaxSync or Backbone.sync # for test only
     fullname: ->
       if @has 'full_name'
         @get 'full_name'
@@ -70,6 +72,7 @@ define 'models', ['lib/common'], ->
   class Publishers extends ManagerCollection
     model: Publisher
     url: Publisher::urlRoot
+    sync: Publisher::sync
 
   ## Workflow
 
