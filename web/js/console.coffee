@@ -119,6 +119,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @user = @tenant = User.current = Tenant.current = null
       $.ajaxSetup
         headers:
+          Accept: 'application/json'
           Authorization: null
       SignInView.get().show()
       @hide()
@@ -196,35 +197,43 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
     _disable: (val) -> $(@form.elements).prop 'disabled', val
     _signIn: (email, password) ->
       @_disable true
-      # TODO: use real auth
-      user = new User email: email.toLowerCase()
-      user.fetch
-        success: (user) =>
-          require ['crypto'], ({hashPassword, md5Email}) =>
-            # fake validation
-            hash = hashPassword email, password
+      require ['crypto'], ({hashPassword, md5Email}) =>
+        # fake validation
+        email = email.toLowerCase()
+        hash = hashPassword email, password
+        auth = 'Basic ' + btoa "#{email}:#{hash}"
+        user = new User {email}
+        user.fetch
+          headers:
+            Authorization: auth
+          success: (user) =>
             console.log 'login with', email, hash
-            if user.has('tenant_id') and hash is user?.get 'password'
+            if user.has('tenant_id') and email is user.get 'email'
               user.set 'email_md5', md5Email email
               user.set 'credential', btoa "#{email}:#{hash}"
               tenantId = user.get 'tenant_id'
               new Tenant(id: tenantId).fetch
+                headers:
+                  Authorization: auth
                 success: (tenant) =>
                   if tenant.id is tenantId
                     @signedIn user, tenant
                   else
                     @_disable false
                     alert 'Failed to get tenant profile of this user'
-                error: ->
+                error: =>
                   @_disable false
                   alert 'Failed to get tenant profile'
             else
               @form.password.select()
               @_disable false
               alert 'User not exist or email and password are not matched.'
-        error: (ignored, response) =>
-          @_disable false
-          alert 'Sign in failed: ' + response
+            return
+          error: (ignored, response) =>
+            @_disable false
+            alert 'Sign in failed: ' + response
+            return
+      return
     signedIn: (user, tenant) -> # test data only
       @trigger 'success', user, tenant
       @hide()
