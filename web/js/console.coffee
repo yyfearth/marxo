@@ -198,12 +198,10 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
     _signIn: (email, password) ->
       @_disable true
       require ['crypto'], ({hashPassword, md5Email}) =>
-        # fake validation
         email = email.toLowerCase()
         hash = hashPassword email, password
         auth = 'Basic ' + btoa "#{email}:#{hash}"
-        user = new User {email}
-        user.fetch
+        new User({email}).fetch
           headers:
             Authorization: auth
           success: (user) =>
