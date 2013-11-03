@@ -1,9 +1,6 @@
 package marxo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.types.User;
 import marxo.entity.Workflow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
