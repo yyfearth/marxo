@@ -1,6 +1,6 @@
 package marxo.filter;
 
-import marxo.controller.EntityController;
+import marxo.controller.TenantChildController;
 import marxo.tool.ILoggable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -11,15 +11,20 @@ import javax.servlet.http.HttpServletResponse;
 
 @Component
 public class MarxoInterceptor extends HandlerInterceptorAdapter implements ILoggable {
+	/**
+	 * This interceptor calls setupDao if the handling controller is a tenantChildController.
+	 */
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		if (handler instanceof HandlerMethod) {
 			HandlerMethod handlerMethod = (HandlerMethod) handler;
-			logger.debug(String.format("handlerMethod: [%s] %s", handlerMethod.getClass(), handlerMethod.getMethod()));
 
-			if (handlerMethod.getBean() instanceof EntityController) {
-				EntityController entityController = (EntityController) handlerMethod.getBean();
-				logger.debug(String.format("entityController: [%s]", entityController.getClass()));
+			if (handlerMethod.getBean() instanceof TenantChildController) {
+				TenantChildController tenantChildController = (TenantChildController) handlerMethod.getBean();
+				logger.debug(String.format("TenantChildController detected: %s", tenantChildController.getClass()));
+				logger.debug(String.format("handlerMethod: %s", handlerMethod.getMethod()));
+
+				tenantChildController.setupDao();
 			}
 		}
 
