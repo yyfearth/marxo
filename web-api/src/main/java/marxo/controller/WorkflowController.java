@@ -10,11 +10,11 @@ import marxo.entity.*;
 import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -26,6 +26,8 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 	NodeDao nodeDao;
 	@Autowired
 	LinkDao linkDao;
+	@Autowired
+	NodeController nodeController;
 
 	@Autowired
 	public WorkflowController(WorkflowDao workflowDao) {
@@ -34,6 +36,7 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 
 	@Override
 	public List<Workflow> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
+		// todo: refactoring this.
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		User user = marxoAuthentication.getUser();
 		dao.setTenantId(user.tenantId);
@@ -79,6 +82,10 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 
 	@Override
 	public Workflow read(@PathVariable String idString) {
+		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
+		User user = marxoAuthentication.getUser();
+		dao.setTenantId(user.tenantId);
+
 		Workflow workflow = super.read(idString);
 
 		List<Node> nodes = nodeDao.searchByWorkflowId(workflow.id);
@@ -90,6 +97,16 @@ public class WorkflowController extends EntityController<Workflow, WorkflowDao> 
 		workflow.links = Lists.newArrayList(workflowLinks);
 
 		return workflow;
+	}
+
+	@RequestMapping("/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}//{nodeIdString:[\\da-fA-F]{24}}")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Node getNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) {
+		Node node = nodeController.read(nodeIdString);
+		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+
+		return node;
 	}
 }
 
