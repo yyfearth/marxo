@@ -113,14 +113,16 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @$frames.find(".active[data-inner-frame]").not($target).removeClass 'active'
       @
     signout: ->
-      # TODO: real sign out
-      delete sessionStorage.user
-      delete sessionStorage.tenant
+      sessionStorage.clear()
+      # force browser forget basic auth
+      # User.current.fetch
+      #   headers:
+      #     Authorization: ''
       @user = @tenant = User.current = Tenant.current = null
       $.ajaxSetup
         headers:
           Accept: 'application/json'
-          Authorization: null
+          Authorization: ''
       SignInView.get().show()
       @hide()
       @trigger 'signout'
@@ -231,8 +233,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
               alert 'User not exist or email and password are not matched.'
             return
           error: (ignored, response) =>
+            console.error 'sign-in failed', response
             @_disable false
-            alert 'Sign in failed: ' + response
+            alert 'Sign in failed.\nUser not exist or email and password are not matched.'
             return
       return
     signedIn: (user, tenant) -> # test data only
