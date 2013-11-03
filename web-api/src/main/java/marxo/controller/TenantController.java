@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("tenant{:s?}")
-public class TenantController extends EntityController<Tenant, TenantDao> {
+public class TenantController extends EntityController<Tenant> {
 	@Autowired
-	public TenantController(TenantDao dao) {
-		super(dao);
+	public TenantController(TenantDao tenantDao) {
+		super(tenantDao);
 	}
 }

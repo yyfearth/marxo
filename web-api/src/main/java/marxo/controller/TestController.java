@@ -60,10 +60,10 @@ public class TestController extends BasicController {
 @JsonSerialize
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 class RemoteInfomation {
-	String ip;
-	String host;
-	int port;
-	Map<String, String> headers;
+	protected String ip;
+	protected String host;
+	protected int port;
+	protected Map<String, String> headers;
 
 	public RemoteInfomation(HttpServletRequest request) {
 		ip = request.getRemoteAddr();

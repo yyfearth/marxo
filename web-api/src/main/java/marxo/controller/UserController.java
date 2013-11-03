@@ -14,10 +14,13 @@ import java.util.List;
 
 @Controller
 @RequestMapping("user{:s?}")
-public class UserController extends EntityController<User, UserDao> {
+public class UserController extends TenantChildController<User> {
+	UserDao userDao;
+
 	@Autowired
-	protected UserController(UserDao dao) {
-		super(dao);
+	protected UserController(UserDao userDao) {
+		super(userDao);
+		this.userDao = userDao;
 	}
 
 	@RequestMapping(value = "/{idString:[\\w\\-\\+\\.@]+}", method = RequestMethod.GET)
@@ -33,7 +36,7 @@ public class UserController extends EntityController<User, UserDao> {
 			throw new InvalidObjectIdException(idString);
 		}
 
-		List<User> users = dao.getByEmail(idString);
+		List<User> users = userDao.getByEmail(idString);
 
 		if (users.size() == 0) {
 			throw new EntityNotFoundException(idString);

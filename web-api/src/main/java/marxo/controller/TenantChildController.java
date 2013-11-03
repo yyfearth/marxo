@@ -4,16 +4,20 @@ import marxo.dao.TenantChildDao;
 import marxo.entity.TenantChildEntity;
 import marxo.security.MarxoAuthentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.Assert;
 
-public class TenantChildController<E extends TenantChildEntity, Dao extends TenantChildDao<E>> extends EntityController<E, Dao> {
-	@SuppressWarnings("unchecked")
-	protected TenantChildController(TenantChildDao dao) {
-		super((Dao) dao);
+public class TenantChildController<E extends TenantChildEntity> extends EntityController<E> {
+	TenantChildDao<E> tenantChildDao;
+
+	protected TenantChildController(TenantChildDao<E> tenantChildDao) {
+		super(tenantChildDao);
+		this.tenantChildDao = tenantChildDao;
 	}
 
 	public void setupDao() {
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
+		Assert.notNull(marxoAuthentication);
 		user = marxoAuthentication.getUser();
-		dao.setTenantId(user.tenantId);
+		tenantChildDao.setTenantId(user.tenantId);
 	}
 }

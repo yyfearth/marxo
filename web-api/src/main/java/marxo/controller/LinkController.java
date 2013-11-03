@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("link{:s?}")
-public class LinkController extends EntityController<Link, LinkDao> {
+public class LinkController extends TenantChildController<Link> {
 	@Autowired
-	public LinkController(LinkDao dao) {
-		super(dao);
+	public LinkController(LinkDao linkDao) {
+		super(linkDao);
 	}
 }

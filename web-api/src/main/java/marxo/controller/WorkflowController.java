@@ -7,20 +7,20 @@ import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
 import marxo.entity.*;
-import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.*;
 
 @Controller
 @RequestMapping("workflow{:s?}")
-public class WorkflowController extends TenantChildController<Workflow, WorkflowDao> {
+public class WorkflowController extends TenantChildController<Workflow> {
 	static final ModifiedDateComparator modifiedDateComparator = new ModifiedDateComparator();
 	@Autowired
 	NodeDao nodeDao;
@@ -42,7 +42,7 @@ public class WorkflowController extends TenantChildController<Workflow, Workflow
 		List<Workflow> workflows;
 
 		if (!hasName && !hasCreated && !hasModified) {
-			workflows = dao.findAll();
+			workflows = tenantChildDao.findAll();
 			ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
 			for (Workflow workflow : workflows) {
 				workflowIds.add(workflow.id);
@@ -66,7 +66,7 @@ public class WorkflowController extends TenantChildController<Workflow, Workflow
 		}
 
 		if (hasName) {
-			workflows = dao.searchByName(name);
+			workflows = tenantChildDao.searchByName(name);
 			Collections.sort(workflows, modifiedDateComparator);
 			return workflows;
 		}
@@ -90,12 +90,45 @@ public class WorkflowController extends TenantChildController<Workflow, Workflow
 		return workflow;
 	}
 
-	@RequestMapping("/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}//{nodeIdString:[\\da-fA-F]{24}}")
+	/*
+	Delegate methods to node controller.
+	 */
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.POST)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
+	public Node createNode(@PathVariable String workflowIdString, @Valid @RequestBody Node node, HttpServletResponse response) throws Exception {
+		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+		node = nodeController.create(node, response);
+
+		return node;
+	}
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public Node getNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) {
+	public Node readNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
 		Node node = nodeController.read(nodeIdString);
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+
+		return node;
+	}
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Node updateNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString, @Valid @RequestBody Node node) throws Exception {
+		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+		node = nodeController.update(nodeIdString, node);
+
+		return node;
+	}
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Node deleteNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
+		Node node = nodeController.delete(nodeIdString);
 
 		return node;
 	}

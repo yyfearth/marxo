@@ -13,14 +13,14 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
-public abstract class EntityController<E extends BasicEntity, Dao extends BasicDao<E>> extends BasicController {
-	Dao dao;
+public abstract class EntityController<E extends BasicEntity> extends BasicController {
+	BasicDao<E> dao;
 	/**
 	 * The user who is using the controller.
 	 */
 	User user;
 
-	protected EntityController(Dao dao) {
+	protected EntityController(BasicDao<E> dao) {
 		this.dao = dao;
 	}
 
@@ -68,7 +68,6 @@ public abstract class EntityController<E extends BasicEntity, Dao extends BasicD
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	// review: is the parameter 'id' necessary?
 	public E update(@Valid @PathVariable String idString, @Valid @RequestBody E entity) {
 		if (!ObjectId.isValid(idString)) {
 			throw new InvalidObjectIdException(idString);

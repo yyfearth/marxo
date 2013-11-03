@@ -11,9 +11,9 @@ import java.util.regex.Pattern;
 public class User extends TenantChildEntity implements Serializable {
 	public final static Pattern emailPattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
 	@JsonIgnore
-	String password;
-	String email;
-	UserType userType;
+	protected String password;
+	protected String email;
+	protected UserType userType;
 
 	public String getPassword() {
 		return password;
