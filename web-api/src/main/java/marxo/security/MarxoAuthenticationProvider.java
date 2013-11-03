@@ -32,7 +32,9 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, ILog
 		List<User> users = userDao.getByEmail(email);
 
 		if (users.size() == 0) {
-			throw new UsernameNotFoundException(email + " is not found");
+			String message = email + " is not found";
+			logger.trace(message);
+			throw new UsernameNotFoundException(message);
 		} else if (users.size() > 1) {
 			// review: consider whether this is a bug.
 			logger.warn("There are " + users.size() + " have email as " + email);
@@ -45,10 +47,13 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, ILog
 		if (encryptedPassword.toLowerCase().equals(user.getPassword().toLowerCase())) {
 			List<GrantedAuthority> grantedAuths = new ArrayList<>();
 			grantedAuths.add(new SimpleGrantedAuthority("user"));
+			logger.trace(String.format("User [%s] passed BasicAuth", user.getEmail()));
 			return new MarxoAuthentication(user, grantedAuths);
 		}
 
-		throw new BadCredentialsException("The password for " + email + " is not correct");
+		String message = "The password for " + email + " is not correct";
+		logger.trace(message);
+		throw new BadCredentialsException(message);
 	}
 
 	@Override
