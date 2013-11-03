@@ -19,10 +19,10 @@
 
       ProfileFrameView.prototype.initialize = function(options) {
         ProfileFrameView.__super__.initialize.call(this, options);
-        if (!sessionStorage.user) {
+        if (!User.current) {
           throw new Error('not signed in yet');
         }
-        this.model = new User(JSON.parse(sessionStorage.user));
+        this.model = User.current;
         this.initForm();
         this.btn = find('#update_user', this.el);
         return this.avatar = find('#user_avatar img', this.el);

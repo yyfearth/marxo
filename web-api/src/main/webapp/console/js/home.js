@@ -20,13 +20,24 @@
       HomeFrameView.prototype.collection = Projects.projects;
 
       HomeFrameView.prototype.initialize = function(options) {
+        var list, _auto_update,
+          _this = this;
         HomeFrameView.__super__.initialize.call(this, options);
-        this.notificationList = new NotificationListView({
+        list = this.notificationList = new NotificationListView({
           el: find('.sidebar-list', this.el),
           parent: this
         });
         this._render = this._render.bind(this);
         this.listenTo(this.collection, 'reset add remove', this._render);
+        _auto_update = list.autoUpdate.bind(list);
+        _auto_update(true);
+        this.on('activate', function() {
+          _this.render();
+          return _auto_update(true);
+        });
+        this.on('deactivate', function() {
+          return _auto_update(false);
+        });
       };
 
       HomeFrameView.prototype._tpl = tpl('#project_overview_tpl');
@@ -45,7 +56,12 @@
       };
 
       HomeFrameView.prototype.render = function() {
-        this.collection.load(this._render);
+        var _this = this;
+        this.collection.load(function(ignored, resp) {
+          if (!(_this.rendered && resp !== 'loaded')) {
+            return _this._render();
+          }
+        });
         this.notificationList.fetch();
         return this;
       };

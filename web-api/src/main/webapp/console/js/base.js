@@ -430,6 +430,10 @@
         return this;
       };
 
+      FormViewMixin.prototype._find = function(name, tag) {
+        return find("" + (tag || '') + "[name='" + name + "']", this.el);
+      };
+
       FormViewMixin.prototype.fill = function(attributes) {
         var checked, input, name, radio, value, _i, _len, _ref5;
         this._attributes = {};
@@ -594,7 +598,7 @@
         this.targetClassName = options.targetClassName || this.targetClassName;
         this.emptyItem = options.emptyItem || this.emptyItem;
         this.allowEmpty = options.allowEmpty || this.allowEmpty;
-        this.listenTo(this.collection, 'reset', this.render.bind(this));
+        this.listenTo(this.collection, 'reset add remove', this.render.bind(this));
         if (this.events == null) {
           this.events = {};
         }
@@ -700,7 +704,8 @@
           a.href = "#" + this.urlRoot + ":" + this.emptyItem;
           a.textContent = 'Empty';
         } else {
-          throw new Error('unsupported item for list ' + model);
+          console.dir(model);
+          throw new Error('unsupported item for list');
         }
         if (model === this.defaultItem) {
           li.className += ' active';

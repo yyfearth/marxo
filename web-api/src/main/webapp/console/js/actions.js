@@ -137,11 +137,6 @@
       };
 
       ActionView.prototype.remove = function() {
-        var model;
-        model = this.model;
-        model.type = null;
-        model.name = null;
-        model.data = null;
         this.remove = function() {
           return this;
         };
@@ -202,13 +197,14 @@
         return this;
       };
 
-      ActionView.prototype.read = function(data) {
-        var els;
+      ActionView.prototype.read = function() {
+        var data, els;
         if (!this.form) {
           throw new Error('cannot find the form, may not rendered yet');
         }
-        if (data == null) {
-          data = {};
+        data = this.model.toJSON();
+        if (data.type == null) {
+          data.type = this.type;
         }
         els = [].slice.call(this.form.elements);
         els.forEach(function(el) {

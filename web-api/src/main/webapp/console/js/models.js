@@ -6,7 +6,7 @@
     __slice = [].slice;
 
   define('models', ['lib/common'], function() {
-    var Action, Actions, Collection, Content, Contents, Entity, Event, Events, Link, Links, ManagerCollection, Node, Nodes, Notification, Notifications, Project, Projects, Publisher, Publishers, ROOT, Report, Reports, Service, Tenant, User, Workflow, Workflows, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    var Action, Actions, ChangeObserableEntity, Collection, Content, Contents, Entity, Event, Events, Link, Links, ManagerCollection, Node, Nodes, Notification, Notifications, Project, Projects, Publisher, Publishers, ROOT, Report, Reports, Service, Tenant, User, Workflow, Workflows, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
     ROOT = '/api';
     Entity = Backbone.Model;
     Collection = Backbone.Collection;
@@ -18,6 +18,8 @@
       ManagerCollection.prototype.defaultState = {
         pageSize: 15
       };
+
+      ManagerCollection.prototype._delay = 1000;
 
       function ManagerCollection() {
         var key, options, value, _ref;
@@ -33,6 +35,30 @@
         ManagerCollection.__super__.constructor.apply(this, options);
       }
 
+      ManagerCollection.prototype.load = function(callback, delay) {
+        var _this = this;
+        if (delay == null) {
+          delay = this._delay;
+        }
+        if (!this._last_load || (Date.now() - this._last_load) > delay) {
+          this.fetch({
+            reset: true,
+            success: function(collection, response, options) {
+              _this._last_load = Date.now();
+              return typeof callback === "function" ? callback(collection, 'loaded', response, options) : void 0;
+            },
+            error: function(collection, response, options) {
+              return typeof callback === "function" ? callback(this, 'error', response, options) : void 0;
+            }
+          });
+        } else {
+          if (typeof callback === "function") {
+            callback(this, 'skipped');
+          }
+        }
+        return this;
+      };
+
       return ManagerCollection;
 
     })(Backbone.PageableCollection);
@@ -44,7 +70,7 @@
         return _ref;
       }
 
-      Tenant.prototype.urlRoot = '/tenants';
+      Tenant.prototype.urlRoot = ROOT + '/tenants';
 
       return Tenant;
 
@@ -57,13 +83,17 @@
         return _ref1;
       }
 
-      User.prototype.urlRoot = '/users';
+      User.prototype.urlRoot = ROOT + '/users';
 
       User.prototype.idAttribute = 'email';
 
       User.prototype.fullname = function() {
-        if (this.has('first_name') && this.has('last_name')) {
+        if (this.has('full_name')) {
+          return this.get('full_name');
+        } else if (this.has('first_name') && this.has('last_name')) {
           return "" + (this.get('first_name')) + " " + (this.get('last_name'));
+        } else if (this.has('name')) {
+          return this.get('name');
         } else {
           return this.get('first_name') || this.get('last_name') || null;
         }
@@ -95,6 +125,8 @@
 
       Publishers.prototype.url = Publisher.prototype.urlRoot;
 
+      Publishers.prototype.sync = Publisher.prototype.sync;
+
       return Publishers;
 
     })(ManagerCollection);
@@ -111,7 +143,8 @@
       }
 
       Workflow.prototype._warp = function(model) {
-        var links, nodes, url, _createLinkRef, _createNodeRef, _links_loaded, _nodes_loaded;
+        var links, nodes, url, _createLinkRef, _createNodeRef, _deleted, _links_loaded, _nodes_loaded,
+          _this = this;
         if (model == null) {
           model = this;
         }
@@ -121,30 +154,41 @@
         url = (typeof this.url === "function" ? this.url() : void 0) || this.url || '';
         _nodes_loaded = Array.isArray(model.nodes);
         nodes = _nodes_loaded ? model.nodes : [];
-        this.nodes = new Nodes(nodes, {
+        nodes = this.nodes = new Nodes(nodes, {
           url: url + '/nodes'
         });
-        this.nodes._loaded = _nodes_loaded;
+        nodes._loaded = _nodes_loaded;
         _links_loaded = Array.isArray(model.links);
         links = _links_loaded ? model.links : [];
-        this.links = new Links(links, {
+        links = this.links = new Links(links, {
           url: url + '/links'
         });
-        this.links._loaded = _links_loaded;
+        links._loaded = _links_loaded;
+        nodes.sync = links.sync = this.sync;
+        _deleted = this._deleted = [];
         _createNodeRef = this._createNodeRef.bind(this);
-        this.nodes.forEach(_createNodeRef);
-        this.listenTo(this.nodes, {
+        nodes.forEach(_createNodeRef);
+        this.listenTo(nodes, {
           add: _createNodeRef,
-          remove: this._removeNodeRef.bind(this)
+          remove: function(node) {
+            _this._removeNodeRef(node);
+            if (!node.isNew()) {
+              _deleted.push(node);
+            }
+          }
         });
         _createLinkRef = this._createLinkRef.bind(this);
-        this.links.forEach(_createLinkRef);
-        this.listenTo(this.links, {
+        links.forEach(_createLinkRef);
+        this.listenTo(links, {
           add: _createLinkRef,
-          remove: this._removeLinkRef.bind(this)
+          remove: function(link) {
+            _this._removeLinkRef(link);
+            if (!link.isNew()) {
+              _deleted.push(link);
+            }
+          }
         });
         this.set({});
-        return this;
       };
 
       Workflow.prototype.fetch = function(options) {
@@ -168,7 +212,8 @@
       };
 
       Workflow.prototype.save = function(attributes, options) {
-        var link_ids, node_ids, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+        var isLocalTest, link_ids, node_ids, _ref10, _ref11, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+          _this = this;
         if (attributes == null) {
           attributes = {};
         }
@@ -184,18 +229,49 @@
         if ((link_ids != null ? link_ids.join(',') : void 0) !== ((_ref7 = this.get('link_ids')) != null ? _ref7.join(',') : void 0)) {
           attributes.link_ids = link_ids;
         }
-        if (this.nodes != null) {
-          attributes.nodes = (_ref8 = this.nodes) != null ? _ref8.map(function(r) {
-            return r.attributes;
-          }) : void 0;
+        if (isLocalTest = (Backbone.LocalStorage != null) && this.sync !== Backbone.ajaxSync) {
+          if (this.nodes != null) {
+            attributes.nodes = (_ref8 = this.nodes) != null ? _ref8.map(function(r) {
+              return r.attributes;
+            }) : void 0;
+          }
+          if (this.links != null) {
+            attributes.links = (_ref9 = this.links) != null ? _ref9.map(function(r) {
+              return r.attributes;
+            }) : void 0;
+          }
         }
-        if (this.links != null) {
-          attributes.links = (_ref9 = this.links) != null ? _ref9.map(function(r) {
-            return r.attributes;
-          }) : void 0;
+        if ((_ref10 = this.nodes) != null) {
+          _ref10.forEach(function(node) {
+            if (node.isNew()) {
+              return _this.nodes.create(node, {
+                wait: true
+              });
+            } else if (node._changed) {
+              node.resetChangeFlag();
+              return node.save();
+            }
+          });
+        }
+        if ((_ref11 = this.links) != null) {
+          _ref11.forEach(function(link) {
+            if (link.isNew()) {
+              return _this.links.create(link, {
+                wait: true
+              });
+            } else if (link._changed) {
+              link.resetChangeFlag();
+              return link.save();
+            }
+          });
         }
         console.log('save', this._name, attributes, this);
         Workflow.__super__.save.call(this, attributes, options);
+        if (!isLocalTest) {
+          this._deleted.forEach(function(model) {
+            return model.destroy();
+          });
+        }
         return this;
       };
 
@@ -276,7 +352,9 @@
         if (!(node instanceof Node)) {
           throw new Error('it must be a Node object');
         }
-        node.workflow = this;
+        if (this._name === 'workflow') {
+          node.workflow = this;
+        }
         node.inLinks = [];
         node.outLinks = [];
       };
@@ -302,7 +380,9 @@
         if (!(link.has('prev_node_id') && link.has('next_node_id'))) {
           throw new Error('link ' + (link.key || link.id) + 'is broken, prev/next node missing');
         }
-        link.workflow = this;
+        if (this._name === 'workflow') {
+          link.workflow = this;
+        }
         prevNodeId = link.get('prev_node_id');
         nextNodeId = link.get('next_node_id');
         link.prevNode = this.nodes.get(prevNodeId);
@@ -364,33 +444,42 @@
 
       Workflows.prototype._delay = 600000;
 
-      Workflows.prototype.load = function(callback, delay) {
-        var _this = this;
-        if (delay == null) {
-          delay = this._delay;
-        }
-        if (!this._last_load || (Date.now() - this._last_load) > delay) {
-          this.fetch({
-            reset: true,
-            success: function(collection, response, options) {
-              _this._last_load = Date.now();
-              return typeof callback === "function" ? callback(collection, 'loaded', response, options) : void 0;
-            },
-            error: function(collection, response, options) {
-              return typeof callback === "function" ? callback(this, 'error', response, options) : void 0;
-            }
-          });
-        } else {
-          if (typeof callback === "function") {
-            callback(this, 'skipped');
-          }
-        }
-        return this;
-      };
+      Workflows.prototype.sync = Workflow.prototype.sync;
 
       return Workflows;
 
     })(ManagerCollection);
+    ChangeObserableEntity = (function(_super) {
+      __extends(ChangeObserableEntity, _super);
+
+      function ChangeObserableEntity(model, options) {
+        ChangeObserableEntity.__super__.constructor.call(this, model, options);
+        this.setChangeFlag = this.setChangeFlag.bind(this);
+        this.resetChangeFlag();
+      }
+
+      ChangeObserableEntity.prototype.resetChangeFlag = function() {
+        return this.setChangeFlag(false);
+      };
+
+      ChangeObserableEntity.prototype.setChangeFlag = function(val) {
+        if (val != null) {
+          this._changed = Boolean(val);
+          this.off('change', this.setChangeFlag);
+          if (!val) {
+            this.set({});
+            this.on('change', this.setChangeFlag);
+          }
+        } else if (!this._changed && this.hasChanged() && !this.isNew()) {
+          this._changed = true;
+          this.off('change', this.setChangeFlag);
+        }
+        return this;
+      };
+
+      return ChangeObserableEntity;
+
+    })(Entity);
     Node = (function(_super) {
       __extends(Node, _super);
 
@@ -413,7 +502,7 @@
 
       return Node;
 
-    })(Entity);
+    })(ChangeObserableEntity);
     Nodes = (function(_super) {
       __extends(Nodes, _super);
 
@@ -447,7 +536,7 @@
 
       return Link;
 
-    })(Entity);
+    })(ChangeObserableEntity);
     Links = (function(_super) {
       __extends(Links, _super);
 
@@ -498,6 +587,8 @@
       Project.prototype._name = 'project';
 
       Project.prototype.urlRoot = ROOT + '/projects';
+
+      Project.prototype.sync = Backbone.sync;
 
       Project.prototype.copy = function(workflow, callback) {
         var id, links, nodes,
@@ -614,6 +705,8 @@
 
       Projects.prototype.url = Project.prototype.urlRoot;
 
+      Projects.prototype.sync = Project.prototype.sync;
+
       Projects.prototype._delay = 60000;
 
       Projects.prototype.find = function(_arg) {
@@ -651,27 +744,6 @@
               return typeof callback === "function" ? callback({}) : void 0;
             }
           });
-        }
-        return this;
-      };
-
-      Projects.prototype.load = function(callback, delay) {
-        var _this = this;
-        if (delay == null) {
-          delay = this._delay;
-        }
-        if (!this._last_load || (Date.now() - this._last_load) > delay) {
-          this.fetch({
-            reset: true,
-            success: function(collection, response, options) {
-              _this._last_load = Date.now();
-              return typeof callback === "function" ? callback(collection, response, options) : void 0;
-            }
-          });
-        } else {
-          if (typeof callback === "function") {
-            callback(this, null, options);
-          }
         }
         return this;
       };

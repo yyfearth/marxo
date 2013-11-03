@@ -558,7 +558,7 @@
         return _ref4;
       }
 
-      EventManagemerView.prototype.columns = ['checkbox', 'id', 'title:event', 'project', 'node_action', 'type', 'status', 'actions:event'];
+      EventManagemerView.prototype.columns = ['id', 'title:event', 'project', 'node_action', 'type', 'status', 'actions:event'];
 
       EventManagemerView.prototype.initialize = function(options) {
         var collection;

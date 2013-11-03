@@ -54,9 +54,6 @@
         } else {
           this._hide(btn);
         }
-        if (status === 'EXPIRED') {
-          this._hide('mute');
-        }
         return this;
       };
 
@@ -72,7 +69,7 @@
       }
 
       NotificationCenterView.prototype.columns = [
-        'checkbox', 'id', {
+        'id', {
           name: 'title',
           label: 'Title',
           cell: 'tooltip',
@@ -135,7 +132,6 @@
       NotificationCenterView.prototype.render = function() {
         NotificationCenterView.__super__.render.apply(this, arguments);
         this.projectFilter.render();
-        this.signin_user = JSON.parse(sessionStorage.user);
         return this;
       };
 
@@ -188,6 +184,20 @@
             return _renderPopover($el.data('model'));
           }
         });
+        return this;
+      };
+
+      NotificationListView.prototype.autoUpdate = function(val) {
+        var _this = this;
+        if (this._auto_update) {
+          this._auto_update = clearInterval(this._auto_update);
+        }
+        if (val) {
+          this._auto_update = setInterval(function() {
+            console.log('auto update notifications');
+            return _this.fetch();
+          }, this._reload_timeout + 1);
+        }
         return this;
       };
 

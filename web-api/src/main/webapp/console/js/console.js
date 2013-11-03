@@ -78,7 +78,7 @@
       };
 
       ConsoleView.prototype.initialize = function() {
-        var tenant, user,
+        var tenant, user, _base,
           _this = this;
         user = tenant = null;
         try {
@@ -99,6 +99,12 @@
         this.tenant = tenant;
         this.avatarEl = find('img#avatar');
         this.usernameEl = find('#username');
+        if ((_base = this.avatarEl.dataset).src == null) {
+          _base.src = this.avatarEl.src;
+        }
+        this.avatarEl.onerror = function() {
+          return this.src = this.dataset.src;
+        };
         this.frames = {};
         findAll('.frame', this.el).forEach(function(frame) {
           return _this.frames[frame.id] = {
@@ -179,7 +185,13 @@
       ConsoleView.prototype.signout = function() {
         delete sessionStorage.user;
         delete sessionStorage.tenant;
-        this.user = this.tenant = null;
+        this.user = this.tenant = User.current = Tenant.current = null;
+        $.ajaxSetup({
+          headers: {
+            Accept: 'application/json',
+            Authorization: null
+          }
+        });
         SignInView.get().show();
         this.hide();
         this.trigger('signout');
@@ -188,8 +200,8 @@
 
       ConsoleView.prototype.signin = function(user, tenant, remember) {
         var u;
-        this.user = user;
-        this.tenant = tenant;
+        this.user = User.current = user;
+        this.tenant = Tenant.current = tenant;
         if (remember) {
           u = user.toJSON();
           delete u.password;
@@ -200,8 +212,14 @@
           delete sessionStorage.user;
           delete sessionStorage.tenant;
         }
+        $.ajaxSetup({
+          headers: {
+            Accept: 'application/json',
+            Authorization: 'Basic ' + user.get('credential')
+          }
+        });
         this.avatarEl.src = "https://secure.gravatar.com/avatar/" + (user.get('email_md5')) + "?s=20&d=mm";
-        $(this.usernameEl).text("" + (user.get('first_name')) + " " + (user.get('last_name')));
+        $(this.usernameEl).text(user.fullname());
         return this.show();
       };
 
@@ -279,7 +297,7 @@
           this.form.password.focus();
           alert('Password is required!');
         } else {
-          this._signIn(email);
+          this._signIn(email, password);
         }
         return false;
       };
@@ -288,26 +306,63 @@
         return $(this.form.elements).prop('disabled', val);
       };
 
-      SignInView.prototype._signIn = function(email) {
-        var tenant, user;
+      SignInView.prototype._signIn = function(email, password) {
+        var _this = this;
         this._disable(true);
-        user = new User({
-          email: email,
-          first_name: 'Test',
-          last_name: 'User',
-          tenant_id: 0
+        require(['crypto'], function(_arg1) {
+          var auth, hash, hashPassword, md5Email, user;
+          hashPassword = _arg1.hashPassword, md5Email = _arg1.md5Email;
+          email = email.toLowerCase();
+          hash = hashPassword(email, password);
+          auth = 'Basic ' + btoa("" + email + ":" + hash);
+          user = new User({
+            email: email
+          });
+          return user.fetch({
+            headers: {
+              Authorization: auth
+            },
+            success: function(user) {
+              var tenantId;
+              console.log('login with', email, hash);
+              if (user.has('password') && hash !== user.get('password')) {
+                _this._disable(false);
+                alert('(TEST ONLY) Password not correct');
+              } else if (user.has('tenant_id') && email === user.get('email')) {
+                user.set('email_md5', md5Email(email));
+                user.set('credential', btoa("" + email + ":" + hash));
+                tenantId = user.get('tenant_id');
+                new Tenant({
+                  id: tenantId
+                }).fetch({
+                  headers: {
+                    Authorization: auth
+                  },
+                  success: function(tenant) {
+                    if (tenant.id === tenantId) {
+                      return _this.signedIn(user, tenant);
+                    } else {
+                      _this._disable(false);
+                      return alert('Failed to get tenant profile of this user');
+                    }
+                  },
+                  error: function() {
+                    _this._disable(false);
+                    return alert('Failed to get tenant profile');
+                  }
+                });
+              } else {
+                _this.form.password.select();
+                _this._disable(false);
+                alert('User not exist or email and password are not matched.');
+              }
+            },
+            error: function(ignored, response) {
+              _this._disable(false);
+              alert('Sign in failed: ' + response);
+            }
+          });
         });
-        tenant = new Tenant({
-          id: 0,
-          name: 'Marxo',
-          desc: 'Marxo dev group',
-          contact: 'Wilson Young',
-          email: 'wilson@gmail.com',
-          tel: '(408) 888-8888',
-          fax: '(408) 888-8888',
-          addr: 'One Washington Square, San Jose, CA 95112'
-        });
-        return this.signedIn(user, tenant);
       };
 
       SignInView.prototype.signedIn = function(user, tenant) {

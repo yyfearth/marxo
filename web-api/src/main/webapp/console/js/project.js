@@ -111,7 +111,7 @@
         },
         'click li.sidebar-item > a, a.linked-item': function(e) {
           e.preventDefault();
-          this.navTo($(e.currentTarget).data('model'));
+          this.navTo($(e.currentTarget).data('model') || e.currentTarget.dataset.item);
           return false;
         }
       };
@@ -132,7 +132,7 @@
         return this;
       };
 
-      ProjectEditorView.prototype.create = function(wf, callback) {
+      ProjectEditorView.prototype.create = function(wf) {
         var _this = this;
         wf = (wf != null ? wf.id : void 0) || wf;
         if (typeof wf !== 'string') {
@@ -143,20 +143,22 @@
         }), function(action, data) {
           if (action === 'save') {
             console.log('wf created', action, data);
-            _this.projects.create(data);
-            return typeof callback === "function" ? callback(_this.model, _this) : void 0;
+            _this.projects.create(data, {
+              wait: true
+            });
+            return _this.trigger('create', _this.model, _this);
           }
         });
         return this;
       };
 
       ProjectEditorView.prototype.edit = function(project, opt) {
-        var action, callback, link, node,
+        var action, link, node,
           _this = this;
         if (opt == null) {
           opt = {};
         }
-        link = opt.link, node = opt.node, action = opt.action, callback = opt.callback;
+        link = opt.link, node = opt.node, action = opt.action;
         if (action && !node) {
           throw new Error('cannot open a action without given a node');
         }
@@ -172,7 +174,7 @@
           if (action === 'save') {
             console.log('project saved', action, data);
             _this.model.save(data);
-            return typeof callback === "function" ? callback(_this.model, _this) : void 0;
+            return _this.trigger('edit', _this.model, _this);
           }
         });
         return this;
@@ -195,6 +197,12 @@
             _this._renderSelect();
           }
           _this.fill(data);
+          if (!model.isNew()) {
+            if (model.has('created_by')) {
+              _this.$el.find('#project_created_by').val(model.get('created_by')).parents('.control-group').show();
+            }
+            _this.$el.find('#project_created_at').val(new Date(model.get('created_at')).toLocaleString()).parents('.control-group').show();
+          }
           select.disabled = !model.isNew() || model.has('node_ids') || ((_ref2 = model.nodes) != null ? _ref2.length : void 0);
           if (select.disabled) {
             _this._renderProject(model);
@@ -214,7 +222,7 @@
 
       ProjectEditorView.prototype.navTo = function(model) {
         var $linkOptions, $nodeOptions, $section, type;
-        type = (model != null ? model._name : void 0) || 'project';
+        type = (typeof model === 'string' ? model : model != null ? model._name : void 0) || 'project';
         if (this._cur_type !== type) {
           this.$projectForm.hide();
           this.$actions.hide();
@@ -223,6 +231,10 @@
           $linkOptions = $section.find('.link-options').hide();
           if (type === 'project') {
             this.$projectForm.show();
+            model = null;
+          } else if (type === 'users') {
+            this.$projectForm.show();
+            model = null;
           } else {
             $section.show();
             if (type === 'node') {
@@ -239,12 +251,23 @@
         } else if (this._cur_model === model) {
           return this;
         }
+        this._readData();
         this._cur_model = model;
         console.log('nav to', type, model);
         if (model) {
           this.dataEditor.fill(model);
         }
         return this;
+      };
+
+      ProjectEditorView.prototype._readData = function() {
+        var data, model;
+        if (model = this._cur_model) {
+          data = this.dataEditor.read();
+          console.log('data', data, 'for', model);
+          model.set(data);
+          model._changed = true;
+        }
       };
 
       ProjectEditorView.prototype._selectWorkflow = function() {
@@ -319,6 +342,7 @@
 
       ProjectEditorView.prototype.reset = function() {
         this.$wfbtns.hide();
+        $(this._find('created_at')).parents('.control-group').hide();
         $(this.sidebar).find('li.node-item, li.link-item').remove();
         this.navTo(null);
         return ProjectEditorView.__super__.reset.apply(this, arguments);
@@ -359,6 +383,7 @@
       };
 
       ProjectEditorView.prototype.save = function() {
+        this._readData();
         this.data = this.read();
         this.callback('save');
         this.hide(true);
@@ -634,7 +659,11 @@
 
       ProjectManagemerView.prototype.collection = new Projects;
 
+      ProjectManagemerView.prototype.defaultFilterField = 'name';
+
       ProjectManagemerView.prototype.initialize = function(options) {
+        var projects,
+          _this = this;
         ProjectManagemerView.__super__.initialize.call(this, options);
         this.list = new WorkflowListView({
           el: find('ul.workflow-list', this.el)
@@ -643,6 +672,31 @@
           console.log('create project from workflow', id, model);
           return this.trigger('create', id, model);
         });
+        this.on('remove', this.remove.bind(this));
+        projects = Projects.projects.fullCollection;
+        this.listenTo(projects, 'add', function(model) {
+          _this.collection.add(model);
+          _this.refresh();
+        });
+        this.listenTo(this.collection, 'remove', function(model) {
+          projects.remove(model);
+        });
+        return this;
+      };
+
+      ProjectManagemerView.prototype.remove = function(models) {
+        var names;
+        if (!Array.isArray(models)) {
+          models = [models];
+        }
+        names = models.map(function(model) {
+          return model.get('name');
+        });
+        if (confirm("Are you sure to remove these projects: " + (names.join(', ')) + "?\n\nThis action cannot be undone!")) {
+          models.forEach(function(model) {
+            return model.destroy();
+          });
+        }
         return this;
       };
 

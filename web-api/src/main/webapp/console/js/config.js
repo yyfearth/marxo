@@ -8,10 +8,10 @@
   FB_APP_ID = '213527892138380';
 
   define('config', ['base', 'manager', 'models'], function(_arg, _arg1, _arg2) {
-    var ConfigFrameView, FacebookStatusPopup, FacebookStatusView, FormDialogView, FormViewMixin, FrameView, InnerFrameView, ManagerView, ModalDialogView, ProjectFilterView, Publisher, Publishers, Service, ServiceConnectorView, ServiceStatusView, Tenant, TenantProfileView, UserEditor, UserManagemerView, UsernameCell, View, find, findAll, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+    var ConfigFrameView, FacebookStatusPopup, FacebookStatusView, FormDialogView, FormViewMixin, FrameView, InnerFrameView, ManagerView, ModalDialogView, ProjectFilterView, Publisher, Publishers, Service, ServiceConnectorView, ServiceStatusView, Tenant, TenantProfileView, User, UserEditor, UserManagemerView, UsernameCell, View, find, findAll, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
     find = _arg.find, findAll = _arg.findAll, View = _arg.View, FrameView = _arg.FrameView, InnerFrameView = _arg.InnerFrameView, ModalDialogView = _arg.ModalDialogView, FormViewMixin = _arg.FormViewMixin, FormDialogView = _arg.FormDialogView;
     ManagerView = _arg1.ManagerView, ProjectFilterView = _arg1.ProjectFilterView;
-    Tenant = _arg2.Tenant, Publisher = _arg2.Publisher, Publishers = _arg2.Publishers, Service = _arg2.Service;
+    Tenant = _arg2.Tenant, User = _arg2.User, Publisher = _arg2.Publisher, Publishers = _arg2.Publishers, Service = _arg2.Service;
     ConfigFrameView = (function(_super) {
       __extends(ConfigFrameView, _super);
 
@@ -685,7 +685,7 @@
       UserManagemerView.prototype.render = function() {
         UserManagemerView.__super__.render.apply(this, arguments);
         this.projectFilter.render();
-        this.signin_user = JSON.parse(sessionStorage.user);
+        this.signin_user = User.current.toJSON();
         return this;
       };
 

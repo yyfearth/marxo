@@ -25,7 +25,7 @@
       <div id="navbar" class="navbar navbar-static-top">
         <div class="navbar-inner container-fluid"><a href="#" class="brand">MARXO</a>
           <ul class="nav pull-right">
-            <li data-frame="profile" class="dropdown"><a href="#profile"><img id="avatar" src="https://secure.gravatar.com/avatar?s=20&amp;d=mm"><span id="username">(Username)</span><b class="caret"></b></a>
+            <li data-frame="profile" class="dropdown"><a href="#profile"><img id="avatar" src="data:image/gif;base64,R0lGODdhFAAUAPMKAPDw8Pz8/PPz89DQ0Onp6ff398DAwMrKysfHx+vr67a2tgAAAAAAAAAAAAAAAAAAACwAAAAAFAAUAAAERVDJSau9OM8BwNDVEIzBB0oCGQgnqrKtSJqxINBtrmsIURQERIugGhFAiSIpkTkoVQcM8WnEFKijAiaFhVkMXKXAsCuDIgA7"><span id="username">(Username)</span><b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li data-frame="profile"><a href="#profile" class="icon-user">Profile</a></li>
                 <li data-frame="notification"><a href="#notification" class="icon-notify">Notifications</a></li>
@@ -317,7 +317,8 @@
               <div class="sidebar well">
                 <ul class="sidebar-list nav nav-list">
                   <li class="nav-header">Project</li>
-                  <li class="sidebar-item project-item"><a>Project Info</a></li>
+                  <li class="sidebar-item project-item"><a data-item="project">Project Info</a></li>
+                  <li class="sidebar-item users-item"><a data-item="users" class="muted">Members</a></li>
                   <li class="nav-header node-header">Nodes</li>
                   <li class="nav-header link-header">Links</li>
                 </ul>
@@ -358,6 +359,18 @@
                     <label for="project_desc" class="control-label">Description</label>
                     <div class="controls">
                       <textarea id="project_desc" name="desc" cols="30" rows="3" maxlength="2048" placeholder="Description"></textarea>
+                    </div>
+                  </div>
+                  <div class="control-group hide">
+                    <label class="control-label">Created By</label>
+                    <div class="controls">
+                      <input id="project_created_by" type="text" readonly>
+                    </div>
+                  </div>
+                  <div class="control-group hide">
+                    <label class="control-label">Created At</label>
+                    <div class="controls">
+                      <input id="project_created_at" type="text" readonly>
                     </div>
                   </div>
                 </form>
@@ -436,7 +449,7 @@
                 </li>
                 <li class="grid-filter"></li>
               </ul>
-              <div id="t_project_action_cell" class="tpl"><a title="View" name="view" href="#project/{{id}}" class="btn btn-info btn-round icon-search"></a>
+              <div id="t_project_action_cell" class="tpl"><a title="View" name="view" href="#project/{{id}}" class="btn btn-info btn-round icon-search"></a><a title="Edit" name="edit" href="#project/{{id}}" class="btn btn-primary btn-round icon-edit"></a>
                 <button title="Remove" name="remove" class="btn btn-danger btn-round icon-close"></button>
               </div>
               <div class="grid-scroller">
@@ -475,7 +488,7 @@
                   <button title="Reset workflow to previous save" data-placement="bottom" class="btn btn-danger wf-reset">Reset</button>
                   <button title="Save the workflow" data-placement="bottom" class="btn btn-primary wf-save">Save</button>
                 </div>
-                <h3 id="workflow_header" title="Change Workflow Title and Description" data-placement="bottom"><span class="editable-name"></span><small class="editable-desc"></small></h3>
+                <h3 id="workflow_header" title="Change Workflow Name and Description" data-placement="bottom"><span class="editable-name"></span><small class="editable-desc"></small></h3>
               </div>
               <div id="workflow_view" class="content-view"></div>
               <div id="t_popover" class="tpl">
@@ -539,8 +552,8 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
-                <button class="btn btn-primary btn-save">Save</button>
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>
+                <button class="btn btn-primary btn-save">OK</button>
               </div>
             </div>
             <div id="link_editor" aria-labelledby="link_editor_title" aria-hidden="true" class="modal hide fade">
@@ -586,8 +599,8 @@
                 </form>
               </div>
               <div class="modal-footer">
-                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
-                <button class="btn btn-primary btn-save">Save</button>
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>
+                <button class="btn btn-primary btn-save">OK</button>
               </div>
             </div>
             <div id="workflow_name_editor" aria-labelledby="workflow_name_editor_header" aria-hidden="true" class="modal hide fade">
@@ -618,8 +631,8 @@
                 </form>
               </div>
               <div class="modal-footer">
-                <button data-dismiss="modal" aria-hidden="true" class="btn">Close</button>
-                <button class="btn btn-primary btn-save">Save</button>
+                <button data-dismiss="modal" aria-hidden="true" class="btn">Cancel</button>
+                <button class="btn btn-primary btn-save">OK</button>
               </div>
             </div>
           </div>
@@ -1595,13 +1608,10 @@
                   </li>
                   <li class="action-buttons pull-right">
                     <button name="reload" title="Reload Table" class="btn">Reload</button>
-                    <button name="mute_selected" title="Mute Selected" disabled class="btn btn-warning enable_if_selected icon-ok">Mute</button>
                   </li>
                   <li class="grid-filter"></li>
                 </ul>
-                <div id="t_notification_action_cell" class="tpl"><a title="Process" name="process" class="btn btn-primary btn-round icon-right-open"></a>
-                  <button title="Mute" name="mute" disabled class="btn btn-warning btn-round icon-ok"></button>
-                </div>
+                <div id="t_notification_action_cell" class="tpl"><a title="Process" name="process" class="btn btn-primary btn-round icon-right-open"></a></div>
                 <div class="grid-scroller">
                   <table id="notification_table" class="grid-table">
                     <caption class="loading icon-spinner animate-spin"></caption>

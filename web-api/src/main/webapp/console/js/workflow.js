@@ -67,6 +67,8 @@
 
       WorkflowManagerView.prototype.collection = new Workflows;
 
+      WorkflowManagerView.prototype.defaultFilterField = 'name';
+
       WorkflowManagerView.prototype.events = {
         'click #wf_template_list .wf_tempate a': function(e) {
           var wf;
@@ -101,7 +103,7 @@
           template = '';
         }
         this.creator.popup({
-          template: template
+          template_id: template
         }, function(action, data) {
           if (action === 'save') {
             console.log('create new wf:', data);
@@ -180,7 +182,8 @@
             if (action === 'save') {
               console.log('save name', wf);
               _this.nameEl.textContent = wf.get('name');
-              return _this.descEl.textContent = wf.get('desc');
+              _this.descEl.textContent = wf.get('desc');
+              _this.model.trigger('changed', 'rename_workflow', _this.model);
             }
           });
         }
@@ -202,6 +205,7 @@
           el: find('#workflow_name_editor', this.el)
         });
         this.btnSave = find('.wf-save', this.el);
+        this.btnReset = find('.wf-reset', this.el);
         this.nameEl = find('.editable-name', this.el);
         this.descEl = find('.editable-desc', this.el);
         this.listenTo(this.nodeList, 'select', function(id, node) {
@@ -215,72 +219,87 @@
           }
           return _this.view.createNode(node);
         });
+        this._changed = this._changed.bind(this);
         return this;
       };
 
       WorkflowEditorView.prototype.reset = function() {
         if (confirm('All changes will be descarded since last save, are you sure to do that?')) {
           this.reload();
+          this.btnSave.disabled = this.btnReset.disabled = true;
         }
         return this;
       };
 
       WorkflowEditorView.prototype.save = function() {
         console.log('save', this.model.attributes);
-        this.model.nodes.forEach(function(node) {
-          var style;
-          node.view.el.style.zIndex = '';
-          style = node.view.el.getAttribute('style');
-          if (style !== node.get('style')) {
-            node.set('style', style);
-            return console.log('node style', node.id, style);
-          }
-        });
+        this.btnSave.disabled = this.btnReset.disabled = true;
         this.model.save({}, {
           success: function(wf) {
             return console.log('saved', wf);
           },
           error: function() {
-            return console.error('save failed');
+            this._changed();
+            return console.error('save failed', this.model);
           }
         });
         return this;
       };
 
+      WorkflowEditorView.prototype._changed = function() {
+        this.btnSave.disabled = this.btnReset.disabled = false;
+      };
+
+      WorkflowEditorView.prototype._loaded = function(wf, sub) {
+        this.id = wf.id;
+        this.nameEl.textContent = wf.get('name');
+        this.descEl.textContent = wf.get('desc');
+        this.model = wf;
+        this.view.load(wf, sub);
+        this.nodeList.setNodes(wf.nodes);
+        this.listenToOnce(wf, 'changed', this._changed);
+        this.listenTo(wf, 'changed', function(action, entity) {
+          return console.log('workflow changed', action, entity);
+        });
+      };
+
+      WorkflowEditorView.prototype._clear = function() {
+        this.stopListening(this.model);
+        this.id = null;
+        this.model = null;
+        this.nameEl.textContent = '';
+        this.descEl.textContent = '';
+        this.btnSave.disabled = true;
+        this.btnReset.disabled = true;
+        this.view.clear();
+      };
+
       WorkflowEditorView.prototype.load = function(wf, sub) {
-        var _load,
-          _this = this;
-        _load = function(wf) {
-          _this.view.load(wf, sub);
-          _this.nodeList.setNodes(wf.nodes);
-        };
+        var _this = this;
         if (!wf) {
-          this.id = null;
-          this.model = null;
-          this.nameEl.textContent = '';
-          this.descEl.textContent = '';
-          this.view.clear();
+          this._clear();
         } else if (typeof wf === 'string') {
           if (this.id === wf && !(sub != null ? sub.reload : void 0)) {
             this.load(this.model, sub);
           } else {
-            this.fetch(wf, function(err, wf) {
-              return _this.load(wf, sub);
-            });
+            this._clear();
+            this.load(new Workflow({
+              id: wf
+            }), sub);
           }
         } else if (wf.id) {
           if (this.id === wf.id) {
-            _load(wf);
+            this._loaded(wf, sub);
           } else {
-            this.id = wf.id;
-            this.nameEl.textContent = wf.get('name');
-            this.descEl.textContent = wf.get('desc');
-            this.model = wf;
             if (wf.loaded()) {
-              _load(wf);
+              this._loaded(wf, sub);
             } else {
+              this._clear();
               wf.fetch({
-                success: _load
+                silent: true,
+                success: function(wf) {
+                  return _this._loaded(wf, sub);
+                }
               });
             }
           }
@@ -298,19 +317,6 @@
 
       WorkflowEditorView.prototype.render = function() {
         this.nodeList.render();
-        return this;
-      };
-
-      WorkflowEditorView.prototype.fetch = function(id, callback) {
-        var wf;
-        wf = this.workflow = new Workflow({
-          id: id
-        });
-        wf.fetch({
-          success: function() {
-            return callback(null, wf);
-          }
-        });
         return this;
       };
 
@@ -484,9 +490,8 @@
       };
 
       NodeEditorView.prototype.save = function() {
-        console.log('save');
         this.data.set('actions', this.readActions());
-        console.log('save actions', actions, this.data);
+        console.log('save node', this.data);
         NodeEditorView.__super__.save.apply(this, arguments);
         return this;
       };
@@ -865,8 +870,9 @@
         this.nodeEditor.popup(node, function(action, node) {
           if (action === 'save') {
             if (false !== (typeof callback === "function" ? callback(node) : void 0)) {
-              return _this.model.createNode(node);
+              _this.model.createNode(node);
             }
+            return _this.model.trigger('changed', 'create_node', node);
           } else {
             return console.log('canceled or ignored create node', action);
           }
@@ -883,7 +889,7 @@
         this.nodeEditor.popup(node, function(action, node) {
           if (action === 'save') {
             node.view.update(node);
-            console.log('saved node', node);
+            _this.model.trigger('changed', 'edit_node', node);
           } else {
             console.log('canceled or ignored edit node', action);
           }
@@ -905,8 +911,8 @@
           return this;
         }
         if (confirm("Delete the node: " + (node.get('name')) + "?")) {
-          console.log('remove node', node);
           node.destroy();
+          this.model.trigger('changed', 'remove_node', node);
         }
         return this;
       };
@@ -929,8 +935,9 @@
         this.linkEditor.popup(data, function(action, link) {
           if (action === 'save') {
             if (false !== (typeof callback === "function" ? callback(link) : void 0)) {
-              return _this.model.createLink(link);
+              _this.model.createLink(link);
             }
+            return _this.model.trigger('changed', 'create_link', link);
           } else {
             return console.log('canceled or ignored create link', action);
           }
@@ -956,7 +963,7 @@
         this.linkEditor.popup(link, function(action, link) {
           if (action === 'save') {
             link.view.update(link);
-            console.log('saved link', link);
+            _this.model.trigger('changed', 'edit_link', link);
           } else {
             console.log('canceled or ignored edit link', action);
           }
@@ -978,8 +985,8 @@
           return this;
         }
         if (confirm("Delete the link: " + (link.get('name') || '(No Name)') + "?")) {
-          console.log('remove node', link);
           link.destroy();
+          this.model.trigger('changed', 'remove_link', link);
         }
         return this;
       };
@@ -1044,13 +1051,24 @@
       NodeView.prototype._popover_tpl = tpl('#t_popover');
 
       NodeView.prototype.render = function() {
-        var node, param;
+        var node, param,
+          _this = this;
         node = this.el.node = this.model;
         this.el.id = 'node_' + node.id;
         this.listenTo(node, 'destroy', this.remove.bind(this));
         this._renderModel(node);
         jsPlumb.draggable(this.$el, {
-          stack: '.node'
+          stack: '.node',
+          stop: function() {
+            var style, _ref10;
+            node.view.el.style.zIndex = '';
+            style = node.view.el.getAttribute('style');
+            if (style !== node.get('style')) {
+              node.set('style', style);
+              console.log('node style', node.id, style);
+              return (_ref10 = node.workflow) != null ? _ref10.trigger('changed', 'move_node', node) : void 0;
+            }
+          }
         });
         this.parentEl.appendChild(this.el);
         param = {

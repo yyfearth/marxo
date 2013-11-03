@@ -16,26 +16,16 @@
         return _ref;
       }
 
-      SeqCell.prototype.formatter = null;
-
       SeqCell.prototype.initialize = function(options) {
-        var _this = this;
-        if (this.formatter == null) {
-          this.formatter = {
-            fromRaw: function() {
-              var seq;
-              seq = _this.model._seq;
-              if (seq != null) {
-                return seq + 1;
-              } else {
-                return '';
-              }
-            },
-            toRaw: function() {
-              return _this.model.id;
-            }
-          };
-        }
+        this.formatter = {
+          model: this.model,
+          fromRaw: function() {
+            return this.model._seq || '';
+          },
+          toRaw: function() {
+            return this.model.id;
+          }
+        };
         return SeqCell.__super__.initialize.call(this, options);
       };
 
@@ -308,7 +298,7 @@
         if (rawValue) {
           val = rawValue.toLowerCase();
           labelCls = 'label capitalized ';
-          if (this.column.has('cls')) {
+          if (val !== 'none' && this.column.has('cls')) {
             cls = this.column.get('cls');
             if (typeof cls !== 'string') {
               cls = cls[val] || '';
@@ -389,11 +379,20 @@
       MergeableFilter.prototype.initialize = function(options) {
         var _base;
         MergeableFilter.__super__.initialize.call(this, options);
-        return this._shared_matchers = (_base = this.collection)._matchers != null ? (_base = this.collection)._matchers : _base._matchers = [];
+        this._shared_matchers = (_base = this.collection)._matchers != null ? (_base = this.collection)._matchers : _base._matchers = [];
       };
 
       MergeableFilter.prototype.getMatcher = function(query) {
-        return this.makeMatcher(query).bind(this);
+        var field, regexp;
+        if (this.fields.length > 1) {
+          return this.makeMatcher(query).bind(this);
+        } else {
+          field = this.fields[0];
+          regexp = new RegExp(query.trim(), 'i');
+          return function(model) {
+            return regexp.test(model.get(field));
+          };
+        }
       };
 
       MergeableFilter.prototype.mergeMatcher = function(query) {
@@ -442,13 +441,13 @@
         }
         matcher = this.mergeMatcher(query);
         if (matcher) {
-          shadow = this._gen_seq(this.shadowCollection.filter(matcher));
+          shadow = this.shadowCollection.filter(matcher);
           col.reset(shadow, {
             reindex: false
           });
           col._filtered = true;
         } else if (col._filtered) {
-          col.reset(this._gen_seq(this.shadowCollection.models), {
+          col.reset(this.shadowCollection.models, {
             reindex: false
           });
           col._filtered = false;
@@ -465,13 +464,6 @@
           this.search(null);
         }
         return this;
-      };
-
-      MergeableFilter.prototype._gen_seq = function(col) {
-        col.forEach(function(model, i) {
-          return model._seq = i;
-        });
-        return col;
       };
 
       return MergeableFilter;
@@ -517,22 +509,24 @@
         console.log('q', query);
         keys = this.keys;
         if (keys.length === 1) {
+          keys = keys[0];
           if (query === '') {
             return function(model) {
               var value;
-              value = model.get(keys[0]);
+              value = model.get(keys);
               return value === '' || (value == null);
             };
           } else {
             regexp = new RegExp(query.trim(), 'i');
             return function(model) {
-              return regexp.test(model.get(keys[0]));
+              return regexp.test(model.get(keys));
             };
           }
         } else {
           if (query === '') {
             return function(model) {
-              var key, value;
+              var i, key, value;
+              i = 0;
               value = model.get(keys[0]);
               while (value && (key = keys[++i])) {
                 value = value[key];
@@ -648,6 +642,8 @@
         return _ref12;
       }
 
+      ManagerView.prototype.defaultFilterField = 'title';
+
       ManagerView.prototype._predefinedColumns = {
         checkbox: {
           name: '',
@@ -725,7 +721,7 @@
       };
 
       ManagerView.prototype.initialize = function(options) {
-        var action, collection, event, _base, _gen_seq, _ref13;
+        var action, collection, event, fullCollection, _base, _body, _ref13, _render;
         if (this.events == null) {
           this.events = {};
         }
@@ -742,16 +738,10 @@
           this.collection = options.collection;
         }
         collection = this.collection;
+        fullCollection = collection.fullCollection;
         if (!(collection instanceof ManagerCollection)) {
           throw new Error('collection must be a instance of ManagerCollection');
         }
-        _gen_seq = function() {
-          return collection.fullCollection.each(function(model, i) {
-            return model._seq = i;
-          });
-        };
-        this.listenTo(collection.fullCollection, 'reset add remove', _gen_seq);
-        this.listenTo(collection, 'add remove', _gen_seq);
         this.listenTo(collection, 'remove', this._selection_changed.bind(this));
         this.pageSize = collection.state.pageSize || 15;
         this.grid = new Backgrid.Grid({
@@ -762,10 +752,19 @@
           collection: collection
         });
         this.filter = new MergeableFilter({
-          collection: collection.fullCollection,
-          fields: ['title'],
+          collection: fullCollection,
+          fields: [this.defaultFilterField],
           wait: 300
         });
+        _body = this.grid.body;
+        _render = _body.render.bind(_body);
+        _body.render = function() {
+          fullCollection.forEach(function(model, i) {
+            return model._seq = i + 1;
+          });
+          return _render();
+        };
+        this.$enable_if_selected = this.$el.find('.enable_if_selected');
         $('.action-buttons .btn[title]').attr({
           'data-placement': 'bottom',
           'data-container': 'body'
@@ -836,21 +835,25 @@
         this.$el.find('.grid-paginator').replaceWith(this.paginator.render().$el.addClass('grid-paginator'));
         this.$el.find('.grid-filter').empty().append(this.filter.render().$el);
         this.reload();
-        this.$enable_if_selected = this.$el.find('.enable_if_selected');
         return this;
       };
 
       ManagerView.prototype.refresh = function() {
-        this.grid.body.refresh();
+        if (this.rendered) {
+          this.grid.body.refresh();
+        }
         return this;
       };
 
       ManagerView.prototype.reload = function() {
-        this.collection.fetch({
-          reset: true
-        });
-        this.collection.getPage(1);
-        this.filter.clear();
+        var _this = this;
+        this.collection.fullCollection.set(null);
+        this.collection.load(function() {
+          _this.collection.getFirstPage({
+            silent: true
+          });
+          return _this.filter.clear();
+        }, 100);
         return this;
       };
 
@@ -899,14 +902,16 @@
         this.$enable_if_selected.prop('disabled', !(selected != null ? selected.length : void 0));
         this.delayedTrigger('selection_changed', 100, selected, this.grid, this);
         checkboxes = findAll('.select-row-cell input[type=checkbox]', this.el);
-        checked = (_ref13 = checkboxes[0]) != null ? _ref13.checked : void 0;
-        indeterminate = checkboxes.some(function(box) {
-          return box.checked !== checked;
-        });
-        checkAll = find('.select-all-header-cell input[type=checkbox]', this.el);
-        checkAll.indeterminate = indeterminate;
-        if (!indeterminate) {
-          checkAll.checked = checked;
+        if (typeof checkAll !== "undefined" && checkAll !== null) {
+          checked = (_ref13 = checkboxes[0]) != null ? _ref13.checked : void 0;
+          indeterminate = checkboxes.some(function(box) {
+            return box.checked !== checked;
+          });
+          checkAll = find('.select-all-header-cell input[type=checkbox]', this.el);
+          checkAll.indeterminate = indeterminate;
+          if (!indeterminate) {
+            checkAll.checked = checked;
+          }
         }
       };
 
