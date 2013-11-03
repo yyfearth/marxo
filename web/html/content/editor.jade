@@ -15,26 +15,20 @@ include rich_editor
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save
 
-#email_composer.modal.modal-full.hide.fade(aria-labelledby='email_composer_title', aria-hidden='true')
+#email_composer.modal.hide.fade(aria-labelledby='email_composer_title', aria-hidden='true')
   .modal-header
     button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
     h3#email_composer_title Email Content
   .modal-body
-    iframe
-    form.form-horizontal
-      .control-group
-        label.control-label(for='page_title') Title
-        .controls
-          input#page_title.input-large(type='text', name='title',
-          placeholder='Title of Email', maxlength='255', required)
-          span.help-inline(title='Required') *
-      .control-group
-        label.control-label(for='email_desc') Content
-        .controls
-          textarea.input-block-level(id='email_desc', name='desc',
-          rows=15, placeholder='The email content ...', maxlength='65535')
+    form
+      .input-prepend.input-block-level
+        span.add-on To
+        input.span11(name="email_to", title='Send To', type='text', required,
+        placeholder='email_1@example.com; email_2@example.com')
+      input#page_title.input-block-level(type='text', name='title',
+      placeholder='Title of Email', maxlength='255', required)
+      mixin rich_editor('email_desc')
   .modal-footer
-    button.btn.btn-info.pull-left.btn-preview Preview
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save
 
