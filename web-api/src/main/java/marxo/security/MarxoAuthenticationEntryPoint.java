@@ -20,7 +20,6 @@ public class MarxoAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-		ErrorJson errorJson = new ErrorJson("Either you give me your old ID card or you are fired.");
 		response.setStatus(HttpStatus.UNAUTHORIZED.value());
 		response.setContentType(MediaType.APPLICATION_JSON);
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -29,6 +28,7 @@ public class MarxoAuthenticationEntryPoint implements AuthenticationEntryPoint {
 			response.addHeader("WWW-Authenticate", "Basic realm=\"marxo\"");
 		}
 
+		ErrorJson errorJson = new ErrorJson("Either you give me your old ID card or you are fired.");
 		String body = objectMapper.writeValueAsString(errorJson);
 		response.getWriter().print(body);
 	}
