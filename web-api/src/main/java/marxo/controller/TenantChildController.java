@@ -11,7 +11,7 @@ public class TenantChildController<E extends TenantChildEntity, Dao extends Tena
 		super((Dao) dao);
 	}
 
-	protected void setupDao() {
+	public void setupDao() {
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		user = marxoAuthentication.getUser();
 		dao.setTenantId(user.tenantId);
