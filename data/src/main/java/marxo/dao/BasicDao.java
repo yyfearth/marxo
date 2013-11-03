@@ -22,7 +22,7 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 	/**
 	 * The pre-defined filter which will constrain the results.
 	 */
-	// review: find a way to autowire this. Currently, when a DAO is loaded, it has no info about mongo-configuration.xml. Changing context order doesn't help.
+	// review: find a way to auto wire this. Currently, when a DAO is loaded, it has no info about mongo-configuration.xml. Changing context order doesn't help.
 	MongoTemplate mongoTemplate;
 	ApplicationContext context;
 
