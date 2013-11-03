@@ -39,10 +39,10 @@ define 'models', ['lib/common'], ->
   ## Tenant / User
 
   class Tenant extends Entity
-    urlRoot: '/tenants'
+    urlRoot: ROOT + '/tenants'
 
   class User extends Entity
-    urlRoot: '/users'
+    urlRoot: ROOT + '/users'
     idAttribute: 'email'
     fullname: ->
       if @has('first_name') and @has('last_name')
