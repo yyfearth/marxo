@@ -36,11 +36,6 @@ public class WorkflowController extends TenantChildController<Workflow, Workflow
 
 	@Override
 	public List<Workflow> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
-		// todo: refactoring this.
-		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
-		User user = marxoAuthentication.getUser();
-		dao.setTenantId(user.tenantId);
-
 		boolean hasName = !Strings.isNullOrEmpty(name);
 		boolean hasCreated = created != null;
 		boolean hasModified = modified != null;
@@ -82,10 +77,6 @@ public class WorkflowController extends TenantChildController<Workflow, Workflow
 
 	@Override
 	public Workflow read(@PathVariable String idString) {
-		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
-		User user = marxoAuthentication.getUser();
-		dao.setTenantId(user.tenantId);
-
 		Workflow workflow = super.read(idString);
 
 		List<Node> nodes = nodeDao.searchByWorkflowId(workflow.id);
