@@ -156,6 +156,8 @@ mixin actions_thumb
         placeholder='email_1@example.com; email_2@example.com')
       mixin action_template_select
       mixin track_checkbox
+      input#page_title.input-block-level(type='text', name='title',
+      placeholder='Title of Email', maxlength='255', required)
       textarea.input-block-level(name='email_content', placeholder='Email Content...',
       title='Content for email (1000 max)', rows=5, maxlength=1000)
 

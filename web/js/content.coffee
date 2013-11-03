@@ -31,8 +31,7 @@ ProjectFilterView
       super options
       @manager = new ContentManagerView el: @el, parent: @
       @editor = new TextEditor el: '#text_editor', parent: @
-      # TODO: email composer
-      @composer = new TextEditor el: '#email_composer', parent: @
+      @composer = new EmailComposer el: '#email_composer', parent: @
       @designer = new PageDesigner el: '#page_designer', parent: @
       @
     open: (name, arg) ->
@@ -84,9 +83,84 @@ ProjectFilterView
       else
         throw new Error 'content editor can only load a content model or an id string'
 
+  class RichEditorMixin
+    _fonts: [
+      'Serif', 'Sans', 'Arial', 'Arial Black'
+      'Courier', 'Courier New', 'Comic Sans MS'
+      'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
+      'Tahoma', 'Times', 'Times New Roman', 'Verdana'
+    ]
+    events:
+      'click .btn.hyperlink': (e) ->
+        setTimeout ->
+          $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
+        , 200
+      'click .btn-switch': '_switch'
+    readOnlyHtml: (val) ->
+      @readOnly = val
+      @$editor.attr 'contenteditable', not val
+      @$code.attr 'readonly', val
+      @$edits.prop 'disabled', val
+      @
+    fillHtml: (html) -> # can only be called after rendered
+      @$editor.html html or ''
+      @
+    readHtml: ->
+      if @$code.is(':visible') then @$code.val() else @$editor.cleanHtml()
+    resetHtml: ->
+      @$code.val('')
+      @_switch false
+      @$el.find('.btn-switch').removeClass 'active'
+      @
+    _renderFonts: ->
+      fontTarget = find '.fonts-select', @el
+      fontTarget.innerHTML = ''
+      flagment = document.createDocumentFragment()
+      for fontName in @_fonts
+        li = document.createElement 'li'
+        a = document.createElement 'a'
+        a.dataset.edit = "fontName #{fontName}"
+        a.style.fontFamily = fontName
+        a.textContent = fontName
+        li.appendChild a
+        flagment.appendChild li
+      fontTarget.appendChild flagment
+      return
+    renderRichEditor: ->
+      @_renderFonts()
+      @$el.find('.dropdown-menu input').click(-> false).change(->
+        $(@).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
+      ).keydown (e) ->
+        if e.which is 27 # esc
+          @value = ''
+          $(@).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
+        true
+      @$el.find('[type=file]').each ->
+        overlay = $(@)
+        target = $(overlay.data('target'))
+        overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
+        .width(target.outerWidth()).height target.outerHeight()
+      @$editor = @$el.find('.rich-editor').wysiwyg()
+      @$code = @$editor.siblings('.rich-editor-html')
+      @$edits = @$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit')
+      @$edits.tooltip container: @el
+      @
+    _switch: (toCode) ->
+      $editor = @$editor
+      $code = @$code
+      toCode = not $code.is ':visible' unless typeof toCode is 'boolean'
+      if toCode
+        $editor.hide()
+        $code.show().val $editor.cleanHtml()
+      else
+        $code.hide()
+        $editor.show().html $code.val()
+      @$edits.prop 'disabled', toCode unless @readOnly
+      return
+
   class TextEditor extends FormDialogView
     @acts_as ContentEditorMixin
-    popup: (data, callback) ->
+    popup: (data, ignored, callback) ->
       super data, callback
       @fill data
       posted = 'POSTED' is data.get 'status'
@@ -114,6 +188,37 @@ ProjectFilterView
       @data.set 'desc', @read()
       @callback 'save'
       @hide true
+      @
+
+  class EmailComposer extends FormDialogView
+    @acts_as ContentEditorMixin, RichEditorMixin
+    popup: (data, ignored, callback) ->
+      super data, callback
+      @fill data
+      posted = 'POSTED' is data.get 'status'
+      @readOnlyHtml posted
+      @btnSave.disabled = posted
+      @
+    fill: (data) -> # can only be called after rendered
+      super data.attributes
+      @fillHtml data.get 'desc'
+      @
+    read: ->
+      data = super
+      data.desc = @readHtml()
+      data
+    save: ->
+      @data.set @read()
+      @callback 'save'
+      @hide true
+      @
+    reset: ->
+      super
+      @resetHtml()
+      @
+    render: ->
+      super
+      @renderRichEditor()
       @
 
   class PageDesigner extends ModalDialogView
@@ -290,75 +395,23 @@ ProjectFilterView
       @
 
   class PageDescView extends BoxFormView
-    _fonts: [
-      'Serif', 'Sans', 'Arial', 'Arial Black'
-      'Courier', 'Courier New', 'Comic Sans MS'
-      'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
-      'Tahoma', 'Times', 'Times New Roman', 'Verdana'
-    ]
-    events:
-      'click .btn.hyperlink': (e) ->
-        setTimeout ->
-          $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
-        , 200
-      'click .btn-switch': '_switch'
+    @acts_as RichEditorMixin
     fill: (data) -> # can only be called after rendered
       super data
-      @$editor.html data.desc or ''
+      @fillHtml data.desc
       @
     read: ->
       data = super
-      data.desc = if @$code.is(':visible') then @$code.val() else @$editor.cleanHtml()
+      data.desc = @readHtml()
       data
     reset: ->
       super
-      @$code.val('')
-      @_switch false
-      @$el.find('.btn-switch').removeClass 'active'
+      @resetHtml()
       @
-    _renderFonts: ->
-      fontTarget = find '.fonts-select', @el
-      fontTarget.innerHTML = ''
-      flagment = document.createDocumentFragment()
-      for fontName in @_fonts
-        li = document.createElement 'li'
-        a = document.createElement 'a'
-        a.dataset.edit = "fontName #{fontName}"
-        a.style.fontFamily = fontName
-        a.textContent = fontName
-        li.appendChild a
-        flagment.appendChild li
-      fontTarget.appendChild flagment
     render: ->
       super
-      @_renderFonts()
-      @$el.find('.dropdown-menu input').click(-> false).change(->
-        $(@).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
-      ).keydown (e) ->
-        if e.which is 27 # esc
-          @value = ''
-          $(@).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
-        true
-      @$el.find('[type=file]').each ->
-        overlay = $(@)
-        target = $(overlay.data('target'))
-        overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
-          .width(target.outerWidth()).height target.outerHeight()
-      @$editor = @$el.find('.rich-editor').wysiwyg()
-      @$code = @$editor.siblings('.rich-editor-html')
-      @$edits = @$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit')
+      @renderRichEditor()
       @
-    _switch: (toCode) ->
-      $editor = @$editor
-      $code = @$code
-      toCode = not $code.is ':visible' unless typeof toCode is 'boolean'
-      if toCode
-        $editor.hide()
-        $code.show().val $editor.cleanHtml()
-      else
-        $code.hide()
-        $editor.show().html $code.val()
-      @$edits.prop 'disabled', toCode
 
   class ChangeTypeMixin
     changeType: (type) ->
