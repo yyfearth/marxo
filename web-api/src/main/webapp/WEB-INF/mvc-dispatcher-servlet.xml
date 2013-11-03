@@ -10,7 +10,7 @@
     <context:component-scan base-package="marxo.exception"/>
     <context:component-scan base-package="marxo.filter"/>
 
-    <mvc:annotation-driven/>
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
@@ -19,15 +19,7 @@
     </mvc:interceptors>
 
     <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-        <property name="contentNegotiationManager">
-            <bean class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-                <property name="mediaTypes">
-                    <map>
-                        <entry key="json" value="application/json"/>
-                    </map>
-                </property>
-            </bean>
-        </property>
+        <property name="contentNegotiationManager" ref="contentNegotiationManager"/>
         <property name="viewResolvers">
             <list>
                 <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
@@ -43,14 +35,23 @@
         </property>
     </bean>
 
-    <!-- review: check whether the following works -->
-    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-        <property name="contentNegotiationManager">
-            <bean class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-                <property name="defaultContentType" value="application/json"/>
-                <property name="favorPathExtension" value="true"/>
-                <property name="favorParameter" value="true"/>
-            </bean>
-        </property>
+    <!--<bean name="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">-->
+    <!--<property name="useSuffixPatternMatch" value="true"/>-->
+    <!--<property name="useRegisteredSuffixPatternMatch" value="true"/>-->
+    <!--<property name="useTrailingSlashMatch" value="false"/>-->
+    <!--</bean>-->
+
+    <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="defaultContentType" value="application/json"/>
+        <!-- Disable it for it will disrupted by end url with email, e.g. test@example.com, it will use .com as media type -->
+        <property name="favorPathExtension" value="false"/>
+        <!-- The following accept .json as the path extension and set the media header to related type. -->
+        <!--<property name="favorPathExtension" value="true"/>-->
+        <!--<property name="useJaf" value="false"/>-->
+        <!--<property name="mediaTypes">-->
+        <!--<map>-->
+        <!--<entry key="json" value="application/json"/>-->
+        <!--</map>-->
+        <!--</property>-->
     </bean>
 </beans>
