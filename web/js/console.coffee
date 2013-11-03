@@ -208,7 +208,10 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
             Authorization: auth
           success: (user) =>
             console.log 'login with', email, hash
-            if user.has('tenant_id') and email is user.get 'email'
+            if user.has('password') and hash isnt user.get 'password' # for test only
+              @_disable false
+              alert '(TEST ONLY) Password not correct'
+            else if user.has('tenant_id') and email is user.get 'email'
               user.set 'email_md5', md5Email email
               user.set 'credential', btoa "#{email}:#{hash}"
               tenantId = user.get 'tenant_id'
