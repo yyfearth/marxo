@@ -5,7 +5,6 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.types.User;
 import marxo.entity.Workflow;
-import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -16,6 +15,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -26,27 +26,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testng.Assert.assertNotNull;
 
-@ContextConfiguration
-@WebAppConfiguration("classpath:mvc-dispatcher-servlet.xml")
+@WebAppConfiguration
+@ContextConfiguration("classpath*:mvc-dispatcher-servlet.xml")
 public class WebApiTests extends AbstractTestNGSpringContextTests {
 	@Autowired
 	WebApplicationContext webApplicationContext;
 	MockMvc mockMvc;
 
 	@BeforeClass
-	public void before() {
+	public void beforeClass() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 	}
 
 	@BeforeMethod
 	public void setUp() throws Exception {
-
 	}
 
 	@AfterMethod
 	public void tearDown() throws Exception {
-
 	}
+
+
 
 	@Test
 	public void getWorkflows() throws Exception {
