@@ -21,9 +21,6 @@ public class MarxoInterceptor extends HandlerInterceptorAdapter implements ILogg
 
 			if (handlerMethod.getBean() instanceof TenantChildController) {
 				TenantChildController tenantChildController = (TenantChildController) handlerMethod.getBean();
-				logger.debug(String.format("TenantChildController detected: %s", tenantChildController.getClass()));
-				logger.debug(String.format("handlerMethod: %s", handlerMethod.getMethod()));
-
 				tenantChildController.setupDao();
 			}
 		}
