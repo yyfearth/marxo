@@ -245,8 +245,6 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @form._callback = callback if typeof callback is 'function'
       @_submit_btn.click()
       @
-    _find: (name, tag) ->
-      find "#{tag or ''}[name='#{name}']", @el
     fill: (attributes) ->
       @_attributes = {}
       if attributes? then for name, value of attributes
