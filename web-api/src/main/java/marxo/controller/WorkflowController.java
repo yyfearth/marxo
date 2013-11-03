@@ -20,7 +20,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("workflow{:s?}")
-public class WorkflowController extends EntityController<Workflow, WorkflowDao> {
+public class WorkflowController extends TenantChildController<Workflow, WorkflowDao> {
 	static final ModifiedDateComparator modifiedDateComparator = new ModifiedDateComparator();
 	@Autowired
 	NodeDao nodeDao;
