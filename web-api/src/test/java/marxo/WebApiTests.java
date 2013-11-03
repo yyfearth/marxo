@@ -47,7 +47,6 @@ public class WebApiTests extends AbstractTestNGSpringContextTests {
 	}
 
 
-
 	@Test
 	public void getWorkflows() throws Exception {
 		MockHttpServletRequestBuilder builder = get("/api/workflows").accept(MediaType.parseMediaType("application/json;charset=UTF-8"));

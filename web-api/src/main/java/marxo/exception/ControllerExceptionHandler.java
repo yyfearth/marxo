@@ -1,8 +1,6 @@
 package marxo.exception;
 
 import marxo.tool.ILoggable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataAccessResourceFailureException;

@@ -1,7 +1,6 @@
 package marxo.dao;
 
 import com.google.common.base.Strings;
-import com.mongodb.BasicDBObject;
 import marxo.entity.BasicEntity;
 import marxo.entity.Workflow;
 import marxo.tool.StringTool;
@@ -9,7 +8,6 @@ import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;

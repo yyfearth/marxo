@@ -10,7 +10,7 @@
     <context:component-scan base-package="marxo.exception"/>
     <context:component-scan base-package="marxo.filter"/>
 
-    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
