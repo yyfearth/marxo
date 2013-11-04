@@ -18,6 +18,7 @@
       ProfileFrameView.acts_as(FormViewMixin);
 
       ProfileFrameView.prototype.initialize = function(options) {
+        var _this = this;
         ProfileFrameView.__super__.initialize.call(this, options);
         if (!User.current) {
           throw new Error('not signed in yet');
@@ -25,17 +26,29 @@
         this.model = User.current;
         this.initForm();
         this.btn = find('#update_user', this.el);
-        return this.avatar = find('#user_avatar img', this.el);
+        this.avatar = find('#user_avatar img', this.el);
+        this.on('load', this.load.bind(this));
+        return this.on('activate', function() {
+          return _this.delayedTrigger('load', 100);
+        });
       };
 
       ProfileFrameView.prototype.render = function() {
-        var _this = this;
         ProfileFrameView.__super__.render.apply(this, arguments);
-        return this.model.fetch({
+        return this.delayedTrigger('load', 100);
+      };
+
+      ProfileFrameView.prototype.load = function() {
+        var _this = this;
+        (this.model = User.current).fetch({
           success: function(data) {
             var attrs, sex;
+            if (User.current == null) {
+              console.warn('user logged out');
+              return;
+            }
             console.log('fetch tenant', data.attributes);
-            _this.model = data;
+            _this.model = User.current = data;
             attrs = data.toJSON();
             sex = attrs.sex;
             attrs.sex = !sex ? 'Unspecified' : sex.charAt(0).toUpperCase() + sex.slice(1);
@@ -46,6 +59,7 @@
             $(_this.btn).removeAttr('disabled');
           }
         });
+        return this;
       };
 
       return ProfileFrameView;

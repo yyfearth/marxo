@@ -188,9 +188,11 @@
             Authorization: ''
           }
         });
-        SignInView.get().show();
+        this.router.clear();
         this.hide();
         this.trigger('signout');
+        location.hash = 'signin';
+        location.reload();
         return this;
       };
 
@@ -510,6 +512,11 @@
         } else {
           console.log('failed to go back for no last record');
         }
+        return this;
+      };
+
+      Router.prototype.clear = function() {
+        this._last = this._cur = null;
         return this;
       };
 
