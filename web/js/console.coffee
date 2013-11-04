@@ -5,7 +5,6 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
   class ConsoleView extends View
     el: '#main'
     user: sessionStorage.user
-    tenant: sessionStorage.tenant
     events:
       'touchstart #navbar .dropdown > a': (e) ->
         $el = $(e.currentTarget).parent()
@@ -48,9 +47,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         if @user
           user = new User JSON.parse @user
           user = null unless user.has 'email'
-        if @tenant
-          tenant = new Tenant JSON.parse @tenant
+          tenant = new Tenant user.get 'tenant'
           tenant = null unless tenant.has 'name'
+      console.log 'load from session', user, tenant
       @user = user
       @tenant = tenant
       @avatarEl = find 'img#avatar'
@@ -133,12 +132,11 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       if remember
         u = user.toJSON()
         delete u.password
+        u.tenant = tenant.toJSON()
         sessionStorage.user = JSON.stringify u
-        sessionStorage.tenant = JSON.stringify tenant.toJSON()
         console.log 'logged in', u
       else
         delete sessionStorage.user
-        delete sessionStorage.tenant
       # set ajax basic auth
       $.ajaxSetup
         headers:
