@@ -2,7 +2,7 @@ package marxo.exception;
 
 import org.bson.types.ObjectId;
 
-public class EntityNotFoundException extends RuntimeException {
+public class EntityNotFoundException extends EntityException {
 	protected String identity;
 	protected String message;
 
@@ -15,6 +15,7 @@ public class EntityNotFoundException extends RuntimeException {
 	}
 
 	protected EntityNotFoundException(String identity, String message) {
+		super(message);
 		this.identity = identity;
 		this.message = message;
 	}
