@@ -10,10 +10,10 @@ public class EntityInvalidException extends EntityException {
 	}
 
 	public EntityInvalidException(ObjectId id, String message) {
-		super(id, message);
+		super(message);
 	}
 
 	public EntityInvalidException(ObjectId id, List<String> messages) {
-		super(id, messages);
+		super(messages);
 	}
 }
