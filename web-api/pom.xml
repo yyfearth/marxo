@@ -133,7 +133,6 @@
             <version>${spring-security.version}</version>
         </dependency>
 
-
         <!-- Social media -->
         <dependency>
             <groupId>com.restfb</groupId>
@@ -166,6 +165,13 @@
             <artifactId>junit</artifactId>
             <version>4.11</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Utitlies -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.3</version>
         </dependency>
     </dependencies>
 
