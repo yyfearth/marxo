@@ -2,7 +2,8 @@
 
 define 'models', ['lib/common'], ->
 
-  ROOT = 'http://marxo.masonwan.com/api'
+  ROOT = 'http://masonwan.com/marxo/api'
+  # ROOT = '../api'
   # ROOT = '/api'
 
   ## Common
@@ -23,7 +24,7 @@ define 'models', ['lib/common'], ->
         @state[key] = value
       super options...
     load: (callback, delay = @_delay) ->
-      if not @_last_load or (Date.now() - @_last_load) > delay
+      if not @_last_load or delay < 1 or (Date.now() - @_last_load) > delay
         @fetch
           reset: true
           success: (collection, response, options) =>
