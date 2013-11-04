@@ -204,7 +204,6 @@ Service
   # Tenant Profile
   class TenantProfileView extends InnerFrameView
     @acts_as FormViewMixin
-    model: new Tenant(id: 0) # fake
     events:
       'click .btn-reset': 'reset'
       'click .btn-reload': 'reload'
@@ -212,14 +211,25 @@ Service
       super options
       @initForm()
       @form.onreset = =>
-        setTimeout =>
+        if @model then setTimeout =>
           @fill @model.attributes
         , 1
-      @on 'submit', @save.bind @
+        return
       $btnReload = $ find '.btn-reload', @el
-      @on 'reload', =>
+      $btns = $ findAll '.btn', @form
+      @on 'submit', =>
+        $btns.prop 'disabled', true
+        @save() # it will call reload, while will enable btns
+        return
+      @on 'reload', (force) =>
+        console.log 'reload'
         $btnReload.button 'loading'
-        @load -> $btnReload.button 'reset'
+        $btns.prop 'disabled', true
+        @load force, ->
+          $btnReload.button 'reset'
+          $btns.prop 'disabled', false
+          return
+        return
       @
     save: ->
       $btn = $(@_submit_btn)
@@ -233,14 +243,23 @@ Service
     render: ->
       @reload()
       super
-    reload: ->
-      @delayedTrigger 'reload', 100
-    load: (callback) ->
-      @model.fetch success: (data) =>
-        console.log 'fetch tenant', data.attributes
-        @model = data
-        @fill data.attributes
-        callback? data
+    reload: (force) ->
+      @delayedTrigger 'reload', 100, force
+    _delay: 60000 # 1min
+    _last_load: 0
+    load: (force, callback) ->
+      ts = new Date().getTime()
+      if force or ts - @_last_load > @_delay
+        @model = null
+        @form.reset()
+        Tenant.current?.fetch success: (data) =>
+          console.log 'fetch tenant', data.attributes
+          @model = Tenant.current = data
+          @fill data.attributes
+          @_last_load = new Date().getTime()
+          callback? data
+      else
+        callback? null
       @
 
   # User Editor

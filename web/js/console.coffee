@@ -5,7 +5,6 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
   class ConsoleView extends View
     el: '#main'
     user: sessionStorage.user
-    tenant: sessionStorage.tenant
     events:
       'touchstart #navbar .dropdown > a': (e) ->
         $el = $(e.currentTarget).parent()
@@ -48,9 +47,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         if @user
           user = new User JSON.parse @user
           user = null unless user.has 'email'
-        if @tenant
-          tenant = new Tenant JSON.parse @tenant
+          tenant = new Tenant user.get 'tenant'
           tenant = null unless tenant.has 'name'
+      console.log 'load from session', user, tenant
       @user = user
       @tenant = tenant
       @avatarEl = find 'img#avatar'
@@ -113,14 +112,16 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @$frames.find(".active[data-inner-frame]").not($target).removeClass 'active'
       @
     signout: ->
-      # TODO: real sign out
-      delete sessionStorage.user
-      delete sessionStorage.tenant
+      sessionStorage.clear()
+      # force browser forget basic auth
+      # User.current.fetch
+      #   headers:
+      #     Authorization: ''
       @user = @tenant = User.current = Tenant.current = null
       $.ajaxSetup
         headers:
           Accept: 'application/json'
-          Authorization: null
+          Authorization: ''
       SignInView.get().show()
       @hide()
       @trigger 'signout'
@@ -131,12 +132,11 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       if remember
         u = user.toJSON()
         delete u.password
+        u.tenant = tenant.toJSON()
         sessionStorage.user = JSON.stringify u
-        sessionStorage.tenant = JSON.stringify tenant.toJSON()
         console.log 'logged in', u
       else
         delete sessionStorage.user
-        delete sessionStorage.tenant
       # set ajax basic auth
       $.ajaxSetup
         headers:
@@ -198,12 +198,10 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
     _signIn: (email, password) ->
       @_disable true
       require ['crypto'], ({hashPassword, md5Email}) =>
-        # fake validation
         email = email.toLowerCase()
         hash = hashPassword email, password
         auth = 'Basic ' + btoa "#{email}:#{hash}"
-        user = new User {email}
-        user.fetch
+        new User({email}).fetch
           headers:
             Authorization: auth
           success: (user) =>
@@ -233,8 +231,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
               alert 'User not exist or email and password are not matched.'
             return
           error: (ignored, response) =>
+            console.error 'sign-in failed', response
             @_disable false
-            alert 'Sign in failed: ' + response
+            alert 'Sign in failed.\nUser not exist or email and password are not matched.'
             return
       return
     signedIn: (user, tenant) -> # test data only
