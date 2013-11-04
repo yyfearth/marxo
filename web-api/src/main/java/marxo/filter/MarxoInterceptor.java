@@ -1,6 +1,6 @@
 package marxo.filter;
 
-import marxo.controller.TenantChildController;
+import marxo.controller.IInterceptroPreHandlable;
 import marxo.tool.ILoggable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -12,16 +12,17 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 public class MarxoInterceptor extends HandlerInterceptorAdapter implements ILoggable {
 	/**
-	 * This interceptor calls setupDao if the handling controller is a tenantChildController.
+	 * This interceptor calls preHandle if the handling controller is a tenantChildController.
 	 */
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		if (handler instanceof HandlerMethod) {
 			HandlerMethod handlerMethod = (HandlerMethod) handler;
+			Object bean = handlerMethod.getBean();
 
-			if (handlerMethod.getBean() instanceof TenantChildController) {
-				TenantChildController tenantChildController = (TenantChildController) handlerMethod.getBean();
-				tenantChildController.setupDao();
+			if (bean instanceof IInterceptroPreHandlable) {
+				IInterceptroPreHandlable interceptroPreHandlable = (IInterceptroPreHandlable) bean;
+				interceptroPreHandlable.preHandle();
 			}
 		}
 
