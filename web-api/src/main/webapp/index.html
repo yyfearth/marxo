@@ -5,37 +5,58 @@
     <meta charset="UTF-8">
     <title>Marxo Development Tools</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
-    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 </head>
 <body>
 <div>
-    <p>
-        Shortcuts & tools:
-    </p>
+    <h1>
+        Web client
+    </h1>
     <ul>
         <li>
             <a href="/console/">Go to console</a>
         </li>
+    </ul>
+
+    <h1>
+        Entity API
+    </h1>
+    <ul id="api-list">
         <li>
-            <a href="/api/workflows">Get workflows</a>
+            <a href="api/workflows">Get workflows</a>
         </li>
         <li>
-            <a href="/api/workflows?name=Alpha">Search workflows</a>
+            <a href="api/workflows?name=Alpha">Search workflows</a>
         </li>
         <li>
-            <a href="/api/nodes">Get nodes</a>
+            <a href="api/nodes">Get nodes</a>
         </li>
         <li>
-            <a href="/api/links">Get links</a>
+            <a href="api/links">Get links</a>
         </li>
         <li>
-            <a href="/api/workflows/i-do-not-exist">Check error response</a>
+            <a href="api/workflows/i-do-not-exist">Check error response</a>
+        </li>
+    </ul>
+
+    <h1>
+        Channel API
+    </h1>
+    <ul>
+        <li>
+            <a href="/api/service/facebook">Facebook API</a>
         </li>
         <li>
-            <a id="login" href="#">Login</a>
+            <a target="_blank" href="https://developers.facebook.com/apps/213527892138380/insights?ref=nav&sk=ae_213527892138380">Check Facebook API error and usage</a>
         </li>
+    </ul>
+
+    <h1>
+        Lab (make sure you're not drunk)
+    </h1>
+    <ul>
         <li>
-            <b><a class="warning" href="/api/reset">Reset database using AdvancedGenerator (use it with caution)</a></b>
+            <b><a class="warning" href="/api/reset">Reset database with random data (use it with caution)</a></b>
         </li>
     </ul>
 </div>
@@ -44,47 +65,36 @@
 <script>
     // Additional JS functions here
     window.fbAsyncInit = function () {
-        console.log('window.fbAsyncInit');
+        console.log('Initialing Facebook SDK');
 
         FB.init({
             appId: '213527892138380', // App ID
 //            channelUrl: '//WWW.YOUR_DOMAIN.COM/channel.html', // Channel File
             status: true, // check login status
             cookie: true, // enable cookies to allow the server to access the session
-            xfbml: true  // parse XFBML
+            xfbml: false  // parse XFBML
         });
 
         FB.Event.subscribe('auth.authResponseChange', function (response) {
-            console.log(response);
+            console.log('FB subscrition response:', response);
+            console.log('access token: ', response.authResponse.accessToken);
+            console.log('expires in: ', response.authResponse.expiresIn);
+            console.log('signed request: ', response.authResponse.signedRequest);
             // Here we specify what we do with the response anytime this event occurs.
             if (response.status === 'connected') {
-                // The response object is returned with a status field that lets the app know the current
-                // login status of the person. In this case, we're handling the situation where they
-                // have logged in to the app.
+                console.log('The user is logged in');
                 testAPI();
             } else if (response.status === 'not_authorized') {
-                // In this case, the person is logged into Facebook, but not into the app, so we call
-                // FB.login() to prompt them to do so.
-                // In real-life usage, you wouldn't want to immediately prompt someone to login
-                // like this, for two reasons:
-                // (1) JavaScript created popup windows are blocked by most browsers unless they
-                // result from direct interaction from people using the app (such as a mouse click)
-                // (2) it is a bad experience to be continually prompted to login upon page load.
-                FB.login();
+                console.log("The user doesn't authorize the app yet.");
             } else {
-                // In this case, the person is not logged into Facebook, so we call the login()
-                // function to prompt them to do so. Note that at this stage there is no indication
-                // of whether they are logged into the app. If they aren't then they'll see the Login
-                // dialog right after they log in to Facebook.
-                // The same caveats as above apply to the FB.login() call here.
-                FB.login();
+                console.log('The user is not logged into Facebook');
             }
         });
     };
 
     // Load the SDK asynchronously
     (function (d) {
-        console.log('Load Facebook SDK');
+        console.log('Loading Facebook SDK');
         var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
         if (d.getElementById(id)) {
             return;
@@ -101,7 +111,8 @@
     function testAPI() {
         console.log('Welcome!  Fetching your information.... ');
         FB.api('/me', function (response) {
-            console.log(JSON.stringify(response));
+            console.log('Response is saved to window.response');
+            window.response = response;
         });
     }
 </script>
