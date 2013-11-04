@@ -122,9 +122,14 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         headers:
           Accept: 'application/json'
           Authorization: ''
-      SignInView.get().show()
+      @router.clear()
+      # TODO: reset all frames and views!
+      #SignInView.get().show()
       @hide()
       @trigger 'signout'
+      # before done reset all views, use this instead
+      location.hash = 'signin'
+      location.reload()
       @
     signin: (user, tenant, remember) ->
       @user = User.current = user
@@ -321,6 +326,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         @navigate opt.fallback, opt
       else
         console.log 'failed to go back for no last record'
+      @
+    clear: ->
+      @_last = @_cur = null
       @
     show: (frame, name, sub) ->
       unless ConsoleView.get().user?
