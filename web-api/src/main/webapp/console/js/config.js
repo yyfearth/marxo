@@ -373,31 +373,36 @@
 
       TenantProfileView.acts_as(FormViewMixin);
 
-      TenantProfileView.prototype.model = new Tenant({
-        id: 0
-      });
-
       TenantProfileView.prototype.events = {
         'click .btn-reset': 'reset',
         'click .btn-reload': 'reload'
       };
 
       TenantProfileView.prototype.initialize = function(options) {
-        var $btnReload,
+        var $btnReload, $btns,
           _this = this;
         TenantProfileView.__super__.initialize.call(this, options);
         this.initForm();
         this.form.onreset = function() {
-          return setTimeout(function() {
-            return _this.fill(_this.model.attributes);
-          }, 1);
+          if (_this.model) {
+            setTimeout(function() {
+              return _this.fill(_this.model.attributes);
+            }, 1);
+          }
         };
-        this.on('submit', this.save.bind(this));
         $btnReload = $(find('.btn-reload', this.el));
-        this.on('reload', function() {
+        $btns = $(findAll('.btn', this.form));
+        this.on('submit', function() {
+          $btns.prop('disabled', true);
+          _this.save();
+        });
+        this.on('reload', function(force) {
+          console.log('reload');
           $btnReload.button('loading');
-          return _this.load(function() {
-            return $btnReload.button('reset');
+          $btns.prop('disabled', true);
+          _this.load(force, function() {
+            $btnReload.button('reset');
+            $btns.prop('disabled', false);
           });
         });
         return this;
@@ -424,20 +429,37 @@
         return TenantProfileView.__super__.render.apply(this, arguments);
       };
 
-      TenantProfileView.prototype.reload = function() {
-        return this.delayedTrigger('reload', 100);
+      TenantProfileView.prototype.reload = function(force) {
+        return this.delayedTrigger('reload', 100, force);
       };
 
-      TenantProfileView.prototype.load = function(callback) {
-        var _this = this;
-        this.model.fetch({
-          success: function(data) {
-            console.log('fetch tenant', data.attributes);
-            _this.model = data;
-            _this.fill(data.attributes);
-            return typeof callback === "function" ? callback(data) : void 0;
+      TenantProfileView.prototype._delay = 60000;
+
+      TenantProfileView.prototype._last_load = 0;
+
+      TenantProfileView.prototype.load = function(force, callback) {
+        var ts, _ref6,
+          _this = this;
+        ts = new Date().getTime();
+        if (force || ts - this._last_load > this._delay) {
+          this.model = null;
+          this.form.reset();
+          if ((_ref6 = Tenant.current) != null) {
+            _ref6.fetch({
+              success: function(data) {
+                console.log('fetch tenant', data.attributes);
+                _this.model = Tenant.current = data;
+                _this.fill(data.attributes);
+                _this._last_load = new Date().getTime();
+                return typeof callback === "function" ? callback(data) : void 0;
+              }
+            });
           }
-        });
+        } else {
+          if (typeof callback === "function") {
+            callback(null);
+          }
+        }
         return this;
       };
 

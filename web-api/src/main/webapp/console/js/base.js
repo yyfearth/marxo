@@ -430,10 +430,6 @@
         return this;
       };
 
-      FormViewMixin.prototype._find = function(name, tag) {
-        return find("" + (tag || '') + "[name='" + name + "']", this.el);
-      };
-
       FormViewMixin.prototype.fill = function(attributes) {
         var checked, input, name, radio, value, _i, _len, _ref5;
         this._attributes = {};

@@ -6,7 +6,7 @@
     __slice = [].slice;
 
   define('content', ['base', 'models', 'manager', 'lib/jquery-ui', 'lib/bootstrap-fileupload', 'lib/bootstrap-wysiwyg'], function(_arg, _arg1, _arg2) {
-    var AutoIncOptionList, BoxFormView, BoxView, ChangeTypeMixin, Content, ContentActionCell, ContentEditorMixin, ContentFrameView, ContentManagerView, Contents, FormDialogView, FormViewMixin, FrameView, InnerFrameView, ManagerView, ModalDialogView, NavFilterView, PageDescView, PageDesigner, ProjectFilterView, SectionEditor, SubmitOptionsEditor, TextEditor, View, find, findAll, tpl, tplAll, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+    var AutoIncOptionList, BoxFormView, BoxView, ChangeTypeMixin, Content, ContentActionCell, ContentEditorMixin, ContentFrameView, ContentManagerView, Contents, EmailComposer, FormDialogView, FormViewMixin, FrameView, InnerFrameView, ManagerView, ModalDialogView, NavFilterView, PageDescView, PageDesigner, ProjectFilterView, RichEditorMixin, SectionEditor, SubmitOptionsEditor, TextEditor, View, find, findAll, tpl, tplAll, _ref, _ref1, _ref10, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
     find = _arg.find, findAll = _arg.findAll, tpl = _arg.tpl, tplAll = _arg.tplAll, View = _arg.View, BoxView = _arg.BoxView, FrameView = _arg.FrameView, InnerFrameView = _arg.InnerFrameView, ModalDialogView = _arg.ModalDialogView, FormViewMixin = _arg.FormViewMixin, FormDialogView = _arg.FormDialogView;
     Contents = _arg1.Contents, Content = _arg1.Content;
     ManagerView = _arg2.ManagerView, NavFilterView = _arg2.NavFilterView, ProjectFilterView = _arg2.ProjectFilterView;
@@ -28,7 +28,7 @@
           el: '#text_editor',
           parent: this
         });
-        this.composer = new TextEditor({
+        this.composer = new EmailComposer({
           el: '#email_composer',
           parent: this
         });
@@ -134,6 +134,121 @@
       return ContentEditorMixin;
 
     })();
+    RichEditorMixin = (function() {
+      function RichEditorMixin() {}
+
+      RichEditorMixin.prototype._fonts = ['Serif', 'Sans', 'Arial', 'Arial Black', 'Courier', 'Courier New', 'Comic Sans MS', 'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans', 'Tahoma', 'Times', 'Times New Roman', 'Verdana'];
+
+      RichEditorMixin.prototype.events = {
+        'click .btn.hyperlink': function(e) {
+          return setTimeout(function() {
+            return $(e.currentTarget).siblings('.dropdown-menu').find('input').focus();
+          }, 200);
+        },
+        'click .btn-switch': '_switch'
+      };
+
+      RichEditorMixin.prototype.readOnlyHtml = function(val) {
+        this.readOnly = val;
+        this.$editor.attr('contenteditable', !val);
+        this.$code.attr('readonly', val);
+        this.$edits.prop('disabled', val);
+        return this;
+      };
+
+      RichEditorMixin.prototype.fillHtml = function(html) {
+        this.$editor.html(html || '');
+        return this;
+      };
+
+      RichEditorMixin.prototype.readHtml = function() {
+        if (this.$code.is(':visible')) {
+          return this.$code.val();
+        } else {
+          return this.$editor.cleanHtml();
+        }
+      };
+
+      RichEditorMixin.prototype.resetHtml = function() {
+        this.$code.val('');
+        this._switch(false);
+        this.$el.find('.btn-switch').removeClass('active');
+        return this;
+      };
+
+      RichEditorMixin.prototype._renderFonts = function() {
+        var a, flagment, fontName, fontTarget, li, _i, _len, _ref1;
+        fontTarget = find('.fonts-select', this.el);
+        fontTarget.innerHTML = '';
+        flagment = document.createDocumentFragment();
+        _ref1 = this._fonts;
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          fontName = _ref1[_i];
+          li = document.createElement('li');
+          a = document.createElement('a');
+          a.dataset.edit = "fontName " + fontName;
+          a.style.fontFamily = fontName;
+          a.textContent = fontName;
+          li.appendChild(a);
+          flagment.appendChild(li);
+        }
+        fontTarget.appendChild(flagment);
+      };
+
+      RichEditorMixin.prototype.renderRichEditor = function() {
+        this._renderFonts();
+        this.$el.find('.dropdown-menu input').click(function() {
+          return false;
+        }).change(function() {
+          return $(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');
+        }).keydown(function(e) {
+          if (e.which === 27) {
+            this.value = '';
+            $(this).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');
+          }
+          return true;
+        });
+        this.$el.find('[type=file]').each(function() {
+          var overlay, target;
+          overlay = $(this);
+          target = $(overlay.data('target'));
+          return overlay.css({
+            opacity: 0,
+            position: 'absolute',
+            cursor: 'pointer'
+          }).offset(target.offset()).width(target.outerWidth()).height(target.outerHeight());
+        });
+        this.$editor = this.$el.find('.rich-editor').wysiwyg();
+        this.$code = this.$editor.siblings('.rich-editor-html');
+        this.$edits = this.$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit');
+        this.$edits.tooltip({
+          container: this.el
+        });
+        return this;
+      };
+
+      RichEditorMixin.prototype._switch = function(toCode) {
+        var $code, $editor;
+        $editor = this.$editor;
+        $code = this.$code;
+        if (typeof toCode !== 'boolean') {
+          toCode = !$code.is(':visible');
+        }
+        if (toCode) {
+          $editor.hide();
+          $code.show().val($editor.cleanHtml());
+        } else {
+          $code.hide();
+          $editor.show().html($code.val());
+        }
+        if (!this.readOnly) {
+          this.$edits.prop('disabled', toCode);
+        }
+      };
+
+      return RichEditorMixin;
+
+    })();
     TextEditor = (function(_super) {
       __extends(TextEditor, _super);
 
@@ -144,7 +259,7 @@
 
       TextEditor.acts_as(ContentEditorMixin);
 
-      TextEditor.prototype.popup = function(data, callback) {
+      TextEditor.prototype.popup = function(data, ignored, callback) {
         var posted;
         TextEditor.__super__.popup.call(this, data, callback);
         this.fill(data);
@@ -190,12 +305,67 @@
       return TextEditor;
 
     })(FormDialogView);
+    EmailComposer = (function(_super) {
+      __extends(EmailComposer, _super);
+
+      function EmailComposer() {
+        _ref2 = EmailComposer.__super__.constructor.apply(this, arguments);
+        return _ref2;
+      }
+
+      EmailComposer.acts_as(ContentEditorMixin, RichEditorMixin);
+
+      EmailComposer.prototype.popup = function(data, ignored, callback) {
+        var posted;
+        EmailComposer.__super__.popup.call(this, data, callback);
+        this.fill(data);
+        posted = 'POSTED' === data.get('status');
+        this.readOnlyHtml(posted);
+        this.btnSave.disabled = posted;
+        return this;
+      };
+
+      EmailComposer.prototype.fill = function(data) {
+        EmailComposer.__super__.fill.call(this, data.attributes);
+        this.fillHtml(data.get('desc'));
+        return this;
+      };
+
+      EmailComposer.prototype.read = function() {
+        var data;
+        data = EmailComposer.__super__.read.apply(this, arguments);
+        data.desc = this.readHtml();
+        return data;
+      };
+
+      EmailComposer.prototype.save = function() {
+        this.data.set(this.read());
+        this.callback('save');
+        this.hide(true);
+        return this;
+      };
+
+      EmailComposer.prototype.reset = function() {
+        EmailComposer.__super__.reset.apply(this, arguments);
+        this.resetHtml();
+        return this;
+      };
+
+      EmailComposer.prototype.render = function() {
+        EmailComposer.__super__.render.apply(this, arguments);
+        this.renderRichEditor();
+        return this;
+      };
+
+      return EmailComposer;
+
+    })(FormDialogView);
     PageDesigner = (function(_super) {
       __extends(PageDesigner, _super);
 
       function PageDesigner() {
-        _ref2 = PageDesigner.__super__.constructor.apply(this, arguments);
-        return _ref2;
+        _ref3 = PageDesigner.__super__.constructor.apply(this, arguments);
+        return _ref3;
       }
 
       PageDesigner.acts_as(ContentEditorMixin);
@@ -271,7 +441,7 @@
       };
 
       PageDesigner.prototype.read = function(callback) {
-        var data, defered, el, read, _i, _idx, _len, _ref3;
+        var data, defered, el, read, _i, _idx, _len, _ref4;
         read = function(formView) {
           var deferred, _t;
           deferred = $.Deferred();
@@ -294,9 +464,9 @@
           throw new Error('content editor read is async, callback is needed');
         }
         defered = [read(this.pageDesc)];
-        _ref3 = findAll('.box.section', this.el);
-        for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-          el = _ref3[_i];
+        _ref4 = findAll('.box.section', this.el);
+        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+          el = _ref4[_i];
           _idx = el.dataset.idx;
           data = read(this.sections[_idx]);
           defered.push(data);
@@ -370,7 +540,7 @@
       };
 
       PageDesigner.prototype.showPreview = function(data) {
-        var btnCls, cls, html, iframe, url, _ref3;
+        var btnCls, cls, html, iframe, url, _ref4;
         if (!data) {
           throw new Error('data is empty for gen preview');
         }
@@ -384,8 +554,8 @@
           if (!('srcdoc' in iframe)) {
             url = 'javascript: window.frameElement.getAttribute("srcdoc");';
             iframe.src = url;
-            if ((_ref3 = iframe.contentWindow) != null) {
-              _ref3.location = url;
+            if ((_ref4 = iframe.contentWindow) != null) {
+              _ref4.location = url;
             }
           }
         }
@@ -455,8 +625,8 @@
       __extends(BoxFormView, _super);
 
       function BoxFormView() {
-        _ref3 = BoxFormView.__super__.constructor.apply(this, arguments);
-        return _ref3;
+        _ref4 = BoxFormView.__super__.constructor.apply(this, arguments);
+        return _ref4;
       }
 
       BoxFormView.acts_as(FormViewMixin);
@@ -477,106 +647,35 @@
       __extends(PageDescView, _super);
 
       function PageDescView() {
-        _ref4 = PageDescView.__super__.constructor.apply(this, arguments);
-        return _ref4;
+        _ref5 = PageDescView.__super__.constructor.apply(this, arguments);
+        return _ref5;
       }
 
-      PageDescView.prototype._fonts = ['Serif', 'Sans', 'Arial', 'Arial Black', 'Courier', 'Courier New', 'Comic Sans MS', 'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans', 'Tahoma', 'Times', 'Times New Roman', 'Verdana'];
-
-      PageDescView.prototype.events = {
-        'click .btn.hyperlink': function(e) {
-          return setTimeout(function() {
-            return $(e.currentTarget).siblings('.dropdown-menu').find('input').focus();
-          }, 200);
-        },
-        'click .btn-switch': '_switch'
-      };
+      PageDescView.acts_as(RichEditorMixin);
 
       PageDescView.prototype.fill = function(data) {
         PageDescView.__super__.fill.call(this, data);
-        this.$editor.html(data.desc || '');
+        this.fillHtml(data.desc);
         return this;
       };
 
       PageDescView.prototype.read = function() {
         var data;
         data = PageDescView.__super__.read.apply(this, arguments);
-        data.desc = this.$code.is(':visible') ? this.$code.val() : this.$editor.cleanHtml();
+        data.desc = this.readHtml();
         return data;
       };
 
       PageDescView.prototype.reset = function() {
         PageDescView.__super__.reset.apply(this, arguments);
-        this.$code.val('');
-        this._switch(false);
-        this.$el.find('.btn-switch').removeClass('active');
+        this.resetHtml();
         return this;
-      };
-
-      PageDescView.prototype._renderFonts = function() {
-        var a, flagment, fontName, fontTarget, li, _i, _len, _ref5;
-        fontTarget = find('.fonts-select', this.el);
-        fontTarget.innerHTML = '';
-        flagment = document.createDocumentFragment();
-        _ref5 = this._fonts;
-        for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
-          fontName = _ref5[_i];
-          li = document.createElement('li');
-          a = document.createElement('a');
-          a.dataset.edit = "fontName " + fontName;
-          a.style.fontFamily = fontName;
-          a.textContent = fontName;
-          li.appendChild(a);
-          flagment.appendChild(li);
-        }
-        return fontTarget.appendChild(flagment);
       };
 
       PageDescView.prototype.render = function() {
         PageDescView.__super__.render.apply(this, arguments);
-        this._renderFonts();
-        this.$el.find('.dropdown-menu input').click(function() {
-          return false;
-        }).change(function() {
-          return $(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');
-        }).keydown(function(e) {
-          if (e.which === 27) {
-            this.value = '';
-            $(this).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');
-          }
-          return true;
-        });
-        this.$el.find('[type=file]').each(function() {
-          var overlay, target;
-          overlay = $(this);
-          target = $(overlay.data('target'));
-          return overlay.css({
-            opacity: 0,
-            position: 'absolute',
-            cursor: 'pointer'
-          }).offset(target.offset()).width(target.outerWidth()).height(target.outerHeight());
-        });
-        this.$editor = this.$el.find('.rich-editor').wysiwyg();
-        this.$code = this.$editor.siblings('.rich-editor-html');
-        this.$edits = this.$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit');
+        this.renderRichEditor();
         return this;
-      };
-
-      PageDescView.prototype._switch = function(toCode) {
-        var $code, $editor;
-        $editor = this.$editor;
-        $code = this.$code;
-        if (typeof toCode !== 'boolean') {
-          toCode = !$code.is(':visible');
-        }
-        if (toCode) {
-          $editor.hide();
-          $code.show().val($editor.cleanHtml());
-        } else {
-          $code.hide();
-          $editor.show().html($code.val());
-        }
-        return this.$edits.prop('disabled', toCode);
       };
 
       return PageDescView;
@@ -586,15 +685,15 @@
       function ChangeTypeMixin() {}
 
       ChangeTypeMixin.prototype.changeType = function(type) {
-        var cls, field, required, show, _i, _len, _ref5;
+        var cls, field, required, show, _i, _len, _ref6;
         if (type !== this._type) {
           this.trigger('type_change', type, this._type);
           if (this.optionFields == null) {
             this.optionFields = findAll('.option-field', this.el);
           }
-          _ref5 = this.optionFields;
-          for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
-            field = _ref5[_i];
+          _ref6 = this.optionFields;
+          for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
+            field = _ref6[_i];
             cls = field.classList;
             show = type && cls.contains(type + '-option');
             required = find('[data-option-required]', field);
@@ -619,8 +718,8 @@
       __extends(SubmitOptionsEditor, _super);
 
       function SubmitOptionsEditor() {
-        _ref5 = SubmitOptionsEditor.__super__.constructor.apply(this, arguments);
-        return _ref5;
+        _ref6 = SubmitOptionsEditor.__super__.constructor.apply(this, arguments);
+        return _ref6;
       }
 
       SubmitOptionsEditor.acts_as(ChangeTypeMixin);
@@ -646,8 +745,8 @@
       __extends(SectionEditor, _super);
 
       function SectionEditor() {
-        _ref6 = SectionEditor.__super__.constructor.apply(this, arguments);
-        return _ref6;
+        _ref7 = SectionEditor.__super__.constructor.apply(this, arguments);
+        return _ref7;
       }
 
       SectionEditor.acts_as(ChangeTypeMixin);
@@ -825,8 +924,8 @@
       __extends(AutoIncOptionList, _super);
 
       function AutoIncOptionList() {
-        _ref7 = AutoIncOptionList.__super__.constructor.apply(this, arguments);
-        return _ref7;
+        _ref8 = AutoIncOptionList.__super__.constructor.apply(this, arguments);
+        return _ref8;
       }
 
       AutoIncOptionList.prototype.events = {
@@ -946,8 +1045,8 @@
       __extends(ContentActionCell, _super);
 
       function ContentActionCell() {
-        _ref8 = ContentActionCell.__super__.constructor.apply(this, arguments);
-        return _ref8;
+        _ref9 = ContentActionCell.__super__.constructor.apply(this, arguments);
+        return _ref9;
       }
 
       ContentActionCell.prototype.render = function() {
@@ -988,8 +1087,8 @@
       __extends(ContentManagerView, _super);
 
       function ContentManagerView() {
-        _ref9 = ContentManagerView.__super__.constructor.apply(this, arguments);
-        return _ref9;
+        _ref10 = ContentManagerView.__super__.constructor.apply(this, arguments);
+        return _ref10;
       }
 
       ContentManagerView.prototype.columns = [

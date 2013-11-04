@@ -19,8 +19,6 @@
 
       ConsoleView.prototype.user = sessionStorage.user;
 
-      ConsoleView.prototype.tenant = sessionStorage.tenant;
-
       ConsoleView.prototype.events = {
         'touchstart #navbar .dropdown > a': function(e) {
           var $el;
@@ -87,14 +85,13 @@
             if (!user.has('email')) {
               user = null;
             }
-          }
-          if (this.tenant) {
-            tenant = new Tenant(JSON.parse(this.tenant));
+            tenant = new Tenant(user.get('tenant'));
             if (!tenant.has('name')) {
               tenant = null;
             }
           }
         } catch (_error) {}
+        console.log('load from session', user, tenant);
         this.user = user;
         this.tenant = tenant;
         this.avatarEl = find('img#avatar');
@@ -183,13 +180,12 @@
       };
 
       ConsoleView.prototype.signout = function() {
-        delete sessionStorage.user;
-        delete sessionStorage.tenant;
+        sessionStorage.clear();
         this.user = this.tenant = User.current = Tenant.current = null;
         $.ajaxSetup({
           headers: {
             Accept: 'application/json',
-            Authorization: null
+            Authorization: ''
           }
         });
         SignInView.get().show();
@@ -205,12 +201,11 @@
         if (remember) {
           u = user.toJSON();
           delete u.password;
+          u.tenant = tenant.toJSON();
           sessionStorage.user = JSON.stringify(u);
-          sessionStorage.tenant = JSON.stringify(tenant.toJSON());
           console.log('logged in', u);
         } else {
           delete sessionStorage.user;
-          delete sessionStorage.tenant;
         }
         $.ajaxSetup({
           headers: {
@@ -310,15 +305,14 @@
         var _this = this;
         this._disable(true);
         require(['crypto'], function(_arg1) {
-          var auth, hash, hashPassword, md5Email, user;
+          var auth, hash, hashPassword, md5Email;
           hashPassword = _arg1.hashPassword, md5Email = _arg1.md5Email;
           email = email.toLowerCase();
           hash = hashPassword(email, password);
           auth = 'Basic ' + btoa("" + email + ":" + hash);
-          user = new User({
+          return new User({
             email: email
-          });
-          return user.fetch({
+          }).fetch({
             headers: {
               Authorization: auth
             },
@@ -358,8 +352,9 @@
               }
             },
             error: function(ignored, response) {
+              console.error('sign-in failed', response);
               _this._disable(false);
-              alert('Sign in failed: ' + response);
+              alert('Sign in failed.\nUser not exist or email and password are not matched.');
             }
           });
         });

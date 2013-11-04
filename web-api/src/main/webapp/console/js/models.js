@@ -7,7 +7,7 @@
 
   define('models', ['lib/common'], function() {
     var Action, Actions, ChangeObserableEntity, Collection, Content, Contents, Entity, Event, Events, Link, Links, ManagerCollection, Node, Nodes, Notification, Notifications, Project, Projects, Publisher, Publishers, ROOT, Report, Reports, Service, Tenant, User, Workflow, Workflows, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-    ROOT = '/api';
+    ROOT = '../api';
     Entity = Backbone.Model;
     Collection = Backbone.Collection;
     ManagerCollection = (function(_super) {
@@ -40,7 +40,7 @@
         if (delay == null) {
           delay = this._delay;
         }
-        if (!this._last_load || (Date.now() - this._last_load) > delay) {
+        if (!this._last_load || delay < 1 || (Date.now() - this._last_load) > delay) {
           this.fetch({
             reset: true,
             success: function(collection, response, options) {
