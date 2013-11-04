@@ -109,6 +109,8 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				}
 				workflow.name += " Workflow " + i;
 
+				workflow.fillWithDefaultValues();
+
 				// Nodes
 				int numNodes = threadLocalRandom.nextInt(2, 8);
 				workflow.nodeIdList = new ArrayList<>(numNodes);
@@ -167,8 +169,6 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					condition.fillWithDefaultValues();
 					link.condition = condition;
 				}
-
-				workflow.fillWithDefaultValues();
 			}
 		}
 
