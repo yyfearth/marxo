@@ -7,9 +7,11 @@ import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
 import marxo.entity.*;
+import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +34,15 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@Autowired
 	public WorkflowController(WorkflowDao workflowDao) {
 		super(workflowDao);
+	}
+
+	@Override
+	public void preHandle() {
+		super.preHandle();
+		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
+		User user = marxoAuthentication.getUser();
+		nodeDao.setTenantId(user.tenantId);
+		linkDao.setTenantId(user.tenantId);
 	}
 
 	@Override
