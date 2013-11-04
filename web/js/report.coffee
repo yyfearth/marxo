@@ -1050,10 +1050,8 @@ ProjectFilterView
         .x((d) -> new Date(d[0]).getTime()).y((d) -> d[1])
         .transitionDuration(300)
         # .width(600).height(500)
-
-        #.clipEdge(true);
-
-        # chart.stacked.scatter.clipVoronoi(false);
+        #.clipEdge(true)
+        # chart.stacked.scatter.clipVoronoi(false)
         chart.xAxis.tickFormat (d) ->
           d3.time.format("%x") new Date(d)
 
