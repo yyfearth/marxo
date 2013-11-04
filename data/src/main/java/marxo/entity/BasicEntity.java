@@ -24,7 +24,6 @@ public abstract class BasicEntity {
 	public ObjectId id;
 	@Field(order = 3)
 	public String name;
-	@JsonIgnore
 	@Field(order = 4)
 	public String key;
 	@JsonProperty("created_at")
@@ -41,10 +40,6 @@ public abstract class BasicEntity {
 	public ObjectId modifiedByUserId;
 	@JsonProperty("desc")
 	public String description;
-
-	public String getKey() {
-		return key;
-	}
 
 	@JsonProperty("id")
 	public String getJsonId() {
