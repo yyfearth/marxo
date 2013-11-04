@@ -19,11 +19,18 @@ User
       @initForm()
       @btn = find '#update_user', @el
       @avatar = find '#user_avatar img', @el
+      @on 'load', @load.bind @
+      @on 'activate', => @delayedTrigger 'load', 100
     render: ->
       super
-      @model.fetch success: (data) =>
+      @delayedTrigger 'load', 100
+    load: ->
+      (@model = User.current).fetch success: (data) =>
+        unless User.current?
+          console.warn 'user logged out'
+          return
         console.log 'fetch tenant', data.attributes
-        @model = data
+        @model = User.current = data
         attrs = data.toJSON()
         sex = attrs.sex
         attrs.sex = unless sex then 'Unspecified' else sex.charAt(0).toUpperCase() + sex[1..]
@@ -33,5 +40,6 @@ User
         @btn.href = '#config/users/' + data.id
         $(@btn).removeAttr 'disabled'
         return
+      @
 
   ProfileFrameView
