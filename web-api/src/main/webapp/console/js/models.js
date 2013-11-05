@@ -5,11 +5,11 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
 
-  console.log('ver', 2);
+  console.log('ver', 3);
 
   define('models', ['lib/common'], function() {
     var Action, Actions, ChangeObserableEntity, Collection, Content, Contents, Entity, Event, Events, Link, Links, ManagerCollection, Node, Nodes, Notification, Notifications, Project, Projects, Publisher, Publishers, ROOT, Report, Reports, Service, SimpleCollection, Tenant, User, Workflow, Workflows, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9, _setAuth;
-    ROOT = 'http://masonwan.com/marxo/api';
+    ROOT = '../api';
     _setAuth = function(options) {
       var _base, _base1, _ref;
       if (options.headers == null) {

@@ -185,6 +185,8 @@
         this.router.clear();
         this.hide();
         this.trigger('signout');
+        location.hash = 'signin';
+        location.reload();
         return this;
       };
 
