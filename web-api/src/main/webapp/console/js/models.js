@@ -5,11 +5,61 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
 
+  console.log('ver', 2);
+
   define('models', ['lib/common'], function() {
-    var Action, Actions, ChangeObserableEntity, Collection, Content, Contents, Entity, Event, Events, Link, Links, ManagerCollection, Node, Nodes, Notification, Notifications, Project, Projects, Publisher, Publishers, ROOT, Report, Reports, Service, Tenant, User, Workflow, Workflows, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-    ROOT = '../api';
-    Entity = Backbone.Model;
+    var Action, Actions, ChangeObserableEntity, Collection, Content, Contents, Entity, Event, Events, Link, Links, ManagerCollection, Node, Nodes, Notification, Notifications, Project, Projects, Publisher, Publishers, ROOT, Report, Reports, Service, SimpleCollection, Tenant, User, Workflow, Workflows, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref14, _ref15, _ref16, _ref17, _ref18, _ref19, _ref2, _ref20, _ref21, _ref22, _ref23, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9, _setAuth;
+    ROOT = 'http://masonwan.com/marxo/api';
+    _setAuth = function(options) {
+      var _base, _base1, _ref;
+      if (options.headers == null) {
+        options.headers = {};
+      }
+      if ((_base = options.headers).Accept == null) {
+        _base.Accept = 'application/json';
+      }
+      if ((_base1 = options.headers).Authorization == null) {
+        _base1.Authorization = ((_ref = User.current) != null ? _ref.get('credential') : void 0) || '';
+      }
+      return options;
+    };
+    Entity = (function(_super) {
+      __extends(Entity, _super);
+
+      function Entity() {
+        _ref = Entity.__super__.constructor.apply(this, arguments);
+        return _ref;
+      }
+
+      Entity.prototype.sync = function(method, model, options) {
+        if (options == null) {
+          options = {};
+        }
+        return Entity.__super__.sync.call(this, method, model, _setAuth(options));
+      };
+
+      return Entity;
+
+    })(Backbone.Model);
     Collection = Backbone.Collection;
+    SimpleCollection = (function(_super) {
+      __extends(SimpleCollection, _super);
+
+      function SimpleCollection() {
+        _ref1 = SimpleCollection.__super__.constructor.apply(this, arguments);
+        return _ref1;
+      }
+
+      SimpleCollection.prototype.sync = function(method, model, options) {
+        if (options == null) {
+          options = {};
+        }
+        return SimpleCollection.__super__.sync.call(this, method, model, _setAuth(options));
+      };
+
+      return SimpleCollection;
+
+    })(Collection);
     ManagerCollection = (function(_super) {
       __extends(ManagerCollection, _super);
 
@@ -22,14 +72,14 @@
       ManagerCollection.prototype._delay = 1000;
 
       function ManagerCollection() {
-        var key, options, value, _ref;
+        var key, options, value, _ref2;
         options = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         if (this.state == null) {
           this.state = {};
         }
-        _ref = this.defaultState;
-        for (key in _ref) {
-          value = _ref[key];
+        _ref2 = this.defaultState;
+        for (key in _ref2) {
+          value = _ref2[key];
           this.state[key] = value;
         }
         ManagerCollection.__super__.constructor.apply(this, options);
@@ -59,6 +109,13 @@
         return this;
       };
 
+      ManagerCollection.prototype.sync = function(method, model, options) {
+        if (options == null) {
+          options = {};
+        }
+        return ManagerCollection.__super__.sync.call(this, method, model, _setAuth(options));
+      };
+
       return ManagerCollection;
 
     })(Backbone.PageableCollection);
@@ -66,8 +123,8 @@
       __extends(Tenant, _super);
 
       function Tenant() {
-        _ref = Tenant.__super__.constructor.apply(this, arguments);
-        return _ref;
+        _ref2 = Tenant.__super__.constructor.apply(this, arguments);
+        return _ref2;
       }
 
       Tenant.prototype.urlRoot = ROOT + '/tenants';
@@ -79,8 +136,8 @@
       __extends(User, _super);
 
       function User() {
-        _ref1 = User.__super__.constructor.apply(this, arguments);
-        return _ref1;
+        _ref3 = User.__super__.constructor.apply(this, arguments);
+        return _ref3;
       }
 
       User.prototype.urlRoot = ROOT + '/users';
@@ -106,8 +163,8 @@
       __extends(Publisher, _super);
 
       function Publisher() {
-        _ref2 = Publisher.__super__.constructor.apply(this, arguments);
-        return _ref2;
+        _ref4 = Publisher.__super__.constructor.apply(this, arguments);
+        return _ref4;
       }
 
       return Publisher;
@@ -117,15 +174,13 @@
       __extends(Publishers, _super);
 
       function Publishers() {
-        _ref3 = Publishers.__super__.constructor.apply(this, arguments);
-        return _ref3;
+        _ref5 = Publishers.__super__.constructor.apply(this, arguments);
+        return _ref5;
       }
 
       Publishers.prototype.model = Publisher;
 
       Publishers.prototype.url = Publisher.prototype.urlRoot;
-
-      Publishers.prototype.sync = Publisher.prototype.sync;
 
       return Publishers;
 
@@ -164,7 +219,6 @@
           url: url + '/links'
         });
         links._loaded = _links_loaded;
-        nodes.sync = links.sync = this.sync;
         _deleted = this._deleted = [];
         _createNodeRef = this._createNodeRef.bind(this);
         nodes.forEach(_createNodeRef);
@@ -192,12 +246,12 @@
       };
 
       Workflow.prototype.fetch = function(options) {
-        var _ref4, _success,
+        var _ref6, _success,
           _this = this;
         if (options == null) {
           options = {};
         }
-        _success = (_ref4 = options.success) != null ? _ref4.bind(this) : void 0;
+        _success = (_ref6 = options.success) != null ? _ref6.bind(this) : void 0;
         options.success = function(collection, response, options) {
           _this._warp(collection);
           return typeof _success === "function" ? _success(collection, response, options) : void 0;
@@ -207,42 +261,42 @@
       };
 
       Workflow.prototype.loaded = function() {
-        var _ref4, _ref5;
-        return Boolean(((_ref4 = this.nodes) != null ? _ref4._loaded : void 0) && ((_ref5 = this.links) != null ? _ref5._loaded : void 0));
+        var _ref6, _ref7;
+        return Boolean(((_ref6 = this.nodes) != null ? _ref6._loaded : void 0) && ((_ref7 = this.links) != null ? _ref7._loaded : void 0));
       };
 
       Workflow.prototype.save = function(attributes, options) {
-        var isLocalTest, link_ids, node_ids, _ref10, _ref11, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
+        var isLocalTest, link_ids, node_ids, _ref10, _ref11, _ref12, _ref13, _ref6, _ref7, _ref8, _ref9,
           _this = this;
         if (attributes == null) {
           attributes = {};
         }
-        node_ids = (_ref4 = this.nodes) != null ? _ref4.map(function(r) {
+        node_ids = (_ref6 = this.nodes) != null ? _ref6.map(function(r) {
           return r.id;
         }) : void 0;
-        link_ids = (_ref5 = this.links) != null ? _ref5.map(function(r) {
+        link_ids = (_ref7 = this.links) != null ? _ref7.map(function(r) {
           return r.id;
         }) : void 0;
-        if ((node_ids != null ? node_ids.join(',') : void 0) !== ((_ref6 = this.get('node_ids')) != null ? _ref6.join(',') : void 0)) {
+        if ((node_ids != null ? node_ids.join(',') : void 0) !== ((_ref8 = this.get('node_ids')) != null ? _ref8.join(',') : void 0)) {
           attributes.node_ids = node_ids;
         }
-        if ((link_ids != null ? link_ids.join(',') : void 0) !== ((_ref7 = this.get('link_ids')) != null ? _ref7.join(',') : void 0)) {
+        if ((link_ids != null ? link_ids.join(',') : void 0) !== ((_ref9 = this.get('link_ids')) != null ? _ref9.join(',') : void 0)) {
           attributes.link_ids = link_ids;
         }
         if (isLocalTest = (Backbone.LocalStorage != null) && this.sync !== Backbone.ajaxSync) {
           if (this.nodes != null) {
-            attributes.nodes = (_ref8 = this.nodes) != null ? _ref8.map(function(r) {
+            attributes.nodes = (_ref10 = this.nodes) != null ? _ref10.map(function(r) {
               return r.attributes;
             }) : void 0;
           }
           if (this.links != null) {
-            attributes.links = (_ref9 = this.links) != null ? _ref9.map(function(r) {
+            attributes.links = (_ref11 = this.links) != null ? _ref11.map(function(r) {
               return r.attributes;
             }) : void 0;
           }
         }
-        if ((_ref10 = this.nodes) != null) {
-          _ref10.forEach(function(node) {
+        if ((_ref12 = this.nodes) != null) {
+          _ref12.forEach(function(node) {
             if (node.isNew()) {
               return _this.nodes.create(node, {
                 wait: true
@@ -253,8 +307,8 @@
             }
           });
         }
-        if ((_ref11 = this.links) != null) {
-          _ref11.forEach(function(link) {
+        if ((_ref13 = this.links) != null) {
+          _ref13.forEach(function(link) {
             if (link.isNew()) {
               return _this.links.create(link, {
                 wait: true
@@ -408,16 +462,16 @@
       };
 
       Workflow.prototype.hasLink = function(from, to) {
-        var link, _i, _len, _ref4;
+        var link, _i, _len, _ref6;
         if (typeof from === 'string') {
           from = this.nodes.get(from);
         }
         if (typeof to === 'string') {
           to = this.nodes.get(to);
         }
-        _ref4 = from.outLinks;
-        for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
-          link = _ref4[_i];
+        _ref6 = from.outLinks;
+        for (_i = 0, _len = _ref6.length; _i < _len; _i++) {
+          link = _ref6[_i];
           if (link.nextNode === to) {
             return true;
           }
@@ -432,8 +486,8 @@
       __extends(Workflows, _super);
 
       function Workflows() {
-        _ref4 = Workflows.__super__.constructor.apply(this, arguments);
-        return _ref4;
+        _ref6 = Workflows.__super__.constructor.apply(this, arguments);
+        return _ref6;
       }
 
       Workflows.workflows = new Workflows;
@@ -443,8 +497,6 @@
       Workflows.prototype.url = Workflow.prototype.urlRoot;
 
       Workflows.prototype._delay = 600000;
-
-      Workflows.prototype.sync = Workflow.prototype.sync;
 
       return Workflows;
 
@@ -484,8 +536,8 @@
       __extends(Node, _super);
 
       function Node() {
-        _ref5 = Node.__super__.constructor.apply(this, arguments);
-        return _ref5;
+        _ref7 = Node.__super__.constructor.apply(this, arguments);
+        return _ref7;
       }
 
       Node.prototype._name = 'node';
@@ -507,8 +559,8 @@
       __extends(Nodes, _super);
 
       function Nodes() {
-        _ref6 = Nodes.__super__.constructor.apply(this, arguments);
-        return _ref6;
+        _ref8 = Nodes.__super__.constructor.apply(this, arguments);
+        return _ref8;
       }
 
       Nodes.prototype.model = Node;
@@ -517,13 +569,13 @@
 
       return Nodes;
 
-    })(Collection);
+    })(SimpleCollection);
     Link = (function(_super) {
       __extends(Link, _super);
 
       function Link() {
-        _ref7 = Link.__super__.constructor.apply(this, arguments);
-        return _ref7;
+        _ref9 = Link.__super__.constructor.apply(this, arguments);
+        return _ref9;
       }
 
       Link.prototype._name = 'link';
@@ -541,8 +593,8 @@
       __extends(Links, _super);
 
       function Links() {
-        _ref8 = Links.__super__.constructor.apply(this, arguments);
-        return _ref8;
+        _ref10 = Links.__super__.constructor.apply(this, arguments);
+        return _ref10;
       }
 
       Links.prototype.model = Link;
@@ -551,13 +603,13 @@
 
       return Links;
 
-    })(Collection);
+    })(SimpleCollection);
     Action = (function(_super) {
       __extends(Action, _super);
 
       function Action() {
-        _ref9 = Action.__super__.constructor.apply(this, arguments);
-        return _ref9;
+        _ref11 = Action.__super__.constructor.apply(this, arguments);
+        return _ref11;
       }
 
       return Action;
@@ -567,28 +619,26 @@
       __extends(Actions, _super);
 
       function Actions() {
-        _ref10 = Actions.__super__.constructor.apply(this, arguments);
-        return _ref10;
+        _ref12 = Actions.__super__.constructor.apply(this, arguments);
+        return _ref12;
       }
 
       Actions.prototype.model = Action;
 
       return Actions;
 
-    })(Collection);
+    })(SimpleCollection);
     Project = (function(_super) {
       __extends(Project, _super);
 
       function Project() {
-        _ref11 = Project.__super__.constructor.apply(this, arguments);
-        return _ref11;
+        _ref13 = Project.__super__.constructor.apply(this, arguments);
+        return _ref13;
       }
 
       Project.prototype._name = 'project';
 
       Project.prototype.urlRoot = ROOT + '/projects';
-
-      Project.prototype.sync = Backbone.sync;
 
       Project.prototype.copy = function(workflow, callback) {
         var id, links, nodes,
@@ -684,8 +734,8 @@
       __extends(Projects, _super);
 
       function Projects() {
-        _ref12 = Projects.__super__.constructor.apply(this, arguments);
-        return _ref12;
+        _ref14 = Projects.__super__.constructor.apply(this, arguments);
+        return _ref14;
       }
 
       Projects.projects = new Projects;
@@ -704,8 +754,6 @@
       Projects.prototype.model = Project;
 
       Projects.prototype.url = Project.prototype.urlRoot;
-
-      Projects.prototype.sync = Project.prototype.sync;
 
       Projects.prototype._delay = 60000;
 
@@ -755,8 +803,8 @@
       __extends(Notification, _super);
 
       function Notification() {
-        _ref13 = Notification.__super__.constructor.apply(this, arguments);
-        return _ref13;
+        _ref15 = Notification.__super__.constructor.apply(this, arguments);
+        return _ref15;
       }
 
       Notification.prototype.urlRoot = ROOT + '/notifications';
@@ -778,8 +826,8 @@
       __extends(Notifications, _super);
 
       function Notifications() {
-        _ref14 = Notifications.__super__.constructor.apply(this, arguments);
-        return _ref14;
+        _ref16 = Notifications.__super__.constructor.apply(this, arguments);
+        return _ref16;
       }
 
       Notifications.notifications = new Notifications;
@@ -795,8 +843,8 @@
       __extends(Event, _super);
 
       function Event() {
-        _ref15 = Event.__super__.constructor.apply(this, arguments);
-        return _ref15;
+        _ref17 = Event.__super__.constructor.apply(this, arguments);
+        return _ref17;
       }
 
       Event.prototype.urlRoot = ROOT + '/events';
@@ -808,8 +856,8 @@
       __extends(Events, _super);
 
       function Events() {
-        _ref16 = Events.__super__.constructor.apply(this, arguments);
-        return _ref16;
+        _ref18 = Events.__super__.constructor.apply(this, arguments);
+        return _ref18;
       }
 
       Events.prototype.model = Event;
@@ -823,8 +871,8 @@
       __extends(Content, _super);
 
       function Content() {
-        _ref17 = Content.__super__.constructor.apply(this, arguments);
-        return _ref17;
+        _ref19 = Content.__super__.constructor.apply(this, arguments);
+        return _ref19;
       }
 
       Content.prototype.urlRoot = ROOT + '/contents';
@@ -836,8 +884,8 @@
       __extends(Contents, _super);
 
       function Contents() {
-        _ref18 = Contents.__super__.constructor.apply(this, arguments);
-        return _ref18;
+        _ref20 = Contents.__super__.constructor.apply(this, arguments);
+        return _ref20;
       }
 
       Contents.prototype.model = Content;
@@ -851,8 +899,8 @@
       __extends(Report, _super);
 
       function Report() {
-        _ref19 = Report.__super__.constructor.apply(this, arguments);
-        return _ref19;
+        _ref21 = Report.__super__.constructor.apply(this, arguments);
+        return _ref21;
       }
 
       return Report;
@@ -862,8 +910,8 @@
       __extends(Reports, _super);
 
       function Reports() {
-        _ref20 = Reports.__super__.constructor.apply(this, arguments);
-        return _ref20;
+        _ref22 = Reports.__super__.constructor.apply(this, arguments);
+        return _ref22;
       }
 
       Reports.prototype.model = Report;
@@ -877,8 +925,8 @@
       __extends(Service, _super);
 
       function Service() {
-        _ref21 = Service.__super__.constructor.apply(this, arguments);
-        return _ref21;
+        _ref23 = Service.__super__.constructor.apply(this, arguments);
+        return _ref23;
       }
 
       Service.prototype.idAttribute = 'service';

@@ -182,17 +182,9 @@
       ConsoleView.prototype.signout = function() {
         sessionStorage.clear();
         this.user = this.tenant = User.current = Tenant.current = null;
-        $.ajaxSetup({
-          headers: {
-            Accept: 'application/json',
-            Authorization: ''
-          }
-        });
         this.router.clear();
         this.hide();
         this.trigger('signout');
-        location.hash = 'signin';
-        location.reload();
         return this;
       };
 
@@ -209,12 +201,6 @@
         } else {
           delete sessionStorage.user;
         }
-        $.ajaxSetup({
-          headers: {
-            Accept: 'application/json',
-            Authorization: 'Basic ' + user.get('credential')
-          }
-        });
         this.avatarEl.src = "https://secure.gravatar.com/avatar/" + (user.get('email_md5')) + "?s=20&d=mm";
         $(this.usernameEl).text(user.fullname());
         return this.show();
@@ -326,7 +312,6 @@
                 alert('(TEST ONLY) Password not correct');
               } else if (user.has('tenant_id') && email === user.get('email')) {
                 user.set('email_md5', md5Email(email));
-                user.set('credential', btoa("" + email + ":" + hash));
                 tenantId = user.get('tenant_id');
                 new Tenant({
                   id: tenantId
@@ -336,6 +321,7 @@
                   },
                   success: function(tenant) {
                     if (tenant.id === tenantId) {
+                      user.set('credential', auth);
                       return _this.signedIn(user, tenant);
                     } else {
                       _this._disable(false);
