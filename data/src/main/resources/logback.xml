@@ -7,7 +7,7 @@
     </appender>
 
     <logger name="marxo" level="TRACE"/>
-    <logger name="marxo.filter" level="OFF"/>
+    <logger name="marxo.filter" level="TRACE"/>
     <!--<logger name="org.springframework.security" level="TRACE"/>-->
 
     <root level="WARN">
