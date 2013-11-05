@@ -333,11 +333,6 @@ Service
 
   # User Manager
 
-  class UsernameCell extends Backgrid.StringCell
-    render: ->
-      @$el.text "#{@model.get 'first_name'} #{@model.get 'last_name'}"
-      @
-
   class UserManagemerView extends ManagerView
     columns: [
       'checkbox'
@@ -345,7 +340,9 @@ Service
     ,
       name: 'first_name'
       label: 'Username'
-      cell: UsernameCell
+      cell: Backgrid.StringCell.extend render: ->
+        @$el.text @model.fullname()
+        @
       editable: false
     ,
       name: 'email'
