@@ -1,4 +1,3 @@
-// Additional JS functions here
 window.fbAsyncInit = function () {
     console.log('Initialing Facebook SDK');
 
@@ -20,7 +19,6 @@ window.fbAsyncInit = function () {
             console.log('signed request: ', response.authResponse.signedRequest);
 
             console.log('The user is logged in');
-            testAPI();
         } else if (response.status === 'not_authorized') {
             console.log("The user doesn't authorize the app yet.");
         } else {
@@ -43,11 +41,16 @@ window.fbAsyncInit = function () {
     ref.parentNode.insertBefore(js, ref);
 }(document));
 
-// Here we run a very simple test of the Graph API after login is successful.
-// This testAPI() function is only called in those cases.
-function testAPI() {
-    FB.api('/me', function (response) {
-        console.log('Response from /me is saved to window.response');
-        window.response = response;
+$('#login').click(function () {
+    var scopes = {scope: 'publish_actions, email, '};
+
+    FB.login(function (response) {
+        console.log('Login response: ', response);
+    }, scopes);
+});
+
+$('#logout').click(function () {
+    FB.logout(function() {
+        console.log('Logout!');
     });
-}
+});

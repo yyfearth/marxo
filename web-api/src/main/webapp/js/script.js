@@ -13,18 +13,4 @@ function onReady() {
         var link = $(element).attr('href');
         $(element).attr('href', uri + link);
     });
-
-    $('#login').click(function () {
-        var scopes = {scope: 'publish_actions, email, '};
-
-        FB.login(function (response) {
-            console.log('Login response: ', response);
-        }, scopes);
-    });
-
-    $('#logout').click(function () {
-        FB.logout(function() {
-            console.log('Logout!');
-        });
-    });
 }

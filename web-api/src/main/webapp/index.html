@@ -4,70 +4,105 @@
 <head>
     <meta charset="UTF-8">
     <title>Marxo Development Tools</title>
-    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/3.0.0/flatly/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
 </head>
 <body>
-<div>
-    <h1>
-        Web client
-    </h1>
-    <ul>
-        <li>
-            <a href="console/">Go to console</a>
-        </li>
-    </ul>
+<div class="container">
+    <div class="jumbotron">
+        <h1>
+            <i class="fa fa-wrench"></i> Marxo Development Tools
+        </h1>
+    </div>
 
-    <h1>
-        Entity API
-    </h1>
-    <ul id="api-list">
-        <li>
-            <a href="api/workflows">Get workflows</a>
-        </li>
-        <li>
-            <a href="api/workflows?name=Alpha">Search workflows</a>
-        </li>
-        <li>
-            <a href="api/nodes">Get nodes</a>
-        </li>
-        <li>
-            <a href="api/links">Get links</a>
-        </li>
-        <li>
-            <a href="api/workflows/i-do-not-exist">Check error response</a>
-        </li>
-    </ul>
+    <section>
+        <h1>
+            Web client
+        </h1>
 
-    <h1>
-        Channel API
-    </h1>
-    <ul>
+        <p>
+            <a href="console/">
+                <button type="button" class="btn btn-info">
+                    Go to console
+                </button>
+            </a>
+        </p>
+    </section>
+
+    <section>
+        <h1>
+            Entity API
+        </h1>
+
+        <div id="api-list">
+            <a href="api/workflows">
+                <button class="btn btn-default">
+                    Get workflows
+                </button>
+            </a>
+            <a href="api/workflows?name=Alpha">
+                <button class="btn btn-default">
+                    Search workflows
+                </button>
+            </a>
+            <a href="api/nodes">
+                <button class="btn btn-default">
+                    Get nodes
+                </button>
+            </a>
+            <a href="api/links">
+                <button class="btn btn-default">
+                    Get links
+                </button>
+            </a>
+            <a href="api/workflows/i-do-not-exist">
+                <button class="btn btn-default">
+                    Check error response
+                </button>
+            </a>
+        </div>
+    </section>
+
+    <section>
+        <h1>
+            Channel API
+        </h1>
+
+        <a href="/api/service/facebook">
+            <button class="btn btn-default">
+                Facebook API
+            </button>
+        </a>
+        <a target="_blank" href="https://developers.facebook.com/apps/213527892138380/insights?ref=nav&sk=ae_213527892138380">
+            <button class="btn btn-default">
+                Check Facebook API error and usage
+            </button>
+        </a>
+
+        <button id="login" class="btn btn-default">Login</button>
+        <button id="logout" class="btn btn-default">Logout</button>
+
         <div class="fb-login-button" show-faces="true" width="200" max-rows="1"></div>
-        <li>
-            <a href="/api/service/facebook">Facebook API</a>
-        </li>
-        <li>
-            <a target="_blank" href="https://developers.facebook.com/apps/213527892138380/insights?ref=nav&sk=ae_213527892138380">Check Facebook API error and usage</a>
-        </li>
-        <li>
-            <div>
-                <button id="login">Login</button>
-                <button id="logout">Logout</button>
-            </div>
-        </li>
         <div id="fb-root"></div>
-    </ul>
+    </section>
 
-    <h1>
-        Lab (make sure you're not drunk)
-    </h1>
-    <ul>
-        <li>
-            <b><a class="warning" href="/api/reset">Reset database with random data (use it with caution)</a></b>
-        </li>
-    </ul>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-    <script type="text/javascript" src="script.js"></script>
-    <script type="text/javascript" src="facebook.js"></script>
+    <section>
+        <h1>
+            Lab (make sure you're not drunk)
+        </h1>
+
+        <p>
+            <a class="warning" href="/api/reset">
+                <button class="btn btn-danger">
+                    Reset database with random data (use it with caution)
+                </button>
+            </a>
+        </p>
+    </section>
+
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
+    <script type="text/javascript" src="js/facebook.js"></script>
 </body>
 </html>
