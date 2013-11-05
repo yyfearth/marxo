@@ -24,7 +24,7 @@
         <authentication-provider ref="marxoAuthenticationProvider"/>
     </authentication-manager>
 
-    <beans:bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
+    <beans:bean id="basicAuthenticationFilter" class="marxo.security.MarxoBasicAuthenticationFilter">
         <beans:constructor-arg ref="authenticationManager"/>
         <beans:constructor-arg ref="marxoAuthenticationEntryPoint"/>
     </beans:bean>
