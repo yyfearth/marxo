@@ -2,6 +2,9 @@
 
 define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
 
+  #$.ajaxPrefilter (opt, org) -> # debug only
+  #  console.log 'ajax', opt.url, opt, org
+
   class ConsoleView extends View
     el: '#main'
     user: sessionStorage.user
@@ -113,15 +116,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @
     signout: ->
       sessionStorage.clear()
-      # force browser forget basic auth
-      # User.current.fetch
-      #   headers:
-      #     Authorization: ''
       @user = @tenant = User.current = Tenant.current = null
-      $.ajaxSetup
-        headers:
-          Accept: 'application/json'
-          Authorization: ''
       @router.clear()
       # TODO: reset all frames and views!
       #SignInView.get().show()
@@ -142,11 +137,6 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         console.log 'logged in', u
       else
         delete sessionStorage.user
-      # set ajax basic auth
-      $.ajaxSetup
-        headers:
-          Accept: 'application/json'
-          Authorization: 'Basic ' + user.get 'credential'
       # update avatar
       @avatarEl.src = "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
       $(@usernameEl).text user.fullname()
@@ -216,13 +206,13 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
               alert '(TEST ONLY) Password not correct'
             else if user.has('tenant_id') and email is user.get 'email'
               user.set 'email_md5', md5Email email
-              user.set 'credential', btoa "#{email}:#{hash}"
               tenantId = user.get 'tenant_id'
               new Tenant(id: tenantId).fetch
                 headers:
                   Authorization: auth
                 success: (tenant) =>
                   if tenant.id is tenantId
+                    user.set 'credential', auth
                     @signedIn user, tenant
                   else
                     @_disable false

@@ -1,5 +1,7 @@
 "use strict"
 
+console.log 'ver', 3
+
 define 'models', ['lib/common'], ->
 
   ROOT = 'http://masonwan.com/marxo/api'
@@ -8,10 +10,22 @@ define 'models', ['lib/common'], ->
 
   ## Common
 
-  Entity = Backbone.Model
+  _setAuth = (options) ->
+    options.headers ?= {}
+    options.headers.Accept ?= 'application/json'
+    options.headers.Authorization ?= User.current?.get('credential') or ''
+    options
+
+  class Entity extends Backbone.Model
+    sync: (method, model, options = {}) ->
+      super method, model, _setAuth options
 
   # just a alias, otherwise PageableCollection will not extends Collection
   Collection = Backbone.Collection
+
+  class SimpleCollection extends Collection
+    sync: (method, model, options = {}) ->
+      super method, model, _setAuth options
 
   class ManagerCollection extends Backbone.PageableCollection
     mode: 'client'
@@ -36,17 +50,17 @@ define 'models', ['lib/common'], ->
       else
         callback? @, 'skipped'
       @
+    sync: (method, model, options = {}) ->
+      super method, model, _setAuth options
 
   ## Tenant / User
 
   class Tenant extends Entity
     urlRoot: ROOT + '/tenants'
-    #sync: Backbone.ajaxSync or Backbone.sync # for test only
 
   class User extends Entity
     urlRoot: ROOT + '/users'
     idAttribute: 'email'
-    #sync: Backbone.ajaxSync or Backbone.sync # for test only
     fullname: ->
       if @has 'full_name'
         @get 'full_name'
@@ -66,14 +80,13 @@ define 'models', ['lib/common'], ->
 
 #  class Evalutator extends User
 
-#  class Participants extends Collection
+#  class Participants extends SimpleCollection
 #    model: Participant
 #    url: '/users'
 
   class Publishers extends ManagerCollection
     model: Publisher
     url: Publisher::urlRoot
-    sync: Publisher::sync
 
   ## Workflow
 
@@ -95,8 +108,6 @@ define 'models', ['lib/common'], ->
       links = if _links_loaded then model.links else []
       links = @links = new Links links, url: url + '/links'
       links._loaded = _links_loaded
-
-      nodes.sync = links.sync = @sync # for test only
 
       _deleted = @_deleted = []
 
@@ -126,7 +137,6 @@ define 'models', ['lib/common'], ->
       @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
-    #sync: Backbone.ajaxSync or Backbone.sync # for test only
     save: (attributes = {}, options) -> # override for sync ids
       node_ids = @nodes?.map (r) -> r.id
       link_ids = @links?.map (r) -> r.id
@@ -235,7 +245,6 @@ define 'models', ['lib/common'], ->
     model: Workflow
     url: Workflow::urlRoot
     _delay: 600000 # 10 min
-    sync: Workflow::sync # for test only
 
   class ChangeObserableEntity extends Entity
     constructor: (model, options) ->
@@ -262,7 +271,7 @@ define 'models', ['lib/common'], ->
     name: -> @get 'name'
     actions: -> @_actions ?= new Actions @get 'actions'
 
-  class Nodes extends Collection
+  class Nodes extends SimpleCollection
     model: Node
     url: Node::urlRoot
   # url: -> @workflow.url() + '/nodes'
@@ -272,7 +281,7 @@ define 'models', ['lib/common'], ->
     urlRoot: ROOT + '/links'
     name: -> @get('name') or @get('desc') or @get('key')
 
-  class Links extends Collection
+  class Links extends SimpleCollection
     model: Link
     url: Link::urlRoot
   # url: -> @workflow.url() + '/links'
@@ -280,7 +289,7 @@ define 'models', ['lib/common'], ->
   class Action extends Entity
   # idAttribute: 'index'
 
-  class Actions extends Collection
+  class Actions extends SimpleCollection
     model: Action
   # url: -> @node.url() + '/actions'
 
@@ -289,7 +298,6 @@ define 'models', ['lib/common'], ->
   class Project extends Workflow
     _name: 'project'
     urlRoot: ROOT + '/projects'
-    sync: Backbone.sync # reset from workflow, for test only
     copy: (workflow, callback) -> # copy form workflow as template
       workflow ?= @get 'workflow_id'
       workflow = new Workflow id: workflow if typeof workflow is 'string'
@@ -354,7 +362,6 @@ define 'models', ['lib/common'], ->
       @projects
     model: Project
     url: Project::urlRoot
-    sync: Project::sync # for test only
     _delay: 60000 # 1 min
     find: ({projectId, nodeId, linkId, actionId, callback}) ->
       throw new Error 'projectId is required' unless projectId
