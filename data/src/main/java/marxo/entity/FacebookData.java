@@ -12,7 +12,7 @@ import java.util.Date;
 @JsonPropertyOrder({"service", "status", "user_id", "username", "fullname", "access_token", "expires_at", "link", "locale"})
 public class FacebookData {
 	public final static String service = "facebook";
-	public FacebookStatus status = FacebookStatus.Disconntected;
+	public FacebookStatus status;
 	@JsonProperty("user_id")
 	public String userId;
 	public String username;
