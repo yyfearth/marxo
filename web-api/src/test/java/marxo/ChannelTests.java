@@ -3,13 +3,26 @@ package marxo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
+import com.restfb.Parameter;
 import com.restfb.exception.FacebookOAuthException;
+import com.restfb.types.FacebookType;
+import com.restfb.types.Post;
 import com.restfb.types.User;
 import marxo.tool.ILoggable;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.io.ByteArrayOutputStream;
 
 public class ChannelTests implements ILoggable {
 	static String appId;
@@ -17,18 +30,26 @@ public class ChannelTests implements ILoggable {
 	static String appToken;
 	static String userToken;
 	static String extendedUserToken;
+	static String postId = "635503102_10152019328983103";
 
 	static {
 		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(FacebookConfig.class);
 		appId = (String) applicationContext.getBean("appId");
 		appSecret = (String) applicationContext.getBean("appSecret");
 		appToken = (String) applicationContext.getBean("appToken");
-		userToken = "CAADCM9YpGYwBAI57YJyWayreUUAcAVE2xZCYViTzI7SaRiTVeCA4ui0cXlF7laNYAf5gN15ZCMugTGhhq8fqS7HW7vZCBye2tiqGdPWofCgtSqPJ3F9PI1hLqe5NZB6wloj7ej8zAJ5Vhdge2eblTXjeAcZBdG95u79N3vZBzEuLZC71YYt2l9uGP65zJXrjSYZD";
+		userToken = "CAADCM9YpGYwBACl64uziT6gUcc5kE8ZBrORcrKyMJp1VGZAqd2IZCLbCpgwBrFvUtGvDi1QyfSfIHEgyJ71TqdxXE4IGitZCvLtWVh4yJh5DYkCZBbBypn5NNJz02cZC7EUHmxwCcGYuVmk0JlAazdBi6160dgnta1zSpP2iNNOB4dp6eBZBvJtaZB9dGP4GyZBQZD";
+	}
+
+	FacebookClient facebookClient = new DefaultFacebookClient(userToken);
+	ObjectMapper objectMapper = new ObjectMapper();
+
+	@BeforeClass
+	public void beforeClass() throws Exception {
+
 	}
 
 	@Test
 	public void getUser() throws Exception {
-		FacebookClient facebookClient = new DefaultFacebookClient(userToken);
 		User user = null;
 		try {
 			user = facebookClient.fetchObject("me", User.class);
@@ -41,7 +62,6 @@ public class ChannelTests implements ILoggable {
 
 	@Test
 	public void getLongTermToken() {
-		FacebookClient facebookClient = new DefaultFacebookClient(userToken);
 		String requestToken = userToken;
 		FacebookClient.AccessToken accessToken;
 		DateTime dateTime;
@@ -51,11 +71,93 @@ public class ChannelTests implements ILoggable {
 
 			accessToken = facebookClient.obtainExtendedAccessToken(appId, appSecret, requestToken);
 			extendedUserToken = accessToken.getAccessToken();
-			logger.info("extendedUserToken: " + extendedUserToken.substring(0, 6) + "..." + extendedUserToken.substring(extendedUserToken.length() - 5));
+			logger.info("extendedUserToken: " + extendedUserToken);
 			dateTime = new DateTime(accessToken.getExpires());
 			logger.info("expire at " + dateTime);
 
 			requestToken = accessToken.getAccessToken();
 		}
+	}
+
+	@Test
+	public void testHttpClient() throws Exception {
+		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+		HttpGet httpGet = new HttpGet("http://google.com");
+		CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet);
+
+		try {
+			logger.info(closeableHttpResponse.getStatusLine().toString());
+			HttpEntity httpEntity = closeableHttpResponse.getEntity();
+
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			httpEntity.writeTo(outputStream);
+			String content = outputStream.toString();
+			logger.info("Content: " + content);
+
+			EntityUtils.consume(httpEntity);
+		} finally {
+			closeableHttpResponse.close();
+		}
+	}
+
+	@Test
+	public void testDebugToken() throws Exception {
+		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
+
+		HttpGet httpGet = new HttpGet("");
+		CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet);
+
+		try {
+			logger.info(closeableHttpResponse.getStatusLine().toString());
+			HttpEntity httpEntity = closeableHttpResponse.getEntity();
+
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			httpEntity.writeTo(outputStream);
+			String content = outputStream.toString();
+			logger.info("Content: " + content);
+
+			EntityUtils.consume(httpEntity);
+		} finally {
+			closeableHttpResponse.close();
+		}
+	}
+
+	@Test
+	public void testParseSignedRequest() throws Exception {
+		String signedRequest = "";
+		String data = parseSignedRequest(signedRequest);
+		assert data != null;
+	}
+
+	public String parseSignedRequest(String signedRequest) {
+//		list($encoded_sig, $payload) = explode('.', $signed_request, 2);
+//
+//		// decode the data
+//		$sig = base64_url_decode($encoded_sig);
+//		$data = json_decode(base64_url_decode($payload), true);
+//
+//		// confirm the signature
+//		$expected_sig = hash_hmac('sha256', $payload, $secret, $raw = true);
+//		if ($sig !== $expected_sig) {
+//			error_log('Bad Signed JSON signature!');
+//			return null;
+//		}
+//
+//		return $data;
+		throw new NotImplementedException();
+	}
+
+	@Test
+	public void testSubmitPost() throws Exception {
+		FacebookType publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", "Marxo Test"));
+
+		logger.info("Published message ID: " + publishMessageResponse.getId());
+	}
+
+	@Test()
+	public void testGetPost() throws Exception {
+		Post post = facebookClient.fetchObject("635503102_10152019328983103", Post.class);
+		assert post != null;
+		logger.info(objectMapper.writeValueAsString(post));
 	}
 }
