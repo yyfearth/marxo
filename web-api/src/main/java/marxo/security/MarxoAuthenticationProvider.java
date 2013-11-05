@@ -27,6 +27,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, ILog
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+		logger.debug("authenticating: " + authentication.toString());
 		String email = authentication.getName();
 
 		List<User> users = userDao.getByEmail(email);
@@ -51,7 +52,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, ILog
 			return new MarxoAuthentication(user, grantedAuths);
 		}
 
-		String message = "The password for " + email + " is not correct";
+		String message = "The password " + plainPassword + " for " + email + " is not correct";
 		logger.trace(message);
 		throw new BadCredentialsException(message);
 	}
