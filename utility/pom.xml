@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>engine</artifactId>
+    <artifactId>utility</artifactId>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,17 +22,11 @@
     </properties>
 
     <dependencies>
+        <!-- Logging -->
         <dependency>
-            <groupId>com.marxo</groupId>
-            <artifactId>utility</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.restfb</groupId>
-            <artifactId>restfb</artifactId>
-            <version>1.6.12</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.0.13</version>
         </dependency>
     </dependencies>
 

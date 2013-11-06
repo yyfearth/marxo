@@ -1,4 +1,4 @@
-package marxo.tool;
+package marxo.dev;
 
 import java.util.concurrent.ThreadLocalRandom;
 

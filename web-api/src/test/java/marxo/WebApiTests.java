@@ -1,7 +1,6 @@
 package marxo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import marxo.entity.Workflow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,7 +55,7 @@ public class WebApiTests extends AbstractTestNGSpringContextTests {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
 		ObjectMapper objectMapper = new ObjectMapper();
-		ArrayList<Workflow> workflows = objectMapper.readValue(content().toString(), ArrayList.class);
+		ArrayList workflows = objectMapper.readValue(content().toString(), ArrayList.class);
 
 		assertNotNull(workflows);
 	}

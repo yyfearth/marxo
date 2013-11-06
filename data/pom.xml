@@ -23,6 +23,13 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.marxo</groupId>
+            <artifactId>utility</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- JSON Library -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
