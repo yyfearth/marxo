@@ -171,7 +171,7 @@ Service
       scopes: CFG.FB_SCOPES
       status: false # check login status
       cookie: false # enable cookies to allow the server to access the session
-      xfbml: true
+      xfbml: false
     popup: new FacebookStatusPopup
     FB: (callback) ->  # lazy init
       if @_FB?
