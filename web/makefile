@@ -34,7 +34,7 @@ clean_res:
 	rm -rf "$(dist)/font"
 	rm -f "$(dist)/favicon.ico" "$(dist)/robots.txt"
 clean_html:
-	rm -f "$(dist)/*.html"
+	rm -f "$(dist)/index.html" "$(dist)/remote.html"
 
 lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js $(dist)/js/lib/preview.js
 modules: $(DIST_MODULES)
