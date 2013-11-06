@@ -1,6 +1,5 @@
 package marxo.controller;
 
-import com.restfb.FacebookClient;
 import marxo.dao.TenantDao;
 import marxo.entity.FacebookData;
 import marxo.entity.Tenant;
@@ -46,7 +45,7 @@ public class FacebookController extends BasicController implements IInterceptroP
 	public FacebookData readData() {
 		Tenant tenant = tenantDao.get(user.tenantId);
 		if (tenant == null) {
-			throw new EntityNotFoundException(tenant.id);
+			throw new EntityNotFoundException(user.tenantId);
 		}
 
 		return (tenant.facebookData == null) ? new FacebookData() : tenant.facebookData;
