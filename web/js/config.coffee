@@ -1,8 +1,6 @@
 "use strict"
 
-FB_APP_ID = '213527892138380'
-
-define 'config', ['base', 'manager', 'models'],
+define 'config', ['base', 'manager', 'models', 'module'],
 ({
 find
 findAll
@@ -21,7 +19,9 @@ User
 Publisher
 Publishers
 Service
-}) ->
+}, module) ->
+
+  CFG = module.config()
 
   class ConfigFrameView extends FrameView
     initialize: (options) ->
@@ -50,8 +50,9 @@ Service
     initialize: (options) ->
       super options
       @facebookView = new FacebookStatusView el: find '.btn-facebook', @el
-      @twitterView = new ServiceStatusView el: find '.btn-twitter', @el
-      @emailView = new ServiceStatusView el: find '.btn-email', @el
+      # for test only
+      @twitterView = new ServiceStatusView service: 'twitter', el: find '.btn-twitter', @el
+      @emailView = new ServiceStatusView service: 'email', el: find '.btn-email', @el
     open: (service) ->
       switch service
         when 'facebook'
@@ -69,6 +70,8 @@ Service
 
   class ServiceStatusView extends View
     initialize: (options) ->
+      @service = options.service or @service or ''
+      @model = new Service service: @service
       @events ?= {}
       @events.click ?= 'click'
       @render = @render.bind @
@@ -87,10 +90,15 @@ Service
         @connect()
       @
     changed: (auth) ->
-      auth ?=
-        service: @service
-        status: 'disconnected'
-      @model.clear().save auth, success: @render
+      @model.clear().set service: @service
+      if auth
+        @model.save auth, wait: true, success: @render, error: ->
+          alert 'Failed to connect this account.'
+      else
+        @model.destroy error: =>
+          @render() # re-fetch
+          alert 'Failed to disconnect this account.'
+        @render()
       @
     render: (model = @model) ->
       model?.fetch success: @_render, error: @_render
@@ -119,18 +127,17 @@ Service
       text = @service.charAt(0).toUpperCase() + @service[1..]
       field = @text_field and @model?.get @text_field
       @$el.removeClass 'connected disconnected'
-      switch @model?.get 'status'
-        when 'disconnected'
-          cls = 'disconnected'
-          text += ' Disconnected'
-          text += ' from ' + field if field
-        when 'connected'
-          cls = 'connected'
-          text += ' Connected'
-          text += ' as ' + field if field
-        else
-          cls = ''
-          text = @_default_text
+      if @model?.connected()
+        cls = 'connected'
+        text += ' Connected'
+        text += ' as ' + field if field
+      else if @model? and /DISCONNECTED/i.test @model.get 'status'
+        cls = 'disconnected'
+        text += ' Disconnected'
+        text += ' from ' + field if field
+      else
+        cls = ''
+        text = @_default_text
       @$el.addClass cls if cls
       @$el.text text
       @
@@ -148,14 +155,13 @@ Service
 
   class FacebookStatusView extends ServiceStatusView
     service: 'facebook'
-    copy_fields: ['username', 'link', 'locale', 'timezone'] # + fullname(name)
     text_field: 'fullname'
     cfg:
-      appId: FB_APP_ID # App ID
+      appId: CFG.FB_APP_ID
+      scopes: CFG.FB_SCOPES
       status: false # check login status
       cookie: false # enable cookies to allow the server to access the session
       xfbml: true
-    model: new Service(service: 'facebook')
     popup: new FacebookStatusPopup
     FB: (callback) ->  # lazy init
       if @_FB?
@@ -164,9 +170,8 @@ Service
         @_FB.init @cfg
         callback.call @, @_FB
       @
-    connect: (callback = @changed) ->
-      fields = @copy_fields
-      @FB (FB) -> FB.login (response) ->
+    connect: (callback = @changed) -> @FB (FB) ->
+      FB.login (response) ->
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           auth =
@@ -174,9 +179,11 @@ Service
             access_token: response.accessToken
             expires_at: new Date Date.now() + 1000 * response.expiresIn
             service: 'facebook'
-            status: 'connected'
+            status: 'CONNECTED'
           FB.api '/me', (response) ->
-            auth[key] = response[key] for key in fields
+            auth.username = response.username
+            auth.link = response.link
+            auth.locale = response.locale
             auth.fullname = response.name
             console.log 'facebook connected', auth
             callback auth
@@ -184,7 +191,8 @@ Service
           console.warn 'User cancelled login or did not fully authorize.', response
           callback null
           alert 'You cancelled login or did not fully authorize.'
-      @
+        return
+      , scope: @cfg.scopes
     #disable: ->
     #  if confirm 'Are you sure to stop using Facebook service?\n\nIt will cause Marxo Service stop to send messages and track the responses!'
     #    @model.destroy()
@@ -236,7 +244,7 @@ Service
       $btn.button 'loading'
       data = @read()
       console.log 'save', data
-      @model.save data, success: =>
+      @model.save data, wait: true, success: =>
         $btn.button 'reset'
         @reload()
       @
@@ -389,9 +397,9 @@ Service
           # enforce tenant id
           data.tenant_id = @signin_user.tenant_id
           if user.isNew()
-            @collection.create data
+            @collection.create data, wait: true
           else
-            user.save data
+            user.save data, wait: true
           @refresh()
       @
     remove: (users) ->

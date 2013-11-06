@@ -1,14 +1,11 @@
 "use strict"
 
-console.log 'ver', 3
-
-define 'models', ['lib/common'], ->
-
-  ROOT = 'http://masonwan.com/marxo/api'
-  # ROOT = '../api'
-  # ROOT = '/api'
+define 'models', ['module', 'lib/common'], (module) ->
 
   ## Common
+
+  ROOT = module.config().BASE_URL
+  ROOT = ROOT[...-1] if ROOT[-1..] is '/'
 
   _setAuth = (options) ->
     options.headers ?= {}
@@ -432,7 +429,7 @@ define 'models', ['lib/common'], ->
     idAttribute: 'service'
     urlRoot: ROOT + '/services'
     connected: ->
-      'connected' is @get 'status'
+      /CONNECTED/i.test @get 'status'
 
   { # exports
   Entity
