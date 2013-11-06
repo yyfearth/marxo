@@ -74,9 +74,11 @@
           el: find('.btn-facebook', this.el)
         });
         this.twitterView = new ServiceStatusView({
+          service: 'twitter',
           el: find('.btn-twitter', this.el)
         });
         return this.emailView = new ServiceStatusView({
+          service: 'email',
           el: find('.btn-email', this.el)
         });
       };
@@ -113,6 +115,10 @@
 
       ServiceStatusView.prototype.initialize = function(options) {
         var _base;
+        this.service = options.service || this.service || '';
+        this.model = new Service({
+          service: this.service
+        });
         if (this.events == null) {
           this.events = {};
         }
@@ -145,16 +151,26 @@
       };
 
       ServiceStatusView.prototype.changed = function(auth) {
-        if (auth == null) {
-          auth = {
-            service: this.service,
-            status: 'disconnected'
-          };
-        }
-        this.model.clear().save(auth, {
-          wait: true,
-          success: this.render
+        this.model.clear().set({
+          service: this.service
         });
+        if (auth) {
+          this.model.save(auth, {
+            wait: true,
+            success: this.render,
+            error: function() {
+              return alert('Failed to connect Facebook account.');
+            }
+          });
+        } else {
+          this.model.destroy({
+            wait: true,
+            success: this.render,
+            error: function() {
+              return alert('Failed to disconnect Facebook account.');
+            }
+          });
+        }
         return this;
       };
 
@@ -206,14 +222,14 @@
         field = this.text_field && ((_ref3 = this.model) != null ? _ref3.get(this.text_field) : void 0);
         this.$el.removeClass('connected disconnected');
         switch ((_ref4 = this.model) != null ? _ref4.get('status') : void 0) {
-          case 'disconnected':
+          case 'DISCONNECTED':
             cls = 'disconnected';
             text += ' Disconnected';
             if (field) {
               text += ' from ' + field;
             }
             break;
-          case 'connected':
+          case 'CONNECTED':
             cls = 'connected';
             text += ' Connected';
             if (field) {
@@ -281,10 +297,6 @@
         xfbml: true
       };
 
-      FacebookStatusView.prototype.model = new Service({
-        service: 'facebook'
-      });
-
       FacebookStatusView.prototype.popup = new FacebookStatusPopup;
 
       FacebookStatusView.prototype.FB = function(callback) {
@@ -315,15 +327,12 @@
                 access_token: response.accessToken,
                 expires_at: new Date(Date.now() + 1000 * response.expiresIn),
                 service: 'facebook',
-                status: 'connected'
+                status: 'CONNECTED'
               };
               FB.api('/me', function(response) {
-                var key, _i, _len, _ref5;
-                _ref5 = ['username', 'link', 'locale', 'timezone'];
-                for (_i = 0, _len = _ref5.length; _i < _len; _i++) {
-                  key = _ref5[_i];
-                  auth[key] = response[key];
-                }
+                auth.username = response.username;
+                auth.link = response.link;
+                auth.locale = response.locale;
                 auth.fullname = response.name;
                 console.log('facebook connected', auth);
                 return callback(auth);
