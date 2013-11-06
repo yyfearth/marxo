@@ -429,7 +429,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     idAttribute: 'service'
     urlRoot: ROOT + '/services'
     connected: ->
-      'connected' is @get 'status'
+      /CONNECTED/i.test @get 'status'
 
   { # exports
   Entity

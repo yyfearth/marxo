@@ -52,7 +52,7 @@ Service
       @facebookView = new FacebookStatusView el: find '.btn-facebook', @el
       # for test only
       @twitterView = new ServiceStatusView service: 'twitter', el: find '.btn-twitter', @el
-      @emailView = new ServiceStatusView service: 'email',el: find '.btn-email', @el
+      @emailView = new ServiceStatusView service: 'email', el: find '.btn-email', @el
     open: (service) ->
       switch service
         when 'facebook'
@@ -89,9 +89,16 @@ Service
       else
         @connect()
       @
-    changed: (auth = {}) ->
-      auth.status ?= 'disconnected'
-      @model.clear().set(service: @service).save auth, wait: true, success: @render
+    changed: (auth) ->
+      @model.clear().set service: @service
+      if auth
+        @model.save auth, wait: true, success: @render, error: ->
+          alert 'Failed to connect this account.'
+      else
+        @model.destroy error: =>
+          @render() # re-fetch
+          alert 'Failed to disconnect this account.'
+        @_render()
       @
     render: (model = @model) ->
       model?.fetch success: @_render, error: @_render
@@ -120,18 +127,17 @@ Service
       text = @service.charAt(0).toUpperCase() + @service[1..]
       field = @text_field and @model?.get @text_field
       @$el.removeClass 'connected disconnected'
-      switch @model?.get 'status'
-        when 'disconnected'
-          cls = 'disconnected'
-          text += ' Disconnected'
-          text += ' from ' + field if field
-        when 'connected'
-          cls = 'connected'
-          text += ' Connected'
-          text += ' as ' + field if field
-        else
-          cls = ''
-          text = @_default_text
+      if @model?.connected()
+        cls = 'connected'
+        text += ' Connected'
+        text += ' as ' + field if field
+      else if @model? and /DISCONNECTED/i.test @model.get 'status'
+        cls = 'disconnected'
+        text += ' Disconnected'
+        text += ' from ' + field if field
+      else
+        cls = ''
+        text = @_default_text
       @$el.addClass cls if cls
       @$el.text text
       @
@@ -173,10 +179,11 @@ Service
             access_token: response.accessToken
             expires_at: new Date Date.now() + 1000 * response.expiresIn
             service: 'facebook'
-            status: 'connected'
-          # for test data only
+            status: 'CONNECTED'
           FB.api '/me', (response) ->
-            auth[key] = response[key] for key in ['username', 'link', 'locale', 'timezone']
+            auth.username = response.username
+            auth.link = response.link
+            auth.locale = response.locale
             auth.fullname = response.name
             console.log 'facebook connected', auth
             callback auth
