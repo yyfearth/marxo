@@ -51,8 +51,8 @@ Service
       super options
       @facebookView = new FacebookStatusView el: find '.btn-facebook', @el
       # for test only
-      @twitterView = new ServiceStatusView service: 'twitter', el: find '.btn-twitter', @el
-      @emailView = new ServiceStatusView service: 'email', el: find '.btn-email', @el
+      @twitterView = new ServiceStatusView service: 'twitter' #, el: find '.btn-twitter', @el
+      @emailView = new ServiceStatusView service: 'email' #, el: find '.btn-email', @el
     open: (service) ->
       switch service
         when 'facebook'
@@ -89,18 +89,24 @@ Service
       else
         @connect()
       @
+    disconnect: (callback = @changed) -> # waiting for override
+      callback null
+      @
     changed: (auth) ->
       @model.clear().set service: @service
       if auth
+        @_loading 'connecting'
         @model.save auth, wait: true, success: @render, error: ->
+          @_render()
           alert 'Failed to connect this account.'
       else
-        @model.destroy error: =>
-          @render() # re-fetch
+        @_loading 'disconnecting'
+        @model.destroy wait: true, success: @render, error: ->
+          @_render()
           alert 'Failed to disconnect this account.'
-        @_render()
       @
     render: (model = @model) ->
+      @_loading 'loading'
       model?.fetch success: @_render, error: @_render
       super
     showStatus: ->
@@ -123,10 +129,14 @@ Service
           else
             console.log @service, 'status popup', action
       @
+    _loading: (status) -> unless @el.disabled
+      @el.disabled = true
+      @el.textContent = "#{status.capitalize()} to #{@service.capitalize()}..."
+      return
     _render: (@model) ->
-      text = @service.charAt(0).toUpperCase() + @service[1..]
+      text = @service.capitalize()
       field = @text_field and @model?.get @text_field
-      @$el.removeClass 'connected disconnected'
+      @$el.prop('disabled', false).removeClass 'connected disconnected'
       if @model?.connected()
         cls = 'connected'
         text += ' Connected'
@@ -193,21 +203,16 @@ Service
           alert 'You cancelled login or did not fully authorize.'
         return
       , scope: @cfg.scopes
-    #disable: ->
-    #  if confirm 'Are you sure to stop using Facebook service?\n\nIt will cause Marxo Service stop to send messages and track the responses!'
-    #    @model.destroy()
-    #    @render()
+    #disconnect: (callback = @changed) ->
+    #  @FB (FB) -> FB.getLoginStatus (response) ->
+    #    if response.status is 'connected'
+    #      FB.logout (response) ->
+    #        # user is now logged out
+    #        console.log 'logout', response
+    #        callback null
+    #    else
+    #      callback null
     #  @
-    disconnect: (callback = @changed) ->
-      @FB (FB) -> FB.getLoginStatus (response) ->
-        if response.status is 'connected'
-          FB.logout (response) ->
-            # user is now logged out
-            console.log 'logout', response
-            callback null
-        else
-          callback null
-      @
 
   # Tenant Profile
   class TenantProfileView extends InnerFrameView
