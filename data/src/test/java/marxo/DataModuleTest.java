@@ -1,8 +1,8 @@
 package marxo;
 
 import marxo.dao.WorkflowDao;
-import marxo.entity.*;
 import marxo.dev.AdvancedGenerator;
+import marxo.entity.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;

@@ -54,9 +54,9 @@ public class ChannelTests implements ILoggable {
 		try {
 			user = facebookClient.fetchObject("me", User.class);
 			ObjectMapper objectMapper = new ObjectMapper();
-			ILoggable.logger.info(objectMapper.writeValueAsString(user));
+			logger.info(objectMapper.writeValueAsString(user));
 		} catch (FacebookOAuthException e) {
-			ILoggable.logger.error(String.format("[%s] %s", e.getClass(), e.getMessage()), e);
+			logger.error(String.format("[%s] %s", e.getClass(), e.getMessage()), e);
 		}
 	}
 
@@ -67,13 +67,13 @@ public class ChannelTests implements ILoggable {
 		DateTime dateTime;
 
 		for (int i = 0; i < 2; i++) {
-			ILoggable.logger.info("Getting extended token " + (i + 1));
+			logger.info("Getting extended token " + (i + 1));
 
 			accessToken = facebookClient.obtainExtendedAccessToken(appId, appSecret, requestToken);
 			extendedUserToken = accessToken.getAccessToken();
-			ILoggable.logger.info("extendedUserToken: " + extendedUserToken);
+			logger.info("extendedUserToken: " + extendedUserToken);
 			dateTime = new DateTime(accessToken.getExpires());
-			ILoggable.logger.info("expire at " + dateTime);
+			logger.info("expire at " + dateTime);
 
 			requestToken = accessToken.getAccessToken();
 		}
@@ -85,13 +85,13 @@ public class ChannelTests implements ILoggable {
 		HttpGet httpGet = new HttpGet("http://google.com");
 
 		try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet)) {
-			ILoggable.logger.info(closeableHttpResponse.getStatusLine().toString());
+			logger.info(closeableHttpResponse.getStatusLine().toString());
 			HttpEntity httpEntity = closeableHttpResponse.getEntity();
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			httpEntity.writeTo(outputStream);
 			String content = outputStream.toString();
-			ILoggable.logger.info("Content: " + content);
+			logger.info("Content: " + content);
 
 			EntityUtils.consume(httpEntity);
 		}
@@ -104,13 +104,13 @@ public class ChannelTests implements ILoggable {
 		HttpGet httpGet = new HttpGet("");
 
 		try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet)) {
-			ILoggable.logger.info(closeableHttpResponse.getStatusLine().toString());
+			logger.info(closeableHttpResponse.getStatusLine().toString());
 			HttpEntity httpEntity = closeableHttpResponse.getEntity();
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			httpEntity.writeTo(outputStream);
 			String content = outputStream.toString();
-			ILoggable.logger.info("Content: " + content);
+			logger.info("Content: " + content);
 
 			EntityUtils.consume(httpEntity);
 		}
@@ -145,13 +145,13 @@ public class ChannelTests implements ILoggable {
 	public void testSubmitPost() throws Exception {
 		FacebookType publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", "Marxo Test"));
 
-		ILoggable.logger.info("Published message ID: " + publishMessageResponse.getId());
+		logger.info("Published message ID: " + publishMessageResponse.getId());
 	}
 
 	@Test()
 	public void testGetPost() throws Exception {
 		Post post = facebookClient.fetchObject("635503102_10152019328983103", Post.class);
 		assert post != null;
-		ILoggable.logger.info(objectMapper.writeValueAsString(post));
+		logger.info(objectMapper.writeValueAsString(post));
 	}
 }
