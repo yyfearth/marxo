@@ -50,8 +50,9 @@ Service
     initialize: (options) ->
       super options
       @facebookView = new FacebookStatusView el: find '.btn-facebook', @el
-      @twitterView = new ServiceStatusView el: find '.btn-twitter', @el
-      @emailView = new ServiceStatusView el: find '.btn-email', @el
+      # for test only
+      @twitterView = new ServiceStatusView service: 'twitter', el: find '.btn-twitter', @el
+      @emailView = new ServiceStatusView service: 'email',el: find '.btn-email', @el
     open: (service) ->
       switch service
         when 'facebook'
@@ -69,6 +70,8 @@ Service
 
   class ServiceStatusView extends View
     initialize: (options) ->
+      @service = options.service or @service or ''
+      @model = new Service service: @service
       @events ?= {}
       @events.click ?= 'click'
       @render = @render.bind @
@@ -86,11 +89,9 @@ Service
       else
         @connect()
       @
-    changed: (auth) ->
-      auth ?=
-        service: @service
-        status: 'disconnected'
-      @model.clear().save auth, wait: true, success: @render
+    changed: (auth = {}) ->
+      auth.status ?= 'disconnected'
+      @model.clear().set(service: @service).save auth, wait: true, success: @render
       @
     render: (model = @model) ->
       model?.fetch success: @_render, error: @_render
@@ -155,7 +156,6 @@ Service
       status: false # check login status
       cookie: false # enable cookies to allow the server to access the session
       xfbml: true
-    model: new Service(service: 'facebook')
     popup: new FacebookStatusPopup
     FB: (callback) ->  # lazy init
       if @_FB?
