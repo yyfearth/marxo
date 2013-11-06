@@ -235,6 +235,7 @@
         console.log('save', this.model.attributes);
         this.btnSave.disabled = this.btnReset.disabled = true;
         this.model.save({}, {
+          wait: true,
           success: function(wf) {
             return console.log('saved', wf);
           },

@@ -1148,6 +1148,7 @@
           el: find('ul.project-list', this.el),
           collection: collection
         });
+        this.refresh = this.refresh.bind(this);
         this.on({
           block: this.block.bind(this),
           unblock: this.unblock.bind(this)
@@ -1157,16 +1158,24 @@
 
       ContentManagerView.prototype.block = function(model) {
         if (confirm('Are you sure to block this content to post to its media?')) {
-          model.save('status', 'BLOCKED');
-          this.refresh();
+          model.save({
+            status: 'BLOCKED'
+          }, {
+            wait: true,
+            success: this.refresh
+          });
         }
         return this;
       };
 
       ContentManagerView.prototype.unblock = function(model) {
         if (confirm('Are you sure to unblock this content and post to its media?')) {
-          model.save('status', 'WAITING');
-          this.refresh();
+          model.save({
+            status: 'WAITING'
+          }, {
+            wait: true,
+            success: this.refresh
+          });
         }
         return this;
       };
