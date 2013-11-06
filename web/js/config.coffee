@@ -1,8 +1,6 @@
 "use strict"
 
-FB_APP_ID = '213527892138380'
-
-define 'config', ['base', 'manager', 'models'],
+define 'config', ['base', 'manager', 'models', 'module'],
 ({
 find
 findAll
@@ -21,7 +19,9 @@ User
 Publisher
 Publishers
 Service
-}) ->
+}, module) ->
+
+  CFG = module.config()
 
   class ConfigFrameView extends FrameView
     initialize: (options) ->
@@ -148,10 +148,10 @@ Service
 
   class FacebookStatusView extends ServiceStatusView
     service: 'facebook'
-    copy_fields: ['username', 'link', 'locale', 'timezone'] # + fullname(name)
     text_field: 'fullname'
     cfg:
-      appId: FB_APP_ID # App ID
+      appId: CFG.FB_APP_ID
+      scopes: CFG.FB_SCOPES
       status: false # check login status
       cookie: false # enable cookies to allow the server to access the session
       xfbml: true
@@ -164,9 +164,8 @@ Service
         @_FB.init @cfg
         callback.call @, @_FB
       @
-    connect: (callback = @changed) ->
-      fields = @copy_fields
-      @FB (FB) -> FB.login (response) ->
+    connect: (callback = @changed) -> @FB (FB) ->
+      FB.login (response) ->
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           auth =
@@ -175,8 +174,9 @@ Service
             expires_at: new Date Date.now() + 1000 * response.expiresIn
             service: 'facebook'
             status: 'connected'
+          # for test data only
           FB.api '/me', (response) ->
-            auth[key] = response[key] for key in fields
+            auth[key] = response[key] for key in ['username', 'link', 'locale', 'timezone']
             auth.fullname = response.name
             console.log 'facebook connected', auth
             callback auth
@@ -184,7 +184,8 @@ Service
           console.warn 'User cancelled login or did not fully authorize.', response
           callback null
           alert 'You cancelled login or did not fully authorize.'
-      @
+        return
+      , scope: @cfg.scopes
     #disable: ->
     #  if confirm 'Are you sure to stop using Facebook service?\n\nIt will cause Marxo Service stop to send messages and track the responses!'
     #    @model.destroy()

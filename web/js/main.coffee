@@ -1,7 +1,6 @@
 "use strict"
 
-# browser test
-do browser_test = ->
+do -> # browser test
   EXCUSE = 'Marxo Console is powered by HTML5 technologies which need a modern browser to support.\nPlease upgrade or switch your browser.'
   UA = navigator.userAgent
   fail = (msg) ->
@@ -15,7 +14,9 @@ do browser_test = ->
     fail 'Your browser is out-of-date!'
   return
 
-require.config
+console.log 'ver', 3
+
+requirejs.config
   shim:
     'lib/jquery-ui':
       deps: ['lib/common']
@@ -23,6 +24,12 @@ require.config
       exports: 'FB'
   paths:
     'lib/facebook': '//connect.facebook.net/en_US/all'
+  config:
+    models:
+      BASE_URL: 'http://masonwan.com/marxo/api' # '../api'
+    config:
+      FB_APP_ID: '213527892138380'
+      FB_SCOPES: 'publish_actions, email, read_stream, '
 
 define 'main', ['console'], ({ConsoleView, SignInView, Router}) ->
   # EP
