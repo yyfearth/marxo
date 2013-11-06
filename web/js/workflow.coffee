@@ -161,6 +161,7 @@ Action
       console.log 'save', @model.attributes
       @btnSave.disabled = @btnReset.disabled = true
       @model.save {},
+        wait: true
         success: (wf) ->
           console.log 'saved', wf
         error: ->

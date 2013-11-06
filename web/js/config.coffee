@@ -90,7 +90,7 @@ Service
       auth ?=
         service: @service
         status: 'disconnected'
-      @model.clear().save auth, success: @render
+      @model.clear().save auth, wait: true, success: @render
       @
     render: (model = @model) ->
       model?.fetch success: @_render, error: @_render
@@ -237,7 +237,7 @@ Service
       $btn.button 'loading'
       data = @read()
       console.log 'save', data
-      @model.save data, success: =>
+      @model.save data, wait: true, success: =>
         $btn.button 'reset'
         @reload()
       @
@@ -390,9 +390,9 @@ Service
           # enforce tenant id
           data.tenant_id = @signin_user.tenant_id
           if user.isNew()
-            @collection.create data
+            @collection.create data, wait: true
           else
-            user.save data
+            user.save data, wait: true
           @refresh()
       @
     remove: (users) ->
