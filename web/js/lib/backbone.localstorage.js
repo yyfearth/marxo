@@ -155,6 +155,7 @@ define('lib/backbone.localstorage', ['lib/common'], function () {
 		} else if (model instanceof Backbone.Collection) {
 			key = url;
 		}
+		key = key.replace(/^http.+?(?=\/api\/)/, '');
 		var store = stores[key];
 		if (store == null)
 			store = stores[key] = new Backbone.LocalStorage(key);
