@@ -41,6 +41,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
 
   # Polyfill
   Date::now ?= -> +new Date
+  String::capitalize ?= ->
+    @charAt(0).toUpperCase() + @slice(1).toLowerCase()
 
   # Enable CoffeeScript class for Javascript Mixin
   # https://github.com/yi/coffee-acts-as

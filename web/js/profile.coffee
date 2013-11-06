@@ -33,7 +33,7 @@ User
         @model = User.current = data
         attrs = data.toJSON()
         sex = attrs.sex
-        attrs.sex = unless sex then 'Unspecified' else sex.charAt(0).toUpperCase() + sex[1..]
+        attrs.sex = unless sex then 'Unspecified' else sex.capitalize()
         console.log attrs
         @fill attrs
         @avatar.src = "https://secure.gravatar.com/avatar/#{attrs.email_md5}?s=200&d=mm"
