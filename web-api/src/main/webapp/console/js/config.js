@@ -74,12 +74,10 @@
           el: find('.btn-facebook', this.el)
         });
         this.twitterView = new ServiceStatusView({
-          service: 'twitter',
-          el: find('.btn-twitter', this.el)
+          service: 'twitter'
         });
         return this.emailView = new ServiceStatusView({
-          service: 'email',
-          el: find('.btn-email', this.el)
+          service: 'email'
         });
       };
 
@@ -150,27 +148,38 @@
         return this;
       };
 
+      ServiceStatusView.prototype.disconnect = function(callback) {
+        if (callback == null) {
+          callback = this.changed;
+        }
+        callback(null);
+        return this;
+      };
+
       ServiceStatusView.prototype.changed = function(auth) {
-        var _this = this;
         this.model.clear().set({
           service: this.service
         });
         if (auth) {
+          this._loading('connecting');
           this.model.save(auth, {
             wait: true,
             success: this.render,
             error: function() {
+              this._render();
               return alert('Failed to connect this account.');
             }
           });
         } else {
+          this._loading('disconnecting');
           this.model.destroy({
+            wait: true,
+            success: this.render,
             error: function() {
-              _this.render();
+              this._render();
               return alert('Failed to disconnect this account.');
             }
           });
-          this.render();
         }
         return this;
       };
@@ -179,6 +188,7 @@
         if (model == null) {
           model = this.model;
         }
+        this._loading('loading');
         if (model != null) {
           model.fetch({
             success: this._render,
@@ -216,12 +226,19 @@
         return this;
       };
 
+      ServiceStatusView.prototype._loading = function(status) {
+        if (!this.el.disabled) {
+          this.el.disabled = true;
+          this.el.textContent = "" + (status.capitalize()) + " to " + (this.service.capitalize()) + "...";
+        }
+      };
+
       ServiceStatusView.prototype._render = function(model) {
         var cls, field, text, _ref3, _ref4;
         this.model = model;
-        text = this.service.charAt(0).toUpperCase() + this.service.slice(1);
+        text = this.service.capitalize();
         field = this.text_field && ((_ref3 = this.model) != null ? _ref3.get(this.text_field) : void 0);
-        this.$el.removeClass('connected disconnected');
+        this.$el.prop('disabled', false).removeClass('connected disconnected');
         if ((_ref4 = this.model) != null ? _ref4.connected() : void 0) {
           cls = 'connected';
           text += ' Connected';
@@ -292,7 +309,7 @@
         scopes: CFG.FB_SCOPES,
         status: false,
         cookie: false,
-        xfbml: true
+        xfbml: false
       };
 
       FacebookStatusView.prototype.popup = new FacebookStatusPopup;
@@ -344,25 +361,6 @@
             scope: this.cfg.scopes
           });
         });
-      };
-
-      FacebookStatusView.prototype.disconnect = function(callback) {
-        if (callback == null) {
-          callback = this.changed;
-        }
-        this.FB(function(FB) {
-          return FB.getLoginStatus(function(response) {
-            if (response.status === 'connected') {
-              return FB.logout(function(response) {
-                console.log('logout', response);
-                return callback(null);
-              });
-            } else {
-              return callback(null);
-            }
-          });
-        });
-        return this;
       };
 
       return FacebookStatusView;

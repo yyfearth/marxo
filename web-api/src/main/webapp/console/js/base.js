@@ -6,7 +6,7 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   define('base', ['models', 'lib/common', 'lib/html5-dataset'], function(_arg) {
-    var BoxView, Collection, FormDialogView, FormView, FormViewMixin, FrameView, InnerFrameView, ModalDialogView, NavListView, Tenant, User, View, fill, find, findAll, tpl, tplAll, _base, _html, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+    var BoxView, Collection, FormDialogView, FormView, FormViewMixin, FrameView, InnerFrameView, ModalDialogView, NavListView, Tenant, User, View, fill, find, findAll, tpl, tplAll, _base, _base1, _html, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
     Collection = _arg.Collection, Tenant = _arg.Tenant, User = _arg.User;
     find = function(selector, parent) {
       if (parent == null) {
@@ -66,6 +66,11 @@
     if ((_base = Date.prototype).now == null) {
       _base.now = function() {
         return +(new Date);
+      };
+    }
+    if ((_base1 = String.prototype).capitalize == null) {
+      _base1.capitalize = function() {
+        return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
       };
     }
     Function.prototype.acts_as = function() {
@@ -357,11 +362,11 @@
           throw new Error('FormViewMixin require a form element in ' + (this.el.id || this.el.outerHTML));
         }
         this.form.onsubmit = function(e) {
-          var _base1;
+          var _base2;
           e.preventDefault();
           if (_this.validate(_this.form)) {
-            if (typeof (_base1 = _this.form)._callback === "function") {
-              _base1._callback(_this.form);
+            if (typeof (_base2 = _this.form)._callback === "function") {
+              _base2._callback(_this.form);
             }
             _this.form._callback = null;
             _this.trigger('submit', _this.form, _this.data);

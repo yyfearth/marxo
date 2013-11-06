@@ -51,7 +51,7 @@
             _this.model = User.current = data;
             attrs = data.toJSON();
             sex = attrs.sex;
-            attrs.sex = !sex ? 'Unspecified' : sex.charAt(0).toUpperCase() + sex.slice(1);
+            attrs.sex = !sex ? 'Unspecified' : sex.capitalize();
             console.log(attrs);
             _this.fill(attrs);
             _this.avatar.src = "https://secure.gravatar.com/avatar/" + attrs.email_md5 + "?s=200&d=mm";
