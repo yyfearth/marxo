@@ -147,6 +147,7 @@ define('lib/backbone.localstorage', ['lib/common'], function () {
 	Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function (method, model, options) {
 		var key;
 		var url = typeof model.url == 'function' ? model.url() : model.url || '';
+		url = url.replace(/^http.+?(?=\/api\/)/, '');
 		if (model instanceof Backbone.Model) {
 			key = model.urlRoot || url.replace(model.id, '');
 			if (key.slice(-1) == '/')
