@@ -935,7 +935,7 @@
       Service.prototype.urlRoot = ROOT + '/services';
 
       Service.prototype.connected = function() {
-        return 'connected' === this.get('status');
+        return /CONNECTED/i.test(this.get('status'));
       };
 
       return Service;

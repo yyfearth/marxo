@@ -151,6 +151,7 @@
       };
 
       ServiceStatusView.prototype.changed = function(auth) {
+        var _this = this;
         this.model.clear().set({
           service: this.service
         });
@@ -159,17 +160,17 @@
             wait: true,
             success: this.render,
             error: function() {
-              return alert('Failed to connect Facebook account.');
+              return alert('Failed to connect this account.');
             }
           });
         } else {
           this.model.destroy({
-            wait: true,
-            success: this.render,
             error: function() {
-              return alert('Failed to disconnect Facebook account.');
+              _this.render();
+              return alert('Failed to disconnect this account.');
             }
           });
+          this.render();
         }
         return this;
       };
@@ -221,24 +222,21 @@
         text = this.service.charAt(0).toUpperCase() + this.service.slice(1);
         field = this.text_field && ((_ref3 = this.model) != null ? _ref3.get(this.text_field) : void 0);
         this.$el.removeClass('connected disconnected');
-        switch ((_ref4 = this.model) != null ? _ref4.get('status') : void 0) {
-          case 'DISCONNECTED':
-            cls = 'disconnected';
-            text += ' Disconnected';
-            if (field) {
-              text += ' from ' + field;
-            }
-            break;
-          case 'CONNECTED':
-            cls = 'connected';
-            text += ' Connected';
-            if (field) {
-              text += ' as ' + field;
-            }
-            break;
-          default:
-            cls = '';
-            text = this._default_text;
+        if ((_ref4 = this.model) != null ? _ref4.connected() : void 0) {
+          cls = 'connected';
+          text += ' Connected';
+          if (field) {
+            text += ' as ' + field;
+          }
+        } else if ((this.model != null) && /DISCONNECTED/i.test(this.model.get('status'))) {
+          cls = 'disconnected';
+          text += ' Disconnected';
+          if (field) {
+            text += ' from ' + field;
+          }
+        } else {
+          cls = '';
+          text = this._default_text;
         }
         if (cls) {
           this.$el.addClass(cls);
