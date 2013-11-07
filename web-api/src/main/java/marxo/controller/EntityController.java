@@ -30,7 +30,7 @@ public abstract class EntityController<E extends BasicEntity> extends BasicContr
 		return dao.findAll();
 	}
 
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public E create(@Valid @RequestBody E entity, HttpServletResponse response) throws Exception {
