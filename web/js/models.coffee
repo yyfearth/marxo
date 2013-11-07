@@ -134,35 +134,100 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
-    save: (attributes = {}, options) -> # override for sync ids
-      node_ids = @nodes?.map (r) -> r.id
-      link_ids = @links?.map (r) -> r.id
-      attributes.node_ids = node_ids if node_ids?.join(',') isnt @get('node_ids')?.join(',')
-      attributes.link_ids = link_ids if link_ids?.join(',') isnt @get('link_ids')?.join(',')
-      if isLocalTest = Backbone.LocalStorage? and @sync isnt Backbone.ajaxSync # for test only
-        if @nodes? then attributes.nodes = @nodes?.map (r) -> r.attributes
-        if @links? then attributes.links = @links?.map (r) -> r.attributes
-      #else # save nodes and links
-      @nodes?.forEach (node) =>
-        if node.isNew()
-          @nodes.create node, wait: true
-        else if node._changed
-          node.resetChangeFlag()
-          node.save()
-      @links?.forEach (link) =>
-        if link.isNew()
-          @links.create link, wait: true
-        else if link._changed
-          link.resetChangeFlag()
-          link.save()
-
-      console.log 'save', @_name, attributes, @
-      super attributes, options
-
-      unless isLocalTest # or never delete, until any bkg task to achieve them
-        @_deleted.forEach (model) -> model.destroy()
-
+    copy: (workflow) -> # create form workflow as template
+      throw new Error 'must be copy from a workflow' unless workflow instanceof Workflow
+      nodes = []
+      links = []
+      node_index = {}
+      silent = silent: true
+      workflow.nodes.forEach (node) ->
+        cloned_node = node.clone().unset('id', silent)
+        .unset('workflow_id', silent).set template_id: node.id
+        if node.has 'actions' # remove id in action
+          cloned_node.set 'actions', node.get('actions').map (action) ->
+            new Action(action).unset('id', silent).toJSON()
+        nodes.push cloned_node
+        node_index[node.id] = cloned_node
+        return
+      workflow.links.forEach (link) ->
+        # remove linked nodes id then ref nodes
+        cloned_link = link.clone().unset('id', silent).unset('workflow_id', silent)
+        .unset('prev_node_id', silent).unset('next_node_id', silent)
+        .set template_id: link.id
+        cloned_link.prevNode = node_index[link.get 'prev_node_id']
+        cloned_link.nextNode = node_index[link.get 'next_node_id']
+        links.push cloned_link
+      attr = workflow.attributes
+      @set
+        name: attr.name
+        desc: attr.desc
+        key: attr.key
+        template_id: workflow.id
+        nodes: nodes
+        links: links
+      @_warp @
       @
+    save: (attributes = {}, options = {}) -> # override for sync ids
+      if Backbone.LocalStorage? # for local sync
+        if @nodes?
+          node_ids = attributes.node_ids = []
+          attributes.nodes = @nodes.map (r) ->
+            node_ids.push r.id
+            r.attributes
+        if @links?
+          link_ids = attributes.link_ids = []
+          attributes.links = @links.map (r) ->
+            link_ids.push r.id
+            r.attributes
+        console.log 'save local', @_name, attributes
+        super attributes, options
+      else # for ajax sync
+        console.log 'saving', @_name, attributes, @
+        # replace original callbacks
+        _success = options.success
+        _err = options.error
+        options.success = (wf, resp, opt) =>
+          # save nodes
+          attr = workflow_id: wf.id
+          save_opt = wait: true, reset: true
+          requests = []
+          @nodes?.forEach (node) =>
+            if node.isNew()
+              requests.push node.save attr, save_opt
+            else if node._changed
+              node.resetChangeFlag().save()
+            return
+          $.when.apply($, requests).then =>
+            # then save links
+            requests = []
+            @links?.forEach (link) =>
+              if link.isNew()
+                attr =
+                  workflow_id: wf.id
+                  prev_node_id: link.prevNode.id
+                  next_node_id: link.nextNode.id
+                requests.push link.save attr, save_opt
+              else if link._changed
+                link.resetChangeFlag().save()
+              return
+            $.when.apply($, requests).then =>
+              # finally done
+              console.log 'saved', @_name, attributes, @
+              _success? wf, resp, opt
+            , =>
+              console.error 'fail to save links for wf', @
+              _err? wf, null, options
+              return
+            return
+          , =>
+            console.error 'fail to save nodes for wf', @
+            _err? wf, null, options
+            return
+          # delete unused nodes/links (no wait)
+          @_deleted?.forEach (model) -> model.destroy()
+          return
+        # save workflow
+        super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
       n = @_name
       if @loaded()
@@ -210,15 +275,16 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     _createLinkRef: (link) ->
       throw new Error 'it must be a Link object' unless link instanceof Link
-      unless link.has('prev_node_id') and link.has('next_node_id')
-        throw new Error 'link ' + (link.key or link.id) + 'is broken, prev/next node missing'
       link.workflow = @ if @_name is 'workflow'
       prevNodeId = link.get 'prev_node_id'
       nextNodeId = link.get 'next_node_id'
-      link.prevNode = @nodes.get prevNodeId
-      throw new Error "cannot find prev node with id #{prevNodeId} for link #{link.id}" unless link.prevNode
-      link.nextNode = @nodes.get nextNodeId
-      throw new Error "cannot find next node with id #{prevNodeId} for link #{link.id}" unless link.nextNode
+      if prevNodeId and nextNodeId
+        link.prevNode = @nodes.get prevNodeId
+        throw new Error "cannot find prev node with id #{prevNodeId} for link #{link.id}" unless link.prevNode
+        link.nextNode = @nodes.get nextNodeId
+        throw new Error "cannot find next node with id #{prevNodeId} for link #{link.id}" unless link.nextNode
+      else unless link.prevNode? and link.nextNode?
+        throw new Error 'link ' + (link.key or link.id) + ' is broken, prev/next node missing'
       link.prevNode.outLinks.push link
       link.nextNode.inLinks.push link
       return
@@ -336,7 +402,6 @@ define 'models', ['module', 'lib/common'], (module) ->
           nodes: nodes
           links: links
         @_warp @
-        console.log @
         callback? @, workflow
       @
     _createNodeRef: (node) ->
