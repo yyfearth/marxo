@@ -348,12 +348,14 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @events ?= {}
       @events['click .btn-refresh'] = => @fetch true
       @fetch false if options.auto
-    fetch: (force) ->
+    fetch: (options = {}) ->
       col = @collection
       ts = Date.now()
-      if force or not col._last_load or ts - col._last_load > @_reload_timeout
+      options = {force: options} if typeof options is 'boolean'
+      if options.force or not col._last_load or ts - col._last_load > @_reload_timeout
         console.log 'fetch for list', @headerTitle
-        col.fetch reset: true
+        options.reset ?= true
+        col.fetch options
         col._last_load = Date.now()
         true
       else
