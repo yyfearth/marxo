@@ -112,6 +112,7 @@ Notifications
       super options
       # popover details
       _renderPopover = @_renderPopover.bind @
+      @autoUpdate = @autoUpdate.bind @
       @$el.popover
         html: true
         selector: 'a.pointer'
@@ -131,11 +132,12 @@ Notifications
       @
     autoUpdate: (val) ->
       #console.log 'set auto update notifications', val
-      @_auto_update = clearInterval @_auto_update if @_auto_update
-      if val then @_auto_update = setInterval =>
-        console.log 'auto update notifications'
-        @fetch()
-      , @_reload_timeout + 1
+      @_auto_update = clearTimeout @_auto_update if @_auto_update
+      if val then @fetch
+        success: =>
+          console.log 'auto update notifications successful'
+          @_auto_update = setTimeout @autoUpdate, @_reload_timeout + 1
+        error: -> console.log 'auto update notifications failed, stop auto update'
       @
     _renderPopover: (model) ->
       console.log 'render popover', model
