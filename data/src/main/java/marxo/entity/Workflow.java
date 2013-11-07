@@ -10,7 +10,6 @@ import java.util.List;
 
 public class Workflow extends TenantChildEntity {
 	public WorkflowType type = null;
-	public WorkflowStatus status = null;
 	@JsonIgnore
 	public List<ObjectId> nodeIdList = null;
 	@JsonIgnore
@@ -47,14 +46,6 @@ public class Workflow extends TenantChildEntity {
 		this.type = type;
 	}
 
-	public WorkflowStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(WorkflowStatus status) {
-		this.status = status;
-	}
-
 	@JsonProperty("node_ids")
 	public String[] getJsonNodeIds() {
 		if (nodeIdList == null) {
@@ -89,10 +80,6 @@ public class Workflow extends TenantChildEntity {
 
 		if (type == null) {
 			type = WorkflowType.NONE;
-		}
-
-		if (status == null) {
-			status = WorkflowStatus.NONE;
 		}
 
 		if (nodeIdList == null) {
