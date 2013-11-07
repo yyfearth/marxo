@@ -42,7 +42,7 @@ window.fbAsyncInit = function () {
 }(document));
 
 $('#login').click(function () {
-    var scopes = {scope: 'publish_actions, email, '};
+    var scopes = {scope: 'publish_actions, email, read_stream, '};
 
     FB.login(function (response) {
         console.log('Login response: ', response);
