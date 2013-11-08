@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public abstract class TenantChildDao<E extends TenantChildEntity> extends BasicDao<E> {
+public abstract class TenantChildDao<Entity extends TenantChildEntity> extends BasicDao<Entity> {
 	protected ObjectId tenantId;
 
 	public TenantChildDao() {
@@ -27,26 +27,27 @@ public abstract class TenantChildDao<E extends TenantChildEntity> extends BasicD
 		this.tenantId = tenantId;
 	}
 
+	@Override
 	public Criteria getFilterCriteria() {
 		return Criteria.where("tenantId").is(tenantId);
 	}
 
 	@Override
-	public void insert(E entity) {
+	public void insert(Entity entity) {
 		entity.tenantId = tenantId;
 		super.insert(entity);
 	}
 
 	@Override
-	public void insert(List<E> entities) {
-		for (E workflow : entities) {
-			workflow.tenantId = tenantId;
+	public void insert(List<Entity> entities) {
+		for (Entity entity : entities) {
+			entity.tenantId = tenantId;
 		}
 		super.insert(entities);
 	}
 
 	@Override
-	public void save(E entity) {
+	public void save(Entity entity) {
 		entity.tenantId = tenantId;
 		super.save(entity);
 	}

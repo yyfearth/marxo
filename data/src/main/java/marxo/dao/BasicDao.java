@@ -19,10 +19,6 @@ import java.util.List;
 @Repository
 public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 	protected Class<E> entityClass;
-	/**
-	 * The pre-defined filter which will constrain the results.
-	 */
-	// review: find a way to auto wire this. Currently, when a DAO is loaded, it has no info about mongo-configuration.xml. Changing context order doesn't help.
 	MongoTemplate mongoTemplate;
 	ApplicationContext context;
 
@@ -46,7 +42,10 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		return mongoTemplate.count(Query.query(getFilterCriteria()), entityClass);
 	}
 
-	// Create
+	/*
+	Create
+	 */
+
 	@Override
 	public void insert(E entity) {
 		mongoTemplate.insert(entity);
@@ -57,7 +56,10 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		mongoTemplate.insert(entities, entityClass);
 	}
 
-	// Read
+	/*
+	Read
+	 */
+
 	@Override
 	public List<E> findAll() {
 		return mongoTemplate.find(Query.query(getFilterCriteria()), entityClass);
@@ -70,19 +72,28 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		return mongoTemplate.findOne(query, entityClass);
 	}
 
-	// Update
+	/*
+	Update
+	 */
+
 	@Override
 	public void save(E entity) {
 		mongoTemplate.save(entity);
 	}
 
-	// Delete
+	/*
+	Delete
+	 */
+
 	@Override
 	public E deleteById(ObjectId id) {
 		return mongoTemplate.findAndRemove(Query.query(getFilterCriteria().and("id").is(id)), entityClass);
 	}
 
-	// Search
+	/*
+	Search
+	 */
+
 	public List<E> searchByWorkflowId(ObjectId workflowId) {
 		return mongoTemplate.find(Query.query(getFilterCriteria().and("workflowId").is(workflowId)), entityClass);
 	}

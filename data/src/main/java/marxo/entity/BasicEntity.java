@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Strings;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -26,13 +27,13 @@ public abstract class BasicEntity {
 	public String name;
 	@Field(order = 4)
 	public String key;
-	@JsonProperty("created_at")
+	@JsonIgnore
 	@Field(order = 50)
 	public Date createdDate = new Date();
 	@JsonIgnore
 	@Field(order = 51)
 	public ObjectId createdByUserId;
-	@JsonProperty("updated_at")
+	@JsonIgnore
 	@Field(order = 52)
 	public Date modifiedDate = new Date();
 	@JsonIgnore
@@ -40,6 +41,26 @@ public abstract class BasicEntity {
 	public ObjectId modifiedByUserId;
 	@JsonProperty("desc")
 	public String description;
+
+	@JsonProperty("created_at")
+	public String getCreatedDate() {
+		return (new DateTime(createdDate)).toString();
+	}
+
+	@JsonProperty("created_at")
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	@JsonProperty("updated_at")
+	public String getModifiedDate() {
+		return (new DateTime(modifiedDate)).toString();
+	}
+
+	@JsonProperty("updated_at")
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
 
 	@JsonProperty("id")
 	public String getJsonId() {
