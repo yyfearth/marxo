@@ -410,12 +410,15 @@ Action
         drop: (e, ui) =>
           node = ui.draggable.data 'model'
           if node instanceof Node
-            # set style after createNode since it will remove style when clone
+            # set offset after createNode since it will remove offset when clone
             @createNode node, (node) =>
               $el_offset = @$el.offset()
-              x = ui.offset.left - $el_offset.left
-              y = ui.offset.top - $el_offset.top
-              node.set 'style', "left:#{if x < 0 then 0 else x}px;top:#{if y < 0 then 0 else y}px"
+              offset =
+                x: ui.offset.left - $el_offset.left
+                y: ui.offset.top - $el_offset.top
+              offset.x = 0 if offset.x < 0
+              offset.y = 0 if offset.y < 0
+              node.set 'offset', offset
               true
             true
           else
@@ -539,7 +542,7 @@ Action
       wf = @model
       throw new Error 'workflow not loaded' unless wf?
       #console.log wf.nodes
-      unless wf.nodes.length and wf.nodes.at(0).has 'style'
+      unless wf.nodes.length and wf.nodes.at(0).has 'offset'
         @_sortNodeViews wf.nodes
       jsPlumb.ready =>
         wf.nodes.forEach @_addNode.bind @
@@ -575,7 +578,7 @@ Action
           key: node.get('key') + '_clone'
           name: name + ' (Clone)'
           desc: if desc then desc + ' (Clone)' else null
-        node.unset 'style'
+        node.unset 'offset'
         node.unset 'id'
       else if node.name
         node = new Node node
@@ -698,13 +701,13 @@ Action
       @listenTo node, 'destroy', @remove.bind @
       @_renderModel node
       jsPlumb.draggable @$el, stack: '.node', stop: =>
-        node.view.el.style.zIndex = ''
-        style = node.view.el.getAttribute 'style'
-        if style isnt node.get 'style'
-          node.set 'style', style
-          #node.save()
-          console.log 'node style', node.id, style
-          node.workflow?.trigger 'changed', 'move_node', node
+        # set offset after drag
+        $el_pos = $(node.view.el).position()
+        offset =
+          x: if $el_pos.left < 0 then 0 else $el_pos.left
+          y: if $el_pos.top < 0 then 0 else $el_pos.top
+        node.set 'offset', offset
+        node.workflow?.trigger 'changed', 'move_node', node
       @parentEl.appendChild @el
       # build endpoints must after append el to dom
       param =
@@ -722,8 +725,11 @@ Action
     _renderModel: (node = @model) ->
       @el.innerHTML = node.escape 'name'
       name = node.get 'name'
-      if node.has 'style'
-        @el.setAttribute 'style', node.get 'style'
+      if node.has 'offset'
+        offset = node.get 'offset'
+        style = @el.style
+        style.left = offset.x + 'px'
+        style.top = offset.y + 'px'
       else
         @el.style.left = node.x + 'px'
         @el.style.top = node.y + 'px'
