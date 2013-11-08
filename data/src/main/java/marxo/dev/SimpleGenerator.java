@@ -23,7 +23,6 @@ public class SimpleGenerator extends BasicGenerator implements ILoggable {
 
 		ArrayList<Tenant> tenants = new ArrayList<>();
 		ArrayList<User> users = new ArrayList<>();
-		ArrayList<Project> projects = new ArrayList<>();
 		ArrayList<Workflow> workflows = new ArrayList<>();
 		ArrayList<Node> nodes = new ArrayList<>();
 		ArrayList<Action> actions = new ArrayList<>();
@@ -63,33 +62,6 @@ public class SimpleGenerator extends BasicGenerator implements ILoggable {
 				w.modifiedByUserId = modifiedBy;
 				ObjectId createdBy = users.get(random.nextInt(users.size())).id;
 				w.createdByUserId = createdBy;
-			}
-		}
-
-		// Project
-		{
-			for (int i = 1; i <= 10; i++) {
-				Tenant tenant = tenants.get(random.nextInt(tenants.size()));
-				Workflow workflow = workflows.get(random.nextInt(workflows.size()));
-
-				Project p = new Project();
-				p.tenantId = tenant.id;
-				p.name = "Project " + i;
-				p.description = StringTool.getRandomString(120);
-				p.fillWithDefaultValues();
-				projects.add(p);
-
-				boolean hasTemplate = random.nextBoolean();
-				if (hasTemplate) {
-					p.templateId = workflow.id;
-					p.modifiedByUserId = workflow.modifiedByUserId;
-					p.createdByUserId = workflow.createdByUserId;
-				} else {
-					ObjectId modifiedBy = users.get(random.nextInt(users.size())).id;
-					p.modifiedByUserId = modifiedBy;
-					ObjectId createdBy = users.get(random.nextInt(users.size())).id;
-					p.createdByUserId = createdBy;
-				}
 			}
 		}
 
@@ -173,8 +145,6 @@ public class SimpleGenerator extends BasicGenerator implements ILoggable {
 		mongoTemplate.insert(users, User.class);
 		mongoTemplate.dropCollection(Workflow.class);
 		mongoTemplate.insert(workflows, Workflow.class);
-		mongoTemplate.dropCollection(Project.class);
-		mongoTemplate.insert(projects, Project.class);
 		mongoTemplate.dropCollection(Node.class);
 		mongoTemplate.insert(nodes, Node.class);
 		mongoTemplate.dropCollection(Action.class);

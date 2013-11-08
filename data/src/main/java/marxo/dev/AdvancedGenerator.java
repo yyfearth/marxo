@@ -30,7 +30,6 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 
 		ArrayList<Tenant> tenants = new ArrayList<>();
 		ArrayList<User> users = new ArrayList<>();
-		ArrayList<Project> projects = new ArrayList<>();
 		ArrayList<Workflow> workflows = new ArrayList<>();
 		ArrayList<Node> nodes = new ArrayList<>();
 		ArrayList<Link> links = new ArrayList<>();
