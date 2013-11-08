@@ -59,7 +59,7 @@ Action
       'name:workflow'
       'desc'
       'type'
-      'status'
+      'sharing'
       'created_at'
       'updated_at'
       'actions:workflow'
