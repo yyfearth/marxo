@@ -74,7 +74,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post project idea'
         created_at: '2013-06-27T00:23:31.747Z'
         updated_at: '2013-06-27T00:23:31.747Z'
-        style: 'left: 26px; top: 43px;'
+        offset:
+          x: 26, y: 43
         actions: [
           id: '50447afb4728cb2036cf9f00'
           type: 'post_page'
@@ -92,7 +93,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post requirements'
         created_at: '2013-06-27T00:24:55.070Z'
         updated_at: '2013-06-27T00:24:55.070Z'
-        style: 'left: 334px; top: 44px;'
+        offset:
+          x: 334, y: 44
         actions: [
           id: '50447afb4728cb2036cf9f03'
           type: 'post_page'
@@ -110,7 +112,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Cancel project for less response than expected'
         created_at: '2013-06-27T00:25:58.702Z'
         updated_at: '2013-06-27T00:25:58.702Z'
-        style: 'left: 334px; top: 204px;'
+        offset:
+          x: 334, y: 204
         actions: [
           id: '50447afb4728cb2036cf9f06'
           type: 'post_to_multi_social_media'
@@ -122,7 +125,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Retrieve app submissions'
         created_at: '2013-06-27T00:32:46.817Z'
         updated_at: '2013-06-27T00:32:46.817Z'
-        style: 'left: 613px; top: 44px;'
+        offset:
+          x: 613, y: 44
         actions: [
           id: '50447afb4728cb2036cf9f07'
           type: 'post_page'
@@ -140,7 +144,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Retrieve logo design'
         created_at: '2013-06-27T00:35:36.856Z'
         updated_at: '2013-06-27T00:35:36.856Z'
-        style: 'left: 629px; top: 282px;'
+        offset:
+          x: 629, y: 282
         actions: [
           id: '50447afb4728cb2036cf9f0a'
           type: 'post_page'
@@ -158,7 +163,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Email to evaluators'
         created_at: '2013-06-27T00:36:21.950Z'
         updated_at: '2013-06-27T00:36:21.950Z'
-        style: 'left: 1018px; top: 44px;'
+        offset:
+          x: 1018, y: 44
         actions: [
           id: '50447afb4728cb2036cf9f0d'
           type: 'post_page'
@@ -176,7 +182,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post and vote'
         created_at: '2013-06-27T00:36:47.097Z'
         updated_at: '2013-06-27T00:36:47.097Z'
-        style: 'left: 1043px; top: 282px;'
+        offset:
+          x: 1043, y: 282
         actions: [
           id: '50447afb4728cb2036cf9f10'
           type: 'post_page'
@@ -194,7 +201,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post final result and reward'
         created_at: '2013-06-27T00:39:04.602Z'
         updated_at: '2013-06-27T00:39:04.602Z'
-        style: 'left: 1420px; top: 183px;'
+        offset:
+          x: 1420, y: 183
         actions: [
           id: '50447afb4728cb2036cf9f13'
           type: 'post_page'
@@ -454,7 +462,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post project idea'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 26px; top: 43px;'
+        offset:
+          x: 26, y: 43
         actions: [
           id: '50447afb4728cc2036cf9f00'
           type: 'post_page'
@@ -473,7 +482,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post requirements'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 334px; top: 44px;'
+        offset:
+          x: 334, y: 44
         actions: [
           id: '50447afb4728cc2036cf9f03'
           type: 'post_page'
@@ -492,7 +502,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Cancel project for less response than expected'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 334px; top: 204px;'
+        offset:
+          x: 334, y: 204
         actions: [
           id: '50447afb4728cc2036cf9f06'
           type: 'post_to_multi_social_media'
@@ -505,7 +516,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Retrieve app submissions'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 613px; top: 44px;'
+        offset:
+          x: 613, y: 44
         actions: [
           id: '50447afb4728cc2036cf9f07'
           type: 'post_page'
@@ -524,7 +536,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Retrieve logo design'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 629px; top: 282px;'
+        offset:
+          x: 629, y: 282
         actions: [
           id: '50447afb4728cc2036cf9f0a'
           type: 'post_page'
@@ -543,7 +556,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Email to evaluators'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 1018px; top: 44px;'
+        offset:
+          x: 1018, y: 44
         actions: [
           id: '50447afb4728cc2036cf9f0d'
           type: 'post_page'
@@ -562,7 +576,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post and vote'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 1043px; top: 282px;'
+        offset:
+          x: 1043, y: 282
         actions: [
           id: '50447afb4728cc2036cf9f10'
           type: 'post_page'
@@ -581,7 +596,8 @@ define 'test_data', ['models'], (models) ->
         desc: 'Post final result and reward'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
-        style: 'left: 1420px; top: 183px;'
+        offset:
+          x: 1420, y: 183
         actions: [
           id: '50447afb4728cc2036cf9f13'
           type: 'post_page'
