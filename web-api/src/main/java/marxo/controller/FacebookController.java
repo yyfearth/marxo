@@ -2,23 +2,22 @@ package marxo.controller;
 
 import marxo.dao.TenantDao;
 import marxo.entity.FacebookData;
+import marxo.entity.FacebookStatus;
 import marxo.entity.Tenant;
 import marxo.entity.User;
 import marxo.exception.EntityNotFoundException;
 import marxo.security.MarxoAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
 @Controller
-@RequestMapping("/service/facebook")
+@RequestMapping("/service{:s?}/facebook")
 public class FacebookController extends BasicController implements IInterceptroPreHandlable {
 	User user;
 	@Autowired
@@ -31,15 +30,6 @@ public class FacebookController extends BasicController implements IInterceptroP
 		user = marxoAuthentication.getUser();
 	}
 
-	@RequestMapping(method = RequestMethod.PUT)
-	@ResponseBody
-	public FacebookData saveData(@Valid @RequestBody FacebookData facebookData) {
-		Assert.notNull(facebookData);
-		Tenant tenant = tenantDao.get(user.tenantId);
-		tenantDao.updateFacebookData(tenant.id, facebookData);
-		return facebookData;
-	}
-
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public FacebookData readData() {
@@ -49,5 +39,26 @@ public class FacebookController extends BasicController implements IInterceptroP
 		}
 
 		return (tenant.facebookData == null) ? new FacebookData() : tenant.facebookData;
+	}
+
+	@RequestMapping(method = RequestMethod.PUT)
+	@ResponseBody
+	public FacebookData saveData(@Valid @RequestBody FacebookData facebookData) {
+		Assert.notNull(facebookData);
+		Tenant tenant = tenantDao.get(user.tenantId);
+
+		// todo: call channel
+		facebookData.status = FacebookStatus.CONNECTED;
+
+		tenantDao.updateFacebookData(tenant.id, facebookData);
+
+		return facebookData;
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteData() {
+		tenantDao.removeFacebookData(user.tenantId);
 	}
 }
