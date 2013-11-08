@@ -619,9 +619,9 @@ Action
     createLink: (from, to, callback) ->
       from = @model.nodes.get from unless from.id and from.has 'name'
       to = @model.nodes.get to unless to.id and to.has 'name'
-      name = "#{from.get 'name'}_to_#{to.get 'name'}"
+      key = "#{from.get 'key'}_to_#{to.get 'key'}"
       data = new Link
-        name: name[0..32].toLowerCase()
+        key: key[0..32].toLowerCase()
         prev_node_id: from.id
         next_node_id: to.id
       @linkEditor.popup data, (action, link) =>
