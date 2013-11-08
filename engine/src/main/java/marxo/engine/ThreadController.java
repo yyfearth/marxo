@@ -5,6 +5,10 @@ public class ThreadController {
 		MessageLoop messageLoop = new MessageLoop();
 		messageLoop.run();
 	}
+
+	public void start() {
+
+	}
 }
 
 class MessageLoop implements Runnable {
