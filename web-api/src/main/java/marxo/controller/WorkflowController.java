@@ -30,6 +30,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	LinkDao linkDao;
 	@Autowired
 	NodeController nodeController;
+	@Autowired
+	LinkController linkController;
 
 	@Autowired
 	public WorkflowController(WorkflowDao workflowDao) {
@@ -90,6 +92,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	public Workflow read(@PathVariable String idString) {
 		Workflow workflow = super.read(idString);
 
+		nodeDao.setWorkflowId(workflow.id);
+		linkDao.setWorkflowId(workflow.id);
+
 		List<Node> nodes = nodeDao.searchByWorkflowId(workflow.id);
 		List<Link> links = linkDao.searchByWorkflowId(workflow.id);
 		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
@@ -102,8 +107,20 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	/*
-	Delegate methods to node controller.
+	Sub-resources
 	 */
+
+	/*
+	Node
+	 */
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.GET)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<Node> readAllNodes(@PathVariable String workflowIdString) throws Exception {
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		return nodeDao.searchByWorkflowId(workflowId);
+	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.POST)
 	@ResponseBody
@@ -139,9 +156,56 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Node deleteNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
-		Node node = nodeController.delete(nodeIdString);
+		return nodeController.delete(nodeIdString);
+	}
 
-		return node;
+	/*
+	Link
+	 */
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.GET)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public List<Link> readAllLinks(@PathVariable String workflowIdString) throws Exception {
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		return linkDao.searchByWorkflowId(workflowId);
+	}
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.POST)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
+	public Link createLink(@PathVariable String workflowIdString, @Valid @RequestBody Link link, HttpServletResponse response) throws Exception {
+		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
+		link = linkController.create(link, response);
+
+		return link;
+	}
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Link readLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
+		Link link = linkController.read(linkIdString);
+		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
+
+		return link;
+	}
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Link updateLink(@PathVariable String workflowIdString, @PathVariable String linkIdString, @Valid @RequestBody Link link) throws Exception {
+		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
+		link = linkController.update(linkIdString, link);
+
+		return link;
+	}
+
+	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public Link deleteLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
+		return linkController.delete(linkIdString);
 	}
 }
 
