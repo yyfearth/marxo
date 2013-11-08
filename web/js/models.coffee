@@ -140,22 +140,24 @@ define 'models', ['module', 'lib/common'], (module) ->
       links = []
       node_index = {}
       silent = silent: true
-      workflow.nodes.forEach (node) ->
+      workflow.nodes.forEach (node, i) ->
         cloned_node = node.clone().unset('id', silent)
         .unset('workflow_id', silent).set template_id: node.id
         if node.has 'actions' # remove id in action
           cloned_node.set 'actions', node.get('actions').map (action) ->
             new Action(action).unset('id', silent).toJSON()
         nodes.push cloned_node
+        cloned_node.idx = i
         node_index[node.id] = cloned_node
         return
       workflow.links.forEach (link) ->
+        prevNode = node_index[link.get 'prev_node_id']
+        nextNode = node_index[link.get 'next_node_id']
         # remove linked nodes id then ref nodes
-        cloned_link = link.clone().unset('id', silent).unset('workflow_id', silent)
-        .unset('prev_node_id', silent).unset('next_node_id', silent)
-        .set template_id: link.id
-        cloned_link.prevNode = node_index[link.get 'prev_node_id']
-        cloned_link.nextNode = node_index[link.get 'next_node_id']
+        cloned_link = link.clone().unset('id', silent).unset('workflow_id', silent).set
+          template_id: link.id, prev_node_id: prevNode.idx, next_node_id: nextNode.idx
+        cloned_link.prevNode = prevNode
+        cloned_link.nextNode = nextNode
         links.push cloned_link
       attr = workflow.attributes
       @set
@@ -194,6 +196,10 @@ define 'models', ['module', 'lib/common'], (module) ->
             requests = []
             @links?.forEach (link) =>
               if link.isNew()
+                if not link.prevNode? and 'number' is typeof idx = link.get 'prev_node_id'
+                  link.prevNode = @nodes.at idx
+                if not link.nextNode? and 'number' is typeof idx = link.get 'next_node_id'
+                  link.nextNode = @nodes.at idx
                 attr =
                   workflow_id: wf.id
                   prev_node_id: link.prevNode.id
@@ -219,6 +225,8 @@ define 'models', ['module', 'lib/common'], (module) ->
           @_deleted?.forEach (model) -> model.destroy()
           return
         # save workflow
+        @unset 'nodes', silent: true
+        @unset 'links', silent: true
         super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
       n = @_name
@@ -270,10 +278,10 @@ define 'models', ['module', 'lib/common'], (module) ->
       link.workflow = @ if @_name is 'workflow'
       prevNodeId = link.get 'prev_node_id'
       nextNodeId = link.get 'next_node_id'
-      if prevNodeId and nextNodeId
-        link.prevNode = @nodes.get prevNodeId
+      if prevNodeId? and nextNodeId?
+        link.prevNode = @nodes[if typeof prevNodeId is 'number' then 'at' else 'get'] prevNodeId
         throw new Error "cannot find prev node with id #{prevNodeId} for link #{link.id}" unless link.prevNode
-        link.nextNode = @nodes.get nextNodeId
+        link.nextNode = @nodes[if typeof nextNodeId is 'number' then 'at' else 'get'] nextNodeId
         throw new Error "cannot find next node with id #{prevNodeId} for link #{link.id}" unless link.nextNode
       else unless link.prevNode? and link.nextNode?
         throw new Error 'link ' + (link.key or link.id) + ' is broken, prev/next node missing'
