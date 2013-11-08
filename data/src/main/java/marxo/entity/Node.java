@@ -1,5 +1,6 @@
 package marxo.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 @Document
 public class Node extends WorkflowChildEntity {
-
+	@JsonProperty("offset")
 	public Position positoin;
 	public List<Action> actions;
 
@@ -28,7 +29,7 @@ public class Node extends WorkflowChildEntity {
 		}
 	}
 
-	class Position {
+	public class Position {
 		public double x;
 		public double y;
 	}
