@@ -64,11 +64,13 @@ Projects
             ''
           else if datetime instanceof Date
             datetime.toLocaleString()
-          else if typeof datetime is 'number' or /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test datetime
-            new Date(datetime).toLocaleString()
           else
-            console.error 'unsupported datetime', datetime
-            ''
+            try
+              date = new Date datetime
+            catch e
+              date = null
+              console.error 'unsupported datetime', datetime
+            unless date then '' else date.toLocaleString()
         toRaw: -> return
       super options
 
@@ -146,14 +148,15 @@ Projects
       rawValue = @model.get @column.get 'name'
       if rawValue
         val = rawValue.toLowerCase()
+        formattedValue = @formatter.fromRaw rawValue
+        val = formattedValue unless val
         labelCls = 'label capitalized '
         if val isnt 'none' and @column.has 'cls'
           cls = @column.get 'cls'
-          cls = cls[val] or '' unless typeof cls is 'string'
+          cls = cls[val] or cls[formattedValue] or '' unless typeof cls is 'string'
           labelCls += cls
         else
           labelCls += "label-#{val}"
-        formattedValue = @formatter.fromRaw rawValue
         @$el.append $('<span>', class: labelCls).text formattedValue
       @delegateEvents()
       @
@@ -390,6 +393,15 @@ Projects
         label: 'Type'
         cell: 'label'
         cls: 'label-info'
+        editable: false
+      sharing:
+        name: 'tenant_id'
+        label: 'Sharing'
+        cell: Backgrid.LabelCell.extend formatter:
+          fromRaw: (raw) -> if raw then 'private' else 'public'
+        cls:
+          private: 'label-info'
+          public: 'label-inverse'
         editable: false
       status:
         name: 'status'
