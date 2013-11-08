@@ -1,6 +1,7 @@
 package marxo.exception;
 
 import marxo.tool.ILoggable;
+import marxo.tool.StringTool;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -19,8 +20,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.net.BindException;
 
 @ControllerAdvice
@@ -29,18 +28,24 @@ public class ControllerExceptionHandler implements ILoggable {
 	@ExceptionHandler({BindException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, TypeMismatchException.class})
 	public ResponseEntity<ErrorJson> handleBadRequest(Exception e) {
 		logger.debug(e.getMessage());
+		logger.debug(StringTool.exceptionToString(e));
+
 		return new ResponseEntity<>(new ErrorJson(String.format("The shit you gave is bad (%s)", e.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({ConversionNotSupportedException.class, HttpMessageNotWritableException.class})
 	public ResponseEntity<ErrorJson> handleInternalServerError(Exception e) {
 		logger.error(e.getMessage());
+		logger.error(StringTool.exceptionToString(e));
+
 		return new ResponseEntity<>(new ErrorJson("Sorry, I don't know how to translate your shit"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
 	public ResponseEntity<ErrorJson> handleNotAcceptable(Exception e) {
 		logger.debug(e.getMessage());
+		logger.debug(StringTool.exceptionToString(e));
+
 		return new ResponseEntity<>(new ErrorJson(String.format("Cannot accept your shit (%s)", e.getMessage())), HttpStatus.NOT_ACCEPTABLE);
 	}
 
@@ -53,6 +58,7 @@ public class ControllerExceptionHandler implements ILoggable {
 	@ExceptionHandler({HttpRequestMethodNotSupportedException.class})
 	public ResponseEntity<ErrorJson> handleMethodNotAllowed(Exception e) {
 		logger.debug(e.getMessage());
+
 		return new ResponseEntity<>(new ErrorJson(String.format("Your shit is not allowed (%s)", e.getMessage())), HttpStatus.METHOD_NOT_ALLOWED);
 	}
 
@@ -65,6 +71,8 @@ public class ControllerExceptionHandler implements ILoggable {
 	@ExceptionHandler({InvalidObjectIdException.class})
 	public ResponseEntity<ErrorJson> handleInvalidObjectIdException(InvalidObjectIdException e) {
 		logger.debug(e.getMessage());
+		logger.debug(StringTool.exceptionToString(e));
+
 		return new ResponseEntity<>(new ErrorJson(e.message), HttpStatus.BAD_REQUEST);
 	}
 
@@ -77,6 +85,8 @@ public class ControllerExceptionHandler implements ILoggable {
 	@ExceptionHandler({DataAccessResourceFailureException.class})
 	public ResponseEntity<ErrorJson> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
 		logger.error(e.getMessage());
+		logger.error(StringTool.exceptionToString(e));
+
 		return new ResponseEntity<>(new ErrorJson("Cannot connect to the database"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
@@ -87,10 +97,7 @@ public class ControllerExceptionHandler implements ILoggable {
 
 	@ExceptionHandler({Exception.class})
 	public ResponseEntity<ErrorJson> handleOtherException(Exception e) {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		PrintStream printStream = new PrintStream(byteArrayOutputStream);
-		e.printStackTrace(printStream);
-		logger.error(byteArrayOutputStream.toString());
+		logger.error(StringTool.exceptionToString(e));
 		return new ResponseEntity<>(new ErrorJson("Congratulations! You broke the server: [" + e.getClass().getSimpleName() + "] " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

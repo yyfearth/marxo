@@ -1,5 +1,7 @@
 package marxo.tool;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class StringTool {
@@ -107,5 +109,15 @@ public class StringTool {
 		}
 
 		return 'z';
+	}
+
+	/**
+	 * Transform the stack trace of an exception to a string.
+	 */
+	public static String exceptionToString(Exception e) {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		PrintStream printStream = new PrintStream(byteArrayOutputStream);
+		e.printStackTrace(printStream);
+		return byteArrayOutputStream.toString();
 	}
 }
