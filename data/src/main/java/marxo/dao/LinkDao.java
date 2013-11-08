@@ -4,5 +4,5 @@ import marxo.entity.Link;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class LinkDao extends TenantChildDao<Link> {
+public class LinkDao extends WorkflowChildDao<Link> {
 }
