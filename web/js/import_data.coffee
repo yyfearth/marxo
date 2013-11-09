@@ -16,11 +16,11 @@ Workflow, Workflows
         offset:
           x: 26, y: 43
         actions: [
-          type: 'post_page'
+          type: 'CREATE_PAGE'
         ,
-          type: 'post_to_multi_social_media'
+          type: 'POST_FACEBOOK'
         ,
-          type: 'generate_report'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post Requirements'
@@ -29,11 +29,11 @@ Workflow, Workflows
         offset:
           x: 334, y: 44
         actions: [
-          type: 'post_page'
+          type: 'CREATE_PAGE'
         ,
-          type: 'post_to_multi_social_media'
+          type: 'POST_FACEBOOK'
         ,
-          type: 'generate_report'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Cancel Notification'
@@ -42,7 +42,7 @@ Workflow, Workflows
         offset:
           x: 334, y: 204
         actions: [
-          type: 'post_to_multi_social_media'
+          type: 'POST_FACEBOOK'
         ]
       ,
         name: 'Retrieve App Submissions'
@@ -51,11 +51,11 @@ Workflow, Workflows
         offset:
           x: 613, y: 44
         actions: [
-          type: 'post_page'
+          type: 'CREATE_PAGE'
         ,
-          type: 'post_to_multi_social_media'
+          type: 'POST_FACEBOOK'
         ,
-          type: 'generate_report'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Retrieve Logo Design'
@@ -64,11 +64,11 @@ Workflow, Workflows
         offset:
           x: 629, y: 282
         actions: [
-          type: 'post_page'
+          type: 'CREATE_PAGE'
         ,
-          type: 'post_to_multi_social_media'
+          type: 'POST_FACEBOOK'
         ,
-          type: 'generate_report'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Email to Evaluators'
@@ -77,11 +77,11 @@ Workflow, Workflows
         offset:
           x: 1018, y: 44
         actions: [
-          type: 'post_page'
+          type: 'CREATE_PAGE'
         ,
-          type: 'send_email'
+          type: 'SEND_EMAIL'
         ,
-          type: 'generate_report'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post and Vote'
@@ -90,11 +90,11 @@ Workflow, Workflows
         offset:
           x: 1043, y: 282
         actions: [
-          type: 'post_page'
+          type: 'CREATE_PAGE'
         ,
-          type: 'post_to_multi_social_media'
+          type: 'POST_FACEBOOK'
         ,
-          type: 'generate_report'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post Final Result and Reward'
@@ -103,13 +103,13 @@ Workflow, Workflows
         offset:
           x: 1420, y: 183
         actions: [
-          type: 'post_page'
+          type: 'CREATE_PAGE'
         ,
-          type: 'post_to_multi_social_media'
+          type: 'POST_FACEBOOK'
         ,
-          type: 'send_email'
+          type: 'SEND_EMAIL'
         ,
-          type: 'generate_report'
+          type: 'GENERATE_REPORT'
         ]
       ]
       links: [
