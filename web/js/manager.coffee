@@ -64,11 +64,13 @@ Projects
             ''
           else if datetime instanceof Date
             datetime.toLocaleString()
-          else if typeof datetime is 'number' or /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{3})?Z$/.test datetime
-            new Date(datetime).toLocaleString()
           else
-            console.error 'unsupported datetime', datetime
-            ''
+            try
+              date = new Date datetime
+            catch e
+              date = null
+              console.error 'unsupported datetime', datetime
+            unless date then '' else date.toLocaleString()
         toRaw: -> return
       super options
 
