@@ -18,9 +18,7 @@ public class Workflow extends TenantChildEntity {
 	public List<Node> nodes;
 	@Transient
 	public List<Link> links;
-
-	public Workflow() {
-	}
+	public WorkflowStatus status;
 
 	public List<ObjectId> getLinkIdList() {
 		return linkIdList;
@@ -96,6 +94,10 @@ public class Workflow extends TenantChildEntity {
 
 		if (links == null) {
 			links = new ArrayList<>();
+		}
+
+		if (status == null) {
+			status = WorkflowStatus.IDLE;
 		}
 	}
 }
