@@ -14,6 +14,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AdvancedGenerator extends BasicGenerator implements ILoggable {
@@ -170,6 +171,141 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					condition.rightOperand = null;
 					condition.fillWithDefaultValues();
 					link.condition = condition;
+				}
+			}
+
+			// a complete example case.
+			{
+				List<TenantChildEntity> tenantChildEntities = new ArrayList<>();
+
+				Workflow workflow = new Workflow();
+				tenantChildEntities.add(workflow);
+				workflow.name = "Mobile app development";
+				workflow.fillWithDefaultValues();
+				workflow.description = "Develop a mobile for student project.";
+
+				Node node;
+				Action action;
+				Link link;
+				Condition condition;
+
+				node = new Node();
+				tenantChildEntities.add(node);
+				node.name = "Make the requirement";
+				node.fillWithDefaultValues();
+				workflow.nodeIdList.add(node.id);
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Announce the requirement";
+				action.type = "POST_FACEBOOK";
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Wait for the submissions";
+				action.type = "WAIT";
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Open for voting";
+				action.type = "POST_FACEBOOK";
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Wait for the votes";
+				action.type = "WAIT";
+
+				link = new Link();
+				tenantChildEntities.add(link);
+				link.name = "To client development";
+				link.previousNodeId = node.id;
+
+				condition = new Condition();
+				tenantChildEntities.add(condition);
+				link.condition = condition;
+
+				node = new Node();
+				tenantChildEntities.add(node);
+				node.name = "Develop the client";
+				node.fillWithDefaultValues();
+				link.nextNodeId = node.id;
+				workflow.nodeIdList.add(node.id);
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Announce the client requirement";
+				action.type = "POST_FACEBOOK";
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Wait for the client submissions";
+				action.type = "WAIT";
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Wait for user review";
+				action.type = "USER_TRIGGER";
+
+				link = new Link();
+				tenantChildEntities.add(link);
+				link.name = "To server development";
+				link.previousNodeId = node.id;
+
+				condition = new Condition();
+				tenantChildEntities.add(condition);
+				link.condition = condition;
+
+				node = new Node();
+				tenantChildEntities.add(node);
+				node.name = "Develop the server";
+				node.fillWithDefaultValues();
+				link.nextNodeId = node.id;
+				workflow.nodeIdList.add(node.id);
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Announce the server requirement";
+				action.type = "POST_FACEBOOK";
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Wait for the server submissions";
+				action.type = "WAIT";
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Wait for user review";
+				action.type = "USER_TRIGGER";
+
+				link = new Link();
+				tenantChildEntities.add(link);
+				link.name = "Close the workflow";
+				link.previousNodeId = node.id;
+
+				condition = new Condition();
+				tenantChildEntities.add(condition);
+				link.condition = condition;
+
+				node = new Node();
+				tenantChildEntities.add(node);
+				node.name = "Announce the result";
+				node.fillWithDefaultValues();
+				workflow.nodeIdList.add(node.id);
+
+				action = new Action();
+				node.actions.add(action);
+				action.name = "Post result to Facebook";
+				action.type = "POST_FACEBOOK";
+
+				Tenant tenant = tenants.get(0);
+				for (TenantChildEntity tenantChildEntity : tenantChildEntities) {
+					tenantChildEntity.tenantId = tenant.id;
+
+					if (tenantChildEntity instanceof Node) {
+						workflow.nodeIdList.add(((Node) tenantChildEntity).id);
+					} else if (tenantChildEntity instanceof Link) {
+						workflow.linkIdList.add(((Link) tenantChildEntity).id);
+					}
 				}
 			}
 		}
