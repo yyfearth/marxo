@@ -92,7 +92,7 @@ public class ControllerExceptionHandler implements ILoggable {
 
 	@ExceptionHandler({NotImplementedException.class})
 	public ResponseEntity<ErrorJson> handleNotImplementedException(NotImplementedException e) {
-		return new ResponseEntity<>(new ErrorJson("Well... you are using a working-in-progress project. This part isn't done yet."), HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(new ErrorJson("Well... you are using a working-in-progress project. This part isn't done yet."), HttpStatus.NOT_IMPLEMENTED);
 	}
 
 	@ExceptionHandler({Exception.class})
