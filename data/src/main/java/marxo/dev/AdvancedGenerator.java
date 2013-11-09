@@ -179,6 +179,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				List<TenantChildEntity> tenantChildEntities = new ArrayList<>();
 
 				Workflow workflow = new Workflow();
+				workflows.add(workflow);
 				tenantChildEntities.add(workflow);
 				workflow.name = "Mobile app development";
 				workflow.fillWithDefaultValues();
@@ -186,14 +187,13 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 
 				Node node;
 				Action action;
-				Link link;
+				Link linkLeft, linkRight;
 				Condition condition;
 
 				node = new Node();
 				tenantChildEntities.add(node);
 				node.name = "Make the requirement";
 				node.fillWithDefaultValues();
-				workflow.nodeIdList.add(node.id);
 
 				action = new Action();
 				node.actions.add(action);
@@ -215,21 +215,31 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action.name = "Wait for the votes";
 				action.type = "WAIT";
 
-				link = new Link();
-				tenantChildEntities.add(link);
-				link.name = "To client development";
-				link.previousNodeId = node.id;
+				linkLeft = new Link();
+				tenantChildEntities.add(linkLeft);
+				linkLeft.name = "To client development";
+				linkLeft.fillWithDefaultValues();
+				linkLeft.previousNodeId = node.id;
 
 				condition = new Condition();
 				tenantChildEntities.add(condition);
-				link.condition = condition;
+				linkLeft.condition = condition;
+
+				linkRight = new Link();
+				tenantChildEntities.add(linkRight);
+				linkRight.name = "To server development";
+				linkRight.fillWithDefaultValues();
+				linkRight.previousNodeId = node.id;
+
+				condition = new Condition();
+				tenantChildEntities.add(condition);
+				linkRight.condition = condition;
 
 				node = new Node();
 				tenantChildEntities.add(node);
 				node.name = "Develop the client";
 				node.fillWithDefaultValues();
-				link.nextNodeId = node.id;
-				workflow.nodeIdList.add(node.id);
+				linkLeft.nextNodeId = node.id;
 
 				action = new Action();
 				node.actions.add(action);
@@ -246,21 +256,21 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action.name = "Wait for user review";
 				action.type = "USER_TRIGGER";
 
-				link = new Link();
-				tenantChildEntities.add(link);
-				link.name = "To server development";
-				link.previousNodeId = node.id;
+				linkLeft = new Link();
+				tenantChildEntities.add(linkLeft);
+				linkLeft.name = "Client to close";
+				linkLeft.fillWithDefaultValues();
+				linkLeft.previousNodeId = node.id;
 
 				condition = new Condition();
 				tenantChildEntities.add(condition);
-				link.condition = condition;
+				linkLeft.condition = condition;
 
 				node = new Node();
 				tenantChildEntities.add(node);
 				node.name = "Develop the server";
 				node.fillWithDefaultValues();
-				link.nextNodeId = node.id;
-				workflow.nodeIdList.add(node.id);
+				linkRight.nextNodeId = node.id;
 
 				action = new Action();
 				node.actions.add(action);
@@ -277,20 +287,22 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action.name = "Wait for user review";
 				action.type = "USER_TRIGGER";
 
-				link = new Link();
-				tenantChildEntities.add(link);
-				link.name = "Close the workflow";
-				link.previousNodeId = node.id;
+				linkRight = new Link();
+				tenantChildEntities.add(linkRight);
+				linkRight.name = "To server development";
+				linkRight.fillWithDefaultValues();
+				linkRight.previousNodeId = node.id;
 
 				condition = new Condition();
 				tenantChildEntities.add(condition);
-				link.condition = condition;
+				linkRight.condition = condition;
 
 				node = new Node();
 				tenantChildEntities.add(node);
 				node.name = "Announce the result";
 				node.fillWithDefaultValues();
-				workflow.nodeIdList.add(node.id);
+				linkLeft.nextNodeId = node.id;
+				linkRight.nextNodeId = node.id;
 
 				action = new Action();
 				node.actions.add(action);
@@ -302,9 +314,13 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					tenantChildEntity.tenantId = tenant.id;
 
 					if (tenantChildEntity instanceof Node) {
-						workflow.nodeIdList.add(((Node) tenantChildEntity).id);
+						node = (Node) tenantChildEntity;
+						nodes.add(node);
+						workflow.nodeIdList.add(node.id);
 					} else if (tenantChildEntity instanceof Link) {
-						workflow.linkIdList.add(((Link) tenantChildEntity).id);
+						Link link = (Link) tenantChildEntity;
+						links.add(link);
+						workflow.linkIdList.add(link.id);
 					}
 				}
 			}
