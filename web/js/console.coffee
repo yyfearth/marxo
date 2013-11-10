@@ -169,7 +169,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       # auto sign in
       {user, tenant} = ConsoleView.get()
       if (user instanceof User) and (tenant instanceof Tenant)
-        @signedIn user, tenant
+        @_validateUser user
       else
         @show()
       @
@@ -195,41 +195,52 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       require ['crypto'], ({hashPassword, md5Email}) =>
         email = email.toLowerCase()
         hash = hashPassword email, password
-        auth = 'Basic ' + btoa "#{email}:#{hash}"
-        new User({email}).fetch
-          headers:
-            Authorization: auth
-          success: (user) =>
-            console.log 'login with', email, hash
-            if user.has('password') and hash isnt user.get 'password' # for test only
-              @_disable false
-              alert '(TEST ONLY) Password not correct'
-            else if user.has('tenant_id') and email is user.get 'email'
-              user.set 'email_md5', md5Email email
-              tenantId = user.get 'tenant_id'
-              new Tenant(id: tenantId).fetch
-                headers:
-                  Authorization: auth
-                success: (tenant) =>
-                  if tenant.id is tenantId
-                    user.set 'credential', auth
-                    @signedIn user, tenant
-                  else
-                    @_disable false
-                    alert 'Failed to get tenant profile of this user'
-                error: =>
-                  @_disable false
-                  alert 'Failed to get tenant profile'
-            else
-              @form.password.select()
-              @_disable false
-              alert 'User not exist or email and password are not matched.'
-            return
-          error: (ignored, response) =>
-            console.error 'sign-in failed', response
+        user = new User
+          email: email
+          credential: 'Basic ' + btoa "#{email}:#{hash}"
+          email_md5: md5Email email
+        console.log 'login with', email, hash
+        @_validateUser user
+        return
+      return
+    _validateUser: (user) ->
+      email = user.get 'email'
+      auth = user.get 'credential'
+      email_md5 = user.get 'email_md5'
+      new User({email}).fetch
+        headers:
+          Authorization: auth
+        success: (user) =>
+          if user.has('password') and user.get('password') isnt atob(auth[6..]).slice(email.length + 1) # for test only
             @_disable false
-            alert 'Sign in failed.\nUser not exist or email and password are not matched.'
-            return
+            alert '(TEST ONLY) Password not correct'
+          else if user.has('tenant_id') and email is user.get 'email'
+            user.set 'email_md5', email_md5
+            tenantId = user.get 'tenant_id'
+            new Tenant(id: tenantId).fetch
+              headers:
+                Authorization: auth
+              success: (tenant) =>
+                if tenant.id is tenantId
+                  user.set 'credential', auth
+                  @signedIn user, tenant
+                else
+                  @_disable false
+                  alert 'Failed to get tenant profile of this user'
+              error: =>
+                @_disable false
+                alert 'Failed to get tenant profile'
+          else
+            @show() unless @$el.is ':visible'
+            @form.password.select()
+            @_disable false
+            alert 'User not exist or email and password are not matched.'
+          return
+        error: (ignored, response) =>
+          console.error 'sign-in failed', response
+          @_disable false
+          alert 'Sign in failed.\nUser not exist or email and password are not matched.'
+          return
       return
     signedIn: (user, tenant) -> # test data only
       @trigger 'success', user, tenant
