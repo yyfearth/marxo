@@ -20,6 +20,9 @@ print = @echo "$(CWHT)- $(CYEL)$< $(CWHT)> $(CBLU)$@$(CRST)"
 
 default: clean js css html res
 
+upload:
+	scp -r $(dist)/* wilson@masonwan.com:web/marxo
+
 .PHONY: js css html
 
 clean: clean_js clean_css clean_res clean_html
