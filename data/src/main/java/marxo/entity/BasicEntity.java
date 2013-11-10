@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Strings;
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -42,29 +41,24 @@ public abstract class BasicEntity {
 	@JsonProperty("desc")
 	public String description;
 
-	@JsonProperty("created_at")
-	public String getCreatedDate() {
-		return (new DateTime(createdDate)).toString();
-	}
-
-	@JsonProperty("created_at")
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
+	@JsonProperty("modified_by")
+	public ObjectId getModifiedByUserId() {
+		return modifiedByUserId;
 	}
 
 	@JsonProperty("updated_at")
-	public String getModifiedDate() {
-		return (new DateTime(modifiedDate)).toString();
+	public Date getModifiedDate() {
+		return modifiedDate;
 	}
 
-	@JsonProperty("updated_at")
-	public void setModifiedDate(Date modifiedDate) {
-		this.modifiedDate = modifiedDate;
+	@JsonProperty("created_at")
+	public Date getCreatedDate() {
+		return createdDate;
 	}
 
 	@JsonProperty("id")
-	public String getJsonId() {
-		return (id == null) ? null : id.toString();
+	public ObjectId getId() {
+		return id;
 	}
 
 	@JsonProperty("object_type")
@@ -78,22 +72,9 @@ public abstract class BasicEntity {
 		return aClass.getSimpleName();
 	}
 
-	public ObjectId getCreatedByUserId() {
-		return createdByUserId;
-	}
-
-	public ObjectId getModifiedByUserId() {
-		return modifiedByUserId;
-	}
-
 	@JsonProperty("created_by")
 	public String getJsonCreatedByUserId() {
 		return (createdByUserId == null) ? null : createdByUserId.toString();
-	}
-
-	@JsonProperty("modified_by")
-	public String getJsonModifiedByUserId() {
-		return (modifiedByUserId == null) ? null : modifiedByUserId.toString();
 	}
 
 	public void fillWithDefaultValues() {

@@ -10,7 +10,17 @@
     <context:component-scan base-package="marxo.exception"/>
     <context:component-scan base-package="marxo.filter"/>
 
-    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper" ref="marxoObjectMapper"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <bean id="marxoObjectMapper" class="marxo.serialization.MarxoObjectMapper"/>
+
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
