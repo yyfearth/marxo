@@ -103,10 +103,6 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		return mongoTemplate.find(Query.query(getFilterCriteria().and("workflowId").is(workflowId)), entityClass);
 	}
 
-	public List<E> searchByWorkflowIds(List<ObjectId> workflowIds) {
-		return mongoTemplate.find(Query.query(getFilterCriteria().and("workflowId").in(workflowIds)), entityClass);
-	}
-
 	/**
 	 * Search the collection where the entity's name partially matched.
 	 */

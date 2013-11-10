@@ -54,38 +54,40 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		boolean hasModified = modified != null;
 		List<Workflow> workflows;
 
-		if (!hasName && !hasCreated && !hasModified) {
-			workflows = tenantChildDao.findAll();
-			ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
-			for (Workflow workflow : workflows) {
-				workflowIds.add(workflow.id);
-			}
+		return tenantChildDao.findAll();
 
-			List<Node> nodes = nodeDao.searchByWorkflowIds(workflowIds);
-			List<Link> links = linkDao.searchByWorkflowIds(workflowIds);
-
-			// Java really needs a kick-ass collection library for the following. I have used Guava for this, it still looks as bad as it could.
-			// The following is for getting all nodes and links which match the workflow's ID.
-			for (Workflow workflow : workflows) {
-				WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
-				Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
-				workflow.nodes = Lists.newArrayList(workflowNodes);
-				Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
-				workflow.links = Lists.newArrayList(workflowLinks);
-			}
-
-			Collections.sort(workflows, modifiedDateComparator);
-			return workflows;
-		}
-
-		if (hasName) {
-			workflows = tenantChildDao.searchByName(name);
-			Collections.sort(workflows, modifiedDateComparator);
-			return workflows;
-		}
+//		if (!hasName && !hasCreated && !hasModified) {
+//			workflows = tenantChildDao.findAll();
+//			ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
+//			for (Workflow workflow : workflows) {
+//				workflowIds.add(workflow.id);
+//			}
+//
+//			List<Node> nodes = nodeDao.searchByWorkflowIds(workflowIds);
+//			List<Link> links = linkDao.searchByWorkflowIds(workflowIds);
+//
+//			// Java really needs a kick-ass collection library for the following. I have used Guava for this, it still looks as bad as it could.
+//			// The following is for getting all nodes and links which match the workflow's ID.
+//			for (Workflow workflow : workflows) {
+//				WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
+//				Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
+//				workflow.nodes = Lists.newArrayList(workflowNodes);
+//				Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
+//				workflow.links = Lists.newArrayList(workflowLinks);
+//			}
+//
+//			Collections.sort(workflows, modifiedDateComparator);
+//			return workflows;
+//		}
+//
+//		if (hasName) {
+//			workflows = tenantChildDao.searchByName(name);
+//			Collections.sort(workflows, modifiedDateComparator);
+//			return workflows;
+//		}
 
 		// todo: implemented created and modified search APIs
-		return new ArrayList<>();
+//		return new ArrayList<>();
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package marxo.dao;
 import marxo.entity.WorkflowChildEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public abstract class WorkflowChildDao<Entity extends WorkflowChildEntity> exten
 
 	@Override
 	public Criteria getFilterCriteria() {
-		return Criteria.where("tenantId").is(tenantId).and("workflowId").is(workflowId);
+		return Criteria.where("tenantId").is(tenantId);
 	}
 
 	@Override
@@ -40,5 +41,9 @@ public abstract class WorkflowChildDao<Entity extends WorkflowChildEntity> exten
 	public void save(Entity entity) {
 		entity.workflowId = workflowId;
 		super.save(entity);
+	}
+
+	public List<Entity> searchByWorkflowIds(List<ObjectId> workflowIds) {
+		return mongoTemplate.find(Query.query(Criteria.where("workflowId").in(workflowIds)), entityClass);
 	}
 }
