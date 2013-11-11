@@ -41,8 +41,6 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@Override
 	public void preHandle() {
 		super.preHandle();
-		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
-		User user = marxoAuthentication.getUser();
 		nodeDao.setTenantId(user.tenantId);
 		linkDao.setTenantId(user.tenantId);
 	}
