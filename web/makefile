@@ -34,13 +34,13 @@ clean_res:
 	rm -rf "$(dist)/font"
 	rm -f "$(dist)/favicon.ico" "$(dist)/robots.txt"
 clean_html:
-	rm -f "$(dist)/index.html" "$(dist)/remote.html"
+	rm -f "$(dist)/index.html" "$(dist)/test.html"
 
 lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js $(dist)/js/lib/preview.js
 modules: $(DIST_MODULES)
 js: lib modules
 css: $(dist)/css/console.css $(dist)/css/preview.css
-html: $(dist)/index.html $(dist)/remote.html
+html: $(dist)/index.html $(dist)/test.html
 res: $(dist)/font $(dist)/favicon.ico $(dist)/robots.txt
 
 $(dist)/favicon.ico: favicon.ico
@@ -124,7 +124,7 @@ $(dist)/index.html: index.jade
 	@mkdir -p $(@D)
 	jade -Dp . < $< | tr '\n' ' ' | sed -e "s/> </></g" > $@
 
-$(dist)/remote.html: remote.jade
+$(dist)/test.html: test.jade
 	$(print)
 	@mkdir -p $(@D)
 	jade -Dp . < $< | tr '\n' ' ' | sed -e "s/> </></g" > $@
