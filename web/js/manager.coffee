@@ -65,11 +65,11 @@ Projects
           else if datetime instanceof Date
             datetime.toLocaleString()
           else
+            date = null
             try
               date = new Date datetime
-            catch e
-              date = null
-              console.error 'unsupported datetime', datetime
+              date = null if isNaN date.getTime()
+            console.error 'unsupported datetime', datetime unless date?
             unless date then '' else date.toLocaleString()
         toRaw: -> return
       super options
