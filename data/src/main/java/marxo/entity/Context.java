@@ -1,6 +1,7 @@
 package marxo.entity;
 
-public class Context {
-	String key;
-	String data;
+import org.bson.types.ObjectId;
+
+public class Context extends BasicEntity {
+	public ObjectId actionId;
 }
