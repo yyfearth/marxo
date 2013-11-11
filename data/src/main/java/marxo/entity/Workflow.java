@@ -1,5 +1,7 @@
 package marxo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 
@@ -8,20 +10,26 @@ import java.util.List;
 
 public class Workflow extends TenantChildEntity {
 	public WorkflowType type = null;
+	@JsonIgnore
 	public List<ObjectId> nodeIdList = null;
+	@JsonIgnore
 	public List<ObjectId> linkIdList = null;
+	@JsonIgnore
 	@Transient
 	public List<Node> nodes;
+	@JsonIgnore
 	@Transient
 	public List<Link> links;
 	public WorkflowStatus status;
 
-	public WorkflowType getType() {
-		return type;
+	@JsonProperty("nodes")
+	public List<Node> getNodes() {
+		return nodes;
 	}
 
-	public void setType(WorkflowType type) {
-		this.type = type;
+	@JsonProperty("links")
+	public List<Link> getLinks() {
+		return links;
 	}
 
 	public void fillWithDefaultValues() {
