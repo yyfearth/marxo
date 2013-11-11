@@ -99,8 +99,6 @@ Notifications
       @projectFilter.render()
       @
 
-  # TODO: auto reload
-
   class NotificationListView extends NavListView
     auto: false
     urlRoot: 'notification'
