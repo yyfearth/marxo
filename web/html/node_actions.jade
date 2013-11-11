@@ -35,20 +35,16 @@ mixin track_checkbox_disabled
 mixin actions_thumb
   li.nav-header Content Page
   li
-    a.action-thumb(href='#action:post_page', data-placement='bottom'
+    a.action-thumb(href='#action:create_page', data-placement='bottom'
     title='Generate an information page or survey form using templates and post as a web page')
-      | Post Page or Form
+      | Create Page or Form
   li.nav-header Social Media
   li
-    a.action-thumb(href='#action:post_to_multi_social_media',
-    title='Post the same message to multiple selected social media')
-      | Post to Social Media
-  li
-    a.action-thumb(href='#action:post_to_twitter',
+    a.action-thumb(href='#action:post_twitter',
     title='Post message to Twitter')
       | Post to Twitter
   li
-    a.action-thumb(href='#action:post_to_facebook',
+    a.action-thumb(href='#action:post_facebook',
     title='Post message to Facebook')
       | Post to Facebook
   li.nav-header Email
@@ -74,7 +70,7 @@ mixin actions_thumb
 //- show in the actions box
 #actions_tpl.tpl
 
-  .tpl(name='post_page')
+  .tpl(name='create_page')
     .box-header.well
       h4 Post Page or Form
       mixin box_icons
@@ -97,26 +93,7 @@ mixin actions_thumb
         br
         | Click "Preview" button to preview the generated page.
 
-  .tpl(name='post_to_multi_social_media')
-    .box-header.well
-      h4 Post to Multiple Social Media
-      mixin box_icons
-    form.box-content
-      mixin action_name_key
-      ul.action-bar
-        li
-          mixin multi_social_media_group_btns
-        li
-          mixin action_template_select
-        li
-          mixin track_checkbox
-      mixin post_content('social media', 140, 2)
-      .help-block
-        | The maximium content length is 140, which is limited by Twitter.
-        br
-        | Use "Post to Facebook" action instead for longer content length.
-
-  .tpl(name='post_to_twitter')
+  .tpl(name='post_twitter')
     .box-header.well
       h4 Post to Twitter
       mixin box_icons
@@ -130,7 +107,7 @@ mixin actions_thumb
       mixin post_content('Twitter', 140, 2)
       .help-block The maximium content length is 140, which is limited by Twitter.
 
-  .tpl(name='post_to_facebook')
+  .tpl(name='post_facebook')
     .box-header.well
       h4 Post to Facebook
       mixin box_icons

@@ -70,7 +70,8 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       @containerEl = options.container
       @model = options.model
       @model.view = @
-      @type = @model.get?('type') or options.model.type or options.type
+      type = @model.get?('type') or options.model.type or options.type
+      @type = type.toLowerCase()
       throw new Error 'need action model and type' unless @model and @type
       @
     remove: ->
@@ -83,7 +84,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         console.error 'unable to find tpl for action type', @type
         @remove()
       else
-        @el.innerHTML = @_tpl[@type]
+        @el.innerHTML = _tpl
         @el.id = 'action_' + @model.id or 'no_id'
         @_name = @$el.find('.box-header h4').text()
         #@containerEl.appendChild @el
@@ -115,7 +116,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
     read: -> # read form the form to get a json data
       throw new Error 'cannot find the form, may not rendered yet' unless @form
       data = @model.toJSON()
-      data.type ?= @type
+      data.type = @type.toUpperCase()
       els = [].slice.call @form.elements
       els.forEach (el) ->
         $el = $ el
