@@ -167,13 +167,16 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @form.remember.checked = remember = localStorage.marxo_sign_in_remember is 'true'
       @form.email.value = localStorage.marxo_sign_in_email if remember
       # auto sign in
-      {user, tenant} = ConsoleView.get()
-      if (user instanceof User) and (tenant instanceof Tenant)
+      console = ConsoleView.get()
+      if console.user instanceof User
+        user = console.user
+        console.user = console.tenant = null
+        @hide()
         @_validateUser user
       else
         @show()
       @
-    submit: (e) -> # fake
+    submit: (e) ->
       e.preventDefault()
       email = @form.email.value.trim()
       password = @form.password.value.trim()
