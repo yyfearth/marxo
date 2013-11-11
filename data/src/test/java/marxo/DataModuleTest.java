@@ -3,6 +3,9 @@ package marxo;
 import marxo.dao.WorkflowDao;
 import marxo.dev.AdvancedGenerator;
 import marxo.entity.*;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.ReadableDuration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -53,5 +56,13 @@ public class DataModuleTest {
 		WorkflowDao workflowDao = new WorkflowDao();
 		List<Workflow> workflows = workflowDao.findAll();
 		assert workflowDao.count() != 0;
+	}
+
+	@Test
+	public void testJodaTime() throws Exception {
+		DateTime dateTime1 = new DateTime("2013-11-09");
+		DateTime dateTime2 = new DateTime("2013-11-10");
+		Duration duration = new Duration(dateTime1.getMillis(), dateTime2.getMillis());
+		System.out.println(duration);
 	}
 }
