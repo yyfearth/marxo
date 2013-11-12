@@ -51,7 +51,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public List<Workflow> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created, @RequestParam(value = "is_project", required = false) boolean isProject) {
+	public List<Workflow> search(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created, @RequestParam(value = "is_project", required = false) boolean isProject) {
 		boolean hasName = !Strings.isNullOrEmpty(name);
 		boolean hasCreated = created != null;
 		boolean hasModified = modified != null;

@@ -1,8 +1,10 @@
 package marxo.dao;
 
 import com.google.common.base.Strings;
+import com.mongodb.WriteResult;
 import marxo.entity.BasicEntity;
 import marxo.entity.Workflow;
+import marxo.exception.DatabaseException;
 import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationContext;
@@ -10,6 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.ParameterizedType;
@@ -18,13 +21,17 @@ import java.util.List;
 
 @Repository
 public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
-	protected Class<E> entityClass;
-	MongoTemplate mongoTemplate;
-	ApplicationContext context;
+	static protected ApplicationContext context;
+	static protected MongoTemplate mongoTemplate;
 
-	public BasicDao() {
+	static {
 		context = new ClassPathXmlApplicationContext("classpath*:mongo-configuration.xml");
 		mongoTemplate = (MongoTemplate) new ClassPathXmlApplicationContext("classpath*:mongo-configuration.xml").getBean("mongoTemplate");
+	}
+
+	protected Class<E> entityClass;
+
+	public BasicDao() {
 		this.entityClass = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 
@@ -81,6 +88,12 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		mongoTemplate.save(entity);
 	}
 
+	public void updateField(String criteriaField, Object criteriaValue, String updateField, Object updateValue) {
+		Criteria criteria = Criteria.where(criteriaField).is(criteriaValue);
+		Update update = Update.update(updateField, updateValue);
+		throwIfError(mongoTemplate.updateFirst(Query.query(criteria), update, entityClass));
+	}
+
 	/*
 	Delete
 	 */
@@ -113,5 +126,16 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		}
 		String escapedName = StringTool.escapePatternCharacters(name);
 		return mongoTemplate.find(Query.query(getFilterCriteria().and("name").regex(".*" + escapedName + ".*")), Workflow.class);
+	}
+
+	/*
+	Error handling
+	 */
+
+	public void throwIfError(WriteResult writeResult) {
+		String error = writeResult.getError();
+		if (!Strings.isNullOrEmpty(error)) {
+			throw new DatabaseException(error);
+		}
 	}
 }
