@@ -23,6 +23,10 @@ public class Workflow extends TenantChildEntity {
 	public ProjectStatus status = ProjectStatus.IDLE;
 	@JsonProperty("is_project")
 	public boolean isProject = false;
+	@JsonIgnore
+	public ObjectId processingNodeId;
+	@JsonIgnore
+	public ObjectId processingActionId;
 
 	@JsonProperty("link_ids")
 	public List<ObjectId> getLinkIds() {
