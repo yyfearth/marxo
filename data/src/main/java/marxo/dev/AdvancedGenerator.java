@@ -391,10 +391,12 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 
 					if (tenantChildEntity instanceof Node) {
 						node = (Node) tenantChildEntity;
+						node.workflowId = workflow.id;
 						nodes.add(node);
 						workflow.nodeIds.add(node.id);
 					} else if (tenantChildEntity instanceof Link) {
 						Link link = (Link) tenantChildEntity;
+						link.workflowId = workflow.id;
 						links.add(link);
 						workflow.linkIds.add(link.id);
 					}
