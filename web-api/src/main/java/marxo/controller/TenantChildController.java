@@ -25,16 +25,4 @@ public class TenantChildController<E extends TenantChildEntity> extends EntityCo
 		user = marxoAuthentication.getUser();
 		tenantChildDao.setTenantId(user.tenantId);
 	}
-
-//	@Override
-//	public E create(@Valid @RequestBody E entity, HttpServletResponse response) throws Exception {
-//		entity.createdByUserId = entity.modifiedByUserId = user.id;
-//		return super.create(entity, response);
-//	}
-//
-//	@Override
-//	public E update(@Valid @PathVariable String idString, @Valid @RequestBody E entity) {
-//		entity.modifiedByUserId = user.id;
-//		return super.update(idString, entity);
-//	}
 }
