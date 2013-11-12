@@ -43,4 +43,10 @@ public class UserController extends TenantChildController<User> {
 		}
 		return users.get(0);
 	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	public List<User> search() {
+		return dao.findAll();
+	}
 }

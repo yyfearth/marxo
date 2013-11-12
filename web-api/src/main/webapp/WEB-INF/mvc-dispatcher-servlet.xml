@@ -53,9 +53,9 @@
 
     <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
         <property name="defaultContentType" value="application/json"/>
-        <!-- Disable it for it will disrupted by end url with email, e.g. test@example.com, it will use .com as media type -->
+        <!-- Disable it for it will disrupted by end url with email, e.g. test@example.com, it will use .com as media contextType -->
         <property name="favorPathExtension" value="false"/>
-        <!-- The following accept .json as the path extension and set the media header to related type. -->
+        <!-- The following accept .json as the path extension and set the media header to related contextType. -->
         <!--<property name="favorPathExtension" value="true"/>-->
         <!--<property name="useJaf" value="false"/>-->
         <!--<property name="mediaTypes">-->

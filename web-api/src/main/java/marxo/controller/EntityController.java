@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Date;
-import java.util.List;
 
 public abstract class EntityController<E extends BasicEntity> extends BasicController {
 	BasicDao<E> dao;
@@ -22,12 +21,6 @@ public abstract class EntityController<E extends BasicEntity> extends BasicContr
 
 	protected EntityController(BasicDao<E> dao) {
 		this.dao = dao;
-	}
-
-	@RequestMapping(method = RequestMethod.GET)
-	@ResponseBody
-	public List<E> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
-		return dao.findAll();
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
@@ -85,11 +78,10 @@ public abstract class EntityController<E extends BasicEntity> extends BasicContr
 		entity.modifiedDate = new Date();
 
 		try {
-			// todo: use validation.
 			entity.id = oldEntity.id;
 			entity.createdByUserId = oldEntity.createdByUserId;
 			entity.createdDate = oldEntity.createdDate;
-			entity.modifiedByUserId = new ObjectId("000000000000000000000000");
+			entity.modifiedByUserId = user.id;
 			entity.modifiedDate = new Date();
 			dao.save(entity);
 		} catch (ValidationException ex) {

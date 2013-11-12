@@ -83,14 +83,12 @@ public class SimpleGenerator extends BasicGenerator implements ILoggable {
 
 				int workflowIndex = random.nextInt(workflows.size());
 				Workflow workflow = workflows.get(workflowIndex);
-				workflow.nodeIdList.add(node.id);
+				workflow.nodeIds.add(node.id);
 
 				int actionNum = random.nextInt(4);
 				for (int j = 0; j < actionNum; j++) {
 					Action action = new Action();
 					action.name = "Action " + j;
-					action.type = "post_to_multi_social_media";
-					action.content = "....";
 					action.fillWithDefaultValues();
 					actions.add(action);
 					node.actions.add(action);
@@ -132,7 +130,7 @@ public class SimpleGenerator extends BasicGenerator implements ILoggable {
 
 				int workflowIndex = random.nextInt(workflows.size());
 				Workflow workflow = workflows.get(workflowIndex);
-				workflow.linkIdList.add(link.id);
+				workflow.linkIds.add(link.id);
 				link.workflowId = workflow.id;
 				link.previousNodeId = nodes.get(random.nextInt(nodes.size())).id;
 				link.nextNodeId = nodes.get(random.nextInt(nodes.size())).id;

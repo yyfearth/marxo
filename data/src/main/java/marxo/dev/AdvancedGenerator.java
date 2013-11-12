@@ -1,10 +1,12 @@
 package marxo.dev;
 
+import com.rits.cloning.Cloner;
 import marxo.entity.*;
 import marxo.tool.ILoggable;
 import marxo.tool.PasswordEncryptor;
 import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
+import org.joda.time.Days;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -34,6 +36,8 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 		ArrayList<Workflow> workflows = new ArrayList<>();
 		ArrayList<Node> nodes = new ArrayList<>();
 		ArrayList<Link> links = new ArrayList<>();
+		ArrayList<Context> contexts = new ArrayList<>();
+		ArrayList<Notification> notifications = new ArrayList<>();
 
 		// Tenant
 		{
@@ -116,7 +120,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 
 				// Nodes
 				int numNodes = threadLocalRandom.nextInt(2, 8);
-				workflow.nodeIdList = new ArrayList<>(numNodes);
+				workflow.nodeIds = new ArrayList<>(numNodes);
 				for (int j = 0; j < numNodes; j++) {
 					Node node = new Node();
 					nodes.add(node);
@@ -137,15 +141,14 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 						action.name = "Action " + (k + 1);
 						action.createdByUserId = creatingUserId;
 						action.modifiedByUserId = modifyingUserId;
-						action.content = "Not implemented";
 						action.fillWithDefaultValues();
 					}
 
 					node.fillWithDefaultValues();
-					workflow.nodeIdList.add(node.id);
+					workflow.nodeIds.add(node.id);
 				}
 
-				workflow.linkIdList = new ArrayList<>();
+				workflow.linkIds = new ArrayList<>();
 				for (int j = 0; j < numNodes - 1; j++) {
 					Node previousNode = nodes.get(threadLocalRandom.nextInt(nodes.size() - numNodes, nodes.size()));
 					Node nextNode = nodes.get(threadLocalRandom.nextInt(nodes.size() - numNodes, nodes.size()));
@@ -161,7 +164,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					link.previousNodeId = previousNode.id;
 					link.nextNodeId = nextNode.id;
 					link.fillWithDefaultValues();
-					workflow.linkIdList.add(link.id);
+					workflow.linkIds.add(link.id);
 
 					Condition condition = new Condition();
 					condition.tenantId = user.tenantId;
@@ -184,11 +187,15 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				workflow.name = "Mobile app development";
 				workflow.fillWithDefaultValues();
 				workflow.description = "Develop a mobile for student project.";
+				workflow.createdByUserId = workflow.modifiedByUserId = users.get(users.size() - 1).id;
 
 				Node node;
 				Action action;
 				Link linkLeft, linkRight;
 				Condition condition;
+				FacebookPost facebookPost;
+				Schedule schedule;
+				Trigger trigger;
 
 				node = new Node();
 				tenantChildEntities.add(node);
@@ -198,22 +205,48 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Announce the requirement";
-				action.type = "POST_FACEBOOK";
+				action.contextType = ContextType.FB_POST;
+
+				facebookPost = new FacebookPost();
+				facebookPost.content = "This is requirement.";
+				facebookPost.actionId = action.id;
+				facebookPost.fillWithDefaultValues();
+				action.contextId = facebookPost.id;
+				contexts.add(facebookPost);
 
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the submissions";
-				action.type = "WAIT";
+				action.contextType = ContextType.SCHEDULE;
+
+				schedule = new Schedule();
+				schedule.duration = Days.days(1).toStandardDuration();
+				schedule.fillWithDefaultValues();
+				action.contextId = schedule.id;
+				contexts.add(schedule);
 
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Open for voting";
-				action.type = "POST_FACEBOOK";
+				action.contextType = ContextType.FB_POST;
+
+				facebookPost = new FacebookPost();
+				facebookPost.content = "Please vote the design.";
+				facebookPost.actionId = action.id;
+				facebookPost.fillWithDefaultValues();
+				action.contextId = facebookPost.id;
+				contexts.add(facebookPost);
 
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the votes";
-				action.type = "WAIT";
+				action.contextType = ContextType.SCHEDULE;
+
+				schedule = new Schedule();
+				schedule.duration = Days.days(1).toStandardDuration();
+				schedule.fillWithDefaultValues();
+				action.contextId = schedule.id;
+				contexts.add(schedule);
 
 				linkLeft = new Link();
 				tenantChildEntities.add(linkLeft);
@@ -244,17 +277,35 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Announce the client requirement";
-				action.type = "POST_FACEBOOK";
+				action.contextType = ContextType.FB_POST;
+
+				facebookPost = new FacebookPost();
+				facebookPost.content = "Please design the client";
+				facebookPost.actionId = action.id;
+				facebookPost.fillWithDefaultValues();
+				action.contextId = facebookPost.id;
+				contexts.add(facebookPost);
 
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the client submissions";
-				action.type = "WAIT";
+				action.contextType = ContextType.SCHEDULE;
+
+				schedule = new Schedule();
+				schedule.duration = Days.days(1).toStandardDuration();
+				schedule.fillWithDefaultValues();
+				action.contextId = schedule.id;
+				contexts.add(schedule);
 
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for user review";
-				action.type = "USER_TRIGGER";
+				action.contextType = ContextType.TRIGGER;
+
+				trigger = new Trigger();
+				trigger.fillWithDefaultValues();
+				action.contextId = trigger.id;
+				contexts.add(trigger);
 
 				linkLeft = new Link();
 				tenantChildEntities.add(linkLeft);
@@ -275,17 +326,35 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Announce the server requirement";
-				action.type = "POST_FACEBOOK";
+				action.contextType = ContextType.FB_POST;
+
+				facebookPost = new FacebookPost();
+				facebookPost.content = "Please design the server";
+				facebookPost.actionId = action.id;
+				facebookPost.fillWithDefaultValues();
+				action.contextId = facebookPost.id;
+				contexts.add(facebookPost);
 
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the server submissions";
-				action.type = "WAIT";
+				action.contextType = ContextType.SCHEDULE;
+
+				schedule = new Schedule();
+				schedule.duration = Days.days(1).toStandardDuration();
+				schedule.fillWithDefaultValues();
+				action.contextId = schedule.id;
+				contexts.add(schedule);
 
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for user review";
-				action.type = "USER_TRIGGER";
+				action.contextType = ContextType.TRIGGER;
+
+				trigger = new Trigger();
+				trigger.fillWithDefaultValues();
+				action.contextId = trigger.id;
+				contexts.add(trigger);
 
 				linkRight = new Link();
 				tenantChildEntities.add(linkRight);
@@ -307,7 +376,14 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Post result to Facebook";
-				action.type = "POST_FACEBOOK";
+				action.contextType = ContextType.FB_POST;
+
+				facebookPost = new FacebookPost();
+				facebookPost.content = "Please design the client";
+				facebookPost.actionId = action.id;
+				facebookPost.fillWithDefaultValues();
+				action.contextId = facebookPost.id;
+				contexts.add(facebookPost);
 
 				Tenant tenant = tenants.get(0);
 				for (TenantChildEntity tenantChildEntity : tenantChildEntities) {
@@ -316,13 +392,71 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					if (tenantChildEntity instanceof Node) {
 						node = (Node) tenantChildEntity;
 						nodes.add(node);
-						workflow.nodeIdList.add(node.id);
+						workflow.nodeIds.add(node.id);
 					} else if (tenantChildEntity instanceof Link) {
 						Link link = (Link) tenantChildEntity;
 						links.add(link);
-						workflow.linkIdList.add(link.id);
+						workflow.linkIds.add(link.id);
 					}
 				}
+			}
+		}
+
+		// Project
+		{
+			Cloner cloner = new Cloner();
+
+			HashMap<ObjectId, Node> nodeMap = new HashMap<>();
+			for (Node node : nodes) {
+				nodeMap.put(node.id, node);
+			}
+
+			HashMap<ObjectId, Link> linkMap = new HashMap<>();
+			for (Link link : links) {
+				linkMap.put(link.id, link);
+			}
+
+			HashMap<ObjectId, Context> contextMap = new HashMap<>();
+			for (Context context : contexts) {
+				contextMap.put(context.id, context);
+			}
+
+			for (int i = 0; i < 2; i++) {
+				Workflow workflow = workflows.get(i);
+				Workflow project = cloner.deepClone(workflow);
+
+				project.id = new ObjectId();
+				project.templateId = workflow.id;
+				project.isProject = true;
+
+				ArrayList<ObjectId> newNodeIds = new ArrayList<>();
+				for (ObjectId nodeId : project.nodeIds) {
+					Node node = nodeMap.get(nodeId);
+					Node newNode = cloner.deepClone(node);
+					newNode.id = new ObjectId();
+					nodes.add(newNode);
+					newNodeIds.add(newNode.id);
+
+					for (Action action : newNode.actions) {
+						action.id = new ObjectId();
+					}
+				}
+				project.nodeIds = newNodeIds;
+
+				ArrayList<ObjectId> newLinkIds = new ArrayList<>();
+				for (ObjectId linkId : project.linkIds) {
+					Link link = linkMap.get(linkId);
+					Link newLink = cloner.deepClone(link);
+					newLink.id = new ObjectId();
+					newLink.templateId = link.id;
+					links.add(newLink);
+					newLinkIds.add(newLink.id);
+
+					newLink.condition.id = new ObjectId();
+				}
+				project.linkIds = newLinkIds;
+
+				workflows.add(project);
 			}
 		}
 
@@ -332,6 +466,8 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 		map.put(Workflow.class, workflows);
 		map.put(Node.class, nodes);
 		map.put(Link.class, links);
+		map.put(Context.class, contexts);
+		map.put(Notification.class, notifications);
 
 		for (Class aClass : map.keySet()) {
 			mongoTemplate.dropCollection(aClass);

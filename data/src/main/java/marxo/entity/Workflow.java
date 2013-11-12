@@ -9,18 +9,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Workflow extends TenantChildEntity {
-	public WorkflowType type = null;
+	public WorkflowType type = WorkflowType.NONE;
 	@JsonIgnore
-	public List<ObjectId> nodeIdList = null;
+	public List<ObjectId> nodeIds;
 	@JsonIgnore
-	public List<ObjectId> linkIdList = null;
+	public List<ObjectId> linkIds;
 	@JsonIgnore
 	@Transient
 	public List<Node> nodes;
 	@JsonIgnore
 	@Transient
 	public List<Link> links;
-	public WorkflowStatus status;
+	public ProjectStatus status = ProjectStatus.IDLE;
+	@JsonProperty("is_project")
+	public boolean isProject = false;
+
+	@JsonProperty("link_ids")
+	public List<ObjectId> getLinkIds() {
+		return linkIds;
+	}
+
+	@JsonProperty("node_ids")
+	public List<ObjectId> getNodeIds() {
+		return nodeIds;
+	}
 
 	@JsonProperty("nodes")
 	public List<Node> getNodes() {
@@ -39,16 +51,12 @@ public class Workflow extends TenantChildEntity {
 			description = "";
 		}
 
-		if (type == null) {
-			type = WorkflowType.NONE;
+		if (nodeIds == null) {
+			nodeIds = new ArrayList<>();
 		}
 
-		if (nodeIdList == null) {
-			nodeIdList = new ArrayList<>();
-		}
-
-		if (linkIdList == null) {
-			linkIdList = new ArrayList<>();
+		if (linkIds == null) {
+			linkIds = new ArrayList<>();
 		}
 
 		if (nodes == null) {
@@ -57,10 +65,6 @@ public class Workflow extends TenantChildEntity {
 
 		if (links == null) {
 			links = new ArrayList<>();
-		}
-
-		if (status == null) {
-			status = WorkflowStatus.IDLE;
 		}
 	}
 }

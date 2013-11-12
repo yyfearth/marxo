@@ -7,18 +7,19 @@ import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowDao;
 import marxo.entity.*;
-import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 @Controller
 @RequestMapping("workflow{:s?}")
@@ -29,6 +30,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@Autowired
 	LinkDao linkDao;
 	@Autowired
+	WorkflowDao workflowDao;
+	@Autowired
 	NodeController nodeController;
 	@Autowired
 	LinkController linkController;
@@ -36,6 +39,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@Autowired
 	public WorkflowController(WorkflowDao workflowDao) {
 		super(workflowDao);
+		this.workflowDao = workflowDao;
 	}
 
 	@Override
@@ -45,14 +49,13 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		linkDao.setTenantId(user.tenantId);
 	}
 
-	@Override
-	public List<Workflow> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	public List<Workflow> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created, @RequestParam(value = "is_project", required = false) boolean isProject) {
 		boolean hasName = !Strings.isNullOrEmpty(name);
 		boolean hasCreated = created != null;
 		boolean hasModified = modified != null;
 		List<Workflow> workflows;
-
-		return tenantChildDao.findAll();
 
 //		if (!hasName && !hasCreated && !hasModified) {
 //			workflows = tenantChildDao.findAll();
@@ -77,23 +80,24 @@ public class WorkflowController extends TenantChildController<Workflow> {
 //			Collections.sort(workflows, modifiedDateComparator);
 //			return workflows;
 //		}
-//
-//		if (hasName) {
-//			workflows = tenantChildDao.searchByName(name);
-//			Collections.sort(workflows, modifiedDateComparator);
-//			return workflows;
-//		}
 
 		// todo: implemented created and modified search APIs
-//		return new ArrayList<>();
+
+		if (hasName) {
+			workflows = workflowDao.searchByName(name);
+		} else if (isProject) {
+			workflows = workflowDao.search("isProject", true);
+		} else {
+			workflows = workflowDao.findAll();
+		}
+
+		Collections.sort(workflows, modifiedDateComparator);
+		return workflows;
 	}
 
 	@Override
 	public Workflow read(@PathVariable String idString) {
 		Workflow workflow = super.read(idString);
-
-		nodeDao.setWorkflowId(workflow.id);
-		linkDao.setWorkflowId(workflow.id);
 
 		List<Node> nodes = nodeDao.searchByWorkflowId(workflow.id);
 		List<Link> links = linkDao.searchByWorkflowId(workflow.id);

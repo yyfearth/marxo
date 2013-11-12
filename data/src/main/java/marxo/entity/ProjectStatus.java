@@ -1,6 +1,6 @@
 package marxo.entity;
 
-public enum WorkflowStatus {
+public enum ProjectStatus {
 	IDLE,
 	PROCESSING,
 }
