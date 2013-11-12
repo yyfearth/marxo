@@ -64,7 +64,10 @@ public class ControllerExceptionHandler implements ILoggable {
 
 	@ExceptionHandler({NoSuchRequestHandlingMethodException.class, IllegalArgumentException.class})
 	public ResponseEntity<ErrorJson> handleNotFound(Exception e) {
-		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit (%s)", e.getMessage())), HttpStatus.NOT_FOUND);
+		logger.debug(e.getMessage());
+		logger.debug(StringTool.exceptionToString(e));
+
+		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit [%s] %s", e.getMessage(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
 	}
 
 	// This application only
