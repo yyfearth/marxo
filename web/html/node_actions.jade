@@ -166,8 +166,8 @@ mixin actions_thumb
     form.box-content
       mixin action_name_key
       .btn-group(data-toggle='buttons-radio')
-        button.btn.active(type='button', name='type', value='auto') Starts Automatically
-        button.btn(type='button', name='type', value='manual') Starts Manually
+        button.btn.active(type='button', name='start_type', value='auto') Starts Automatically
+        button.btn(type='button', name='start_type', value='manual') Starts Manually
       label Duration
         input(type='text', name='duration', placeholder='1 day 2 hours')
       .help-block
