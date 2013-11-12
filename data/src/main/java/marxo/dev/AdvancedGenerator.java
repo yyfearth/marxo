@@ -434,6 +434,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					Node node = nodeMap.get(nodeId);
 					Node newNode = cloner.deepClone(node);
 					newNode.id = new ObjectId();
+					newNode.workflowId = project.id;
 					nodes.add(newNode);
 					newNodeIds.add(newNode.id);
 
@@ -448,6 +449,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					Link link = linkMap.get(linkId);
 					Link newLink = cloner.deepClone(link);
 					newLink.id = new ObjectId();
+					newLink.workflowId = project.id;
 					newLink.templateId = link.id;
 					links.add(newLink);
 					newLinkIds.add(newLink.id);
