@@ -142,7 +142,7 @@ Action
       @nameEl = find '.editable-name', @el
       @descEl = find '.editable-desc', @el
 
-      @listenTo @nodeList, 'select', (id, node) =>
+      @nodeList.on 'select', (id, node) =>
         console.log 'select from node list', id, node
         if id is 'new'
           node = null
