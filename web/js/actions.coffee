@@ -14,12 +14,13 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         cancel: '.box-content'
       @
     fillActions: (actions) ->
-      # @clearActions()
-      unless actions instanceof Actions
-        actions = actions.actions?() or new Actions actions.actions or actions
-      console.log 'fill actions', actions
-      @actions = actions
-      @actions.forEach @addAction.bind @
+      if actions
+        # @clearActions()
+        actions = new Actions actions if Array.isArray actions
+        throw new Error 'fill action only accept Actions or array' unless actions instanceof Actions
+        console.log 'fill actions', actions
+        @actions = actions
+        @actions.forEach @addAction.bind @
       @
     readActions: ->
       findAll('.action', @actionsEl).map (el) ->
@@ -71,7 +72,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       @model = options.model
       @model.view = @
       type = @model.get?('type') or options.model.type or options.type
-      @type = type.toLowerCase()
+      @type = type?.toLowerCase()
       throw new Error 'need action model and type' unless @model and @type
       @
     remove: ->
