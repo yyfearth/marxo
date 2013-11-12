@@ -299,7 +299,7 @@ Action
       e.preventDefault()
       target = e.target
       matched = target.href.match /action:(\w+)/i
-      @addAction {type: matched[1]}, {scrollIntoView: true} if matched
+      @addAction {context_type: matched[1]}, {scrollIntoView: true} if matched
       false
     fill: (attributes) ->
       # fill info form

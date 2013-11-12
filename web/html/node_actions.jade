@@ -18,7 +18,7 @@ mixin post_content(media, max, rows)
   title='Content post to ' + media + ' (' + max + ' max)', rows=rows, maxlength=max)
 
 mixin action_template_select
-  select(name='template', disabled).tmp
+  select(disabled)
     option (Select from Template)
 
 mixin track_checkbox
