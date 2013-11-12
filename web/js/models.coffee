@@ -266,6 +266,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         callback? {}
       @
     createNode: (data) ->
+      data.workflow_id ?= @id
       @nodes.create data, wait: true
       @
     _createNodeRef: (node) ->
@@ -279,6 +280,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       node.inLinks.concat(node.outLinks).forEach (link) -> link.destroy()
       return
     createLink: (data) ->
+      data.workflow_id ?= @id
       @links.create data, wait: true
       @
     _createLinkRef: (link) ->

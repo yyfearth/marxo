@@ -178,9 +178,8 @@ Action
       @model = wf
       @view.load wf, sub
       @nodeList.setNodes wf.nodes
-      @listenToOnce wf, 'changed', @_changed
-      # for test only
       @listenTo wf, 'changed', (action, entity) ->
+        @_changed()
         console.log 'workflow changed', action, entity
       return
     _clear: ->
@@ -305,7 +304,7 @@ Action
     fill: (attributes) ->
       # fill info form
       super attributes
-      @fillActions attributes
+      @fillActions attributes?.actions
       @
     save: ->
       @data.set 'actions', @readActions()
@@ -567,13 +566,15 @@ Action
       @el.appendChild view.el
       return
     createNode: (node, callback) ->
+      wf_id = @model.id
       if not node or node.id is 'new'
-        node = new Node
+        node = new Node workflow_id: wf_id
       else if node instanceof Node and node.id
         node = node.clone()
         name = node.get 'name'
         desc = node.get 'desc'
         node.set
+          workflow_id: wf_id
           template_id: node.id
           key: node.get('key') + '_clone'
           name: name + ' (Clone)'
@@ -581,6 +582,7 @@ Action
         node.unset 'offset'
         node.unset 'id'
       else if node.name
+        node.workflow_id = wf_id
         node = new Node node
       else
         console.error 'invalid node to create', node
@@ -621,6 +623,7 @@ Action
       to = @model.nodes.get to unless to.id and to.has 'name'
       key = "#{from.get 'key'}_to_#{to.get 'key'}"
       data = new Link
+        workflow_id: @model.id
         key: key[0..32].toLowerCase()
         prev_node_id: from.id
         next_node_id: to.id
