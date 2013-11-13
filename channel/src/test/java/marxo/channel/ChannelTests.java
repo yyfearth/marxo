@@ -8,7 +8,7 @@ import com.restfb.exception.FacebookOAuthException;
 import com.restfb.types.FacebookType;
 import com.restfb.types.Post;
 import com.restfb.types.User;
-import marxo.tool.ILoggable;
+import marxo.tool.Loggable;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 
-public class ChannelTests implements ILoggable {
+public class ChannelTests implements Loggable {
 	static String appId;
 	static String appSecret;
 	static String appToken;

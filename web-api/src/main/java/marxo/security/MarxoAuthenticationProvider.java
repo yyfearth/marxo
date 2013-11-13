@@ -2,7 +2,7 @@ package marxo.security;
 
 import marxo.dao.UserDao;
 import marxo.entity.User;
-import marxo.tool.ILoggable;
+import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class MarxoAuthenticationProvider implements AuthenticationProvider, ILoggable {
+public class MarxoAuthenticationProvider implements AuthenticationProvider, Loggable {
 	@Autowired
 	UserDao userDao;
 	@Autowired

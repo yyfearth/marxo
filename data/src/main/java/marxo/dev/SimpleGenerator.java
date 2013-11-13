@@ -1,7 +1,7 @@
 package marxo.dev;
 
 import marxo.entity.*;
-import marxo.tool.ILoggable;
+import marxo.tool.Loggable;
 import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationContext;
@@ -14,7 +14,7 @@ import java.util.Random;
 /**
  * It generates entities without the relationship.
  */
-public class SimpleGenerator extends BasicGenerator implements ILoggable {
+public class SimpleGenerator extends BasicGenerator implements Loggable {
 	public static void main(String[] args) {
 		ApplicationContext context = new ClassPathXmlApplicationContext("classpath*:marxo/mongo-configuration.xml");
 		MongoTemplate mongoTemplate = context.getBean(MongoTemplate.class);

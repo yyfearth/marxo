@@ -1,6 +1,6 @@
 package marxo.exception;
 
-import marxo.tool.ILoggable;
+import marxo.tool.Loggable;
 import marxo.tool.StringTool;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -23,7 +23,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.net.BindException;
 
 @ControllerAdvice
-public class ControllerExceptionHandler implements ILoggable {
+public class ControllerExceptionHandler implements Loggable {
 	// Spring built-in
 	@ExceptionHandler({BindException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, TypeMismatchException.class})
 	public ResponseEntity<ErrorJson> handleBadRequest(Exception e) {

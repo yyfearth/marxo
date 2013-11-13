@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/service{:s?}/facebook")
-public class FacebookController extends BasicController implements IInterceptroPreHandlable {
+public class FacebookController extends BasicController implements InterceptorPreHandlable {
 	User user;
 	@Autowired
 	TenantDao tenantDao;
