@@ -171,8 +171,12 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     save: (attributes = {}, options = {}) -> # override for sync ids
       if Backbone.LocalStorage? # for local sync
-        if @nodes? then attributes.nodes = @nodes.map (r) -> r.attributes
-        if @links? then attributes.links = @links.map (r) -> r.attributes
+        _getAttr = (r) ->
+          attr = r.attributes
+          attr.id ?= r.cid
+          attr
+        if @nodes? then attributes.nodes = @nodes.map _getAttr
+        if @links? then attributes.links = @links.map _getAttr
         console.log 'save local', @_name, attributes
         super attributes, options
       else # for ajax sync
@@ -181,17 +185,21 @@ define 'models', ['module', 'lib/common'], (module) ->
         _success = options.success
         _err = options.error
         options.success = (wf, resp, opt) =>
+          # console.log 'saved wf', wf
           # save nodes
-          attr = workflow_id: wf.id
+          workflow_id = wf.id
+          console.log 'workflow_id', workflow_id
           save_opt = wait: true, reset: true
           requests = []
           @nodes?.forEach (node) =>
             if node.isNew()
-              requests.push node.save attr, save_opt
+              # console.log 'create node', workflow_id
+              requests.push node.save {workflow_id}, save_opt
             else if node._changed
               node.resetChangeFlag().save()
             return
           $.when.apply($, requests).then =>
+            # console.log 'new nodes created', @nodes
             # then save links
             requests = []
             @links?.forEach (link) =>
@@ -201,21 +209,25 @@ define 'models', ['module', 'lib/common'], (module) ->
                 if not link.nextNode? and 'number' is typeof idx = link.get 'next_node_id'
                   link.nextNode = @nodes.at idx
                 attr =
-                  workflow_id: wf.id
+                  workflow_id: workflow_id
                   prev_node_id: link.prevNode.id
                   next_node_id: link.nextNode.id
+                # console.log 'create link', attr
                 requests.push link.save attr, save_opt
               else if link._changed
                 link.resetChangeFlag().save()
               return
-            $.when.apply($, requests).then =>
-              # finally done
-              console.log 'saved', @_name, attributes, @
-              _success? wf, resp, opt
-            , =>
-              console.error 'fail to save links for wf', @
-              _err? wf, null, options
-              return
+            if (typeof _success is 'function') or (typeof _err is 'function')
+              $.when.apply($, requests).then =>
+                # console.log 'new links created', @links
+                # finally done
+                console.log 'saved', @_name, attributes, @
+                _success wf, resp, opt
+              , =>
+                console.error 'fail to save links for wf', @
+                _err wf, null, options
+                return
+            console.log 'saving wf', @
             return
           , =>
             console.error 'fail to save nodes for wf', @
@@ -258,6 +270,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         callback? {}
       @
     createNode: (data) ->
+      data.workflow_id ?= @id
       @nodes.create data, wait: true
       @
     _createNodeRef: (node) ->
@@ -271,6 +284,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       node.inLinks.concat(node.outLinks).forEach (link) -> link.destroy()
       return
     createLink: (data) ->
+      data.workflow_id ?= @id
       @links.create data, wait: true
       @
     _createLinkRef: (link) ->
@@ -361,57 +375,6 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Project extends Workflow
     _name: 'project'
     urlRoot: ROOT + '/projects'
-    copy: (workflow, callback) -> # copy form workflow as template
-      workflow ?= @get 'workflow_id'
-      workflow = new Workflow id: workflow if typeof workflow is 'string'
-      throw new Error 'must be create from a workflow' unless workflow instanceof Workflow
-      unless workflow.loaded()
-        workflow.fetch success: (wf) => @copy wf, callback
-      else
-        id = @id
-        nodes = []
-        links = []
-        workflow.nodes.forEach (node) ->
-          cloned_node = node.clone()
-          # TODO: for test only, should be null
-          node_id = node.id + 1000000
-          cloned_node.set id: node_id, template_id: node.id, project_id: id
-          # TODO: for test only, should give action id
-          if node.has 'actions'
-            cloned_node.set 'actions', node.get('actions').map (action, i) ->
-              action.id = i
-              action
-          nodes.push cloned_node
-        workflow.links.forEach (link) ->
-          cloned_link = link.clone()
-          # TODO: for test only, should be null
-          link_id = link.id + 1000000
-          cloned_link.set
-            id: link_id
-            template_id: link.id
-            project_id: id
-            # TODO: for test only, should be auto updated
-            prev_node_id: link.get('prev_node_id') + 1000000
-            next_node_id: link.get('next_node_id') + 1000000
-          links.push cloned_link
-        @set
-          workflow_id: workflow.id
-          template_id: null
-          node_ids: nodes.map((n) -> n.id)
-          link_ids: links.map((l) -> l.id)
-          nodes: nodes
-          links: links
-        @_warp @
-        callback? @, workflow
-      @
-    _createNodeRef: (node) ->
-      super node
-      node.project = @
-      @
-    _createLinkRef: (link) ->
-      super link
-      link.project = @
-      @
 
   class Projects extends ManagerCollection
     @projects: new Projects

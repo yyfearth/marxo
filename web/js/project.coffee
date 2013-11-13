@@ -51,9 +51,9 @@ Projects
     workflows: Workflows.workflows
     projects: Projects.projects
     events:
-      'change select[name=workflow_id]': (e) ->
+      'change select[name=template_id]': (e) ->
         wf = e.currentTarget.value
-        cur = @model.get 'workflow_id'
+        cur = @model.get 'template_id'
         @$wfbtns.hide()
         @sidebar.classList.remove 'active'
         @btnSave.disabled = true
@@ -70,8 +70,8 @@ Projects
         return
       'click .btn-select': '_selectWorkflow'
       'click .btn-revert': ->
-        @form.workflow_id.value = @model.get('workflow_id') or ''
-        $(@form.workflow_id).change()
+        @form.template_id.value = @model.get('template_id') or ''
+        $(@form.template_id).change()
         return
       'click li.sidebar-item > a, a.linked-item': (e) ->
         e.preventDefault()
@@ -91,9 +91,9 @@ Projects
     create: (wf) ->
       wf = wf?.id or wf
       wf = null unless typeof wf is 'string'
-      @popup new Project(workflow_id: wf), (action, data) => if action is 'save'
-        console.log 'wf created', action, data
-        @projects.create data, wait: true
+      @popup new Project(template_id: wf), (action) => if action is 'save'
+        console.log 'wf created', action, @model
+        @projects.create @model, wait: true
         # TODO: save all nodes and links?
         @trigger 'create', @model, @
       @
@@ -104,7 +104,7 @@ Projects
       console.log 'popup node/link editor', {link, node, action}
       @popup project, (action, data) => if action is 'save'
         console.log 'project saved', action, data
-        @model.save data
+        @model.save @model
         @trigger 'edit', @model, @
       @
     popup: (model, callback) ->
@@ -112,7 +112,7 @@ Projects
       @model = model
       @render() unless @rendered
       super data, callback
-      select = @form.workflow_id
+      select = @form.template_id
       select.disabled = true
       @workflows.load (ignored, ret) =>
         @_renderSelect() if 'loaded' is ret
@@ -182,7 +182,7 @@ Projects
         model._changed = true
       return
     _selectWorkflow: ->
-      wf = @form.workflow_id.value
+      wf = @form.template_id.value
       return unless wf
       wf = @workflows.get wf unless wf instanceof Workflow
       project = @model
@@ -192,7 +192,8 @@ Projects
         project.set node_ids: null, nodes: null, link_ids: null, links: null
         project._warp()
       console.log 'selected wf for project', wf.name
-      project.copy wf, @_renderProject.bind @
+      project.copy wf
+      @_renderProject project
       return
     _renderProject: (project) ->
       @sidebar.classList.add 'active'
@@ -226,12 +227,12 @@ Projects
       super
     reset: ->
       @$wfbtns.hide()
-      $(@_find('created_at')).parents('.control-group').hide()
+      @$el.find('.control-group:has(#project_created_at)').hide()
       $(@sidebar).find('li.node-item, li.link-item').remove()
       @navTo null
       super
     _renderSelect: ->
-      select = @form.workflow_id
+      select = @form.template_id
       wfs = @workflows.fullCollection
       if wfs.length
         owned = document.createElement 'optgroup'
@@ -258,6 +259,7 @@ Projects
     save: ->
       @_readData() # read last modified
       @data = @read()
+      @model.set @read()
       @callback 'save'
       @hide true
       @
@@ -362,7 +364,7 @@ Projects
       @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
     render: ->
       @$el.empty()
-      id = @model.get('workflow_id')
+      id = @model.get('template_id')
       _render = (wf) =>
         name = _.escape wf.get 'name'
         @$el.addClass('workflow-link-cell').append $('<a>',
@@ -397,7 +399,7 @@ Projects
       'name:project'
       'desc'
     ,
-      name: 'workflow_id'
+      name: 'template_id'
       label: 'Workflow'
       editable: false
       cell: WorkflowCell
