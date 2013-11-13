@@ -16,11 +16,11 @@ Workflow, Workflows
         offset:
           x: 26, y: 43
         actions: [
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post Requirements'
@@ -29,11 +29,11 @@ Workflow, Workflows
         offset:
           x: 334, y: 44
         actions: [
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Cancel Notification'
@@ -42,7 +42,7 @@ Workflow, Workflows
         offset:
           x: 334, y: 204
         actions: [
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ]
       ,
         name: 'Retrieve App Submissions'
@@ -51,11 +51,11 @@ Workflow, Workflows
         offset:
           x: 613, y: 44
         actions: [
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Retrieve Logo Design'
@@ -64,11 +64,11 @@ Workflow, Workflows
         offset:
           x: 629, y: 282
         actions: [
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Email to Evaluators'
@@ -77,11 +77,11 @@ Workflow, Workflows
         offset:
           x: 1018, y: 44
         actions: [
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
-          type: 'SEND_EMAIL'
+          context_type: 'SEND_EMAIL'
         ,
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post and Vote'
@@ -90,11 +90,11 @@ Workflow, Workflows
         offset:
           x: 1043, y: 282
         actions: [
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post Final Result and Reward'
@@ -103,13 +103,13 @@ Workflow, Workflows
         offset:
           x: 1420, y: 183
         actions: [
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
-          type: 'SEND_EMAIL'
+          context_type: 'SEND_EMAIL'
         ,
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ]
       links: [
@@ -160,80 +160,6 @@ Workflow, Workflows
         key: 'post_and_vote_to_post_final'
         prev_node_id: 6
         next_node_id: 7
-      ]
-    ,
-      key: 'test_wf'
-      name: 'Test Workflow'
-      desc: 'The test workflow'
-      nodes: [
-        key: 'post_idea'
-        name: 'Post Idea'
-        desc: 'Post software project ideas'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        actions: []
-      ,
-        key: 'post_cancel'
-        name: 'Post Cancel'
-        desc: 'Post cancel notification'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        actions: []
-      ,
-        key: 'post_req'
-        name: 'Post Requirement'
-        desc: 'Post project requirement'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        actions: []
-      ,
-        key: 'submit_design'
-        name: 'Submit Design'
-        desc: 'Retrieve theme design submissions & e-mail to stackholders'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        actions: []
-      ,
-        key: 'notification'
-        name: 'Notification'
-        desc: 'Notification'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        actions: []
-      ,
-        key: 'post_result'
-        name: 'Post Result'
-        desc: 'Post & e-mail result everyone'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        actions: []
-      ]
-      links: [
-        key: 'post_req_to_submit_design'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        prev_node_id: 2
-        next_node_id: 3
-      ,
-        key: 'pass_to_post'
-        desc: 'Post & e-mail to everyone if pass rate > 50%'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        prev_node_id: 3
-        next_node_id: 5
-      ,
-        key: 'to_cancel'
-        name: 'Like < 300'
-        desc: 'Cancel if like count < 300'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        prev_node_id: 0
-        next_node_id: 1
-      ,
-        key: 'continue_to_req'
-        name: 'Like >= 300'
-        desc: 'Continue to post requirement if like count >= 300'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        prev_node_id: 0
-        next_node_id: 2
-      ,
-        key: 'not_pass_to_notify'
-        name: 'Pass rate <= 50%'
-        desc: 'Notification if pass rate <= 50%'
-        workflow_id: '50447afb4728cb2036cf9ca1'
-        prev_node_id: 3
-        next_node_id: 4
       ]
     ]
 

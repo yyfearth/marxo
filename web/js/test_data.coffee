@@ -78,13 +78,13 @@ define 'test_data', ['models'], (models) ->
           x: 26, y: 43
         actions: [
           id: '50447afb4728cb2036cf9f00'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cb2036cf9f01'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cb2036cf9f02'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cb2036cf9cb1'
@@ -97,13 +97,13 @@ define 'test_data', ['models'], (models) ->
           x: 334, y: 44
         actions: [
           id: '50447afb4728cb2036cf9f03'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cb2036cf9ce4'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cb2036cf9f05'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cb2036cf9cb2'
@@ -116,7 +116,7 @@ define 'test_data', ['models'], (models) ->
           x: 334, y: 204
         actions: [
           id: '50447afb4728cb2036cf9f06'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ]
       ,
         id: '50447afb4728cb2036cf9cb3'
@@ -129,13 +129,13 @@ define 'test_data', ['models'], (models) ->
           x: 613, y: 44
         actions: [
           id: '50447afb4728cb2036cf9f07'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cb2036cf9f08'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cb2036cf9f09'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cb2036cf9cb4'
@@ -148,13 +148,13 @@ define 'test_data', ['models'], (models) ->
           x: 629, y: 282
         actions: [
           id: '50447afb4728cb2036cf9f0a'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cb2036cf9f0b'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cb2036cf9f0c'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cb2036cf9cb5'
@@ -167,13 +167,13 @@ define 'test_data', ['models'], (models) ->
           x: 1018, y: 44
         actions: [
           id: '50447afb4728cb2036cf9f0d'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cb2036cf9f0e'
-          type: 'SEND_EMAIL'
+          context_type: 'SEND_EMAIL'
         ,
           id: '50447afb4728cb2036cf9f0f'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cb2036cf9cb6'
@@ -186,13 +186,13 @@ define 'test_data', ['models'], (models) ->
           x: 1043, y: 282
         actions: [
           id: '50447afb4728cb2036cf9f10'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cb2036cf9f11'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cb2036cf9f12'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cb2036cf9cb7'
@@ -205,16 +205,16 @@ define 'test_data', ['models'], (models) ->
           x: 1420, y: 183
         actions: [
           id: '50447afb4728cb2036cf9f13'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cb2036cf9f14'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cb2036cf9f15'
-          type: 'SEND_EMAIL'
+          context_type: 'SEND_EMAIL'
         ,
           id: '50447afb4728cb2036cf9f16'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ]
       links: [
@@ -466,13 +466,13 @@ define 'test_data', ['models'], (models) ->
           x: 26, y: 43
         actions: [
           id: '50447afb4728cc2036cf9f00'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cc2036cf9f01'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cc2036cf9f02'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cc2036cf9cb1'
@@ -486,13 +486,13 @@ define 'test_data', ['models'], (models) ->
           x: 334, y: 44
         actions: [
           id: '50447afb4728cc2036cf9f03'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cc2036cf9ce4'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cc2036cf9f05'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cc2036cf9cb2'
@@ -506,7 +506,7 @@ define 'test_data', ['models'], (models) ->
           x: 334, y: 204
         actions: [
           id: '50447afb4728cc2036cf9f06'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ]
       ,
         id: '50447afb4728cc2036cf9cb3'
@@ -520,13 +520,13 @@ define 'test_data', ['models'], (models) ->
           x: 613, y: 44
         actions: [
           id: '50447afb4728cc2036cf9f07'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cc2036cf9f08'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cc2036cf9f09'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cc2036cf9cb4'
@@ -540,13 +540,13 @@ define 'test_data', ['models'], (models) ->
           x: 629, y: 282
         actions: [
           id: '50447afb4728cc2036cf9f0a'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cc2036cf9f0b'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cc2036cf9f0c'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cc2036cf9cb5'
@@ -560,13 +560,13 @@ define 'test_data', ['models'], (models) ->
           x: 1018, y: 44
         actions: [
           id: '50447afb4728cc2036cf9f0d'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cc2036cf9f0e'
-          type: 'SEND_EMAIL'
+          context_type: 'SEND_EMAIL'
         ,
           id: '50447afb4728cc2036cf9f0f'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cc2036cf9cb6'
@@ -580,13 +580,13 @@ define 'test_data', ['models'], (models) ->
           x: 1043, y: 282
         actions: [
           id: '50447afb4728cc2036cf9f10'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cc2036cf9f11'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cc2036cf9f12'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ,
         id: '50447afb4728cc2036cf9cb7'
@@ -600,16 +600,16 @@ define 'test_data', ['models'], (models) ->
           x: 1420, y: 183
         actions: [
           id: '50447afb4728cc2036cf9f13'
-          type: 'CREATE_PAGE'
+          context_type: 'CREATE_PAGE'
         ,
           id: '50447afb4728cc2036cf9f14'
-          type: 'POST_FACEBOOK'
+          context_type: 'POST_FACEBOOK'
         ,
           id: '50447afb4728cc2036cf9f15'
-          type: 'SEND_EMAIL'
+          context_type: 'SEND_EMAIL'
         ,
           id: '50447afb4728cc2036cf9f16'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
       ]
       links: [
@@ -719,10 +719,10 @@ define 'test_data', ['models'], (models) ->
         workflow_id: '50447afb4728cc2036cf9ca1'
         actions: [
           id: '50447afb4728cc2036cfaca0'
-          type: 'SEND_EMAIL'
+          context_type: 'SEND_EMAIL'
         ,
           id: '50447afb4728cc2036cfaca1'
-          type: 'GENERATE_REPORT'
+          context_type: 'GENERATE_REPORT'
         ]
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
