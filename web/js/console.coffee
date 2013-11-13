@@ -167,13 +167,16 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @form.remember.checked = remember = localStorage.marxo_sign_in_remember is 'true'
       @form.email.value = localStorage.marxo_sign_in_email if remember
       # auto sign in
-      {user, tenant} = ConsoleView.get()
-      if (user instanceof User) and (tenant instanceof Tenant)
+      console = ConsoleView.get()
+      if console.user instanceof User
+        user = console.user
+        console.user = console.tenant = null
+        @hide()
         @_validateUser user
       else
         @show()
       @
-    submit: (e) -> # fake
+    submit: (e) ->
       e.preventDefault()
       email = @form.email.value.trim()
       password = @form.password.value.trim()
@@ -339,8 +342,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         _frame = @frames[frame]
         if _frame._cur? and not name
           name = _frame._cur?._name
-          if name then @navigate "##{frame}/#{name}", replace: true
-        _frame._cur = _frame[name] if name
+          @navigate "##{frame}/#{name}", replace: true if name
+        _frame._cur = _frame[name] or _name: name unless not name or /^new|signout$/.test name
         @frames._cur = _frame
         #console.log 'frames data', frame, name, @frames
 

@@ -4,9 +4,10 @@ mixin box_icons
     button.btn.btn-close.btn-round.icon-close
 
 mixin action_name_key
-  input(type='text', name='name', maxlength='255', title='Action Name', placeholder='Action Name')
-  input.input-medium(type='text', name='key',maxlength='255', title='Action Key', placeholder='action_name')
-  .help-inline (Action Name and Key)
+  .action-name-key
+    input(type='text', name='name', maxlength='255', title='Action Name', placeholder='Action Name')
+    input.input-medium(type='text', name='key',maxlength='255', title='Action Key', placeholder='action_name')
+    .help-inline (Action Name and Key)
 
 mixin multi_social_media_group_btns
   .btn-group(data-toggle='buttons-checkbox')
@@ -18,7 +19,7 @@ mixin post_content(media, max, rows)
   title='Content post to ' + media + ' (' + max + ' max)', rows=rows, maxlength=max)
 
 mixin action_template_select
-  select(name='template', disabled).tmp
+  select(disabled)
     option (Select from Template)
 
 mixin track_checkbox
@@ -166,8 +167,8 @@ mixin actions_thumb
     form.box-content
       mixin action_name_key
       .btn-group(data-toggle='buttons-radio')
-        button.btn.active(type='button', name='type', value='auto') Starts Automatically
-        button.btn(type='button', name='type', value='manual') Starts Manually
+        button.btn.active(type='button', name='start_type', value='auto') Starts Automatically
+        button.btn(type='button', name='start_type', value='manual') Starts Manually
       label Duration
         input(type='text', name='duration', placeholder='1 day 2 hours')
       .help-block

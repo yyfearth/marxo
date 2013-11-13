@@ -558,7 +558,7 @@ ProjectFilterView
           throw new Error 'unknown section type ' + type
       tpl.section
         .replace('{{title}}', data.section_title or '(Need a Title)')
-        .replace('{{desc}}', data.section_desc or '')
+        .replace('{{desc}}', data.section_desc.replace(/\n/g, '<br/>') or '')
         .replace('{{body}}', body)
     updatePreview: ->
       data = @read()
