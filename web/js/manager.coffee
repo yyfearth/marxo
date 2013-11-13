@@ -65,11 +65,11 @@ Projects
           else if datetime instanceof Date
             datetime.toLocaleString()
           else
+            date = null
             try
               date = new Date datetime
-            catch e
-              date = null
-              console.error 'unsupported datetime', datetime
+              date = null if isNaN date.getTime()
+            console.error 'unsupported datetime', datetime unless date?
             unless date then '' else date.toLocaleString()
         toRaw: -> return
       super options
@@ -118,23 +118,26 @@ Projects
       node_id = @model.get 'node_id'
       action_id = @model.get 'action_id'
       url = "#project/#{project_id}/node/#{node_id}/action/#{action_id}"
-      Projects.find
-        projectId: project_id
-        nodeId: node_id
-        actionId: action_id
-        callback: ({node, action}) =>
-          if node and action
-            node_name = _.escape node.get 'name'
-            action_name = _.escape action.get('name') or action.get('type')
-            tooltip = "#{node_name}: #{action_name}"
-            html = "<span class='node-title'>#{node_name}</span>: #{action_name}"
-            @$el.addClass('action-link-cell').append $('<a>',
-              tabIndex: -1
-              href: url
-            ).attr(title: tooltip).html html
-            @delegateEvents()
-          else
-            console.warn 'failed to get node action for url', url
+      try
+        Projects.find
+          projectId: project_id
+          nodeId: node_id
+          actionId: action_id
+          callback: ({node, action}) =>
+            if node and action
+              node_name = _.escape node.get 'name'
+              action_name = _.escape action.get('name') or action.get('type')
+              tooltip = "#{node_name}: #{action_name}"
+              html = "<span class='node-title'>#{node_name}</span>: #{action_name}"
+              @$el.addClass('action-link-cell').append $('<a>',
+                tabIndex: -1
+                href: url
+              ).attr(title: tooltip).html html
+              @delegateEvents()
+            else
+              console.warn 'failed to get node action for url', url
+      catch e
+        console.error 'failed to get node action', e
       @
 
   # single label tag
