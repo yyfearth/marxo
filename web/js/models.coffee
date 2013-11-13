@@ -171,8 +171,12 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     save: (attributes = {}, options = {}) -> # override for sync ids
       if Backbone.LocalStorage? # for local sync
-        if @nodes? then attributes.nodes = @nodes.map (r) -> r.attributes
-        if @links? then attributes.links = @links.map (r) -> r.attributes
+        _getAttr = (r) ->
+          attr = r.attributes
+          attr.id ?= r.cid
+          attr
+        if @nodes? then attributes.nodes = @nodes.map _getAttr
+        if @links? then attributes.links = @links.map _getAttr
         console.log 'save local', @_name, attributes
         super attributes, options
       else # for ajax sync
