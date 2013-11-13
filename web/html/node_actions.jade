@@ -4,9 +4,10 @@ mixin box_icons
     button.btn.btn-close.btn-round.icon-close
 
 mixin action_name_key
-  input(type='text', name='name', maxlength='255', title='Action Name', placeholder='Action Name')
-  input.input-medium(type='text', name='key',maxlength='255', title='Action Key', placeholder='action_name')
-  .help-inline (Action Name and Key)
+  .action-name-key
+    input(type='text', name='name', maxlength='255', title='Action Name', placeholder='Action Name')
+    input.input-medium(type='text', name='key',maxlength='255', title='Action Key', placeholder='action_name')
+    .help-inline (Action Name and Key)
 
 mixin multi_social_media_group_btns
   .btn-group(data-toggle='buttons-checkbox')
