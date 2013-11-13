@@ -41,6 +41,221 @@ define 'test_data', ['models'], (models) ->
       updated_at: '2013-09-05T02:18:13.621Z'
     ]
     workflows: [
+      id: "655a3dd88b20999dd786d38b"
+      name: "Waterfall Development"
+      key: "waterfall_dev"
+      desc: "Workflow for Waterfall Development"
+      nodes: [
+        id: "ec21b6896dd7a39b2e4ae470"
+        name: "Requirement"
+        key: "requirement"
+        offset:
+          x: 24, y: 41.5
+        actions: [
+          id: "ec21b6896dd7a39b2e4ae471"
+          context_type: "CREATE_PAGE"
+          name: "Post Page or Form"
+          key: "create_page"
+        ,
+          context_type: "POST_FACEBOOK"
+          name: "Post to Facebook"
+          key: "post_facebook"
+        ,
+          context_type: "MAKE_SCHEDULE"
+          name: "Make Schedule"
+          key: "make_schedule"
+        ,
+          context_type: "GENERATE_REPORT"
+          name: "Generate Report"
+          key: "generate_report"
+        ]
+        created_at: "2013-11-12T01:31:52.328Z"
+        updated_at: "2013-11-12T01:31:52.328Z"
+      ,
+        id: "c4ebf77d7d3564cc60d322e7"
+        name: "Design"
+        key: "design"
+        offset:
+          x: 192, y: 41
+        actions: [
+          context_type: "CREATE_PAGE"
+          name: "Post Page or Form"
+          key: "create_page"
+        ,
+          context_type: "POST_FACEBOOK"
+          name: "Post to Facebook"
+          key: "post_facebook"
+        ,
+          context_type: "SEND_EMAIL"
+          name: "Send Email"
+          key: "send_email"
+        ,
+          context_type: "MAKE_SCHEDULE"
+          name: "Make Schedule"
+          key: "make_schedule"
+          start_type: "manual"
+        ,
+          context_type: "GENERATE_REPORT"
+          name: "Generate Report"
+          key: "generate_report"
+        ]
+        created_at: "2013-11-12T01:49:10.224Z"
+        updated_at: "2013-11-12T01:49:10.224Z"
+      ,
+        id: "6842887a4153d55ed1c5b228"
+        name: "Implementation"
+        key: "implementation"
+        offset:
+          x: 338.21875, y: 41.5
+        actions: [
+          context_type: "CREATE_PAGE"
+          name: "Post Page or Form"
+          key: "create_page"
+        ,
+          context_type: "POST_FACEBOOK"
+          name: "Post to Facebook"
+          key: "post_facebook"
+        ,
+          context_type: "SEND_EMAIL"
+          name: "Send Email"
+          key: "send_email"
+        ,
+          context_type: "MAKE_SCHEDULE"
+          name: "Make Schedule"
+          key: "make_schedule"
+          start_type: "manual"
+        ,
+          context_type: "GENERATE_REPORT"
+          name: "Generate Report"
+          key: "generate_report"
+        ]
+        created_at: "2013-11-12T01:49:46.366Z"
+        updated_at: "2013-11-12T01:49:46.366Z"
+      ,
+        id: "142720933a58ebd2d70110c5"
+        name: "Testing"
+        key: "testing"
+        offset:
+          x: 669, y: 41
+        actions: [
+          context_type: "CREATE_PAGE"
+          name: "Post Page or Form"
+          key: "create_page"
+        ,
+          context_type: "POST_FACEBOOK"
+          name: "Post to Facebook"
+          key: "post_facebook"
+        ,
+          context_type: "SEND_EMAIL"
+          name: "Send Email"
+          key: "send_email"
+        ,
+          context_type: "MAKE_SCHEDULE"
+          name: "Make Schedule"
+          key: "make_schedule"
+          start_type: "manual"
+        ,
+          context_type: "GENERATE_REPORT"
+          name: "Generate Report"
+          key: "generate_report"
+        ]
+        created_at: "2013-11-12T01:50:13.818Z"
+        updated_at: "2013-11-12T01:50:13.818Z"
+      ,
+        id: "4387684971cf7d8ae0e5111c"
+        name: "Demo"
+        key: "demo"
+        offset:
+          x: 814.21875, y: 41.5
+        actions: [
+          context_type: "CREATE_PAGE"
+          name: "Post Page or Form"
+          key: "create_page"
+        ,
+          context_type: "POST_FACEBOOK"
+          name: "Post to Facebook"
+          key: "post_facebook"
+        ,
+          context_type: "SEND_EMAIL"
+          name: "Send Email"
+          key: "send_email"
+        ,
+          context_type: "GENERATE_REPORT"
+          name: "Generate Report"
+          key: "generate_report"
+        ]
+        created_at: "2013-11-12T01:50:56.436Z"
+        updated_at: "2013-11-12T01:50:56.436Z"
+      ,
+        id: "9ddf5927f60bed963c753283"
+        name: "Integration"
+        key: "integration"
+        offset:
+          x: 517.5625, y: 41.5
+        workflow_id: "655a3dd88b20999dd786d38b"
+        actions: [
+          context_type: "POST_FACEBOOK"
+          name: "Post to Facebook"
+          key: "post_facebook"
+        ,
+          context_type: "SEND_EMAIL"
+          name: "Send Email"
+          key: "send_email"
+        ,
+          context_type: "MAKE_SCHEDULE"
+          name: "Make Schedule"
+          key: "make_schedule"
+          start_type: "manual"
+        ]
+        created_at: "2013-11-12T03:42:32.728Z"
+        updated_at: "2013-11-12T03:42:32.728Z"
+      ]
+      links: [
+        id: "6d1378ca0858b307cc1145d2"
+        key: "requirement_to_design"
+        prev_node_id: "ec21b6896dd7a39b2e4ae470"
+        next_node_id: "c4ebf77d7d3564cc60d322e7"
+        conditional: false
+        created_at: "2013-11-12T01:49:16.420Z"
+        updated_at: "2013-11-12T01:49:16.420Z"
+      ,
+        id: "e89620d9fa1a49315e7af9b9"
+        key: "design_to_implementation"
+        prev_node_id: "c4ebf77d7d3564cc60d322e7"
+        next_node_id: "6842887a4153d55ed1c5b228"
+        conditional: false
+        created_at: "2013-11-12T01:49:50.782Z"
+        updated_at: "2013-11-12T01:49:50.782Z"
+      ,
+        id: "59623f83efccd3d9c190a521"
+        key: "testing_to_demo"
+        prev_node_id: "142720933a58ebd2d70110c5"
+        next_node_id: "4387684971cf7d8ae0e5111c"
+        conditional: false
+        created_at: "2013-11-12T01:51:07.066Z"
+        updated_at: "2013-11-12T01:51:07.066Z"
+      ,
+        id: "0c97f0018cbdbd3f465d6f30"
+        workflow_id: "655a3dd88b20999dd786d38b"
+        key: "implementation_to_integration"
+        prev_node_id: "6842887a4153d55ed1c5b228"
+        next_node_id: "9ddf5927f60bed963c753283"
+        conditional: false
+        created_at: "2013-11-12T03:42:36.785Z"
+        updated_at: "2013-11-12T03:42:36.785Z"
+      ,
+        id: "6eac0542472d22acd92dc757"
+        workflow_id: "655a3dd88b20999dd786d38b"
+        key: "integration_to_testing"
+        prev_node_id: "9ddf5927f60bed963c753283"
+        next_node_id: "142720933a58ebd2d70110c5"
+        conditional: false
+        created_at: "2013-11-12T03:42:43.499Z"
+        updated_at: "2013-11-12T03:42:43.499Z"
+      ]
+      created_at: "2013-11-12T01:29:33.302Z"
+      updated_at: "2013-11-12T01:29:33.302Z"
+    ,
       id: '50447afb4728cb2036cf9ca0'
       name: 'Demo Workflow'
       key: 'demo_workflow'
@@ -872,6 +1087,27 @@ define 'test_data', ['models'], (models) ->
       action_id: '50447afb4728cc2036cfaca0'
       status: 'WAITING'
       created_at: new Date(1371191309656)
+    ,
+      id: "655a3dd88b20999dd786d38b"
+      title: "CMPE 275 Project Requirements"
+      desc: "<p>This is CMPE 275 course project.</p>\n<img src=\"http://upload.wikimedia.org/wikipedia/commons/e/e2/Waterfall_model.svg\">"
+      media: "PAGE"
+      workflow_id: "655a3dd88b20999dd786d38b"
+      node_id: "ec21b6896dd7a39b2e4ae470"
+      action_id: "ec21b6896dd7a39b2e4ae471"
+      status: "WAITING"
+      created_at: "2013-06-14T06:28:29.656Z"
+      sections: [
+        section_title: "Group Registration"
+        section_desc: "Please enter your group name"
+        section_type: "text"
+        text_multiline: false
+      ,
+        section_title: "Group Members"
+        section_desc: "Please enter your group members as:\nLast Name, First Name <email> (SID)\ne.g. Young, Wilson <yyfearth@gmail.com> 008060123"
+        section_type: "text"
+        text_multiline: true
+      ]
     ]
 
     events: [
