@@ -103,9 +103,6 @@ ProjectFilterView
   class ReportView extends ModalDialogView
     el: '#report_viewer'
     goBackOnHidden: 'report'
-    popup: (model, callback) ->
-      @render() unless @rendered
-      super model, callback
     reset: ->
       # test only
       @$el.find('.nav-tabs a[data-toggle=tab]:eq(1)').tab 'show'

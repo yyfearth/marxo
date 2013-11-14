@@ -164,6 +164,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         @router.back fallback: @goBackOnHidden
       @
     popup: (data, callback) ->
+      @render() unless @rendered
       if data is @data
         callback? 'ignored'
       else

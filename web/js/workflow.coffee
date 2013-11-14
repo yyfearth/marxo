@@ -52,6 +52,39 @@ Action
 
   ## Workflow Manager
 
+  class TemplateWorkflowListView extends NavListView
+    auto: false
+    urlRoot: 'worklfow'
+    headerTitle: 'Template'
+    itemClassName: 'workflow-list-item'
+    collection: Workflows.workflows
+    defaultItem: null
+    allowEmpty: true
+    emptyItem: new Workflow id: 'new', name: 'Empty Workflow'
+    events:
+      'click': (e) ->
+        el = e.target
+        if el.tagName is 'A' and el.dataset.id
+          e.preventDefault()
+          @trigger 'select', el.dataset.id
+          false
+    _render: (models = @collection) ->
+      models = models.fullCollection if models.fullCollection
+      #console.log 'render models', models
+      fragments1 = document.createDocumentFragment()
+      fragments2 = document.createDocumentFragment()
+      models.forEach (model) =>
+        fragments = if model.has 'tenant_id' then fragments2 else fragments1
+        fragments.appendChild @_renderItem model
+      @el.appendChild fragments1
+      @el.appendChild @_renderHeader 'Workflows'
+      @el.appendChild fragments2
+      return
+    render: ->
+      @_clear()
+      @_render()
+      @
+
   class WorkflowManagerView extends ManagerView
     columns: [
       'checkbox'
@@ -66,26 +99,34 @@ Action
     ]
     collection: new Workflows
     defaultFilterField: 'name'
-    events:
-      'click #wf_template_list .wf_tempate a': (e) ->
-        e.preventDefault()
-        wf = e.target.href.match /#workflow:(\w+)/
-        console.log 'wf template clicked', wf
-        @create wf[1] if wf.length is 2
-        false
     initialize: (options) ->
       super options
+      @list = new TemplateWorkflowListView el: find 'ul.template-list', @el
       @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
       _remove = @remove.bind @
       @on remove: _remove, remove_selected: _remove
+      @list.on 'select', @create.bind @
       @
-    create: (template) ->
-      template = '' if not template or /^(?:new|empty)$/i.test template
-      @creator.popup template_id: template, (action, data) =>
+    create: (template_id) ->
+      template_id = '' if not template_id or /^(?:new|empty)$/i.test template_id
+      @creator.popup {template_id}, (action, data) =>
         if action is 'save'
           console.log 'create new wf:', data
-          @collection.create data, wait: true
-          # location.hash = '#workflow/' + data.id
+          if template_id = data.template_id
+            wf = Workflows.workflows.get template_id
+            throw new Error 'cannot find workflow with id', template_id unless wf
+            _do_create = (wf) =>
+              data.desc = "Cloned from workflow #{wf.get 'name'}" unless data.desc
+              new Workflow().copy(wf).save data, success: (wf) =>
+                @collection.add wf
+                @refresh()
+              return
+            if wf.loaded()
+              _do_create wf
+            else
+              wf.fetch reset: true, success: _do_create
+          else
+            @collection.create data, wait: true
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
@@ -95,10 +136,14 @@ Action
         @reload() if models.length >= @pageSize / 2
       #console.log 'delete', model, @
       @
+    render: ->
+      @list.fetch()
+      super
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
     goBackOnHidden: 'workflow/mgr'
+    collection: Workflows.workflows
     #initialize: (options) ->
     #  super options
     popup: (data, callback) ->
@@ -110,6 +155,33 @@ Action
       @callback 'save'
       @hide true
       @
+    render: ->
+      @collection.load => @_renderSelect()
+      super
+    _renderSelect: ->
+      select = @form.template_id
+      wfs = @collection.fullCollection
+      if wfs.length
+        owned = document.createElement 'optgroup'
+        owned.label = 'Owned Workflows'
+        shared = document.createElement 'optgroup'
+        shared.label = 'Shared Workflows'
+        wfs.forEach (wf) ->
+          op = document.createElement 'option'
+          op.value = wf.id
+          op.textContent = wf.get 'name'
+          unless wf.has 'tanent_id'
+            shared.appendChild op
+          else
+            owned.appendChild op
+        select.innerHTML = ''
+        op = document.createElement 'option'
+        op.value = ''
+        op.textContent = '(Empty Workflow)'
+        select.appendChild op
+        select.appendChild owned if owned.childElementCount
+        select.appendChild shared if shared.childElementCount
+      return
 
   ## Workflow Editor (Workflow/Node/Link/Action Editor)
 
@@ -174,7 +246,7 @@ Action
     _loaded: (wf, sub) ->
       @id = wf.id
       @nameEl.textContent = wf.get 'name'
-      @descEl.textContent = wf.get 'desc'
+      @descEl.textContent = wf.get('desc') or ''
       @model = wf
       @view.load wf, sub
       @nodeList.setNodes wf.nodes
