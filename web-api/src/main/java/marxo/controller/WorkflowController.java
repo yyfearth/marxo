@@ -55,26 +55,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	Search
 	 */
 
-//	@RequestMapping(method = RequestMethod.GET)
-//	@ResponseBody
-//	public List<Workflow> search(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
-//		boolean hasName = !Strings.isNullOrEmpty(name);
-//		boolean hasCreated = created != null;
-//		boolean hasModified = modified != null;
-//		List<Workflow> workflows;
-//
-//		// todo: implemented created and modified search APIs
-//
-//		if (hasName) {
-//			workflows = dao.findByName(name);
-//		} else {
-//			workflows = dao.find();
-//		}
-//
-//		Collections.sort(workflows, modifiedDateComparator);
-//		return workflows;
-//	}
-
+	// todo: implemented created and modified search APIs
 	@Override
 	public List<Workflow> search() {
 		String name = request.getParameter("name");
@@ -197,16 +178,6 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	/*
 	Utilities
 	 */
-
-//	private List<Node> getAllNodes(ObjectId workflowId) {
-//		NodeDao nodeDao = new NodeDao(workflowId, user.tenantId);
-//		return nodeDao.findAll();
-//	}
-//
-//	private List<Link> getAllLinks(ObjectId workflowId) {
-//		LinkDao linkDao = new LinkDao(workflowId, user.tenantId);
-//		return linkDao.findAll();
-//	}
 
 	// Why am I doing this? Just for fun...
 	<Entity extends WorkflowChildEntity> List<Entity> getAllEntities(Class<? extends WorkflowChildDao> daoClass, ObjectId workflowId) {
