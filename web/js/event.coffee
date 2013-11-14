@@ -390,7 +390,7 @@ Event
       # 'checkbox'
       'id'
       'title:event'
-      'project'
+      'workflow'
       'node_action'
       'type'
       'status'

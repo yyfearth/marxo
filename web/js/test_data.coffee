@@ -1010,7 +1010,7 @@ define 'test_data', ['models'], (models) ->
       title: 'Demo Project Initialization'
       desc: 'Demo Project Initialization Page'
       media: 'PAGE'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
       action_id: '50447afb4728cc2036cf9f00'
       url: 'about:blank'
@@ -1023,7 +1023,7 @@ define 'test_data', ['models'], (models) ->
       title: 'Demo Project Initialization'
       desc: 'Demo Project Initialization Facebook Post'
       media: 'FACEBOOK'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
       action_id: '50447afb4728cc2036cf9f01'
       url: 'http://facebook.com/'
@@ -1036,7 +1036,7 @@ define 'test_data', ['models'], (models) ->
       title: 'Demo Project Initialization'
       desc: 'Demo Project Initialization Twitter Post'
       media: 'TWITTER'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
       action_id: '50447afb4728cc2036cf9f01'
       report_id: 'e57bf4f6aad752f9fc51fef1'
@@ -1049,7 +1049,7 @@ define 'test_data', ['models'], (models) ->
       title: 'Demo Project Post Requirements'
       desc: 'Demo Project Post Requirements Page'
       media: 'PAGE'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'
       action_id: '50447afb4728cc2036cf9f03'
       report_id: 'e57bf4f6aad752f9fc51fef1'
@@ -1060,7 +1060,7 @@ define 'test_data', ['models'], (models) ->
       title: 'Demo Project Post Requirements'
       desc: 'Demo Project Post Requirements Facebook Post'
       media: 'FACEBOOK'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'
       action_id: '50447afb4728cc2036cf9ce4'
       report_id: 'e57bf4f6aad752f9fc51fef1'
@@ -1071,7 +1071,7 @@ define 'test_data', ['models'], (models) ->
       title: 'Demo Project Post Requirements'
       desc: 'Demo Project Post Requirements Twitter Post'
       media: 'TWITTER'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'
       action_id: '50447afb4728cc2036cf9ce4'
       report_id: 'e57bf4f6aad752f9fc51fef1'
@@ -1082,7 +1082,7 @@ define 'test_data', ['models'], (models) ->
       title: 'Test Content'
       desc: 'Test Content'
       media: 'EMAIL'
-      project_id: '50447afb4728cc2036cf9ca1'
+      workflow_id: '50447afb4728cc2036cf9ca1'
       node_id: '507f81413d070321728ffe10'
       action_id: '50447afb4728cc2036cfaca0'
       status: 'WAITING'
@@ -1116,7 +1116,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'Demo scheduled event test data'
       status: 'SCHEDULED'
       type: 'WAIT'
-      project_id: '50447afb4728cc2036cf9ca1'
+      workflow_id: '50447afb4728cc2036cf9ca1'
       node_id: '507f81413d070321728ffe10'
       action_id: '50447afb4728cc2036cfaca0' # TODO: should be changed
       starts: new Date(1371104900000)
@@ -1128,7 +1128,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'Demo unscheduled event test data'
       status: 'UNSCHEDULED'
       type: 'NOWAIT'
-      project_id: '50447afb4728cc2036cf9ca1'
+      workflow_id: '50447afb4728cc2036cf9ca1'
       node_id: '507f81413d070321728ffe10'
       action_id: '50447afb4728cc2036cfaca0' # TODO: should be changed
       duration: 86400000 # 1 day
@@ -1138,7 +1138,7 @@ define 'test_data', ['models'], (models) ->
       desc: 'Demo manual event test data'
       status: 'MANUAL'
       type: 'NOWAIT'
-      project_id: '50447afb4728cc2036cf9ca1'
+      workflow_id: '50447afb4728cc2036cf9ca1'
       node_id: '507f81413d070321728ffe10'
       action_id: '50447afb4728cc2036cfaca0' # TODO: should be changed
     ]
@@ -1147,7 +1147,7 @@ define 'test_data', ['models'], (models) ->
       id: 'e57bf4f6aad752f9fc51fef0'
       name: 'Demo Project Initialization Report'
       desc: 'Demo Project Initialization Report'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
       action_id: '50447afb4728cc2036cf9f02'
       status: 'COLLECTED'
@@ -1158,7 +1158,7 @@ define 'test_data', ['models'], (models) ->
       id: 'e57bf4f6aad752f9fc51fef1'
       name: 'Demo Project Post Requirements Report'
       desc: 'Demo Project Post Requirements Report'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'
       action_id: '50447afb4728cc2036cf9f05'
       status: 'COLLECTING'
@@ -1174,7 +1174,7 @@ define 'test_data', ['models'], (models) ->
       type: 'ROUTINE' # ROUTINE/REQUISITE/EMERGENT (imply priority)
       scope: 'PROJECT' # PROJECT/TENANT
       status: 'ACTIVE' # ACTIVE/PROCESSED/EXPIRED
-      project_id: '50447afb4728cc2036cf9ca1'
+      workflow_id: '50447afb4728cc2036cf9ca1'
       created_at: new Date(1380127473000)
       updated_at: new Date(1380127473000)
       expires_at: new Date(1380213873000)
@@ -1182,7 +1182,7 @@ define 'test_data', ['models'], (models) ->
       id: 'e57bf4e6aad752f9ec51eee1'
       title: 'Project Start'
       desc: 'Demo Project started at {{date}}'
-      project_id: '50447afb4728cc2036cf9ca0'
+      workflow_id: '50447afb4728cc2036cf9ca0'
       type: 'ROUTINE'
       scope: 'PROJECT'
       status: 'EXPIRED'

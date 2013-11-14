@@ -10,7 +10,28 @@ NavListView
 }, {
 ManagerCollection
 Projects
+Workflows
 }) ->
+
+  # Util
+
+  findProjectOrWorkflow = (options) ->
+    unless options.workflowId and typeof options.callback is 'function'
+      throw new Error 'workflowId and callback must be given'
+    _callback = options.callback
+    _tried = false
+    options.callback = (ret) -> if _callback
+      if ret.workflow or Object.keys(ret).length
+        # console.log 'find project or workflow got', ret, _tried
+        _callback ret
+        _callback = null
+      else if _tried
+        _callback ret
+      _tried = true
+      return
+    Projects.find options
+    Workflows.find options
+    return
 
   ## Cells
 
@@ -94,50 +115,46 @@ Projects
       _btn?.style.display = 'none'
       _btn
 
-  class Backgrid.ProjectCell extends Backgrid.UriCell
+  class Backgrid.WorkflowCell extends Backgrid.UriCell
     render: ->
       @$el.empty()
-      id = @model.get('project_id')
-      if id then Projects.find projectId: id, callback: ({project}) =>
-        if project
-          name = _.escape project.get 'name'
+      id = @model.get('workflow_id')
+      unless id
+        console.warn 'workflow cell cannot get worklfow id', @model
+      else findProjectOrWorkflow workflowId: id, callback: ({workflow}) =>
+        if workflow
+          name = _.escape workflow.get 'name'
+          @$el.addClass('workflow-link-cell').append $('<a>',
+            tabIndex: -1
+            href: "##{workflow._name}/#{id}" + id
+          ).attr('title', name).text name
         else
-          console.warn 'project not found', id
-          name = '(Unknown Project)'
-        @$el.addClass('project-link-cell').append $('<a>',
-          tabIndex: -1
-          href: '#project/' + id
-        ).attr('title', name).text name
+          console.warn 'workflow/project not found', id
+          @$el.text '(Unknown)'
         @delegateEvents()
       @
 
   class Backgrid.NodeActionCell extends Backgrid.UriCell
     render: ->
       @$el.empty()
-      project_id = @model.get 'project_id'
-      node_id = @model.get 'node_id'
-      action_id = @model.get 'action_id'
-      url = "#project/#{project_id}/node/#{node_id}/action/#{action_id}"
-      try
-        Projects.find
-          projectId: project_id
-          nodeId: node_id
-          actionId: action_id
-          callback: ({node, action}) =>
-            if node and action
-              node_name = _.escape node.get 'name'
-              action_name = _.escape action.get('name') or action.get('type')
-              tooltip = "#{node_name}: #{action_name}"
-              html = "<span class='node-title'>#{node_name}</span>: #{action_name}"
-              @$el.addClass('action-link-cell').append $('<a>',
-                tabIndex: -1
-                href: url
-              ).attr(title: tooltip).html html
-              @delegateEvents()
-            else
-              console.warn 'failed to get node action for url', url
-      catch e
-        console.error 'failed to get node action', e
+      findProjectOrWorkflow
+        workflowId: @model.get 'workflow_id'
+        nodeId: @model.get 'node_id'
+        actionId: @model.get 'action_id'
+        callback: ({workflow, node, action}) =>
+          if workflow and node and action
+            url = "##{workflow._name}/#{workflow.id}/node/#{node.id}/action/#{action.id}"
+            node_name = _.escape node.get 'name'
+            action_name = _.escape action.get('name') or action.get('context_type').replace(/_/, ' ').capitalize()
+            tooltip = "#{node_name}: #{action_name}"
+            html = "<span class='node-title'>#{node_name}</span>: #{action_name}"
+            @$el.addClass('action-link-cell').append $('<a>',
+              tabIndex: -1
+              href: url
+            ).attr(title: tooltip).html html
+            @delegateEvents()
+          else
+            console.warn 'failed to get node action for url', url
       @
 
   # single label tag
@@ -321,13 +338,14 @@ Projects
         @search switch query
           when 'all' then null
           when 'empty' then ''
-          else query
+          else
+            query
         last?.classList.remove 'active'
         a.parentElement.classList.add 'active'
       @
 
   class ProjectFilterView extends NavFilterView
-    field: 'project_id'
+    field: 'workflow_id'
     urlRoot: 'project'
     headerTitle: 'Projects'
     initialize: (options) ->
@@ -353,7 +371,7 @@ Projects
 
   class ManagerView extends InnerFrameView
     defaultFilterField: 'title'
-    _predefinedColumns: {
+    _predefinedColumns:
       checkbox:
       # name is a required parameter, but you don't really want one on a select all column
         name: ''
@@ -381,10 +399,10 @@ Projects
         label: 'Description'
         cell: 'string'
         editable: false
-      project:
-        name: 'project_id'
-        label: 'Project'
-        cell: 'project'
+      workflow:
+        name: 'workflow_id'
+        label: 'Project/Workflow'
+        cell: 'workflow'
         editable: false
       node_action:
         name: 'action'
@@ -422,7 +440,6 @@ Projects
         label: 'Date Updated'
         cell: 'readonly-datetime'
         editable: false
-    }
     _defaultEvents:
       'click .action-cell button[name]': '_action_cell'
       'click .action-buttons .btn': '_action_buttons'
@@ -548,7 +565,8 @@ Projects
       else
         console.log 'action', action
         @trigger action, @
-        @[action]?() # reload
+        _action = @[action]
+        _action?() # reload
       return
     _selection_changed: ->
       selected = @getSelected()
@@ -568,4 +586,5 @@ Projects
   ManagerView
   NavFilterView
   ProjectFilterView
+  findProjectOrWorkflow
   }

@@ -701,7 +701,7 @@ ProjectFilterView
         email: 'label-info icon-mail'
       editable: false
     ,
-      'project'
+      'workflow'
       'node_action'
     ,
       name: 'status'
