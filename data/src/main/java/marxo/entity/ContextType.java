@@ -1,9 +1,11 @@
 package marxo.entity;
 
 public enum ContextType {
-	FB_POST(FacebookPost.class),
-	SCHEDULE(Schedule.class),
-	TRIGGER(Trigger.class);
+	CREATE_PAGE(FacebookPost.class),
+	POST_FACEBOOK(FacebookPost.class),
+	SCHEDULE_EVENT(Schedule.class),
+	TRIGGER(Trigger.class),
+	GENERATE_REPORT(Trigger.class);
 	Class<? extends Context> contextClass;
 
 	private ContextType(Class<? extends Context> contextClass) {
