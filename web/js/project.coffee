@@ -110,7 +110,6 @@ Projects
     popup: (model, callback) ->
       data = model.toJSON()
       @model = model
-      @render() unless @rendered
       super data, callback
       select = @form.template_id
       select.disabled = true
