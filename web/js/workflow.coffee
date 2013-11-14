@@ -52,6 +52,39 @@ Action
 
   ## Workflow Manager
 
+  class TemplateWorkflowListView extends NavListView
+    auto: false
+    urlRoot: 'worklfow'
+    headerTitle: 'Template'
+    itemClassName: 'workflow-list-item'
+    collection: Workflows.workflows
+    defaultItem: null
+    allowEmpty: true
+    emptyItem: new Workflow id: 'new', name: 'Empty Workflow'
+    events:
+      'click': (e) ->
+        el = e.target
+        if el.tagName is 'A' and el.dataset.id
+          e.preventDefault()
+          @trigger 'select', el.dataset.id
+          false
+    _render: (models = @collection) ->
+      models = models.fullCollection if models.fullCollection
+      #console.log 'render models', models
+      fragments1 = document.createDocumentFragment()
+      fragments2 = document.createDocumentFragment()
+      models.forEach (model) =>
+        fragments = if model.has 'tenant_id' then fragments2 else fragments1
+        fragments.appendChild @_renderItem model
+      @el.appendChild fragments1
+      @el.appendChild @_renderHeader 'Workflows'
+      @el.appendChild fragments2
+      return
+    render: ->
+      @_clear()
+      @_render()
+      @
+
   class WorkflowManagerView extends ManagerView
     columns: [
       'checkbox'
@@ -66,18 +99,13 @@ Action
     ]
     collection: new Workflows
     defaultFilterField: 'name'
-    events:
-      'click #wf_template_list .wf_tempate a': (e) ->
-        e.preventDefault()
-        wf = e.target.href.match /#workflow:(\w+)/
-        console.log 'wf template clicked', wf
-        @create wf[1] if wf.length is 2
-        false
     initialize: (options) ->
       super options
+      @list = new TemplateWorkflowListView el: find 'ul.template-list', @el
       @creator = new WorkflowCreatorView el: '#workflow_creator', parent: @
       _remove = @remove.bind @
       @on remove: _remove, remove_selected: _remove
+      @list.on 'select', @create.bind @
       @
     create: (template_id) ->
       template_id = '' if not template_id or /^(?:new|empty)$/i.test template_id
@@ -108,6 +136,9 @@ Action
         @reload() if models.length >= @pageSize / 2
       #console.log 'delete', model, @
       @
+    render: ->
+      @list.fetch()
+      super
 
   class WorkflowCreatorView extends FormDialogView
     el: '#workflow_creator'
