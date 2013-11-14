@@ -7,10 +7,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Strings;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
 import java.util.regex.Pattern;
 
 // review: it's fucking weird that the entities are coupled with Jackson annotation.
@@ -28,13 +28,13 @@ public abstract class BasicEntity {
 	public String key;
 	@JsonIgnore
 	@Field(order = 50)
-	public Date createdDate = new Date();
+	public DateTime createdDate = new DateTime();
 	@JsonIgnore
 	@Field(order = 51)
 	public ObjectId createdByUserId;
 	@JsonIgnore
 	@Field(order = 52)
-	public Date modifiedDate = new Date();
+	public DateTime modifiedDate = new DateTime();
 	@JsonIgnore
 	@Field(order = 53)
 	public ObjectId modifiedByUserId;
@@ -47,12 +47,12 @@ public abstract class BasicEntity {
 	}
 
 	@JsonProperty("updated_at")
-	public Date getModifiedDate() {
+	public DateTime getModifiedDate() {
 		return modifiedDate;
 	}
 
 	@JsonProperty("created_at")
-	public Date getCreatedDate() {
+	public DateTime getCreatedDate() {
 		return createdDate;
 	}
 
@@ -84,14 +84,6 @@ public abstract class BasicEntity {
 
 		if (name == null) {
 			name = "";
-		}
-
-		if (createdDate == null) {
-			createdDate = new Date();
-		}
-
-		if (modifiedDate == null) {
-			modifiedDate = new Date();
 		}
 
 		if (key == null) {
