@@ -1,8 +1,10 @@
 package marxo.dao;
 
 import marxo.entity.Notification;
-import org.springframework.stereotype.Repository;
+import org.bson.types.ObjectId;
 
-@Repository
-public class NotificationDao extends BasicDao<Notification> {
+public class NotificationDao extends TenantChildDao<Notification> {
+	public NotificationDao(ObjectId tenantId) {
+		super(tenantId);
+	}
 }

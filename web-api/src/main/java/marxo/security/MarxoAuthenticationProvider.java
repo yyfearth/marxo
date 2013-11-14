@@ -20,7 +20,6 @@ import java.util.List;
 
 @Component
 public class MarxoAuthenticationProvider implements AuthenticationProvider, Loggable {
-	@Autowired
 	UserDao userDao;
 	@Autowired
 	PasswordEncryptor passwordEncryptor;
@@ -30,6 +29,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 		logger.debug("authenticating: " + authentication.toString());
 		String email = authentication.getName();
 
+		userDao = new UserDao();
 		List<User> users = userDao.getByEmail(email);
 
 		if (users.size() == 0) {

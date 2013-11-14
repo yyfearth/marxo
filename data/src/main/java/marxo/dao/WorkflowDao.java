@@ -7,12 +7,19 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.stereotype.Repository;
 
-@Repository
+import java.util.List;
+
 public class WorkflowDao extends TenantChildDao<Workflow> {
-	public WorkflowDao() {
-		super();
+	boolean isProject = false;
+
+	public WorkflowDao(ObjectId tenantId) {
+		super(tenantId);
+	}
+
+	public WorkflowDao(ObjectId tenantId, boolean isProject) {
+		super(tenantId);
+		this.isProject = isProject;
 	}
 
 	/**
@@ -29,5 +36,17 @@ public class WorkflowDao extends TenantChildDao<Workflow> {
 		Update update = Update.update("status", status);
 		WriteResult writeResult = mongoTemplate.updateFirst(Query.query(criteria), update, entityClass);
 		throwIfError(writeResult);
+	}
+
+	@Override
+	protected void processEntity(Workflow entity) {
+		entity.isProject = isProject;
+		super.processEntity(entity);
+	}
+
+	@Override
+	protected void processDataPairs(List<DataPair> dataPairs) {
+		dataPairs.add(new DataPair("isProject", isProject));
+		super.processDataPairs(dataPairs);
 	}
 }

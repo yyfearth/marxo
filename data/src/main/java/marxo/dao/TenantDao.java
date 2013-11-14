@@ -24,6 +24,7 @@ public class TenantDao extends BasicDao<Tenant> {
 		return data;
 	}
 
+	// todo: use a generalized way to do the shit.
 	public void removeFacebookData(ObjectId tenantId) {
 		Query query = Query.query(Criteria.where("id").is(tenantId));
 		Update update = Update.update("facebookData", null);

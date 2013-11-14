@@ -8,7 +8,6 @@
            http://www.springframework.org/schema/security/spring-security-3.1.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
     <context:annotation-config/>
     <context:component-scan base-package="marxo.security"/>
-    <context:component-scan base-package="marxo.dao"/>
 
     <http use-expressions="true" entry-point-ref="marxoAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
         <intercept-url pattern="/api/**" requires-channel="any" access="true" method="OPTIONS"/>

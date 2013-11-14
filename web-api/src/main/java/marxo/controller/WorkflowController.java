@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
+import marxo.dao.WorkflowChildDao;
 import marxo.dao.WorkflowDao;
 import marxo.entity.*;
 import org.bson.types.ObjectId;
@@ -16,9 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -26,81 +27,21 @@ import java.util.List;
 public class WorkflowController extends TenantChildController<Workflow> {
 	static final ModifiedDateComparator modifiedDateComparator = new ModifiedDateComparator();
 	@Autowired
-	NodeDao nodeDao;
-	@Autowired
-	LinkDao linkDao;
-	@Autowired
-	WorkflowDao workflowDao;
-	@Autowired
 	NodeController nodeController;
 	@Autowired
 	LinkController linkController;
 
-	@Autowired
-	public WorkflowController(WorkflowDao workflowDao) {
-		super(workflowDao);
-		this.workflowDao = workflowDao;
-	}
-
 	@Override
 	public void preHandle() {
 		super.preHandle();
-		nodeDao.setTenantId(user.tenantId);
-		linkDao.setTenantId(user.tenantId);
-	}
-
-	@RequestMapping(method = RequestMethod.GET)
-	@ResponseBody
-	public List<Workflow> search(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created, @RequestParam(value = "is_project", required = false) boolean isProject) {
-		boolean hasName = !Strings.isNullOrEmpty(name);
-		boolean hasCreated = created != null;
-		boolean hasModified = modified != null;
-		List<Workflow> workflows;
-
-//		if (!hasName && !hasCreated && !hasModified) {
-//			workflows = tenantChildDao.findAll();
-//			ArrayList<ObjectId> workflowIds = new ArrayList<>(workflows.size());
-//			for (Workflow workflow : workflows) {
-//				workflowIds.add(workflow.id);
-//			}
-//
-//			List<Node> nodes = nodeDao.searchByWorkflowIds(workflowIds);
-//			List<Link> links = linkDao.searchByWorkflowIds(workflowIds);
-//
-//			// Java really needs a kick-ass collection library for the following. I have used Guava for this, it still looks as bad as it could.
-//			// The following is for getting all nodes and links which match the workflow's ID.
-//			for (Workflow workflow : workflows) {
-//				WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
-//				Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
-//				workflow.nodes = Lists.newArrayList(workflowNodes);
-//				Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
-//				workflow.links = Lists.newArrayList(workflowLinks);
-//			}
-//
-//			Collections.sort(workflows, modifiedDateComparator);
-//			return workflows;
-//		}
-
-		// todo: implemented created and modified search APIs
-
-		if (hasName) {
-			workflows = workflowDao.searchByName(name);
-		} else if (isProject) {
-			workflows = workflowDao.search("isProject", true);
-		} else {
-			workflows = workflowDao.findAll();
-		}
-
-		Collections.sort(workflows, modifiedDateComparator);
-		return workflows;
+		dao = new WorkflowDao(user.tenantId);
 	}
 
 	@Override
 	public Workflow read(@PathVariable String idString) {
 		Workflow workflow = super.read(idString);
-
-		List<Node> nodes = nodeDao.searchByWorkflowId(workflow.id);
-		List<Link> links = linkDao.searchByWorkflowId(workflow.id);
+		List<Node> nodes = getAllEntities(NodeDao.class, workflow.id);
+		List<Link> links = getAllEntities(LinkDao.class, workflow.id);
 		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
 		Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
 		workflow.nodes = Lists.newArrayList(workflowNodes);
@@ -108,6 +49,47 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		workflow.links = Lists.newArrayList(workflowLinks);
 
 		return workflow;
+	}
+
+	/*
+	Search
+	 */
+
+//	@RequestMapping(method = RequestMethod.GET)
+//	@ResponseBody
+//	public List<Workflow> search(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
+//		boolean hasName = !Strings.isNullOrEmpty(name);
+//		boolean hasCreated = created != null;
+//		boolean hasModified = modified != null;
+//		List<Workflow> workflows;
+//
+//		// todo: implemented created and modified search APIs
+//
+//		if (hasName) {
+//			workflows = dao.findByName(name);
+//		} else {
+//			workflows = dao.find();
+//		}
+//
+//		Collections.sort(workflows, modifiedDateComparator);
+//		return workflows;
+//	}
+
+	@Override
+	public List<Workflow> search() {
+		String name = request.getParameter("name");
+		boolean hasName = !Strings.isNullOrEmpty(name);
+
+		List<Workflow> workflows;
+
+		if (hasName) {
+			workflows = dao.findByName(name);
+		} else {
+			workflows = dao.find();
+		}
+
+		Collections.sort(workflows, modifiedDateComparator);
+		return workflows;
 	}
 
 	/*
@@ -123,7 +105,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Node> readAllNodes(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		return nodeDao.searchByWorkflowId(workflowId);
+		return getAllEntities(NodeDao.class, workflowId);
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.POST)
@@ -172,7 +154,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Link> readAllLinks(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		return linkDao.searchByWorkflowId(workflowId);
+		return getAllEntities(LinkDao.class, workflowId);
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.POST)
@@ -210,6 +192,31 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Link deleteLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
 		return linkController.delete(linkIdString);
+	}
+
+	/*
+	Utilities
+	 */
+
+//	private List<Node> getAllNodes(ObjectId workflowId) {
+//		NodeDao nodeDao = new NodeDao(workflowId, user.tenantId);
+//		return nodeDao.findAll();
+//	}
+//
+//	private List<Link> getAllLinks(ObjectId workflowId) {
+//		LinkDao linkDao = new LinkDao(workflowId, user.tenantId);
+//		return linkDao.findAll();
+//	}
+
+	// Why am I doing this? Just for fun...
+	<Entity extends WorkflowChildEntity> List<Entity> getAllEntities(Class<? extends WorkflowChildDao> daoClass, ObjectId workflowId) {
+		try {
+			WorkflowChildDao workflowChildDao = daoClass.getDeclaredConstructor(ObjectId.class, ObjectId.class).newInstance(workflowId, user.tenantId);
+			return workflowChildDao.find();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 }
 

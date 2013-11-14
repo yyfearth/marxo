@@ -1,15 +1,26 @@
 package marxo.dao;
 
 import marxo.entity.User;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Repository
 public class UserDao extends TenantChildDao<User> {
+	public UserDao(ObjectId tenantId) {
+		super(tenantId);
+	}
+
+	public UserDao() {
+		super(null);
+	}
+
 	public List<User> getByEmail(String email) {
-		return mongoTemplate.find(Query.query(Criteria.where("email").is(email.toLowerCase())), User.class);
+		email = email.toLowerCase();
+		return find(Arrays.asList(
+				new DataPair("email", email)
+		));
 	}
 }

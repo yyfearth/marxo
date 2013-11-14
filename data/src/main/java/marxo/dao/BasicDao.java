@@ -3,24 +3,24 @@ package marxo.dao;
 import com.google.common.base.Strings;
 import com.mongodb.WriteResult;
 import marxo.entity.BasicEntity;
-import marxo.entity.Workflow;
 import marxo.exception.DatabaseException;
 import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
-@Repository
-public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
+public abstract class BasicDao<Entity extends BasicEntity> {
 	static protected ApplicationContext context;
 	static protected MongoTemplate mongoTemplate;
 
@@ -29,37 +29,37 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 		mongoTemplate = (MongoTemplate) new ClassPathXmlApplicationContext("classpath*:mongo-configuration.xml").getBean("mongoTemplate");
 	}
 
-	protected Class<E> entityClass;
+	protected Class<Entity> entityClass;
 
 	public BasicDao() {
-		this.entityClass = (Class<E>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		this.entityClass = (Class<Entity>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
 
-	public Criteria getFilterCriteria() {
-		return new Criteria();
-	}
-
-	@Override
-	public boolean exists(ObjectId id) {
-		return mongoTemplate.exists(Query.query(getFilterCriteria().and("id").is(id)), entityClass);
-	}
-
-	@Override
-	public long count() {
-		return mongoTemplate.count(Query.query(getFilterCriteria()), entityClass);
+	/**
+	 * Chain all filter with And Operator and create a Update object.
+	 * Return empty update if daoFilters is null.
+	 */
+	protected Update dataPairsToUpdate(List<DataPair> dataPairs) {
+		Update update = new Update();
+		if (dataPairs != null) {
+			for (DataPair dataPair : dataPairs) {
+				update = update.set(dataPair.field, dataPair.value);
+			}
+		}
+		return update;
 	}
 
 	/*
 	Create
 	 */
 
-	@Override
-	public void insert(E entity) {
+	public void insert(Entity entity) {
+		processEntities(Arrays.asList(entity));
 		mongoTemplate.insert(entity);
 	}
 
-	@Override
-	public void insert(List<E> entities) {
+	public void insert(List<Entity> entities) {
+		processEntities(entities);
 		mongoTemplate.insert(entities, entityClass);
 	}
 
@@ -67,75 +67,147 @@ public abstract class BasicDao<E extends BasicEntity> implements IEntityDao<E> {
 	Read
 	 */
 
-	@Override
-	public List<E> findAll() {
-		return mongoTemplate.find(Query.query(getFilterCriteria()), entityClass);
+	public Entity get(List<DataPair> dataPairs) {
+		processDataPairs(dataPairs);
+		Query query = Query.query(dataPairsToCriteria(dataPairs));
+		return mongoTemplate.findOne(query, entityClass);
 	}
 
-	@Override
-	public E get(ObjectId id) {
-		Criteria criteria = getFilterCriteria();
-		Query query = Query.query(criteria.and("id").is(id));
-		return mongoTemplate.findOne(query, entityClass);
+	public Entity get(ObjectId id) {
+		return get(Arrays.asList(
+				new DataPair("id", id)
+		));
+	}
+
+	public List<Entity> find(List<DataPair> dataPairs) {
+		processDataPairs(dataPairs);
+		Query query = Query.query(dataPairsToCriteria(dataPairs));
+		return mongoTemplate.find(query, entityClass);
+	}
+
+	public List<Entity> find(String field, Object value) {
+		return find(Arrays.asList(
+				new DataPair(field, value)
+		));
+	}
+
+	public List<Entity> find() {
+		return find(new ArrayList<DataPair>());
+	}
+
+	/**
+	 * Search the collection where the entity's name partially matched.
+	 */
+	public List<Entity> findByName(String name) {
+		return find(Arrays.asList(
+				new DataPair("name", DataPairOperator.LIKE, name)
+		));
 	}
 
 	/*
 	Update
 	 */
 
-	@Override
-	public void save(E entity) {
+	public void save(Entity entity) {
+		processEntities(Arrays.asList(entity));
 		mongoTemplate.save(entity);
 	}
 
-	public void updateField(String criteriaField, Object criteriaValue, String updateField, Object updateValue) {
-		Criteria criteria = Criteria.where(criteriaField).is(criteriaValue);
-		Update update = Update.update(updateField, updateValue);
-		throwIfError(mongoTemplate.updateFirst(Query.query(criteria), update, entityClass));
+	public void update(List<DataPair> criteriaList, List<DataPair> updateList) {
+		processDataPairs(criteriaList);
+		throwIfError(mongoTemplate.updateFirst(Query.query(dataPairsToCriteria(criteriaList)), dataPairsToUpdate(updateList), entityClass));
 	}
 
 	/*
 	Delete
 	 */
 
-	@Override
-	public E deleteById(ObjectId id) {
-		return mongoTemplate.findAndRemove(Query.query(getFilterCriteria().and("id").is(id)), entityClass);
+	public Entity delete(List<DataPair> dataPairs) {
+		processDataPairs(dataPairs);
+		return mongoTemplate.findAndRemove(Query.query(dataPairsToCriteria(dataPairs)), entityClass);
+	}
+
+	public Entity deleteById(ObjectId id) {
+		return delete(Arrays.asList(
+				new DataPair("id", id)
+		));
 	}
 
 	/*
-	Search
+	Utilities
 	 */
 
-	public List<E> search(String field, Object value) {
-		Criteria criteria = getFilterCriteria().andOperator(Criteria.where(field).is(value));
-		return mongoTemplate.find(Query.query(criteria), entityClass);
+	public boolean exists(List<DataPair> dataPairs) {
+		processDataPairs(dataPairs);
+		Query query = Query.query(dataPairsToCriteria(dataPairs));
+		return mongoTemplate.exists(query, entityClass);
 	}
 
-	public List<E> searchByWorkflowId(ObjectId workflowId) {
-		return mongoTemplate.find(Query.query(getFilterCriteria().and("workflowId").is(workflowId)), entityClass);
+	public boolean exists(ObjectId id) {
+		return exists(Arrays.asList(
+				new DataPair("id", id)
+		));
+	}
+
+	public long count(List<DataPair> dataPairs) {
+		processDataPairs(dataPairs);
+		Query query = Query.query(dataPairsToCriteria(dataPairs));
+		return mongoTemplate.count(query, entityClass);
+	}
+
+	public long count() {
+		return count(new ArrayList<DataPair>());
 	}
 
 	/**
-	 * Search the collection where the entity's name partially matched.
+	 * Chain all filter with And Operator and create a Criteria object.
+	 * Return empty criteria if daoFilters is null.
 	 */
-	@Override
-	public List<Workflow> searchByName(String name) {
-		if (Strings.isNullOrEmpty(name)) {
-			return new ArrayList<>();
+	protected Criteria dataPairsToCriteria(List<DataPair> dataPairs) {
+		Criteria criteria = new Criteria();
+		for (DataPair dataPair : dataPairs) {
+			switch (dataPair.operator) {
+				case IN:
+					criteria = criteria.and(dataPair.field).in(dataPair.value);
+					break;
+				case LIKE:
+					String escapedName = StringTool.escapePatternCharacters(dataPair.value.toString());
+					Pattern pattern = Pattern.compile(".*" + escapedName + ".*", Pattern.CASE_INSENSITIVE);
+					criteria = criteria.and(dataPair.field).regex(pattern);
+					break;
+				case IS:
+					criteria = criteria.and(dataPair.field).is(dataPair.value);
+					break;
+			}
 		}
-		String escapedName = StringTool.escapePatternCharacters(name);
-		return mongoTemplate.find(Query.query(getFilterCriteria().and("name").regex(".*" + escapedName + ".*")), Workflow.class);
+		return criteria;
 	}
 
-	/*
-	Error handling
-	 */
-
-	public void throwIfError(WriteResult writeResult) {
+	protected void throwIfError(WriteResult writeResult) {
 		String error = writeResult.getError();
 		if (!Strings.isNullOrEmpty(error)) {
 			throw new DatabaseException(error);
 		}
+	}
+
+	/**
+	 * The method will be called before construct the real database query.
+	 *
+	 * @param entity The entity to be used for database query.
+	 */
+	protected void processEntity(Entity entity) {
+		entity.modifiedDate = new DateTime();
+	}
+
+	private void processEntities(List<Entity> entities) {
+		for (Entity entity : entities) {
+			processEntity(entity);
+		}
+	}
+
+	/**
+	 * The method will be called before construct the real database query.
+	 */
+	protected void processDataPairs(List<DataPair> dataPairs) {
 	}
 }

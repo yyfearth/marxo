@@ -1,8 +1,14 @@
 package marxo.dao;
 
 import marxo.entity.Link;
-import org.springframework.stereotype.Repository;
+import org.bson.types.ObjectId;
 
-@Repository
 public class LinkDao extends WorkflowChildDao<Link> {
+	public LinkDao(ObjectId workflowId, ObjectId tenantId) {
+		super(workflowId, tenantId);
+	}
+
+	public LinkDao(ObjectId tenantId) {
+		super(tenantId);
+	}
 }

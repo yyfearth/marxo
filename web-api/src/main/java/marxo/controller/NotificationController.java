@@ -12,15 +12,10 @@ import java.util.List;
 
 @Controller
 @RequestMapping("notification{:s?}")
-public class NotificationController extends EntityController<Notification> {
-	@Autowired
-	public NotificationController(NotificationDao dao) {
-		super(dao);
-	}
-
-	@RequestMapping(method = RequestMethod.GET)
-	@ResponseBody
-	public List<Notification> search() {
-		return dao.findAll();
+public class NotificationController extends TenantChildController<Notification> {
+	@Override
+	public void preHandle() {
+		super.preHandle();
+		dao = new NotificationDao(user.tenantId);
 	}
 }

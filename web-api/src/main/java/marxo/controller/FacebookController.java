@@ -18,9 +18,8 @@ import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/service{:s?}/facebook")
-public class FacebookController extends BasicController implements InterceptorPreHandlable {
+public class FacebookController implements InterceptorPreHandlable {
 	User user;
-	@Autowired
 	TenantDao tenantDao;
 
 	@Override
@@ -28,6 +27,7 @@ public class FacebookController extends BasicController implements InterceptorPr
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		Assert.notNull(marxoAuthentication);
 		user = marxoAuthentication.getUser();
+		tenantDao = new TenantDao();
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
