@@ -239,7 +239,6 @@ Projects
         shared = document.createElement 'optgroup'
         shared.label = 'Shared Workflows'
         wfs.forEach (wf) ->
-          # TODO: the id should be current logined
           op = document.createElement 'option'
           op.value = wf.id
           op.textContent = wf.get 'name'

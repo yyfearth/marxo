@@ -565,8 +565,7 @@ Workflows
       else
         console.log 'action', action
         @trigger action, @
-        _action = @[action]
-        _action?() # reload
+        @[action]?() # reload
       return
     _selection_changed: ->
       selected = @getSelected()
