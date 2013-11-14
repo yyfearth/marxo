@@ -36,9 +36,9 @@ Projects
           @switchTo @manager
         else
           throw new Error 'open project with a name or id is needed' unless name
-          Projects.find projectId: name, callback: ({project}) =>
-            throw new Error "project with id #{name} cannot found" unless project
-            @editor.edit project, sub
+          Projects.find workflowId: name, callback: ({workflow}) =>
+            throw new Error "project with id #{name} cannot found" unless workflow
+            @editor.edit workflow, sub
       # @switchTo @viewer
       # @viewer.load project
       # @viewer.focus sub
@@ -365,26 +365,20 @@ Projects
     render: ->
       @$el.empty()
       id = @model.get('template_id')
-      _render = (wf) =>
-        name = _.escape wf.get 'name'
-        @$el.addClass('workflow-link-cell').append $('<a>',
-          tabIndex: -1
-          href: '#workflow/' + id
-        ).attr('title', name).text name
-        @delegateEvents()
-      _callback = (wfs) ->
-        wf = wfs.get id
-        if wf
-          _render wf
+      unless id
+        console.warn 'workflow cell cannot find template_id for project',  @model
+        @$el.text '(None)'
+      else @collection.find workflowId: id, callback: ({workflow}) =>
+        if workflow
+          name = _.escape workflow.get 'name'
+          @$el.addClass('workflow-link-cell').append $('<a>',
+            tabIndex: -1
+            href: '#workflow/' + id
+          ).attr('title', name).text name
+          @delegateEvents()
         else
-          wf = new Workflow id: id
-          wf.fetch success: _render
-      unless @collection.length
-        @collection.fetch success: (wfs) ->
-          wfs._last_load = Date.now()
-          _callback wfs
-      else
-        _callback @collection
+          console.warn 'failed to find workflow with id', id, @model
+          @$el.text '(Unknown)'
       @
 
   class ProjectActionCell extends Backgrid.ActionsCell

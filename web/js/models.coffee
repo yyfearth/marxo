@@ -82,6 +82,7 @@ define 'models', ['module', 'lib/common'], (module) ->
 #    url: '/users'
 
   class Publishers extends ManagerCollection
+    @publishers: new Publishers
     model: Publisher
     url: Publisher::urlRoot
 
@@ -319,9 +320,36 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class Workflows extends ManagerCollection
     @workflows: new Workflows
+    @find: (options) ->
+      unless @workflows.length
+        @workflows.load (wfs) ->
+          wfs.find options
+      else
+        @workflows.find options
+      @workflows
     model: Workflow
     url: Workflow::urlRoot
     _delay: 600000 # 10 min
+    find: ({workflowId, nodeId, linkId, actionId, callback}) ->
+      throw new Error 'workflowId is required' unless workflowId
+      workflow = @get workflowId
+      _find = (workflow) ->
+        if nodeId or linkId or actionId
+          workflow.find {
+            nodeId, linkId, actionId
+            callback: (results) ->
+              results.workflow = workflow
+              callback? results
+          }
+        else
+          callback? {workflow}
+      if workflow
+        _find workflow
+      else
+        new @model(id: workflowId).fetch
+          success: _find
+          error: -> callback? {}
+      @
 
   class ChangeObserableEntity extends Entity
     constructor: (model, options) ->
@@ -376,7 +404,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     _name: 'project'
     urlRoot: ROOT + '/projects'
 
-  class Projects extends ManagerCollection
+  class Projects extends Workflows
     @projects: new Projects
     @find: (options) ->
       unless @projects.length
@@ -388,26 +416,6 @@ define 'models', ['module', 'lib/common'], (module) ->
     model: Project
     url: Project::urlRoot
     _delay: 60000 # 1 min
-    find: ({projectId, nodeId, linkId, actionId, callback}) ->
-      throw new Error 'projectId is required' unless projectId
-      project = @get projectId
-      _find = (project) ->
-        if nodeId or linkId or actionId
-          project.find {
-            nodeId, linkId, actionId
-            callback: (results) ->
-              results.project = project
-              callback? results
-          }
-        else
-          callback? {project}
-      if project
-        _find project
-      else
-        new Project(id: projectId).fetch
-          success: _find
-          error: -> callback? {}
-      @
 
   ## Home
 

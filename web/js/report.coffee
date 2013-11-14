@@ -44,7 +44,7 @@ ProjectFilterView
 #      cell: 'string'
 #      editable: false
 #    ,
-      'project'
+      'workflow'
       'node_action'
       'status'
       'created_at'
