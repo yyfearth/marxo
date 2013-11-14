@@ -4,6 +4,7 @@ import marxo.entity.User;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class UserDao extends TenantChildDao<User> {
 
 	public List<User> getByEmail(String email) {
 		email = email.toLowerCase();
-		return find(Arrays.asList(
+		return find(new ArrayList<>(Arrays.asList(
 				new DataPair("email", email)
-		));
+		)));
 	}
 }

@@ -54,7 +54,7 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	 */
 
 	public void insert(Entity entity) {
-		processEntities(Arrays.asList(entity));
+		processEntities(new ArrayList<>(Arrays.asList(entity)));
 		mongoTemplate.insert(entity);
 	}
 
@@ -74,9 +74,9 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	}
 
 	public Entity get(ObjectId id) {
-		return get(Arrays.asList(
+		return get(new ArrayList<>(Arrays.asList(
 				new DataPair("id", id)
-		));
+		)));
 	}
 
 	public List<Entity> find(List<DataPair> dataPairs) {
@@ -86,9 +86,9 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	}
 
 	public List<Entity> find(String field, Object value) {
-		return find(Arrays.asList(
+		return find(new ArrayList<>(Arrays.asList(
 				new DataPair(field, value)
-		));
+		)));
 	}
 
 	public List<Entity> find() {
@@ -99,9 +99,9 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	 * Search the collection where the entity's name partially matched.
 	 */
 	public List<Entity> findByName(String name) {
-		return find(Arrays.asList(
+		return find(new ArrayList<>(Arrays.asList(
 				new DataPair("name", DataPairOperator.LIKE, name)
-		));
+		)));
 	}
 
 	/*
@@ -109,7 +109,7 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	 */
 
 	public void save(Entity entity) {
-		processEntities(Arrays.asList(entity));
+		processEntities(new ArrayList<>(Arrays.asList(entity)));
 		mongoTemplate.save(entity);
 	}
 
@@ -128,9 +128,9 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	}
 
 	public Entity deleteById(ObjectId id) {
-		return delete(Arrays.asList(
+		return delete(new ArrayList<>(Arrays.asList(
 				new DataPair("id", id)
-		));
+		)));
 	}
 
 	/*
@@ -144,9 +144,9 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	}
 
 	public boolean exists(ObjectId id) {
-		return exists(Arrays.asList(
+		return exists(new ArrayList<>(Arrays.asList(
 				new DataPair("id", id)
-		));
+		)));
 	}
 
 	public long count(List<DataPair> dataPairs) {
