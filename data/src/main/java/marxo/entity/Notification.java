@@ -1,4 +1,4 @@
 package marxo.entity;
 
-public class Notification extends BasicEntity {
+public class Notification extends TenantChildEntity {
 }

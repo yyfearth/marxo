@@ -40,12 +40,12 @@ public class Workflow extends TenantChildEntity {
 
 	@JsonProperty("nodes")
 	public List<Node> getNodes() {
-		return nodes;
+		return (nodes == null) ? new ArrayList<Node>() : nodes;
 	}
 
 	@JsonProperty("links")
 	public List<Link> getLinks() {
-		return links;
+		return (links == null) ? new ArrayList<Link>() : links;
 	}
 
 	public void fillWithDefaultValues() {

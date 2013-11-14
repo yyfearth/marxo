@@ -2,7 +2,7 @@ package marxo.dev;
 
 import com.rits.cloning.Cloner;
 import marxo.entity.*;
-import marxo.tool.ILoggable;
+import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
 import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
@@ -14,12 +14,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AdvancedGenerator extends BasicGenerator implements ILoggable {
+public class AdvancedGenerator extends BasicGenerator implements Loggable {
 	public static void main(String[] args) {
 		ApplicationContext dataContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 		MongoTemplate mongoTemplate = dataContext.getBean(MongoTemplate.class);
@@ -109,10 +108,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 					workflow.name = "Alpha";
 				} else {
 					workflow.name = "Beta";
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(workflow.modifiedDate);
-					calendar.add(Calendar.HOUR, threadLocalRandom.nextInt(-12, 13));
-					workflow.modifiedDate = calendar.getTime();
+					workflow.modifiedDate.plusHours(threadLocalRandom.nextInt(-12, 13));
 				}
 				workflow.name += " Workflow " + i;
 
@@ -205,7 +201,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Announce the requirement";
-				action.contextType = ContextType.FB_POST;
+				action.contextType = ContextType.POST_FACEBOOK;
 
 				facebookPost = new FacebookPost();
 				facebookPost.content = "This is requirement.";
@@ -217,7 +213,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the submissions";
-				action.contextType = ContextType.SCHEDULE;
+				action.contextType = ContextType.SCHEDULE_EVENT;
 
 				schedule = new Schedule();
 				schedule.duration = Days.days(1).toStandardDuration();
@@ -228,7 +224,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Open for voting";
-				action.contextType = ContextType.FB_POST;
+				action.contextType = ContextType.POST_FACEBOOK;
 
 				facebookPost = new FacebookPost();
 				facebookPost.content = "Please vote the design.";
@@ -240,7 +236,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the votes";
-				action.contextType = ContextType.SCHEDULE;
+				action.contextType = ContextType.SCHEDULE_EVENT;
 
 				schedule = new Schedule();
 				schedule.duration = Days.days(1).toStandardDuration();
@@ -277,7 +273,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Announce the client requirement";
-				action.contextType = ContextType.FB_POST;
+				action.contextType = ContextType.POST_FACEBOOK;
 
 				facebookPost = new FacebookPost();
 				facebookPost.content = "Please design the client";
@@ -289,7 +285,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the client submissions";
-				action.contextType = ContextType.SCHEDULE;
+				action.contextType = ContextType.SCHEDULE_EVENT;
 
 				schedule = new Schedule();
 				schedule.duration = Days.days(1).toStandardDuration();
@@ -326,7 +322,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Announce the server requirement";
-				action.contextType = ContextType.FB_POST;
+				action.contextType = ContextType.POST_FACEBOOK;
 
 				facebookPost = new FacebookPost();
 				facebookPost.content = "Please design the server";
@@ -338,7 +334,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Wait for the server submissions";
-				action.contextType = ContextType.SCHEDULE;
+				action.contextType = ContextType.SCHEDULE_EVENT;
 
 				schedule = new Schedule();
 				schedule.duration = Days.days(1).toStandardDuration();
@@ -376,7 +372,7 @@ public class AdvancedGenerator extends BasicGenerator implements ILoggable {
 				action = new Action();
 				node.actions.add(action);
 				action.name = "Post result to Facebook";
-				action.contextType = ContextType.FB_POST;
+				action.contextType = ContextType.POST_FACEBOOK;
 
 				facebookPost = new FacebookPost();
 				facebookPost.content = "Please design the client";

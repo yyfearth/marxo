@@ -13,6 +13,9 @@ public class StringTool {
 	}
 
 	public static String escapePatternCharacters(String patternString) {
+		if (patternString == null) {
+			return null;
+		}
 		return patternString.replaceAll(regexEscapeString, "\\\\$1");
 	}
 
