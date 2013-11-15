@@ -3,7 +3,6 @@ package marxo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.MediaType;
 import marxo.entity.Workflow;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -55,22 +54,18 @@ public class WebApiTests {
 
 	@Test
 	public void getWorkflows() throws Exception {
-		HttpGet request = new HttpGet("http://localhost:8080/api/workflows");
-		Header header = getAuthorizationHeader("yyfearth@gmail.com", "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8");
-
 		try (Tester tester = new Tester()) {
-			tester.httpGet("http://localhost:8080/api/workflows").basicAuth("yyfearth@gmail.com", "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8").send();
-			tester.isOk().matchContentType(MediaType.JSON_UTF_8);
+			tester
+					.httpGet("http://localhost:8080/api/workflows")
+					.basicAuth("yyfearth@gmail.com", "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8")
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
 			String content = tester.getContent();
 			List<Workflow> workflows = objectMapper.readValue(content, ArrayList.class);
 			assert workflows != null;
 		}
-	}
-
-	public BasicHeader getAuthorizationHeader(String username, String password) {
-		String credentialString = username + ":" + password;
-		String credential = DatatypeConverter.printBase64Binary(credentialString.getBytes());
-		return new BasicHeader("Authorization", "Basic " + credential);
 	}
 }
 
