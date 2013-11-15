@@ -94,6 +94,8 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 		{
 			for (int i = 1; i <= 5; i++) {
 				Workflow workflow = new Workflow();
+				workflow.name += " Workflow " + i;
+				workflow.fillWithDefaultValues();
 				workflows.add(workflow);
 
 				workflow.description = StringTool.getRandomString(120);
@@ -110,9 +112,6 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					workflow.name = "Beta";
 					workflow.modifiedDate.plusHours(threadLocalRandom.nextInt(-12, 13));
 				}
-				workflow.name += " Workflow " + i;
-
-				workflow.fillWithDefaultValues();
 
 				// Nodes
 				int numNodes = threadLocalRandom.nextInt(2, 8);

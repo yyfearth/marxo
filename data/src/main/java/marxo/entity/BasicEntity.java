@@ -1,6 +1,5 @@
 package marxo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -19,47 +18,57 @@ import java.util.regex.Pattern;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BasicEntity {
 	static Pattern pattern = Pattern.compile("");
-	@Id
-	@JsonIgnore
-	public ObjectId id;
 	@Field(order = 3)
 	public String name;
+	@Id
+	@JsonProperty("id")
+//	@JsonIgnore
+	public ObjectId id;
 	@Field(order = 4)
 	public String key;
-	@JsonIgnore
+	//	@JsonIgnore
 	@Field(order = 50)
-	public DateTime createdDate = new DateTime();
-	@JsonIgnore
+	@JsonProperty("created_at")
+	public DateTime createdDate;
+	//	@JsonIgnore
+	@Field(order = 52)
+	@JsonProperty("updated_at")
+	public DateTime modifiedDate;
+	//	@JsonIgnore
+	@JsonProperty("created_by")
 	@Field(order = 51)
 	public ObjectId createdByUserId;
-	@JsonIgnore
-	@Field(order = 52)
-	public DateTime modifiedDate = new DateTime();
-	@JsonIgnore
+	//	@JsonIgnore
 	@Field(order = 53)
+	@JsonProperty("modified_by")
 	public ObjectId modifiedByUserId;
 	@JsonProperty("desc")
 	public String description;
 
-	@JsonProperty("modified_by")
-	public ObjectId getModifiedByUserId() {
-		return modifiedByUserId;
-	}
+//	@JsonProperty("modified_by")
+//	public ObjectId getModifiedByUserId() {
+//		return modifiedByUserId;
+//	}
+//
+//	@JsonProperty("updated_at")
+//	public DateTime getModifiedDate() {
+//		return modifiedDate;
+//	}
+//
+//	@JsonProperty("created_at")
+//	public DateTime getCreatedDate() {
+//		return createdDate;
+//	}
 
-	@JsonProperty("updated_at")
-	public DateTime getModifiedDate() {
-		return modifiedDate;
-	}
+//	@JsonProperty("id")
+//	public ObjectId getId() {
+//		return id;
+//	}
 
-	@JsonProperty("created_at")
-	public DateTime getCreatedDate() {
-		return createdDate;
-	}
-
-	@JsonProperty("id")
-	public ObjectId getId() {
-		return id;
-	}
+//	@JsonProperty("created_by")
+//	public String getJsonCreatedByUserId() {
+//		return (createdByUserId == null) ? null : createdByUserId.toString();
+//	}
 
 	@JsonProperty("object_type")
 	public String getObjectType() {
@@ -70,11 +79,6 @@ public abstract class BasicEntity {
 		}
 
 		return aClass.getSimpleName();
-	}
-
-	@JsonProperty("created_by")
-	public String getJsonCreatedByUserId() {
-		return (createdByUserId == null) ? null : createdByUserId.toString();
 	}
 
 	public void fillWithDefaultValues() {
@@ -90,6 +94,14 @@ public abstract class BasicEntity {
 			if (!Strings.isNullOrEmpty(name)) {
 				key = name.replaceAll("[^\\w]+", "_").toLowerCase();
 			}
+		}
+
+		if (createdDate == null) {
+			createdDate = DateTime.now();
+		}
+
+		if (modifiedDate == null) {
+			modifiedDate = DateTime.now();
 		}
 	}
 }

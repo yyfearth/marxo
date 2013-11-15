@@ -30,12 +30,12 @@ public class Workflow extends TenantChildEntity {
 
 	@JsonProperty("link_ids")
 	public List<ObjectId> getLinkIds() {
-		return linkIds;
+		return (linkIds == null) ? new ArrayList<ObjectId>() : linkIds;
 	}
 
 	@JsonProperty("node_ids")
 	public List<ObjectId> getNodeIds() {
-		return nodeIds;
+		return (nodeIds == null) ? new ArrayList<ObjectId>() : nodeIds;
 	}
 
 	@JsonProperty("nodes")
