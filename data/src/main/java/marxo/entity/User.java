@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.regex.Pattern;
 
 /**
- * Note that it implements Serializable since it seems that Spring Security will serialize it. And it pops out warning even it's fully serializable without the interfact.
+ * Note that it implements Serializable since it seems that Spring Security will serialize it. And it pops out warning even it's fully serializable without the interface.
  */
 public class User extends TenantChildEntity implements Serializable {
 	public final static Pattern emailPattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
