@@ -1,4 +1,5 @@
-.node { // shared by workflow and sidebar
+.node {
+  // shared by workflow and sidebar
   border: 1px solid #346789;
   -webkit-box-shadow: 2px 2px 13px #aaa;
   -moz-box-shadow: 2px 2px 13px #aaa;
@@ -70,7 +71,8 @@
   .endpoint {
     z-index: 22;
     cursor: move;
-    &:after { // for padding
+    &:after {
+      // for padding
       position: absolute;
       visibility: hidden;
       content: ' ';
@@ -189,5 +191,41 @@
   #wf_preview {
     height: 150px;
     margin-bottom: 10px;
+
+    svg {
+      cursor: default;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+
+      line.link {
+        fill: none;
+        stroke: #000;
+        stroke-width: 4px;
+        cursor: pointer;
+        &.selected {
+          stroke-width: 6px;
+        }
+      }
+
+      circle.node {
+        stroke-width: 1.5px;
+        cursor: pointer;
+        &.reflexive {
+          stroke: #000 !important;
+          stroke-width: 2.5px;
+        }
+      }
+
+      text.label {
+        font: 12px sans-serif;
+        pointer-events: none;
+      }
+
+      text.id {
+        text-anchor: middle;
+        font-weight: bold;
+      }
+    }
   }
 }

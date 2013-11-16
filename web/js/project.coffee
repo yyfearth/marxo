@@ -210,6 +210,51 @@ Projects
         links.appendChild _renderSidebarItem link
       $sidebar.find('.node-header').after nodes
       $sidebar.find('.link-header').after links
+
+      @_drawWorkflow project
+      return
+    _drawWorkflow: (wf) -> require ['lib/d3v3'], (d3) =>
+      data =
+        nodes: wf.nodes.map (node, i) ->
+          node._idx = i
+          offset = node.get('offset') or x: 0, y: 0
+          x: 10 + offset.x / 2
+          y: 3 + offset.y / 2
+          fixed: true
+        links: wf.links.map (link) ->
+          source: link.prevNode._idx
+          target: link.nextNode._idx
+      console.log 'wf data', data
+      tick = ->
+        link.attr('x1', (d) ->
+          d.source.x
+        ).attr('y1', (d) ->
+          d.source.y
+        ).attr('x2', (d) ->
+          d.target.x
+        ).attr 'y2', (d) ->
+          d.target.y
+
+        node.attr('cx', (d) -> d.x ).attr('cy', (d) -> d.y)
+
+      width = @$wfPreview.innerWidth()
+      height = @$wfPreview.innerHeight()
+
+      force = d3.layout.force().size([width, height]).charge(-400).linkDistance(100).on('tick', tick)
+      svg = d3.select('#wf_preview').html('').append('svg').attr('width', width).attr('height', height)
+      svg.append('svg:defs').append('svg:marker')
+      .attr('id', 'end-arrow')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 6)
+      .attr('markerWidth', 4)
+      .attr('markerHeight', 4)
+      .attr('orient', 'auto')
+      .append('svg:path')
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', '#000')
+      force.nodes(data.nodes).links(data.links).start()
+      link = svg.selectAll('.link').data(data.links).enter().append('line').attr('class', 'link').style('marker-end', 'url(#end-arrow)')
+      node = svg.selectAll('.node').data(data.nodes).enter().append('circle').attr('class', 'node').attr('r', 12).call force.drag()
       return
     _renderSidebarItem: (model) ->
       el = document.createElement 'li'
