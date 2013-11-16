@@ -1,6 +1,7 @@
-package marxo.entity;
+package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import marxo.entity.BasicEntity;
 import org.bson.types.ObjectId;
 
 public class Context extends BasicEntity {

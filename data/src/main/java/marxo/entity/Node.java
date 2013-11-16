@@ -1,6 +1,7 @@
 package marxo.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import marxo.entity.action.Action;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 

@@ -2,6 +2,7 @@ package marxo.dev;
 
 import com.rits.cloning.Cloner;
 import marxo.entity.*;
+import marxo.entity.action.*;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
 import marxo.tool.StringTool;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+@SuppressWarnings("unchecked")
 public class AdvancedGenerator extends BasicGenerator implements Loggable {
 	public static void main(String[] args) {
 		ApplicationContext dataContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");

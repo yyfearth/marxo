@@ -1,4 +1,9 @@
-package marxo.entity;
+package marxo.entity.action;
+
+import marxo.entity.Schedule;
+import marxo.entity.action.Context;
+import marxo.entity.action.FacebookPost;
+import marxo.entity.action.Trigger;
 
 public enum ContextType {
 	CREATE_PAGE(FacebookPost.class),
