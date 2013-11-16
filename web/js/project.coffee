@@ -210,6 +210,84 @@ Projects
         links.appendChild _renderSidebarItem link
       $sidebar.find('.node-header').after nodes
       $sidebar.find('.link-header').after links
+
+      @_drawWorkflow project
+      return
+    _drawWorkflow: (wf) -> require ['lib/d3v3'], (d3) =>
+      r = 20
+      w = @$wfPreview.innerWidth()
+      h = @$wfPreview.innerHeight()
+      ++r
+      data =
+        nodes: wf.nodes.map (node, i) ->
+          node._idx = i
+          offset = node.get('offset') or x: 0, y: 0
+          x = r + Math.round(offset.x / r / 2) * r
+          y = r + Math.round(offset.y / r / 2) * r
+          w = x if x > w
+          h = y if y > h
+          x: x or 0
+          y: y or 0
+          fixed: true
+          index: i + 1
+          model: node
+        links: wf.links.map (link) ->
+          src = link.prevNode._idx
+          tar = link.nextNode._idx
+          source: src
+          target: tar
+          straight: tar > src
+          model: link
+      w += r
+      h += r
+      --r
+      padding = r + 7
+      force = d3.layout.force().size([w, h]).charge(-500).linkDistance(100).on 'tick', ->
+        node.attr 'transform', (d) -> "translate(#{d.x},#{d.y})"
+        link.attr 'd', (d) ->
+          sourceX = d.source.x
+          sourceY = d.source.y
+          targetX = d.target.x
+          targetY = d.target.y
+          deltaX = targetX - sourceX
+          deltaY = targetY - sourceY
+          if deltaX or deltaY
+            arc = 0
+            dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+            normX = deltaX / dist
+            normY = deltaY / dist
+            sourceX += r * normX
+            sourceY += r * normY
+            targetX -= padding * normX
+            targetY -= padding * normY
+            return "M#{sourceX},#{sourceY}L#{targetX},#{targetY}" if d.straight
+          else
+            arc = 1
+            dist = r
+            ++targetX
+            ++targetY
+          "M#{sourceX},#{sourceY}A#{dist},#{dist} 0,#{arc},1 #{targetX},#{targetY}";
+        return
+      svg = d3.select('#wf_preview').html('').append('svg')
+      .attr('viewBox', '0 0 ' + w + ' ' + h )
+      .attr('preserveAspectRatio', 'xMidYMid meet')
+      svg.append('svg:defs').append('svg:marker')
+      .attr('id', 'end-arrow')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 6)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('svg:path')
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', '#000')
+      link = svg.append('svg:g').selectAll('.link').data(data.links).enter()
+      .append('path').attr('class', 'link').style('marker-end', 'url(#end-arrow)')
+      node = svg.append('svg:g').selectAll('g').data(data.nodes).enter().append('svg:g').call force.drag()
+      node.append('circle').attr('class', 'node').attr('r', r)
+      node.append('svg:text').attr('x', 0).attr('y', 10).attr('class', 'index').text (d) -> d.index
+      force.nodes(data.nodes).links(data.links).start()
+      setTimeout (-> force.stop()), 100
       return
     _renderSidebarItem: (model) ->
       el = document.createElement 'li'

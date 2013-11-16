@@ -1,25 +1,28 @@
-.node { // shared by workflow and sidebar
-  border: 1px solid #346789;
-  -webkit-box-shadow: 2px 2px 13px #aaa;
-  -moz-box-shadow: 2px 2px 13px #aaa;
-  box-shadow: 2px 2px 13px #aaa;
-  -moz-border-radius: 0.5em;
-  border-radius: 0.5em;
-  opacity: 0.8;
-  text-align: center;
-  background-color: #eeeeef;
-  color: black;
-  font-family: helvetica;
-  padding: 0.5em;
-  min-width: 5em;
-  margin: 10px;
-  font-size: 0.9em;
+#workflow_editor {
+  .node {
+    // shared by workflow and sidebar
+    border: 1px solid #346789;
+    -webkit-box-shadow: 2px 2px 13px #aaa;
+    -moz-box-shadow: 2px 2px 13px #aaa;
+    box-shadow: 2px 2px 13px #aaa;
+    -moz-border-radius: 0.5em;
+    border-radius: 0.5em;
+    opacity: 0.8;
+    text-align: center;
+    background-color: #eeeeef;
+    color: black;
+    font-family: helvetica;
+    padding: 0.5em;
+    min-width: 5em;
+    margin: 10px;
+    font-size: 0.9em;
 
-  &:hover {
-    -webkit-box-shadow: 2px 2px 13px #444;
-    -moz-box-shadow: 2px 2px 13px #444;
-    box-shadow: 2px 2px 13px #444;
-    opacity: 0.6;
+    &:hover {
+      -webkit-box-shadow: 2px 2px 13px #444;
+      -moz-box-shadow: 2px 2px 13px #444;
+      box-shadow: 2px 2px 13px #444;
+      opacity: 0.6;
+    }
   }
 }
 
@@ -70,7 +73,8 @@
   .endpoint {
     z-index: 22;
     cursor: move;
-    &:after { // for padding
+    &:after {
+      // for padding
       position: absolute;
       visibility: hidden;
       content: ' ';
@@ -189,5 +193,48 @@
   #wf_preview {
     height: 150px;
     margin-bottom: 10px;
+
+    svg {
+      cursor: default;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+
+      .link {
+        fill: none;
+        stroke: #000;
+        stroke-width: 3px;
+        cursor: pointer;
+        &.active {
+          stroke-width: 4.5px;
+        }
+      }
+
+      .node {
+        fill: #eee;
+        stroke-width: 2px;
+        stroke: #000;
+        cursor: pointer;
+      }
+
+      text.index {
+        fill: #000;
+        stroke-width: 2px;
+        text-anchor: middle;
+        font-size: 30px;
+        cursor: pointer;
+      }
+
+      .active .node {
+        stroke-width: 4px;
+        fill: #0088cc;
+      }
+
+      /*.label {
+        font: 12px sans-serif;
+        pointer-events: none;
+      }*/
+
+    }
   }
 }
