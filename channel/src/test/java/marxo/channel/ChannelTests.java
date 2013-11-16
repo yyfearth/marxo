@@ -70,35 +70,15 @@ public class ChannelTests implements Loggable {
 		FacebookClient.AccessToken accessToken;
 		DateTime dateTime;
 
-		for (int i = 0; i < 2; i++) {
-			logger.info("Getting extended token " + (i + 1));
+		logger.info("Getting extended token");
 
-			accessToken = facebookClient.obtainExtendedAccessToken(appId, appSecret, requestToken);
-			extendedUserToken = accessToken.getAccessToken();
-			logger.info("extendedUserToken: " + extendedUserToken);
-			dateTime = new DateTime(accessToken.getExpires());
-			logger.info("expire at " + dateTime);
+		accessToken = facebookClient.obtainExtendedAccessToken(appId, appSecret, requestToken);
+		extendedUserToken = accessToken.getAccessToken();
+		logger.info("extendedUserToken: " + extendedUserToken);
+		dateTime = new DateTime(accessToken.getExpires());
+		logger.info("expire at " + dateTime);
 
-			requestToken = accessToken.getAccessToken();
-		}
-	}
-
-	@Test
-	public void testHttpClient() throws Exception {
-		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
-		HttpGet httpGet = new HttpGet("http://google.com");
-
-		try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet)) {
-			logger.info(closeableHttpResponse.getStatusLine().toString());
-			HttpEntity httpEntity = closeableHttpResponse.getEntity();
-
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			httpEntity.writeTo(outputStream);
-			String content = outputStream.toString();
-			logger.info("Content: " + content);
-
-			EntityUtils.consume(httpEntity);
-		}
+		requestToken = accessToken.getAccessToken();
 	}
 
 	@Test
