@@ -44,7 +44,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		}
 
 		ObjectId objectId = new ObjectId(idString);
-		Entity entity = dao.get(objectId);
+		Entity entity = dao.findOne(objectId);
 
 		if (entity == null) {
 			throw new EntityNotFoundException(objectId);
@@ -64,7 +64,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		ObjectId objectId = new ObjectId(idString);
 		assert objectId.equals(entity.id);
 
-		Entity oldEntity = dao.get(objectId);
+		Entity oldEntity = dao.findOne(objectId);
 
 		if (oldEntity == null) {
 			throw new EntityNotFoundException(objectId);

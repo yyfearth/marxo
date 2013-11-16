@@ -1,6 +1,6 @@
 package marxo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
@@ -8,25 +8,27 @@ import org.springframework.data.annotation.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties(value = {
+		"nodeIds", "linkIds", "nodes", "links", "startNodeId", "currentNodeId", "endNodeId"
+}, ignoreUnknown = true)
 public class Workflow extends TenantChildEntity {
 	public WorkflowType type = WorkflowType.NONE;
-	@JsonIgnore
 	public List<ObjectId> nodeIds;
-	@JsonIgnore
 	public List<ObjectId> linkIds;
-	@JsonIgnore
 	@Transient
 	public List<Node> nodes;
-	@JsonIgnore
 	@Transient
 	public List<Link> links;
 	public ProjectStatus status = ProjectStatus.IDLE;
 	@JsonProperty("is_project")
 	public boolean isProject = false;
-	@JsonIgnore
-	public ObjectId processingNodeId;
-	@JsonIgnore
-	public ObjectId processingActionId;
+	/*
+	Internal engine data
+	 */
+	public ObjectId startNodeId;
+	public ObjectId currentNodeId;
+	public ObjectId endNodeId;
+	public ObjectId currentActionId;
 
 	@JsonProperty("link_ids")
 	public List<ObjectId> getLinkIds() {

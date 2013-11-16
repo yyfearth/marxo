@@ -1,48 +1,72 @@
 package marxo.engine;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import marxo.dao.DataPair;
 import marxo.dao.NodeDao;
+import marxo.dao.TaskDao;
 import marxo.dao.WorkflowDao;
-import marxo.entity.Action;
 import marxo.entity.Node;
+import marxo.entity.Task;
 import marxo.entity.Workflow;
-import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import marxo.entity.action.Action;
+import marxo.tool.Loggable;
+import marxo.tool.StringTool;
 
-import java.util.Map;
-
-public class EngineWorker implements Runnable {
-	@Autowired
+public class EngineWorker implements Runnable, Loggable {
 	WorkflowDao workflowDao;
-	@Autowired
 	NodeDao nodeDao;
+	String name;
+
+	public EngineWorker(String name) {
+		this.name = name;
+	}
 
 	// todo: make the method thread-safe, ready for multi-thread.
 	@Override
 	public void run() {
-		Workflow workflow = workflowDao.getNextProject();
+		try {
+			workflowDao = new WorkflowDao(null, true);
+			nodeDao = new NodeDao(null);
 
-		if (workflow.processingNodeId == null) {
-//			workflow
-		} else {
-			Node node = nodeDao.get(workflow.processingNodeId);
+			TaskDao taskDao = new TaskDao();
+			Task task = taskDao.findAndRemove(Lists.<DataPair>newArrayList());
 
-			if (node == null) {
-				throw new NotImplementedException();
+			if (task == null) {
+				return;
 			}
 
-			Map<ObjectId, Action> actionMap = Maps.uniqueIndex(node.actions, new Function<Action, ObjectId>() {
+			Workflow workflow = workflowDao.findOne(task.id);
+
+			if (workflow.startNodeId == null) {
+				workflow.currentNodeId = workflow.startNodeId;
+			}
+
+			Node node = nodeDao.findOne(workflow.currentNodeId);
+
+			if (workflow.currentActionId == null) {
+				if (node.actions.size() == 0) {
+					// todo: end this node.
+				}
+				workflow.currentActionId = node.actions.get(0).id;
+			}
+
+			final Workflow w = workflow;
+
+			Action action = Iterables.find(node.actions, new Predicate<Action>() {
 				@Override
-				public ObjectId apply(Action input) {
-					return input.id;
+				public boolean apply(Action input) {
+					return input.id.equals(w.currentActionId);
 				}
 			});
 
-			if (!actionMap.containsKey(workflow.processingActionId)) {
+			// todo: do if the schedule hits
 
-			}
+			workflowDao.insert(workflow);
+		} catch (Exception e) {
+			logger.error("[" + name + "] " + e.getMessage());
+			logger.error(StringTool.exceptionToString(e));
 		}
 	}
 }

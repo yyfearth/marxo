@@ -1,5 +1,6 @@
 package marxo.dao;
 
+import com.google.common.collect.Lists;
 import com.mongodb.WriteResult;
 import marxo.entity.ProjectStatus;
 import marxo.entity.Workflow;
@@ -22,13 +23,16 @@ public class WorkflowDao extends TenantChildDao<Workflow> {
 		this.isProject = isProject;
 	}
 
-	/**
-	 * Get next project which is waiting to be processed.
-	 */
-	public Workflow getNextProject() {
-//		mongoTemplate.findAndModify()
-		Criteria criteria = Criteria.where("isProject").is(true).and("status").is(ProjectStatus.IDLE);
-		return mongoTemplate.findOne(org.springframework.data.mongodb.core.query.Query.query(criteria), entityClass);
+	public List<Workflow> findWithStatus(ProjectStatus status) {
+		return find(Lists.newArrayList(
+				new DataPair("status", status)
+		));
+	}
+
+	public Workflow findOneWithStatus(ProjectStatus status) {
+		return findOne(Lists.newArrayList(
+				new DataPair("status", status)
+		));
 	}
 
 	public void setStatus(ObjectId workflowId, ProjectStatus status) {

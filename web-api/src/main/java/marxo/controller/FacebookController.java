@@ -7,7 +7,6 @@ import marxo.entity.Tenant;
 import marxo.entity.User;
 import marxo.exception.EntityNotFoundException;
 import marxo.security.MarxoAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -33,7 +32,7 @@ public class FacebookController implements InterceptorPreHandlable {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public FacebookData readData() {
-		Tenant tenant = tenantDao.get(user.tenantId);
+		Tenant tenant = tenantDao.findOne(user.tenantId);
 		if (tenant == null) {
 			throw new EntityNotFoundException(user.tenantId);
 		}
@@ -45,7 +44,7 @@ public class FacebookController implements InterceptorPreHandlable {
 	@ResponseBody
 	public FacebookData saveData(@Valid @RequestBody FacebookData facebookData) {
 		Assert.notNull(facebookData);
-		Tenant tenant = tenantDao.get(user.tenantId);
+		Tenant tenant = tenantDao.findOne(user.tenantId);
 
 		// todo: call channel
 		facebookData.status = FacebookStatus.CONNECTED;

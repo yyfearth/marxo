@@ -1,6 +1,7 @@
 package marxo.dao;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.mongodb.WriteResult;
 import marxo.entity.BasicEntity;
 import marxo.exception.DatabaseException;
@@ -53,30 +54,40 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	Create
 	 */
 
-	public void insert(Entity entity) {
-		processEntities(new ArrayList<>(Arrays.asList(entity)));
-		mongoTemplate.insert(entity);
+	public void insert(List<Entity> entities) {
+		for (Entity entity : entities) {
+			entity.fillWithDefaultValues();
+			entity.createdDate = entity.modifiedDate = DateTime.now();
+		}
+
+		processEntities(entities);
+
+		mongoTemplate.insert(entities, entityClass);
 	}
 
-	public void insert(List<Entity> entities) {
-		processEntities(entities);
-		mongoTemplate.insert(entities, entityClass);
+	public void insert(Entity entity) {
+		insert(Lists.newArrayList(entity));
 	}
 
 	/*
 	Read
 	 */
 
-	public Entity get(List<DataPair> dataPairs) {
+	public Entity findOne(List<DataPair> dataPairs) {
 		processDataPairs(dataPairs);
 		Query query = Query.query(dataPairsToCriteria(dataPairs));
 		return mongoTemplate.findOne(query, entityClass);
 	}
 
-	public Entity get(ObjectId id) {
-		return get(new ArrayList<>(Arrays.asList(
+	public Entity findOne(ObjectId id) {
+		return findOne(new ArrayList<>(Arrays.asList(
 				new DataPair("id", id)
 		)));
+	}
+
+	public Entity findAndRemove(List<DataPair> dataPairs) {
+		Query query = Query.query(dataPairsToCriteria(dataPairs));
+		return mongoTemplate.findAndRemove(query, entityClass);
 	}
 
 	public List<Entity> find(List<DataPair> dataPairs) {
@@ -109,7 +120,10 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	 */
 
 	public void save(Entity entity) {
+		entity.modifiedDate = DateTime.now();
+
 		processEntities(new ArrayList<>(Arrays.asList(entity)));
+
 		mongoTemplate.save(entity);
 	}
 
@@ -131,6 +145,11 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 		return delete(new ArrayList<>(Arrays.asList(
 				new DataPair("id", id)
 		)));
+	}
+
+	public void remove(List<DataPair> dataPairs) {
+		processDataPairs(dataPairs);
+		mongoTemplate.remove(Query.query(dataPairsToCriteria(dataPairs)), entityClass);
 	}
 
 	/*
@@ -196,7 +215,6 @@ public abstract class BasicDao<Entity extends BasicEntity> {
 	 * @param entity The entity to be used for database query.
 	 */
 	protected void processEntity(Entity entity) {
-		entity.modifiedDate = new DateTime();
 	}
 
 	private void processEntities(List<Entity> entities) {
