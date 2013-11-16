@@ -65,11 +65,6 @@
 
         <!-- Helpers that make the fucking Java language suck less -->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>15.0</version>
-        </dependency>
-        <dependency>
             <groupId>de.sven-jacobs</groupId>
             <artifactId>loremipsum</artifactId>
             <version>1.0</version>
