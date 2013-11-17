@@ -173,9 +173,9 @@ Projects
       $sidebar = $ @sidebar
       $sidebar.find('.sidebar-item.active').removeClass 'active'
       $sidebar.find(if model then ".sidebar-item:has(a[data-cid='#{model.cid}'])" else ".project-item").addClass 'active'
-      # TODO: select nothing in flow
-      # TODO: select node with id in flow
-      # TODO: select link with id in flow
+      if d3 = @d3
+        d3.selectAll('svg .active').classed 'active', false
+        d3.select("##{type}_#{model.cid}").classed 'active', true if model
       @
     _readData: ->
       if model = @_cur_model
@@ -217,7 +217,7 @@ Projects
 
       @_drawWorkflow project
       return
-    _drawWorkflow: (wf) -> require ['lib/d3v3'], (d3) =>
+    _drawWorkflow: (wf) -> require ['lib/d3v3'], (@d3) =>
       r = 20
       w = @$wfPreview.innerWidth()
       h = @$wfPreview.innerHeight()
@@ -287,9 +287,9 @@ Projects
       .attr('fill', '#000')
       link = svg.append('svg:g').selectAll('.link').data(data.links).enter()
       .append('path').attr('class', 'link').style('marker-end', 'url(#end-arrow)')
-      .on 'click', (d) => @navTo d.model
+      .attr('id', (d) -> 'link_' + d.model.cid).on 'click', (d) => @navTo d.model
       node = svg.append('svg:g').selectAll('g').data(data.nodes).enter().append('svg:g').call force.drag()
-      node.on 'click', (d) => @navTo d.model
+      node.attr('id', (d) -> 'node_' + d.model.cid).on 'click', (d) => @navTo d.model
       node.append('circle').attr('class', 'node').attr('r', r)
       node.append('svg:text').attr('x', 0).attr('y', 10).attr('class', 'index').text (d) -> d.index
       force.nodes(data.nodes).links(data.links).start()

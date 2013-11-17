@@ -205,8 +205,8 @@
         stroke: #000;
         stroke-width: 3px;
         cursor: pointer;
-        &.selected {
-          stroke-width: 5px;
+        &.active {
+          stroke-width: 4.5px;
         }
       }
 
@@ -215,18 +215,19 @@
         stroke-width: 2px;
         stroke: #000;
         cursor: pointer;
-        .selected & {
-          stroke-width: 4px;
-        }
       }
 
       text.index {
+        fill: #000;
+        stroke-width: 2px;
         text-anchor: middle;
         font-size: 30px;
         cursor: pointer;
-        .selected & {
-          font-weight: bold;
-        }
+      }
+
+      .active .node {
+        stroke-width: 4px;
+        fill: #0088cc;
       }
 
       /*.label {
