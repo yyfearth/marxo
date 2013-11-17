@@ -196,6 +196,9 @@ Projects
         project._warp()
       console.log 'selected wf for project', wf.name
       project.copy wf
+      unless @form.name.value
+        @form.name.value = wf.get 'name'
+        $(@form.name).trigger 'input'
       @_renderProject project
       return
     _renderProject: (project) ->
