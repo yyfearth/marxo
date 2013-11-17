@@ -232,8 +232,11 @@ Projects
           index: i + 1
           model: node
         links: wf.links.map (link) ->
-          source: link.prevNode._idx
-          target: link.nextNode._idx
+          src = link.prevNode._idx
+          tar = link.nextNode._idx
+          source: src
+          target: tar
+          straight: tar > src
           model: link
       w += r
       h += r
@@ -249,7 +252,6 @@ Projects
           deltaX = targetX - sourceX
           deltaY = targetY - sourceY
           if deltaX or deltaY
-            rot = 0
             arc = 0
             dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
             normX = deltaX / dist
@@ -258,13 +260,13 @@ Projects
             sourceY += r * normY
             targetX -= padding * normX
             targetY -= padding * normY
+            return "M#{sourceX},#{sourceY}L#{targetX},#{targetY}" if d.straight
           else
-            rot = -45
             arc = 1
             dist = r
             ++targetX
             ++targetY
-          "M#{sourceX},#{sourceY}A#{dist},#{dist} #{rot},#{arc},1 #{targetX},#{targetY}";
+          "M#{sourceX},#{sourceY}A#{dist},#{dist} 0,#{arc},1 #{targetX},#{targetY}";
         return
       svg = d3.select('#wf_preview').html('').append('svg')
       .attr('viewBox', '0 0 ' + w + ' ' + h )
