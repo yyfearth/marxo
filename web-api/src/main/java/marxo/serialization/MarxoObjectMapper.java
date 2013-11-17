@@ -11,15 +11,13 @@ public class MarxoObjectMapper extends ObjectMapper {
 	public MarxoObjectMapper() {
 		super();
 		SimpleModule simpleModule = new SimpleModule();
-
 		simpleModule.addSerializer(ObjectId.class, new ObjectIdSerializer());
 		simpleModule.addDeserializer(ObjectId.class, new ObjectIdDeserializer());
-
 		simpleModule.addSerializer(Date.class, new DateSerializer());
-
 		simpleModule.addSerializer(DateTime.class, new DateTimeSerializer());
 		simpleModule.addDeserializer(DateTime.class, new DateTimeDeserializer());
-
 		registerModule(simpleModule);
+
+		this.setPropertyNamingStrategy(new MarxoPropertyNamingStrategy());
 	}
 }

@@ -9,6 +9,5 @@ public class Tenant extends BasicEntity {
 	public String phoneNumber;
 	public String fax;
 	public String address;
-	@JsonProperty("facebook_data")
 	public FacebookData facebookData;
 }

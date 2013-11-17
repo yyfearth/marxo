@@ -70,7 +70,6 @@ public abstract class BasicEntity {
 //		return (createdByUserId == null) ? null : createdByUserId.toString();
 //	}
 
-	@JsonProperty("object_type")
 	public String getObjectType() {
 		Class<?> aClass = getClass();
 
