@@ -169,9 +169,13 @@ Projects
       @_cur_model = model
       console.log 'nav to', type, model
       @dataEditor.fill model if model
-      # TODO: select nothing in flow
-      # TODO: select node with id in flow
-      # TODO: select link with id in flow
+      # show active status
+      $sidebar = $ @sidebar
+      $sidebar.find('.sidebar-item.active').removeClass 'active'
+      $sidebar.find(if model then ".sidebar-item:has(a[data-cid='#{model.cid}'])" else ".project-item").addClass 'active'
+      if d3 = @d3
+        d3.selectAll('svg .active').classed 'active', false
+        d3.select("##{type}_#{model.cid}").classed 'active', true if model
       @
     _readData: ->
       if model = @_cur_model
@@ -192,6 +196,9 @@ Projects
         project._warp()
       console.log 'selected wf for project', wf.name
       project.copy wf
+      unless @form.name.value
+        @form.name.value = wf.get 'name'
+        $(@form.name).trigger 'input'
       @_renderProject project
       return
     _renderProject: (project) ->
@@ -203,17 +210,17 @@ Projects
       $sidebar.find('li.node-item, li.link-item').remove()
       nodes = document.createDocumentFragment()
       _renderSidebarItem = @_renderSidebarItem.bind @
-      project.nodes.forEach (node) ->
-        nodes.appendChild _renderSidebarItem node
+      project.nodes.forEach (node, i) ->
+        nodes.appendChild _renderSidebarItem node, i
       links = document.createDocumentFragment()
-      project.links.forEach (link) ->
-        links.appendChild _renderSidebarItem link
+      project.links.forEach (link, i) ->
+        links.appendChild _renderSidebarItem link, i
       $sidebar.find('.node-header').after nodes
       $sidebar.find('.link-header').after links
 
       @_drawWorkflow project
       return
-    _drawWorkflow: (wf) -> require ['lib/d3v3'], (d3) =>
+    _drawWorkflow: (wf) -> require ['lib/d3v3'], (@d3) =>
       r = 20
       w = @$wfPreview.innerWidth()
       h = @$wfPreview.innerHeight()
@@ -283,18 +290,20 @@ Projects
       .attr('fill', '#000')
       link = svg.append('svg:g').selectAll('.link').data(data.links).enter()
       .append('path').attr('class', 'link').style('marker-end', 'url(#end-arrow)')
+      .attr('id', (d) -> 'link_' + d.model.cid).on 'click', (d) => @navTo d.model
       node = svg.append('svg:g').selectAll('g').data(data.nodes).enter().append('svg:g').call force.drag()
+      node.attr('id', (d) -> 'node_' + d.model.cid).on 'click', (d) => @navTo d.model
       node.append('circle').attr('class', 'node').attr('r', r)
       node.append('svg:text').attr('x', 0).attr('y', 10).attr('class', 'index').text (d) -> d.index
       force.nodes(data.nodes).links(data.links).start()
       setTimeout (-> force.stop()), 100
       return
-    _renderSidebarItem: (model) ->
+    _renderSidebarItem: (model, i) ->
       el = document.createElement 'li'
       el.className = "sidebar-item #{model._name}-item"
       a = document.createElement 'a'
-      name = a.textContent = model.name()
-      a.dataset.id = model.id
+      name = a.textContent = "#{1 + i}. #{model.name()}"
+      a.dataset.cid = model.cid
       $a = $(a).data 'model', model
       $a.tooltip title: name, placement: 'right', container: @el if name.length > 15
       el.appendChild a
