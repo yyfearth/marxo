@@ -242,19 +242,29 @@ Projects
       force = d3.layout.force().size([w, h]).charge(-500).linkDistance(100).on 'tick', ->
         node.attr 'transform', (d) -> "translate(#{d.x},#{d.y})"
         link.attr 'd', (d) ->
-          deltaX = d.target.x - d.source.x
-          deltaY = d.target.y - d.source.y
+          sourceX = d.source.x
+          sourceY = d.source.y
+          targetX = d.target.x
+          targetY = d.target.y
+          deltaX = targetX - sourceX
+          deltaY = targetY - sourceY
           if deltaX or deltaY
+            rot = 0
+            arc = 0
             dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
             normX = deltaX / dist
             normY = deltaY / dist
-            sourceX = d.source.x + r * normX
-            sourceY = d.source.y + r * normY
-            targetX = d.target.x - padding * normX
-            targetY = d.target.y - padding * normY
+            sourceX += r * normX
+            sourceY += r * normY
+            targetX -= padding * normX
+            targetY -= padding * normY
           else
-            sourceX = sourceY = targetX = targetY = 0
-          "M#{sourceX},#{sourceY}L#{targetX},#{targetY}"
+            rot = -45
+            arc = 1
+            dist = r
+            ++targetX
+            ++targetY
+          "M#{sourceX},#{sourceY}A#{dist},#{dist} #{rot},#{arc},1 #{targetX},#{targetY}";
         return
       svg = d3.select('#wf_preview').html('').append('svg')
       .attr('viewBox', '0 0 ' + w + ' ' + h )
@@ -269,7 +279,8 @@ Projects
       .append('svg:path')
       .attr('d', 'M0,-5L10,0L0,5')
       .attr('fill', '#000')
-      link = svg.selectAll('.link').data(data.links).enter().append('path').attr('class', 'link').style('marker-end', 'url(#end-arrow)')
+      link = svg.append('svg:g').selectAll('.link').data(data.links).enter()
+      .append('path').attr('class', 'link').style('marker-end', 'url(#end-arrow)')
       node = svg.append('svg:g').selectAll('g').data(data.nodes).enter().append('svg:g').call force.drag()
       node.append('circle').attr('class', 'node').attr('r', r)
       node.append('svg:text').attr('x', 0).attr('y', 10).attr('class', 'index').text (d) -> d.index
