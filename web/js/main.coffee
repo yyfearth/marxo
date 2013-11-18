@@ -25,8 +25,8 @@ requirejs.config
   paths:
     'lib/facebook': '//connect.facebook.net/en_US/all'
   config:
-    models:
-      BASE_URL: 'http://masonwan.com/marxo/api' # '../api'
+    models: # for testsing
+      BASE_URL: localStorage.ROOT ? 'http://masonwan.com/marxo/api' # '../api'
     config:
       FB_APP_ID: '213527892138380'
       FB_SCOPES: 'publish_actions, email, read_stream, '
