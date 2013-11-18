@@ -1,7 +1,6 @@
-package marxo.entity;
+package marxo.entity.workflow;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import marxo.entity.user.TenantChildEntity;
 import org.bson.types.ObjectId;
 
 public abstract class WorkflowChildEntity extends TenantChildEntity {

@@ -1,7 +1,7 @@
 package marxo.dao;
 
 /**
- * A field and value pair to represent a criteria or update query.
+ * MapNode field and value pair to represent a criteria or update query.
  */
 public class DataPair {
 	final public String field;

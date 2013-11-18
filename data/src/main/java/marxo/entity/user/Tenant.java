@@ -1,6 +1,8 @@
-package marxo.entity;
+package marxo.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import marxo.entity.BasicEntity;
+import marxo.entity.FacebookData;
 
 public class Tenant extends BasicEntity {
 	public String contact;

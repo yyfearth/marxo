@@ -1,4 +1,4 @@
-package marxo.entity;
+package marxo.entity.workflow;
 
 public enum ProjectStatus {
 	/**

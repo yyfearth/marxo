@@ -1,6 +1,6 @@
 package marxo.dao;
 
-import marxo.entity.WorkflowChildEntity;
+import marxo.entity.workflow.WorkflowChildEntity;
 import org.bson.types.ObjectId;
 
 import java.util.List;

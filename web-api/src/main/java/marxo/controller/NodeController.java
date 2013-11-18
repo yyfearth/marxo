@@ -1,13 +1,9 @@
 package marxo.controller;
 
 import marxo.dao.NodeDao;
-import marxo.entity.Node;
+import marxo.entity.node.Node;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("node{:s?}")

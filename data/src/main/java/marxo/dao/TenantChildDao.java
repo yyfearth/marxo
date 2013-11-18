@@ -1,6 +1,6 @@
 package marxo.dao;
 
-import marxo.entity.TenantChildEntity;
+import marxo.entity.user.TenantChildEntity;
 import org.bson.types.ObjectId;
 
 import java.util.List;

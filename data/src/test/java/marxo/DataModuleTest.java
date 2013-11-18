@@ -3,7 +3,11 @@ package marxo;
 import marxo.dao.TenantDao;
 import marxo.dao.WorkflowDao;
 import marxo.dev.AdvancedGenerator;
-import marxo.entity.*;
+import marxo.entity.link.Link;
+import marxo.entity.node.Node;
+import marxo.entity.user.Tenant;
+import marxo.entity.user.User;
+import marxo.entity.workflow.Workflow;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.springframework.context.ApplicationContext;
@@ -15,6 +19,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+@SuppressWarnings("ALL")
 public class DataModuleTest {
 	@Test
 	public void canGenerateSampleData() throws Exception {

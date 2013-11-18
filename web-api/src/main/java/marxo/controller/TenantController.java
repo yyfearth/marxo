@@ -1,7 +1,7 @@
 package marxo.controller;
 
 import marxo.dao.TenantDao;
-import marxo.entity.Tenant;
+import marxo.entity.user.Tenant;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedField;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.AnnotatedParameter;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MarxoPropertyNamingStrategy extends PropertyNamingStrategy {
@@ -33,13 +32,6 @@ public class MarxoPropertyNamingStrategy extends PropertyNamingStrategy {
 	}
 
 	String convert(String defaultName) {
-		Matcher matcher = pattern.matcher(defaultName);
-		StringBuffer stringBuffer = new StringBuffer();
-		while (matcher.find()) {
-			String captured = matcher.group();
-			matcher.appendReplacement(stringBuffer, "_" + captured.toLowerCase());
-		}
-		matcher.appendTail(stringBuffer);
-		return stringBuffer.toString();
+		return defaultName.replaceAll("[A-Z]", "_$0").toLowerCase();
 	}
 }

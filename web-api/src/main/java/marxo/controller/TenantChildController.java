@@ -1,7 +1,6 @@
 package marxo.controller;
 
-import marxo.dao.TenantChildDao;
-import marxo.entity.TenantChildEntity;
+import marxo.entity.user.TenantChildEntity;
 import marxo.security.MarxoAuthentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;

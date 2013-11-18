@@ -1,4 +1,4 @@
-package marxo.entity;
+package marxo.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

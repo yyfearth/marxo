@@ -2,7 +2,7 @@ package marxo.controller;
 
 import marxo.dao.BasicDao;
 import marxo.entity.BasicEntity;
-import marxo.entity.User;
+import marxo.entity.user.User;
 import marxo.exception.*;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;

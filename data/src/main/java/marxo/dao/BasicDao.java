@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("ALL")
 public abstract class BasicDao<Entity extends BasicEntity> {
 	static protected ApplicationContext context;
 	static protected MongoTemplate mongoTemplate;

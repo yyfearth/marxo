@@ -1,6 +1,4 @@
-package marxo.entity;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package marxo.entity.user;
 
 public class Publisher extends TenantChildEntity {
 	public String firstName;

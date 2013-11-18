@@ -1,6 +1,6 @@
 package marxo.dao;
 
-import marxo.entity.Node;
+import marxo.entity.node.Node;
 import org.bson.types.ObjectId;
 
 public class NodeDao extends WorkflowChildDao<Node> {

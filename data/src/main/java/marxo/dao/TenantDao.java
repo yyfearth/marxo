@@ -3,7 +3,7 @@ package marxo.dao;
 import com.google.common.base.Strings;
 import com.mongodb.WriteResult;
 import marxo.entity.FacebookData;
-import marxo.entity.Tenant;
+import marxo.entity.user.Tenant;
 import marxo.exception.DatabaseException;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;

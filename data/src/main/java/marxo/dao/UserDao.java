@@ -1,6 +1,6 @@
 package marxo.dao;
 
-import marxo.entity.User;
+import marxo.entity.user.User;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
 

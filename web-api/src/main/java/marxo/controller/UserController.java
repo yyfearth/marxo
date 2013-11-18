@@ -1,7 +1,7 @@
 package marxo.controller;
 
 import marxo.dao.UserDao;
-import marxo.entity.User;
+import marxo.entity.user.User;
 import marxo.exception.EntityNotFoundException;
 import marxo.exception.InvalidObjectIdException;
 import org.bson.types.ObjectId;

@@ -1,6 +1,7 @@
-package marxo.entity;
+package marxo.entity.link;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import marxo.entity.user.TenantChildEntity;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document

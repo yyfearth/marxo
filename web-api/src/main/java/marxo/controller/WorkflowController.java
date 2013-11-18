@@ -7,7 +7,11 @@ import marxo.dao.LinkDao;
 import marxo.dao.NodeDao;
 import marxo.dao.WorkflowChildDao;
 import marxo.dao.WorkflowDao;
-import marxo.entity.*;
+import marxo.entity.link.Link;
+import marxo.entity.node.Node;
+import marxo.entity.workflow.Workflow;
+import marxo.entity.workflow.WorkflowChildEntity;
+import marxo.entity.workflow.WorkflowPredicate;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +26,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+@SuppressWarnings("ALL")
 @Controller
 @RequestMapping("workflow{:s?}")
 public class WorkflowController extends TenantChildController<Workflow> {

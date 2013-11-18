@@ -1,7 +1,7 @@
 package marxo.security;
 
 import marxo.dao.UserDao;
-import marxo.entity.User;
+import marxo.entity.user.User;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
