@@ -1,17 +1,14 @@
 package marxo.engine;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import marxo.dao.DataPair;
-import marxo.dao.DataPairOperator;
-import marxo.dao.TaskDao;
-import marxo.dao.WorkflowDao;
-import marxo.entity.Node;
-import marxo.entity.ProjectStatus;
+import marxo.dao.*;
 import marxo.entity.Task;
-import marxo.entity.Workflow;
-import marxo.entity.action.Action;
-import org.bson.types.ObjectId;
+import marxo.entity.content.FacebookContent;
+import marxo.entity.node.Node;
+import marxo.entity.node.PostFacebook;
+import marxo.entity.workflow.ProjectStatus;
+import marxo.entity.workflow.Workflow;
+import marxo.validation.SelectIdFunction;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -25,6 +22,8 @@ public class EngineTest {
 	final SelectIdFunction selectIdFunction = new SelectIdFunction();
 	WorkflowDao workflowDao = new WorkflowDao(null, true);
 	TaskDao taskDao = new TaskDao();
+	EventDao eventDao = new EventDao();
+	ContentDao contentDao = new ContentDao();
 	List<Workflow> workflowsToDelete = new ArrayList<>();
 
 	@BeforeMethod
@@ -47,22 +46,28 @@ public class EngineTest {
 	@Test
 	public void testWorkerDirectly() throws Exception {
 		Workflow workflow = new Workflow();
-		workflow.name = "Test Workflow for Engine";
+		workflow.setName("Test Workflow for Engine");
 		workflow.fillWithDefaultValues();
 		workflowsToDelete.add(workflow);
 
 		Node node = new Node();
-		node.name = "Test Node for Engine";
+		node.setName("Test Node for Engine");
 		node.fillWithDefaultValues();
 		workflow.nodeIds.add(node.id);
 
-		Action action = new Action();
-		action.name = "Test Action for Engine";
-		action.fillWithDefaultValues();
-		node.actions.add(action);
+		PostFacebook postFacebook = new PostFacebook();
+		postFacebook.setName("Test Action for Engine");
+		postFacebook.fillWithDefaultValues();
+		node.actions.add(postFacebook);
+
+		FacebookContent facebookContent = new FacebookContent();
+		facebookContent.fillWithDefaultValues();
+		postFacebook.contentId = facebookContent.id;
+		facebookContent.message = "Marxo Engine Automation\nThat's one small step for the engine, a giant leap for the project";
+		facebookContent.actionId = postFacebook.id;
+		contentDao.insert(facebookContent);
 
 		workflow.startNodeId = node.id;
-		workflow.endNodeId = node.id;
 		workflow.status = ProjectStatus.STARTED;
 
 		workflowDao.save(workflow);
@@ -76,12 +81,5 @@ public class EngineTest {
 		workflow = workflowDao.findOne(workflow.id);
 		Assert.assertEquals(workflow.status, ProjectStatus.FINISHED);
 		Assert.assertEquals(taskDao.count(), 0);
-	}
-
-	class SelectIdFunction implements Function<Workflow, ObjectId> {
-		@Override
-		public ObjectId apply(Workflow input) {
-			return input.id;
-		}
 	}
 }

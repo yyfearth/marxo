@@ -2,10 +2,10 @@ package marxo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.net.MediaType;
-import marxo.entity.Link;
-import marxo.entity.Node;
-import marxo.entity.User;
-import marxo.entity.Workflow;
+import marxo.entity.link.Link;
+import marxo.entity.node.Node;
+import marxo.entity.user.User;
+import marxo.entity.workflow.Workflow;
 import marxo.serialization.MarxoObjectMapper;
 import marxo.tool.Loggable;
 import org.apache.http.HttpEntity;
@@ -37,6 +37,8 @@ public class WebApiTests implements Loggable {
 	final String email = "yyfearth@gmail.com";
 	final String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
 	User user;
+//	String baseUrl = "http://localhost:8080/api/";
+	String baseUrl = "http://masonwan.com/marxo/api/";
 
 	@BeforeClass
 	public void beforeClass() {
@@ -58,7 +60,7 @@ public class WebApiTests implements Loggable {
 	public void getUser() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet("http://localhost:8080/api/users/" + email)
+					.httpGet(baseUrl + "users/" + email)
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -67,7 +69,7 @@ public class WebApiTests implements Loggable {
 			user = tester.getContent(User.class);
 			Assert.assertEquals(user.getEmail(), email);
 			Assert.assertNotNull(user.id);
-			Assert.assertNotNull(user.name);
+			Assert.assertNotNull(user.getName());
 			Assert.assertNotNull(user.createdDate);
 			Assert.assertNotNull(user.modifiedDate);
 			Assert.assertNotNull(user.tenantId);
@@ -79,7 +81,7 @@ public class WebApiTests implements Loggable {
 	public void getUsers() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet("http://localhost:8080/api/users")
+					.httpGet(baseUrl + "users")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -99,7 +101,7 @@ public class WebApiTests implements Loggable {
 	public void getWorkflows() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet("http://localhost:8080/api/workflows")
+					.httpGet(baseUrl + "workflows")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -120,7 +122,7 @@ public class WebApiTests implements Loggable {
 	public void getProjects() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet("http://localhost:8080/api/projects")
+					.httpGet(baseUrl + "projects")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -141,7 +143,7 @@ public class WebApiTests implements Loggable {
 	public void getNodes() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet("http://localhost:8080/api/node")
+					.httpGet(baseUrl + "node")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -165,7 +167,7 @@ public class WebApiTests implements Loggable {
 	public void getLinks() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet("http://localhost:8080/api/links/")
+					.httpGet(baseUrl + "links/")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -252,7 +254,11 @@ class Tester implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		client.close();
-		response.close();
+		if (client != null) {
+			client.close();
+		}
+		if (response != null) {
+			response.close();
+		}
 	}
 }
