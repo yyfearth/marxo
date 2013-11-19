@@ -620,7 +620,7 @@ define 'test_data', ['models'], (models) ->
 
     projects: [
       id: '50447afb4728cc2036cf9ca0'
-      workflow_id: '50447afb4728cb2036cf9ca0'
+      template_id: '50447afb4728cb2036cf9ca0'
       name: 'Demo Project'
       key: 'demo_prj'
       desc: 'Demo Project from Demo Workflow'
@@ -876,7 +876,7 @@ define 'test_data', ['models'], (models) ->
       updated_at: new Date(1379528126251)
     ,
       id: '50447afb4728cc2036cf9ca1'
-      workflow_id: '50447afb4728cb2036cf9ca1'
+      template_id: '50447afb4728cb2036cf9ca1'
       key: 'test_prj'
       name: 'Test Project'
       desc: 'The test project using test workflow'
