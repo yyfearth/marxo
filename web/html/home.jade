@@ -13,9 +13,11 @@
         .well
           .page-header
             h3
-              | {{name}}
-              small {{counts}}
-              small {{desc}}
+              span(name='name')
+              small(name='counts')
+              small(name='desc')
           .wf-diagram.well
-          p {{status}}
-          a.btn(href='#project/{{id}}') View details &raquo;
+          .action-bar
+            a.btn(href='#project/{{id}}') View details &raquo;
+            | &nbsp;
+            span.label(name='status')

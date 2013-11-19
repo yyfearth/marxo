@@ -59,15 +59,18 @@ NotificationListView
     render: ->
       throw new Error 'nothing to load' unless @model
       @el.id = 'overview_' + @model.cid
+      @el.innerHTML = @_tpl
+      @diagram = new WorkflowDiagramView maxTimeout: 1000, el: find '.wf-diagram', @el
       @model.fetch reset: true
       @
+    _find: (name) ->
+      find "[name='#{name}']", @el
     _render: ->
-      _tpl = @_tpl
       project = @model
       obj = project.toJSON()
       obj.counts = "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links)"
-      @el.innerHTML = fill _tpl, obj
-      @diagram = new WorkflowDiagramView maxTimeout: 1000, el: find '.wf-diagram', @el
+      for key, value of obj
+        @_find(key)?.textContent = value
       @diagram.draw project
       return
     remove: ->
