@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 @SuppressWarnings("ALL")
@@ -193,12 +192,5 @@ public class WorkflowController extends TenantChildController<Workflow> {
 			e.printStackTrace();
 			return new ArrayList<>();
 		}
-	}
-}
-
-class ModifiedDateComparator implements Comparator<Workflow> {
-	@Override
-	public int compare(Workflow w1, Workflow w2) {
-		return w1.modifiedDate.compareTo(w2.modifiedDate);
 	}
 }
