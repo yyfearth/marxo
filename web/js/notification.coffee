@@ -49,7 +49,10 @@ Notifications
       tooltip: 'desc'
       editable: false
     ,
-      'project'
+      name: 'workflow_id'
+      label: 'Project'
+      cell: 'workflow'
+      editable: false
     ,
       name: 'type'
       label: 'Type'
