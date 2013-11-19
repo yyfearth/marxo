@@ -460,8 +460,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           target: tar
           straight: tar > src
           model: link
-      @w = w + r
-      @h = h + r
+      @w = w + r + r
+      @h = h + r + r
       @fixed = fixed
       @force.size([@w, @h])
       @svg.attr('viewBox', '0 0 ' + @w + ' ' + @h)
@@ -548,7 +548,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       fixed = @fixed
       if @max_t and not fixed
         t = @max_t
-        fixed = false
+        fixed = true
       setTimeout (-> force.stop()), t if t and fixed
       return
     draw: (wf = @model) ->
