@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(value = {
-		"nodeIds", "linkIds", "nodes", "links", "startNodeId", "currentNodeId", "endNodeId"
 }, ignoreUnknown = true)
 public class Workflow extends TenantChildEntity {
 	public WorkflowType type = WorkflowType.NONE;

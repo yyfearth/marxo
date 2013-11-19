@@ -30,6 +30,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -37,8 +38,9 @@ public class WebApiTests implements Loggable {
 	final String email = "yyfearth@gmail.com";
 	final String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
 	User user;
-//	String baseUrl = "http://localhost:8080/api/";
-	String baseUrl = "http://masonwan.com/marxo/api/";
+	String baseUrl = "http://localhost:8080/api/";
+	//	String baseUrl = "http://masonwan.com/marxo/api/";
+	List<Workflow> workflows = new ArrayList<>();
 
 	@BeforeClass
 	public void beforeClass() {
@@ -108,13 +110,52 @@ public class WebApiTests implements Loggable {
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			List<Workflow> workflows = tester.getContent(new TypeReference<List<Workflow>>() {
+			workflows = tester.getContent(new TypeReference<List<Workflow>>() {
 			});
 			Assert.assertNotNull(workflows);
 			for (Workflow workflow : workflows) {
 				Assert.assertEquals(workflow.tenantId, this.user.tenantId);
 				Assert.assertFalse(workflow.isProject);
 			}
+		}
+	}
+
+	@Test(dependsOnGroups = "start", dependsOnMethods = "getWorkflows")
+	public void searchWorkflows() throws Exception {
+		if (workflows.size() == 0) {
+			try (Tester tester = new Tester()) {
+				tester
+						.httpGet(baseUrl + "workflows")
+						.basicAuth(email, password)
+						.send();
+				tester
+						.isOk()
+						.matchContentType(MediaType.JSON_UTF_8);
+
+				List<Workflow> workflows = tester.getContent(new TypeReference<List<Workflow>>() {
+				});
+				Assert.assertNotNull(workflows);
+				Assert.assertEquals(workflows.size(), 0);
+			}
+		}
+
+		Workflow workflow = workflows.get(0);
+
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl + "workflows/" + workflow.id)
+					.basicAuth(email, password)
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			workflow = tester.getContent(new TypeReference<Workflow>() {
+			});
+			Assert.assertNotNull(workflow);
+			Assert.assertEquals(workflow.nodeIds.size(), workflow.nodes.size());
+			Assert.assertEquals(workflow.linkIds.size(), workflow.links.size());
+			Assert.assertEquals(workflow.tenantId, this.user.tenantId);
 		}
 	}
 

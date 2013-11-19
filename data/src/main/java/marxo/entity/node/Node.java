@@ -15,7 +15,7 @@ import java.util.List;
 public class Node extends WorkflowChildEntity {
 	@JsonProperty("offset")
 	public Position positoin;
-	public List<Action> actions;
+	public List<Action> actions = new ArrayList<>();
 	public List<ObjectId> fromlinkIds = new ArrayList<>();
 	public List<ObjectId> tolinkIds = new ArrayList<>();
 	@Transient

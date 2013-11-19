@@ -1,6 +1,5 @@
 package marxo.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -38,7 +37,6 @@ public abstract class BasicEntity {
 	public String description;
 	@Field(order = 3)
 	protected String name;
-	@JsonIgnore
 	@Transient
 	protected String objectType;
 
