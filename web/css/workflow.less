@@ -190,51 +190,63 @@
       vertical-align: middle;
     }
   }
-  #wf_preview {
+  .wf-diagram {
     height: 150px;
     margin-bottom: 10px;
+  }
+}
 
-    svg {
-      cursor: default;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      user-select: none;
+#home_view .wf-diagram {
+  display: inline-block;
+  height: 150px;
+  width: 50%;
+  min-width: 250px;
+  max-width: 450px;
+  margin: 0 5px 5px 0;
+  padding: 0;
+}
 
-      .link {
-        fill: none;
-        stroke: #000;
-        stroke-width: 3px;
-        cursor: pointer;
-        &.active {
-          stroke-width: 4.5px;
-        }
+.wf-diagram {
+  svg {
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+
+    .link {
+      fill: none;
+      stroke: #000;
+      stroke-width: 3px;
+      cursor: pointer;
+      &.active {
+        stroke-width: 4.5px;
       }
-
-      .node {
-        fill: #eee;
-        stroke-width: 2px;
-        stroke: #000;
-        cursor: pointer;
-      }
-
-      text.index {
-        fill: #000;
-        stroke-width: 2px;
-        text-anchor: middle;
-        font-size: 30px;
-        cursor: pointer;
-      }
-
-      .active .node {
-        stroke-width: 4px;
-        fill: #0088cc;
-      }
-
-      /*.label {
-        font: 12px sans-serif;
-        pointer-events: none;
-      }*/
-
     }
+
+    .node {
+      fill: #eee;
+      stroke-width: 2px;
+      stroke: #000;
+      cursor: pointer;
+    }
+
+    text.index {
+      fill: #000;
+      stroke-width: 2px;
+      text-anchor: middle;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .active .node {
+      stroke-width: 4px;
+      fill: #0088cc;
+    }
+
+    /*.label {
+      font: 12px sans-serif;
+      pointer-events: none;
+    }*/
+
   }
 }
