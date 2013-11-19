@@ -42,7 +42,7 @@ define 'models', ['module', 'lib/common'], (module) ->
             @_last_load = Date.now()
             #@trigger 'loaded', collection
             callback? collection, 'loaded', response, options
-          error: (collection, response, options) ->
+          error: (collection, response, options) =>
             callback? @, 'error', response, options
       else
         callback? @, 'skipped'
