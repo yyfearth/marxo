@@ -1,5 +1,7 @@
-package marxo.dev;
+package marxo;
 
+import marxo.entity.node.PostFacebook;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.regex.Matcher;
@@ -19,5 +21,15 @@ public class AdHocTest {
 		}
 		matcher.appendTail(sb);
 		System.out.println(sb.toString());
+	}
+
+	@Test
+	public void testCreateInstance() throws Exception {
+		String simpleName = PostFacebook.class.getSimpleName();
+		String fullName = PostFacebook.class.getName();
+		Class<?> aClass = Class.forName(fullName);
+		PostFacebook postFacebook = (PostFacebook) aClass.newInstance();
+		Assert.assertNotNull(postFacebook);
+
 	}
 }
