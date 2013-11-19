@@ -45,9 +45,9 @@ NotificationListView
       return
     render: ->
       @collection.load (ignored, resp) =>
-        @_render() unless @rendered and resp isnt 'loaded'
+        @_render() if @rendered and resp is 'loaded'
       @notificationList.fetch()
-      @
+      super
 
   class ProjectOverview extends View
     _tpl: tpl('#project_overview_tpl')
@@ -67,7 +67,7 @@ NotificationListView
       obj = project.toJSON()
       obj.counts = "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links)"
       @el.innerHTML = fill _tpl, obj
-      @diagram = new WorkflowDiagramView el: find '.wf-diagram', @el
+      @diagram = new WorkflowDiagramView maxTimeout: 1000, el: find '.wf-diagram', @el
       @diagram.draw project
       return
     remove: ->
