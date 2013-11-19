@@ -86,6 +86,7 @@ Projects
       wfPreview = find '#wf_preview', @el
       @$wfPreview = $ wfPreview
       @wfDiagram = new WorkflowDiagramView el: wfPreview
+      @listenTo @wfDiagram, 'select', @navTo.bind @
       @$nodeLinkSection = $ find 'section.node-link', @el
       @$projectForm = $ @form
       @$actions = $ find '.node-actions', @el
@@ -198,9 +199,11 @@ Projects
       console.log 'selected wf for project', wf.name
       _copy = (wf) =>
         project.copy wf
+        project.set 'status', 'NONE'
         unless @form.name.value
           @form.name.value = wf.get 'name'
           $(@form.name).trigger 'input'
+        @form.desc.value = "Created from workflow #{wf.get 'name'}" unless @form.desc.value
         @_renderProject project
         return
       console.log 'cpy', wf.loaded(), wf
