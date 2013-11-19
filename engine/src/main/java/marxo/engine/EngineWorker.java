@@ -1,9 +1,9 @@
 package marxo.engine;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import marxo.dao.*;
+import marxo.dao.EventDao;
+import marxo.dao.NodeDao;
+import marxo.dao.TaskDao;
+import marxo.dao.WorkflowDao;
 import marxo.entity.Task;
 import marxo.entity.node.Action;
 import marxo.entity.node.Event;
@@ -43,14 +43,18 @@ public class EngineWorker implements Runnable, Loggable {
 			while (action == null) {
 				if (workflow.currentActionIds.size() == 0) {
 					Node node = nodeDao.findOne(workflow.startNodeId);
+					// todo: let node is tracable from action.
+
 				}
 
 				if (action.eventId == null) {
 					// do it immediately
 				} else {
 					Event event = eventDao.findOne(action.eventId);
-					if (event.getStartTime() == null) {
+					if (event.getStartTime() == null || event.getStartTime().isBeforeNow()) {
 						// do it immediately
+					} else {
+						// add another task to the dao
 					}
 				}
 			}
