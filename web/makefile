@@ -20,6 +20,26 @@ print = @echo "$(CWHT)- $(CYEL)$< $(CWHT)> $(CBLU)$@$(CRST)"
 
 default: clean js css html res
 
+upload_dist:
+	scp -r $(dist)/* wilson@masonwan.com:web/marxo
+
+upload:
+	rm -rf test/
+	mkdir test
+	cp favicon.ico test/
+	cp robots.txt test/
+	mkdir test/font
+	cp font/* test/font/
+	mkdir -p test/js/lib
+	cp js/lib/*.js test/js/lib
+	rm test/js/lib/*.min.js
+	coffee -co test/js js
+	mkdir test/css
+	lessc --no-ie-compat css/console.less test/css/console.css
+	lessc --no-ie-compat css/preview.less test/css/preview.css
+	jade --DP --out test/ *.jade
+	scp -r test/* wilson@masonwan.com:web/marxo
+
 .PHONY: js css html
 
 clean: clean_js clean_css clean_res clean_html
