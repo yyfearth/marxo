@@ -9,12 +9,13 @@
 .span10.workspace
   #home_view.content-view
     #project_overview_tpl.tpl
-      .row-fluid
+      .row-fluid.project-overview
         .well
           .page-header
             h3
               | {{name}}
               small {{counts}}
-          p {{desc}}
+              small {{desc}}
+          .wf-diagram.well
           p {{status}}
           a.btn(href='#project/{{id}}') View details &raquo;

@@ -128,9 +128,10 @@ define 'models', ['module', 'lib/common'], (module) ->
       return
     fetch: (options = {}) -> # override for warp
       _success = options.success?.bind @
-      options.success = (collection, response, options) =>
-        @_warp collection
-        _success? collection, response, options
+      options.success = (model, response, options) =>
+        @_warp model
+        @trigger 'loaded', model
+        _success? model, response, options
       super options
       @
     loaded: ->
