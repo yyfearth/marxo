@@ -360,6 +360,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         col._last_load = Date.now()
         true
       else
+        @render()
         false
     render: ->
       @_clear()
