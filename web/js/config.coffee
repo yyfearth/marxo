@@ -261,11 +261,13 @@ Service
     _delay: 60000 # 1min
     _last_load: 0
     load: (force, callback) ->
+      throw new Error 'invalid user logined' unless User.current?.has 'tenant_id'
       ts = new Date().getTime()
       if force or ts - @_last_load > @_delay
         @model = null
         @form.reset()
-        Tenant.current?.fetch success: (data) =>
+        @model ?= new Tenant id: User.current.get 'tenant_id'
+        @model.fetch reset: true, success: (data) =>
           console.log 'fetch tenant', data.attributes
           @model = Tenant.current = data
           @fill data.attributes

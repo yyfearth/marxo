@@ -45,16 +45,13 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @instance
     initialize: ->
       # init user
-      user = tenant = null
+      user = null
       try
         if @user
           user = new User JSON.parse @user
           user = null unless user.has 'email'
-          tenant = new Tenant user.get 'tenant'
-          tenant = null unless tenant.has 'name'
-      console.log 'load from session', user, tenant
+      console.log 'load from session', user
       @user = user
-      @tenant = tenant
       @avatarEl = find 'img#avatar'
       @usernameEl = find '#username'
       @avatarEl.dataset.src ?= @avatarEl.src
@@ -97,7 +94,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         find('#navbar li.active')?.classList.remove 'active'
         frame.el.classList.add 'active'
         $(window).resize()
-        console.log 'frame', frame
+        # console.log 'frame', frame
       if frame instanceof FrameView
         frame.trigger 'activate'
         frame.open? name, sub
@@ -116,7 +113,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @
     signout: ->
       sessionStorage.clear()
-      @user = @tenant = User.current = Tenant.current = null
+      @user = User.current = null
       @router.clear()
       # TODO: reset all frames and views!
       #SignInView.get().show()
@@ -126,13 +123,11 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       location.hash = 'signin'
       location.reload()
       @
-    signin: (user, tenant, remember) ->
+    signin: (user, remember) ->
       @user = User.current = user
-      @tenant = Tenant.current = tenant
       if remember
         u = user.toJSON()
         delete u.password
-        u.tenant = tenant.toJSON()
         sessionStorage.user = JSON.stringify u
         console.log 'logged in', u
       else
@@ -170,7 +165,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       console = ConsoleView.get()
       if console.user instanceof User
         user = console.user
-        console.user = console.tenant = null
+        console.user = null
         @hide()
         @_validateUser user
       else
@@ -219,20 +214,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
             alert '(TEST ONLY) Password not correct'
           else if user.has('tenant_id') and email is user.get 'email'
             user.set 'email_md5', email_md5
-            tenantId = user.get 'tenant_id'
-            new Tenant(id: tenantId).fetch
-              headers:
-                Authorization: auth
-              success: (tenant) =>
-                if tenant.id is tenantId
-                  user.set 'credential', auth
-                  @signedIn user, tenant
-                else
-                  @_disable false
-                  alert 'Failed to get tenant profile of this user'
-              error: =>
-                @_disable false
-                alert 'Failed to get tenant profile'
+            user.set 'credential', auth
+            @signedIn user
           else
             @show() unless @$el.is ':visible'
             @form.password.select()
@@ -245,12 +228,12 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
           alert 'Sign in failed.\nUser not exist or email and password are not matched.'
           return
       return
-    signedIn: (user, tenant) -> # test data only
-      @trigger 'success', user, tenant
+    signedIn: (user) -> # test data only
+      @trigger 'success', user
       @hide()
       localStorage.marxo_sign_in_remember = remember = @form.remember.checked
       localStorage.marxo_sign_in_email = if remember then @form.email.value else ''
-      ConsoleView.get().signin user, tenant, remember
+      ConsoleView.get().signin user, remember
       @router.back fallback: 'home' if /signin/i.test location.hash
       @
     show: ->
