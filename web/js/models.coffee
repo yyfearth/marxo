@@ -34,10 +34,12 @@ define 'models', ['module', 'lib/common'], (module) ->
       for key, value of @defaultState
         @state[key] = value
       super options...
-    load: (callback, delay = @_delay) ->
-      if not @_last_load or delay < 1 or (Date.now() - @_last_load) > delay
+    load: (callback, options = {}) ->
+      options = delay: options if typeof options is 'number'
+      options.delay ?= @_delay
+      if not @_last_load or options.delay < 1 or (Date.now() - @_last_load) > options.delay
         @fetch
-          reset: true
+          reset: options.reset ? true
           success: (collection, response, options) =>
             @_last_load = Date.now()
             #@trigger 'loaded', collection
