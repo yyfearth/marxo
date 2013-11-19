@@ -641,7 +641,7 @@ Action
       wf_id = @model.id
       if not node or node.id is 'new'
         node = new Node workflow_id: wf_id
-      else if node instanceof Node and node.id
+      else if node instanceof Node and node.id?
         node = node.clone()
         name = node.get 'name'
         desc = node.get 'desc'
@@ -668,7 +668,7 @@ Action
           console.log 'canceled or ignored create node', action
       @
     editNode: (node) ->
-      return @ unless node?.id
+      return @ unless node?.id?
       @nodeEditor.popup node, (action, node) =>
         if action is 'save'
           node.view.update node
@@ -691,8 +691,8 @@ Action
         @model.trigger 'changed', 'remove_node', node
       @
     createLink: (from, to, callback) ->
-      from = @model.nodes.get from unless from.id and from.has 'name'
-      to = @model.nodes.get to unless to.id and to.has 'name'
+      from = @model.nodes.get from unless from.id? and from.has 'name'
+      to = @model.nodes.get to unless to.id? and to.has 'name'
       key = "#{from.get 'key'}_to_#{to.get 'key'}"
       data = new Link
         workflow_id: @model.id
