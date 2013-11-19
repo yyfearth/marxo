@@ -37,12 +37,13 @@ define 'models', ['module', 'lib/common'], (module) ->
     load: (callback, options = {}) ->
       options = delay: options if typeof options is 'number'
       options.delay ?= @_delay
+      options.reset ?= true
       if not @_last_load or options.delay < 1 or (Date.now() - @_last_load) > options.delay
         @fetch
-          reset: options.reset ? true
+          reset: options.reset
           success: (collection, response, options) =>
             @_last_load = Date.now()
-            #@trigger 'loaded', collection
+            @trigger 'loaded', collection
             callback? collection, 'loaded', response, options
           error: (collection, response, options) =>
             callback? @, 'error', response, options
@@ -175,9 +176,11 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     save: (attributes = {}, options = {}) -> # override for sync ids
       if Backbone.LocalStorage? # for local sync
-        _getAttr = (r) ->
+        _getAttr = (r, i) ->
           attr = r.attributes
-          attr.id ?= r.cid
+          attr.id ?= i
+          if Array.isArray attr.actions
+            action.id ?= i for action, i in attr.actions
           attr
         if @nodes? then attributes.nodes = @nodes.map _getAttr
         if @links? then attributes.links = @links.map _getAttr
@@ -279,6 +282,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     _createNodeRef: (node) ->
       throw new Error 'it must be a Node object' unless node instanceof Node
+      node.set 'workflow_id', @id if @id and not node.has 'workflow_id' # for test data only
       node.workflow = @ if @_name is 'workflow'
       node.inLinks = []
       node.outLinks = []
@@ -293,6 +297,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     _createLinkRef: (link) ->
       throw new Error 'it must be a Link object' unless link instanceof Link
+      link.set 'workflow_id', @id if @id and not link.has 'workflow_id' # for test data only
       link.workflow = @ if @_name is 'workflow'
       prevNodeId = link.get 'prev_node_id'
       nextNodeId = link.get 'next_node_id'
