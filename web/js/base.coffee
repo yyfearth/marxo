@@ -394,7 +394,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       li.className = @itemClassName if @itemClassName
       a = document.createElement 'a'
       a.className = @targetClassName if @targetClassName
-      if model.id
+      if model.id?
         a.href = "##{@urlRoot}:#{model.id}"
         a.textContent = model.get('title') or model.get('name')
         a.dataset.id = model.id

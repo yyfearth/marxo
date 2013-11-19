@@ -200,7 +200,7 @@ Notifications
       li = document.createElement 'li'
       li.className = @itemClassName if @itemClassName
       a = document.createElement 'a'
-      if model.id
+      if model.id?
         a.className = "pointer #{cls}"
         a.dataset.id = model.id
         $.data a, 'model', model
