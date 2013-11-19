@@ -190,17 +190,25 @@ Projects
       return unless wf
       wf = @workflows.get wf unless wf instanceof Workflow
       project = @model
-      if project.nodes?.length or project.has 'node_ids'
+      if project.nodes?.length or project.has 'nodes'
         # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
         # clear nodes and links
-        project.set node_ids: null, nodes: null, link_ids: null, links: null
+        project.set nodes: null, links: null
         project._warp()
       console.log 'selected wf for project', wf.name
-      project.copy wf
-      unless @form.name.value
-        @form.name.value = wf.get 'name'
-        $(@form.name).trigger 'input'
-      @_renderProject project
+      _copy = (wf) =>
+        project.copy wf
+        unless @form.name.value
+          @form.name.value = wf.get 'name'
+          $(@form.name).trigger 'input'
+        @_renderProject project
+        return
+      console.log 'cpy', wf.loaded(), wf
+      if wf.loaded() and wf.nodes?.length
+        _copy wf
+      else
+        wf.fetch reset: true, success: _copy, error: ->
+          alert 'failed to load worklfow ' + wf.get 'name'
       return
     _renderProject: (project) ->
       @sidebar.classList.add 'active'
