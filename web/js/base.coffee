@@ -1,6 +1,6 @@
 "use strict"
 
-define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tenant, User}) ->
+define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tenant, User, Workflow}) ->
 
   ## Utils
 
@@ -414,6 +414,160 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       li.appendChild a
       li
 
+  class WorkflowDiagramView extends View
+    initialize: (options) ->
+      @model = options.model
+      @r = options.radius or 20
+      @w = options.width or 0
+      @h = options.height or 0
+      @t = options.timeout ? 100
+      @max_t = options.maxTimeout
+      @_tick = @_tick.bind @
+      @_draw = @_draw.bind @
+      @_click = @_click.bind @
+      super options
+    _click: (d) -> @trigger 'select', d.model
+    _data: (wf) ->
+      @model = wf
+      r = @r + 1
+      w = @w or @$el.innerWidth()
+      h = @h or @$el.innerHeight()
+      fixed = true
+      @data =
+        nodes: wf.nodes.map (node, i) ->
+          node._idx = i
+          _fixed = node.has 'offset'
+          offset = if _fixed
+            node.get 'offset'
+          else
+            fixed = false
+            x: r * i * 0.56
+            y: h / 2
+          x = r + Math.round((offset.x or 0) / r / 2) * r
+          y = r + Math.round((offset.y or 0) / r / 2) * r
+          w = x if x > w
+          h = y if y > h
+          x: x
+          y: y
+          fixed: _fixed or i is 0
+          index: i + 1
+          model: node
+        links: wf.links.map (link) ->
+          src = link.prevNode._idx
+          tar = link.nextNode._idx
+          source: src
+          target: tar
+          straight: tar > src
+          model: link
+      @w = w + r
+      @h = h + r
+      @fixed = fixed
+      @force.size([@w, @h])
+      @svg.attr('viewBox', '0 0 ' + @w + ' ' + @h)
+      #console.log 'nodes'
+      #console.table @data.nodes
+      #console.log 'links'
+      #console.table @data.links
+      return
+    _init: (callback) -> require ['lib/d3v3'], (@d3) =>
+      # init force layout
+      @force = d3.layout.force().friction(0.5).charge(-800).linkDistance(100).on 'tick', @_tick
+      # init svg
+      svg = @svg = d3.select(@el).html('').append('svg')
+      .attr('preserveAspectRatio', 'xMidYMid meet')
+      svg.append('svg:defs').append('svg:marker')
+      .attr('id', 'end-arrow')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 6)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('svg:path')
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', '#000')
+      # init nodes and links
+      @link = svg.append('svg:g').selectAll('.link')
+      @node = svg.append('svg:g').selectAll('g')
+
+      callback? d3
+      return
+    _tick: ->
+      r = @r
+      padding = r + 7
+      @node.attr 'transform', (d) -> "translate(#{d.x},#{d.y})"
+      @link.attr 'd', (d) ->
+        sourceX = d.source.x
+        sourceY = d.source.y
+        targetX = d.target.x
+        targetY = d.target.y
+        deltaX = targetX - sourceX
+        deltaY = targetY - sourceY
+        if deltaX or deltaY
+          arc = 0
+          dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+          normX = deltaX / dist
+          normY = deltaY / dist
+          sourceX += r * normX
+          sourceY += r * normY
+          targetX -= padding * normX
+          targetY -= padding * normY
+          dist *= 0.75
+          return "M#{sourceX},#{sourceY}L#{targetX},#{targetY}" if d.straight
+        else
+          arc = 1
+          dist = r
+          ++targetX
+          ++targetY
+        "M#{sourceX},#{sourceY}A#{dist},#{dist} 0,#{arc},1 #{targetX},#{targetY}"
+      return
+    _draw: ->
+      r = @r
+      t = @t
+      data = @data
+      force = @force
+      force.nodes(data.nodes).links(data.links)
+      # load nodes
+      link = @link = @link.data(data.links)
+      link.enter().append('path').attr('class', 'link').attr('id', (d) -> 'link_' + d.model.cid)
+      .style('marker-end', 'url(#end-arrow)').on 'click', @_click
+      link.exit().remove()
+      # load links
+      @node = @node.data(data.nodes)
+      node = @node.enter().append('svg:g').call @force.drag()
+      node.attr('id',(d) -> 'node_' + d.model.cid).on 'click', @_click
+      node.append('circle').attr('class', 'node').attr('r', r)
+      node.append('svg:text').attr('x', 0).attr('y', 10).attr('class', 'index').text (d) -> d.index
+      @node.exit().remove()
+      # start
+      force.start()
+      #i = 0
+      #force.tick() while force.alpha() > 0.001 and ++i < 10000
+      #force.stop()
+      # auto stop
+      fixed = @fixed
+      if @max_t and not fixed
+        t = @max_t
+        fixed = false
+      setTimeout (-> force.stop()), t if t and fixed
+      return
+    draw: (wf = @model) ->
+      throw new Error 'unable to draw workflow' unless wf instanceof Workflow
+      @render() unless @rendered
+      unless @d3
+        @_init =>
+          @_data wf
+          @_draw()
+          return
+      else
+        @_data wf if wf isnt @model
+        @_draw()
+      @
+    highlight: (model) -> # must be node or link
+      if d3 = @d3
+        d3.selectAll('svg .active').classed 'active', false
+        d3.select("##{model._name}_#{model.cid}").classed 'active', true if model
+      @
+
   { # exports
   find
   findAll
@@ -429,6 +583,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
   FormDialogView
   FormViewMixin
   FormView
+  WorkflowDiagramView
   Tenant
   User
   }
