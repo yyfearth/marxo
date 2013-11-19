@@ -5,6 +5,7 @@ import marxo.entity.user.TenantChildEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 
+// todo: make this class abstract
 public class Action extends TenantChildEntity {
 	public String eventType;
 	public ObjectId eventId;
@@ -26,10 +27,5 @@ public class Action extends TenantChildEntity {
 	}
 
 	public void act() {
-	}
-
-	@Override
-	public void fillWithDefaultValues() {
-		super.fillWithDefaultValues();
 	}
 }

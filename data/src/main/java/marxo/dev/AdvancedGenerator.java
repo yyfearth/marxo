@@ -52,7 +52,6 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 			for (int i = 0; i < 2; i++) {
 				Tenant tenant = new Tenant();
 				tenant.setName("Tenant " + (i + 1));
-				tenant.fillWithDefaultValues();
 				tenants.add(tenant);
 			}
 		}
@@ -93,21 +92,23 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 			user.setName("Mason");
 			user.setEmail("masonwan@gmail.com");
 			user.setPassword(passwordEncryptor.encrypt("test"));
-
-			for (User u : users) {
-				u.fillWithDefaultValues();
-			}
 		}
 
 		// Workflow
 		{
 			for (int i = 1; i <= 5; i++) {
 				Workflow workflow = new Workflow();
-				workflow.fillWithDefaultValues();
 				workflows.add(workflow);
 
 				workflow.description = StringTool.getRandomString(120);
-				User user = users.get(threadLocalRandom.nextInt(users.size()));
+				User user;
+
+				if (i <= 3) {
+					user = users.get(1);
+				} else {
+					user = users.get(3);
+				}
+
 				ObjectId modifyingUserId = user.id;
 				workflow.modifiedByUserId = modifyingUserId;
 				ObjectId creatingUserId = user.id;
@@ -144,10 +145,8 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 						action.setName("Action " + (k + 1));
 						action.createdByUserId = creatingUserId;
 						action.modifiedByUserId = modifyingUserId;
-						action.fillWithDefaultValues();
 					}
 
-					node.fillWithDefaultValues();
 					workflow.nodeIds.add(node.id);
 				}
 
@@ -166,7 +165,6 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					link.modifiedByUserId = modifyingUserId;
 					link.previousNodeId = previousNode.id;
 					link.nextNodeId = nextNode.id;
-					link.fillWithDefaultValues();
 					workflow.linkIds.add(link.id);
 
 					Condition condition = new Condition();
@@ -175,7 +173,6 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					condition.leftOperand = null;
 					condition.rightOperandType = null;
 					condition.rightOperand = null;
-					condition.fillWithDefaultValues();
 					link.condition = condition;
 				}
 			}

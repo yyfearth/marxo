@@ -12,6 +12,9 @@ public class ErrorJson {
 	@JsonProperty("errors")
 	public List<String> messages = new ArrayList<>();
 
+	public ErrorJson() {
+	}
+
 	public ErrorJson(String... messages) {
 		this.messages = Arrays.asList(messages);
 	}

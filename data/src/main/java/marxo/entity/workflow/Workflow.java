@@ -36,28 +36,4 @@ public class Workflow extends TenantChildEntity {
 		this.template = template;
 		templateId = template.id;
 	}
-
-//	public List<ObjectId> getLinkIds() {
-//		return (linkIds == null) ? new ArrayList<ObjectId>() : linkIds;
-//	}
-//
-//	public List<ObjectId> getNodeIds() {
-//		return (nodeIds == null) ? new ArrayList<ObjectId>() : nodeIds;
-//	}
-//
-//	public List<Node> getNodes() {
-//		return (nodes == null) ? new ArrayList<Node>() : nodes;
-//	}
-//
-//	public List<Link> getLinks() {
-//		return (links == null) ? new ArrayList<Link>() : links;
-//	}
-
-	public void fillWithDefaultValues() {
-		super.fillWithDefaultValues();
-
-		if (description == null) {
-			description = "";
-		}
-	}
 }

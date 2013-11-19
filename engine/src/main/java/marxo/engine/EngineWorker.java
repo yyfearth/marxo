@@ -11,11 +11,15 @@ import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.tool.StringTool;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EngineWorker implements Runnable, Loggable {
+	@Autowired
 	WorkflowDao workflowDao;
+	@Autowired
 	NodeDao nodeDao;
-	EventDao eventDao = new EventDao();
+	@Autowired
+	EventDao eventDao;
 	String name;
 
 	public EngineWorker(String name) {
@@ -26,12 +30,8 @@ public class EngineWorker implements Runnable, Loggable {
 	@Override
 	public void run() {
 		try {
-			workflowDao = new WorkflowDao(null, true);
-			nodeDao = new NodeDao(null);
-
-
 			TaskDao taskDao = new TaskDao();
-			Task task = taskDao.findAndRemove(Lists.<DataPair>newArrayList());
+			Task task = taskDao.findAndRemove();
 
 			if (task == null) {
 				return;

@@ -30,15 +30,6 @@ public class Node extends WorkflowChildEntity {
 		this.workflowId = workflowId;
 	}
 
-	@Override
-	public void fillWithDefaultValues() {
-		super.fillWithDefaultValues();
-
-		if (actions == null) {
-			actions = new ArrayList<>();
-		}
-	}
-
 	public class Position {
 		public double x;
 		public double y;

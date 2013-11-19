@@ -1,5 +1,6 @@
 package marxo.entity.node;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
@@ -8,14 +9,17 @@ import com.restfb.types.FacebookType;
 import marxo.dao.ContentDao;
 import marxo.dao.TenantDao;
 import marxo.entity.content.FacebookContent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Transient;
 
 @JsonIgnoreProperties(value = {"tenantDao", "contentDao"})
 public class PostFacebook extends Action {
 	@Transient
-	TenantDao tenantDao = new TenantDao();
+	@Autowired
+	TenantDao tenantDao;
 	@Transient
-	ContentDao contentDao = new ContentDao();
+	@Autowired
+	ContentDao contentDao;
 
 	@Override
 	public void act() {
@@ -27,14 +31,17 @@ public class PostFacebook extends Action {
 		saveContent();
 	}
 
+	@JsonIgnore
 	public void getTenant() {
 		tenant = tenantDao.findOne(this.tenantId);
 	}
 
+	@JsonIgnore
 	public void getContent() {
 		content = contentDao.findOne(contentId);
 	}
 
+	@JsonIgnore
 	public void saveContent() {
 		contentDao.save(content);
 	}

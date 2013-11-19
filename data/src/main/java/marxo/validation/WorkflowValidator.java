@@ -1,6 +1,7 @@
 package marxo.validation;
 
 import com.google.common.collect.Maps;
+import marxo.dao.NodeDao;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
@@ -21,18 +22,25 @@ project:
 * the startNodeId should not be null
 */
 
-// todo: find out how
 public class WorkflowValidator extends BasicValidator {
 	static protected MongoTemplate mongoTemplate = (MongoTemplate) new ClassPathXmlApplicationContext("classpath*:mongo-configuration.xml").getBean("mongoTemplate");
 
+	/**
+	 * Wire dual-directional link and fill up logical fields.
+	 * @param workflow
+	 */
 	public static void wire(Workflow workflow) {
 		Query query = Query.query(Criteria.where("workflowId").is(workflow.id));
 		List<Link> links = mongoTemplate.find(query, Link.class);
 		List<Node> nodes = mongoTemplate.find(query, Node.class);
 
 		SelectIdFunction selectIdFunction = new SelectIdFunction();
-		Map<ObjectId, Link> linkMap = Maps.uniqueIndex(links, selectIdFunction);
 		Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, selectIdFunction);
+		Map<ObjectId, Link> linkMap = Maps.uniqueIndex(links, selectIdFunction);
+
+		for (Node node : nodes) {
+
+		}
 
 		for (Link link : links) {
 			Node node;

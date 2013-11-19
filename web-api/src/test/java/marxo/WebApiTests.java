@@ -6,16 +6,9 @@ import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
-import marxo.serialization.MarxoObjectMapper;
+import marxo.exception.ErrorJson;
 import marxo.tool.Loggable;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
+import org.bson.types.ObjectId;
 import org.junit.AfterClass;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
@@ -24,12 +17,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.xml.bind.DatatypeConverter;
-import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,9 +26,10 @@ public class WebApiTests implements Loggable {
 	final String email = "yyfearth@gmail.com";
 	final String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
 	User user;
-	String baseUrl = "http://localhost:8080/api/";
-	//	String baseUrl = "http://masonwan.com/marxo/api/";
+	//	String baseUrl = "http://localhost:8080/api/";
+	String baseUrl = "http://masonwan.com/marxo/api/";
 	List<Workflow> workflows = new ArrayList<>();
+	Workflow workflow;
 
 	@BeforeClass
 	public void beforeClass() {
@@ -76,6 +65,21 @@ public class WebApiTests implements Loggable {
 			Assert.assertNotNull(user.modifiedDate);
 			Assert.assertNotNull(user.tenantId);
 			Assert.assertNull(user.getPassword());
+		}
+	}
+
+	@Test(priority = -100, groups = "start")
+	public void wrongAuthentication() throws Exception {
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl)
+					.basicAuth(email, "wrong password")
+					.send();
+			tester
+					.is(HttpStatus.UNAUTHORIZED)
+					.matchContentType(MediaType.JSON_UTF_8);
+			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			Assert.assertNotNull(errorJson);
 		}
 	}
 
@@ -139,7 +143,7 @@ public class WebApiTests implements Loggable {
 			}
 		}
 
-		Workflow workflow = workflows.get(0);
+		workflow = workflows.get(0);
 
 		try (Tester tester = new Tester()) {
 			tester
@@ -180,11 +184,11 @@ public class WebApiTests implements Loggable {
 		}
 	}
 
-	@Test(dependsOnGroups = "start")
+	@Test(dependsOnGroups = "start", dependsOnMethods = "searchWorkflows")
 	public void getNodes() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet(baseUrl + "node")
+					.httpGet(baseUrl + "workflow/" + workflow.id + "/node")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -193,22 +197,38 @@ public class WebApiTests implements Loggable {
 			List<Node> nodes = tester.getContent(new TypeReference<List<Node>>() {
 			});
 			Assert.assertNotNull(nodes);
-//			for (Node node : nodes) {
+			for (Node node : nodes) {
+				Assert.assertEquals(node.workflowId, workflow.id);
 //				Assert.assertEquals(node.tenantId, this.user.tenantId);
 //				for (Action action : node.actions) {
 //					if (action.contextId != null) {
 //						Assert.assertNotNull(action.contextType);
 //					}
 //				}
-//			}
+			}
 		}
 	}
 
-	@Test(dependsOnGroups = "start")
+	@Test(dependsOnGroups = "start", dependsOnMethods = "searchWorkflows")
+	public void getNoNode() throws Exception {
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl + "workflow/" + workflow.id + "/node/" + (new ObjectId()))
+					.basicAuth(email, password)
+					.send();
+			tester
+					.isBadRequest()
+					.matchContentType(MediaType.JSON_UTF_8);
+			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			Assert.assertNotNull(errorJson);
+		}
+	}
+
+	@Test(dependsOnGroups = "start", dependsOnMethods = "searchWorkflows")
 	public void getLinks() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet(baseUrl + "links/")
+					.httpGet(baseUrl + "workflow/" + workflow.id + "/links/")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -217,7 +237,8 @@ public class WebApiTests implements Loggable {
 			List<Link> links = tester.getContent(new TypeReference<List<Link>>() {
 			});
 			Assert.assertNotNull(links);
-//			for (Link link : links) {
+			for (Link link : links) {
+				Assert.assertEquals(link.workflowId, workflow.id);
 //				Assert.assertEquals(link.tenantId, this.user.tenantId);
 //				if (link.condition != null) {
 //					Assert.assertNotNull(link.condition.leftOperand);
@@ -225,81 +246,8 @@ public class WebApiTests implements Loggable {
 //					Assert.assertNotNull(link.condition.rightOperand);
 //					Assert.assertNotNull(link.condition.rightOperandType);
 //				}
-//			}
+			}
 		}
 	}
 }
 
-class Tester implements Closeable {
-	HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-	CloseableHttpClient client = httpClientBuilder.build();
-	CloseableHttpResponse response;
-	MarxoObjectMapper objectMapper = new MarxoObjectMapper();
-	URI uri;
-	BasicHeader authorizationHeader;
-	HttpRequestBase request;
-	HttpEntity httpEntity;
-	MediaType mediaType;
-	String content;
-
-	public Tester httpGet(String url) throws URISyntaxException {
-		this.uri = new URI(url);
-		request = new HttpGet(uri);
-		return this;
-	}
-
-	public Tester basicAuth(String username, String password) {
-		String credentialString = username + ":" + password;
-		String credential = DatatypeConverter.printBase64Binary(credentialString.getBytes());
-		authorizationHeader = new BasicHeader("Authorization", "Basic " + credential);
-		request.addHeader(authorizationHeader);
-		return this;
-	}
-
-	public Tester send() throws IOException {
-		response = client.execute(request);
-		httpEntity = response.getEntity();
-		mediaType = MediaType.parse(httpEntity.getContentType().getValue());
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		httpEntity.writeTo(stream);
-		content = new String(stream.toByteArray());
-		return this;
-	}
-
-	public Tester isOk() {
-		StatusLine statusLine = response.getStatusLine();
-		Assert.assertEquals(statusLine.getStatusCode(), HttpStatus.OK.value(), "Status: " + statusLine.getReasonPhrase() + " Message: " + content);
-		return this;
-	}
-
-	public Tester matchContentType(MediaType mediaType) {
-		assert this.mediaType.type().equals(mediaType.type());
-		assert this.mediaType.subtype().equals(mediaType.subtype());
-		return this;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public <T> T getContent(Class<T> tClass) throws IOException {
-		return objectMapper.readValue(content, tClass);
-	}
-
-	/**
-	 * Use this to get content in class with generic type.
-	 */
-	public <T> T getContent(TypeReference<T> typeReference) throws IOException {
-		return objectMapper.readValue(content, typeReference);
-	}
-
-	@Override
-	public void close() throws IOException {
-		if (client != null) {
-			client.close();
-		}
-		if (response != null) {
-			response.close();
-		}
-	}
-}

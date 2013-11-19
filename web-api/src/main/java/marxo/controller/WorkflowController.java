@@ -3,10 +3,7 @@ package marxo.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import marxo.dao.LinkDao;
-import marxo.dao.NodeDao;
-import marxo.dao.WorkflowChildDao;
-import marxo.dao.WorkflowDao;
+import marxo.dao.*;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,23 +25,36 @@ import java.util.List;
 @Controller
 @RequestMapping("workflow{:s?}")
 public class WorkflowController extends TenantChildController<Workflow> {
-	static final ModifiedDateComparator modifiedDateComparator = new ModifiedDateComparator();
 	@Autowired
 	NodeController nodeController;
 	@Autowired
 	LinkController linkController;
+	@Autowired
+	NodeDao nodeDao;
+	@Autowired
+	LinkDao linkDao;
+
+	@Autowired
+	protected WorkflowController(WorkflowDao dao) {
+		super(dao);
+	}
 
 	@Override
 	public void preHandle() {
 		super.preHandle();
-		dao = new WorkflowDao(user.tenantId);
+		daoContext = daoContext.addContext("isProject", false);
 	}
 
 	@Override
-	public Workflow read(@PathVariable String idString) {
+	public Workflow read(@PathVariable String idString) throws Exception {
 		Workflow workflow = super.read(idString);
-		List<Node> nodes = getAllEntities(NodeDao.class, workflow.id);
-		List<Link> links = getAllEntities(LinkDao.class, workflow.id);
+
+		DaoContext daoContext = DaoContext.newInstance().addContext(
+				new DaoContextData("workflowId", workflow.id),
+				new DaoContextData("tenantId", user.tenantId)
+		);
+		List<Node> nodes = nodeDao.find(daoContext);
+		List<Link> links = linkDao.find(daoContext);
 		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
 		Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
 		workflow.nodes = Lists.newArrayList(workflowNodes);
@@ -59,8 +68,10 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	Search
 	 */
 
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
 	// todo: implemented created and modified search APIs
-	@Override
 	public List<Workflow> search() {
 		String name = request.getParameter("name");
 		boolean hasName = !Strings.isNullOrEmpty(name);
@@ -68,18 +79,26 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		List<Workflow> workflows;
 
 		if (hasName) {
-			workflows = dao.findByName(name);
+			workflows = dao.findByName(name, daoContext);
 		} else {
-			workflows = dao.find();
+			workflows = dao.find(daoContext);
 		}
 
-		Collections.sort(workflows, modifiedDateComparator);
+		Collections.sort(workflows, ModifiedDateComparator.SINGLETON);
 		return workflows;
 	}
 
 	/*
 	Sub-resources
 	 */
+
+	protected DaoContext getEntityContext(ObjectId workflowId) {
+		DaoContext daoContext = DaoContext.newInstance().addContext(
+				new DaoContextData("workflowId", workflowId),
+				new DaoContextData("tenantId", user.tenantId)
+		);
+		return daoContext;
+	}
 
 	/*
 	Node
@@ -90,7 +109,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Node> readAllNodes(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		return getAllEntities(NodeDao.class, workflowId);
+		return nodeDao.find(getEntityContext(workflowId));
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.POST)
@@ -98,6 +117,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Node createNode(@PathVariable String workflowIdString, @Valid @RequestBody Node node, HttpServletResponse response) throws Exception {
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		nodeController.daoContext = getEntityContext(workflowId);
 		node = nodeController.create(node, response);
 
 		return node;
@@ -107,6 +129,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Node readNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		nodeController.daoContext = getEntityContext(workflowId);
 		Node node = nodeController.read(nodeIdString);
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
 
@@ -118,6 +142,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Node updateNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString, @Valid @RequestBody Node node) throws Exception {
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		nodeController.daoContext = getEntityContext(workflowId);
 		node = nodeController.update(nodeIdString, node);
 
 		return node;
@@ -127,6 +154,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Node deleteNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		nodeController.daoContext = getEntityContext(workflowId);
 		return nodeController.delete(nodeIdString);
 	}
 
@@ -139,7 +168,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Link> readAllLinks(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		return getAllEntities(LinkDao.class, workflowId);
+		return linkDao.find(getEntityContext(workflowId));
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.POST)
@@ -147,6 +176,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Link createLink(@PathVariable String workflowIdString, @Valid @RequestBody Link link, HttpServletResponse response) throws Exception {
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
+
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		linkController.daoContext = getEntityContext(workflowId);
 		link = linkController.create(link, response);
 
 		return link;
@@ -156,6 +188,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Link readLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		linkController.daoContext = getEntityContext(workflowId);
 		Link link = linkController.read(linkIdString);
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
 
@@ -167,6 +201,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Link updateLink(@PathVariable String workflowIdString, @PathVariable String linkIdString, @Valid @RequestBody Link link) throws Exception {
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
+
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		linkController.daoContext = getEntityContext(workflowId);
 		link = linkController.update(linkIdString, link);
 
 		return link;
@@ -176,21 +213,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Link deleteLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
+		ObjectId workflowId = new ObjectId(workflowIdString);
+		linkController.daoContext = getEntityContext(workflowId);
 		return linkController.delete(linkIdString);
-	}
-
-	/*
-	Utilities
-	 */
-
-	// Why am I doing this? Just for fun...
-	<Entity extends WorkflowChildEntity> List<Entity> getAllEntities(Class<? extends WorkflowChildDao> daoClass, ObjectId workflowId) {
-		try {
-			WorkflowChildDao workflowChildDao = daoClass.getDeclaredConstructor(ObjectId.class, ObjectId.class).newInstance(workflowId, user.tenantId);
-			return workflowChildDao.find();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ArrayList<>();
-		}
 	}
 }

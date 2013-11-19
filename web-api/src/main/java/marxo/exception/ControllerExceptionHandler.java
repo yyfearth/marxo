@@ -59,7 +59,7 @@ public class ControllerExceptionHandler implements Loggable {
 	public ResponseEntity<ErrorJson> handleMethodNotAllowed(Exception e) {
 		logger.debug(e.getMessage());
 
-		return new ResponseEntity<>(new ErrorJson(String.format("Your shit is not allowed (%s)", e.getMessage())), HttpStatus.METHOD_NOT_ALLOWED);
+		return new ResponseEntity<>(new ErrorJson(String.format("Your shit is not allowed (%s) %s", e.getMessage(), StringTool.exceptionToString(e))), HttpStatus.METHOD_NOT_ALLOWED);
 	}
 
 	@ExceptionHandler({NoSuchRequestHandlingMethodException.class, IllegalArgumentException.class})

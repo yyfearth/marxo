@@ -60,7 +60,7 @@ public class DataModuleTest {
 		MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
 		TenantDao tenantDao = new TenantDao();
 		List<Tenant> tenants = tenantDao.find();
-		WorkflowDao workflowDao = new WorkflowDao(tenants.get(0).id);
+		WorkflowDao workflowDao = new WorkflowDao();
 		List<Workflow> workflows = workflowDao.find();
 		assert workflowDao.count() != 0;
 	}

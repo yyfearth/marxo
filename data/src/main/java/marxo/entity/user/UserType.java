@@ -2,19 +2,23 @@ package marxo.entity.user;
 
 public enum UserType {
 	/**
+	 * For development only.
+	 */
+	UNKNOWN,
+	/**
 	 * User who can manage other users.
 	 */
-	Admin,
+	ADMIN,
 	/**
 	 * User who can interact with the system's form.
 	 */
-	Participant,
+	PARTICIPANT,
 	/**
 	 * User who can interact with the system's form; defined by publishers.
 	 */
-	Evaluator,
+	EVALUATOR,
 	/**
 	 * User who manage workflow.
 	 */
-	Publisher,
+	PUBLISHER,
 }

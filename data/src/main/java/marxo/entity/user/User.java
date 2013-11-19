@@ -13,7 +13,7 @@ public class User extends TenantChildEntity implements Serializable {
 	@JsonIgnore
 	protected String password;
 	protected String email;
-	protected UserType userType;
+	protected UserType userType = UserType.UNKNOWN;
 
 	public String getPassword() {
 		return password;
@@ -29,16 +29,10 @@ public class User extends TenantChildEntity implements Serializable {
 
 	public void setEmail(String email) {
 		this.email = email;
+		this.key = email;
 	}
 
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
-	}
-
-	@Override
-	public void fillWithDefaultValues() {
-		key = email;
-
-		super.fillWithDefaultValues();
 	}
 }
