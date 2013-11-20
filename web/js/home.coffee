@@ -22,9 +22,9 @@ NotificationListView
     initialize: (options) ->
       super options
       list = @notificationList = new NotificationListView el: find('.sidebar-list', @el), parent: @
-      @_render = @_render.bind @
       @viewEl = find '#home_view', @el
-      @listenTo @collection, 'reset', _.delay @_render, 100
+      @on 'loaded', @_render.bind @
+      @listenTo @collection, 'reset', => @delayedTrigger 'loaded', 100
       @listenTo @collection, 'add', (project) =>
         view = @views.index['_idx_' + project.cid] = new ProjectOverview model: project, parent: @
         $(@viewEl).prepend view.render().$el
@@ -54,8 +54,7 @@ NotificationListView
       @viewEl.appendChild list
       return
     render: ->
-      @collection.load (ignored, resp) =>
-        @_render() if @rendered and resp is 'loaded'
+      @collection.load => @delayedTrigger 'loaded', 100
       @notificationList.fetch()
       super
 
