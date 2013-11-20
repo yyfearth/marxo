@@ -428,6 +428,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @_click = @_click.bind @
       @_mouseover = @_mouseover.bind @
       @_mouseleave = @_mouseleave.bind @
+      @draw = @draw.bind @
       super options
     _click: (d) -> @trigger 'select', d.model
     _data: (wf) ->
@@ -570,10 +571,20 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         fixed = true
       setTimeout (-> force.stop()), t if t and fixed
       return
+    clear: ->
+      if @d3
+        @model = {}
+        @data = links: [], nodes: []
+        @w = @h = 0
+        @_draw()
+      @
     draw: (wf = @model) ->
       throw new Error 'unable to draw workflow' unless wf instanceof Workflow
       @render() unless @rendered
-      unless @d3
+      @w = @h = 0
+      unless wf.loaded
+        wf.fetch reset: true, success: @draw
+      else unless @d3
         @_init =>
           @_data wf
           @_draw()
