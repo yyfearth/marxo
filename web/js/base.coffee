@@ -426,6 +426,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @_tick = @_tick.bind @
       @_draw = @_draw.bind @
       @_click = @_click.bind @
+      @_mouseover = @_mouseover.bind @
+      @_mouseleave = @_mouseleave.bind @
+      @draw = @draw.bind @
       super options
     _click: (d) -> @trigger 'select', d.model
     _data: (wf) ->
@@ -450,14 +453,16 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           h = y if y > h
           x: x
           y: y
+          title: "Node #{i + 1}: #{node.get 'name'}"
           fixed: _fixed or i is 0
           index: i + 1
           model: node
-        links: wf.links.map (link) ->
+        links: wf.links.map (link, i) ->
           src = link.prevNode._idx
           tar = link.nextNode._idx
           source: src
           target: tar
+          title: "Link #{i + 1}: #{link.name()}"
           straight: tar > src
           model: link
       @w = w + r + r
@@ -489,8 +494,12 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       # init nodes and links
       @link = svg.append('svg:g').selectAll('.link')
       @node = svg.append('svg:g').selectAll('g')
-
+      # init tooltip
+      @tooltip = d3.select(@el).append('div')
+      .attr('class', 'tooltip')
+      .style('opacity', 0)
       callback? d3
+      @_init = -> false # once
       return
     _tick: ->
       r = @r
@@ -521,6 +530,15 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           ++targetY
         "M#{sourceX},#{sourceY}A#{dist},#{dist} 0,#{arc},1 #{targetX},#{targetY}"
       return
+    _mouseover: (d) ->
+      pos = @d3.mouse(@el)
+      # console.log 'over', d, pos, @tooltip
+      @tooltip.transition().duration(200).style('opacity', .9)
+      .style('left', pos[0] + 'px')
+      .style('top', pos[1] + 'px')
+      .text(d.title)
+    _mouseleave: ->
+      @tooltip.transition().duration(500).style('opacity', 0)
     _draw: ->
       r = @r
       t = @t
@@ -530,12 +548,14 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       # load nodes
       link = @link = @link.data(data.links)
       link.enter().append('path').attr('class', 'link').attr('id', (d) -> 'link_' + d.model.cid)
-      .style('marker-end', 'url(#end-arrow)').on 'click', @_click
+      .style('marker-end', 'url(#end-arrow)').on('click', @_click)
+      .on('mouseover', @_mouseover).on('mouseleave', @_mouseleave)
       link.exit().remove()
       # load links
       @node = @node.data(data.nodes)
       node = @node.enter().append('svg:g').call @force.drag()
-      node.attr('id',(d) -> 'node_' + d.model.cid).on 'click', @_click
+      node.attr('id',(d) -> 'node_' + d.model.cid).on('click', @_click)
+      .on('mouseover', @_mouseover).on('mouseleave', @_mouseleave)
       node.append('circle').attr('class', 'node').attr('r', r)
       node.append('svg:text').attr('x', 0).attr('y', 10).attr('class', 'index').text (d) -> d.index
       @node.exit().remove()
@@ -551,10 +571,20 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         fixed = true
       setTimeout (-> force.stop()), t if t and fixed
       return
+    clear: ->
+      if @d3
+        @model = {}
+        @data = links: [], nodes: []
+        @w = @h = 0
+        @_draw()
+      @
     draw: (wf = @model) ->
       throw new Error 'unable to draw workflow' unless wf instanceof Workflow
       @render() unless @rendered
-      unless @d3
+      @w = @h = 0
+      unless wf.loaded
+        wf.fetch reset: true, success: @draw
+      else unless @d3
         @_init =>
           @_data wf
           @_draw()
