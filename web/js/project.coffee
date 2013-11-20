@@ -375,7 +375,6 @@ Projects
       @
 
   class WorkflowCell extends Backgrid.UriCell
-    collection: Workflows.workflows
     initialize: (options) ->
       super options
       @urlRoot = @column.get('urlRoot') or @urlRoot
@@ -386,7 +385,7 @@ Projects
       unless id
         console.warn 'workflow cell cannot find template_id for project',  @model
         @$el.text '(None)'
-      else @collection.find workflowId: id, callback: ({workflow}) =>
+      else Workflows.find workflowId: id, callback: ({workflow}) =>
         if workflow
           name = _.escape workflow.get 'name'
           @$el.addClass('workflow-link-cell').append $('<a>',
