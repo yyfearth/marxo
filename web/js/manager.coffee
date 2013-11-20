@@ -126,7 +126,7 @@ Workflows
           name = _.escape workflow.get 'name'
           @$el.addClass('workflow-link-cell').append $('<a>',
             tabIndex: -1
-            href: "##{workflow._name}/#{id}" + id
+            href: "##{workflow._name}/#{id}"
           ).attr('title', name).text name
         else
           console.warn 'workflow/project not found', id
