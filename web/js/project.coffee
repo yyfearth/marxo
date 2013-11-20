@@ -39,10 +39,13 @@ Projects
           throw new Error 'open project with a name or id is needed' unless name
           Projects.find workflowId: name, callback: ({workflow}) =>
             throw new Error "project with id #{name} cannot found" unless workflow
-            #@editor.edit workflow, sub
-            @switchTo @viewer
-            @viewer.load name
-            @viewer.focus sub if sub
+            if sub?.edit
+              @editor.edit workflow, sub
+            else
+              @switchTo @viewer
+              @viewer.load workflow
+              @viewer.focus sub if sub
+            return
       @
 
   # Editor
@@ -345,18 +348,19 @@ Projects
     initialize: (options) ->
       @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
       super options
-    load: (id) ->
-      console.log 'load project', id
+    load: (model) ->
+      console.log 'load project', project
       @stopListening @model if @model
-      model = @model = Projects.projects.get(id) or new Project {id}
+      model = Projects.projects.get(model) or new Project {model} if typeof model is 'string'
+      @model = model
       @listenTo model, 'loaded', @_render.bind @
       if model.loaded
         @_render model
       else
         model.load()
       @
-    _render: (@model) ->
-      @wfDiagram.draw model
+    _render: ->
+      @wfDiagram.draw @model
       return
     focus: (opt = {}) ->
       {link, node, action} = opt
