@@ -80,6 +80,7 @@ NotificationListView
       obj.counts = "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links)"
       for key, value of obj
         @_find(key)?.textContent = value
+      find('a.btn-view', @el)?.href = '#project/' + project.id
       @diagram.draw project
       return
     remove: ->
