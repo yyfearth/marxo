@@ -86,6 +86,7 @@ Projects
       wfPreview = find '#wf_preview', @el
       @$wfPreview = $ wfPreview
       @wfDiagram = new WorkflowDiagramView el: wfPreview
+      @listenTo @wfDiagram, 'select', @navTo.bind @
       @$nodeLinkSection = $ find 'section.node-link', @el
       @$projectForm = $ @form
       @$actions = $ find '.node-actions', @el
@@ -198,9 +199,11 @@ Projects
       console.log 'selected wf for project', wf.name
       _copy = (wf) =>
         project.copy wf
+        project.set 'status', 'NONE'
         unless @form.name.value
           @form.name.value = wf.get 'name'
           $(@form.name).trigger 'input'
+        @form.desc.value = "Created from workflow #{wf.get 'name'}" unless @form.desc.value
         @_renderProject project
         return
       console.log 'cpy', wf.loaded(), wf
@@ -372,7 +375,6 @@ Projects
       @
 
   class WorkflowCell extends Backgrid.UriCell
-    collection: Workflows.workflows
     initialize: (options) ->
       super options
       @urlRoot = @column.get('urlRoot') or @urlRoot
@@ -383,7 +385,7 @@ Projects
       unless id
         console.warn 'workflow cell cannot find template_id for project',  @model
         @$el.text '(None)'
-      else @collection.find workflowId: id, callback: ({workflow}) =>
+      else Workflows.find workflowId: id, callback: ({workflow}) =>
         if workflow
           name = _.escape workflow.get 'name'
           @$el.addClass('workflow-link-cell').append $('<a>',
