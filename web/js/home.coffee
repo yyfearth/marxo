@@ -22,9 +22,17 @@ NotificationListView
     initialize: (options) ->
       super options
       list = @notificationList = new NotificationListView el: find('.sidebar-list', @el), parent: @
-      @_render = @_render.bind @
       @viewEl = find '#home_view', @el
-      @listenTo @collection, 'reset add remove', _.delay @_render, 100
+      @on 'loaded', @_render.bind @
+      @listenTo @collection, 'reset', => @delayedTrigger 'loaded', 100
+      @listenTo @collection, 'add', (project) =>
+        view = @views.index['_idx_' + project.cid] = new ProjectOverview model: project, parent: @
+        $(@viewEl).prepend view.render().$el
+        @views.unshift view
+        return
+      @listenTo @collection, 'remove', (project) =>
+        @views['_idx_' + project.cid]?.remove()
+        return
       _auto_update = list.autoUpdate.bind list
       _auto_update true
       @on 'activate', =>
@@ -36,16 +44,17 @@ NotificationListView
     _render: ->
       @views?.forEach (view) -> view.remove()
       list = document.createDocumentFragment()
+      index = {}
       @views = @collection.map (project) =>
-        view = new ProjectOverview model: project, parent: @
-        view.render()
-        list.appendChild view.el
+        view = index['_idx_' + project.cid] = new ProjectOverview model: project, parent: @
+        list.appendChild view.render().el
+        view
+      @views.index = index
       @viewEl.innerHTML = ''
       @viewEl.appendChild list
       return
     render: ->
-      @collection.load (ignored, resp) =>
-        @_render() if @rendered and resp is 'loaded'
+      @collection.load => @delayedTrigger 'loaded', 100
       @notificationList.fetch()
       super
 
@@ -71,10 +80,10 @@ NotificationListView
       obj.counts = "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links)"
       for key, value of obj
         @_find(key)?.textContent = value
+      find('a.btn-view', @el)?.href = '#project/' + project.id
       @diagram.draw project
       return
     remove: ->
-      @stopListening @model
       @diagram.remove()
       @el.innerHTML = ''
       super
