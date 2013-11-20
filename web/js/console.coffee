@@ -264,8 +264,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
     routes:
       'workflow/:id(/link/:link)(/node/:node)(/action/:action)': (id, link, node, action) ->
         @show 'workflow', id, {link, node, action}
-      'project/:id(/link/:link)(/node/:node)(/action/:action)': (id, link, node, action) ->
-        @show 'project', id, {link, node, action}
+      'project/:id(/link/:link)(/node/:node)(/action/:action)(/:edit)': (id, link, node, action, edit) ->
+        @show 'project', id, {link, node, action, edit: edit is 'edit'}
       'content/:id(/:action)': (id, action) ->
         @show 'content', id, action
       'config/:name(/:sub)': (name, sub) ->
