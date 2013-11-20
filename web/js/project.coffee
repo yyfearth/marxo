@@ -61,6 +61,12 @@ Projects
         @$wfbtns.hide()
         @sidebar.classList.remove 'active'
         @btnSave.disabled = true
+        unless wf
+          @wfDiagram.clear()
+        else
+          model = $(e.currentTarget).find(':selected').data 'model'
+          console.log 'data', model
+          @wfDiagram.draw model if model
         if wf and cur
           if wf is cur
             @sidebar.classList.add 'active'
@@ -265,6 +271,7 @@ Projects
           op = document.createElement 'option'
           op.value = wf.id
           op.textContent = wf.get 'name'
+          $(op).data 'model', wf
           unless wf.has 'tanent_id'
             shared.appendChild op
           else
