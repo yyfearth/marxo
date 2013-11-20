@@ -39,10 +39,10 @@ Projects
           throw new Error 'open project with a name or id is needed' unless name
           Projects.find workflowId: name, callback: ({workflow}) =>
             throw new Error "project with id #{name} cannot found" unless workflow
-            @editor.edit workflow, sub
-      # @switchTo @viewer
-      # @viewer.load project
-      # @viewer.focus sub
+            #@editor.edit workflow, sub
+            @switchTo @viewer
+            @viewer.load name
+            @viewer.focus sub if sub
       @
 
   # Editor
@@ -343,10 +343,21 @@ Projects
 
   class ProjectViewerView extends InnerFrameView
     initialize: (options) ->
+      @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
       super options
-    load: (name) ->
-      console.log 'load project', name
+    load: (id) ->
+      console.log 'load project', id
+      @stopListening @model if @model
+      model = @model = Projects.projects.get(id) or new Project {id}
+      @listenTo model, 'loaded', @_render.bind @
+      if model.loaded
+        @_render model
+      else
+        model.load()
       @
+    _render: (@model) ->
+      @wfDiagram.draw model
+      return
     focus: (opt = {}) ->
       {link, node, action} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
