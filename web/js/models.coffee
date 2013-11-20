@@ -338,7 +338,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     model: Workflow
     url: Workflow::urlRoot
     _delay: 600000 # 10 min
-    find: ({workflowId, nodeId, linkId, actionId, callback}) ->
+    find: ({workflowId, nodeId, linkId, actionId, callback, nofetch}) ->
       throw new Error 'workflowId is required' unless workflowId
       workflow = @get workflowId
       _find = (workflow) ->
@@ -353,10 +353,12 @@ define 'models', ['module', 'lib/common'], (module) ->
           callback? {workflow}
       if workflow
         _find workflow
-      else
+      else if nofetch is true
         new @model(id: workflowId).fetch
           success: _find
           error: -> callback? {}
+      else
+        callback? {}
       @
 
   class ChangeObserableEntity extends Entity
