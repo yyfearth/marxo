@@ -162,7 +162,7 @@ define('lib/backbone.localstorage', ['lib/common'], function () {
 		var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
 
 		try {
-			console.log('Sync', method, url, model)
+			console.log('Sync Req:', method, url, model.toJSON());
 			switch (method) {
 				case "read":
 					resp = model.id != undefined ? store.find(model) : store.findAll();
@@ -193,14 +193,15 @@ define('lib/backbone.localstorage', ['lib/common'], function () {
 					options.success(resp);
 				}
 			}
+			console.log('Sync Resp:', method, url);
+			console[model.length ? 'table' : 'dir'](model.toJSON());
 			if (syncDfd) {
 				syncDfd.resolve(resp);
 			}
-
 		} else {
 			errorMessage = errorMessage ? errorMessage
 				: "Record Not Found";
-
+			console.error('Error:', errorMessage);
 			if (options && options.error)
 				if (Backbone.VERSION === "0.9.10") {
 					options.error(model, errorMessage, options);
