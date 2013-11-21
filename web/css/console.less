@@ -1,5 +1,5 @@
 @import 'bootstrap';
-@import 'bootstrap-fileupload.less';
+@import 'bootstrap-fileupload';
 @import 'backgrid';
 @import 'font-icon';
 @import 'jquery-ui';
@@ -100,16 +100,6 @@ ul.action-bar {
   }
   .nav {
     margin-bottom: 0;
-  }
-}
-
-.page-header {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-  h3 {
-    display: inline;
   }
 }
 
@@ -363,20 +353,25 @@ ul.action-bar {
       text-overflow: ellipsis;
     }
 
+    .page-header {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      margin: 0 0 10px;
+      padding-bottom: 0;
+      h3 {
+        display: inline;
+        margin: 0 .2em;
+        small {
+          margin-left: 1em;
+        }
+      }
+    }
+
     .workspace {
       margin-left: 13px;
       overflow: auto;
-
-      .page-header {
-        margin: 0 0 10px;
-        padding-bottom: 0;
-        h3 {
-          margin: 0 .2em;
-          small {
-            margin-left: 1em;
-          }
-        }
-      }
 
       // dropdown menu fix
       .pull-right {
