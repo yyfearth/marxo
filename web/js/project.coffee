@@ -354,6 +354,10 @@ Projects
   class ProjectViewerView extends InnerFrameView
     initialize: (options) ->
       @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
+      @$title = $ find '.project-name', @el
+      @$desc = $ find '.project-desc', @el
+      @$status = $ find '.label-status > span', @el
+      @btnEdit = find '.btn-edit', @el
       super options
     load: (model) ->
       console.log 'load project', project
@@ -367,7 +371,13 @@ Projects
         model.load()
       @
     _render: ->
-      @wfDiagram.draw @model
+      project = @model
+      @$title.text project.get 'name'
+      @$desc.text "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links) #{project.get 'desc'}"
+      @$status.text project.get('status') or 'NONE'
+      # TODO: coloring status label
+      @btnEdit.href = "#project/#{project.id}/edit"
+      @wfDiagram.draw project
       return
     focus: (opt = {}) ->
       {link, node, action} = opt
