@@ -7,22 +7,41 @@ define 'models', ['module', 'lib/common'], (module) ->
   ROOT = module.config().BASE_URL
   ROOT = ROOT[...-1] if ROOT[-1..] is '/'
 
-  _setAuth = (options) ->
+  syncValidation = (method, model, options = {}) ->
     options.headers ?= {}
     options.headers.Accept ?= 'application/json'
     options.headers.Authorization ?= User.current?.get('credential') or ''
-    options
+    throw new Error 'no auth, need user login' unless options.headers.Authorization
+    if method isnt 'read'
+      cur_tenant_id = User.current?.get 'tenant_id'
+      throw new Error 'cannot create or update or delete without login user' unless cur_tenant_id
+      switch method
+        when 'create', 'update'
+          unless model.has 'tenant_id'
+            model.set 'tenant_id', cur_tenant_id
+          else if cur_tenant_id isnt model.get 'tenant_id'
+            throw new Error 'cannot replace existing tenant_id'
+        when 'delete'
+          if cur_tenant_id isnt model.get 'tenant_id'
+            throw new Error 'cannot delete item not belong to your tenant'
+        when 'read'
+          break
+        else
+          throw new Error 'unsupported method ' + method
+    return
 
   class Entity extends Backbone.Model
     sync: (method, model, options = {}) ->
-      super method, model, _setAuth options
+      syncValidation method, model, options
+      super method, model, options
 
   # just a alias, otherwise PageableCollection will not extends Collection
   Collection = Backbone.Collection
 
   class SimpleCollection extends Collection
     sync: (method, model, options = {}) ->
-      super method, model, _setAuth options
+      syncValidation method, model, options
+      super method, model, options
 
   class ManagerCollection extends Backbone.PageableCollection
     mode: 'client'
@@ -51,7 +70,8 @@ define 'models', ['module', 'lib/common'], (module) ->
         callback? @, 'skipped'
       @
     sync: (method, model, options = {}) ->
-      super method, model, _setAuth options
+      syncValidation method, model, options
+      super method, model, options
 
   ## Tenant / User
 
