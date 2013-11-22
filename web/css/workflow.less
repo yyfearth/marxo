@@ -39,7 +39,7 @@
     line-height: 5em;
     position: absolute;
     white-space: nowrap;
-    padding: 0.5em 1em;
+    padding: .5em 1em;
     cursor: pointer;
     margin: 0;
     z-index: 20;
@@ -60,6 +60,23 @@
       cursor: move;
     }
 
+    &.node-start {
+      padding: .7em;
+      height: auto;
+      line-height: 1em;
+      min-width: 0;
+      font-weight: bold;
+      background-color: #eea;
+      border-radius: 2em;
+      left: 25px;
+      top: 25px;
+      &:hover {
+        -webkit-box-shadow: 2px 2px 13px #888;
+        -moz-box-shadow: 2px 2px 13px #888;
+        box-shadow: 2px 2px 13px #888;
+        opacity: 1;
+      }
+    }
   }
 
   .link {
@@ -269,6 +286,8 @@
   .tooltip {
     position: absolute;
     text-align: center;
+    margin-top: -1.5em;
+    margin-left: .5em;
     padding: 5px .5em;
     font: 12px sans-serif;
     background: #fff;
