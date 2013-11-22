@@ -17,14 +17,16 @@
   .page-header
     .action-buttons.pull-right
       a.btn(href='#workflow/mgr', title='Go back to Workflow Manager', data-placement='bottom') Back to List
+      select.btn#wf_orientation(name='orientation', title='Orientation', data-placement='bottom')
+        option(value='h') Horizontal
+        option(value='v') Vertical
       button.btn.btn-danger.wf-reset(title='Reset workflow to previous save', data-placement='bottom') Reset
       button.btn.btn-primary.wf-save(title='Save the workflow', data-placement='bottom') Save
     h3#workflow_header(title='Change Workflow Name and Description', data-placement='bottom')
       span.editable-name
       small.editable-desc
   #workflow_view.content-view
-  #workflow_alert.alert.hide
-  div.tpl#t_popover
+  #t_popover.tpl
     .popover-desc {desc}
     .popover-buttons
       button.btn.btn-danger.btn-delete.pull-left Delete
