@@ -419,8 +419,6 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
     initialize: (options) ->
       @model = options.model
       @r = options.radius or 20
-      @w = options.width or 0
-      @h = options.height or 0
       @t = options.timeout ? 100
       @max_t = options.maxTimeout
       @_tick = @_tick.bind @
@@ -430,25 +428,25 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @_mouseleave = @_mouseleave.bind @
       @draw = @draw.bind @
       super options
-    _click: (d) -> @trigger 'select', d.model
+    _click: (d) -> @trigger 'select', d.model, @model
     _data: (wf) ->
       @model = wf
       r = @r + 1
-      w = @w or @$el.innerWidth()
-      h = @h or @$el.innerHeight()
+      w = 0
+      h = 0
       fixed = true
       @data =
         nodes: wf.nodes.map (node, i) ->
           node._idx = i
           _fixed = node.has 'offset'
-          offset = if _fixed
+          {x, y} = if _fixed
             node.get 'offset'
           else
             fixed = false
             x: r * i * 0.56
             y: h / 2
-          x = r + Math.round((offset.x or 0) / r / 2) * r
-          y = r + Math.round((offset.y or 0) / r / 2) * r
+          x = r + Math.round((x or 0) / r / 2) * r
+          y = r + Math.round((y or 0) / r / 2) * r
           w = x if x > w
           h = y if y > h
           x: x
@@ -465,8 +463,15 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           title: "Link #{i + 1}: #{link.name()}"
           straight: tar > src
           model: link
-      @w = w + r + r
-      @h = h + r + r
+      if fixed and h > w
+        [w, h] = [h, w]
+        @data.nodes.forEach (node) ->
+          x = node.x
+          node.x = node.y
+          node.y = x
+          return
+      @w = Math.max @$el.innerWidth(), w + r + r
+      @h = Math.max @$el.innerHeight(), h + r + r
       @fixed = fixed
       @force.size([@w, @h])
       @svg.attr('viewBox', '0 0 ' + @w + ' ' + @h)
