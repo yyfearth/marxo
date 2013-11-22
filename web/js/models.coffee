@@ -14,7 +14,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     throw new Error 'no auth, need user login' unless options.headers.Authorization
     if method isnt 'read'
       cur_tenant_id = User.current?.get 'tenant_id'
-      throw new Error 'cannot create or update or delete without login user' unless cur_tenant_id
+      throw new Error 'cannot create or update or delete without login user' unless cur_tenant_id?
       switch method
         when 'create', 'update'
           unless model.has 'tenant_id'
