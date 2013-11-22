@@ -44,11 +44,10 @@ public class EngineWorker implements Runnable, Loggable {
 
 				}
 
-				if (action.eventId == null) {
+				if (action.event == null) {
 					// do it immediately
 				} else {
-					Event event = mongoTemplate.findById(action.eventId, Event.class);
-					if (event.getStartTime() == null || event.getStartTime().isBeforeNow()) {
+					if (action.event.getStartTime() == null || action.event.getStartTime().isBeforeNow()) {
 						// do it immediately
 					} else {
 						// add another task to the dao
