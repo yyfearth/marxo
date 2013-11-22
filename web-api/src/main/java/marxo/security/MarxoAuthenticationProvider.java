@@ -1,11 +1,14 @@
 package marxo.security;
 
-import marxo.dao.DaoContext;
-import marxo.dao.UserDao;
 import marxo.entity.user.User;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +24,8 @@ import java.util.List;
 
 @Component
 public class MarxoAuthenticationProvider implements AuthenticationProvider, Loggable {
-	UserDao userDao;
+	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
 	@Autowired
 	PasswordEncryptor passwordEncryptor;
 
@@ -29,8 +33,8 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		String email = authentication.getName();
 
-		userDao = new UserDao();
-		User user = userDao.findOne(DaoContext.newInstance().addContext("email", email.toLowerCase()));
+		Criteria criteria = Criteria.where("email").is(email.toLowerCase());
+		User user = mongoTemplate.findOne(Query.query(criteria), User.class);
 
 		if (user == null) {
 			String message = email + " is not found";

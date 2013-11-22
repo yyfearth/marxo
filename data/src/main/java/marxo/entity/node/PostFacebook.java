@@ -6,13 +6,9 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.types.FacebookType;
-import marxo.dao.ContentDao;
-import marxo.dao.TenantDao;
 import marxo.entity.content.Content;
 import marxo.entity.content.FacebookContent;
 import marxo.entity.user.Tenant;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Transient;
 
 @JsonIgnoreProperties(value = {"tenantDao", "contentDao"})
 public class PostFacebook extends Action {
@@ -23,22 +19,16 @@ public class PostFacebook extends Action {
 		FacebookClient facebookClient = new DefaultFacebookClient(getTenant().facebookData.accessToken);
 		FacebookContent facebookContent = (FacebookContent) getContent();
 		facebookContent.publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", facebookContent.message));
-		saveContent();
 	}
 
 	@JsonIgnore
 	@Override
 	public Tenant getTenant() {
-		return (tenant == null) ? (tenant = tenantDao.findOne(this.tenantId)) : tenant;
+		return (tenant == null) ? (tenant = mongoTemplate.findById(this.tenantId, Tenant.class)) : tenant;
 	}
 
 	@JsonIgnore
 	public Content getContent() {
-		return (content == null) ? (content = contentDao.findOne(contentId)) : content;
-	}
-
-	@JsonIgnore
-	public void saveContent() {
-		contentDao.save(content);
+		return (content == null) ? (content = mongoTemplate.findById(this.contentId, Content.class)) : content;
 	}
 }

@@ -3,14 +3,16 @@ package marxo.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import marxo.dao.*;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
 import marxo.entity.workflow.WorkflowChildEntity;
 import marxo.entity.workflow.WorkflowPredicate;
+import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("ALL")
 @Controller
@@ -29,32 +32,24 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	NodeController nodeController;
 	@Autowired
 	LinkController linkController;
-	@Autowired
-	NodeDao nodeDao;
-	@Autowired
-	LinkDao linkDao;
-
-	@Autowired
-	protected WorkflowController(WorkflowDao dao) {
-		super(dao);
-	}
 
 	@Override
 	public void preHandle() {
 		super.preHandle();
-		daoContext = daoContext.addContext("isProject", false);
+		criteria.and("isProject").is(isProject());
+	}
+
+	protected boolean isProject() {
+		return false;
 	}
 
 	@Override
 	public Workflow read(@PathVariable String idString) throws Exception {
 		Workflow workflow = super.read(idString);
 
-		DaoContext daoContext = DaoContext.newInstance().addContext(
-				new DaoContextData("workflowId", workflow.id),
-				new DaoContextData("tenantId", user.tenantId)
-		);
-		List<Node> nodes = nodeDao.find(daoContext);
-		List<Link> links = linkDao.find(daoContext);
+		Criteria subCriteria = Criteria.where("workflowId").is(workflow.id).and("tenantId").is(user.tenantId);
+		List<Node> nodes = mongoTemplate.find(Query.query(subCriteria), Node.class);
+		List<Link> links = mongoTemplate.find(Query.query(subCriteria), Link.class);
 		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
 		Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
 		workflow.nodes = Lists.newArrayList(workflowNodes);
@@ -79,10 +74,12 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		List<Workflow> workflows;
 
 		if (hasName) {
-			workflows = dao.findByName(name, daoContext);
-		} else {
-			workflows = dao.find(daoContext);
+			String escapedName = StringTool.escapePatternCharacters(name);
+			Pattern pattern = Pattern.compile(".*" + escapedName + ".*", Pattern.CASE_INSENSITIVE);
+			criteria.and("name").regex(pattern);
 		}
+
+		workflows = mongoTemplate.find(getDefaultQuery(criteria), entityClass);
 
 		Collections.sort(workflows, ModifiedDateComparator.SINGLETON);
 		return workflows;
@@ -91,14 +88,6 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	/*
 	Sub-resources
 	 */
-
-	protected DaoContext getEntityContext(ObjectId workflowId) {
-		DaoContext daoContext = DaoContext.newInstance().addContext(
-				new DaoContextData("workflowId", workflowId),
-				new DaoContextData("tenantId", user.tenantId)
-		);
-		return daoContext;
-	}
 
 	/*
 	Node
@@ -109,7 +98,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Node> readAllNodes(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		return nodeDao.find(getEntityContext(workflowId));
+		criteria.and("workflowId").is(workflowId);
+		nodeController.criteria = criteria;
+		return nodeController.search();
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.POST)
@@ -119,7 +110,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		nodeController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		nodeController.criteria = criteria;
 		node = nodeController.create(node, response);
 
 		return node;
@@ -130,9 +122,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Node readNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		nodeController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		nodeController.criteria = criteria;
 		Node node = nodeController.read(nodeIdString);
-		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
 
 		return node;
 	}
@@ -144,7 +136,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		nodeController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		nodeController.criteria = criteria;
 		node = nodeController.update(nodeIdString, node);
 
 		return node;
@@ -155,7 +148,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Node deleteNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		nodeController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		nodeController.criteria = criteria;
 		return nodeController.delete(nodeIdString);
 	}
 
@@ -168,7 +162,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Link> readAllLinks(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		return linkDao.find(getEntityContext(workflowId));
+		criteria.and("workflowId").is(workflowId);
+		linkController.criteria = criteria;
+		return linkController.search();
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.POST)
@@ -178,7 +174,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		linkController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		linkController.criteria = criteria;
 		link = linkController.create(link, response);
 
 		return link;
@@ -189,7 +186,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Link readLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		linkController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		linkController.criteria = criteria;
 		Link link = linkController.read(linkIdString);
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
 
@@ -203,7 +201,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		linkController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		linkController.criteria = criteria;
 		link = linkController.update(linkIdString, link);
 
 		return link;
@@ -214,7 +213,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Link deleteLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		linkController.daoContext = getEntityContext(workflowId);
+		criteria.and("workflowId").is(workflowId);
+		linkController.criteria = criteria;
 		return linkController.delete(linkIdString);
 	}
 }

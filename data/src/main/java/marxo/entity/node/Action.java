@@ -1,22 +1,22 @@
 package marxo.entity.node;
 
-import marxo.dao.ContentDao;
 import marxo.entity.content.Content;
 import marxo.entity.user.TenantChildEntity;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 // todo: make this class abstract
 public class Action extends TenantChildEntity {
+	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
 	public String eventType;
 	public ObjectId eventId;
 	public String contentType;
 	public ObjectId contentId;
 	public ObjectId nodeId;
-	@Transient
-	@Autowired
-	protected ContentDao contentDao;
 	@Transient
 	protected Content content;
 	@Transient

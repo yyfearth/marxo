@@ -1,11 +1,10 @@
 package marxo.controller;
 
-import marxo.dao.UserDao;
 import marxo.entity.user.User;
 import marxo.exception.EntityNotFoundException;
 import marxo.exception.InvalidObjectIdException;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("user{:s?}")
 public class UserController extends TenantChildController<User> {
-	UserDao dao;
-
-	@Autowired
-	protected UserController(UserDao dao) {
-		super(dao);
-		this.dao = dao;
-	}
-
 	@RequestMapping(value = "/{idString:[\\w\\-\\+\\.@]+}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
@@ -34,7 +25,7 @@ public class UserController extends TenantChildController<User> {
 			throw new InvalidObjectIdException(idString);
 		}
 
-		User user = dao.findOne(daoContext.addContext("email", idString));
+		User user = mongoTemplate.findOne(Query.query(criteria.and("email").is(idString)), entityClass);
 		if (user == null) {
 			throw new EntityNotFoundException(idString);
 		}
