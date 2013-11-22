@@ -1,7 +1,6 @@
 package marxo.validation;
 
 import com.google.common.collect.Maps;
-import marxo.dao.NodeDao;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
@@ -27,6 +26,7 @@ public class WorkflowValidator extends BasicValidator {
 
 	/**
 	 * Wire dual-directional link and fill up logical fields.
+	 *
 	 * @param workflow
 	 */
 	public static void wire(Workflow workflow) {

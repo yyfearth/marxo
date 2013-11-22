@@ -30,14 +30,6 @@ public class MarxoBasicAuthenticationFilter extends BasicAuthenticationFilter {
 	private RememberMeServices rememberMeServices = new NullRememberMeServices();
 	private String credentialsCharset = "UTF-8";
 
-	public MarxoBasicAuthenticationFilter() {
-	}
-
-//	public MarxoBasicAuthenticationFilter(AuthenticationManager authenticationManager) {
-//		super(authenticationManager);
-//		this.authenticationManager = authenticationManager;
-//	}
-
 	public MarxoBasicAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationEntryPoint authenticationEntryPoint) {
 		super(authenticationManager, authenticationEntryPoint);
 		this.authenticationManager = authenticationManager;

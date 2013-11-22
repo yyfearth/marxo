@@ -1,14 +1,17 @@
 package marxo.controller;
 
-import marxo.dao.DaoContext;
-import marxo.dao.TenantDao;
 import marxo.entity.FacebookData;
 import marxo.entity.FacebookStatus;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.exception.EntityNotFoundException;
 import marxo.security.MarxoAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -20,23 +23,23 @@ import javax.validation.Valid;
 @Controller
 @RequestMapping("/service{:s?}/facebook")
 public class FacebookController implements InterceptorPreHandlable {
-	@Autowired
-	TenantDao tenantDao;
+	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
+	Criteria criteria;
 	User user;
-	DaoContext daoContext;
 
 	@Override
 	public void preHandle() {
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		Assert.notNull(marxoAuthentication);
 		user = marxoAuthentication.getUser();
-		daoContext = DaoContext.newInstance().addContext("tenantId", user.tenantId);
+		criteria.and("tenantId").is(user.tenantId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public Object readData() {
-		Tenant tenant = tenantDao.findOne(user.tenantId, daoContext);
+		Tenant tenant = mongoTemplate.findOne(Query.query(criteria), Tenant.class);
 		if (tenant == null) {
 			throw new EntityNotFoundException(user.tenantId);
 		}
@@ -48,12 +51,13 @@ public class FacebookController implements InterceptorPreHandlable {
 	@ResponseBody
 	public FacebookData saveData(@Valid @RequestBody FacebookData facebookData) {
 		Assert.notNull(facebookData);
-		Tenant tenant = tenantDao.findOne(user.tenantId, daoContext);
+		Tenant tenant = mongoTemplate.findOne(Query.query(criteria), Tenant.class);
 
 		// todo: call channel
 		facebookData.status = FacebookStatus.CONNECTED;
 
-		tenantDao.updateFacebookData(daoContext, facebookData);
+		Update update = Update.update("facebookData", facebookData);
+		mongoTemplate.updateFirst(Query.query(criteria), update, Tenant.class);
 
 		return facebookData;
 	}
@@ -62,6 +66,7 @@ public class FacebookController implements InterceptorPreHandlable {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteData() {
-		tenantDao.removeFacebookData(daoContext);
+		Update update = new Update().unset("facebookData");
+		mongoTemplate.updateFirst(Query.query(criteria), update, Tenant.class);
 	}
 }

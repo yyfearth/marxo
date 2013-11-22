@@ -1,7 +1,5 @@
 package marxo.controller;
 
-import marxo.dao.BasicDao;
-import marxo.dao.DaoContext;
 import marxo.entity.BasicEntity;
 import marxo.entity.user.User;
 import marxo.exception.EntityInvalidException;
@@ -12,6 +10,12 @@ import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
@@ -20,20 +24,34 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public abstract class EntityController<Entity extends BasicEntity> extends BasicController implements InterceptorPreHandlable {
-	protected DaoContext daoContext;
+	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
+	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "modifiedDate"));
+	protected Class<Entity> entityClass;
+	protected Criteria criteria;
 	/**
 	 * The user who is using the controller.
 	 */
 	protected User user;
-	protected BasicDao<Entity> dao;
 	@Autowired
 	HttpServletRequest request;
 
-	protected EntityController(BasicDao<Entity> dao) {
-		this.dao = dao;
+	protected EntityController() {
+		Class<?> targetClass = getClass();
+		Type type = targetClass.getGenericSuperclass();
+		while (!(type instanceof ParameterizedType)) {
+			targetClass = getClass().getSuperclass();
+			type = targetClass.getGenericSuperclass();
+		}
+
+		ParameterizedType parameterizedType = (ParameterizedType) type;
+		this.entityClass = (Class<Entity>) parameterizedType.getActualTypeArguments()[0];
 	}
 
 	@Override
@@ -41,7 +59,11 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		Assert.notNull(marxoAuthentication);
 		user = marxoAuthentication.getUser();
-		daoContext = DaoContext.newInstance();
+		criteria = new Criteria();
+	}
+
+	protected Query getDefaultQuery(Criteria criteria) {
+		return Query.query(criteria).with(defaultSort);
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
@@ -50,7 +72,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	public Entity create(@Valid @RequestBody Entity entity, HttpServletResponse response) throws Exception {
 		entity.createdByUserId = entity.modifiedByUserId = user.id;
 		entity.createdDate = entity.modifiedDate = DateTime.now();
-		dao.save(entity);
+		mongoTemplate.save(entity);
 
 		response.setHeader("Location", String.format("/%s/%s", entity.getClass().getSimpleName().toLowerCase(), entity.id));
 		return entity;
@@ -65,7 +87,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		}
 
 		ObjectId objectId = new ObjectId(idString);
-		Entity entity = dao.findOne(objectId, daoContext);
+		Entity entity = mongoTemplate.findOne(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
 			throw new EntityNotFoundException(objectId);
@@ -85,7 +107,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		ObjectId objectId = new ObjectId(idString);
 		assert objectId.equals(entity.id);
 
-		Entity oldEntity = dao.findOne(objectId, daoContext);
+		Entity oldEntity = mongoTemplate.findById(objectId, entityClass);
 
 		if (oldEntity == null) {
 			throw new EntityNotFoundException(objectId);
@@ -96,7 +118,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 			entity.createdByUserId = oldEntity.createdByUserId;
 			entity.createdDate = oldEntity.createdDate;
 			entity.modifiedByUserId = user.id;
-			dao.save(entity);
+			mongoTemplate.save(entity);
 		} catch (ValidationException ex) {
 			for (int i = 0; i < ex.reasons.size(); i++) {
 				logger.error(ex.reasons.get(i));
@@ -116,7 +138,8 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		}
 
 		ObjectId objectId = new ObjectId(idString);
-		Entity entity = dao.findAndRemove(DaoContext.newInstance(daoContext).addContext("id", objectId));
+		criteria.and("id").is(objectId);
+		Entity entity = mongoTemplate.findAndRemove(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
 			throw new EntityNotFoundException(objectId);
@@ -128,7 +151,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public List<Entity> search() {
-		return dao.find(daoContext);
+		return mongoTemplate.find(getDefaultQuery(criteria), entityClass);
 	}
 
 }

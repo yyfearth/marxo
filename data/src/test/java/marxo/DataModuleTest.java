@@ -1,7 +1,5 @@
 package marxo;
 
-import marxo.dao.TenantDao;
-import marxo.dao.WorkflowDao;
 import marxo.dev.AdvancedGenerator;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
@@ -55,17 +53,6 @@ public class DataModuleTest {
 		List<Workflow> workflows = mongoTemplate.find(Query.query(new Criteria()), Workflow.class);
 		System.out.println(workflows);
 		assert workflows != null;
-	}
-
-	@Test
-	public void testAutowired() throws Exception {
-		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-		MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
-		TenantDao tenantDao = new TenantDao();
-		List<Tenant> tenants = tenantDao.find();
-		WorkflowDao workflowDao = new WorkflowDao();
-		List<Workflow> workflows = workflowDao.find();
-		assert workflowDao.count() != 0;
 	}
 
 	@Test
