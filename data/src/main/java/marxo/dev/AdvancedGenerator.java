@@ -403,10 +403,9 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 			// Project
 			{
 				Cloner cloner = new Cloner();
-				SelectIdFunction selectIdFunction = new SelectIdFunction();
 
-				Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, selectIdFunction);
-				Map<ObjectId, Link> linkMap = Maps.uniqueIndex(links, selectIdFunction);
+				Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, SelectIdFunction.getInstance());
+				Map<ObjectId, Link> linkMap = Maps.uniqueIndex(links, SelectIdFunction.getInstance());
 
 				for (int i = 0; i < 2; i++) {
 					Workflow workflow = workflows.get(i);
