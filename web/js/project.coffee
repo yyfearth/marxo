@@ -95,7 +95,9 @@ Projects
       wfPreview = find '#wf_preview', @el
       @$wfPreview = $ wfPreview
       @wfDiagram = new WorkflowDiagramView el: wfPreview
-      @listenTo @wfDiagram, 'select', @navTo.bind @
+      @listenTo @wfDiagram, 'select', (model, workflow) =>
+        @navTo model if @model and @model.id is workflow.id
+        return
       @$nodeLinkSection = $ find 'section.node-link', @el
       @$projectForm = $ @form
       @$actions = $ find '.node-actions', @el
