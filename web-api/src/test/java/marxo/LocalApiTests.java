@@ -1,6 +1,7 @@
 package marxo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
@@ -8,8 +9,14 @@ import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
 import marxo.tool.Loggable;
+import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.*;
@@ -20,12 +27,15 @@ import java.util.List;
 
 @SuppressWarnings("unchecked")
 public class LocalApiTests implements Loggable {
-	final String email = "yyfearth@gmail.com";
-	final String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
+	final ApplicationContext dataContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	final MongoTemplate mongoTemplate = dataContext.getBean(MongoTemplate.class);
+	String email = "yyfearth@gmail.com";
+	String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
 	User user;
 	String baseUrl = "http://localhost:8080/api/";
 	List<Workflow> workflows = new ArrayList<>();
 	Workflow workflow;
+	List<Workflow> workflowsToBeRemoved = new ArrayList<>();
 
 	@BeforeClass
 	public void beforeClass() {
@@ -33,6 +43,8 @@ public class LocalApiTests implements Loggable {
 
 	@AfterClass
 	public void afterClass() throws IOException {
+		List<ObjectId> objectIds = Lists.transform(workflowsToBeRemoved, new SelectIdFunction());
+		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Workflow.class);
 	}
 
 	@BeforeMethod
@@ -42,6 +54,10 @@ public class LocalApiTests implements Loggable {
 	@AfterMethod
 	public void tearDown() throws Exception {
 	}
+
+	/*
+	Authentication
+	 */
 
 	@Test(groups = "authentication")
 	public void getUser() throws Exception {
@@ -64,7 +80,7 @@ public class LocalApiTests implements Loggable {
 		}
 	}
 
-	@Test(groups = "authentication")
+	@Test
 	public void wrongAuthentication() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -123,6 +139,26 @@ public class LocalApiTests implements Loggable {
 		}
 	}
 
+	/*
+	General
+	 */
+
+	@Test(dependsOnGroups = "authentication")
+	public void createBadEntity() throws Exception {
+		try (Tester tester = new Tester()) {
+			tester
+					.httpPost(baseUrl + "workflows", "1{}2")
+					.basicAuth(email, password)
+					.send();
+			tester
+					.isBadRequest();
+		}
+	}
+
+	/*
+	Workflow
+	 */
+
 	@Test(dependsOnGroups = "authentication")
 	public void getWorkflows() throws Exception {
 		try (Tester tester = new Tester()) {
@@ -138,7 +174,9 @@ public class LocalApiTests implements Loggable {
 			});
 			Assert.assertNotNull(workflows);
 			for (Workflow workflow : workflows) {
-				Assert.assertEquals(workflow.tenantId, this.user.tenantId);
+				if (workflow.tenantId != null) {
+					Assert.assertEquals(workflow.tenantId, this.user.tenantId);
+				}
 				Assert.assertFalse(workflow.isProject);
 			}
 		}
@@ -165,7 +203,9 @@ public class LocalApiTests implements Loggable {
 					Assert.assertEquals(workflow.nodes.size(), 0);
 					Assert.assertEquals(workflow.links.size(), 0);
 
-					Assert.assertEquals(workflow.tenantId, user.tenantId);
+					if (workflow.tenantId != null) {
+						Assert.assertEquals(workflow.tenantId, user.tenantId);
+					}
 					Assert.assertEquals(workflow.createdByUserId, user.id);
 					Assert.assertEquals(workflow.modifiedByUserId, user.id);
 				}
@@ -183,13 +223,14 @@ public class LocalApiTests implements Loggable {
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			workflow = tester.getContent(new TypeReference<Workflow>() {
-			});
+			workflow = tester.getContent(Workflow.class);
 			Assert.assertNotNull(workflow);
 			Assert.assertEquals(workflow.nodeIds.size(), workflow.nodes.size());
 			Assert.assertEquals(workflow.linkIds.size(), workflow.links.size());
 
-			Assert.assertEquals(workflow.tenantId, user.tenantId);
+			if (workflow.tenantId != null) {
+				Assert.assertEquals(workflow.tenantId, user.tenantId);
+			}
 			Assert.assertEquals(workflow.createdByUserId, user.id);
 			Assert.assertEquals(workflow.modifiedByUserId, user.id);
 		}
@@ -219,18 +260,6 @@ public class LocalApiTests implements Loggable {
 	}
 
 	@Test(dependsOnGroups = "authentication")
-	public void createBadEntity() throws Exception {
-		try (Tester tester = new Tester()) {
-			tester
-					.httpPost(baseUrl + "workflows", "1{}2")
-					.basicAuth(email, password)
-					.send();
-			tester
-					.isBadRequest();
-		}
-	}
-
-	@Test(dependsOnGroups = "authentication")
 	public void getProjects() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -250,6 +279,54 @@ public class LocalApiTests implements Loggable {
 			}
 		}
 	}
+
+	@Test(dependsOnGroups = "authentication")
+	public void getSharedWorkflows() throws Exception {
+		Workflow sharedWorkflow = new Workflow();
+		workflowsToBeRemoved.add(sharedWorkflow);
+		sharedWorkflow.setName("Shared workflow");
+		sharedWorkflow.createdByUserId = sharedWorkflow.modifiedByUserId = user.id;
+		mongoTemplate.insert(sharedWorkflow);
+
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl + "workflow/" + sharedWorkflow.id)
+					.basicAuth(email, password)
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			Workflow workflow = tester.getContent(Workflow.class);
+			Assert.assertNull(workflow.tenantId);
+		}
+
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl + "workflows")
+					.basicAuth(email, password)
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			List<Workflow> workflows = tester.getContent(new TypeReference<List<Workflow>>() {
+			});
+			Assert.assertNotNull(workflows);
+			boolean doesContainSharedWorkflow = false;
+			for (Workflow workflow : workflows) {
+				if (workflow.id.equals(sharedWorkflow.id)) {
+					doesContainSharedWorkflow = true;
+					break;
+				}
+			}
+			Assert.assertTrue(doesContainSharedWorkflow);
+		}
+	}
+
+	/*
+	Node
+	 */
 
 	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
 	public void getNodes() throws Exception {
@@ -290,6 +367,10 @@ public class LocalApiTests implements Loggable {
 			Assert.assertNotNull(errorJson);
 		}
 	}
+
+	/*
+	Link
+	 */
 
 	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
 	public void getLinks() throws Exception {

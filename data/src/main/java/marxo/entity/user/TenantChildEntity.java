@@ -19,5 +19,6 @@ public class TenantChildEntity extends BasicEntity {
 
 	public void setTenant(Tenant tenant) {
 		this.tenant = tenant;
+		tenantId = tenant.id;
 	}
 }
