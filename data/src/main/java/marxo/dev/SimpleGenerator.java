@@ -1,21 +1,6 @@
 package marxo.dev;
 
-import marxo.entity.link.Condition;
-import marxo.entity.link.Link;
-import marxo.entity.node.Action;
-import marxo.entity.node.Node;
-import marxo.entity.user.Tenant;
-import marxo.entity.user.User;
-import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
-import marxo.tool.StringTool;
-import org.bson.types.ObjectId;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
-
-import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * It generates entities without the relationship.

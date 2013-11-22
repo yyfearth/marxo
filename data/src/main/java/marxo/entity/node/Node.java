@@ -1,7 +1,6 @@
 package marxo.entity.node;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import marxo.entity.node.Action;
 import marxo.entity.link.Link;
 import marxo.entity.workflow.WorkflowChildEntity;
 import org.bson.types.ObjectId;
