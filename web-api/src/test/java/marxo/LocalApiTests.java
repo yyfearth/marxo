@@ -3,8 +3,13 @@ package marxo;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
+import marxo.entity.content.Content;
+import marxo.entity.content.FacebookContent;
 import marxo.entity.link.Link;
+import marxo.entity.node.Event;
 import marxo.entity.node.Node;
+import marxo.entity.node.PostFacebook;
+import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
@@ -34,8 +39,11 @@ public class LocalApiTests implements Loggable {
 	User user;
 	String baseUrl = "http://localhost:8080/api/";
 	List<Workflow> workflows = new ArrayList<>();
-	Workflow workflow;
+	Workflow reusedWorkflow;
 	List<Workflow> workflowsToBeRemoved = new ArrayList<>();
+	List<Node> nodesToBeRemoved = new ArrayList<>();
+	List<Link> linksToBeRemoved = new ArrayList<>();
+	List<Content> contentsToBeRemoved = new ArrayList<>();
 
 	@BeforeClass
 	public void beforeClass() {
@@ -43,8 +51,20 @@ public class LocalApiTests implements Loggable {
 
 	@AfterClass
 	public void afterClass() throws IOException {
-		List<ObjectId> objectIds = Lists.transform(workflowsToBeRemoved, new SelectIdFunction());
+		List<ObjectId> objectIds;
+		SelectIdFunction selectIdFunction = new SelectIdFunction();
+
+		objectIds = Lists.transform(workflowsToBeRemoved, selectIdFunction);
 		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Workflow.class);
+
+		objectIds = Lists.transform(nodesToBeRemoved, selectIdFunction);
+		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Node.class);
+
+		objectIds = Lists.transform(linksToBeRemoved, selectIdFunction);
+		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Link.class);
+
+		objectIds = Lists.transform(contentsToBeRemoved, selectIdFunction);
+		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Content.class);
 	}
 
 	@BeforeMethod
@@ -139,6 +159,31 @@ public class LocalApiTests implements Loggable {
 		}
 	}
 
+	@Test(dependsOnGroups = "authentication")
+	public void testGetTenants() throws Exception {
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl + "tenants")
+					.basicAuth(email, password)
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			List<Tenant> tenants = tester.getContent(new TypeReference<List<Tenant>>() {
+			});
+			Assert.assertNotNull(tenants);
+			boolean doesContainThisUser = false;
+			for (Tenant tenant : tenants) {
+				if (tenant.id.equals(user.tenantId)) {
+					doesContainThisUser = true;
+					break;
+				}
+			}
+			Assert.assertTrue(doesContainThisUser);
+		}
+	}
+
 	/*
 	General
 	 */
@@ -152,6 +197,43 @@ public class LocalApiTests implements Loggable {
 					.send();
 			tester
 					.isBadRequest();
+		}
+	}
+
+	@Test
+	public void testWiring() throws Exception {
+		Workflow workflow = new Workflow();
+		workflowsToBeRemoved.add(workflow);
+
+		Node node = new Node();
+		nodesToBeRemoved.add(node);
+		workflow.setStartNode(node);
+		node.workflowId = workflow.id;
+
+		PostFacebook action = new PostFacebook();
+		action.setNode(node);
+		action.setEvent(new Event());
+
+		FacebookContent content = new FacebookContent();
+		contentsToBeRemoved.add(content);
+		action.setContent(content);
+		content.message = "Action run by Marxo Engine";
+
+		Link link = new Link();
+		linksToBeRemoved.add(link);
+		link.workflowId = workflow.id;
+		link.setPreviousNode(node);
+
+
+		link.setNextNode(node);
+	}
+
+	@Test
+	public void testName() throws Exception {
+		try (Tester tester = new Tester()) {
+			tester.httpGet("http://www.google.com").send();
+			logger.info(tester.getContent());
+			tester.send();
 		}
 	}
 
@@ -184,8 +266,8 @@ public class LocalApiTests implements Loggable {
 
 	@Test(dependsOnGroups = "authentication", dependsOnMethods = "getWorkflows")
 	public void searchWorkflows() throws Exception {
-		if (workflows.size() == 0) {
-			try (Tester tester = new Tester()) {
+		try (Tester tester = new Tester()) {
+			if (workflows.size() == 0) {
 				tester
 						.httpGet(baseUrl + "workflows")
 						.basicAuth(email, password)
@@ -210,29 +292,27 @@ public class LocalApiTests implements Loggable {
 					Assert.assertEquals(workflow.modifiedByUserId, user.id);
 				}
 			}
-		}
 
-		workflow = workflows.get(0);
+			reusedWorkflow = workflows.get(0);
 
-		try (Tester tester = new Tester()) {
 			tester
-					.httpGet(baseUrl + "workflows/" + workflow.id)
+					.httpGet(baseUrl + "workflows/" + reusedWorkflow.id)
 					.basicAuth(email, password)
 					.send();
 			tester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			workflow = tester.getContent(Workflow.class);
-			Assert.assertNotNull(workflow);
-			Assert.assertEquals(workflow.nodeIds.size(), workflow.nodes.size());
-			Assert.assertEquals(workflow.linkIds.size(), workflow.links.size());
+			reusedWorkflow = tester.getContent(Workflow.class);
+			Assert.assertNotNull(reusedWorkflow);
+			Assert.assertEquals(reusedWorkflow.nodeIds.size(), reusedWorkflow.nodes.size());
+			Assert.assertEquals(reusedWorkflow.linkIds.size(), reusedWorkflow.links.size());
 
-			if (workflow.tenantId != null) {
-				Assert.assertEquals(workflow.tenantId, user.tenantId);
+			if (reusedWorkflow.tenantId != null) {
+				Assert.assertEquals(reusedWorkflow.tenantId, user.tenantId);
 			}
-			Assert.assertEquals(workflow.createdByUserId, user.id);
-			Assert.assertEquals(workflow.modifiedByUserId, user.id);
+			Assert.assertEquals(reusedWorkflow.createdByUserId, user.id);
+			Assert.assertEquals(reusedWorkflow.modifiedByUserId, user.id);
 		}
 	}
 
@@ -297,11 +377,11 @@ public class LocalApiTests implements Loggable {
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			Workflow workflow = tester.getContent(Workflow.class);
-			Assert.assertNull(workflow.tenantId);
-		}
+			{
+				Workflow workflow = tester.getContent(Workflow.class);
+				Assert.assertNull(workflow.tenantId);
+			}
 
-		try (Tester tester = new Tester()) {
 			tester
 					.httpGet(baseUrl + "workflows")
 					.basicAuth(email, password)
@@ -332,7 +412,7 @@ public class LocalApiTests implements Loggable {
 	public void getNodes() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet(baseUrl + "workflow/" + workflow.id + "/node")
+					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -342,7 +422,7 @@ public class LocalApiTests implements Loggable {
 			});
 			Assert.assertNotNull(nodes);
 			for (Node node : nodes) {
-				Assert.assertEquals(node.workflowId, workflow.id);
+				Assert.assertEquals(node.workflowId, reusedWorkflow.id);
 //				Assert.assertEquals(node.tenantId, this.user.tenantId);
 //				for (Action action : node.actions) {
 //					if (action.contextId != null) {
@@ -357,7 +437,7 @@ public class LocalApiTests implements Loggable {
 	public void getNoNode() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet(baseUrl + "workflow/" + workflow.id + "/node/" + (new ObjectId()))
+					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node/" + (new ObjectId()))
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -376,7 +456,7 @@ public class LocalApiTests implements Loggable {
 	public void getLinks() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
-					.httpGet(baseUrl + "workflow/" + workflow.id + "/links/")
+					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/links/")
 					.basicAuth(email, password)
 					.send();
 			tester
@@ -386,7 +466,7 @@ public class LocalApiTests implements Loggable {
 			});
 			Assert.assertNotNull(links);
 			for (Link link : links) {
-				Assert.assertEquals(link.workflowId, workflow.id);
+				Assert.assertEquals(link.workflowId, reusedWorkflow.id);
 //				Assert.assertEquals(link.tenantId, this.user.tenantId);
 //				if (link.condition != null) {
 //					Assert.assertNotNull(link.condition.leftOperand);

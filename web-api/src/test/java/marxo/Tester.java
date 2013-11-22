@@ -72,6 +72,9 @@ class Tester implements Closeable {
 	}
 
 	public Tester send() throws IOException {
+		if (response != null) {
+			response.close();
+		}
 		response = client.execute(request);
 		httpEntity = response.getEntity();
 		mediaType = MediaType.parse(httpEntity.getContentType().getValue());
