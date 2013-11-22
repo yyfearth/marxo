@@ -230,9 +230,20 @@ Action
         @btnSave.disabled = @btnReset.disabled = true
       @
     save: ->
-      console.log 'save', @model.attributes
+      wf = @model
+      unless wf.nodes.length
+        alert 'Cannot save a workflow without any node!'
+        return @
+      else unless wf.has('start_node_id') and wf.nodes.get wf.get 'start_node_id'
+        startNodes = wf.nodes.filter (node) -> not node.inLinks.length
+        if startNodes.length is 1
+          @view.setStartNode()
+        else
+          alert 'Please set the start node!'
+          return @
+      console.log 'save', wf.attributes
       @btnSave.disabled = @btnReset.disabled = true
-      @model.save {},
+      wf.save {},
         wait: true
         success: (wf) ->
           console.log 'saved', wf
@@ -272,8 +283,9 @@ Action
           @load @model, sub
         else
           @_clear()
-          @load new Workflow(id: wf), sub
-      else if wf.id
+          wf = new Workflow id: wf
+          wf.fetch silent: true, success: (wf) => @_loaded wf, sub
+      else if wf.id?
         if @id is wf.id
           @_loaded wf, sub
         else
@@ -428,12 +440,6 @@ Action
           location: -5
           id: 'arrow'
         ]
-        [ 'Label',
-          location: 0.5
-          label: 'new link'
-          id: 'label'
-          cssClass: 'link-label'
-        ]
       ]
     gridDefaults:
       padding: 30
@@ -460,7 +466,9 @@ Action
       jsPlumb.bind 'beforeDrop', (info) ->
         sourceId = info.sourceId[5..]
         targetId = info.targetId[5..]
-        unless view.model.hasLink sourceId, targetId
+        if sourceId is 'start'
+          view.setStartNode targetId
+        else unless view.model.hasLink sourceId, targetId
           # remove node_ in id
           view.createLink sourceId, targetId
         false
@@ -472,7 +480,7 @@ Action
       # link click
       jsPlumb.bind 'click', (conn) =>
         label = conn.getOverlay 'label'
-        @_togglePopover target: label.canvas
+        @_togglePopover target: label.canvas if label?
         return
 
       # droppable for .node
@@ -533,7 +541,7 @@ Action
         func = @[action + 'Node']
       else if model = $target.data 'link'
         func = @[action + 'Link']
-      else
+      else unless $target.hasClass 'node-start'
         console.error 'no node or link in data', $target, e
         return
       func?.call @, model
@@ -612,14 +620,36 @@ Action
       console.log 'render wf', wf
       wf = @model
       throw new Error 'workflow not loaded' unless wf?
+      # start node
+      @startNode?.remove()
+      view = @startNode = new StartNodeView parent: @
+      view.render()
+      @el.appendChild view.el
       #console.log wf.nodes
       unless wf.nodes.length and wf.nodes.at(0).has 'offset'
         @_sortNodeViews wf.nodes
       jsPlumb.ready =>
         wf.nodes.forEach @_addNode.bind @
         wf.links.forEach @_addLink.bind @
+        @setStartNode wf.get 'start_node_id'
         return
       return
+    setStartNode: (node) ->
+      unless node?
+        console.log 'auto detach start node'
+        startNodes = @model.nodes.filter (node) -> not node.inLinks.length
+        node = startNodes[0] or @model.nodes.at 0
+        node = node?.id
+      console.log 'set start node', node
+      @model.set 'start_node_id', node
+      startNode = @startNode
+      jsPlumb.detach startNode.conn if startNode.conn
+      if node? then startNode.conn = jsPlumb.connect
+        source: startNode.srcEndpoint
+        target: "node_#{node}"
+        cssClass: 'link'
+        hoverClass: 'hover'
+      @
     addNode: (node = 'emtpy') ->
       if node is 'new' or node is 'empty'
         console.log 'add a empty node'
@@ -686,7 +716,8 @@ Action
       return @ unless node?.id
       # use confirm since no support for undo
       if confirm "Delete the node: #{node.get 'name'}?"
-        #@model.nodes.remove node
+        @model.nodes.remove node
+        @setStartNode() if node.id is @model.get 'start_node_id'
         node.destroy()
         @model.trigger 'changed', 'remove_node', node
       @
@@ -741,12 +772,47 @@ Action
       @el.onselectstart = -> false
       @
 
+  class StartNodeView extends View
+    id: 'node_start'
+    className: 'node node-start target'
+    sourceEndpointStyle:
+      isSource: true
+      uniqueEndpoint: true
+      maxConnections: -1
+      anchor: 'RightMiddle'
+      paintStyle:
+        fillStyle: '#225588'
+        radius: 9
+      connectorStyle:
+        strokeStyle: '#346789'
+        dashstyle: '2 2'
+        lineWidth: 2
+        outlineColor: '#fff'
+        outlineWidth: 1
+      connectorHoverStyle:
+        strokeStyle: '#42a62c'
+        outlineWidth: 2
+    render: ->
+      @$el.html('(S)').tooltip title: 'Start Point', placement: 'bottom', container: @el
+      jsPlumb.draggable @$el, stack: '.node'
+      @parentEl.appendChild @el
+      @srcEndpoint = jsPlumb.addEndpoint @$el, @sourceEndpointStyle, parameters:
+        start: true
+        view: @
+      @
+    remove: ->
+      if @srcEndpoint and @conn then try
+        jsPlumb.deleteEndpoint @srcEndpoint
+      @srcEndpoint = @conn = null
+      super
+
   class NodeView extends View
     tagName: 'div'
     className: 'node'
     sourceEndpointStyle:
       isSource: true
       uniqueEndpoint: true
+      maxConnections: -1
       anchor: 'RightMiddle'
       paintStyle:
         fillStyle: '#225588'
@@ -759,10 +825,17 @@ Action
       connectorHoverStyle:
         strokeStyle: '#42a62c'
         outlineWidth: 2
-      maxConnections: -1
+      connectorOverlays: [
+        [ 'Label',
+          location: 0.5
+          label: 'new link'
+          id: 'label'
+          cssClass: 'link-label'
+        ]
+      ]
     targetEndpointStyle:
       isTarget: true
-      anchor: ['LeftMiddle', 'BottomCenter']
+      anchor: ['LeftMiddle', 'TopCenter', 'BottomCenter']
       paintStyle:
         fillStyle: '#225588'
         radius: 5
@@ -867,6 +940,7 @@ Action
     _destroyPopover: ->
       $(@labelEl).popover 'destroy'
     remove: ->
+      @model?.view = null
       console.log 'remove', @conn, @model, @
       jsPlumb.detach @conn
       @_destroyPopover()
