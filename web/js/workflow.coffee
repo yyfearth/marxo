@@ -198,6 +198,8 @@ Action
             @descEl.textContent = wf.get 'desc'
             @model.trigger 'changed', 'rename_workflow', @model
           return
+      'change #wf_orientation': (e) ->
+        @view.setOrientation e.currentTarget.value, true
     initialize: (options) ->
       super options
       @view = new WorkflowView
@@ -214,6 +216,7 @@ Action
       @btnReset = find '.wf-reset', @el
       @nameEl = find '.editable-name', @el
       @descEl = find '.editable-desc', @el
+      @$orientation = $ find '#wf_orientation', @el
 
       @nodeList.on 'select', (id, node) =>
         console.log 'select from node list', id, node
@@ -268,6 +271,17 @@ Action
       @nameEl.textContent = wf.get 'name'
       @descEl.textContent = wf.get('desc') or ''
       @model = wf
+      # calc orientation
+      w = 0
+      h = 0
+      @model.nodes.forEach (node) -> if node.has 'offset'
+        {x, y} = node.get 'offset'
+        w = x if x > w
+        h = y if y > h
+        return
+      orientation = if w and h and w < h then 'v' else 'h'
+      @$orientation.val orientation
+      @view.setOrientation orientation
       @view.load wf, sub
       @nodeList.setNodes wf.nodes
       @listenTo wf, 'changed', (action, entity) ->
@@ -453,8 +467,6 @@ Action
       padding: 30
       spanX: 300
       spanY: 150
-      vertical: false
-
     events:
       'click .node': '_togglePopover'
       'mousedown': '_cancelPopover'
@@ -571,7 +583,6 @@ Action
         @listenTo @model.nodes, 'add', @_addNode.bind @
         @listenTo @model.links, 'add', @_addLink.bind @
         # node/link remove already binded on destroy
-
         @_renderModel wf
         @hash = "#workflow/#{wf.id}"
 
@@ -584,6 +595,11 @@ Action
       else
         @nodeEditor.cancel()
         @linkEditor.cancel()
+      @
+    setOrientation: (orientation = 'h', reload) ->
+      if @orientation isnt orientation
+        @orientation = orientation
+        @load @model, reload: true if reload
       @
     _sortNodeViews: (nodes) ->
       nodes.lonely = []
@@ -598,7 +614,8 @@ Action
           nodes.end.push node
 
       grid = @grid = [nodes.start.concat nodes.lonely]
-      {vertical, padding, spanX, spanY} = @gridDefaults
+      {padding, spanX, spanY} = @gridDefaults
+      vertical = @orientation is 'v'
 
       do traval = (level = 0) ->
         nextLevel = []
@@ -648,7 +665,7 @@ Action
         startNodes = @model.nodes.filter (node) -> not node.inLinks.length
         node = startNodes[0] or @model.nodes.at 0
         node = node?.id
-      console.log 'set start node', node
+      #console.log 'set start node', node
       @model.set 'start_node_id', node
       startNode = @startNode
       jsPlumb.detach startNode.conn if startNode.conn
@@ -787,7 +804,6 @@ Action
       isSource: true
       uniqueEndpoint: true
       maxConnections: -1
-      anchor: 'RightMiddle'
       paintStyle:
         fillStyle: '#225588'
         radius: 9
@@ -801,9 +817,14 @@ Action
         strokeStyle: '#42a62c'
         outlineWidth: 2
     render: ->
-      @$el.html('(S)').tooltip title: 'Start Point', placement: 'bottom', container: @el
+      vertical = @parent.orientation is 'v'
+      @$el.text('(S)').tooltip
+        title: 'Start Point'
+        container: @el
+        placement: if vertical then 'right' else 'bottom'
       jsPlumb.draggable @$el, stack: '.node'
       @parentEl.appendChild @el
+      @sourceEndpointStyle.anchor = if vertical then 'BottomCenter' else 'RightMiddle'
       @srcEndpoint = jsPlumb.addEndpoint @$el, @sourceEndpointStyle, parameters:
         start: true
         view: @
@@ -821,7 +842,6 @@ Action
       isSource: true
       uniqueEndpoint: true
       maxConnections: -1
-      anchor: 'RightMiddle'
       paintStyle:
         fillStyle: '#225588'
         radius: 9
@@ -843,7 +863,6 @@ Action
       ]
     targetEndpointStyle:
       isTarget: true
-      anchor: ['LeftMiddle', 'TopCenter', 'BottomCenter']
       paintStyle:
         fillStyle: '#225588'
         radius: 5
@@ -852,19 +871,29 @@ Action
         activeClass: 'active'
     _popover_tpl: tpl('#t_popover')
     render: ->
-      node = @el.node = @model
+      el = @el
+      node = el.node = @model
       @el.id = 'node_' + node.id
       @listenTo node, 'destroy', @remove.bind @
+      if @parent.orientation is 'v'
+        @sourceEndpointStyle.anchor = 'BottomCenter'
+        @targetEndpointStyle.anchor = ['LeftMiddle', 'TopCenter', 'RightMiddle']
+      else
+        @sourceEndpointStyle.anchor = 'RightMiddle'
+        @targetEndpointStyle.anchor = ['LeftMiddle', 'TopCenter', 'BottomCenter']
       @_renderModel node
-      jsPlumb.draggable @$el, stack: '.node', stop: =>
+      jsPlumb.draggable @$el, stack: '.node', stop: ->
         # set offset after drag
-        $el_pos = $(node.view.el).position()
-        offset =
-          x: if $el_pos.left < 0 then 0 else $el_pos.left
-          y: if $el_pos.top < 0 then 0 else $el_pos.top
-        node.set 'offset', offset
+        x = parseInt el.style.left
+        y = parseInt el.style.top
+        console.log '$el_pos1',x,y
+        x = 0 unless x > 0
+        y = 0 unless y > 0
+        console.log '$el_pos2',x,y
+        node.set 'offset', {x, y}
         node.workflow?.trigger 'changed', 'move_node', node
-      @parentEl.appendChild @el
+        return
+      @parentEl.appendChild el
       # build endpoints must after append el to dom
       param =
         parameters:
