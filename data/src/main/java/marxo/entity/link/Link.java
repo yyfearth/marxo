@@ -15,7 +15,25 @@ public class Link extends WorkflowChildEntity {
 	public ObjectId nextNodeId;
 	public Condition condition;
 	@Transient
-	public Node previousNode;
+	protected Node previousNode;
 	@Transient
-	public Node nextNode;
+	protected Node nextNode;
+
+	public Node getPreviousNode() {
+		return previousNode;
+	}
+
+	public void setPreviousNode(Node previousNode) {
+		this.previousNode = previousNode;
+		this.previousNodeId = previousNode.id;
+	}
+
+	public Node getNextNode() {
+		return nextNode;
+	}
+
+	public void setNextNode(Node nextNode) {
+		this.nextNode = nextNode;
+		this.nextNodeId = nextNode.id;
+	}
 }
