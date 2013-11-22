@@ -1,7 +1,6 @@
 package marxo.validation;
 
 import org.springframework.validation.Errors;
-import org.springframework.validation.Validator;
 
 public class UserValidator extends BasicValidator {
 	@Override
