@@ -26,7 +26,18 @@ public class Workflow extends TenantChildEntity {
 	public List<ObjectId> currentActionIds = new ArrayList<>();
 	@Transient
 	public Workflow template;
+	@Transient
+	protected Node startNode;
 	ObjectId templateId;
+
+	public Node getStartNode() {
+		return startNode;
+	}
+
+	public void setStartNode(Node startNode) {
+		this.startNode = startNode;
+		this.startNodeId = startNode.id;
+	}
 
 	public Workflow getTemplate() {
 		return template;

@@ -12,17 +12,23 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 public class Action extends TenantChildEntity {
 	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
-	public String eventType;
-	public ObjectId eventId;
+	public ObjectId nodeId;
 	public String contentType;
 	public ObjectId contentId;
-	public ObjectId nodeId;
-	@Transient
-	protected Content content;
-	@Transient
 	protected Event event;
 	@Transient
 	protected Node node;
+	@Transient
+	protected Content content;
+
+	public Event getEvent() {
+		return event;
+	}
+
+	public void setEvent(Event event) {
+		this.event = event;
+		event.actionId = id;
+	}
 
 	public Content getContent() {
 		return content;
@@ -31,6 +37,8 @@ public class Action extends TenantChildEntity {
 	public void setContent(Content content) {
 		this.content = content;
 		this.contentId = content.id;
+
+		content.setAction(this);
 	}
 
 	public Node getNode() {
@@ -40,16 +48,6 @@ public class Action extends TenantChildEntity {
 	public void setNode(Node node) {
 		this.node = node;
 		this.nodeId = node.id;
-	}
-
-	public Event getEvent() {
-		return event;
-	}
-
-	public void setEvent(Event event) {
-		this.event = event;
-		this.eventId = event.id;
-		this.eventType = event.getClass().getSimpleName();
 	}
 
 	public void act() {
