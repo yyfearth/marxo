@@ -1,6 +1,7 @@
 package marxo.controller;
 
 import marxo.entity.user.TenantChildEntity;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.servlet.http.HttpServletResponse;
@@ -13,7 +14,9 @@ public abstract class TenantChildController<Entity extends TenantChildEntity> ex
 	@Override
 	public void preHandle() {
 		super.preHandle();
-		criteria.and("tenantId").is(user.tenantId);
+		Criteria criteria1 = Criteria.where("tenantId").is(user.tenantId);
+		Criteria criteria2 = Criteria.where("tenantId").exists(false);
+		criteria.orOperator(criteria1, criteria2);
 	}
 
 	@Override

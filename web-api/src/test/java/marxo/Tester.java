@@ -63,10 +63,6 @@ class Tester implements Closeable {
 		return httpPost(url, objectMapper.writeValueAsString(object));
 	}
 
-	public Tester httpPost(String url) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
-		return httpPost(url, null);
-	}
-
 	public Tester basicAuth(String username, String password) {
 		String credentialString = username + ":" + password;
 		String credential = DatatypeConverter.printBase64Binary(credentialString.getBytes());
@@ -87,7 +83,7 @@ class Tester implements Closeable {
 
 	public Tester is(HttpStatus httpStatus) {
 		StatusLine statusLine = response.getStatusLine();
-		Assert.assertEquals(statusLine.getStatusCode(), httpStatus.value(), "Status: " + statusLine.getReasonPhrase() + " Message: " + content);
+		Assert.assertEquals(statusLine.getStatusCode(), httpStatus.value(), "Status: " + statusLine.getReasonPhrase() + "\nMessage: " + content);
 		return this;
 	}
 
