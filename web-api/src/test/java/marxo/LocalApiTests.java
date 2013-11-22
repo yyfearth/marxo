@@ -23,7 +23,7 @@ public class LocalApiTests implements Loggable {
 	final String email = "yyfearth@gmail.com";
 	final String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
 	User user;
-	String baseUrl = "http://masonwan.com/marxo/api/";
+	String baseUrl = "http://localhost:8080/api/";
 	List<Workflow> workflows = new ArrayList<>();
 	Workflow workflow;
 
@@ -43,7 +43,7 @@ public class LocalApiTests implements Loggable {
 	public void tearDown() throws Exception {
 	}
 
-	@Test(priority = -100, groups = "authentication")
+	@Test(groups = "authentication")
 	public void getUser() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -64,12 +64,36 @@ public class LocalApiTests implements Loggable {
 		}
 	}
 
-	@Test(priority = -100, groups = "authentication")
+	@Test(groups = "authentication")
 	public void wrongAuthentication() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
 					.httpGet(baseUrl)
 					.basicAuth(email, "wrong password")
+					.send();
+			tester
+					.is(HttpStatus.UNAUTHORIZED)
+					.matchContentType(MediaType.JSON_UTF_8);
+			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			Assert.assertNotNull(errorJson);
+		}
+
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl)
+					.basicAuth("wrong email", password)
+					.send();
+			tester
+					.is(HttpStatus.UNAUTHORIZED)
+					.matchContentType(MediaType.JSON_UTF_8);
+			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			Assert.assertNotNull(errorJson);
+		}
+
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl)
+					.basicAuth("", "")
 					.send();
 			tester
 					.is(HttpStatus.UNAUTHORIZED)
