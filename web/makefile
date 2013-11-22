@@ -35,8 +35,8 @@ upload:
 	rm test/js/lib/*.min.js
 	coffee -co test/js js
 	mkdir test/css
-	lessc --no-ie-compat css/console.less test/css/console.css
-	lessc --no-ie-compat css/preview.less test/css/preview.css
+	lessc --no-ie-compat --clean-css css/console.less test/css/console.css
+	lessc --no-ie-compat --clean-css css/preview.less test/css/preview.css
 	jade --DP --out test/ *.jade
 	scp -r test/* wilson@masonwan.com:web/marxo
 
@@ -137,7 +137,7 @@ $(dist)/js/%.js: js/%.coffee
 $(dist)/css/%.css: css/%.less
 	$(print)
 	@mkdir -p $(@D)
-	lessc --no-ie-compat --yui-compress -O2 $^ $@
+	lessc --no-ie-compat --clean-css $^ $@
 
 $(dist)/index.html: index.jade
 	$(print)
