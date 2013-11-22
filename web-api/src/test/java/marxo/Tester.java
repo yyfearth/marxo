@@ -1,13 +1,18 @@
 package marxo;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Strings;
 import com.google.common.net.MediaType;
 import marxo.serialization.MarxoObjectMapper;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
@@ -18,6 +23,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -37,6 +43,28 @@ class Tester implements Closeable {
 		this.uri = new URI(url);
 		request = new HttpGet(uri);
 		return this;
+	}
+
+	public Tester httpPost(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
+		this.uri = new URI(url);
+
+		HttpPost httpPost = new HttpPost(uri);
+		if (!Strings.isNullOrEmpty(content)) {
+			StringEntity stringEntity = new StringEntity(content);
+			httpPost.setEntity(stringEntity);
+		}
+		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+		request = httpPost;
+
+		return this;
+	}
+
+	public Tester httpPost(String url, Object object) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
+		return httpPost(url, objectMapper.writeValueAsString(object));
+	}
+
+	public Tester httpPost(String url) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
+		return httpPost(url, null);
 	}
 
 	public Tester basicAuth(String username, String password) {
@@ -64,21 +92,15 @@ class Tester implements Closeable {
 	}
 
 	public Tester isOk() {
-		StatusLine statusLine = response.getStatusLine();
-		Assert.assertEquals(statusLine.getStatusCode(), HttpStatus.OK.value(), "Status: " + statusLine.getReasonPhrase() + " Message: " + content);
-		return this;
+		return is(HttpStatus.OK);
 	}
 
 	public Tester isNotFound() {
-		StatusLine statusLine = response.getStatusLine();
-		Assert.assertEquals(statusLine.getStatusCode(), HttpStatus.NOT_FOUND.value(), "Status: " + statusLine.getReasonPhrase() + " Message: " + content);
-		return this;
+		return is(HttpStatus.NOT_FOUND);
 	}
 
 	public Tester isBadRequest() {
-		StatusLine statusLine = response.getStatusLine();
-		Assert.assertEquals(statusLine.getStatusCode(), HttpStatus.BAD_REQUEST.value(), "Status: " + statusLine.getReasonPhrase() + " Message: " + content);
-		return this;
+		return is(HttpStatus.BAD_REQUEST);
 	}
 
 	public Tester matchContentType(MediaType mediaType) {

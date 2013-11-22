@@ -30,7 +30,7 @@ public class FacebookController implements InterceptorPreHandlable {
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		Assert.notNull(marxoAuthentication);
 		user = marxoAuthentication.getUser();
-		daoContext = DaoContext.newInstance().addContext("tenantId", user.tenant);
+		daoContext = DaoContext.newInstance().addContext("tenantId", user.tenantId);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)

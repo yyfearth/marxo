@@ -9,25 +9,21 @@ import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
 import marxo.tool.Loggable;
 import org.bson.types.ObjectId;
-import org.junit.AfterClass;
+import org.joda.time.DateTime;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class WebApiTests implements Loggable {
+public class LocalApiTests implements Loggable {
 	final String email = "yyfearth@gmail.com";
 	final String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
 	User user;
 	String baseUrl = "http://localhost:8080/api/";
-	//	String baseUrl = "http://masonwan.com/marxo/api/";
 	List<Workflow> workflows = new ArrayList<>();
 	Workflow workflow;
 
@@ -47,7 +43,7 @@ public class WebApiTests implements Loggable {
 	public void tearDown() throws Exception {
 	}
 
-	@Test(priority = -100, groups = "start")
+	@Test(groups = "authentication")
 	public void getUser() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -68,7 +64,7 @@ public class WebApiTests implements Loggable {
 		}
 	}
 
-	@Test(priority = -100, groups = "start")
+	@Test(groups = "authentication")
 	public void wrongAuthentication() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -81,9 +77,33 @@ public class WebApiTests implements Loggable {
 			ErrorJson errorJson = tester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
 		}
+
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl)
+					.basicAuth("wrong email", password)
+					.send();
+			tester
+					.is(HttpStatus.UNAUTHORIZED)
+					.matchContentType(MediaType.JSON_UTF_8);
+			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			Assert.assertNotNull(errorJson);
+		}
+
+		try (Tester tester = new Tester()) {
+			tester
+					.httpGet(baseUrl)
+					.basicAuth("", "")
+					.send();
+			tester
+					.is(HttpStatus.UNAUTHORIZED)
+					.matchContentType(MediaType.JSON_UTF_8);
+			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			Assert.assertNotNull(errorJson);
+		}
 	}
 
-	@Test(dependsOnGroups = "start")
+	@Test(dependsOnGroups = "authentication")
 	public void getUsers() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -103,7 +123,7 @@ public class WebApiTests implements Loggable {
 		}
 	}
 
-	@Test(dependsOnGroups = "start")
+	@Test(dependsOnGroups = "authentication")
 	public void getWorkflows() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -124,7 +144,7 @@ public class WebApiTests implements Loggable {
 		}
 	}
 
-	@Test(dependsOnGroups = "start", dependsOnMethods = "getWorkflows")
+	@Test(dependsOnGroups = "authentication", dependsOnMethods = "getWorkflows")
 	public void searchWorkflows() throws Exception {
 		if (workflows.size() == 0) {
 			try (Tester tester = new Tester()) {
@@ -140,6 +160,15 @@ public class WebApiTests implements Loggable {
 				});
 				Assert.assertNotNull(workflows);
 				Assert.assertEquals(workflows.size(), 0);
+
+				for (Workflow workflow : workflows) {
+					Assert.assertEquals(workflow.nodes.size(), 0);
+					Assert.assertEquals(workflow.links.size(), 0);
+
+					Assert.assertEquals(workflow.tenantId, user.tenantId);
+					Assert.assertEquals(workflow.createdByUserId, user.id);
+					Assert.assertEquals(workflow.modifiedByUserId, user.id);
+				}
 			}
 		}
 
@@ -159,11 +188,49 @@ public class WebApiTests implements Loggable {
 			Assert.assertNotNull(workflow);
 			Assert.assertEquals(workflow.nodeIds.size(), workflow.nodes.size());
 			Assert.assertEquals(workflow.linkIds.size(), workflow.links.size());
-			Assert.assertEquals(workflow.tenantId, this.user.tenantId);
+
+			Assert.assertEquals(workflow.tenantId, user.tenantId);
+			Assert.assertEquals(workflow.createdByUserId, user.id);
+			Assert.assertEquals(workflow.modifiedByUserId, user.id);
 		}
 	}
 
-	@Test(dependsOnGroups = "start")
+	@Test(dependsOnGroups = "authentication")
+	public void createWorkflow() throws Exception {
+		try (Tester tester = new Tester()) {
+			tester
+					.httpPost(baseUrl + "workflows", new Workflow())
+					.basicAuth(email, password)
+					.send();
+			tester
+					.is(HttpStatus.CREATED)
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			Workflow workflow = tester.getContent(Workflow.class);
+
+			Assert.assertEquals(workflow.tenantId, user.tenantId);
+			Assert.assertEquals(workflow.createdByUserId, user.id);
+			Assert.assertEquals(workflow.modifiedByUserId, user.id);
+
+			DateTime now = DateTime.now();
+			Assert.assertEquals(workflow.createdDate.dayOfYear().get(), now.dayOfYear().get());
+			Assert.assertEquals(workflow.modifiedDate.dayOfYear().get(), now.dayOfYear().get());
+		}
+	}
+
+	@Test(dependsOnGroups = "authentication")
+	public void createBadEntity() throws Exception {
+		try (Tester tester = new Tester()) {
+			tester
+					.httpPost(baseUrl + "workflows", "1{}2")
+					.basicAuth(email, password)
+					.send();
+			tester
+					.isBadRequest();
+		}
+	}
+
+	@Test(dependsOnGroups = "authentication")
 	public void getProjects() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -184,7 +251,7 @@ public class WebApiTests implements Loggable {
 		}
 	}
 
-	@Test(dependsOnGroups = "start", dependsOnMethods = "searchWorkflows")
+	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
 	public void getNodes() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -209,7 +276,7 @@ public class WebApiTests implements Loggable {
 		}
 	}
 
-	@Test(dependsOnGroups = "start", dependsOnMethods = "searchWorkflows")
+	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
 	public void getNoNode() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
@@ -224,7 +291,7 @@ public class WebApiTests implements Loggable {
 		}
 	}
 
-	@Test(dependsOnGroups = "start", dependsOnMethods = "searchWorkflows")
+	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
 	public void getLinks() throws Exception {
 		try (Tester tester = new Tester()) {
 			tester
