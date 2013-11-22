@@ -188,7 +188,8 @@ Action
   class WorkflowEditorView extends InnerFrameView
     events:
       'click .wf-save': 'save'
-      'click .wf-reset': 'reset'
+      'click .wf-reset': (e) ->
+        @reset e.modifiers or not e.currentTarget.classList.contains 'btn-danger'
       'click #workflow_header': ->
         @renamer.popup @model, (action, wf) =>
           if action is 'save'
@@ -224,10 +225,18 @@ Action
 
       @_changed = @_changed.bind @
       @
-    reset: ->
-      if confirm 'All changes will be descarded since last save, are you sure to do that?'
+    _enableBtns: (enable) ->
+      @btnSave.disabled = not enable
+      $btn = $ @btnReset
+      if enable
+        $btn.addClass('btn-danger').text 'Reset'
+      else
+        $btn.removeClass('btn-danger').text 'Reload'
+      return
+    reset: (force) ->
+      if force is true or confirm 'All changes will be descarded since last save, are you sure to do that?'
         @reload()
-        @btnSave.disabled = @btnReset.disabled = true
+        @_enableBtns false
       @
     save: ->
       wf = @model
@@ -242,7 +251,7 @@ Action
           alert 'Please set the start node!'
           return @
       console.log 'save', wf.attributes
-      @btnSave.disabled = @btnReset.disabled = true
+      @_enableBtns false
       wf.save {},
         wait: true
         success: (wf) ->
@@ -252,7 +261,7 @@ Action
           console.error 'save failed', @model
       @
     _changed: ->
-      @btnSave.disabled = @btnReset.disabled = false
+      @_enableBtns true
       return
     _loaded: (wf, sub) ->
       @id = wf.id
@@ -271,8 +280,7 @@ Action
       @model = null
       @nameEl.textContent = ''
       @descEl.textContent = ''
-      @btnSave.disabled = true
-      @btnReset.disabled = true
+      @_enableBtns false
       @view.clear()
       return
     load: (wf, sub) ->
