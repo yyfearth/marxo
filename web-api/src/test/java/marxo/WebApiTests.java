@@ -26,8 +26,8 @@ public class WebApiTests implements Loggable {
 	final String email = "yyfearth@gmail.com";
 	final String password = "2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8";
 	User user;
-	//	String baseUrl = "http://localhost:8080/api/";
-	String baseUrl = "http://masonwan.com/marxo/api/";
+	String baseUrl = "http://localhost:8080/api/";
+	//	String baseUrl = "http://masonwan.com/marxo/api/";
 	List<Workflow> workflows = new ArrayList<>();
 	Workflow workflow;
 
