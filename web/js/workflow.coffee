@@ -851,19 +851,23 @@ Action
         activeClass: 'active'
     _popover_tpl: tpl('#t_popover')
     render: ->
-      node = @el.node = @model
+      el = @el
+      node = el.node = @model
       @el.id = 'node_' + node.id
       @listenTo node, 'destroy', @remove.bind @
       @_renderModel node
-      jsPlumb.draggable @$el, stack: '.node', stop: =>
+      jsPlumb.draggable @$el, stack: '.node', stop: ->
         # set offset after drag
-        $el_pos = $(node.view.el).position()
-        offset =
-          x: if $el_pos.left < 0 then 0 else $el_pos.left
-          y: if $el_pos.top < 0 then 0 else $el_pos.top
-        node.set 'offset', offset
+        x = parseInt el.style.left
+        y = parseInt el.style.top
+        console.log '$el_pos1',x,y
+        x = 0 unless x > 0
+        y = 0 unless y > 0
+        console.log '$el_pos2',x,y
+        node.set 'offset', {x, y}
         node.workflow?.trigger 'changed', 'move_node', node
-      @parentEl.appendChild @el
+        return
+      @parentEl.appendChild el
       # build endpoints must after append el to dom
       param =
         parameters:
