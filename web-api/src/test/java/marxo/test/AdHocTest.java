@@ -1,4 +1,4 @@
-package marxo;
+package marxo.test;
 
 import marxo.entity.node.PostFacebook;
 import marxo.entity.user.User;
