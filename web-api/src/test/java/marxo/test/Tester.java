@@ -1,4 +1,4 @@
-package marxo;
+package marxo.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -8,10 +8,7 @@ import marxo.serialization.MarxoObjectMapper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -27,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-class Tester implements Closeable {
+public class Tester implements Closeable {
 	HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 	CloseableHttpClient client = httpClientBuilder.build();
 	CloseableHttpResponse response;
@@ -39,9 +36,14 @@ class Tester implements Closeable {
 	MediaType mediaType;
 	String content;
 
+	/*
+	Method
+	 */
+
 	public Tester httpGet(String url) throws URISyntaxException {
 		this.uri = new URI(url);
 		request = new HttpGet(uri);
+		setAuthHeader();
 		return this;
 	}
 
@@ -55,20 +57,57 @@ class Tester implements Closeable {
 		}
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
 		request = httpPost;
+		setAuthHeader();
 
 		return this;
 	}
 
-	public Tester httpPost(String url, Object object) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
-		return httpPost(url, objectMapper.writeValueAsString(object));
+	public Tester httpPost(String url, Object o) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
+		return httpPost(url, objectMapper.writeValueAsString(o));
 	}
+
+	public Tester httpPut(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
+		this.uri = new URI(url);
+
+		HttpPut httpPut = new HttpPut(uri);
+		if (!Strings.isNullOrEmpty(content)) {
+			StringEntity stringEntity = new StringEntity(content);
+			httpPut.setEntity(stringEntity);
+		}
+		httpPut.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.JSON_UTF_8.toString());
+		request = httpPut;
+		setAuthHeader();
+
+		return this;
+	}
+
+	public Tester httpPut(String url, Object o) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
+		return httpPut(url, objectMapper.writeValueAsString(o));
+	}
+
+	public Tester httpDelete(String url) throws URISyntaxException, UnsupportedEncodingException {
+		this.uri = new URI(url);
+		request = new HttpDelete(uri);
+		setAuthHeader();
+		return this;
+	}
+
+	/*
+	Auth
+	 */
 
 	public Tester basicAuth(String username, String password) {
 		String credentialString = username + ":" + password;
 		String credential = DatatypeConverter.printBase64Binary(credentialString.getBytes());
 		authorizationHeader = new BasicHeader("Authorization", "Basic " + credential);
-		request.addHeader(authorizationHeader);
+		setAuthHeader();
 		return this;
+	}
+
+	private void setAuthHeader() {
+		if (request != null) {
+			request.addHeader(authorizationHeader);
+		}
 	}
 
 	public Tester send() throws IOException {
@@ -83,6 +122,10 @@ class Tester implements Closeable {
 		content = new String(stream.toByteArray());
 		return this;
 	}
+
+	/*
+	Validation
+	 */
 
 	public Tester is(HttpStatus httpStatus) {
 		StatusLine statusLine = response.getStatusLine();
@@ -102,11 +145,19 @@ class Tester implements Closeable {
 		return is(HttpStatus.BAD_REQUEST);
 	}
 
+	public Tester isCreated() {
+		return is(HttpStatus.CREATED);
+	}
+
 	public Tester matchContentType(MediaType mediaType) {
 		assert this.mediaType.type().equals(mediaType.type());
 		assert this.mediaType.subtype().equals(mediaType.subtype());
 		return this;
 	}
+
+	/*
+	Content
+	 */
 
 	public String getContent() {
 		return content;
@@ -122,6 +173,10 @@ class Tester implements Closeable {
 	public <T> T getContent(TypeReference<T> typeReference) throws IOException {
 		return objectMapper.readValue(content, typeReference);
 	}
+
+	/*
+	Others
+	 */
 
 	@Override
 	public void close() throws IOException {
