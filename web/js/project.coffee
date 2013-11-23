@@ -354,6 +354,14 @@ Projects
   # Viewer
 
   class ProjectViewerView extends InnerFrameView
+    events:
+      'click .status-btns > .btn': (e) ->
+        status = $(e.currentTarget).attr 'name'
+        if status is 'stop'
+          @destroy()
+        else
+          @setStatus status
+        return
     initialize: (options) ->
       @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
       @$title = $ find '.project-name', @el
@@ -376,16 +384,65 @@ Projects
       project = @model
       @$title.text project.get 'name'
       @$desc.text "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links) #{project.get 'desc'}"
-      @$status.text project.get('status') or 'NONE'
-      # TODO: coloring status label
       @btnEdit.href = "#project/#{project.id}/edit"
+      @_updateStatus()
       @wfDiagram.draw project
       return
+    _updateStatus: ->
+      status = (@model.get('status') or 'NONE').toUpperCase()
+      cls = ''
+      show_btns = switch status
+        when 'NONE'
+          'delete' # no actions
+        when 'IDLE'
+          'start, delete'
+        when 'STARTED'
+          cls = 'label-success'
+          'pause'
+        when 'PAUSED'
+          cls = 'label-warning'
+          'start, stop'
+        when 'STOPPED'
+          cls = 'label-inverse'
+          'start, delete'
+        when 'FINISHED'
+          cls = 'label-info'
+          ''
+        when 'ERROR'
+          cls = 'label-important'
+          'start, delete'
+        else
+          throw new Error 'unknow status ' + status
+      $btns = @$el.find '.status-btns'
+      $btns.find('.btn').hide()
+      $btns.find('.btn[name=start]').text if status is 'PAUSED' then 'Resume' else 'Start'
+      $btns.find(show_btns.replace(/(\w+)/g, '.btn[name="$1"]')).show()
+      @$status.text(status).parent()
+      .removeClass('label-success label-warning label-inverse label-info').addClass cls
+      return
+    destroy: ->
+      if confirm 'Are you sure to delete this project?\n\nThis step cannot be undone!'
+        @model.destroy()
+        @router.navigate 'project/mgr'
+        # TODO: do some clean
+      @
+    setStatus: (status) ->
+      unless status
+        @_updateStatus()
+      else
+        status = status.toUpperCase()
+        if status isnt @model.get('status').toUpperCase()
+          @model.set 'status', status
+          @_updateStatus()
+          # TODO: save status
+        else console.log 'status not changed', status
+      @
     focus: (opt = {}) ->
       {link, node, action} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
       throw new Error 'node and link cannot be open together' if link and node
       console.log 'focus node/link', {link, node, action}
+      # TODO: select this model in view
 
   # Manager
 
@@ -451,7 +508,17 @@ Projects
     ,
       'created_at'
       'updated_at'
-      'status'
+    ,
+      name: 'status'
+      label: 'Status'
+      cell: 'label'
+      cls:
+        started: 'label-success'
+        paused: 'label-warning'
+        stopped: 'label-inverse'
+        finished: 'label-info'
+        error: 'label-important'
+      editable: false
     ,
       name: 'project'
       label: ''
