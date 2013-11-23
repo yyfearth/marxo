@@ -24,7 +24,6 @@ import java.util.ArrayList;
 public class EngineTest {
 	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
-	final SelectIdFunction selectIdFunction = new SelectIdFunction();
 	ArrayList<Workflow> workflowsToDelete = new ArrayList<>();
 
 	@BeforeMethod
@@ -38,7 +37,7 @@ public class EngineTest {
 
 	@AfterClass
 	public void afterClass() throws Exception {
-		Criteria criteria = Criteria.where("id").in(Lists.transform(workflowsToDelete, selectIdFunction));
+		Criteria criteria = Criteria.where("id").in(Lists.transform(workflowsToDelete, SelectIdFunction.getInstance()));
 		mongoTemplate.remove(Query.query(criteria), Workflow.class);
 		mongoTemplate.remove(new Query(), Task.class);
 	}
