@@ -1,5 +1,6 @@
 package marxo.entity.workflow;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
@@ -30,19 +31,23 @@ public class Workflow extends TenantChildEntity {
 	protected Node startNode;
 	ObjectId templateId;
 
+	@JsonIgnore
 	public Node getStartNode() {
 		return startNode;
 	}
 
+	@JsonIgnore
 	public void setStartNode(Node startNode) {
 		this.startNode = startNode;
 		this.startNodeId = startNode.id;
 	}
 
+	@JsonIgnore
 	public Workflow getTemplate() {
 		return template;
 	}
 
+	@JsonIgnore
 	public void setTemplate(Workflow template) {
 		this.template = template;
 		templateId = template.id;
