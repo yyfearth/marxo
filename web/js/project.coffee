@@ -508,7 +508,17 @@ Projects
     ,
       'created_at'
       'updated_at'
-      'status'
+    ,
+      name: 'status'
+      label: 'Status'
+      cell: 'label'
+      cls:
+        started: 'label-success'
+        paused: 'label-warning'
+        stopped: 'label-inverse'
+        finished: 'label-info'
+        error: 'label-important'
+      editable: false
     ,
       name: 'project'
       label: ''
