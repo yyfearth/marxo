@@ -50,7 +50,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 			return new MarxoAuthentication(user, grantedAuths);
 		}
 
-		String message = "The password " + plainPassword + " for " + email + " is not correct";
+		String message = "The password '" + plainPassword + "' for '" + email + "' is not correct";
 		throw new BadCredentialsException(message);
 	}
 
