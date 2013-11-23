@@ -30,7 +30,6 @@ public abstract class BasicApiTests implements Loggable {
 	protected String email;
 	protected String password;
 	protected User user;
-	protected List<Workflow> workflows = new ArrayList<>();
 	protected List<Workflow> workflowsToBeRemoved = new ArrayList<>();
 	protected List<Node> nodesToBeRemoved = new ArrayList<>();
 	protected List<Link> linksToBeRemoved = new ArrayList<>();
