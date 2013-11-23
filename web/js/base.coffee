@@ -327,6 +327,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
 
   class NavListView extends View
     urlRoot: ''
+    seperator: ':'
     headerTitle: ''
     defaultItem: 'all'
     itemClassName: ''
@@ -338,13 +339,14 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       super options
       @collection = options.collection or @collection
       throw new Error 'collection must be given' unless @collection instanceof Collection
-      @urlRoot = options.urlRoot or @urlRoot
+      @seperator = options.seperator ? @seperator
+      @urlRoot = options.urlRoot ? @urlRoot
       @headerTitle = options.headerTitle or @headerTitle
-      @defaultItem = options.defaultItem or @defaultItem
+      @defaultItem = options.defaultItem ? @defaultItem
       @itemClassName = options.itemClassName or @itemClassName
       @targetClassName = options.targetClassName or @targetClassName
-      @emptyItem = options.emptyItem or @emptyItem
       @allowEmpty = options.allowEmpty or @allowEmpty
+      @emptyItem = options.emptyItem ? @emptyItem
       @listenTo @collection, 'reset add remove', @render.bind @
       @events ?= {}
       @events['click .btn-refresh'] = => @fetch true
@@ -365,12 +367,14 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
     render: ->
       @_clear()
       @_render()
+      @trigger 'updated', @
       @
     _clear: ->
       @el.innerHTML = ''
       @el.appendChild @_renderHeader null
       @el.appendChild @_renderItem @defaultItem if @defaultItem
-      @el.appendChild @_renderItem @emptyItem if @allowEmpty and @defaultItem isnt @emptyItem
+      @el.appendChild @_renderItem @emptyItem if @allowEmpty and @emptyItem and @defaultItem isnt @emptyItem
+      return
     _render: (models = @collection) ->
       models = models.fullCollection if models.fullCollection
       #console.log 'render models', models
@@ -394,8 +398,10 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       li.className = @itemClassName if @itemClassName
       a = document.createElement 'a'
       a.className = @targetClassName if @targetClassName
+      sep = @seperator
+      root = @urlRoot
       if model.id?
-        a.href = "##{@urlRoot}:#{model.id}"
+        a.href = "##{root}#{sep}#{model.id}"
         a.textContent = model.get('title') or model.get('name')
         a.dataset.id = model.id
         $(a).data 'model', model
@@ -403,10 +409,10 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         a.href = model.href
         a.textContent = model.title
       else if model is 'all'
-        a.href = "##{@urlRoot}:all"
+        a.href = "##{root}#{sep}all"
         a.textContent = 'All'
       else if model is 'new' or model is 'empty'
-        a.href = "##{@urlRoot}:#{@emptyItem}"
+        a.href = "##{root}#{sep}#{@emptyItem}"
         a.textContent = 'Empty'
       else
         console.dir model

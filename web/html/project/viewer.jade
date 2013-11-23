@@ -1,16 +1,26 @@
-.page-header
-  .action-buttons.pull-right
-    a.btn(href='#project/mgr', title='Go back to Project Manager', data-placement='bottom') Back to List
-    span.label.label-status
-      small Status:
-      span NONE
-    span.status-btns
-      button.btn.btn-success(name='start') Start
-      button.btn.btn-warning(name='pause') Pause
-      button.btn.btn-warning(name='stop') Stop
-      button.btn.btn-danger(name='delete') Delete
-    a.btn.btn-primary.btn-edit Edit
-  h3
-    span.project-name Project Viewer
-    small.project-desc
-.wf-diagram.well
+.span2.sidebar
+  .well.sidebar-nav
+    ul.project-list.sidebar-list.nav.nav-list
+      li.nav-header Projects
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips
+        | Click Project List above to switch to the project.
+.span10.workspace
+  .page-header
+    .action-buttons.pull-right
+      a.btn(href='#project/mgr', title='Go back to Project Manager', data-placement='bottom') Back to List
+      span.label.label-status
+        small Status:
+        span NONE
+      span.status-btns
+        button.btn.btn-success(name='start') Start
+        button.btn.btn-warning(name='pause') Pause
+        button.btn.btn-warning(name='stop') Stop
+        button.btn.btn-danger(name='delete') Delete
+      a.btn.btn-primary.btn-edit Edit
+    h3
+      span.project-name Project Viewer
+      small.project-desc
+  .wf-diagram.well
