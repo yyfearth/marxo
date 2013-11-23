@@ -368,6 +368,19 @@ Projects
       @$desc = $ find '.project-desc', @el
       @$status = $ find '.label-status > span', @el
       @btnEdit = find '.btn-edit', @el
+      @list = new NavListView
+        el: find('.project-list', @el)
+        auto: false
+        collection: Projects.projects
+        urlRoot: 'project'
+        seperator: '/'
+        headerTitle: 'Projects'
+        defaultItem: false
+        emptyItem: false
+        allowEmpty: false
+        itemClassName: 'project-list-item'
+      @listenTo @list, 'updated', => if @model?
+        @list.$el.find("li:has(a[data-id='#{@model.id}'])").addClass 'active'
       super options
     load: (model) ->
       console.log 'load project', project
@@ -375,6 +388,7 @@ Projects
       model = Projects.projects.get(model) or new Project {model} if typeof model is 'string'
       @model = model
       @listenTo model, 'loaded', @_render.bind @
+      @render() unless @rendered
       if model.loaded
         @_render model
       else
@@ -386,6 +400,9 @@ Projects
       @$desc.text "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links) #{project.get 'desc'}"
       @btnEdit.href = "#project/#{project.id}/edit"
       @_updateStatus()
+      $list = @list.$el
+      $selected = $list.find("li:has(a[data-id='#{project.id}'])").addClass 'active'
+      $list.find('li.active').not($selected).removeClass 'active'
       @wfDiagram.draw project
       return
     _updateStatus: ->
@@ -412,7 +429,8 @@ Projects
           cls = 'label-important'
           'start, delete'
         else
-          throw new Error 'unknow status ' + status
+          console.error 'unknow status', status
+          'delete'
       $btns = @$el.find '.status-btns'
       $btns.find('.btn').hide()
       $btns.find('.btn[name=start]').text if status is 'PAUSED' then 'Resume' else 'Start'
@@ -443,6 +461,9 @@ Projects
       throw new Error 'node and link cannot be open together' if link and node
       console.log 'focus node/link', {link, node, action}
       # TODO: select this model in view
+    render: ->
+      @list.fetch()
+      super
 
   # Manager
 
