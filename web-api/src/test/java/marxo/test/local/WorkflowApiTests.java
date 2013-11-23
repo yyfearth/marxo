@@ -1,26 +1,55 @@
 package marxo.test.local;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import marxo.entity.workflow.Workflow;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
+import marxo.validation.SelectIdFunction;
+import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @ApiTestConfiguration
+@Test(groups = "workflow")
 public class WorkflowApiTests extends BasicApiTests {
 	Workflow reusedWorkflow;
 	List<Workflow> workflows = new ArrayList<>();
 
-	@Test(dependsOnGroups = "authentication")
-	public void getWorkflows() throws Exception {
+	@Test
+	public void createWorkflow() throws Exception {
+		try (Tester tester = new Tester().basicAuth(email, password)) {
+			tester
+					.httpPost(baseUrl + "workflows", new Workflow())
+					.send();
+			tester
+					.isCreated()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			reusedWorkflow = tester.getContent(Workflow.class);
+
+			Assert.assertEquals(reusedWorkflow.tenantId, user.tenantId);
+			Assert.assertEquals(reusedWorkflow.createdByUserId, user.id);
+			Assert.assertEquals(reusedWorkflow.modifiedByUserId, user.id);
+
+			DateTime now = DateTime.now();
+			Assert.assertEquals(reusedWorkflow.createdDate.dayOfYear().get(), now.dayOfYear().get());
+			Assert.assertEquals(reusedWorkflow.modifiedDate.dayOfYear().get(), now.dayOfYear().get());
+		}
+	}
+
+	public void getAllWorkflows() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpGet(baseUrl + "workflows")
@@ -38,11 +67,25 @@ public class WorkflowApiTests extends BasicApiTests {
 				}
 				Assert.assertFalse(workflow.isProject);
 			}
+
+			Criteria criteria = Criteria.where("isProject").is(false);
+			Criteria criteria1 = Criteria.where("tenantId").is(user.tenantId);
+			Criteria criteria2 = Criteria.where("tenantId").exists(false);
+			criteria.orOperator(criteria1, criteria2);
+
+			Query query = Query.query(criteria);
+			query.fields().include("id");
+			List<Workflow> workflows1 = mongoTemplate.find(query, Workflow.class);
+			List<ObjectId> ids1 = Lists.transform(workflows, SelectIdFunction.getInstance());
+			Set<ObjectId> set1 = ImmutableSet.copyOf(ids1);
+			List<ObjectId> ids2 = Lists.transform(workflows1, SelectIdFunction.getInstance());
+			Set<ObjectId> set2 = ImmutableSet.copyOf(ids2);
+			Assert.assertEquals(set1, set2);
 		}
 	}
 
 	@Test
-	public void testGetWrongWorkflow() throws Exception {
+	public void getWrongWorkflow() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpGet(baseUrl + "workflows/000000000000000000000000")
@@ -52,7 +95,7 @@ public class WorkflowApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnGroups = "authentication", dependsOnMethods = "getWorkflows")
+	@Test(dependsOnMethods = {"getAllWorkflows"})
 	public void searchWorkflows() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			if (workflows.size() == 0) {
@@ -102,29 +145,7 @@ public class WorkflowApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnGroups = "authentication")
-	public void createWorkflow() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpPost(baseUrl + "workflows", new Workflow())
-					.send();
-			tester
-					.isCreated()
-					.matchContentType(MediaType.JSON_UTF_8);
-
-			Workflow workflow = tester.getContent(Workflow.class);
-
-			Assert.assertEquals(workflow.tenantId, user.tenantId);
-			Assert.assertEquals(workflow.createdByUserId, user.id);
-			Assert.assertEquals(workflow.modifiedByUserId, user.id);
-
-			DateTime now = DateTime.now();
-			Assert.assertEquals(workflow.createdDate.dayOfYear().get(), now.dayOfYear().get());
-			Assert.assertEquals(workflow.modifiedDate.dayOfYear().get(), now.dayOfYear().get());
-		}
-	}
-
-	@Test(dependsOnGroups = "authentication")
+	@Test
 	public void getProjects() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -144,7 +165,7 @@ public class WorkflowApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnGroups = "authentication")
+	@Test
 	public void getSharedWorkflows() throws Exception {
 		Workflow sharedWorkflow = new Workflow();
 		workflowsToBeRemoved.add(sharedWorkflow);

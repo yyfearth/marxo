@@ -43,6 +43,10 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		return false;
 	}
 
+	/*
+	Search
+	 */
+
 	@Override
 	public Workflow read(@PathVariable String idString) throws Exception {
 		Workflow workflow = super.read(idString);
@@ -60,7 +64,17 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	/*
-	Search
+	Sub-resources
+	 */
+
+	private void setSubResourceCriteria(Criteria criteria) {
+		Criteria criteria1 = Criteria.where("tenantId").is(user.tenantId);
+		Criteria criteria2 = Criteria.where("tenantId").exists(false);
+		criteria.orOperator(criteria1, criteria2);
+	}
+
+	/*
+	Node
 	 */
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -85,21 +99,16 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		return workflows;
 	}
 
-	/*
-	Sub-resources
-	 */
-
-	/*
-	Node
-	 */
-
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<Node> readAllNodes(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
+
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
 		nodeController.criteria = criteria;
+
 		return nodeController.search();
 	}
 
@@ -110,11 +119,12 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
-		nodeController.criteria = criteria;
-		node = nodeController.create(node, response);
 
-		return node;
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
+		nodeController.criteria = criteria;
+
+		return nodeController.create(node, response);
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
@@ -122,11 +132,12 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Node readNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
-		nodeController.criteria = criteria;
-		Node node = nodeController.read(nodeIdString);
 
-		return node;
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
+		nodeController.criteria = criteria;
+
+		return nodeController.read(nodeIdString);
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
@@ -136,11 +147,12 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
-		nodeController.criteria = criteria;
-		node = nodeController.update(nodeIdString, node);
 
-		return node;
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
+		nodeController.criteria = criteria;
+
+		return nodeController.update(nodeIdString, node);
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
@@ -148,8 +160,11 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Node deleteNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
+
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
 		nodeController.criteria = criteria;
+
 		return nodeController.delete(nodeIdString);
 	}
 
@@ -162,8 +177,11 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public List<Link> readAllLinks(@PathVariable String workflowIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
+
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
 		linkController.criteria = criteria;
+
 		return linkController.search();
 	}
 
@@ -174,7 +192,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
+
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
 		linkController.criteria = criteria;
 		link = linkController.create(link, response);
 
@@ -186,12 +206,12 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Link readLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
-		linkController.criteria = criteria;
-		Link link = linkController.read(linkIdString);
-		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
 
-		return link;
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
+		linkController.criteria = criteria;
+
+		return linkController.read(linkIdString);
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
@@ -201,11 +221,12 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
 
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
-		linkController.criteria = criteria;
-		link = linkController.update(linkIdString, link);
 
-		return link;
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
+		linkController.criteria = criteria;
+
+		return linkController.update(linkIdString, link);
 	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
@@ -213,8 +234,11 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseStatus(HttpStatus.OK)
 	public Link deleteLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
 		ObjectId workflowId = new ObjectId(workflowIdString);
-		criteria.and("workflowId").is(workflowId);
+
+		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+		setSubResourceCriteria(criteria);
 		linkController.criteria = criteria;
+
 		return linkController.delete(linkIdString);
 	}
 }

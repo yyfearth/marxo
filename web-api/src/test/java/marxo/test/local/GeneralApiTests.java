@@ -7,14 +7,13 @@ import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.entity.node.PostFacebook;
-import marxo.entity.user.Tenant;
-import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
@@ -31,115 +30,11 @@ public class GeneralApiTests extends BasicApiTests {
 	@BeforeClass
 	@Override
 	public void beforeClass() {
+		super.beforeClass();
 		workflow = mongoTemplate.findOne(new Query(), Workflow.class);
-	}
-	/*
-	Authentication
-	 */
-
-	@Test(groups = "authentication")
-	public void getUser() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpGet(baseUrl + "users/" + email)
-					.send();
-			tester
-					.isOk()
-					.matchContentType(MediaType.JSON_UTF_8);
-			user = tester.getContent(User.class);
-			Assert.assertEquals(user.getEmail(), email);
-			Assert.assertNotNull(user.id);
-			Assert.assertNotNull(user.getName());
-			Assert.assertNotNull(user.createdDate);
-			Assert.assertNotNull(user.modifiedDate);
-			Assert.assertNotNull(user.tenantId);
-			Assert.assertNull(user.getPassword());
-		}
 	}
 
 	@Test
-	public void wrongAuthentication() throws Exception {
-		try (Tester tester = new Tester()) {
-			tester
-					.httpGet(baseUrl)
-					.basicAuth(email, "wrong password")
-					.send();
-			tester
-					.is(HttpStatus.UNAUTHORIZED)
-					.matchContentType(MediaType.JSON_UTF_8);
-			ErrorJson errorJson = tester.getContent(ErrorJson.class);
-			Assert.assertNotNull(errorJson);
-
-			tester
-					.httpGet(baseUrl)
-					.basicAuth("wrong email", password)
-					.send();
-			tester
-					.is(HttpStatus.UNAUTHORIZED)
-					.matchContentType(MediaType.JSON_UTF_8);
-			errorJson = tester.getContent(ErrorJson.class);
-			Assert.assertNotNull(errorJson);
-
-			tester
-					.httpGet(baseUrl)
-					.basicAuth("", "")
-					.send();
-			tester
-					.is(HttpStatus.UNAUTHORIZED)
-					.matchContentType(MediaType.JSON_UTF_8);
-			errorJson = tester.getContent(ErrorJson.class);
-			Assert.assertNotNull(errorJson);
-		}
-	}
-
-	@Test(dependsOnGroups = "authentication")
-	public void getUsers() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpGet(baseUrl + "users")
-					.send();
-			tester
-					.isOk()
-					.matchContentType(MediaType.JSON_UTF_8);
-
-			List<User> users = tester.getContent(new TypeReference<List<User>>() {
-			});
-			Assert.assertNotNull(users);
-			for (User user : users) {
-				Assert.assertEquals(user.tenantId, this.user.tenantId);
-			}
-		}
-	}
-
-	@Test(dependsOnGroups = "authentication")
-	public void testGetTenants() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpGet(baseUrl + "tenants")
-					.send();
-			tester
-					.isOk()
-					.matchContentType(MediaType.JSON_UTF_8);
-
-			List<Tenant> tenants = tester.getContent(new TypeReference<List<Tenant>>() {
-			});
-			Assert.assertNotNull(tenants);
-			boolean doesContainThisUser = false;
-			for (Tenant tenant : tenants) {
-				if (tenant.id.equals(user.tenantId)) {
-					doesContainThisUser = true;
-					break;
-				}
-			}
-			Assert.assertTrue(doesContainThisUser);
-		}
-	}
-
-	/*
-	General
-	 */
-
-	@Test(dependsOnGroups = "authentication")
 	public void createBadEntity() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -151,7 +46,7 @@ public class GeneralApiTests extends BasicApiTests {
 	}
 
 	@Test
-	public void testWiring() throws Exception {
+	public void wiring() throws Exception {
 		Workflow workflow = new Workflow();
 		workflowsToBeRemoved.add(workflow);
 
@@ -210,8 +105,6 @@ public class GeneralApiTests extends BasicApiTests {
 					.send();
 			tester
 					.isCreated();
-
-
 		}
 	}
 
@@ -219,7 +112,7 @@ public class GeneralApiTests extends BasicApiTests {
 	Node
 	 */
 
-	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
+	@Test
 	public void getNodes() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -243,17 +136,34 @@ public class GeneralApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
-	public void getNoNode() throws Exception {
+	@Test
+	public void wrongSubResource() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpGet(baseUrl + "workflow/" + workflow.id + "/node/" + (new ObjectId()))
 					.send();
 			tester
-					.isBadRequest()
+					.is(HttpStatus.NOT_FOUND)
 					.matchContentType(MediaType.JSON_UTF_8);
 			ErrorJson errorJson = tester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
+		}
+	}
+
+	@Test
+	public void rightSubResource() throws Exception {
+		Criteria criteria = Criteria.where("tenantId").is(user.tenantId);
+		Node node = mongoTemplate.findOne(Query.query(criteria), Node.class);
+
+		try (Tester tester = new Tester().basicAuth(email, password)) {
+			tester
+					.httpGet(baseUrl + "workflow/" + node.workflowId + "/node/" + node.id)
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+			Node node1 = tester.getContent(Node.class);
+			Assert.assertEquals(node1.id, node.id);
 		}
 	}
 
@@ -261,7 +171,7 @@ public class GeneralApiTests extends BasicApiTests {
 	Link
 	 */
 
-	@Test(dependsOnGroups = "authentication", dependsOnMethods = "searchWorkflows")
+	@Test
 	public void getLinks() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester

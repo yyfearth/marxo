@@ -2,12 +2,12 @@ package marxo.test.local;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.net.MediaType;
-import marxo.test.ApiTestConfiguration;
-import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.exception.ErrorJson;
+import marxo.test.ApiTestConfiguration;
+import marxo.test.BasicApiTests;
+import marxo.test.Tester;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,10 +16,11 @@ import java.util.List;
 
 @SuppressWarnings("unchecked")
 @ApiTestConfiguration
+@Test(groups = "user")
 public class UserApiTests extends BasicApiTests {
 
-	@Test(groups = "authentication")
-	public void getUser() throws Exception {
+	@Test
+	public void getOneUser() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpGet(baseUrl + "users/" + email)
@@ -27,19 +28,22 @@ public class UserApiTests extends BasicApiTests {
 			tester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			user = tester.getContent(User.class);
-			Assert.assertEquals(user.getEmail(), email);
-			Assert.assertNotNull(user.id);
-			Assert.assertNotNull(user.getName());
-			Assert.assertNotNull(user.createdDate);
-			Assert.assertNotNull(user.modifiedDate);
-			Assert.assertNotNull(user.tenantId);
-			Assert.assertNull(user.getPassword());
+			User user = tester.getContent(User.class);
+			Assert.assertEquals(user.getEmail(), this.user.getEmail());
+			Assert.assertEquals(user.id, this.user.id);
+			Assert.assertEquals(user.getName(), this.user.getName());
+			Assert.assertEquals(user.createdDate.toLocalDateTime(), this.user.createdDate.toLocalDateTime());
+			Assert.assertEquals(user.modifiedDate.toLocalDateTime(), this.user.modifiedDate.toLocalDateTime());
+			Assert.assertEquals(user.tenantId, this.user.tenantId);
+			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
 		}
 	}
 
 	@Test
 	public void wrongAuthentication() throws Exception {
+		// Note that it seems that the tester must be created again in order to prevent the remote server returns Bad Request response after the first request.
+		ErrorJson errorJson;
+
 		try (Tester tester = new Tester()) {
 			tester
 					.httpGet(baseUrl)
@@ -48,9 +52,11 @@ public class UserApiTests extends BasicApiTests {
 			tester
 					.is(HttpStatus.UNAUTHORIZED)
 					.matchContentType(MediaType.JSON_UTF_8);
-			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			errorJson = tester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
+		}
 
+		try (Tester tester = new Tester()) {
 			tester
 					.httpGet(baseUrl)
 					.basicAuth("wrong email", password)
@@ -60,7 +66,9 @@ public class UserApiTests extends BasicApiTests {
 					.matchContentType(MediaType.JSON_UTF_8);
 			errorJson = tester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
+		}
 
+		try (Tester tester = new Tester()) {
 			tester
 					.httpGet(baseUrl)
 					.basicAuth("", "")
@@ -73,7 +81,7 @@ public class UserApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnGroups = "authentication")
+	@Test(dependsOnMethods = {"getOneUser", "wrongAuthentication"})
 	public void getUsers() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -92,8 +100,8 @@ public class UserApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnGroups = "authentication")
-	public void testGetTenants() throws Exception {
+	@Test(dependsOnMethods = {"getOneUser", "wrongAuthentication"})
+	public void getTenants() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpGet(baseUrl + "tenants")
