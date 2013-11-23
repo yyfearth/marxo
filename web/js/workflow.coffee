@@ -305,8 +305,9 @@ Action
           @load @model, sub
         else
           @_clear()
-          @load new Workflow(id: wf), sub
-      else if wf.id
+          wf = new Workflow id: wf
+          wf.fetch silent: true, success: (wf) => @_loaded wf, sub
+      else if wf.id?
         if @id is wf.id
           @_loaded wf, sub
         else
