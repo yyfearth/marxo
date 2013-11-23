@@ -2,9 +2,6 @@
 
 define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
 
-  #$.ajaxPrefilter (opt, org) -> # debug only
-  #  console.log 'ajax', opt.url, opt, org
-
   class ConsoleView extends View
     el: '#main'
     user: sessionStorage.user
@@ -137,13 +134,15 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       $(@usernameEl).text user.fullname()
       @show()
     show: ->
+      @_hide_ts = clearTimeout @_hide_ts if @_hide_ts
       @el.style.visibility = 'visible'
       @el.classList.add 'active'
       @el.style.opacity = 1
       @
     hide: ->
       @el.classList.remove 'active'
-      setTimeout =>
+      @_hide_ts = setTimeout =>
+        @_hide_ts = null
         @el.style.visibility = 'hidden'
       , SignInView::delay
       @
@@ -159,17 +158,17 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
     initialize: (options) ->
       super options
       @form = find 'form', @el
-      @form.remember.checked = remember = localStorage.marxo_sign_in_remember is 'true'
+      remember = @form.remember.checked = localStorage.marxo_sign_in_remember is 'true'
       @form.email.value = localStorage.marxo_sign_in_email if remember
       # auto sign in
       console = ConsoleView.get()
       if console.user instanceof User
         user = console.user
-        console.user = null
+        console.user = {}
         @hide()
         @_validateUser user
       else
-        @show()
+        @_fail()
       @
     submit: (e) ->
       e.preventDefault()
@@ -187,6 +186,14 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       else
         @_signIn email, password
       false
+    _fail: (msg) ->
+      ConsoleView.get().user = User.current = null
+      sessionStorage.clear()
+      @router.navigate 'signin', replace: true unless location.hash is '#signin'
+      @show()
+      @_disable false
+      alert msg if msg
+      return
     _disable: (val) -> $(@form.elements).prop 'disabled', val
     _signIn: (email, password) ->
       @_disable true
@@ -205,50 +212,51 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       email = user.get 'email'
       auth = user.get 'credential'
       email_md5 = user.get 'email_md5'
-      new User({email}).fetch
+      unless email and auth and email_md5
+        console.warn 'saved user is not valid', email, auth, email_md5
+        @_fail()
+      else new User({email}).fetch
         headers:
           Authorization: auth
         success: (user) =>
           if user.has('password') and user.get('password') isnt atob(auth[6..]).slice(email.length + 1) # for test only
-            @_disable false
-            alert '(TEST ONLY) Password not correct'
+            @_fail '(TEST ONLY) Password not correct'
           else if user.has('tenant_id') and email is user.get 'email'
             user.set 'email_md5', email_md5
             user.set 'credential', auth
             @signedIn user
           else
-            @show() unless @$el.is ':visible'
+            @_fail 'User not exist or email and password are not matched.'
             @form.password.select()
-            @_disable false
-            alert 'User not exist or email and password are not matched.'
           return
         error: (ignored, response) =>
           console.error 'sign-in failed', response
-          @_disable false
-          alert 'Sign in failed.\nUser not exist or email and password are not matched.'
+          @_fail 'Sign in failed.\nUser not exist or email and password are not matched.'
           return
       return
     signedIn: (user) -> # test data only
       @trigger 'success', user
       @hide()
-      localStorage.marxo_sign_in_remember = remember = @form.remember.checked
+      remember = localStorage.marxo_sign_in_remember = @form.remember.checked
       localStorage.marxo_sign_in_email = if remember then @form.email.value else ''
       ConsoleView.get().signin user, remember
       @router.back fallback: 'home' if /signin/i.test location.hash
       @
     show: ->
-      @el.style.opacity = 0
-      @el.style.display = 'block'
-      @_disable false
-      setTimeout =>
-        @el.classList.add 'active'
-        @el.style.opacity = 1
-      , 1
+      @_hide_ts = clearTimeout @_hide_ts if @_hide_ts
+      unless @el.classList.contains 'active'
+        @el.style.opacity = 0
+        @el.style.display = 'block'
+        @_disable false
+        setTimeout =>
+          @el.classList.add 'active'
+          @el.style.opacity = 1
+        , 1
       @
     hide: ->
       @el.classList.remove 'active'
       @el.style.opacity = 0
-      setTimeout =>
+      @_hide_ts = setTimeout =>
         @form.password.value = ''
         @_disable false
         @el.style.display = 'none'
