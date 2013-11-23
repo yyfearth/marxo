@@ -91,7 +91,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		Entity entity = mongoTemplate.findOne(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
-			throw new EntityNotFoundException(objectId);
+			throw new EntityNotFoundException(entityClass, objectId);
 		}
 
 		return entity;
@@ -111,7 +111,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		Entity oldEntity = mongoTemplate.findById(objectId, entityClass);
 
 		if (oldEntity == null) {
-			throw new EntityNotFoundException(objectId);
+			throw new EntityNotFoundException(entityClass, objectId);
 		}
 
 		try {
@@ -143,7 +143,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		Entity entity = mongoTemplate.findAndRemove(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
-			throw new EntityNotFoundException(objectId);
+			throw new EntityNotFoundException(entityClass, objectId);
 		}
 
 		return entity;

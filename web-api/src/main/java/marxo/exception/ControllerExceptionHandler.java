@@ -74,7 +74,6 @@ public class ControllerExceptionHandler implements Loggable {
 	@ExceptionHandler({EntityNotFoundException.class})
 	public ResponseEntity<ErrorJson> handleEntityNotFoundException(EntityNotFoundException e) {
 		logger.debug(e.getMessage());
-		logger.debug(StringTool.exceptionToString(e));
 
 		return new ResponseEntity<>(new ErrorJson(e.message), HttpStatus.NOT_FOUND);
 	}

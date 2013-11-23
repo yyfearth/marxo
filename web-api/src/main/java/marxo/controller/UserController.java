@@ -27,7 +27,7 @@ public class UserController extends TenantChildController<User> {
 
 		User user = mongoTemplate.findOne(Query.query(criteria.and("email").is(idString)), entityClass);
 		if (user == null) {
-			throw new EntityNotFoundException(idString);
+			throw new EntityNotFoundException(User.class, idString);
 		}
 
 		return user;
