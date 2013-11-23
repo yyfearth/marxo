@@ -25,7 +25,7 @@ import java.util.List;
 
 @SuppressWarnings("unchecked")
 @ApiTestConfiguration
-public class LocalApiTests extends BasicApiTests {
+public class GeneralApiTests extends BasicApiTests {
 	Workflow workflow;
 
 	@BeforeClass
