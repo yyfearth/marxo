@@ -23,32 +23,40 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.regex.Pattern;
 
 public class Tester implements Closeable {
 	HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 	CloseableHttpClient client = httpClientBuilder.build();
 	CloseableHttpResponse response;
 	MarxoObjectMapper objectMapper = new MarxoObjectMapper();
+	String baseUrl;
 	URI uri;
 	BasicHeader authorizationHeader;
 	HttpRequestBase request;
 	HttpEntity httpEntity;
 	MediaType mediaType;
 	String content;
+	Pattern absolutePathPattern = Pattern.compile("^https?:\\/\\/", Pattern.CASE_INSENSITIVE);
 
 	/*
 	Method
 	 */
 
+	public Tester baseUrl(String url) throws URISyntaxException {
+		this.baseUrl = url;
+		return this;
+	}
+
 	public Tester httpGet(String url) throws URISyntaxException {
-		this.uri = new URI(url);
+		setUri(url);
 		request = new HttpGet(uri);
 		setAuthHeader();
 		return this;
 	}
 
 	public Tester httpPost(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
-		this.uri = new URI(url);
+		setUri(url);
 
 		HttpPost httpPost = new HttpPost(uri);
 		if (!Strings.isNullOrEmpty(content)) {
@@ -67,7 +75,7 @@ public class Tester implements Closeable {
 	}
 
 	public Tester httpPut(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
-		this.uri = new URI(url);
+		setUri(url);
 
 		HttpPut httpPut = new HttpPut(uri);
 		if (!Strings.isNullOrEmpty(content)) {
@@ -86,10 +94,18 @@ public class Tester implements Closeable {
 	}
 
 	public Tester httpDelete(String url) throws URISyntaxException, UnsupportedEncodingException {
-		this.uri = new URI(url);
+		setUri(url);
 		request = new HttpDelete(uri);
 		setAuthHeader();
 		return this;
+	}
+
+	protected void setUri(String url) {
+		if (absolutePathPattern.matcher(url).find()) {
+			this.uri = URI.create(url);
+		} else {
+			this.uri = URI.create(baseUrl + url);
+		}
 	}
 
 	/*
