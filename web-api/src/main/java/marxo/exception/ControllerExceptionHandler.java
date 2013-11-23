@@ -71,6 +71,14 @@ public class ControllerExceptionHandler implements Loggable {
 	}
 
 	// This application only
+	@ExceptionHandler({EntityNotFoundException.class})
+	public ResponseEntity<ErrorJson> handleEntityNotFoundException(EntityNotFoundException e) {
+		logger.debug(e.getMessage());
+		logger.debug(StringTool.exceptionToString(e));
+
+		return new ResponseEntity<>(new ErrorJson(e.message), HttpStatus.NOT_FOUND);
+	}
+
 	@ExceptionHandler({InvalidObjectIdException.class})
 	public ResponseEntity<ErrorJson> handleInvalidObjectIdException(InvalidObjectIdException e) {
 		logger.debug(e.getMessage());
@@ -79,7 +87,7 @@ public class ControllerExceptionHandler implements Loggable {
 		return new ResponseEntity<>(new ErrorJson(e.message), HttpStatus.BAD_REQUEST);
 	}
 
-	@ExceptionHandler({EntityInvalidException.class, EntityExistsException.class, EntityNotFoundException.class})
+	@ExceptionHandler({EntityInvalidException.class, EntityExistsException.class})
 	public ResponseEntity<ErrorJson> handleEntityExistsException(EntityException e) {
 		logger.debug(e.getMessage());
 		return new ResponseEntity<>(new ErrorJson(e.messages.toArray(new String[e.messages.size()])), HttpStatus.BAD_REQUEST);

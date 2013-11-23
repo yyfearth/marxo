@@ -87,6 +87,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		}
 
 		ObjectId objectId = new ObjectId(idString);
+		criteria.and("id").is(objectId);
 		Entity entity = mongoTemplate.findOne(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
