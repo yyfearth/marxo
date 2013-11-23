@@ -1,16 +1,15 @@
 package marxo.test.local;
 
 import com.google.common.net.MediaType;
+import marxo.entity.content.Content;
+import marxo.entity.content.FacebookContent;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
-import marxo.entity.content.Content;
-import marxo.entity.content.FacebookContent;
 import org.bson.types.ObjectId;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-@Test(dependsOnGroups = "authentication")
 @ApiTestConfiguration
 public class ContentApiTests extends BasicApiTests {
 	Content reusedContent;

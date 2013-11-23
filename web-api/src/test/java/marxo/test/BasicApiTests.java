@@ -47,6 +47,8 @@ public abstract class BasicApiTests implements Loggable {
 
 	@BeforeClass
 	public void beforeClass() {
+		Criteria criteria = Criteria.where("email").is(email);
+		user = mongoTemplate.findOne(Query.query(criteria), User.class);
 	}
 
 	@AfterClass
