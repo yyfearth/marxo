@@ -120,15 +120,13 @@ define 'models', ['module', 'lib/common'], (module) ->
     _warp: (model = @) ->
       model = model.attributes if model instanceof @constructor
       url = @url?() or @url or ''
-      _nodes_loaded = Array.isArray model.nodes
-      nodes = if _nodes_loaded then model.nodes else []
+      nodes = if Array.isArray(model.nodes) then model.nodes else []
       nodes = @nodes = new Nodes nodes, url: url + '/nodes'
-      nodes._loaded = _nodes_loaded
+      nodes._loaded = nodes.length > 0
 
-      _links_loaded = Array.isArray model.links
-      links = if _links_loaded then model.links else []
+      links = if Array.isArray(model.links) then model.links else []
       links = @links = new Links links, url: url + '/links'
-      links._loaded = _links_loaded
+      links._loaded = links.length > 0
 
       _deleted = @_deleted = []
 
@@ -153,6 +151,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       _success = options.success?.bind @
       options.success = (model, response, options) =>
         @_warp model
+        @nodes._loaded = @links._loaded = true
         @trigger 'loaded', model
         _success? model, response, options
       super options
@@ -185,6 +184,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         cloned_link.nextNode = nextNode
         links.push cloned_link
       attr = workflow.attributes
+      @clear silent
       @set
         name: attr.name
         desc: attr.desc
@@ -360,7 +360,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     _delay: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, nofetch}) ->
       throw new Error 'workflowId is required' unless workflowId
-      workflow = @get workflowId
+      workflow = @fullCollection.get workflowId
       _find = (workflow) ->
         if nodeId or linkId or actionId
           workflow.find {
