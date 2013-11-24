@@ -360,7 +360,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     _delay: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, nofetch}) ->
       throw new Error 'workflowId is required' unless workflowId
-      workflow = @get workflowId
+      workflow = @fullCollection.get workflowId
       _find = (workflow) ->
         if nodeId or linkId or actionId
           workflow.find {
