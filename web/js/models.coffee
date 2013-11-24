@@ -46,7 +46,7 @@ define 'models', ['module', 'lib/common'], (module) ->
   class ManagerCollection extends Backbone.PageableCollection
     mode: 'client'
     defaultState:
-      pageSize: 15
+      pageSize: 255
     _delay: 1000 # 1s
     constructor: (options...) ->
       @state ?= {}
