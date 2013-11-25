@@ -1,6 +1,6 @@
 "use strict"
 
-define 'home', ['base', 'models', 'notification'],
+define 'home', ['base', 'models', 'notification', 'diagram'],
 ({
 find
 #findAll
@@ -9,13 +9,12 @@ fill
 View
 FrameView
 NavListView
-WorkflowDiagramView
 }, {
 Project
 Projects
 }, {
 NotificationListView
-}) ->
+}, WorkflowDiagramView) ->
 
   class HomeFrameView extends FrameView
     collection: Projects.projects
