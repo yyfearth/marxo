@@ -50,9 +50,9 @@ public class SimpleGenerator extends BasicGenerator implements Loggable {
 //				workflows.add(w);
 //
 //				ObjectId modifiedBy = users.get(random.nextInt(users.size())).id;
-//				w.modifiedByUserId = modifiedBy;
+//				w.updateUserId = modifiedBy;
 //				ObjectId createdBy = users.get(random.nextInt(users.size())).id;
-//				w.createdByUserId = createdBy;
+//				w.createUserId = createdBy;
 //			}
 //		}
 //
@@ -68,9 +68,9 @@ public class SimpleGenerator extends BasicGenerator implements Loggable {
 //				nodes.add(node);
 //
 //				ObjectId modifiedBy = users.get(random.nextInt(users.size())).id;
-//				node.modifiedByUserId = modifiedBy;
+//				node.updateUserId = modifiedBy;
 //				ObjectId createdBy = users.get(random.nextInt(users.size())).id;
-//				node.createdByUserId = createdBy;
+//				node.createUserId = createdBy;
 //
 //				int workflowIndex = random.nextInt(workflows.size());
 //				Workflow workflow = workflows.get(workflowIndex);
@@ -97,9 +97,9 @@ public class SimpleGenerator extends BasicGenerator implements Loggable {
 //				links.add(link);
 //
 //				ObjectId modifiedBy = users.get(random.nextInt(users.size())).id;
-//				link.modifiedByUserId = modifiedBy;
+//				link.updateUserId = modifiedBy;
 //				ObjectId createdBy = users.get(random.nextInt(users.size())).id;
-//				link.createdByUserId = createdBy;
+//				link.createUserId = createdBy;
 //
 //				boolean hasCondition = random.nextBoolean();
 //				if (hasCondition) {
@@ -115,8 +115,8 @@ public class SimpleGenerator extends BasicGenerator implements Loggable {
 //					conditions.add(condition);
 //					link.condition = condition;
 //
-//					condition.modifiedByUserId = modifiedBy;
-//					condition.createdByUserId = createdBy;
+//					condition.updateUserId = modifiedBy;
+//					condition.createUserId = createdBy;
 //				}
 //
 //				int workflowIndex = random.nextInt(workflows.size());

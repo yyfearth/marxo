@@ -23,7 +23,7 @@ public class UserApiTests extends BasicApiTests {
 	public void getOneUser() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet(baseUrl + "users/" + email)
+					.httpGet(baseUrl + "users/" + this.user.getEmail())
 					.send();
 			tester
 					.isOk()
@@ -32,8 +32,8 @@ public class UserApiTests extends BasicApiTests {
 			Assert.assertEquals(user.getEmail(), this.user.getEmail());
 			Assert.assertEquals(user.id, this.user.id);
 			Assert.assertEquals(user.getName(), this.user.getName());
-			Assert.assertEquals(user.createdDate.toLocalDateTime(), this.user.createdDate.toLocalDateTime());
-			Assert.assertEquals(user.modifiedDate.toLocalDateTime(), this.user.modifiedDate.toLocalDateTime());
+			Assert.assertEquals(user.createTime.toLocalDateTime(), this.user.createTime.toLocalDateTime());
+			Assert.assertEquals(user.updateTime.toLocalDateTime(), this.user.updateTime.toLocalDateTime());
 			Assert.assertEquals(user.tenantId, this.user.tenantId);
 			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
 		}

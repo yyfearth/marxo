@@ -55,6 +55,13 @@ public class Tester implements Closeable {
 		return this;
 	}
 
+	public Tester httpGet() throws URISyntaxException {
+		setUri("");
+		request = new HttpGet(uri);
+		setAuthHeader();
+		return this;
+	}
+
 	public Tester httpPost(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
 		setUri(url);
 
@@ -72,6 +79,10 @@ public class Tester implements Closeable {
 
 	public Tester httpPost(String url, Object o) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
 		return httpPost(url, objectMapper.writeValueAsString(o));
+	}
+
+	public Tester httpPost(Object o) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
+		return httpPost("", objectMapper.writeValueAsString(o));
 	}
 
 	public Tester httpPut(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
@@ -93,8 +104,19 @@ public class Tester implements Closeable {
 		return httpPut(url, objectMapper.writeValueAsString(o));
 	}
 
+	public Tester httpPut(Object o) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
+		return httpPut("", objectMapper.writeValueAsString(o));
+	}
+
 	public Tester httpDelete(String url) throws URISyntaxException, UnsupportedEncodingException {
 		setUri(url);
+		request = new HttpDelete(uri);
+		setAuthHeader();
+		return this;
+	}
+
+	public Tester httpDelete() throws URISyntaxException, UnsupportedEncodingException {
+		setUri("");
 		request = new HttpDelete(uri);
 		setAuthHeader();
 		return this;
