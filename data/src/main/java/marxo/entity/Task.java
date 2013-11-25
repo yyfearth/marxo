@@ -23,4 +23,8 @@ public class Task extends BasicEntity {
 	public static Task findAndRemove() {
 		return mongoTemplate.findAndRemove(new Query().with(modifiedTimeSort), Task.class);
 	}
+
+	public static long count() {
+		return mongoTemplate.count(new Query(), Task.class);
+	}
 }
