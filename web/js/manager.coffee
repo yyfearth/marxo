@@ -432,12 +432,12 @@ Workflows
         editable: false
       created_at:
         name: 'created_at'
-        label: 'Date Created'
+        label: 'Created'
         cell: 'readonly-datetime'
         editable: false
       updated_at:
         name: 'updated_at'
-        label: 'Date Updated'
+        label: 'Last Updated'
         cell: 'readonly-datetime'
         editable: false
     _defaultEvents:

@@ -543,9 +543,6 @@ Projects
       editable: false
       cell: WorkflowCell
     ,
-      'created_at'
-      'updated_at'
-    ,
       name: 'status'
       label: 'Status'
       cell: 'label'
@@ -556,6 +553,8 @@ Projects
         finished: 'label-info'
         error: 'label-important'
       editable: false
+    ,
+      'updated_at'
     ,
       name: 'project'
       label: ''
