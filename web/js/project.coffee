@@ -62,11 +62,11 @@ Projects
         @btnSave.disabled = true
         unless wf
           @wfDiagram.clear()
+        else if wf is cur and @model.loaded()
+          @wfDiagram.draw @model
         else
-          model = $(e.currentTarget).find(':selected').data 'model'
-          console.log 'data', model
-          @wfDiagram.draw model if model
-        if wf and cur
+          @wfDiagram.draw $(e.currentTarget).find(':selected').data 'model'
+        if wf and cur?
           if wf is cur
             @sidebar.classList.add 'active'
             @btnSave.disabled = false
