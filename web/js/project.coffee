@@ -137,15 +137,15 @@ Projects
             .parents('.control-group').show()
           @$el.find('#project_created_at').val(new Date(model.get 'created_at').toLocaleString())
           .parents('.control-group').show()
-        select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
-        if select.disabled
+        isUpdate = select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
+        if isUpdate
           @_renderProject model
         else
           @_selectWorkflow()
         # auto foucs
         setTimeout =>
           if select.value
-            @form.name.focus()
+            @form.name.select()
           else
             select.focus()
         , 550
@@ -202,13 +202,16 @@ Projects
       return unless wf
       wf = @workflows.get wf unless wf instanceof Workflow
       project = @model
-      if project.nodes?.length or project.has 'nodes'
-        # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
-        # clear nodes and links
-        project.set nodes: null, links: null
-        project._warp()
+      #if project.nodes?.length or project.has 'nodes'
+      # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
       console.log 'selected wf for project', wf.name
       _copy = (wf) =>
+        unless wf.isValid(traverse: true)
+          @model.set 'template_id', ''
+          @sidebar.classList.remove 'active'
+          @btnSave.disabled = true
+          alert "Cannot create project from workflow #{wf.get 'name'}, because it is broken or not finished yet."
+          return
         project.copy wf
         project.set 'status', 'NONE'
         unless @form.name.value
