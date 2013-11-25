@@ -1,4 +1,4 @@
-package marxo.channel;
+package marxo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restfb.DefaultFacebookClient;
@@ -8,6 +8,7 @@ import com.restfb.exception.FacebookOAuthException;
 import com.restfb.types.FacebookType;
 import com.restfb.types.Post;
 import com.restfb.types.User;
+import junit.framework.Assert;
 import marxo.tool.Loggable;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -17,7 +18,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import sun.misc.BASE64Decoder;
@@ -36,7 +37,7 @@ public class ChannelTests implements Loggable {
 	static String postId = "635503102_10152019328983103";
 
 	static {
-		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(FacebookConfig.class);
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("security.xml");
 		appId = (String) applicationContext.getBean("appId");
 		appSecret = (String) applicationContext.getBean("appSecret");
 		appToken = (String) applicationContext.getBean("appToken");
@@ -90,37 +91,30 @@ public class ChannelTests implements Loggable {
 		URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(), url.getQuery());
 		HttpGet httpGet = new HttpGet(uri);
 
+		HttpEntity httpEntity = null;
 		try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet)) {
 			logger.info(closeableHttpResponse.getStatusLine().toString());
-			HttpEntity httpEntity = closeableHttpResponse.getEntity();
+			httpEntity = closeableHttpResponse.getEntity();
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			httpEntity.writeTo(outputStream);
 			String content = outputStream.toString();
 			logger.info("Content: " + content);
-
-			EntityUtils.consume(httpEntity);
+			Assert.assertFalse(content.contains("\"error\":"));
+		} finally {
+			if (httpEntity != null) {
+				EntityUtils.consume(httpEntity);
+			}
 		}
 	}
 
 	@Test
 	public void testParseSignedRequest() throws Exception {
 		String signedRequestString = "FxxDQB7v5bYjmhJ7_ry4VmeKpJ5bpYKR6MSk-HX8hkg.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImNvZGUiOiJBUUJNeXdEZVdtMFZFSmlPbFl6cHpid0lmR0JZcDdfT3o4MllSMGZDMTc5NXZqcTM2dXpBekIwR1J1TVhla050U1RKbDFTdFhqYm55anVEbUphd1JNUGhjVFZwUmNJV3pHNy1PSUYxM0NnQnRLYWNlSEFsbFpqcVFDT093R0o1TkxpYkVMUU9kVHB3Q0ZVSHhzNTRFNjFqdDNCZF9PQjBzbXU1SlBCb3RFRzEzUVQ0SW5KUGIzMXhaeHNRTEl4UThkbW1fbUE2RWdqWDgxMkxhbkphSmVSeWplZXRzWi1DaXR6QzlReGhOVXFyek90LTE4TG9hTlRjZmVBRnVEcWpwYnhGaVdIMjVSTjN3QWo0bFNYU25tZ1JCdkdISkl1YXFPSGVpTWFZbVVnZlp2SFpscWQ2TWRHcWc1VmJuZjdJLVRqWSIsImlzc3VlZF9hdCI6MTM4Mzc1OTc3NCwidXNlcl9pZCI6IjYzNTUwMzEwMiJ9";
-		SignedRequest signedRequest = parseSignedRequest(signedRequestString);
-		assert signedRequest != null;
-		assert signedRequest.signiture != null;
-		assert signedRequest.payload != null;
-	}
-
-	/**
-	 * <a href="https://developers.facebook.com/docs/facebook-login/using-login-with-games/#checklogin">Official docs</a>
-	 */
-	public SignedRequest parseSignedRequest(String signedRequestString) throws IOException {
-		String[] list = signedRequestString.split("\\.");
-		BASE64Decoder base64Decoder = new BASE64Decoder();
-		String sig = new String(base64Decoder.decodeBuffer(list[0]));
-		String payload = new String(base64Decoder.decodeBuffer(list[1]));
-		return new SignedRequest(sig, payload);
+		SignedRequest signedRequest = SignedRequest.getInstance(signedRequestString);
+		logger.info(signedRequestString.toString());
+		Assert.assertNotNull(signedRequest.signiture);
+		Assert.assertNotNull(signedRequest.payload);
 	}
 
 	@Test
@@ -138,14 +132,33 @@ public class ChannelTests implements Loggable {
 		logger.info(objectMapper.writeValueAsString(post));
 		assert post.getApplication().getName().equals("Marxo");
 	}
+}
 
-	class SignedRequest {
-		public String signiture;
-		public String payload;
+class SignedRequest {
+	public String signiture;
+	public String payload;
 
-		SignedRequest(String signiture, String payload) {
-			this.signiture = signiture;
-			this.payload = payload;
-		}
+	SignedRequest(String signiture, String payload) {
+		this.signiture = signiture;
+		this.payload = payload;
+	}
+
+	/**
+	 * <a href="https://developers.facebook.com/docs/facebook-login/using-login-with-games/#checklogin">Official docs</a>
+	 */
+	public static SignedRequest getInstance(String signedRequestString) throws IOException {
+		String[] list = signedRequestString.split("\\.");
+		BASE64Decoder base64Decoder = new BASE64Decoder();
+		String sig = new String(base64Decoder.decodeBuffer(list[0]));
+		String payload = new String(base64Decoder.decodeBuffer(list[1]));
+		return new SignedRequest(sig, payload);
+	}
+
+	@Override
+	public String toString() {
+		return "SignedRequest{" +
+				"signiture='" + signiture + '\'' +
+				", payload='" + payload + '\'' +
+				'}';
 	}
 }
