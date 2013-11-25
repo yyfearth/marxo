@@ -210,7 +210,9 @@ Projects
           @model.set 'template_id', ''
           @sidebar.classList.remove 'active'
           @btnSave.disabled = true
-          alert "Cannot create project from workflow #{wf.get 'name'}, because it is broken or not finished yet."
+          setTimeout ->
+            alert "Cannot create project from workflow #{wf.get 'name'}, because it is broken or not finished yet."
+          , 500
           return
         project.copy wf
         project.set 'status', 'NONE'
