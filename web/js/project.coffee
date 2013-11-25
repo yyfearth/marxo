@@ -356,12 +356,19 @@ Projects
   class ProjectViewerView extends InnerFrameView
     events:
       'click .status-btns > .btn': (e) ->
-        status = $(e.currentTarget).attr 'name'
-        if status is 'stop'
-          @destroy()
-        else
-          @setStatus status
+        switch $(e.currentTarget).attr 'name'
+          when 'start'
+            @setStatus 'started'
+          when 'stop'
+            @setStatus 'stopped'
+          when 'pause'
+            @setStatus 'paused'
+          when 'delete'
+            @destroy()
+          else
+            throw new Error 'unknown status action'
         return
+    collection: Projects.projects
     initialize: (options) ->
       @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
       @$title = $ find '.project-name', @el
@@ -371,7 +378,7 @@ Projects
       @list = new NavListView
         el: find('.project-list', @el)
         auto: false
-        collection: Projects.projects
+        collection: @collection
         urlRoot: 'project'
         seperator: '/'
         headerTitle: 'Projects'
@@ -385,7 +392,7 @@ Projects
     load: (model) ->
       console.log 'load project', project
       @stopListening @model if @model
-      model = Projects.projects.get(model) or new Project {model} if typeof model is 'string'
+      model = @collection.fullCollection.get(model) or new Project {model} if typeof model is 'string'
       @model = model
       @listenTo model, 'loaded', @_render.bind @
       @render() unless @rendered
@@ -441,7 +448,11 @@ Projects
     destroy: ->
       if confirm 'Are you sure to delete this project?\n\nThis step cannot be undone!'
         @model.destroy()
-        @router.navigate 'project/mgr'
+        model = @collection.at(0)
+        if model
+          @load model
+        else
+          @router.back()
         # TODO: do some clean
       @
     setStatus: (status) ->
