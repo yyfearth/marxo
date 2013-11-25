@@ -633,6 +633,7 @@ define 'test_data', ['models'], (models) ->
         name: 'Post Idea'
         key: 'post_idea'
         desc: 'Post project idea'
+        status: 'FINISHED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
         offset:
@@ -653,6 +654,7 @@ define 'test_data', ['models'], (models) ->
         name: 'Post Requirements'
         key: 'post_requirements'
         desc: 'Post requirements'
+        status: 'FINISHED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
         offset:
@@ -672,6 +674,7 @@ define 'test_data', ['models'], (models) ->
         template_id: '50447afb4728cb2036cf9cb2'
         name: 'Cancel Notification'
         key: 'cancel_notification'
+        status: 'IDLE'
         desc: 'Cancel project for less response than expected'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
@@ -687,6 +690,7 @@ define 'test_data', ['models'], (models) ->
         name: 'Retrieve App Submissions'
         key: 'retrieve_app_submissions'
         desc: 'Retrieve app submissions'
+        status: 'STARTED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
         offset:
@@ -707,6 +711,7 @@ define 'test_data', ['models'], (models) ->
         name: 'Retrieve Logo Design'
         key: 'retrieve_logo_design'
         desc: 'Retrieve logo design'
+        status: 'FINISHED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
         offset:
@@ -727,6 +732,7 @@ define 'test_data', ['models'], (models) ->
         name: 'Email to Evaluators'
         key: 'email_to_evaluators'
         desc: 'Email to evaluators'
+        status: 'IDLE'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
         offset:
@@ -747,6 +753,7 @@ define 'test_data', ['models'], (models) ->
         name: 'Post and Vote'
         key: 'post_and_vote'
         desc: 'Post and vote'
+        status: 'STARTED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
         offset:
@@ -767,6 +774,7 @@ define 'test_data', ['models'], (models) ->
         name: 'Post Final Result and Reward'
         key: 'post_final_result_and_reward'
         desc: 'Post final result and reward'
+        status: 'IDLE'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
         offset:
@@ -792,6 +800,7 @@ define 'test_data', ['models'], (models) ->
         prev_node_id: '50447afb4728cc2036cf9cb0'
         next_node_id: '50447afb4728cc2036cf9cb1'
         name: '10 Days & Likes >= 300'
+        status: 'PASSED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -801,6 +810,7 @@ define 'test_data', ['models'], (models) ->
         prev_node_id: '50447afb4728cc2036cf9cb0'
         next_node_id: '50447afb4728cc2036cf9cb2'
         name: '10 Days & Likes < 300'
+        status: 'FAILED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -809,6 +819,7 @@ define 'test_data', ['models'], (models) ->
         key: 'post_req_to_retrieve_app'
         prev_node_id: '50447afb4728cc2036cf9cb1'
         next_node_id: '50447afb4728cc2036cf9cb3'
+        status: 'PASSED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -817,6 +828,7 @@ define 'test_data', ['models'], (models) ->
         key: 'post_req_to_retrieve_logo'
         prev_node_id: '50447afb4728cc2036cf9cb1'
         next_node_id: '50447afb4728cc2036cf9cb4'
+        status: 'PASSED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -826,6 +838,7 @@ define 'test_data', ['models'], (models) ->
         prev_node_id: '50447afb4728cc2036cf9cb3'
         next_node_id: '50447afb4728cc2036cf9cb5'
         name: '15 Days & > 80% Response'
+        status: 'IDLE'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -835,6 +848,7 @@ define 'test_data', ['models'], (models) ->
         prev_node_id: '50447afb4728cc2036cf9cb4'
         next_node_id: '50447afb4728cc2036cf9cb6'
         name: '10 Days & Submissions >= 3'
+        status: 'PASSED'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -845,6 +859,7 @@ define 'test_data', ['models'], (models) ->
         desc: 'Manual trigger back if failed to evaluate'
         prev_node_id: '50447afb4728cc2036cf9cb5'
         next_node_id: '50447afb4728cc2036cf9cb3'
+        status: 'IDLE'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -855,6 +870,7 @@ define 'test_data', ['models'], (models) ->
         desc: 'Manual trigger back if failed to vote'
         prev_node_id: '50447afb4728cc2036cf9cb6'
         next_node_id: '50447afb4728cc2036cf9cb4'
+        status: 'IDLE'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -863,6 +879,7 @@ define 'test_data', ['models'], (models) ->
         key: 'evaluate_to_post_final'
         prev_node_id: '50447afb4728cc2036cf9cb5'
         next_node_id: '50447afb4728cc2036cf9cb7'
+        status: 'IDLE'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ,
@@ -871,6 +888,7 @@ define 'test_data', ['models'], (models) ->
         key: 'post_and_vote_to_post_final'
         prev_node_id: '50447afb4728cc2036cf9cb6'
         next_node_id: '50447afb4728cc2036cf9cb7'
+        status: 'IDLE'
         created_at: new Date(1379528126251)
         updated_at: new Date(1379528126251)
       ]

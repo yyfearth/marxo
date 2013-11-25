@@ -257,6 +257,7 @@
     -moz-user-select: none;
     user-select: none;
 
+    // TODO: update status
     .link {
       fill: none;
       stroke: #000;
@@ -265,6 +266,18 @@
       &.active {
         stroke-width: 4.5px;
       }
+      &.status-waiting {
+        stroke: #c09853;
+      }
+      &.status-error {
+        stroke: #b94a48;
+      }
+      &.status-passed {
+        stroke: #565;
+      }
+      &.status-failed {
+        stroke: #666;
+      }
     }
 
     .node {
@@ -272,6 +285,23 @@
       stroke-width: 2px;
       stroke: #000;
       cursor: pointer;
+      &.start-node {
+        stroke-width: 3px;
+        stroke-dasharray: 7, 2;
+      }
+      &.status-started {
+        fill: #dff0d8;
+      }
+      &.status-error {
+        fill: #f2dede;
+      }
+      &.status-paused, &.status-waiting {
+        fill: #fcf8e3;
+      }
+      &.status-finished {
+        stroke: #565;
+        fill: #dde;
+      }
     }
 
     text.index {

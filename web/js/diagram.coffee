@@ -16,27 +16,29 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       @draw = @draw.bind @
       super options
     _click: (d) -> @trigger 'select', d.model, @model
+    _sort: (wf, nodes, links) ->
+      nodes_cindex = {}
+      links_cindex = {}
+      level = [wf.startNode]
+
+      while node = level.shift()
+        unless nodes_cindex.hasOwnProperty node.cid
+          nodes.push nodes_cindex[node.cid] = node
+          for link in node.outLinks
+            links.push links_cindex[link.cid] = link
+            level.push link.nextNode
+      return
     _data: (wf) ->
       @model = wf
       r = @r + 1
       w = 0
       h = 0
       fixed = true
-      # sort
+
       if wf.startNode?
         nodes = []
-        nodes_cindex = {}
         links = []
-        links_cindex = {}
-        level = [wf.startNode]
-
-        while node = level.shift()
-          unless nodes_cindex.hasOwnProperty node.cid
-            nodes.push nodes_cindex[node.cid] = node
-            for link in node.outLinks
-              links.push links_cindex[link.cid] = link
-              level.push link.nextNode
-
+        @_sort wf, nodes, links
         @_invalid = nodes.length isnt wf.nodes.length or links.length isnt wf.links.length
         # console.log 'sort nodes', @_valid, nodes, links
       else
@@ -58,39 +60,54 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           y = r + Math.round((y or 0) / r / 2) * r
           w = x if x > w
           h = y if y > h
+          cls = []
+          txt = "Node #{i + 1}: #{node.get 'name'}"
+          if node is wf.startNode
+            txt = '[Start] ' + txt
+            cls.push 'start-node'
+          if status = node.get 'status'
+            txt += " (#{status.toUpperCase()})" unless /^IDLE$|^NONE$/i.test status
+            cls.push 'status-' + status.toLowerCase()
           x: x
           y: y
           id: "node_#{node.id ? node.cid}"
-          title: "Node #{i + 1}: #{node.get 'name'}"
+          cls: cls.join(' ')
+          tooltip: txt
           fixed: _fixed or node is wf.startNode
           index: i + 1
           model: node
         links: links.map (link, i) ->
           src = link.prevNode._idx
           tar = link.nextNode._idx
+          if status = link.get 'status'
+            cls = 'status-' + status.toLowerCase()
+            status = if /^IDLE$|^NONE$/i.test(status) then '' else " (#{status.toUpperCase()})"
+
           id: "link_#{link.id ? link.cid}"
+          cls: cls
           source: src
           target: tar
-          title: "Link #{i + 1}: #{link.name()}"
+          tooltip: "Link #{i + 1}: #{link.name()}#{status or ''}"
           straight: tar > src
           model: link
-      if fixed and h > w
+
+      if fixed and h > w # swap to ensure w >= h
         [w, h] = [h, w]
         @data.nodes.forEach (node) ->
           x = node.x
           node.x = node.y
           node.y = x
           return
-      @w = Math.max @$el.innerWidth(), w + r + r
-      @h = Math.max @$el.innerHeight(), h + r + r
+      w = @w = Math.max @$el.innerWidth(), w + r + r
+      h = @h = Math.max @$el.innerHeight(), h + r + r
       @fixed = fixed
-      @force.size([@w, @h])
-      @svg.attr('viewBox', '0 0 ' + @w + ' ' + @h)
+
+      @force.size([w, h])
+      @svg.attr('viewBox', "0 0 #{w} #{h}")
       #console.log 'nodes'
       #console.table @data.nodes
       #console.log 'links'
       #console.table @data.links
-      console.log 'diagram data', @data
       return
     _init: (callback) ->
       # init force layout
@@ -153,7 +170,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       @tooltip.transition().duration(200).style('opacity', .9)
       .style('left', pos[0] + 'px')
       .style('top', pos[1] + 'px')
-      .text(d.title)
+      .text(d.tooltip)
     _mouseleave: ->
       @tooltip.transition().duration(500).style('opacity', 0)
     _draw: ->
@@ -165,7 +182,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       force.nodes(data.nodes).links(data.links)
       # load nodes
       link = @link = @link.data(data.links)
-      link.enter().append('path').attr('class', 'link').attr('id', (d) -> d.id)
+      link.enter().append('path').attr('class', (d) -> "link #{d.cls}").attr('id', (d) -> d.id)
       .style('marker-end', 'url(#end-arrow)').on('click', @_click)
       .on('mouseover', @_mouseover).on('mouseleave', @_mouseleave)
       link.exit().remove()
@@ -174,7 +191,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       node = @node.enter().append('svg:g').call @force.drag()
       node.attr('id',(d) -> d.id).on('click', @_click)
       .on('mouseover', @_mouseover).on('mouseleave', @_mouseleave)
-      node.append('circle').attr('class', 'node').attr('r', r)
+      node.append('circle').attr('class', (d) -> "node #{d.cls}").attr('r', r)
       node.append('svg:text').attr('x', 0).attr('y', 10).attr('class', 'index').text (d) -> d.index
       @node.exit().remove()
       # start
