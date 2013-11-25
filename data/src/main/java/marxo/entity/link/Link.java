@@ -36,4 +36,10 @@ public class Link extends WorkflowChildEntity {
 		this.nextNode = nextNode;
 		this.nextNodeId = nextNode.id;
 	}
+
+	public boolean isPassed() {
+		// todo
+		logger.warn("isPassed is not implemented");
+		return true;
+	}
 }

@@ -11,21 +11,21 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @JsonIgnoreProperties(value = {
 }, ignoreUnknown = true)
 public class Workflow extends TenantChildEntity {
+	public RunStatus status = RunStatus.IDLE;
+
 	public WorkflowType type = WorkflowType.NONE;
-	public Set<ObjectId> nodeIds = new HashSet<>();
-	public Set<ObjectId> linkIds = new HashSet<>();
+	public List<ObjectId> nodeIds = new ArrayList<>();
+	public List<ObjectId> linkIds = new ArrayList<>();
 	@Transient
 	public List<Node> nodes = new ArrayList<>();
 	@Transient
 	public List<Link> links = new ArrayList<>();
-	public RunStatus status = RunStatus.IDLE;
+
 	public boolean isProject = false;
 	public ObjectId startNodeId;
 	public List<ObjectId> currentNodeIds = new ArrayList<>();
@@ -62,6 +62,10 @@ public class Workflow extends TenantChildEntity {
 		Criteria criteria = Criteria.where("id").in(currentNodeIds);
 		return mongoTemplate.find(Query.query(criteria), Node.class);
 	}
+
+	/*
+	DAO
+	 */
 
 	public static Workflow get(ObjectId id) {
 		return mongoTemplate.findById(id, Workflow.class);
