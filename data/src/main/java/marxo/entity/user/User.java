@@ -1,6 +1,7 @@
 package marxo.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.bson.types.ObjectId;
 
 import java.io.Serializable;
 import java.util.regex.Pattern;
@@ -13,7 +14,7 @@ public class User extends TenantChildEntity implements Serializable {
 	@JsonIgnore
 	protected String password;
 	protected String email;
-	protected UserType userType = UserType.UNKNOWN;
+	public UserType type = UserType.UNKNOWN;
 
 	public String getPassword() {
 		return password;
@@ -34,5 +35,9 @@ public class User extends TenantChildEntity implements Serializable {
 
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
+	}
+
+	public static User get(ObjectId id) {
+		return mongoTemplate.findById(id, User.class);
 	}
 }

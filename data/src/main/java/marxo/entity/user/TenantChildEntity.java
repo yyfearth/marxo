@@ -5,7 +5,7 @@ import marxo.entity.BasicEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 
-public class TenantChildEntity extends BasicEntity {
+public abstract class TenantChildEntity extends BasicEntity {
 	public ObjectId tenantId;
 	@Transient
 	protected Tenant tenant;
@@ -14,7 +14,10 @@ public class TenantChildEntity extends BasicEntity {
 
 	@JsonIgnore
 	public Tenant getTenant() {
-		return tenant;
+		if (tenantId == null) {
+			return null;
+		}
+		return (tenant == null) ? (tenant = mongoTemplate.findById(this.tenantId, Tenant.class)) : tenant;
 	}
 
 	public void setTenant(Tenant tenant) {

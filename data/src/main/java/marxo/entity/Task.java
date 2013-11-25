@@ -1,6 +1,7 @@
 package marxo.entity;
 
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.query.Query;
 
 enum TaskType {
 	DEFAULT,
@@ -13,5 +14,13 @@ public class Task extends BasicEntity {
 
 	public Task(ObjectId workflowId) {
 		this.workflowId = workflowId;
+	}
+
+	public static Task get(ObjectId id) {
+		return mongoTemplate.findById(id, Task.class);
+	}
+
+	public static Task findAndRemove() {
+		return mongoTemplate.findAndRemove(new Query().with(modifiedTimeSort), Task.class);
 	}
 }

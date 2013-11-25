@@ -20,15 +20,4 @@ public class PostFacebook extends Action {
 		FacebookContent facebookContent = (FacebookContent) getContent();
 		facebookContent.publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", facebookContent.message));
 	}
-
-	@JsonIgnore
-	@Override
-	public Tenant getTenant() {
-		return (tenant == null) ? (tenant = mongoTemplate.findById(this.tenantId, Tenant.class)) : tenant;
-	}
-
-	@JsonIgnore
-	public Content getContent() {
-		return (content == null) ? (content = mongoTemplate.findById(this.contentId, Content.class)) : content;
-	}
 }
