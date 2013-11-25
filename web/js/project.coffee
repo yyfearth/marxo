@@ -63,11 +63,11 @@ Projects
         @btnSave.disabled = true
         unless wf
           @wfDiagram.clear()
+        else if wf is cur and @model.loaded()
+          @wfDiagram.draw @model
         else
-          model = $(e.currentTarget).find(':selected').data 'model'
-          console.log 'data', model
-          @wfDiagram.draw model if model
-        if wf and cur
+          @wfDiagram.draw $(e.currentTarget).find(':selected').data 'model'
+        if wf and cur?
           if wf is cur
             @sidebar.classList.add 'active'
             @btnSave.disabled = false
@@ -137,15 +137,15 @@ Projects
             .parents('.control-group').show()
           @$el.find('#project_created_at').val(new Date(model.get 'created_at').toLocaleString())
           .parents('.control-group').show()
-        select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
-        if select.disabled
+        isUpdate = select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
+        if isUpdate
           @_renderProject model
         else
           @_selectWorkflow()
         # auto foucs
         setTimeout =>
           if select.value
-            @form.name.focus()
+            @form.name.select()
           else
             select.focus()
         , 550
@@ -202,13 +202,18 @@ Projects
       return unless wf
       wf = @workflows.get wf unless wf instanceof Workflow
       project = @model
-      if project.nodes?.length or project.has 'nodes'
-        # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
-        # clear nodes and links
-        project.set nodes: null, links: null
-        project._warp()
+      #if project.nodes?.length or project.has 'nodes'
+      # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
       console.log 'selected wf for project', wf.name
       _copy = (wf) =>
+        unless wf.isValid(traverse: true)
+          @model.set 'template_id', ''
+          @sidebar.classList.remove 'active'
+          @btnSave.disabled = true
+          setTimeout ->
+            alert "Cannot create project from workflow #{wf.get 'name'}, because it is broken or not finished yet."
+          , 500
+          return
         project.copy wf
         project.set 'status', 'NONE'
         unless @form.name.value
@@ -356,12 +361,19 @@ Projects
   class ProjectViewerView extends InnerFrameView
     events:
       'click .status-btns > .btn': (e) ->
-        status = $(e.currentTarget).attr 'name'
-        if status is 'stop'
-          @destroy()
-        else
-          @setStatus status
+        switch $(e.currentTarget).attr 'name'
+          when 'start'
+            @setStatus 'started'
+          when 'stop'
+            @setStatus 'stopped'
+          when 'pause'
+            @setStatus 'paused'
+          when 'delete'
+            @destroy()
+          else
+            throw new Error 'unknown status action'
         return
+    collection: Projects.projects
     initialize: (options) ->
       @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
       @$title = $ find '.project-name', @el
@@ -371,7 +383,7 @@ Projects
       @list = new NavListView
         el: find('.project-list', @el)
         auto: false
-        collection: Projects.projects
+        collection: @collection
         urlRoot: 'project'
         seperator: '/'
         headerTitle: 'Projects'
@@ -385,7 +397,7 @@ Projects
     load: (model) ->
       console.log 'load project', project
       @stopListening @model if @model
-      model = Projects.projects.get(model) or new Project {model} if typeof model is 'string'
+      model = @collection.fullCollection.get(model) or new Project {model} if typeof model is 'string'
       @model = model
       @listenTo model, 'loaded', @_render.bind @
       @render() unless @rendered
@@ -441,7 +453,11 @@ Projects
     destroy: ->
       if confirm 'Are you sure to delete this project?\n\nThis step cannot be undone!'
         @model.destroy()
-        @router.navigate 'project/mgr'
+        model = @collection.at(0)
+        if model
+          @load model
+        else
+          @router.back()
         # TODO: do some clean
       @
     setStatus: (status) ->

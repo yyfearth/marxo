@@ -626,7 +626,7 @@ define 'test_data', ['models'], (models) ->
       name: 'Demo Project'
       key: 'demo_prj'
       desc: 'Demo Project from Demo Workflow'
-      status: 'RUNNING'
+      status: 'STARTED'
       nodes: [
         id: '50447afb4728cc2036cf9cb0'
         template_id: '50447afb4728cb2036cf9cb0'
@@ -882,7 +882,7 @@ define 'test_data', ['models'], (models) ->
       key: 'test_prj'
       name: 'Test Project'
       desc: 'The test project using test workflow'
-      status: 'WAITING'
+      status: 'IDLE'
       nodes: [
         id: '507f81413d070321728ffe10'
         template_id: '507f81413d070321728fde10'
