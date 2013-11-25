@@ -12,4 +12,8 @@ public class Tenant extends BasicEntity {
 	public String fax;
 	public String address;
 	public FacebookData facebookData;
+
+	public static void removeAll() {
+		mongoTemplate.dropCollection(Tenant.class);
+	}
 }

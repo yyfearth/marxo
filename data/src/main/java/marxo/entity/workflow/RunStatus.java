@@ -1,6 +1,6 @@
 package marxo.entity.workflow;
 
-public enum ProjectStatus {
+public enum RunStatus {
 	/**
 	 * Created but not started yet.
 	 */

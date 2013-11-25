@@ -9,8 +9,12 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Set;
@@ -20,6 +24,10 @@ import java.util.Set;
 @JsonPropertyOrder({"id", "email", "object_type", "tenant_id", "workflow_id", "name", "key", "desc", "context_type", "status", "content", "nodes", "node_ids", "links", "link_ids", "created_at", "created_by", "updated_at", "modified_by"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BasicEntity {
+	@JsonIgnore
+	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	@JsonIgnore
+	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
 	@Id
 	@JsonProperty("id")
 	public ObjectId id = new ObjectId();
@@ -27,22 +35,25 @@ public abstract class BasicEntity {
 	public String key = id.toString();
 	@Field(order = 50)
 	@JsonProperty("created_at")
-	public DateTime createdDate = DateTime.now();
+	public DateTime createTime = DateTime.now();
 	@Field(order = 52)
 	@JsonProperty("updated_at")
-	public DateTime modifiedDate = DateTime.now();
+	public DateTime updateTime = DateTime.now();
 	@JsonProperty("created_by")
 	@Field(order = 51)
-	public ObjectId createdByUserId;
+	public ObjectId createUserId;
 	@Field(order = 53)
 	@JsonProperty("modified_by")
-	public ObjectId modifiedByUserId;
+	public ObjectId updateUserId;
 	@JsonProperty("desc")
 	public String description = "";
 	@Field(order = 3)
 	protected String name = "";
 	@Transient
 	protected String objectType;
+
+	@JsonIgnore
+	protected static final Sort modifiedTimeSort = new Sort(Sort.Direction.ASC, "updateTime");
 
 	public String getName() {
 		return name;
@@ -74,8 +85,8 @@ public abstract class BasicEntity {
 				"name",
 				"key",
 				"description",
-				"createdByUserId",
-				"modifiedByUserId"
+				"createUserId",
+				"updateUserId"
 		);
 		for (String fieldName : strings) {
 			java.lang.reflect.Field field = basicEntityClass.getDeclaredField(fieldName);
@@ -83,5 +94,13 @@ public abstract class BasicEntity {
 			field.set(newEntity, field.get(this));
 		}
 		return newEntity;
+	}
+
+	public void save() {
+		mongoTemplate.insert(this);
+	}
+
+	public void remove() {
+		mongoTemplate.remove(this);
 	}
 }
