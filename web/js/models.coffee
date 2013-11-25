@@ -232,6 +232,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       attr = workflow.attributes
       start_node_id = workflow.get 'start_node_id'
       start_node_id = if start_node_id? then node_index[start_node_id]?.idx else null
+      @clear silent
       @set
         name: attr.name
         desc: attr.desc
