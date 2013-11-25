@@ -396,7 +396,7 @@ Projects
       @model = model
       @listenTo model, 'loaded', @_render.bind @
       @render() unless @rendered
-      if model.loaded
+      if model.loaded()
         @_render model
       else
         model.load()

@@ -593,7 +593,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       throw new Error 'unable to draw workflow' unless wf instanceof Workflow
       @render() unless @rendered
       @w = @h = 0
-      unless wf.loaded
+      unless wf.loaded()
         wf.fetch reset: true, success: @draw
       else unless @d3
         @_init =>
