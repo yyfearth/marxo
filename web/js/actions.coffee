@@ -48,13 +48,16 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           , 600
       el
     addAction: (model, options) ->
-      model = new Action model unless model instanceof Action
-      actionView = new ActionView model: model, parent: @, container: @actionsEl, projectMode: @projectMode
-      @listenTo actionView, 'remove', @removeAction.bind @
-      actionView.render()
-      actionView.el.scrollIntoView() if options?.scrollIntoView
-      @delayedTrigger 'actions_update', 100
-      #@actions.add actionView
+      try
+        model = new Action model unless model instanceof Action
+        actionView = new ActionView model: model, parent: @, container: @actionsEl, projectMode: @projectMode
+        @listenTo actionView, 'remove', @removeAction.bind @
+        actionView.render()
+        actionView.el.scrollIntoView() if options?.scrollIntoView
+        @delayedTrigger 'actions_update', 100
+        #@actions.add actionView
+      catch e
+        console.error 'faild to load action:', e, model
       @
     removeAction: (view) ->
       console.log 'remove action view', view
