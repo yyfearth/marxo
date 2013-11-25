@@ -22,10 +22,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("unchecked")
@@ -414,7 +411,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					project.setTemplate(workflow);
 					project.isProject = true;
 
-					HashSet<ObjectId> newNodeIds = new HashSet<>();
+					List<ObjectId> newNodeIds = new ArrayList<>();
 					for (ObjectId nodeId : project.nodeIds) {
 						Node node = nodeMap.get(nodeId);
 						Node newNode = cloner.deepClone(node);
@@ -429,7 +426,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					}
 					project.nodeIds = newNodeIds;
 
-					HashSet<ObjectId> newLinkIds = new HashSet<>();
+					List<ObjectId> newLinkIds = new ArrayList<>();
 					for (ObjectId linkId : project.linkIds) {
 						Link link = linkMap.get(linkId);
 						Link newLink = cloner.deepClone(link);
