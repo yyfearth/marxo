@@ -373,6 +373,7 @@ Action
       same = data is @data
       super data, callback
       @fill data.attributes unless same
+      @form.name.select() # auto focus
       @
     save: ->
       @data.set @read()
