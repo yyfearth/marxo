@@ -44,6 +44,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
   String::capitalize ?= ->
     @charAt(0).toUpperCase() + @slice(1).toLowerCase()
 
+  # Fallback
+  Element::scrollIntoViewIfNeeded ?= Element::scrollIntoView
+
   # Enable CoffeeScript class for Javascript Mixin
   # https://github.com/yi/coffee-acts-as
   # e.g.: class A ...   class B ...

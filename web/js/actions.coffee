@@ -39,22 +39,25 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       if el?
         hidden = @el.getAttribute 'aria-hidden'
         if hidden is 'true'
-          @$el.one 'shown', -> el.scrollIntoView()
+          @$el.one 'shown', -> el.scrollIntoViewIfNeeded()
         else if hidden is 'false'
-          el.scrollIntoView()
+          el.scrollIntoViewIfNeeded()
         else
           setTimeout ->
-            el.scrollIntoView()
+            el.scrollIntoViewIfNeeded()
           , 600
       el
     addAction: (model, options) ->
-      model = new Action model unless model instanceof Action
-      actionView = new ActionView model: model, parent: @, container: @actionsEl, projectMode: @projectMode
-      @listenTo actionView, 'remove', @removeAction.bind @
-      actionView.render()
-      actionView.el.scrollIntoView() if options?.scrollIntoView
-      @delayedTrigger 'actions_update', 100
-      #@actions.add actionView
+      try
+        model = new Action model unless model instanceof Action
+        actionView = new ActionView model: model, parent: @, container: @actionsEl, projectMode: @projectMode
+        @listenTo actionView, 'remove', @removeAction.bind @
+        actionView.render()
+        actionView.el.scrollIntoViewIfNeeded() if options?.scrollIntoView
+        @delayedTrigger 'actions_update', 100
+        #@actions.add actionView
+      catch e
+        console.error 'faild to load action:', e, model
       @
     removeAction: (view) ->
       console.log 'remove action view', view

@@ -432,12 +432,12 @@ Workflows
         editable: false
       created_at:
         name: 'created_at'
-        label: 'Date Created'
+        label: 'Created'
         cell: 'readonly-datetime'
         editable: false
       updated_at:
         name: 'updated_at'
-        label: 'Date Updated'
+        label: 'Last Updated'
         cell: 'readonly-datetime'
         editable: false
     _defaultEvents:
@@ -458,10 +458,8 @@ Workflows
 
       # selection may change after remove
       @listenTo collection, 'remove', @_selection_changed.bind @
-      # page size alias
-      @pageSize = collection.state.pageSize or 15
-      #window.collection = collection # debug
-      #window.mgr = @ # debug
+
+      collection.setPageSize options.pageSize or 15
 
       @grid = new Backgrid.Grid
         columns: @_configColumns()

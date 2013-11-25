@@ -186,7 +186,8 @@ Projects
       # show active status
       $sidebar = $ @sidebar
       $sidebar.find('.sidebar-item.active').removeClass 'active'
-      $sidebar.find(if model then ".sidebar-item:has(a[data-cid='#{model.cid}'])" else ".project-item").addClass 'active'
+      item = $sidebar.find(if model then ".sidebar-item:has(a[data-cid='#{model.cid}'])" else ".project-item").addClass 'active'
+      item[0].scrollIntoViewIfNeeded()
       @wfDiagram.highlight model
       @
     _readData: ->
@@ -542,9 +543,6 @@ Projects
       editable: false
       cell: WorkflowCell
     ,
-      'created_at'
-      'updated_at'
-    ,
       name: 'status'
       label: 'Status'
       cell: 'label'
@@ -555,6 +553,8 @@ Projects
         finished: 'label-info'
         error: 'label-important'
       editable: false
+    ,
+      'updated_at'
     ,
       name: 'project'
       label: ''

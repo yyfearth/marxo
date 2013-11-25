@@ -373,6 +373,7 @@ Action
       same = data is @data
       super data, callback
       @fill data.attributes unless same
+      @form.name.select() # auto focus
       @
     save: ->
       @data.set @read()
@@ -426,7 +427,7 @@ Action
       count = findAll('.action', @actionsEl).length # @actions.length
       if count > @_too_many_actions_limit
         cls.add 'active'
-        @_too_many_alert.scrollIntoView()
+        @_too_many_alert.scrollIntoViewIfNeeded()
       else
         cls.remove 'active'
 
