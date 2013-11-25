@@ -1,6 +1,6 @@
 "use strict"
 
-define 'project', ['base', 'manager', 'models', 'actions'],
+define 'project', ['base', 'manager', 'models', 'diagram', 'actions'],
 ({
 find
 #findAll
@@ -10,7 +10,6 @@ InnerFrameView
 NavListView
 FormView
 FormDialogView
-WorkflowDiagramView
 }, {
 ManagerView
 WorkflowFilterView
@@ -19,7 +18,7 @@ Workflow
 Workflows
 Project
 Projects
-}, ActionsMixin) ->
+}, WorkflowDiagramView, ActionsMixin) ->
 
   class ProjectFrameView extends FrameView
     initialize: (options) ->
