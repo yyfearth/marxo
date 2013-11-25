@@ -9,6 +9,7 @@ Workflow, Workflows
       name: 'Demo Workflow'
       key: 'demo_workflow'
       desc: 'Demo Workflow for App Dev and Logo Desgin'
+      start_node_id: 0
       nodes: [
         name: 'Post Idea'
         key: 'post_idea'
@@ -165,6 +166,7 @@ Workflow, Workflows
       name: 'Conference Check-in Mobile App'
       key: 'conf_app_dev'
       desc: 'Dev WorkflowBased on project requirements, use crowds sourcing idea to complete the development by steps from design, implementation, testing, until the final result of this web application.Based on project requirements, use crowds sourcing idea to complete the development by steps to the result of this application.'
+      start_node_id: 0
       nodes: [
         name: 'Requirement and Desgin'
         key: 'desgin'

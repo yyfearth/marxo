@@ -144,6 +144,19 @@ define 'models', ['module', 'lib/common'], (module) ->
         _deleted.push link unless link.isNew()
         return
 
+      # start node
+      start_node_id = model.start_node_id
+      if start_node_id?
+        @startNode = @nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+      else if nodes.length
+        starts = nodes.filter (n) -> not n.inLinks.length
+        if starts.length is 1
+          console.warn 'auto detecting start node', model
+          @startNode = starts[0]
+        else
+          console.warn 'cannot find or more than one start node detected', model
+          @startNode = null
+
       @set {}
 
       return
@@ -158,6 +171,39 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
+    validate: (ignored, options) -> if options?.traverse # by default skip
+      try
+        throw 'cannot validate a not loaded workflow' unless @loaded()
+        if @nodes.length
+          startNode = @startNode
+          nodes = @nodes
+          throw 'no start node' unless nodes.length and startNode?
+          link = @links
+          link_idx = {}
+          nodes.forEach (n, i) -> if not n.inLinks.length and n isnt startNode
+            throw "find a node without in links and it is not the start node #{n.id ? i}"
+          link.forEach (l, i) ->
+            key = "#{l.prevNode.cid}-#{l.nextNode.cid}"
+            throw "duplicated link #{key} #{l.id or i}" if link_idx.hasOwnProperty key
+
+          cindex = {}
+          nodes_count = 0
+          links_count = 0
+          level = [@startNode]
+
+          while node = level.shift()
+            unless cindex.hasOwnProperty node.cid
+              cindex[node.cid] = node
+              nodes_count++
+              links_count += node.outLinks.length
+              level.push link.nextNode for link in node.outLinks
+
+          unless nodes_count is @nodes.length and links_count is @links.length
+            throw 'after traversed workflow and find nodes or links not visited'
+      catch e
+        console.error 'validate workflow failed:', e, @
+        return e
+      return
     copy: (workflow) -> # create form workflow as template
       throw new Error 'must be copy from a workflow' unless workflow instanceof Workflow
       nodes = []
@@ -184,11 +230,14 @@ define 'models', ['module', 'lib/common'], (module) ->
         cloned_link.nextNode = nextNode
         links.push cloned_link
       attr = workflow.attributes
+      start_node_id = workflow.get 'start_node_id'
+      start_node_id = if start_node_id? then node_index[start_node_id]?.idx else null
       @clear silent
       @set
         name: attr.name
         desc: attr.desc
         key: attr.key
+        start_node_id: start_node_id
         template_id: workflow.id
         nodes: nodes
         links: links
@@ -207,6 +256,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         console.log 'save local', @_name, attributes
         super attributes, options
       else # for ajax sync
+        throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
         console.log 'saving', @_name, attributes, @
         # replace original callbacks
         _success = options.success
@@ -244,6 +294,9 @@ define 'models', ['module', 'lib/common'], (module) ->
               else if link._changed
                 link.resetChangeFlag().save()
               return
+            # update workflow for start node
+            unless @get('start_node_id') is @startNode.id
+              requests.push @save start_node_id: @startNode.id
             if (typeof _success is 'function') or (typeof _err is 'function')
               $.when.apply($, requests).then =>
                 # console.log 'new links created', @links
@@ -264,6 +317,7 @@ define 'models', ['module', 'lib/common'], (module) ->
           @_deleted?.forEach (model) -> model.destroy()
           return
         # save workflow
+        @unset 'start_node_id', silent: true if typeof @get 'start_node_id' is 'number'
         @unset 'nodes', silent: true
         @unset 'links', silent: true
         super attributes, options
