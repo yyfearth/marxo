@@ -144,6 +144,19 @@ define 'models', ['module', 'lib/common'], (module) ->
         _deleted.push link unless link.isNew()
         return
 
+      # start node
+      start_node_id = model.start_node_id
+      if start_node_id?
+        @startNode = @nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+      else
+        starts = nodes.filter (n) -> not n.inLinks.length
+        if starts.length is 1
+          console.warn 'auto detecting start node', model
+          @startNode = starts[0]
+        else
+          console.warn 'cannot find or more than one start node detected', model
+          @startNode = null
+
       @set {}
 
       return
@@ -184,10 +197,13 @@ define 'models', ['module', 'lib/common'], (module) ->
         cloned_link.nextNode = nextNode
         links.push cloned_link
       attr = workflow.attributes
+      start_node_id = workflow.get 'start_node_id'
+      start_node_id = if start_node_id? then node_index[start_node_id]?.idx else null
       @set
         name: attr.name
         desc: attr.desc
         key: attr.key
+        start_node_id: start_node_id
         template_id: workflow.id
         nodes: nodes
         links: links
@@ -206,6 +222,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         console.log 'save local', @_name, attributes
         super attributes, options
       else # for ajax sync
+        throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
         console.log 'saving', @_name, attributes, @
         # replace original callbacks
         _success = options.success
@@ -243,6 +260,9 @@ define 'models', ['module', 'lib/common'], (module) ->
               else if link._changed
                 link.resetChangeFlag().save()
               return
+            # update workflow for start node
+            unless @get('start_node_id') is @startNode.id
+              requests.push @save start_node_id: @startNode.id
             if (typeof _success is 'function') or (typeof _err is 'function')
               $.when.apply($, requests).then =>
                 # console.log 'new links created', @links
@@ -263,6 +283,7 @@ define 'models', ['module', 'lib/common'], (module) ->
           @_deleted?.forEach (model) -> model.destroy()
           return
         # save workflow
+        @unset 'start_node_id', silent: true if typeof @get 'start_node_id' is 'number'
         @unset 'nodes', silent: true
         @unset 'links', silent: true
         super attributes, options
