@@ -148,7 +148,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       start_node_id = model.start_node_id
       if start_node_id?
         @startNode = @nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
-      else
+      else if nodes.length
         starts = nodes.filter (n) -> not n.inLinks.length
         if starts.length is 1
           console.warn 'auto detecting start node', model
