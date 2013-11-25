@@ -427,7 +427,7 @@ Action
       count = findAll('.action', @actionsEl).length # @actions.length
       if count > @_too_many_actions_limit
         cls.add 'active'
-        @_too_many_alert.scrollIntoView()
+        @_too_many_alert.scrollIntoViewIfNeeded()
       else
         cls.remove 'active'
 
