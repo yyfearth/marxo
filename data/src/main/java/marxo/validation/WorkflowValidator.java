@@ -47,13 +47,13 @@ public class WorkflowValidator extends BasicValidator {
 
 			node = nodeMap.get(link.previousNodeId);
 			link.setPreviousNode(node);
-			node.tolinkIds.add(link.id);
-			node.toLinks.add(link);
+			node.toLinkIds.add(link.id);
+//			node.toLinks.add(link);
 
 			node = nodeMap.get(link.nextNodeId);
 			link.setNextNode(node);
-			node.fromlinkIds.add(link.id);
-			node.fromLinks.add(link);
+			node.fromLinkIds.add(link.id);
+//			node.fromLinks.add(link);
 		}
 	}
 

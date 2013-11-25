@@ -40,12 +40,12 @@ public class WorkflowApiTests extends BasicApiTests {
 			reusedWorkflow = tester.getContent(Workflow.class);
 
 			Assert.assertEquals(reusedWorkflow.tenantId, user.tenantId);
-			Assert.assertEquals(reusedWorkflow.createdByUserId, user.id);
-			Assert.assertEquals(reusedWorkflow.modifiedByUserId, user.id);
+			Assert.assertEquals(reusedWorkflow.createUserId, user.id);
+			Assert.assertEquals(reusedWorkflow.updateUserId, user.id);
 
 			DateTime now = DateTime.now();
-			Assert.assertEquals(reusedWorkflow.createdDate.dayOfYear().get(), now.dayOfYear().get());
-			Assert.assertEquals(reusedWorkflow.modifiedDate.dayOfYear().get(), now.dayOfYear().get());
+			Assert.assertEquals(reusedWorkflow.createTime.dayOfYear().get(), now.dayOfYear().get());
+			Assert.assertEquals(reusedWorkflow.updateTime.dayOfYear().get(), now.dayOfYear().get());
 		}
 	}
 
@@ -118,8 +118,8 @@ public class WorkflowApiTests extends BasicApiTests {
 					if (workflow.tenantId != null) {
 						Assert.assertEquals(workflow.tenantId, user.tenantId);
 					}
-					Assert.assertEquals(workflow.createdByUserId, user.id);
-					Assert.assertEquals(workflow.modifiedByUserId, user.id);
+					Assert.assertEquals(workflow.createUserId, user.id);
+					Assert.assertEquals(workflow.updateUserId, user.id);
 				}
 			}
 
@@ -140,8 +140,8 @@ public class WorkflowApiTests extends BasicApiTests {
 			if (reusedWorkflow.tenantId != null) {
 				Assert.assertEquals(reusedWorkflow.tenantId, user.tenantId);
 			}
-			Assert.assertEquals(reusedWorkflow.createdByUserId, user.id);
-			Assert.assertEquals(reusedWorkflow.modifiedByUserId, user.id);
+			Assert.assertEquals(reusedWorkflow.createUserId, user.id);
+			Assert.assertEquals(reusedWorkflow.updateUserId, user.id);
 		}
 	}
 
@@ -170,7 +170,7 @@ public class WorkflowApiTests extends BasicApiTests {
 		Workflow sharedWorkflow = new Workflow();
 		workflowsToBeRemoved.add(sharedWorkflow);
 		sharedWorkflow.setName("Shared workflow");
-		sharedWorkflow.createdByUserId = sharedWorkflow.modifiedByUserId = user.id;
+		sharedWorkflow.createUserId = sharedWorkflow.updateUserId = user.id;
 		mongoTemplate.insert(sharedWorkflow);
 
 		try (Tester tester = new Tester().basicAuth(email, password)) {

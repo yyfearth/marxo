@@ -32,7 +32,7 @@ import java.util.List;
 public abstract class EntityController<Entity extends BasicEntity> extends BasicController implements InterceptorPreHandlable {
 	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
-	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "modifiedDate"));
+	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime"));
 	protected Class<Entity> entityClass;
 	protected Criteria criteria;
 	/**
@@ -70,8 +70,8 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public Entity create(@Valid @RequestBody Entity entity, HttpServletResponse response) throws Exception {
-		entity.createdByUserId = entity.modifiedByUserId = user.id;
-		entity.createdDate = entity.modifiedDate = DateTime.now();
+		entity.createUserId = entity.updateUserId = user.id;
+		entity.createTime = entity.updateTime = DateTime.now();
 		mongoTemplate.save(entity);
 
 		response.setHeader("Location", String.format("/%s/%s", entity.getClass().getSimpleName().toLowerCase(), entity.id));
@@ -116,9 +116,9 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 
 		try {
 			entity.id = oldEntity.id;
-			entity.createdByUserId = oldEntity.createdByUserId;
-			entity.createdDate = oldEntity.createdDate;
-			entity.modifiedByUserId = user.id;
+			entity.createUserId = oldEntity.createUserId;
+			entity.createTime = oldEntity.createTime;
+			entity.updateUserId = user.id;
 			mongoTemplate.save(entity);
 		} catch (ValidationException ex) {
 			for (int i = 0; i < ex.reasons.size(); i++) {

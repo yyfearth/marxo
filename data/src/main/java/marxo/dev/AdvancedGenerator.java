@@ -24,6 +24,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -110,21 +111,20 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 				}
 
 				ObjectId modifyingUserId = user.id;
-				workflow.modifiedByUserId = modifyingUserId;
+				workflow.updateUserId = modifyingUserId;
 				ObjectId creatingUserId = user.id;
-				workflow.createdByUserId = creatingUserId;
+				workflow.createUserId = creatingUserId;
 				workflow.tenantId = user.tenantId;
 
 				if (i <= 2) {
 					workflow.setName("Alpha " + "Workflow " + i);
 				} else {
 					workflow.setName("Beta " + "Workflow " + i);
-					workflow.modifiedDate.plusHours(threadLocalRandom.nextInt(-12, 13));
+					workflow.updateTime.plusHours(threadLocalRandom.nextInt(-12, 13));
 				}
 
 				// Nodes
 				int numNodes = threadLocalRandom.nextInt(2, 8);
-				workflow.nodeIds = new ArrayList<>(numNodes);
 				for (int j = 0; j < numNodes; j++) {
 					Node node = new Node();
 					nodes.add(node);
@@ -133,8 +133,8 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					node.tenantId = user.tenantId;
 					node.setName("Node " + (j + 1));
 					node.description = StringTool.getRandomString(60);
-					node.createdByUserId = creatingUserId;
-					node.modifiedByUserId = modifyingUserId;
+					node.createUserId = creatingUserId;
+					node.updateUserId = modifyingUserId;
 
 					node.actions = new ArrayList<>();
 					int numActions = threadLocalRandom.nextInt(1, 3);
@@ -143,14 +143,13 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 						node.actions.add(action);
 						action.tenantId = user.tenantId;
 						action.setName("Action " + (k + 1));
-						action.createdByUserId = creatingUserId;
-						action.modifiedByUserId = modifyingUserId;
+						action.createUserId = creatingUserId;
+						action.updateUserId = modifyingUserId;
 					}
 
 					workflow.nodeIds.add(node.id);
 				}
 
-				workflow.linkIds = new ArrayList<>();
 				for (int j = 0; j < numNodes - 1; j++) {
 					Node previousNode = nodes.get(threadLocalRandom.nextInt(nodes.size() - numNodes, nodes.size()));
 					Node nextNode = nodes.get(threadLocalRandom.nextInt(nodes.size() - numNodes, nodes.size()));
@@ -161,8 +160,8 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					link.workflowId = workflow.id;
 					link.tenantId = user.tenantId;
 					link.setName("Link " + (j + 1));
-					link.createdByUserId = creatingUserId;
-					link.modifiedByUserId = modifyingUserId;
+					link.createUserId = creatingUserId;
+					link.updateUserId = modifyingUserId;
 					link.previousNodeId = previousNode.id;
 					link.nextNodeId = nextNode.id;
 					workflow.linkIds.add(link.id);
@@ -187,7 +186,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 //				workflow.setName("Mobile app development");
 //				workflow.fillWithDefaultValues();
 //				workflow.description = "Develop a mobile for student project.";
-//				workflow.createdByUserId = workflow.modifiedByUserId = users.get(users.size() - 1).id;
+//				workflow.createUserId = workflow.updateUserId = users.get(users.size() - 1).id;
 //
 //				Node node;
 //				Action action;
@@ -415,7 +414,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					project.setTemplate(workflow);
 					project.isProject = true;
 
-					ArrayList<ObjectId> newNodeIds = new ArrayList<>();
+					HashSet<ObjectId> newNodeIds = new HashSet<>();
 					for (ObjectId nodeId : project.nodeIds) {
 						Node node = nodeMap.get(nodeId);
 						Node newNode = cloner.deepClone(node);
@@ -430,7 +429,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					}
 					project.nodeIds = newNodeIds;
 
-					ArrayList<ObjectId> newLinkIds = new ArrayList<>();
+					HashSet<ObjectId> newLinkIds = new HashSet<>();
 					for (ObjectId linkId : project.linkIds) {
 						Link link = linkMap.get(linkId);
 						Link newLink = cloner.deepClone(link);
