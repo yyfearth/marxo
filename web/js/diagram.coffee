@@ -66,9 +66,9 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           index: i + 1
           model: node
         links: links.map (link, i) ->
-          id: "link_#{link.id ? link.cid}"
           src = link.prevNode._idx
           tar = link.nextNode._idx
+          id: "link_#{link.id ? link.cid}"
           source: src
           target: tar
           title: "Link #{i + 1}: #{link.name()}"
@@ -109,8 +109,8 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       .attr('d', 'M0,-5L10,0L0,5')
       .attr('fill', '#000')
       # init nodes and links
-      @link = svg.append('svg:g').selectAll('.link')
-      @node = svg.append('svg:g').selectAll('g')
+      @link = svg.append('svg:g').attr('class', 'links').selectAll('.link')
+      @node = svg.append('svg:g').attr('class', 'nodes').selectAll('g')
       # init tooltip
       @tooltip = d3.select(@el).append('div')
       .attr('class', 'tooltip')
@@ -195,16 +195,21 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
     clear: ->
       if @svg
         @model = {}
-        @data =
-          links: [], nodes: []
+        @data = {}
         @w = @h = 0
-        @_draw()
+        emtpy = []
+        @force.nodes(emtpy).links(emtpy)
+        @link = @link.data(emtpy)
+        @link.exit().remove()
+        @node = @node.data(emtpy)
+        @node.exit().remove()
       @
     draw: (wf = @model) ->
       throw new Error 'unable to draw workflow' unless wf.nodes
       @render() unless @rendered
       @w = @h = 0
       unless wf.loaded()
+        console.log 'wf diagram load wf', wf._name, wf.id
         wf.fetch success: @draw
       else unless @svg
         @_init =>
@@ -212,7 +217,9 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           @_draw()
           return
       else
-        @_data wf if not @model or wf isnt @model
+        if not @model or wf isnt @model
+          @clear()
+          @_data wf
         @_draw()
       @
     highlight: (model) -> # must be node or link
