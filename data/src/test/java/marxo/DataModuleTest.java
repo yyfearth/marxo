@@ -1,9 +1,11 @@
 package marxo;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.mongodb.DB;
 import marxo.dev.AdvancedGenerator;
 import marxo.entity.BasicEntity;
+import marxo.entity.FacebookData;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.user.Tenant;
@@ -14,6 +16,7 @@ import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -24,9 +27,12 @@ import org.testng.annotations.*;
 
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-@SuppressWarnings("uncheck")
+@SuppressWarnings({"uncheck", "unchecked"})
 public class DataModuleTest implements Loggable {
 	ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 	MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
@@ -57,18 +63,18 @@ public class DataModuleTest implements Loggable {
 	@Test
 	public void canGenerateSampleData() throws Exception {
 		AdvancedGenerator.main(new String[0]);
-		assert mongoTemplate.getDb().getName().toLowerCase().equals("marxo");
+		Assert.assertEquals(mongoTemplate.getDb().getName().toLowerCase(), "marxo");
 
-		Class[] classes = new Class[]{
+		List<Class<? extends BasicEntity>> classes = Lists.newArrayList(
 				Tenant.class,
 				User.class,
 				Workflow.class,
 				Node.class,
-				Link.class,
-		};
+				Link.class
+		);
 
-		for (Class aClass : classes) {
-			List list = mongoTemplate.findAll(aClass);
+		for (Class<? extends BasicEntity> aClass : classes) {
+			List<? extends BasicEntity> list = mongoTemplate.findAll(aClass);
 			long count = list.size();
 			String message = "Collection " + aClass + " has only " + count + " record(s)";
 			assert count >= 2 : message;
@@ -137,6 +143,12 @@ public class DataModuleTest implements Loggable {
 		tenant.description = "A tall, a good guy, and a cat.";
 		tenant.phoneNumber = "(408) 888-8888";
 		tenant.email = "marxo@gmail.com";
+
+		FacebookData facebookData = new FacebookData();
+		facebookData.accessToken = "CAADCM9YpGYwBANeLvBD7aswljKFqsBYZAAUZC9ohrKoPkR0OQ8yZA1kMZAIwBuLFsxPnnRaUsuIjB40Q9i8qn2BNlaITfkKsQYE4LFatfAY6okQgYe4b8fYcr400YdQP98Wp4SFZBG6MOMCtC3pJNsZCVB3bBpXZCyKvbj66SwBWjBW1ZAAZBYT2a";
+		facebookData.expireTime = DateTime.parse("2014-01-14T08:22:54.541Z");
+		Assert.assertTrue(facebookData.updateToken());
+		tenant.facebookData = facebookData;
 		tenant.save();
 
 		Assert.assertTrue(mongoTemplate.exists(Query.query(Criteria.where("name").is("Marxo")), Tenant.class));
