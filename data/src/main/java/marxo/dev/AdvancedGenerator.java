@@ -22,7 +22,10 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("unchecked")
@@ -133,11 +136,11 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					node.createUserId = creatingUserId;
 					node.updateUserId = modifyingUserId;
 
-					node.actions = new ArrayList<>();
+					node.setActions(new ArrayList<Action>());
 					int numActions = threadLocalRandom.nextInt(1, 3);
 					for (int k = 0; k < numActions; k++) {
 						Action action = new PostFacebook();
-						node.actions.add(action);
+						node.getActions().add(action);
 						action.tenantId = user.tenantId;
 						action.setName("Action " + (k + 1));
 						action.createUserId = creatingUserId;
@@ -420,7 +423,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 						nodes.add(newNode);
 						newNodeIds.add(newNode.id);
 
-						for (Action action : newNode.actions) {
+						for (Action action : newNode.getActions()) {
 							action.id = new ObjectId();
 						}
 					}

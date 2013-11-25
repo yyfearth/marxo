@@ -22,8 +22,6 @@ project:
 */
 
 public class WorkflowValidator extends BasicValidator {
-	static protected MongoTemplate mongoTemplate = (MongoTemplate) new ClassPathXmlApplicationContext("classpath*:mongo-configuration.xml").getBean("mongoTemplate");
-
 	/**
 	 * Wire dual-directional link and fill up logical fields.
 	 *

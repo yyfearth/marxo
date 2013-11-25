@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
+import marxo.tool.Loggable;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +24,7 @@ import java.util.Set;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @JsonPropertyOrder({"id", "email", "object_type", "tenant_id", "workflow_id", "name", "key", "desc", "context_type", "status", "content", "nodes", "node_ids", "links", "link_ids", "created_at", "created_by", "updated_at", "modified_by"})
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class BasicEntity {
+public abstract class BasicEntity implements Loggable {
 	@JsonIgnore
 	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 	@JsonIgnore
@@ -97,7 +98,8 @@ public abstract class BasicEntity {
 	}
 
 	public void save() {
-		mongoTemplate.insert(this);
+		// After a little test, it seems that insert also update the document with the same ID.
+		mongoTemplate.save(this);
 	}
 
 	public void remove() {
