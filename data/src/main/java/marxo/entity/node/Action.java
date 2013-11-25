@@ -11,8 +11,22 @@ import org.springframework.data.annotation.Transient;
 public class Action extends TenantChildEntity {
 	public RunStatus status = RunStatus.IDLE;
 
+	public ObjectId nextActionId;
+
+	@Transient
+	@JsonIgnore
+	protected Action nextAction;
+
+	public Action getNextAction() {
+		return nextAction;
+	}
+
+	public void setNextAction(Action nextAction) {
+		this.nextAction = nextAction;
+		this.nextActionId = nextAction.id;
+	}
+
 	protected Event event;
-	public ObjectId contentId;
 
 	@JsonIgnore
 	public Event getEvent() {
@@ -25,6 +39,7 @@ public class Action extends TenantChildEntity {
 		event.actionId = id;
 	}
 
+	public ObjectId contentId;
 	@Transient
 	protected Content content;
 	public String contentType;

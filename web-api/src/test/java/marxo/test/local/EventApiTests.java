@@ -31,7 +31,7 @@ public class EventApiTests extends BasicApiTests {
 		reusedNode = node;
 
 		PostFacebook postFacebook = new PostFacebook();
-		node.actions.add(postFacebook);
+		node.getActions().add(postFacebook);
 		reusedAction = postFacebook;
 
 		mongoTemplate.insert(node);
@@ -55,7 +55,7 @@ public class EventApiTests extends BasicApiTests {
 		}
 
 		Node node1 = mongoTemplate.findById(reusedNode.id, Node.class);
-		Assert.assertEquals(node1.actions.get(0).getEvent().id, reusedNode.actions.get(0).getEvent().id);
+		Assert.assertEquals(node1.getActions().get(0).getEvent().id, reusedNode.getActions().get(0).getEvent().id);
 	}
 
 	@Test(dependsOnMethods = "testCreateEvent")
@@ -92,7 +92,7 @@ public class EventApiTests extends BasicApiTests {
 		}
 
 		Node node1 = mongoTemplate.findById(reusedNode.id, Node.class);
-		Assert.assertEquals(node1.actions.get(0).getEvent().getName(), reusedEvent.getName());
+		Assert.assertEquals(node1.getActions().get(0).getEvent().getName(), reusedEvent.getName());
 	}
 
 	@Test(dependsOnMethods = "testUpdateEvent")
@@ -107,6 +107,6 @@ public class EventApiTests extends BasicApiTests {
 		}
 
 		Node node1 = mongoTemplate.findById(reusedNode.id, Node.class);
-		Assert.assertNull(node1.actions.get(0).getEvent());
+		Assert.assertNull(node1.getActions().get(0).getEvent());
 	}
 }

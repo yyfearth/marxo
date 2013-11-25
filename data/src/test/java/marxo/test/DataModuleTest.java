@@ -1,19 +1,18 @@
-package marxo;
+package marxo.test;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.mongodb.DB;
-import marxo.dev.AdvancedGenerator;
 import marxo.entity.BasicEntity;
 import marxo.entity.FacebookData;
-import marxo.entity.link.Link;
+import marxo.entity.node.Action;
 import marxo.entity.node.Node;
+import marxo.entity.node.PostFacebook;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.user.UserType;
-import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
+import marxo.validation.NodeValidator;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -27,10 +26,7 @@ import org.testng.annotations.*;
 
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings({"uncheck", "unchecked"})
 public class DataModuleTest implements Loggable {
@@ -54,71 +50,9 @@ public class DataModuleTest implements Loggable {
 
 	@AfterClass
 	public void afterClass() throws Exception {
-		Criteria criteria = Criteria.where("id").in(Collections2.transform(entitiesToRemove, SelectIdFunction.getInstance()));
+		Criteria criteria = Criteria.where("_id").in(Collections2.transform(entitiesToRemove, SelectIdFunction.getInstance()));
 		for (String collectionName : mongoTemplate.getCollectionNames()) {
 			mongoTemplate.remove(Query.query(criteria), collectionName);
-		}
-	}
-
-	@Test
-	public void canGenerateSampleData() throws Exception {
-		AdvancedGenerator.main(new String[0]);
-		Assert.assertEquals(mongoTemplate.getDb().getName().toLowerCase(), "marxo");
-
-		List<Class<? extends BasicEntity>> classes = Lists.newArrayList(
-				Tenant.class,
-				User.class,
-				Workflow.class,
-				Node.class,
-				Link.class
-		);
-
-		for (Class<? extends BasicEntity> aClass : classes) {
-			List<? extends BasicEntity> list = mongoTemplate.findAll(aClass);
-			long count = list.size();
-			String message = "Collection " + aClass + " has only " + count + " record(s)";
-			assert count >= 2 : message;
-			System.out.println(message);
-		}
-	}
-
-	@Test
-	public void testPrefixCriteria() throws Exception {
-		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath*:mongo-configuration.xml");
-		MongoTemplate mongoTemplate = (MongoTemplate) applicationContext.getBean("mongoTemplate");
-		List<Workflow> workflows = mongoTemplate.find(Query.query(new Criteria()), Workflow.class);
-		System.out.println(workflows);
-		assert workflows != null;
-	}
-
-	@Test
-	public void testChainedQuery() throws Exception {
-		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-		MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
-		Criteria criteria = Criteria.where("name").regex(".*").and("isProject").is(true).and("id").regex("\\d");
-		List<Workflow> workflows = mongoTemplate.find(Query.query(criteria), Workflow.class);
-	}
-
-	@Test
-	public void testOrQuery() throws Exception {
-		ObjectId tenantId = new ObjectId("528b805bcf0fed1c40ed34f5");
-		List<Workflow> workflows;
-
-		Criteria criteria1 = Criteria.where("tenantId").is(tenantId);
-		workflows = mongoTemplate.find(Query.query(criteria1), Workflow.class);
-		int size1 = workflows.size();
-
-		Criteria criteria2 = Criteria.where("tenantId").exists(false);
-		workflows = mongoTemplate.find(Query.query(criteria2), Workflow.class);
-		int size2 = workflows.size();
-
-		Criteria criteria = new Criteria().orOperator(criteria1, criteria2);
-		workflows = mongoTemplate.find(Query.query(criteria), Workflow.class);
-		Assert.assertEquals(workflows.size(), size1 + size2);
-		for (Workflow workflow : workflows) {
-			if (workflow.tenantId != null) {
-				Assert.assertEquals(workflow.tenantId, tenantId);
-			}
 		}
 	}
 
@@ -195,5 +129,43 @@ public class DataModuleTest implements Loggable {
 		mongoTemplate.insert(users, User.class);
 
 		Assert.assertEquals(mongoTemplate.count(new Query(), User.class), 3);
+	}
+
+	@Test
+	public void autoWireActionsInNode() throws Exception {
+		List<BasicEntity> entitiesToSave = new ArrayList<>();
+
+		Node node = new Node();
+		entitiesToSave.add(node);
+
+
+		Action action1 = new PostFacebook();
+		entitiesToSave.add(action1);
+		node.getActions().add(action1);
+
+		Action action2 = new PostFacebook();
+		entitiesToSave.add(action2);
+		node.getActions().add(action2);
+
+		Action action3 = new PostFacebook();
+		entitiesToSave.add(action3);
+		node.getActions().add(action3);
+
+		mongoTemplate.insertAll(entitiesToSave);
+		entitiesToRemove.addAll(entitiesToSave);
+
+		node = Node.get(node.id);
+		NodeValidator.wire(node);
+
+		Assert.assertNotNull(node.firstAction());
+		Assert.assertEquals(node.firstAction().id, action1.id);
+
+		Assert.assertEquals(node.firstAction().getNextAction().id, action2.id);
+		Assert.assertEquals(node.firstAction().getNextAction().getNextAction().id, action3.id);
+		Assert.assertNull(node.firstAction().getNextAction().getNextAction().getNextAction());
+
+		Map<ObjectId, Action> actionMap = node.getActionMap();
+		Assert.assertNotNull(actionMap);
+		Assert.assertEquals(actionMap.size(), 3);
 	}
 }
