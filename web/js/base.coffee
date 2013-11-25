@@ -441,8 +441,30 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       w = 0
       h = 0
       fixed = true
+      # sort
+      if wf.startNode?
+        nodes = []
+        nodes_cindex = {}
+        links = []
+        links_cindex = {}
+        level = [wf.startNode]
+
+        while node = level.shift()
+          unless nodes_cindex.hasOwnProperty node.cid
+            nodes.push nodes_cindex[node.cid] = node
+            for link in node.outLinks
+              links.push links_cindex[link.cid] = link
+              level.push link.nextNode
+
+        @_invalid = nodes.length isnt wf.nodes.length or links.length isnt wf.links.length
+        # console.log 'sort nodes', @_valid, nodes, links
+      else
+        @_invalid = true
+        nodes = wf.nodes
+        links = wf.links
+
       @data =
-        nodes: wf.nodes.map (node, i) ->
+        nodes: nodes.map (node, i) ->
           node._idx = i
           _fixed = node.has 'offset'
           {x, y} = if _fixed
@@ -458,10 +480,10 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
           x: x
           y: y
           title: "Node #{i + 1}: #{node.get 'name'}"
-          fixed: _fixed or i is 0
+          fixed: _fixed or node is wf.startNode
           index: i + 1
           model: node
-        links: wf.links.map (link, i) ->
+        links: links.map (link, i) ->
           src = link.prevNode._idx
           tar = link.nextNode._idx
           source: src
@@ -581,6 +603,9 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         t = @max_t
         fixed = true
       setTimeout (-> force.stop()), t if t and fixed
+
+      @svg.classed 'invalid', @_invalid
+      @$el[if @_invalid then 'addClass' else 'removeClass'] 'invalid'
       return
     clear: ->
       if @d3
