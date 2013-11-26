@@ -218,18 +218,93 @@
 }
 
 #project_viewer {
-  .label-status {
-    display: inline-block;
-    padding: 5px;
-    padding-bottom: 3px;
-    vertical-align: bottom;
-    font-size: 20px;
-    margin-left: 10px;
-    small {
-      font-size: 12px;
-      font-weight: normal;
-      margin: 3px .5em 3px 0;
+  .workspace {
+    overflow: hidden !important;
+    > .row-fluid {
+      position: absolute;
+      top: 270px;
+      height: auto;
+      bottom: 0;
+      overflow: hidden;
+      > ul.nav {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        height: auto;
+        overflow: auto;
+        right: 0;
+        left: auto;
+        &.nodes-links-list {
+          left: 0;
+          right: auto;
+        }
+      }
     }
+  }
+  li {
+    .label {
+      margin: 0 3px;
+    }
+    &.active > a {
+      color: #fff;
+      background-color: #08c;
+    }
+    a.status-finished, a.status-passed, a.status-failed {
+      text-decoration: line-through;
+    }
+  }
+  .page-header {
+    height: 40px;
+    .label-status {
+      display: inline-block;
+      padding: 5px;
+      padding-bottom: 3px;
+      vertical-align: bottom;
+      font-size: 20px;
+      margin-left: 10px;
+      small {
+        font-size: 12px;
+        font-weight: normal;
+        margin: 3px .5em 3px 0;
+      }
+    }
+    .btn {
+      margin: 0 2px;
+    }
+  }
+  .wf-diagram {
+    height: 200px;
+    margin-bottom: 10px;
+  }
+  .node-actions, .link-condition {
+    position: relative;
+    padding: 29px 10px 10px 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    &:after {
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      padding: 3px 7px;
+      line-height: 18px;
+      font-size: 12px;
+      font-weight: bold;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      color: #9da0a4;
+      -webkit-border-radius: 4px 0 4px 0;
+      -moz-border-radius: 4px 0 4px 0;
+      border-radius: 4px 0 4px 0;
+    }
+  }
+  .node-actions:after {
+    content: "Node - Actions";
+  }
+  .link-condition:after {
+    content: "Link - Condition";
   }
 }
 
