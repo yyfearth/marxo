@@ -31,10 +31,27 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	/*
+	Wire
+	 */
+
+	public void wire() {
+		for (int i = 0, len = actions.size(); i < len; i++) {
+			Action action = actions.get(i);
+			action.setNode(this);
+			if (i + 1 != len) {
+				action.setNextAction(actions.get(i + 1));
+			}
+
+			action.setNode(this);
+			action.tenantId = tenantId;
+		}
+	}
+
+	/*
 	Actions
 	 */
 
-	private List<Action> actions = new ArrayList<>();
+	protected List<Action> actions = new ArrayList<>();
 
 	public List<Action> getActions() {
 		return actions;
@@ -53,7 +70,7 @@ public class Node extends WorkflowChildEntity {
 		return (actionMap == null) ? (actionMap = Maps.uniqueIndex(actions, SelectIdFunction.getInstance())) : actionMap;
 	}
 
-	public Action firstAction() {
+	public Action getFirstAction() {
 		return (actions.isEmpty()) ? null : actions.get(0);
 	}
 
@@ -141,6 +158,10 @@ public class Node extends WorkflowChildEntity {
 	 */
 
 	public static Node get(ObjectId id) {
-		return mongoTemplate.findById(id, Node.class);
+		Node node = mongoTemplate.findById(id, Node.class);
+		if (node != null) {
+			node.wire();
+		}
+		return node;
 	}
 }
