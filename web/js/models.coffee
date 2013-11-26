@@ -157,6 +157,7 @@ define 'models', ['module', 'lib/common'], (module) ->
           console.warn 'cannot find or more than one start node detected', model
           @startNode = null
 
+      @_sorted = null
       @set {}
 
       return
@@ -171,6 +172,33 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
+    sort: (options = {}) ->
+      unless options.force or @_sorted
+        cindex = {}
+        nodes_count = 0
+        links_count = 0
+        level = [@startNode]
+
+        while node = level.shift()
+          unless cindex.hasOwnProperty node.cid
+            cindex[node.cid] = node
+            node.idx = nodes_count++
+            for link in node.outLinks
+              link.idx = links_count++
+              level.push link.nextNode
+
+        @nodes.comparator = @links.comparator = (o) -> o.idx
+        @nodes.sort()
+        @links.sort()
+        # auto reset sorted flag and remove comparator when added
+        @nodes.comparator = @links.comparator = (o) =>
+          unless o.idx?
+            @_sorted = null
+            @nodes.comparator = @links.comparator = null
+          o.idx
+
+        @_sorted = nodes_count is @nodes.length and links_count is @links.length
+      @
     validate: (ignored, options) -> if options?.traverse # by default skip
       try
         throw 'cannot validate a not loaded workflow' unless @loaded()
@@ -186,38 +214,26 @@ define 'models', ['module', 'lib/common'], (module) ->
             key = "#{l.prevNode.cid}-#{l.nextNode.cid}"
             throw "duplicated link #{key} #{l.id or i}" if link_idx.hasOwnProperty key
 
-          cindex = {}
-          nodes_count = 0
-          links_count = 0
-          level = [@startNode]
-
-          while node = level.shift()
-            unless cindex.hasOwnProperty node.cid
-              cindex[node.cid] = node
-              nodes_count++
-              links_count += node.outLinks.length
-              level.push link.nextNode for link in node.outLinks
-
-          unless nodes_count is @nodes.length and links_count is @links.length
-            throw 'after traversed workflow and find nodes or links not visited'
+          throw 'after traversed workflow and find nodes or links not visited' unless @sort(force: true)._sorted
       catch e
         console.error 'validate workflow failed:', e, @
         return e
       return
-    copy: (workflow) -> # create form workflow as template
+    copy: (workflow, options = {}) -> # create form workflow as template
       throw new Error 'must be copy from a workflow' unless workflow instanceof Workflow
+      throw new Error 'cannot copy a invalid workflow' unless workflow.isValid traverse: options.traverse isnt false
       nodes = []
       links = []
       node_index = {}
       silent = silent: true
-      workflow.nodes.forEach (node, i) ->
+      workflow.nodes.forEach (node) ->
         cloned_node = node.clone().unset('id', silent)
         .unset('workflow_id', silent).set template_id: node.id
         if node.has 'actions' # remove id in action
           cloned_node.set 'actions', node.get('actions').map (action) ->
             new Action(action).unset('id', silent).toJSON()
-        nodes.push cloned_node
-        cloned_node.idx = i
+        nodes[node.idx] = cloned_node
+        cloned_node.idx = node.idx
         node_index[node.id] = cloned_node
         return
       workflow.links.forEach (link) ->
@@ -228,7 +244,9 @@ define 'models', ['module', 'lib/common'], (module) ->
           template_id: link.id, prev_node_id: prevNode.idx, next_node_id: nextNode.idx
         cloned_link.prevNode = prevNode
         cloned_link.nextNode = nextNode
-        links.push cloned_link
+        links[link.idx] = cloned_link
+        cloned_link.idx = link.idx
+        return
       attr = workflow.attributes
       start_node_id = workflow.get 'start_node_id'
       start_node_id = if start_node_id? then node_index[start_node_id]?.idx else null
