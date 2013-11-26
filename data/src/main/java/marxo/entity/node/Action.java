@@ -10,8 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 // todo: make this class abstract
 public class Action extends TenantChildEntity {
-	public RunStatus status = RunStatus.IDLE;
-
 	public ObjectId nextActionId;
 
 	@Transient
