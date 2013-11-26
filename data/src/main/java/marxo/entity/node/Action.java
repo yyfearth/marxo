@@ -84,4 +84,9 @@ public class Action extends TenantChildEntity {
 	public boolean act() {
 		return false;
 	}
+
+	@Override
+	public void save() {
+		throw new UnsupportedOperationException(String.format("%s should not be saved into database", getClass().getSimpleName()));
+	}
 }

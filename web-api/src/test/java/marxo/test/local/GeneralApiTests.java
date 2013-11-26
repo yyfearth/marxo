@@ -28,7 +28,7 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@BeforeClass
 	@Override
-	public void beforeClass() {
+	public void beforeClass() throws Exception {
 		super.beforeClass();
 
 		reusedWorkflow = new Workflow();
