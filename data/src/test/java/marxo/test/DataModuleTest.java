@@ -1,18 +1,20 @@
 package marxo.test;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.mongodb.DB;
 import marxo.entity.BasicEntity;
 import marxo.entity.FacebookData;
+import marxo.entity.link.Link;
 import marxo.entity.node.Action;
 import marxo.entity.node.Node;
 import marxo.entity.node.PostFacebook;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.user.UserType;
+import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
-import marxo.validation.NodeValidator;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -135,37 +137,101 @@ public class DataModuleTest implements Loggable {
 	public void autoWireActionsInNode() throws Exception {
 		List<BasicEntity> entitiesToSave = new ArrayList<>();
 
+		Tenant tenant = new Tenant();
+		entitiesToSave.add(tenant);
+
 		Node node = new Node();
+		node.setTenant(tenant);
 		entitiesToSave.add(node);
 
-
 		Action action1 = new PostFacebook();
-		entitiesToSave.add(action1);
 		node.getActions().add(action1);
 
 		Action action2 = new PostFacebook();
-		entitiesToSave.add(action2);
 		node.getActions().add(action2);
 
 		Action action3 = new PostFacebook();
-		entitiesToSave.add(action3);
 		node.getActions().add(action3);
 
+		node.wire();
 		mongoTemplate.insertAll(entitiesToSave);
 		entitiesToRemove.addAll(entitiesToSave);
 
 		node = Node.get(node.id);
-		NodeValidator.wire(node);
 
-		Assert.assertNotNull(node.firstAction());
-		Assert.assertEquals(node.firstAction().id, action1.id);
+		Assert.assertNotNull(node.getFirstAction());
+		Assert.assertEquals(node.getFirstAction().id, action1.id);
 
-		Assert.assertEquals(node.firstAction().getNextAction().id, action2.id);
-		Assert.assertEquals(node.firstAction().getNextAction().getNextAction().id, action3.id);
-		Assert.assertNull(node.firstAction().getNextAction().getNextAction().getNextAction());
+		Assert.assertEquals(node.getFirstAction().getNextAction().id, action2.id);
+		Assert.assertEquals(node.getFirstAction().getNextAction().getNextAction().id, action3.id);
+		Assert.assertNull(node.getFirstAction().getNextAction().getNextAction().getNextAction());
 
 		Map<ObjectId, Action> actionMap = node.getActionMap();
 		Assert.assertNotNull(actionMap);
 		Assert.assertEquals(actionMap.size(), 3);
+
+		for (Action action : node.getActions()) {
+			Assert.assertEquals(action.tenantId, tenant.id);
+		}
+	}
+
+	@Test
+	public void autoWireWorkflow() throws Exception {
+		List<BasicEntity> entitiesToSave = new ArrayList<>();
+
+		Tenant tenant = new Tenant();
+		entitiesToSave.add(tenant);
+
+		Workflow workflow = new Workflow();
+		workflow.setTenant(tenant);
+		entitiesToSave.add(workflow);
+
+		Node node1 = new Node();
+		Node node2 = new Node();
+		Node node3 = new Node();
+
+		workflow.nodeIds.addAll(Lists.transform(Lists.newArrayList(node1, node2, node3), SelectIdFunction.getInstance()));
+		entitiesToSave.addAll(Lists.newArrayList(node1, node2, node3));
+
+		Link link1 = new Link();
+		link1.previousNodeId = node1.id;
+		link1.nextNodeId = node2.id;
+
+		Link link2 = new Link();
+		link2.previousNodeId = node2.id;
+		link2.nextNodeId = node3.id;
+
+		workflow.linkIds.addAll(Lists.transform(Lists.newArrayList(link1, link2), SelectIdFunction.getInstance()));
+		entitiesToSave.addAll(Lists.newArrayList(link1, link2));
+
+		workflow.wire();
+		mongoTemplate.insertAll(entitiesToSave);
+		entitiesToRemove.addAll(entitiesToSave);
+
+		workflow = Workflow.get(workflow.id);
+		Assert.assertEquals(workflow.startNodeId, node1.id);
+
+		node1 = Node.get(node1.id);
+		node2 = Node.get(node2.id);
+		node3 = Node.get(node3.id);
+		link1 = Link.get(link1.id);
+		link2 = Link.get(link2.id);
+
+		Assert.assertTrue(node1.fromLinkIds.isEmpty());
+		Assert.assertEquals(node1.toLinkIds, Arrays.asList(link1.id));
+
+		Assert.assertEquals(node2.fromLinkIds, Arrays.asList(link1.id));
+		Assert.assertEquals(node2.toLinkIds, Arrays.asList(link2.id));
+
+		Assert.assertEquals(node3.fromLinkIds, Arrays.asList(link2.id));
+		Assert.assertTrue(node3.toLinkIds.isEmpty());
+
+		for (Node node : Lists.newArrayList(node1, node2, node3)) {
+			Assert.assertEquals(node.tenantId, tenant.id);
+		}
+
+		for (Link link : Lists.newArrayList(link1, link2)) {
+			Assert.assertEquals(link.tenantId, tenant.id);
+		}
 	}
 }
