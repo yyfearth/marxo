@@ -1,7 +1,7 @@
 package marxo.engine;
 
-import com.google.common.base.Predicate;
 import marxo.entity.Task;
+import marxo.entity.link.Link;
 import marxo.entity.node.Action;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -48,6 +48,8 @@ public class EngineWorker implements Runnable, Loggable {
 
 			if (workflow.startNodeId == null) {
 				logger.debug(String.format("Workflow [%s] has no start node", workflow.id));
+				workflow.status = RunStatus.ERROR;
+				workflow.save();
 				return;
 			}
 
@@ -61,88 +63,54 @@ public class EngineWorker implements Runnable, Loggable {
 				ObjectId nodeId = workflow.currentNodeIds.get(nodeIndex);
 				Node node = Node.get(nodeId);
 
-				{// Process action
-					if (node.firstAction() == null) {
-						continue;
-					}
+				Node currentNode = node;
 
-					Action currentAction = node.getCurrentAction();
-					if (currentAction == null) {
-						currentAction = node.firstAction();
-					}
+				while (currentNode != null) {
+					Action currentAction = currentNode.getCurrentAction();
+					boolean isScheduled = false;
 
-					while (true) {
+					while (currentAction != null) {
 						if (currentAction.status.equals(RunStatus.FINISHED)) {
 							currentAction = currentAction.getNextAction();
-
-							if (currentAction == null) {
-								// Do next node.
-								break;
-							}
-
 							continue;
 						}
 
-						// Check event
 						Event event = currentAction.getEvent();
 						if (event == null || event.getStartTime().isBeforeNow()) {
-							currentAction.act();
-							currentAction.status = RunStatus.FINISHED;
-							// update the action
+							boolean isOkay = currentAction.act();
+							if (isOkay) {
+								currentAction.status = RunStatus.FINISHED;
+								currentAction = currentAction.getNextAction();
+								node.save();
+							} else {
+								currentAction.status = RunStatus.ERROR;
+								node.save();
+								break;
+							}
 						} else {
 							// put a task into queue
 							Task newTask = new Task(workflow.id);
+							newTask.time = event.getStartTime();
 							task.save();
+							isScheduled = true;
 							break;
 						}
+					}
+
+					if (isScheduled) {
+						break;
+					}
+
+					for (Link link : currentNode.getToLinks()) {
+						// todo: add more currentNodes inside workflows.
 					}
 				}
 			}
 
-//			Action action = null;
-//			while (action == null) {
-//				if (workflow.currentActionIds.size() == 0) {
-//					Node node = mongoTemplate.findById(workflow.startNodeId, Node.class);
-//					// todo: let node is tracable from action.
-//
-//				}
-//
-//				if (action.getEvent() == null) {
-//					action.act();
-//				} else {
-//					if (action.getEvent().getStartTime() == null || action.getEvent().getStartTime().isBeforeNow()) {
-//						// do it immediately
-//					} else {
-//						// add another task to the dao
-//					}
-//				}
-//			}
-
-//			if (workflow.currentActionIds.size() == 0) {
-//				workflow.currentActionIds.add()
-//			}
-
-//			Node node = nodeDao.findOne(workflow.currentNodeId);
-//
-//			for (Action action : node.actions) {
-//				action.act();
-//			}
-//
-//			final Workflow w = workflow;
-//
-//			Action action = Iterables.find(node.actions, new Predicate<Action>() {
-//				@Override
-//				public boolean apply(Action input) {
-//					return input.id.equals(w.currentActionId);
-//				}
-//			});
-
-			// todo: do if the schedule hits
-
 			workflow.status = RunStatus.FINISHED;
 			workflow.save();
 		} catch (Exception e) {
-			logger.error("[" + name + "] " + e.getMessage());
+			logger.error(String.format("Engine [%s] failed to proceed.\nMessage: %s", name, e.getMessage()));
 			logger.error(StringTool.exceptionToString(e));
 		}
 	}
