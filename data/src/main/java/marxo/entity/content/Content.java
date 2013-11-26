@@ -6,7 +6,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "Content")
+@Document(collection = "content")
 public class Content extends BasicEntity {
 	public ObjectId actionId;
 	@Transient

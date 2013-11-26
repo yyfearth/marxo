@@ -101,16 +101,21 @@ public class EngineWorker implements Runnable, Loggable {
 						break;
 					}
 
+					currentNode.status = RunStatus.FINISHED;
+					currentNode.save();
+
 					for (Link link : currentNode.getToLinks()) {
 						// todo: add more currentNodes inside workflows.
 					}
+
+					currentNode = null;
 				}
 			}
 
 			workflow.status = RunStatus.FINISHED;
 			workflow.save();
 		} catch (Exception e) {
-			logger.error(String.format("Engine [%s] failed to proceed.\nMessage: %s", name, e.getMessage()));
+			logger.error(String.format("Engine [%s] has error: %s", name, e.getMessage()));
 			logger.error(StringTool.exceptionToString(e));
 		}
 	}
