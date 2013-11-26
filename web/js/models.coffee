@@ -430,8 +430,9 @@ define 'models', ['module', 'lib/common'], (module) ->
     model: Workflow
     url: Workflow::urlRoot
     _delay: 600000 # 10 min
-    find: ({workflowId, nodeId, linkId, actionId, callback, nofetch}) ->
+    find: ({workflowId, nodeId, linkId, actionId, callback, fetch}) ->
       throw new Error 'workflowId is required' unless workflowId
+      throw new Error 'async callback is required' unless typeof callback is 'function'
       workflow = @fullCollection.get workflowId
       _find = (workflow) ->
         if nodeId or linkId or actionId
@@ -439,18 +440,23 @@ define 'models', ['module', 'lib/common'], (module) ->
             nodeId, linkId, actionId
             callback: (results) ->
               results.workflow = workflow
-              callback? results
+              callback results
           }
+        else if fetch and not workflow.loaded()
+          workflow.fetch
+            success: (workflow) -> callback {workflow}
+            error: -> callback {}
         else
-          callback? {workflow}
+          callback {workflow}
+
       if workflow
         _find workflow
-      else if nofetch is true
+      else if fetch is true
         new @model(id: workflowId).fetch
           success: _find
-          error: -> callback? {}
+          error: -> callback {}
       else
-        callback? {}
+        callback {}
       @
 
   class ChangeObserableEntity extends Entity
