@@ -3,7 +3,6 @@ package marxo.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
@@ -57,9 +56,9 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		List<Link> links = mongoTemplate.find(Query.query(subCriteria), Link.class);
 		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
 		Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
-		workflow.nodes = Lists.newArrayList(workflowNodes);
+		workflow.setNodes(Lists.newArrayList(workflowNodes));
 		Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
-		workflow.links = Lists.newArrayList(workflowLinks);
+		workflow.setLinks(Lists.newArrayList(workflowLinks));
 
 		return workflow;
 	}

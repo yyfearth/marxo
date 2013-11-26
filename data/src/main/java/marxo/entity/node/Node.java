@@ -31,9 +31,34 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	/*
+	From/to nodes
+	 */
+
+	protected List<ObjectId> toNodeIds = new ArrayList<>();
+
+	public List<ObjectId> getToNodeIds() {
+		return toNodeIds;
+	}
+
+	public void setToNodeIds(List<ObjectId> toNodeIds) {
+		this.toNodeIds = toNodeIds;
+	}
+
+	protected List<ObjectId> fromNodeIds = new ArrayList<>();
+
+	public List<ObjectId> getFromNodeIds() {
+		return fromNodeIds;
+	}
+
+	public void setFromNodeIds(List<ObjectId> fromNodeIds) {
+		this.fromNodeIds = fromNodeIds;
+	}
+
+	/*
 	Wire
 	 */
 
+	@Override
 	public void wire() {
 		for (int i = 0, len = actions.size(); i < len; i++) {
 			Action action = actions.get(i);
@@ -109,19 +134,37 @@ public class Node extends WorkflowChildEntity {
 	To/from links
 	 */
 
-	public List<ObjectId> fromLinkIds = new ArrayList<>();
-	public List<ObjectId> toLinkIds = new ArrayList<>();
+	protected List<ObjectId> fromLinkIds = new ArrayList<>();
+
+	public List<ObjectId> getFromLinkIds() {
+		return fromLinkIds;
+	}
+
+	public void setFromLinkIds(List<ObjectId> fromLinkIds) {
+		this.fromLinkIds = fromLinkIds;
+	}
+
+	protected List<ObjectId> toLinkIds = new ArrayList<>();
+
+	public List<ObjectId> getToLinkIds() {
+		return toLinkIds;
+	}
+
+	public void setToLinkIds(List<ObjectId> toLinkIds) {
+		this.toLinkIds = toLinkIds;
+	}
+
 	@Transient
-	protected List<Link> fromLinks = new ArrayList<>();
+	protected List<Link> fromLinks;
 	@Transient
-	protected List<Link> toLinks = new ArrayList<>();
+	protected List<Link> toLinks;
 
 	public List<Link> getFromLinks() {
-		if (fromLinkIds == null) {
-			return new ArrayList<>();
+		if (fromLinks == null) {
+			Criteria criteria = Criteria.where("id").in(fromLinkIds);
+			return fromLinks = mongoTemplate.find(Query.query(criteria), Link.class);
 		}
-		Criteria criteria = Criteria.where("id").in(fromLinkIds);
-		return fromLinks = mongoTemplate.find(Query.query(criteria), Link.class);
+		return fromLinks;
 	}
 
 	public void setFromLinks(List<Link> fromLinks) {
@@ -130,11 +173,11 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	public List<Link> getToLinks() {
-		if (toLinkIds == null) {
-			return new ArrayList<>();
+		if (toLinks == null) {
+			Criteria criteria = Criteria.where("id").in(toLinkIds);
+			return toLinks = mongoTemplate.find(Query.query(criteria), Link.class);
 		}
-		Criteria criteria = Criteria.where("id").in(toLinkIds);
-		return toLinks = mongoTemplate.find(Query.query(criteria), Link.class);
+		return toLinks;
 	}
 
 	public void setToLinks(List<Link> toLinks) {

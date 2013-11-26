@@ -13,7 +13,6 @@ import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
 import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -25,12 +24,26 @@ import java.util.List;
 @ApiTestConfiguration
 public class GeneralApiTests extends BasicApiTests {
 	Workflow reusedWorkflow;
+	Node reusedNode;
 
 	@BeforeClass
 	@Override
 	public void beforeClass() {
 		super.beforeClass();
-		reusedWorkflow = mongoTemplate.findOne(new Query(), Workflow.class);
+
+		reusedWorkflow = new Workflow();
+		reusedWorkflow.createUserId = reusedWorkflow.updateUserId = user.id;
+		reusedWorkflow.tenantId = user.tenantId;
+		reusedWorkflow.setName(getClass().getSimpleName());
+		entitiesToSave.add(reusedWorkflow);
+
+		reusedNode = new Node();
+		reusedNode.setWorkflow(reusedWorkflow);
+		reusedNode.createUserId = reusedNode.updateUserId = user.id;
+		reusedWorkflow.setName(getClass().getSimpleName());
+		entitiesToSave.add(reusedNode);
+
+		insertAll();
 	}
 
 	@Test
@@ -104,9 +117,6 @@ public class GeneralApiTests extends BasicApiTests {
 					.send();
 			tester
 					.isCreated();
-
-//			tester
-//					.httpGet(baseUrl + )
 		}
 	}
 
@@ -154,19 +164,15 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void rightSubResource() throws Exception {
-
-		Node node = new Node();
-		entitiesToRemove.add(node);
-
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet(baseUrl + "workflow/" + node.workflowId + "/node/" + node.id)
+					.httpGet(baseUrl + "workflow/" + reusedNode.workflowId + "/node/" + reusedNode.id)
 					.send();
 			tester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			Node node1 = tester.getContent(Node.class);
-			Assert.assertEquals(node1.id, node.id);
+			Node node = tester.getContent(Node.class);
+			Assert.assertEquals(node.id, reusedNode.id);
 		}
 	}
 

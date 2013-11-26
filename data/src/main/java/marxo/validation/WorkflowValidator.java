@@ -5,8 +5,6 @@ import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
 import org.bson.types.ObjectId;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.validation.Errors;
@@ -32,7 +30,7 @@ public class WorkflowValidator extends BasicValidator {
 		List<Link> links = mongoTemplate.find(query, Link.class);
 		List<Node> nodes = mongoTemplate.find(query, Node.class);
 
-		SelectIdFunction selectIdFunction = new SelectIdFunction();
+		SelectIdFunction selectIdFunction = SelectIdFunction.getInstance();
 		Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, selectIdFunction);
 		Map<ObjectId, Link> linkMap = Maps.uniqueIndex(links, selectIdFunction);
 
@@ -45,12 +43,12 @@ public class WorkflowValidator extends BasicValidator {
 
 			node = nodeMap.get(link.previousNodeId);
 			link.setPreviousNode(node);
-			node.toLinkIds.add(link.id);
+			node.getToLinkIds().add(link.id);
 //			node.toLinks.add(link);
 
 			node = nodeMap.get(link.nextNodeId);
 			link.setNextNode(node);
-			node.fromLinkIds.add(link.id);
+			node.getFromLinkIds().add(link.id);
 //			node.fromLinks.add(link);
 		}
 	}

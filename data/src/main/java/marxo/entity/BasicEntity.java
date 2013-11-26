@@ -17,6 +17,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Field;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Set;
 
@@ -96,6 +97,35 @@ public abstract class BasicEntity implements Loggable {
 		}
 		return newEntity;
 	}
+
+	/*
+	Validation
+	 */
+
+	protected boolean isValidated = false;
+
+	public Boolean getValidated() {
+		return isValidated;
+	}
+
+	public void wire() {
+
+	}
+
+	/**
+	 * Also wire all references, which means database access. This means performance-critical.
+	 */
+	public void deepWire() {
+
+	}
+
+	public boolean validate() {
+		throw new NotImplementedException();
+	}
+
+	/*
+	DAO
+	 */
 
 	public void save() {
 		// After a little test, it seems that insert also update the document with the same ID.

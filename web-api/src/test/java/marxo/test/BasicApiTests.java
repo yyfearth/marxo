@@ -1,16 +1,10 @@
 package marxo.test;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import marxo.entity.BasicEntity;
-import marxo.entity.content.Content;
-import marxo.entity.link.Link;
-import marxo.entity.node.Node;
 import marxo.entity.user.User;
-import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.validation.SelectIdFunction;
-import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -33,7 +27,18 @@ public abstract class BasicApiTests implements Loggable {
 	protected String email;
 	protected String password;
 	protected User user;
+
+	protected List<BasicEntity> entitiesToSave = new ArrayList<>();
 	protected List<BasicEntity> entitiesToRemove = new ArrayList<>();
+
+	/**
+	 * Save everything in `entitiesToSave`, and add them in `entitiesToRemove`. Also clear `entitiesToSave`.
+	 */
+	public void insertAll() {
+		mongoTemplate.insertAll(entitiesToSave);
+		entitiesToRemove.addAll(entitiesToSave);
+		entitiesToSave.clear();
+	}
 
 	protected BasicApiTests() {
 		ApiTestConfiguration configuration = getClass().getAnnotation(ApiTestConfiguration.class);
