@@ -5,7 +5,6 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.types.Post;
 import marxo.engine.EngineWorker;
-import marxo.entity.BasicEntity;
 import marxo.entity.FacebookData;
 import marxo.entity.Task;
 import marxo.entity.content.FacebookContent;
@@ -21,9 +20,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.Test;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class EngineTest extends BasicDataTests {
@@ -53,7 +49,7 @@ public class EngineTest extends BasicDataTests {
 	}
 
 	@Test
-	public void workflowWithNoNode() throws Exception {
+	public void workflowWithoutNode() throws Exception {
 		Workflow workflow = new Workflow();
 		workflow.setName(getClass().toString());
 		workflow.isProject = true;
@@ -68,7 +64,7 @@ public class EngineTest extends BasicDataTests {
 		engineWorker.run();
 
 		workflow = Workflow.get(workflow.id);
-		Assert.assertEquals(workflow.status, RunStatus.FINISHED);
+		Assert.assertEquals(workflow.status, RunStatus.ERROR);
 	}
 
 	@Test
@@ -92,21 +88,23 @@ public class EngineTest extends BasicDataTests {
 
 		Node node = new Node();
 		node.setName("Test Node for Engine");
-		workflow.nodeIds.add(node.id);
+		workflow.addNode(node);
 
 		PostFacebook postFacebook = new PostFacebook();
 		postFacebook.setName("Test Action for Engine");
-		node.getActions().add(postFacebook);
+		node.addAction(postFacebook);
 
 		FacebookContent content = new FacebookContent();
-		postFacebook.contentId = content.id;
 		content.message = "Marxo Engine Automation\nThat's one small step for the engine, a giant leap for the project";
 		content.actionId = postFacebook.id;
+		postFacebook.setContent(content);
 
-		workflow.startNodeId = node.id;
+		workflow.setStartNode(node);
 		workflow.status = RunStatus.STARTED;
 
 		Task task = new Task(workflow.id);
+
+		workflow.wire();
 
 		entitiesToInsert.addAll(Lists.newArrayList(
 				tenant,
