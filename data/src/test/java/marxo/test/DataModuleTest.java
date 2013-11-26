@@ -1,6 +1,5 @@
 package marxo.test;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.mongodb.DB;
 import marxo.entity.BasicEntity;
@@ -13,9 +12,7 @@ import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.user.UserType;
 import marxo.entity.workflow.Workflow;
-import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
-import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
@@ -24,39 +21,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.Test;
 
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 
 @SuppressWarnings({"uncheck", "unchecked"})
-public class DataModuleTest implements Loggable {
-	ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-	MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
-	Set<BasicEntity> entitiesToRemove = new HashSet<>();
-
-	@BeforeMethod
-	public void beforeMethod() throws Exception {
-
-	}
-
-	@AfterMethod
-	public void afterMethod() throws Exception {
-
-	}
-
-	@BeforeClass
-	public void beforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public void afterClass() throws Exception {
-		Criteria criteria = Criteria.where("_id").in(Collections2.transform(entitiesToRemove, SelectIdFunction.getInstance()));
-		for (String collectionName : mongoTemplate.getCollectionNames()) {
-			mongoTemplate.remove(Query.query(criteria), collectionName);
-		}
-	}
+public class DataModuleTest extends BasicDataTests {
 
 	@Test(priority = 10000)
 	public void cleanDatabase() throws Exception {
@@ -176,7 +148,55 @@ public class DataModuleTest implements Loggable {
 	}
 
 	@Test
-	public void wireWorkflow() throws Exception {
+	public void workflowWire() throws Exception {
+		Tenant tenant = new Tenant();
+
+		Workflow workflow = new Workflow();
+		workflow.setTenant(tenant);
+
+		Node node1 = new Node();
+		Node node2 = new Node();
+		Node node3 = new Node();
+
+		workflow.setNodes(Lists.newArrayList(node1, node2, node3));
+
+		Link link1 = new Link();
+		link1.previousNodeId = node1.id;
+		link1.nextNodeId = node2.id;
+
+		Link link2 = new Link();
+		link2.previousNodeId = node2.id;
+		link2.nextNodeId = node3.id;
+
+		workflow.setLinks(Lists.newArrayList(link1, link2));
+
+		workflow.wire();
+
+		Assert.assertEquals(workflow.getStartNode().id, node1.id);
+
+		Assert.assertTrue(node1.getFromLinkIds().isEmpty());
+		Assert.assertEquals(node1.getToLinkIds(), Arrays.asList(link1.id));
+		Assert.assertEquals(node1.getToNodeIds(), Arrays.asList(node2.id));
+
+		Assert.assertEquals(node2.getFromLinkIds(), Arrays.asList(link1.id));
+		Assert.assertEquals(node2.getToLinkIds(), Arrays.asList(link2.id));
+		Assert.assertEquals(node2.getToNodeIds(), Arrays.asList(node3.id));
+
+		Assert.assertEquals(node3.getFromLinkIds(), Arrays.asList(link2.id));
+		Assert.assertTrue(node3.getToLinkIds().isEmpty());
+		Assert.assertTrue(node3.getToNodeIds().isEmpty());
+
+		for (Node node : Lists.newArrayList(node1, node2, node3)) {
+			Assert.assertEquals(node.tenantId, tenant.id);
+		}
+
+		for (Link link : Lists.newArrayList(link1, link2)) {
+			Assert.assertEquals(link.tenantId, tenant.id);
+		}
+	}
+
+	@Test
+	public void workflowDeepWire() throws Exception {
 		List<BasicEntity> entitiesToSave = new ArrayList<>();
 
 		Tenant tenant = new Tenant();

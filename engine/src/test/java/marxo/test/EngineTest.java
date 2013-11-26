@@ -1,6 +1,5 @@
 package marxo.test;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
@@ -15,59 +14,20 @@ import marxo.entity.node.PostFacebook;
 import marxo.entity.user.Tenant;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
-import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
 import org.testng.SkipException;
-import org.testng.annotations.*;
+import org.testng.annotations.Test;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
-public class EngineTest {
-	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
+public class EngineTest extends BasicDataTests {
 	EngineWorker engineWorker = new EngineWorker();
-	Set<BasicEntity> entitiesToRemove = new HashSet<>();
-
-	@BeforeMethod
-	public void beforeMethod() throws Exception {
-
-	}
-
-	@AfterMethod
-	public void afterMethod() throws Exception {
-
-	}
-
-	@BeforeClass
-	public void beforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public void afterClass() throws Exception {
-		Criteria criteria = Criteria.where("_id").in(Collections2.transform(entitiesToRemove, SelectIdFunction.getInstance()));
-		for (String collectionName : mongoTemplate.getCollectionNames()) {
-			mongoTemplate.remove(Query.query(criteria), collectionName);
-		}
-	}
-
-	@Test
-	public void testName() throws Exception {
-		Criteria criteria = Criteria.where("id").in(Collections2.transform(entitiesToRemove, SelectIdFunction.getInstance()));
-		for (String collectionName : mongoTemplate.getCollectionNames()) {
-//			mongoTemplate.remove(Query.query(criteria), collectionName);
-		}
-	}
 
 	@Test
 	public void noTask() throws Exception {
@@ -113,8 +73,6 @@ public class EngineTest {
 
 	@Test
 	public void oneNodeAndOneAction() throws Exception {
-		List<BasicEntity> entitiesToSave = new ArrayList<>();
-
 		Tenant tenant = new Tenant();
 		tenant.setName("Marxo");
 		tenant.description = "A tall, a good guy, and a cat.";
@@ -129,6 +87,7 @@ public class EngineTest {
 		Assert.assertTrue(mongoTemplate.exists(Query.query(Criteria.where("name").is("Marxo")), Tenant.class));
 
 		Workflow workflow = new Workflow();
+		workflow.setTenant(tenant);
 		workflow.setName("Test Workflow for Engine");
 
 		Node node = new Node();
@@ -149,16 +108,14 @@ public class EngineTest {
 
 		Task task = new Task(workflow.id);
 
-		entitiesToSave.addAll(Lists.newArrayList(
+		entitiesToInsert.addAll(Lists.newArrayList(
 				tenant,
 				workflow,
 				node,
 				content,
 				task
 		));
-		mongoTemplate.insertAll(entitiesToSave);
-
-		entitiesToRemove.addAll(entitiesToSave);
+		insertEntities();
 
 		engineWorker.run();
 

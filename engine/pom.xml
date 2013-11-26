@@ -44,6 +44,13 @@
             <version>6.8.7</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.marxo</groupId>
+            <artifactId>data</artifactId>
+            <version>LATEST</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

@@ -35,15 +35,15 @@ public class GeneralApiTests extends BasicApiTests {
 		reusedWorkflow.createUserId = reusedWorkflow.updateUserId = user.id;
 		reusedWorkflow.tenantId = user.tenantId;
 		reusedWorkflow.setName(getClass().getSimpleName());
-		entitiesToSave.add(reusedWorkflow);
+		entitiesToInsert.add(reusedWorkflow);
 
 		reusedNode = new Node();
 		reusedNode.setWorkflow(reusedWorkflow);
 		reusedNode.createUserId = reusedNode.updateUserId = user.id;
 		reusedWorkflow.setName(getClass().getSimpleName());
-		entitiesToSave.add(reusedNode);
+		entitiesToInsert.add(reusedNode);
 
-		insertAll();
+		insertEntities();
 	}
 
 	@Test
