@@ -78,6 +78,10 @@ public class Action extends TenantChildEntity {
 		this.nodeId = node.id;
 	}
 
-	public void act() {
+	/**
+	 * @return true if the action is successfully processed.
+	 */
+	public boolean act() {
+		return false;
 	}
 }

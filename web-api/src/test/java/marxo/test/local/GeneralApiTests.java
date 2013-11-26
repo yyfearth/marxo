@@ -13,7 +13,6 @@ import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
 import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
@@ -25,13 +24,13 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 @ApiTestConfiguration
 public class GeneralApiTests extends BasicApiTests {
-	Workflow workflow;
+	Workflow reusedWorkflow;
 
 	@BeforeClass
 	@Override
 	public void beforeClass() {
 		super.beforeClass();
-		workflow = mongoTemplate.findOne(new Query(), Workflow.class);
+		reusedWorkflow = mongoTemplate.findOne(new Query(), Workflow.class);
 	}
 
 	@Test
@@ -48,10 +47,10 @@ public class GeneralApiTests extends BasicApiTests {
 	@Test
 	public void wiring() throws Exception {
 		Workflow workflow = new Workflow();
-		workflowsToBeRemoved.add(workflow);
+		entitiesToRemove.add(workflow);
 
 		Node node1 = new Node();
-		nodesToBeRemoved.add(node1);
+		entitiesToRemove.add(node1);
 		workflow.setStartNode(node1);
 		node1.setWorkflow(workflow);
 
@@ -60,17 +59,17 @@ public class GeneralApiTests extends BasicApiTests {
 		action.setEvent(new Event());
 
 		FacebookContent content = new FacebookContent();
-		contentsToBeRemoved.add(content);
+		entitiesToRemove.add(content);
 		action.setContent(content);
 		content.message = "Action run by Marxo Engine";
 
 		Link link = new Link();
-		linksToBeRemoved.add(link);
+		entitiesToRemove.add(link);
 		link.setWorkflow(workflow);
 		link.setPreviousNode(node1);
 
 		Node node2 = new Node();
-		nodesToBeRemoved.add(node2);
+		entitiesToRemove.add(node2);
 		workflow.setStartNode(node2);
 		link.setNextNode(node2);
 		node2.setWorkflow(workflow);
@@ -119,7 +118,7 @@ public class GeneralApiTests extends BasicApiTests {
 	public void getNodes() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet(baseUrl + "workflow/" + workflow.id + "/node")
+					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node")
 					.send();
 			tester
 					.isOk()
@@ -128,7 +127,7 @@ public class GeneralApiTests extends BasicApiTests {
 			});
 			Assert.assertNotNull(nodes);
 			for (Node node : nodes) {
-				Assert.assertEquals(node.workflowId, workflow.id);
+				Assert.assertEquals(node.workflowId, reusedWorkflow.id);
 //				Assert.assertEquals(node.tenantId, this.user.tenantId);
 //				for (Action action : node.actions) {
 //					if (action.contextId != null) {
@@ -143,7 +142,7 @@ public class GeneralApiTests extends BasicApiTests {
 	public void wrongSubResource() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet(baseUrl + "workflow/" + workflow.id + "/node/" + (new ObjectId()))
+					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node/" + (new ObjectId()))
 					.send();
 			tester
 					.is(HttpStatus.NOT_FOUND)
@@ -155,8 +154,9 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void rightSubResource() throws Exception {
-		Criteria criteria = Criteria.where("tenantId").is(user.tenantId);
-		Node node = mongoTemplate.findOne(Query.query(criteria), Node.class);
+
+		Node node = new Node();
+		entitiesToRemove.add(node);
 
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -178,7 +178,7 @@ public class GeneralApiTests extends BasicApiTests {
 	public void getLinks() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet(baseUrl + "workflow/" + workflow.id + "/links/")
+					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/links/")
 					.send();
 			tester
 					.isOk()
@@ -187,7 +187,7 @@ public class GeneralApiTests extends BasicApiTests {
 			});
 			Assert.assertNotNull(links);
 			for (Link link : links) {
-				Assert.assertEquals(link.workflowId, workflow.id);
+				Assert.assertEquals(link.workflowId, reusedWorkflow.id);
 //				Assert.assertEquals(link.tenantId, this.user.tenantId);
 //				if (link.condition != null) {
 //					Assert.assertNotNull(link.condition.leftOperand);
