@@ -14,40 +14,19 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       @_mouseover = @_mouseover.bind @
       @_mouseleave = @_mouseleave.bind @
       @draw = @draw.bind @
+      @highlight = @highlight.bind @
       super options
     _click: (d) -> @trigger 'select', d.model, @model
-    _sort: (wf, nodes, links) ->
-      nodes_cindex = {}
-      links_cindex = {}
-      level = [wf.startNode]
-
-      while node = level.shift()
-        unless nodes_cindex.hasOwnProperty node.cid
-          nodes.push nodes_cindex[node.cid] = node
-          for link in node.outLinks
-            links.push links_cindex[link.cid] = link
-            level.push link.nextNode
-      return
     _data: (wf) ->
       @model = wf
       r = @r + 1
       w = 0
       h = 0
       fixed = true
-
-      if wf.startNode?
-        nodes = []
-        links = []
-        @_sort wf, nodes, links
-        @_invalid = nodes.length isnt wf.nodes.length or links.length isnt wf.links.length
-        # console.log 'sort nodes', @_valid, nodes, links
-      else
-        @_invalid = true
-        nodes = wf.nodes
-        links = wf.links
+      @_invalid = not wf.startNode? or not wf.sort()._sorted
 
       @data =
-        nodes: nodes.map (node, i) ->
+        nodes: wf.nodes.map (node, i) ->
           node._idx = i
           _fixed = node.has 'offset'
           {x, y} = if _fixed
@@ -76,7 +55,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           fixed: _fixed or node is wf.startNode
           index: i + 1
           model: node
-        links: links.map (link, i) ->
+        links: wf.links.map (link, i) ->
           src = link.prevNode._idx
           tar = link.nextNode._idx
           if status = link.get 'status'
@@ -101,6 +80,9 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       w = @w = Math.max @$el.innerWidth(), w + r + r
       h = @h = Math.max @$el.innerHeight(), h + r + r
       @fixed = fixed
+
+      # mark, it will be removed when workflow re-wrap
+      wf.nodes._draw_proc = true
 
       @force.size([w, h])
       @svg.attr('viewBox', "0 0 #{w} #{h}")
@@ -234,15 +216,18 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           @_draw()
           return
       else
-        if not @model or wf isnt @model
+        if not @model or wf isnt @model or not wf.nodes._draw_proc
           @clear()
           @_data wf
         @_draw()
       @
-    highlight: (model) -> # must be node or link
+    highlight: (id, type) -> # must be node or link
       if svg = @svg
+        if id and id.cid? # is model
+          type = id._name
+          id = id.id ? id.cid
         svg.selectAll('.active').classed 'active', false
-        svg.select("##{model._name}_#{model.id ? model.cid}").classed 'active', true if model
+        svg.select("##{type}_#{id}").classed 'active', true if type and id
       @
 
   WorkflowDiagramView
