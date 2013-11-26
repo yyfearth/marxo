@@ -1,6 +1,8 @@
 package marxo.test;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
+import marxo.entity.BasicEntity;
 import marxo.entity.content.Content;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
@@ -14,6 +16,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -30,10 +33,7 @@ public abstract class BasicApiTests implements Loggable {
 	protected String email;
 	protected String password;
 	protected User user;
-	protected List<Workflow> workflowsToBeRemoved = new ArrayList<>();
-	protected List<Node> nodesToBeRemoved = new ArrayList<>();
-	protected List<Link> linksToBeRemoved = new ArrayList<>();
-	protected List<Content> contentsToBeRemoved = new ArrayList<>();
+	protected List<BasicEntity> entitiesToRemove = new ArrayList<>();
 
 	protected BasicApiTests() {
 		ApiTestConfiguration configuration = getClass().getAnnotation(ApiTestConfiguration.class);
@@ -49,23 +49,17 @@ public abstract class BasicApiTests implements Loggable {
 	public void beforeClass() {
 		Criteria criteria = Criteria.where("email").is(email);
 		user = mongoTemplate.findOne(Query.query(criteria), User.class);
+		if (user == null) {
+			throw new SkipException(String.format("Cannot find email [%s]", email));
+		}
 	}
 
 	@AfterClass
 	public void afterClass() throws IOException {
-		List<ObjectId> objectIds;
-
-		objectIds = Lists.transform(workflowsToBeRemoved, SelectIdFunction.getInstance());
-		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Workflow.class);
-
-		objectIds = Lists.transform(nodesToBeRemoved, SelectIdFunction.getInstance());
-		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Node.class);
-
-		objectIds = Lists.transform(linksToBeRemoved, SelectIdFunction.getInstance());
-		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Link.class);
-
-		objectIds = Lists.transform(contentsToBeRemoved, SelectIdFunction.getInstance());
-		mongoTemplate.remove(Query.query(Criteria.where("id").in(objectIds)), Content.class);
+		Criteria criteria = Criteria.where("_id").in(Collections2.transform(entitiesToRemove, SelectIdFunction.getInstance()));
+		for (String collectionName : mongoTemplate.getCollectionNames()) {
+			mongoTemplate.remove(Query.query(criteria), collectionName);
+		}
 	}
 
 	@BeforeMethod

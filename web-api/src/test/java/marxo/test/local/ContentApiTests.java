@@ -19,7 +19,7 @@ public class ContentApiTests extends BasicApiTests {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			FacebookContent facebookContent = new FacebookContent();
 			reusedContent = facebookContent;
-			contentsToBeRemoved.add(facebookContent);
+			entitiesToRemove.add(facebookContent);
 			facebookContent.actionId = new ObjectId();
 			facebookContent.message = "testCreateContent";
 
@@ -71,7 +71,7 @@ public class ContentApiTests extends BasicApiTests {
 	public void testDeleteContent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			FacebookContent facebookContent = new FacebookContent();
-			contentsToBeRemoved.add(facebookContent);
+			entitiesToRemove.add(facebookContent);
 			facebookContent.actionId = new ObjectId();
 			facebookContent.message = "testCreateContent";
 

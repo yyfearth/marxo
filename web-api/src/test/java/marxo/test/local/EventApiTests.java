@@ -35,7 +35,7 @@ public class EventApiTests extends BasicApiTests {
 		reusedAction = postFacebook;
 
 		mongoTemplate.insert(node);
-		nodesToBeRemoved.add(node);
+		entitiesToRemove.add(node);
 
 		reusedEvent = new Event();
 		reusedEvent.setStartTime(DateTime.now().plus(Seconds.seconds(5)));
