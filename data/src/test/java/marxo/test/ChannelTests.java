@@ -1,4 +1,4 @@
-package marxo;
+package marxo.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restfb.DefaultFacebookClient;
@@ -9,7 +9,6 @@ import com.restfb.types.FacebookType;
 import com.restfb.types.Post;
 import com.restfb.types.User;
 import junit.framework.Assert;
-import marxo.tool.Loggable;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,7 +27,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 
-public class ChannelTests implements Loggable {
+public class ChannelTests extends BasicDataTests {
 	static String appId;
 	static String appSecret;
 	static String appToken;
@@ -112,7 +111,7 @@ public class ChannelTests implements Loggable {
 	public void testParseSignedRequest() throws Exception {
 		String signedRequestString = "FxxDQB7v5bYjmhJ7_ry4VmeKpJ5bpYKR6MSk-HX8hkg.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImNvZGUiOiJBUUJNeXdEZVdtMFZFSmlPbFl6cHpid0lmR0JZcDdfT3o4MllSMGZDMTc5NXZqcTM2dXpBekIwR1J1TVhla050U1RKbDFTdFhqYm55anVEbUphd1JNUGhjVFZwUmNJV3pHNy1PSUYxM0NnQnRLYWNlSEFsbFpqcVFDT093R0o1TkxpYkVMUU9kVHB3Q0ZVSHhzNTRFNjFqdDNCZF9PQjBzbXU1SlBCb3RFRzEzUVQ0SW5KUGIzMXhaeHNRTEl4UThkbW1fbUE2RWdqWDgxMkxhbkphSmVSeWplZXRzWi1DaXR6QzlReGhOVXFyek90LTE4TG9hTlRjZmVBRnVEcWpwYnhGaVdIMjVSTjN3QWo0bFNYU25tZ1JCdkdISkl1YXFPSGVpTWFZbVVnZlp2SFpscWQ2TWRHcWc1VmJuZjdJLVRqWSIsImlzc3VlZF9hdCI6MTM4Mzc1OTc3NCwidXNlcl9pZCI6IjYzNTUwMzEwMiJ9";
 		SignedRequest signedRequest = SignedRequest.getInstance(signedRequestString);
-		logger.info(signedRequestString.toString());
+		logger.info(signedRequestString);
 		Assert.assertNotNull(signedRequest.signiture);
 		Assert.assertNotNull(signedRequest.payload);
 	}

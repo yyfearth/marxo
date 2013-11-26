@@ -130,6 +130,47 @@ public class Workflow extends TenantChildEntity {
 
 	@Override
 	public void wire() {
+		if (nodes == null || links == null) {
+			return;
+		}
+
+		Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, SelectIdFunction.getInstance());
+
+		boolean isOkay = true;
+
+		// Set start node and next nodes.
+		if (nodes.isEmpty()) {
+			startNodeId = null;
+		} else {
+			for (Link link : links) {
+				Node fromNode = nodeMap.get(link.previousNodeId);
+				Node toNode = nodeMap.get(link.nextNodeId);
+				fromNode.getToLinkIds().add(link.id);
+				fromNode.getToNodeIds().add(toNode.id);
+				toNode.getFromLinkIds().add(link.id);
+				toNode.getFromNodeIds().add(fromNode.id);
+
+				link.setPreviousNode(fromNode);
+				link.setNextNode(toNode);
+			}
+
+			startNodeId = null;
+			for (Node node : nodes) {
+				node.wire();
+
+				if (node.getFromNodeIds().isEmpty() && !node.id.equals(startNodeId)) {
+					if (startNodeId == null) {
+						startNodeId = node.id;
+					} else {
+						logger.debug(String.format("Workflow [%s] validation error: node [%s] is also a potential start node", id, node.id));
+						isOkay = false;
+					}
+				}
+			}
+			setStartNode(nodeMap.get(startNodeId));
+		}
+
+		this.isValidated = isOkay;
 	}
 
 	@Override
@@ -143,7 +184,6 @@ public class Workflow extends TenantChildEntity {
 		}
 
 		Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, SelectIdFunction.getInstance());
-		Map<ObjectId, Link> linkMap = Maps.uniqueIndex(links, SelectIdFunction.getInstance());
 
 		boolean isOkay = true;
 
