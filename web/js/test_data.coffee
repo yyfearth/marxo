@@ -1224,6 +1224,8 @@ define 'test_data', ['models'], (models) ->
     ]
 
   exports = {}
+  temp_user = new models.User tenant_id: 0, credential: 'local'
+  models.User.current ?= temp_user
   for name, list of data
     name = name.toLowerCase()
     cap = name.charAt(0).toUpperCase() + name[1..]
@@ -1240,5 +1242,6 @@ define 'test_data', ['models'], (models) ->
       else for r in list
         model = new Model r
         model.save()
+  models.User.current = null if models.User.current is temp_user
   console.log 'test data loaded'
   exports
