@@ -95,12 +95,17 @@ public class Node extends WorkflowChildEntity {
 		return (actionMap == null) ? (actionMap = Maps.uniqueIndex(actions, SelectIdFunction.getInstance())) : actionMap;
 	}
 
-	public Action getFirstAction() {
-		return (actions.isEmpty()) ? null : actions.get(0);
+//	public Action getFirstAction() {
+//		return (actions.isEmpty()) ? null : actions.get(0);
+//	}
+
+	public void addAction(Action action) {
+		actions.add(action);
+		action.setNode(this);
 	}
 
 	/*
-	Current action
+	Next action
 	 */
 
 	protected ObjectId currentActionId;
@@ -120,7 +125,10 @@ public class Node extends WorkflowChildEntity {
 	@JsonIgnore
 	public Action getCurrentAction() {
 		if (currentActionId == null) {
-			return null;
+			if (actions.isEmpty()) {
+				return null;
+			}
+			return actions.get(0);
 		}
 		return (currentAction == null) ? (currentAction = getActionMap().get(currentActionId)) : null;
 	}

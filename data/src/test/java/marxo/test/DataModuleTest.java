@@ -17,7 +17,6 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
@@ -107,36 +106,33 @@ public class DataModuleTest extends BasicDataTests {
 
 	@Test
 	public void nodeWire() throws Exception {
-		List<BasicEntity> entitiesToSave = new ArrayList<>();
-
 		Tenant tenant = new Tenant();
-		entitiesToSave.add(tenant);
+		entitiesToInsert.add(tenant);
 
 		Node node = new Node();
 		node.setTenant(tenant);
-		entitiesToSave.add(node);
+		entitiesToInsert.add(node);
 
 		Action action1 = new PostFacebook();
-		node.getActions().add(action1);
+		node.addAction(action1);
 
 		Action action2 = new PostFacebook();
-		node.getActions().add(action2);
+		node.addAction(action2);
 
 		Action action3 = new PostFacebook();
-		node.getActions().add(action3);
+		node.addAction(action3);
 
 		node.wire();
-		mongoTemplate.insertAll(entitiesToSave);
-		entitiesToRemove.addAll(entitiesToSave);
+		insertEntities();
 
 		node = Node.get(node.id);
 
-		Assert.assertNotNull(node.getFirstAction());
-		Assert.assertEquals(node.getFirstAction().id, action1.id);
+		Assert.assertNotNull(node.getCurrentAction());
+		Assert.assertEquals(node.getCurrentAction().id, action1.id);
 
-		Assert.assertEquals(node.getFirstAction().getNextAction().id, action2.id);
-		Assert.assertEquals(node.getFirstAction().getNextAction().getNextAction().id, action3.id);
-		Assert.assertNull(node.getFirstAction().getNextAction().getNextAction().getNextAction());
+		Assert.assertEquals(node.getCurrentAction().getNextAction().id, action2.id);
+		Assert.assertEquals(node.getCurrentAction().getNextAction().getNextAction().id, action3.id);
+		Assert.assertNull(node.getCurrentAction().getNextAction().getNextAction().getNextAction());
 
 		Map<ObjectId, Action> actionMap = node.getActionMap();
 		Assert.assertNotNull(actionMap);

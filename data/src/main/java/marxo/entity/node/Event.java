@@ -48,4 +48,9 @@ public class Event extends BasicEntity {
 	public void setDuration(Duration duration) {
 		this.duration = duration;
 	}
+
+	@Override
+	public void save() {
+		throw new UnsupportedOperationException(String.format("%s should not be saved into database", getClass().getSimpleName()));
+	}
 }

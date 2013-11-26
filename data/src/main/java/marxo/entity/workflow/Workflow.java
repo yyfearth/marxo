@@ -65,6 +65,22 @@ public class Workflow extends TenantChildEntity {
 		}
 	}
 
+	public void addNode(Node node) {
+		if (nodes != null) {
+			nodes.add(node);
+		}
+		nodeIds.add(node.id);
+		node.setWorkflow(this);
+	}
+
+	public void addLink(Link link) {
+		if (links != null) {
+			links.add(link);
+		}
+		linkIds.add(link.id);
+		link.setWorkflow(this);
+	}
+
 	/*
 	Start node
 	 */
@@ -122,6 +138,14 @@ public class Workflow extends TenantChildEntity {
 			return currentNodes = mongoTemplate.find(Query.query(criteria), Node.class);
 		}
 		return currentNodes;
+	}
+
+	public void addCurrentNode(Node node) {
+		if (currentNodes == null) {
+			currentNodes.add(node);
+		}
+		currentNodeIds.add(node.id);
+		node.setWorkflow(this);
 	}
 
 	/*
