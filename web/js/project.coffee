@@ -587,7 +587,7 @@ Projects
   class WorkflowListView extends NavListView
     auto: false
     urlRoot: 'worklfow'
-    headerTitle: 'Workflows'
+    headerTitle: 'Create from Workflows'
     itemClassName: 'workflow-list-item'
     collection: Workflows.workflows
     defaultItem: null
