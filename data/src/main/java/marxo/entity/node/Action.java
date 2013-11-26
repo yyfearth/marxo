@@ -6,6 +6,7 @@ import marxo.entity.user.TenantChildEntity;
 import marxo.entity.workflow.RunStatus;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 // todo: make this class abstract
 public class Action extends TenantChildEntity {

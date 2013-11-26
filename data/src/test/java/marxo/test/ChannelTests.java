@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
+import com.restfb.batch.BatchRequest;
+import com.restfb.batch.BatchResponse;
 import com.restfb.exception.FacebookOAuthException;
 import com.restfb.types.FacebookType;
 import com.restfb.types.Post;
@@ -26,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
 
 public class ChannelTests extends BasicDataTests {
 	static String appId;
@@ -33,7 +36,6 @@ public class ChannelTests extends BasicDataTests {
 	static String appToken;
 	static String userToken;
 	static String extendedUserToken;
-	static String postId = "635503102_10152019328983103";
 
 	static {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("security.xml");
@@ -43,6 +45,7 @@ public class ChannelTests extends BasicDataTests {
 		userToken = "CAADCM9YpGYwBAGANsWfvdO3aEPcqWE8NM2AqeKZBjrjv3MquGBWMTDHBy8LKwd8klnZCigONqGubLv7ZAmX3dl5b2kmnx8b86ZAtK6XL63yb7BnxXd0OcYvZCjt6ZCINSd4wbdcwMzT3FHQfo91rAdWrKfSZBL47YDthTbmv1ZAbdZAZBdYaEkw6FG34gOL8P4qkkZD";
 	}
 
+	FacebookType publishMessageResponse;
 	FacebookClient facebookClient = new DefaultFacebookClient(userToken);
 	ObjectMapper objectMapper = new ObjectMapper();
 
@@ -117,19 +120,36 @@ public class ChannelTests extends BasicDataTests {
 	}
 
 	@Test
-	public void testSubmitPost() throws Exception {
-		FacebookType publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", "Marxo Test, please do some action on this post. Thanks."));
+	public void submitPost() throws Exception {
+		publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", "Marxo Test, please do some action on this post. Thanks."));
 
 		logger.info("Published message ID: " + publishMessageResponse.getId());
 	}
 
-	@Test()
-	public void testGetPost() throws Exception {
-		Post post = facebookClient.fetchObject(postId, Post.class);
+	@Test(dependsOnMethods = {"submitPost"}, priority = 100)
+	public void getPost() throws Exception {
+		Post post = facebookClient.fetchObject(publishMessageResponse.getId(), Post.class);
 		assert post != null;
 
 		logger.info(objectMapper.writeValueAsString(post));
 		assert post.getApplication().getName().equals("Marxo");
+	}
+
+	@Test(dependsOnMethods = {"submitPost"}, priority = 200)
+	public void deletePost() throws Exception {
+		boolean isOkay = facebookClient.deleteObject(publishMessageResponse.getId());
+		Assert.assertTrue(isOkay);
+	}
+
+	@Test
+	public void batch() throws Exception {
+		BatchRequest batchRequest = new BatchRequest.BatchRequestBuilder("me").method("GET").build();
+		List<BatchResponse> batchResponses = facebookClient.executeBatch(batchRequest);
+		Assert.assertEquals(batchResponses.size(), 1);
+
+		for (BatchResponse batchResponse : batchResponses) {
+			logger.info(String.format("Response: %s", batchResponse));
+		}
 	}
 }
 
