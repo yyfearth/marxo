@@ -495,6 +495,7 @@ define 'test_data', ['models'], (models) ->
       updated_at: '2013-06-27T00:22:20.272Z'
     ,
       id: '50447afb4728cb2036cf9ca1'
+      tenant_id: 0
       key: 'test_wf'
       name: 'Test Workflow'
       desc: 'The test workflow'
@@ -622,6 +623,7 @@ define 'test_data', ['models'], (models) ->
 
     projects: [
       id: '50447afb4728cc2036cf9ca0'
+      tenant_id: 0
       template_id: '50447afb4728cb2036cf9ca0'
       name: 'Demo Project'
       key: 'demo_prj'
@@ -897,6 +899,7 @@ define 'test_data', ['models'], (models) ->
     ,
       id: '50447afb4728cc2036cf9ca1'
       template_id: '50447afb4728cb2036cf9ca1'
+      tenant_id: 0
       key: 'test_prj'
       name: 'Test Project'
       desc: 'The test project using test workflow'

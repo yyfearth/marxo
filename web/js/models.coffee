@@ -7,7 +7,9 @@ define 'models', ['module', 'lib/common'], (module) ->
   ROOT = module.config().BASE_URL
   ROOT = ROOT[...-1] if ROOT[-1..] is '/'
 
-  syncValidation = (method, model, options = {}) ->
+  if Backbone.LocalStorage? # for local sync
+    syncValidation = -> return
+  else syncValidation = (method, model, options = {}) ->
     options.headers ?= {}
     options.headers.Accept ?= 'application/json'
     options.headers.Authorization ?= User.current?.get('credential') or ''

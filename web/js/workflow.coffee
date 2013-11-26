@@ -55,7 +55,7 @@ Action
   class TemplateWorkflowListView extends NavListView
     auto: false
     urlRoot: 'worklfow'
-    headerTitle: 'Template'
+    headerTitle: 'Create from Template'
     itemClassName: 'workflow-list-item'
     collection: Workflows.workflows
     defaultItem: null
@@ -77,7 +77,7 @@ Action
         fragments = if model.has 'tenant_id' then fragments2 else fragments1
         fragments.appendChild @_renderItem model
       @el.appendChild fragments1
-      @el.appendChild @_renderHeader 'Workflows'
+      @el.appendChild @_renderHeader 'Create from Workflows'
       @el.appendChild fragments2
       return
     render: ->
@@ -91,7 +91,7 @@ Action
       'id'
       'name:workflow'
       'desc'
-      'type'
+      #'type'
       'sharing'
       'created_at'
       'updated_at'

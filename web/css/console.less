@@ -4,9 +4,6 @@
 @import 'font-icon';
 @import 'jquery-ui';
 @import 'nvd3';
-@import 'workflow';
-@import 'content';
-@import 'event';
 
 .transition (@properties: opacity, @duration: .5s, @transition: ease-in-out, @delay: 0) {
   -webkit-transition: @properties @duration @transition @delay;
@@ -552,3 +549,7 @@ ul.action-bar {
     height: auto;
   }
 }
+
+@import 'workflow';
+@import 'content';
+@import 'event';
