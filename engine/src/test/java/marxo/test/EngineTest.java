@@ -175,11 +175,5 @@ public class EngineTest {
 		FacebookClient facebookClient = new DefaultFacebookClient(tenant.facebookData.accessToken);
 		Post post = facebookClient.fetchObject(content1.postId, Post.class);
 		Assert.assertEquals(content1.message, content.message);
-
-		tenant.remove();
-		workflow.remove();
-		node.remove();
-		content.remove();
-		task.remove();
 	}
 }

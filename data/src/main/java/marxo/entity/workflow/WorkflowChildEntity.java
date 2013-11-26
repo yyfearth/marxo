@@ -16,5 +16,7 @@ public abstract class WorkflowChildEntity extends TenantChildEntity {
 	public void setWorkflow(Workflow workflow) {
 		this.workflow = workflow;
 		this.workflowId = workflow.id;
+
+		tenantId = workflow.tenantId;
 	}
 }

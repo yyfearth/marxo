@@ -2,9 +2,13 @@ package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import marxo.entity.BasicEntity;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.user.TenantChildEntity;
+import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -12,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(value = {
 }, ignoreUnknown = true)
@@ -19,32 +24,77 @@ public class Workflow extends TenantChildEntity {
 	public RunStatus status = RunStatus.IDLE;
 
 	public WorkflowType type = WorkflowType.NONE;
+	public boolean isProject = false;
+
+	/*
+	Nodes/links
+	 */
+
 	public List<ObjectId> nodeIds = new ArrayList<>();
 	public List<ObjectId> linkIds = new ArrayList<>();
-	@Transient
-	public List<Node> nodes = new ArrayList<>();
-	@Transient
-	public List<Link> links = new ArrayList<>();
 
-	public boolean isProject = false;
-	public ObjectId startNodeId;
-	public List<ObjectId> currentNodeIds = new ArrayList<>();
 	@Transient
-	public Workflow template;
+	protected List<Node> nodes;
+
+	public List<Node> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(List<Node> nodes) {
+		this.nodes = nodes;
+		this.nodeIds = Lists.transform(nodes, SelectIdFunction.getInstance());
+		for (Node node : nodes) {
+			node.tenantId = tenantId;
+			node.workflowId = id;
+		}
+	}
+
+	@Transient
+	protected List<Link> links;
+
+	public List<Link> getLinks() {
+		return links;
+	}
+
+	public void setLinks(List<Link> links) {
+		this.links = links;
+		this.linkIds = Lists.transform(links, SelectIdFunction.getInstance());
+		for (Link link : links) {
+			link.tenantId = tenantId;
+			link.workflowId = id;
+		}
+	}
+
+	/*
+	Start node
+	 */
+
+	public ObjectId startNodeId;
+
 	@Transient
 	protected Node startNode;
-	ObjectId templateId;
 
 	@JsonIgnore
 	public Node getStartNode() {
+		if (startNode == null) {
+			return startNode = mongoTemplate.findById(startNodeId, Node.class);
+		}
 		return startNode;
 	}
 
 	@JsonIgnore
 	public void setStartNode(Node startNode) {
 		this.startNode = startNode;
-		this.startNodeId = startNode.id;
+		this.startNodeId = (startNode == null) ? null : startNode.id;
 	}
+
+	/*
+	Template
+	 */
+
+	@Transient
+	protected Workflow template;
+	public ObjectId templateId;
 
 	@JsonIgnore
 	public Workflow getTemplate() {
@@ -57,10 +107,93 @@ public class Workflow extends TenantChildEntity {
 		templateId = template.id;
 	}
 
+	/*
+	Current nodes
+	 */
+
+	public List<ObjectId> currentNodeIds = new ArrayList<>();
+
+	protected List<Node> currentNodes;
+
 	@JsonIgnore
 	public List<Node> getCurrentNodes() {
-		Criteria criteria = Criteria.where("id").in(currentNodeIds);
-		return mongoTemplate.find(Query.query(criteria), Node.class);
+		if (currentNodes == null) {
+			Criteria criteria = Criteria.where("id").in(currentNodeIds);
+			return currentNodes = mongoTemplate.find(Query.query(criteria), Node.class);
+		}
+		return currentNodes;
+	}
+
+	/*
+	Validation/wire
+	 */
+
+	@Override
+	public void wire() {
+	}
+
+	@Override
+	public void deepWire() {
+		Query query = Query.query(Criteria.where("workflowId").is(id));
+		if (nodes == null) {
+			nodes = mongoTemplate.find(query, Node.class);
+		}
+		if (links == null) {
+			links = mongoTemplate.find(query, Link.class);
+		}
+
+		Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, SelectIdFunction.getInstance());
+		Map<ObjectId, Link> linkMap = Maps.uniqueIndex(links, SelectIdFunction.getInstance());
+
+		boolean isOkay = true;
+
+		// Set start node and next nodes.
+		if (nodes.isEmpty()) {
+			startNodeId = null;
+		} else {
+			for (Link link : links) {
+				Node fromNode = nodeMap.get(link.previousNodeId);
+				Node toNode = nodeMap.get(link.nextNodeId);
+				fromNode.getToLinkIds().add(link.id);
+				fromNode.getToNodeIds().add(toNode.id);
+				toNode.getFromLinkIds().add(link.id);
+				toNode.getFromNodeIds().add(fromNode.id);
+
+				link.setPreviousNode(fromNode);
+				link.setNextNode(toNode);
+			}
+
+			startNodeId = null;
+			for (Node node : nodes) {
+				node.wire();
+
+				if (node.getFromNodeIds().isEmpty() && !node.id.equals(startNodeId)) {
+					if (startNodeId == null) {
+						startNodeId = node.id;
+					} else {
+						logger.debug(String.format("Workflow [%s] validation error: node [%s] is also a potential start node", id, node.id));
+						isOkay = false;
+					}
+				}
+			}
+			setStartNode(nodeMap.get(startNodeId));
+		}
+
+		this.isValidated = isOkay;
+
+		mongoTemplate.remove(this);
+
+		Criteria criteria = Criteria.where("_id").in(nodeIds);
+		mongoTemplate.remove(Query.query(criteria), Node.class);
+
+		criteria = Criteria.where("_id").in(linkIds);
+		mongoTemplate.remove(Query.query(criteria), Link.class);
+
+		List<BasicEntity> entitiesToSave = new ArrayList<>();
+		entitiesToSave.add(this);
+		entitiesToSave.addAll(nodes);
+		entitiesToSave.addAll(links);
+		mongoTemplate.insertAll(entitiesToSave);
 	}
 
 	/*
@@ -68,6 +201,10 @@ public class Workflow extends TenantChildEntity {
 	 */
 
 	public static Workflow get(ObjectId id) {
-		return mongoTemplate.findById(id, Workflow.class);
+		Workflow workflow = mongoTemplate.findById(id, Workflow.class);
+		if (workflow != null) {
+			workflow.wire();
+		}
+		return workflow;
 	}
 }

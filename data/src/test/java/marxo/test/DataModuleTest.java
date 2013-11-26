@@ -134,7 +134,7 @@ public class DataModuleTest implements Loggable {
 	}
 
 	@Test
-	public void autoWireActionsInNode() throws Exception {
+	public void nodeWire() throws Exception {
 		List<BasicEntity> entitiesToSave = new ArrayList<>();
 
 		Tenant tenant = new Tenant();
@@ -176,7 +176,7 @@ public class DataModuleTest implements Loggable {
 	}
 
 	@Test
-	public void autoWireWorkflow() throws Exception {
+	public void wireWorkflow() throws Exception {
 		List<BasicEntity> entitiesToSave = new ArrayList<>();
 
 		Tenant tenant = new Tenant();
@@ -190,7 +190,7 @@ public class DataModuleTest implements Loggable {
 		Node node2 = new Node();
 		Node node3 = new Node();
 
-		workflow.nodeIds.addAll(Lists.transform(Lists.newArrayList(node1, node2, node3), SelectIdFunction.getInstance()));
+		workflow.setNodes(Lists.newArrayList(node1, node2, node3));
 		entitiesToSave.addAll(Lists.newArrayList(node1, node2, node3));
 
 		Link link1 = new Link();
@@ -201,15 +201,15 @@ public class DataModuleTest implements Loggable {
 		link2.previousNodeId = node2.id;
 		link2.nextNodeId = node3.id;
 
-		workflow.linkIds.addAll(Lists.transform(Lists.newArrayList(link1, link2), SelectIdFunction.getInstance()));
+		workflow.setLinks(Lists.newArrayList(link1, link2));
 		entitiesToSave.addAll(Lists.newArrayList(link1, link2));
 
-		workflow.wire();
 		mongoTemplate.insertAll(entitiesToSave);
 		entitiesToRemove.addAll(entitiesToSave);
+		workflow.deepWire();
 
 		workflow = Workflow.get(workflow.id);
-		Assert.assertEquals(workflow.startNodeId, node1.id);
+		Assert.assertEquals(workflow.getStartNode().id, node1.id);
 
 		node1 = Node.get(node1.id);
 		node2 = Node.get(node2.id);
@@ -217,14 +217,17 @@ public class DataModuleTest implements Loggable {
 		link1 = Link.get(link1.id);
 		link2 = Link.get(link2.id);
 
-		Assert.assertTrue(node1.fromLinkIds.isEmpty());
-		Assert.assertEquals(node1.toLinkIds, Arrays.asList(link1.id));
+		Assert.assertTrue(node1.getFromLinkIds().isEmpty());
+		Assert.assertEquals(node1.getToLinkIds(), Arrays.asList(link1.id));
+		Assert.assertEquals(node1.getToNodeIds(), Arrays.asList(node2.id));
 
-		Assert.assertEquals(node2.fromLinkIds, Arrays.asList(link1.id));
-		Assert.assertEquals(node2.toLinkIds, Arrays.asList(link2.id));
+		Assert.assertEquals(node2.getFromLinkIds(), Arrays.asList(link1.id));
+		Assert.assertEquals(node2.getToLinkIds(), Arrays.asList(link2.id));
+		Assert.assertEquals(node2.getToNodeIds(), Arrays.asList(node3.id));
 
-		Assert.assertEquals(node3.fromLinkIds, Arrays.asList(link2.id));
-		Assert.assertTrue(node3.toLinkIds.isEmpty());
+		Assert.assertEquals(node3.getFromLinkIds(), Arrays.asList(link2.id));
+		Assert.assertTrue(node3.getToLinkIds().isEmpty());
+		Assert.assertTrue(node3.getToNodeIds().isEmpty());
 
 		for (Node node : Lists.newArrayList(node1, node2, node3)) {
 			Assert.assertEquals(node.tenantId, tenant.id);

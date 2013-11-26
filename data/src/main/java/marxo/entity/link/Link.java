@@ -6,7 +6,6 @@ import marxo.entity.workflow.WorkflowChildEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @Document
 public class Link extends WorkflowChildEntity {
@@ -42,14 +41,6 @@ public class Link extends WorkflowChildEntity {
 		// todo
 		logger.warn("isPassed is not implemented");
 		return true;
-	}
-
-	/*
-	Wire
-	 */
-
-	public void wire() {
-		throw new NotImplementedException();
 	}
 
 	/*

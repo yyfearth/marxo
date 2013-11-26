@@ -134,8 +134,8 @@ public class WorkflowApiTests extends BasicApiTests {
 
 			workflow = tester.getContent(Workflow.class);
 			Assert.assertNotNull(workflow);
-			Assert.assertEquals(workflow.nodeIds.size(), workflow.nodes.size());
-			Assert.assertEquals(workflow.linkIds.size(), workflow.links.size());
+			Assert.assertEquals(workflow.nodeIds.size(), workflow.getNodes().size());
+			Assert.assertEquals(workflow.linkIds.size(), workflow.getLinks().size());
 
 			if (workflow.tenantId != null) {
 				Assert.assertEquals(workflow.tenantId, user.tenantId);
