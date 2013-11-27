@@ -515,6 +515,7 @@ Projects
     _prefix: 'prj_status_lst'
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
+      @$detail = $ find '.node-link-detail', @el
       super options
     load: (wf, force) ->
       if force or @model isnt wf
@@ -523,63 +524,112 @@ Projects
       @
     reset: -> @load null, true
     select: ({link, node, action} = {}) ->
+      unless @model?
+        console.error 'model not given yet'
+        return @
+      _prefix = @_prefix
       if node
-        id = "##{@_prefix}_node_#{node}"
+        id = "##{_prefix}_node_#{node}"
+        console.warn 'select node', node, @model, @model.nodes.get node
+        @_renderNode @model.nodes.get node
+        @$detail.find("##{_prefix}_action_#{action}").addClass('active')[0]?.scrollIntoViewIfNeeded() if action
       else if link
         id = "##{@_prefix}_link_#{link}"
+        @_renderLink @model.links.get link
       else
+        @$detail.empty()
         id = null
       #console.log 'select id', id
       @$list.find("li.active").removeClass 'active'
       @$list.find(id).addClass('active')[0]?.scrollIntoViewIfNeeded() if id
       # TODO: action
       @
-    render: ->
+    _renderLabel: (text, cls) ->
+      span = document.createElement 'span'
+      span.className = "label #{cls or ''}"
+      span.textContent = text
+      span
+    _renderListItem: (model) ->
+      wf = model.workflow
+      li = document.createElement 'li'
+      _model = model._name or ''
+      li.id = "#{@_prefix}_#{_model}_#{model.id}"
+      li.className = "capitalized #{_model}"
+      a = document.createElement 'a'
+      a.href = model._href = "#project/#{wf.id}/#{_model}/#{model.id}"
+      a.textContent = "#{_model} #{model.idx + 1}: "
+      i = document.createElement 'i'
+      i.className = 'icon-right-open pull-right'
+      a.appendChild i
+      name = document.createElement 'strong'
+      name.textContent = model.get('name') or model.name?()
+      _label = @_renderLabel
+      a.appendChild name
+      a.appendChild _label '(Start Node)', 'label-info start-node' if model is wf.startNode
+      if status = model.get 'status'
+        status = status.toLowerCase()
+        a.className = "status-#{status}"
+        a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+      li.appendChild a
+      li
+    _renderHeaderItem: (text) ->
+      li = document.createElement 'li'
+      li.className = 'list-header capitalized disabled text-center'
+      a = document.createElement 'a'
+      a.textContent = text
+      li.appendChild a
+      li
+    _renderList: (wf = @model) ->
       @$list.empty()
-      if wf = @model
-        wf.sort()
-        _label = (text, cls) ->
-          span = document.createElement 'span'
-          span.className = "label #{cls or ''}"
-          span.textContent = text
-          span
-        _header = (text) ->
-          li = document.createElement 'li'
-          li.className = 'disabled text-center'
-          a = document.createElement 'a'
-          a.textContent = text
-          li.appendChild a
-          li
-        _prefix = @_prefix
-        _item = (model) ->
-          li = document.createElement 'li'
-          _model = model._name or ''
-          li.id = "#{_prefix}_#{_model}_#{model.id}"
-          li.className = "capitalized #{_model}"
-          a = document.createElement 'a'
-          a.href = "#project/#{wf.id}/#{_model}/#{model.id}"
-          a.textContent = "#{_model} #{model.idx + 1}: "
-          i = document.createElement 'i'
-          i.className = 'icon-right-open pull-right'
-          a.appendChild i
-          name = document.createElement 'strong'
-          name.textContent = model.get('name') or model.name?()
-          a.appendChild name
-          a.appendChild _label '(Start Node)', 'label-info start-node' if model is wf.startNode
-          if status = model.get 'status'
-            status = status.toLowerCase()
-            a.className = "status-#{status}"
-            a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
-          li.appendChild a
-          li
-        frag = document.createDocumentFragment()
-        if wf.nodes.length
-          frag.appendChild _header 'Nodes'
-          wf.nodes.forEach (node) -> frag.appendChild _item node
-        if wf.links.length
-          frag.appendChild _header 'Links'
-          wf.links.forEach (link) -> frag.appendChild _item link
-        @$list.append frag
+      return unless wf
+      wf.sort()
+      _header = @_renderHeaderItem
+      _item = @_renderListItem.bind @
+      frag = document.createDocumentFragment()
+      if wf.nodes.length
+        frag.appendChild _header 'Nodes'
+        wf.nodes.forEach (node) -> frag.appendChild _item node
+      if wf.links.length
+        frag.appendChild _header 'Links'
+        wf.links.forEach (link) -> frag.appendChild _item link
+      @$list.append frag
+      return
+    _renderNode: (model) ->
+      @$detail.empty()
+      return unless model
+      _prefix = @_prefix
+      _label = @_renderLabel
+      _href = model._href
+      frag = document.createDocumentFragment()
+      frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
+      model.actions().forEach (action, i) ->
+        li = document.createElement 'li'
+        li.id = "#{_prefix}_action_#{action.id}"
+        li.className = 'action'
+        a = document.createElement 'a'
+        a.href = "#{_href}/action/#{action.id}" if _href
+        a.textContent = "Action #{i + 1}: "
+        name = document.createElement 'strong'
+        name.textContent = action.get('name') or action.get('type') or action.type
+        a.appendChild name
+        if status = action.get 'status'
+          status = status.toLowerCase()
+          a.className = "status-#{status}"
+          a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+        li.appendChild a
+        frag.appendChild li
+        return
+      @$detail.removeClass('link-condition').addClass('node-actions').append frag
+      return
+    _renderLink: (model) ->
+      @$detail.empty()
+      return unless model
+      frag = document.createDocumentFragment()
+      frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
+      @$detail.removeClass('node-actions').addClass('link-condition').append frag
+      return
+    render: ->
+      @_renderList()
       @
 
   # Manager

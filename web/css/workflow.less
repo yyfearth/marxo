@@ -241,10 +241,10 @@
       }
     }
   }
-  li {
-    .label {
-      margin: 0 3px;
-    }
+  li .label {
+    margin: 0 3px;
+  }
+  .nodes-links-list {
     &.active > a {
       color: #fff;
       background-color: #08c;
@@ -278,7 +278,7 @@
   }
   .node-actions, .link-condition {
     position: relative;
-    padding: 29px 10px 10px 10px;
+    padding: 18px 10px 10px 10px;
     background-color: #fff;
     border: 1px solid #ddd;
     -webkit-border-radius: 4px;
@@ -300,8 +300,24 @@
       border-radius: 4px 0 4px 0;
     }
   }
-  .node-actions:after {
-    content: "Node - Actions";
+  .node-actions {
+    &:after {
+      content: "Node - Actions";
+    }
+    .action > a {
+      &.status-started {
+        background-color: #dff0d8;
+      }
+      &.status-error {
+        background-color: #f2dede;
+      }
+      &.status-paused {
+        background-color: #fcf8e3;
+      }
+      &.status-finished {
+        background-color: #dde;
+      }
+    }
   }
   .link-condition:after {
     content: "Link - Condition";
