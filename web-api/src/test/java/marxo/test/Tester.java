@@ -25,6 +25,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
+// todo: create a builder for this
 public class Tester implements Closeable {
 	HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 	CloseableHttpClient client = httpClientBuilder.build();
@@ -206,7 +207,7 @@ public class Tester implements Closeable {
 	}
 
 	/**
-	 * Use this to get content in class with generic type.
+	 * Use this to get content in class with generic type. Yeah, fuck the type erasure.
 	 */
 	public <T> T getContent(TypeReference<T> typeReference) throws IOException {
 		return objectMapper.readValue(content, typeReference);

@@ -3,10 +3,8 @@ package marxo.entity.node;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import marxo.entity.content.Content;
 import marxo.entity.user.TenantChildEntity;
-import marxo.entity.workflow.RunStatus;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 // todo: make this class abstract
 public class Action extends TenantChildEntity {
@@ -25,16 +23,27 @@ public class Action extends TenantChildEntity {
 		this.nextActionId = nextAction.id;
 	}
 
+	/*
+	Event
+	 */
+
+	public ObjectId eventId;
+
+	@Transient
 	protected Event event;
 
 	@JsonIgnore
 	public Event getEvent() {
-		return event;
+		if (eventId == null) {
+			return null;
+		}
+		return (event == null) ? (event = mongoTemplate.findById(eventId, Event.class)) : event;
 	}
 
 	@JsonIgnore
 	public void setEvent(Event event) {
 		this.event = event;
+		this.eventId = event.id;
 		event.setAction(this);
 	}
 
@@ -55,7 +64,6 @@ public class Action extends TenantChildEntity {
 	public void setContent(Content content) {
 		this.content = content;
 		this.contentId = content.id;
-
 		content.setAction(this);
 	}
 

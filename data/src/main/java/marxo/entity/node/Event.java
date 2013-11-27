@@ -33,15 +33,7 @@ public class Event extends BasicEntity {
 	Node
 	 */
 
-	protected ObjectId nodeId;
-
-	public ObjectId getNodeId() {
-		return nodeId;
-	}
-
-	public void setNodeId(ObjectId nodeId) {
-		this.nodeId = nodeId;
-	}
+	public ObjectId nodeId;
 
 	protected Node node;
 

@@ -34,6 +34,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
 	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime"));
 	protected Class<Entity> entityClass;
+	// review: not sure storing a query is a better idea.
 	protected Criteria criteria;
 	/**
 	 * The user who is using the controller.
