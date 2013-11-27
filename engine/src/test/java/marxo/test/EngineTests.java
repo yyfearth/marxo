@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class EngineTest extends BasicDataTests {
+public class EngineTests extends BasicDataTests {
 	EngineWorker engineWorker = new EngineWorker();
 	List<String> postIdsToRemove = new ArrayList<>();
 	FacebookData facebookData;

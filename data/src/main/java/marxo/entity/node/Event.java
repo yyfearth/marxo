@@ -50,7 +50,7 @@ public class Event extends BasicEntity {
 		this.nodeId = node.id;
 	}
 
-	// Write logic in each setter.
+	// todo: Write logic in each setter.
 
 	public DateTime getStartTime() {
 		return startTime;
