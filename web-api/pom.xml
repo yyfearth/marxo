@@ -76,18 +76,6 @@
 
         <!-- Testing -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.8.7</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.marxo</groupId>
             <artifactId>data</artifactId>
             <version>LATEST</version>

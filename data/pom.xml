@@ -79,9 +79,10 @@
 
         <!--Testing-->
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.8.7</version>
+            <groupId>com.marxo</groupId>
+            <artifactId>utility</artifactId>
+            <version>LATEST</version>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
     </dependencies>
