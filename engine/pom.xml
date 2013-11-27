@@ -20,19 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>com.marxo</groupId>
-            <artifactId>utility</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.marxo</groupId>
             <artifactId>data</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.marxo</groupId>
-            <artifactId>channel</artifactId>
             <version>LATEST</version>
             <scope>compile</scope>
         </dependency>

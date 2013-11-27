@@ -18,7 +18,6 @@
         <module>data</module>
         <module>web-api</module>
         <module>engine</module>
-        <module>channel</module>
         <module>utility</module>
     </modules>
 </project>
