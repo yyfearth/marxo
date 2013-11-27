@@ -375,7 +375,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     _createNodeRef: (node) ->
       throw new Error 'it must be a Node object' unless node instanceof Node
       node.set 'workflow_id', @id if @id and not node.has 'workflow_id' # for test data only
-      node.workflow = @ if @_name is 'workflow'
+      node.workflow = @
       node.inLinks = []
       node.outLinks = []
       return
@@ -390,7 +390,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     _createLinkRef: (link) ->
       throw new Error 'it must be a Link object' unless link instanceof Link
       link.set 'workflow_id', @id if @id and not link.has 'workflow_id' # for test data only
-      link.workflow = @ if @_name is 'workflow'
+      link.workflow = @
       prevNodeId = link.get 'prev_node_id'
       nextNodeId = link.get 'next_node_id'
       if prevNodeId? and nextNodeId?
