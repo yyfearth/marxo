@@ -35,6 +35,7 @@ public class Event extends BasicEntity {
 
 	public ObjectId nodeId;
 
+	@Transient
 	protected Node node;
 
 	public Node getNode() {
