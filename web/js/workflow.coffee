@@ -91,7 +91,7 @@ Action
       'id'
       'name:workflow'
       'desc'
-      'type'
+      #'type'
       'sharing'
       'created_at'
       'updated_at'

@@ -161,15 +161,15 @@ Workflows
   class Backgrid.LabelCell extends Backgrid.StringCell
     className: 'label-cell'
     formatter:
-      fromRaw: (raw) -> raw.toLowerCase()
+      fromRaw: (raw) -> if raw? then raw.toLowerCase() else ''
       toRaw: (formatted) -> formatted.toUpperCase()
     render: ->
       @$el.empty()
       rawValue = @model.get @column.get 'name'
-      if rawValue
-        val = rawValue.toLowerCase()
-        formattedValue = @formatter.fromRaw rawValue
-        val = formattedValue unless val
+      formattedValue = @formatter.fromRaw rawValue
+      console.log rawValue, formattedValue
+      if val = rawValue or formattedValue
+        val = val.toLowerCase()
         labelCls = 'label capitalized '
         if val isnt 'none' and @column.has 'cls'
           cls = @column.get 'cls'
@@ -419,7 +419,7 @@ Workflows
         name: 'tenant_id'
         label: 'Sharing'
         cell: Backgrid.LabelCell.extend formatter:
-          fromRaw: (raw) -> if raw then 'private' else 'public'
+          fromRaw: (raw) -> if raw? then 'private' else 'public'
         cls:
           private: 'label-info'
           public: 'label-inverse'
