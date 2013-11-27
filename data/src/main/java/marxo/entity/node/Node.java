@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.link.Link;
-import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.WorkflowChildEntity;
 import marxo.validation.NodeValidator;
 import marxo.validation.SelectIdFunction;
@@ -21,8 +20,6 @@ import java.util.Map;
 
 @Document
 public class Node extends WorkflowChildEntity {
-	public RunStatus status = RunStatus.IDLE;
-
 	public Node() {
 	}
 
@@ -69,6 +66,11 @@ public class Node extends WorkflowChildEntity {
 
 			action.setNode(this);
 			action.tenantId = tenantId;
+
+			if (action.event != null) {
+				action.event.setAction(action);
+				action.event.setNode(this);
+			}
 		}
 	}
 

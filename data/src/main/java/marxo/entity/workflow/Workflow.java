@@ -21,8 +21,6 @@ import java.util.Map;
 @JsonIgnoreProperties(value = {
 }, ignoreUnknown = true)
 public class Workflow extends TenantChildEntity {
-	public RunStatus status = RunStatus.IDLE;
-
 	public WorkflowType type = WorkflowType.NONE;
 	public boolean isProject = false;
 
