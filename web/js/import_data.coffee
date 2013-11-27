@@ -17,11 +17,11 @@ Workflow, Workflows
         offset:
           x: 26, y: 43
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post Requirements'
@@ -30,11 +30,11 @@ Workflow, Workflows
         offset:
           x: 334, y: 44
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Cancel Notification'
@@ -43,7 +43,7 @@ Workflow, Workflows
         offset:
           x: 334, y: 204
         actions: [
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
         ]
       ,
         name: 'Retrieve App Submissions'
@@ -52,11 +52,11 @@ Workflow, Workflows
         offset:
           x: 613, y: 44
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Retrieve Logo Design'
@@ -65,11 +65,11 @@ Workflow, Workflows
         offset:
           x: 629, y: 282
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Email to Evaluators'
@@ -78,11 +78,11 @@ Workflow, Workflows
         offset:
           x: 1018, y: 44
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
         ,
-          context_type: 'SEND_EMAIL'
+          type: 'SEND_EMAIL'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post and Vote'
@@ -91,11 +91,11 @@ Workflow, Workflows
         offset:
           x: 1043, y: 282
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
         ]
       ,
         name: 'Post Final Result and Reward'
@@ -104,13 +104,13 @@ Workflow, Workflows
         offset:
           x: 1420, y: 183
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
         ,
-          context_type: 'SEND_EMAIL'
+          type: 'SEND_EMAIL'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
         ]
       ]
       links: [
@@ -175,19 +175,19 @@ Workflow, Workflows
           x: 40
           y: 112
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
           name: 'Post Reqirement'
           key: 'post_req'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
           name: 'Post Requirement to Facebook'
           key: 'post_req_fb'
         ,
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait for Design Submit'
           key: 'design_event'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
           name: 'Generate Submit Report'
           key: 'desgin_report'
         ]
@@ -199,19 +199,19 @@ Workflow, Workflows
           x: 308
           y: 54
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
           name: 'Post Design Vote Form'
           key: 'post_design_vote_form'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
           name: 'Post Vote to Facebook'
           key: 'design_vote_fb'
         ,
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait for Design Vote'
           key: 'desgin_vote_event'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
           name: 'Generate Design Vote Report'
           key: 'design_vote_report'
         ]
@@ -223,19 +223,19 @@ Workflow, Workflows
           x: 588
           y: 54
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
           name: 'Post Evaluate Form'
           key: 'eval_form'
         ,
-          context_type: 'SEND_EMAIL'
+          type: 'SEND_EMAIL'
           name: 'Send Email to Evaluator'
           key: 'email_eval'
         ,
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait for Evaluate'
           key: 'eval_event'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
           name: 'Generate Evaluate Report'
           key: 'eval_report'
         ]
@@ -247,23 +247,23 @@ Workflow, Workflows
           x: 866
           y: 54
         actions: [
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait Owner Process Final Desgin'
           key: 'proc_design'
         ,
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
           name: 'Post Final Desgin and Implement Submit Form'
           key: 'post_design_submit_impl'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
           name: 'Post Design to Facebook'
           key: 'desgin_impl_fb'
         ,
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait for Implementation'
           key: 'impl_event'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
           name: 'Generate Implementation Report'
           key: 'impl_report'
         ]
@@ -275,19 +275,19 @@ Workflow, Workflows
           x: 1077
           y: 54
         actions: [
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
           name: 'Post Review Form'
           key: 'review_page'
         ,
-          context_type: 'SEND_EMAIL'
+          type: 'SEND_EMAIL'
           name: 'Send Review Request Email'
           key: 'review_email'
         ,
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait for Review'
           key: 'review_event'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
           name: 'Generate Review Report'
           key: 'review_report'
         ]
@@ -299,23 +299,23 @@ Workflow, Workflows
           x: 898
           y: 246
         actions: [
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait Owner Process Review and Implementation'
           key: 'proc_impl'
         ,
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
           name: 'Post Selected Implementation and Test Request'
           key: 'post_impl_test'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
           name: 'Post Implementation to Facebook'
           key: 'impl_fb'
         ,
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait for Testing'
           key: 'test_event'
         ,
-          context_type: 'GENERATE_REPORT'
+          type: 'GENERATE_REPORT'
           name: 'Generate Testing Report'
           key: 'test_report'
         ]
@@ -327,15 +327,15 @@ Workflow, Workflows
           x: 1083
           y: 246
         actions: [
-          context_type: 'MAKE_SCHEDULE'
+          type: 'MAKE_SCHEDULE'
           name: 'Wait Owner Final Result'
           key: 'result_event'
         ,
-          context_type: 'CREATE_PAGE'
+          type: 'CREATE_PAGE'
           name: 'Post Final Result and Demo'
           key: 'post_result'
         ,
-          context_type: 'POST_FACEBOOK'
+          type: 'POST_FACEBOOK'
           name: 'Post Final Result to Facebook'
           key: 'result_fb'
         ]

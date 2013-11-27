@@ -74,7 +74,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       @containerEl = options.container
       @model = options.model
       @model.view = @
-      type = @model.get?('context_type') or options.model.type or options.type
+      type = @model.get?('type') or options.model.type or options.type
       @type = type?.toLowerCase()
       unless @model and @type
         console.dir options
@@ -122,7 +122,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
     read: -> # read form the form to get a json data
       throw new Error 'cannot find the form, may not rendered yet' unless @form
       data = @model.toJSON()
-      data.context_type = @type.toUpperCase()
+      data.type = @type.toUpperCase()
       els = [].slice.call @form.elements
       els.forEach (el) ->
         $el = $ el
