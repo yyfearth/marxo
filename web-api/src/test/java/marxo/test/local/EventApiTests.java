@@ -40,7 +40,7 @@ public class EventApiTests extends BasicApiTests {
 		reusedEvent = new Event();
 		reusedEvent.setAction(reusedAction);
 		reusedEvent.setNode(reusedNode);
-		entitiesToInsert.add(reusedEvent);
+		entitiesToRemove.add(reusedEvent);
 
 		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
 			tester
@@ -123,6 +123,13 @@ public class EventApiTests extends BasicApiTests {
 			tester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
+
+			Event event = tester.getContent(Event.class);
+			Assert.assertNotNull(event);
+			Assert.assertEquals(event.id, reusedEvent.id);
+			Assert.assertEquals(event.actionId, reusedAction.id);
+			Assert.assertEquals(event.nodeId, reusedNode.id);
+			Assert.assertEquals(event.getName(), reusedEvent.getName());
 		}
 
 		Event event = mongoTemplate.findById(reusedEvent.id, Event.class);
