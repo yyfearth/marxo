@@ -7,12 +7,18 @@ import org.joda.time.Duration;
 import org.springframework.data.annotation.Transient;
 
 public class Event extends BasicEntity {
-	public ObjectId actionId;
-	@Transient
-	protected Action action;
 	DateTime startTime;
 	DateTime endTime;
 	Duration duration;
+
+	/*
+	Action
+	 */
+
+	public ObjectId actionId;
+
+	@Transient
+	protected Action action;
 
 	public Action getAction() {
 		return action;
@@ -21,6 +27,34 @@ public class Event extends BasicEntity {
 	public void setAction(Action action) {
 		this.action = action;
 		this.actionId = action.id;
+	}
+
+	/*
+	Node
+	 */
+
+	protected ObjectId nodeId;
+
+	public ObjectId getNodeId() {
+		return nodeId;
+	}
+
+	protected Node node;
+
+	public void setNodeId(ObjectId nodeId) {
+		this.nodeId = nodeId;
+	}
+
+	public Node getNode() {
+		if (nodeId == null) {
+			return node = null;
+		}
+		return (node == null) ? (node = mongoTemplate.findById(nodeId, Node.class)) : node;
+	}
+
+	public void setNode(Node node) {
+		this.node = node;
+		this.nodeId = node.id;
 	}
 
 	// Write logic in each setter.
