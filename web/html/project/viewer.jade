@@ -19,8 +19,14 @@
         button.btn.btn-warning(name='pause') Pause
         button.btn.btn-warning(name='stop') Stop
         button.btn.btn-danger(name='delete') Delete
+      button.btn.btn-reload Reload
       a.btn.btn-primary.btn-edit Edit
     h3
       span.project-name Project Viewer
       small.project-desc
   .wf-diagram.well
+  .row-fluid
+    ul.nodes-links-list.nav.nav-tabs.nav-stacked.span6
+    ul.node-link-detail.nav.nav-pills.nav-stacked.node-actions.span6
+      li.disabled
+        a (Please select a node or link from the list on the left)

@@ -4,7 +4,7 @@ define 'project', ['base', 'manager', 'models', 'diagram', 'actions'],
 ({
 find
 #findAll
-#View
+View
 FrameView
 InnerFrameView
 NavListView
@@ -19,6 +19,13 @@ Workflows
 Project
 Projects
 }, WorkflowDiagramView, ActionsMixin) ->
+
+  STATUS_CLS =
+    started: 'label-success'
+    paused: 'label-warning'
+    stopped: 'label-inverse'
+    finished: 'label-info'
+    error: 'label-important'
 
   class ProjectFrameView extends FrameView
     initialize: (options) ->
@@ -36,14 +43,14 @@ Projects
           @switchTo @manager
         else
           throw new Error 'open project with a name or id is needed' unless name
-          Projects.find workflowId: name, callback: ({workflow}) =>
+          Projects.find workflowId: name, fetch: true, callback: ({workflow}) =>
             throw new Error "project with id #{name} cannot found" unless workflow
             if sub?.edit
               @editor.edit workflow, sub
             else
               @switchTo @viewer
               @viewer.load workflow
-              @viewer.focus sub if sub
+              @viewer.select sub
             return
       @
 
@@ -214,7 +221,7 @@ Projects
             alert "Cannot create project from workflow #{wf.get 'name'}, because it is broken or not finished yet."
           , 500
           return
-        project.copy wf
+        project.copy wf, traverse: false # already traversed
         project.set 'status', 'NONE'
         unless @form.name.value
           @form.name.value = wf.get 'name'
@@ -234,17 +241,20 @@ Projects
       @$wfbtns.hide()
       @btnSave.disabled = false
       # update sidebar
+      project.sort()
+      nodes = project.nodes
+      links = project.links
       $sidebar = $ @sidebar
       $sidebar.find('li.node-item, li.link-item').remove()
-      nodes = document.createDocumentFragment()
+      frag_nodes = document.createDocumentFragment()
       _renderSidebarItem = @_renderSidebarItem.bind @
-      project.nodes.forEach (node, i) ->
-        nodes.appendChild _renderSidebarItem node, i
-      links = document.createDocumentFragment()
-      project.links.forEach (link, i) ->
-        links.appendChild _renderSidebarItem link, i
-      $sidebar.find('.node-header').after nodes
-      $sidebar.find('.link-header').after links
+      nodes.forEach (node, i) ->
+        frag_nodes.appendChild _renderSidebarItem node, i
+      frag_links = document.createDocumentFragment()
+      links.forEach (link, i) ->
+        frag_links.appendChild _renderSidebarItem link, i
+      $sidebar.find('.node-header').after frag_nodes
+      $sidebar.find('.link-header').after frag_links
       @wfDiagram.draw project
       return
     _renderSidebarItem: (model, i) ->
@@ -373,13 +383,18 @@ Projects
           else
             throw new Error 'unknown status action'
         return
+      'click .btn-reload': -> if @model?
+        @model.fetch reset: true
+        @router.navigate "project/#{@model.id}", trigger: true
+        return
     collection: Projects.projects
     initialize: (options) ->
-      @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
       @$title = $ find '.project-name', @el
       @$desc = $ find '.project-desc', @el
       @$status = $ find '.label-status > span', @el
       @btnEdit = find '.btn-edit', @el
+      @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
+      @statusView = new ProjectStatusView el: $(@wfDiagram).next()
       @list = new NavListView
         el: find('.project-list', @el)
         auto: false
@@ -393,20 +408,24 @@ Projects
         itemClassName: 'project-list-item'
       @listenTo @list, 'updated', => if @model?
         @list.$el.find("li:has(a[data-id='#{@model.id}'])").addClass 'active'
+      @listenTo @wfDiagram, 'select', (model) =>
+        @router.navigate "project/#{@model.id}/#{model._name}/#{model.id}", trigger: true
       super options
-    load: (model) ->
-      console.log 'load project', project
-      @stopListening @model if @model
-      model = @collection.fullCollection.get(model) or new Project {model} if typeof model is 'string'
-      @model = model
-      @listenTo model, 'loaded', @_render.bind @
-      @render() unless @rendered
-      if model.loaded()
-        @_render model
-      else
-        model.load()
+    load: (project, force) ->
+      if force or @model isnt project
+        console.log 'load project', project
+        @stopListening @model if @model
+        project = @collection.fullCollection.get(project) or new Project {project} if typeof project is 'string'
+        @model = project
+        @listenTo project, 'loaded', @_render.bind @
+        @render() unless @rendered
+        if project.loaded()
+          @_render project
+        else
+          project.fetch reset: true
       @
     _render: ->
+      console.log 'view project', @model
       project = @model
       @$title.text project.get 'name'
       @$desc.text "(#{project.nodes?.length or 0} Nodes, #{project.links?.length or 0} Links) #{project.get 'desc'}"
@@ -416,6 +435,7 @@ Projects
       $selected = $list.find("li:has(a[data-id='#{project.id}'])").addClass 'active'
       $list.find('li.active').not($selected).removeClass 'active'
       @wfDiagram.draw project
+      @statusView.load project
       return
     _updateStatus: ->
       status = (@model.get('status') or 'NONE').toUpperCase()
@@ -458,7 +478,7 @@ Projects
           @load model
         else
           @router.back()
-        # TODO: do some clean
+      # TODO: do some clean
       @
     setStatus: (status) ->
       unless status
@@ -471,15 +491,156 @@ Projects
           # TODO: save status
         else console.log 'status not changed', status
       @
-    focus: (opt = {}) ->
+    select: (opt = {}) ->
       {link, node, action} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
       throw new Error 'node and link cannot be open together' if link and node
-      console.log 'focus node/link', {link, node, action}
-      # TODO: select this model in view
+      #console.log 'focus node/link', opt
+      @statusView.select opt
+      highlight = @wfDiagram.highlight
+      if node
+        highlight node, 'node'
+      else if link
+        highlight link, 'link'
+      else
+        highlight null
+      @
+
+    # TODO: select this model in view
     render: ->
       @list.fetch()
       super
+
+  class ProjectStatusView extends View
+    _prefix: 'prj_status_lst'
+    initialize: (options) ->
+      @$list = $ find '.nodes-links-list', @el
+      @$detail = $ find '.node-link-detail', @el
+      super options
+    load: (wf, force) ->
+      if force or @model isnt wf
+        @model = wf
+        @render()
+      @
+    reset: -> @load null, true
+    select: ({link, node, action} = {}) ->
+      unless @model?
+        console.error 'model not given yet'
+        return @
+      _prefix = @_prefix
+      if node
+        id = "##{_prefix}_node_#{node}"
+        console.warn 'select node', node, @model, @model.nodes.get node
+        @_renderNode @model.nodes.get node
+        @$detail.find("##{_prefix}_action_#{action}").addClass('active')[0]?.scrollIntoViewIfNeeded() if action
+      else if link
+        id = "##{@_prefix}_link_#{link}"
+        @_renderLink @model.links.get link
+      else
+        @$detail.empty()
+        id = null
+      #console.log 'select id', id
+      @$list.find("li.active").removeClass 'active'
+      @$list.find(id).addClass('active')[0]?.scrollIntoViewIfNeeded() if id
+      # TODO: action
+      @
+    _renderLabel: (text, cls) ->
+      span = document.createElement 'span'
+      span.className = "label #{cls or ''}"
+      span.textContent = text
+      span
+    _renderListItem: (model) ->
+      wf = model.workflow
+      li = document.createElement 'li'
+      _model = model._name or ''
+      li.id = "#{@_prefix}_#{_model}_#{model.id}"
+      li.className = "capitalized #{_model}"
+      a = document.createElement 'a'
+      a.href = model._href = "#project/#{wf.id}/#{_model}/#{model.id}"
+      a.textContent = "#{_model} #{model.idx + 1}: "
+      i = document.createElement 'i'
+      i.className = 'icon-right-open pull-right'
+      a.appendChild i
+      name = document.createElement 'strong'
+      name.textContent = model.get('name') or model.name?()
+      _label = @_renderLabel
+      a.appendChild name
+      a.appendChild _label '(Start Node)', 'label-info start-node' if model is wf.startNode
+      if status = model.get 'status'
+        status = status.toLowerCase()
+        a.className = "status-#{status}"
+        a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+      li.appendChild a
+      li
+    _renderHeaderItem: (text) ->
+      li = document.createElement 'li'
+      li.className = 'list-header capitalized disabled text-center'
+      a = document.createElement 'a'
+      a.textContent = text
+      li.appendChild a
+      li
+    _renderList: (wf = @model) ->
+      @$list.empty()
+      return unless wf
+      wf.sort()
+      _header = @_renderHeaderItem
+      _item = @_renderListItem.bind @
+      frag = document.createDocumentFragment()
+      if wf.nodes.length
+        frag.appendChild _header 'Nodes'
+        wf.nodes.forEach (node) -> frag.appendChild _item node
+      if wf.links.length
+        frag.appendChild _header 'Links'
+        wf.links.forEach (link) -> frag.appendChild _item link
+      @$list.append frag
+      return
+    _renderNode: (model) ->
+      @$detail.empty()
+      return unless model
+      _prefix = @_prefix
+      _label = @_renderLabel
+      _href = model._href
+      frag = document.createDocumentFragment()
+      frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
+      model.actions().forEach (action, i) ->
+        li = document.createElement 'li'
+        li.id = "#{_prefix}_action_#{action.id}"
+        li.className = 'action'
+        a = document.createElement 'a'
+        a.href = "#{_href}/action/#{action.id}" if _href
+        a.textContent = "Action #{i + 1}: "
+        name = document.createElement 'strong'
+        name.textContent = action.get('name') or action.get('type') or action.type
+        a.appendChild name
+        if status = action.get 'status'
+          status = status.toLowerCase()
+          a.className = "status-#{status}"
+          a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+        li.appendChild a
+        frag.appendChild li
+        return
+      @$detail.removeClass('link-condition').addClass('node-actions').append frag
+      return
+    _renderLink: (model) ->
+      @$detail.empty()
+      return unless model
+      frag = document.createDocumentFragment()
+      frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.name()}"
+      li = document.createElement 'li'
+      a = document.createElement 'a'
+      a.textContent = 'Condition'
+      console.warn model.attributes
+      if status = model.get 'status'
+        status = status.toLowerCase()
+        a.className = "status-#{status}"
+        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+      li.appendChild a
+      frag.appendChild li
+      @$detail.removeClass('node-actions').addClass('link-condition').append frag
+      return
+    render: ->
+      @_renderList()
+      @
 
   # Manager
 
@@ -511,7 +672,7 @@ Projects
       @$el.empty()
       id = @model.get('template_id')
       unless id
-        console.warn 'workflow cell cannot find template_id for project',  @model
+        console.warn 'workflow cell cannot find template_id for project', @model
         @$el.text '(None)'
       else Workflows.find workflowId: id, callback: ({workflow}) =>
         if workflow
@@ -546,12 +707,7 @@ Projects
       name: 'status'
       label: 'Status'
       cell: 'label'
-      cls:
-        started: 'label-success'
-        paused: 'label-warning'
-        stopped: 'label-inverse'
-        finished: 'label-info'
-        error: 'label-important'
+      cls: STATUS_CLS
       editable: false
     ,
       'updated_at'
@@ -588,7 +744,7 @@ Projects
       # TODO: started projects cannot be deleted
       if confirm "Are you sure to remove these projects: #{names.join ', '}?\n\nThis action cannot be undone!"
         models.forEach (model) -> model.destroy()
-        # TODO: remove related data?
+      # TODO: remove related data?
       @
     render: ->
       @list.fetch()
