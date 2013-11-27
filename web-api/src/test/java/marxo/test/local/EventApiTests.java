@@ -8,38 +8,38 @@ import marxo.entity.node.PostFacebook;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
-import org.joda.time.DateTime;
-import org.joda.time.Seconds;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @ApiTestConfiguration("http://localhost:8080/marxo/api/events/")
 public class EventApiTests extends BasicApiTests {
-	Event reusedEvent;
-	Action reusedAction;
 	Node reusedNode;
+	Action reusedAction;
+	Event reusedEvent;
+
+	@BeforeClass
+	@Override
+	public void beforeClass() throws Exception {
+		super.beforeClass();
+
+		reusedNode = new Node();
+		reusedNode.setName(getClass().getSimpleName());
+		entitiesToInsert.add(reusedNode);
+
+		reusedAction = new PostFacebook();
+		reusedNode.addAction(reusedAction);
+		entitiesToInsert.add(reusedNode);
+
+		insertEntities();
+	}
 
 	@Test
-	public void testCreateEvent() throws Exception {
-		Criteria criteria = Criteria
-				.where("tenantId").is(user.tenantId)
-				.and("actions").not().size(0);
-
-		Node node = new Node();
-		node.setName("testCreateContent");
-		reusedNode = node;
-
-		PostFacebook postFacebook = new PostFacebook();
-		node.getActions().add(postFacebook);
-		reusedAction = postFacebook;
-
-		mongoTemplate.insert(node);
-		entitiesToRemove.add(node);
-
+	public void createEvent() throws Exception {
 		reusedEvent = new Event();
-		reusedEvent.setStartTime(DateTime.now().plus(Seconds.seconds(5)));
-		reusedEvent.setAction(postFacebook);
+		reusedEvent.setAction(reusedAction);
+		reusedEvent.setNode(reusedNode);
+		entitiesToInsert.add(reusedEvent);
 
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -51,15 +51,17 @@ public class EventApiTests extends BasicApiTests {
 
 			Event event = tester.getContent(Event.class);
 			Assert.assertEquals(event.id, reusedEvent.id);
-			Assert.assertEquals(event.actionId, reusedEvent.id);
+			Assert.assertEquals(event.actionId, reusedEvent.actionId);
+			Assert.assertEquals(event.getNodeId(), reusedEvent.getNodeId());
 		}
 
-		Node node1 = mongoTemplate.findById(reusedNode.id, Node.class);
-		Assert.assertEquals(node1.getActions().get(0).getEvent().id, reusedNode.getActions().get(0).getEvent().id);
+		Node node = Node.get(reusedNode.id);
+		Event event = node.getActionMap().get(reusedAction.id).getEvent();
+
 	}
 
-	@Test(dependsOnMethods = "testCreateEvent")
-	public void testReadEvent() throws Exception {
+	@Test(dependsOnMethods = "createEvent")
+	public void readEvent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpGet(reusedEvent.id.toString())
@@ -74,8 +76,8 @@ public class EventApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnMethods = "testReadEvent")
-	public void testUpdateEvent() throws Exception {
+	@Test(dependsOnMethods = "readEvent")
+	public void updateEvent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			reusedEvent.setName("Updated event");
 
@@ -95,8 +97,8 @@ public class EventApiTests extends BasicApiTests {
 		Assert.assertEquals(node1.getActions().get(0).getEvent().getName(), reusedEvent.getName());
 	}
 
-	@Test(dependsOnMethods = "testUpdateEvent")
-	public void testDeleteEvent() throws Exception {
+	@Test(dependsOnMethods = "updateEvent")
+	public void deleteEvent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpDelete(reusedEvent.id.toString())

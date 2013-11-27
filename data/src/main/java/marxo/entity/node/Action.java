@@ -35,7 +35,7 @@ public class Action extends TenantChildEntity {
 	@JsonIgnore
 	public void setEvent(Event event) {
 		this.event = event;
-		event.actionId = id;
+		event.setAction(this);
 	}
 
 	public ObjectId contentId;
