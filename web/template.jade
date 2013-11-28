@@ -1,0 +1,67 @@
+doctype 5
+html(lang='en-US')
+  head
+    meta(charset='utf-8')
+    title MARXO Website
+    link(href='css/site.css', rel='stylesheet', media='screen')
+    meta(name='viewport', content='width=device-width, initial-scale=1, user-scalable=no')
+  body
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container
+          a.brand(href='#') MARXO
+          ul.nav.pull-right#user_profile
+            li.dropdown
+              a.dropdown-toggle.pointer(data-toggle='dropdown')
+                img#avatar(src='data:image/gif;base64,R0lGODdhFAAUAPMKAPDw8Pz8/PPz89DQ0Onp6ff398DAwMrKysfHx+vr67a2tgAAAAAAAAAAAAAAAAAAACwAAAAAFAAUAAAERVDJSau9OM8BwNDVEIzBB0oCGQgnqrKtSJqxINBtrmsIURQERIugGhFAiSIpkTkoVQcM8WnEFKijAiaFhVkMXKXAsCuDIgA7')
+                span#username Sign In
+              ul.dropdown-menu#sign_in_menu
+                li.nav-header Sign In
+                li.sign-in
+                  form#sign_in
+                    input.input-block-level(type='email', name='email', placeholder='Email', maxlength='255', required)
+                    input.input-block-level(type='password', name='password', placeholder='Password', maxlength='2048', required)
+                    button.btn.btn-success(type='submit') Sign in
+                    | &nbsp;
+                    button.btn(type='button') Sign Up
+                li.divider
+                li.sign-in
+                  button.btn.btn-facebook.icon-facebook Sign in with Facebook
+              ul.dropdown-menu#user_menu.tpl
+                li
+                  a.icon-user.pointer#view_profile Profile
+                li
+                  a.icon-manager#go_console Console
+                li.divider
+                li
+                  a.icon-logout.pointer#sign_out Sign Out
+          ul.nav
+            li(data-frame='home')
+              a.icon-home(href='#home') Home
+    .content.container
+      form
+        h1 CMPE 275 Project Requirements
+        p This is CMPE 275 course project.
+        img(src='http://upload.wikimedia.org/wikipedia/commons/e/e2/Waterfall_model.svg')
+        section
+          legend.preview-title Group Registration
+          p.preview-desc Please enter your group name
+          .preview-body
+            input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
+        section
+          legend.preview-title Group Members
+          p.preview-desc
+            | Please enter your group members as:
+            br
+            | Last Name, First Name
+            email
+              | (SID)
+              br
+              | e.g. Young, Wilson
+          .preview-body
+            textarea.input-block-level(rows='3', placeholder='Simple Text (Multiple Line)')
+        .form-actions
+          input.btn.btn-primary(type='submit', disabled='', value='Submit')
+          input.btn(type='reset')
+
+    script(data-main='js/site', src='js/lib/require.js', async)
