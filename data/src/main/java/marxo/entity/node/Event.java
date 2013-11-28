@@ -50,14 +50,17 @@ public class Event extends BasicEntity {
 		this.nodeId = node.id;
 	}
 
-	// todo: Write logic in each setter.
-
 	public DateTime getStartTime() {
 		return startTime;
 	}
 
 	public void setStartTime(DateTime startTime) {
 		this.startTime = startTime;
+		if (endTime != null) {
+			duration = new Duration(startTime.getMillis(), endTime.getMillis());
+		} else if (duration != null) {
+			endTime = startTime.plus(duration);
+		}
 	}
 
 	public DateTime getEndTime() {
@@ -66,6 +69,9 @@ public class Event extends BasicEntity {
 
 	public void setEndTime(DateTime endTime) {
 		this.endTime = endTime;
+		if (startTime != null) {
+			duration = new Duration(startTime.getMillis(), endTime.getMillis());
+		}
 	}
 
 	public Duration getDuration() {
@@ -74,10 +80,8 @@ public class Event extends BasicEntity {
 
 	public void setDuration(Duration duration) {
 		this.duration = duration;
-	}
-
-	@Override
-	public void save() {
-		throw new UnsupportedOperationException(String.format("%s should not be saved into database", getClass().getSimpleName()));
+		if (startTime != null) {
+			endTime = startTime.plus(duration);
+		}
 	}
 }
