@@ -253,4 +253,43 @@ public class DataModuleTest extends BasicDataTests {
 			Assert.assertEquals(link.tenantId, tenant.id);
 		}
 	}
+
+	@Test
+	public void getAction() throws Exception {
+		PostFacebook postFacebook = new PostFacebook();
+
+		Node node = new Node();
+		node.addAction(postFacebook);
+
+		entitiesToInsert.add(node);
+		insertEntities();
+
+		Action action = Action.get(postFacebook.id);
+		Assert.assertTrue(action instanceof PostFacebook);
+		Assert.assertEquals(action.id, postFacebook.id);
+	}
+
+	@Test
+	public void getWrongAction() throws Exception {
+		Action action = Action.get(new ObjectId());
+		Assert.assertNull(action);
+	}
+
+	@Test
+	public void saveAction() throws Exception {
+		PostFacebook postFacebook = new PostFacebook();
+
+		Node node = new Node();
+		node.addAction(postFacebook);
+
+		entitiesToInsert.add(node);
+		insertEntities();
+
+		postFacebook.setName("Hello world");
+		postFacebook.save();
+
+		node = Node.get(node.id);
+		Action action = node.getActions().get(0);
+		Assert.assertEquals(action.getName(), postFacebook.getName());
+	}
 }

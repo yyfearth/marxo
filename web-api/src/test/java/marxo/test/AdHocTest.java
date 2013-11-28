@@ -10,6 +10,7 @@ import marxo.tool.Loggable;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.Seconds;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -57,11 +58,11 @@ public class AdHocTest implements Loggable {
 	}
 
 	@Test
-	public void jodaTime() throws Exception {
-		DateTime dateTime1 = new DateTime("2013-11-09");
-		DateTime dateTime2 = new DateTime("2013-11-10");
-		Duration duration = new Duration(dateTime1.getMillis(), dateTime2.getMillis());
-		System.out.println(duration);
+	public void getDurationFromTwoDateTime() throws Exception {
+		DateTime time1 = DateTime.now().plus(Seconds.seconds(5).toStandardDuration());
+		DateTime time2 = DateTime.now().plus(Seconds.seconds(15).toStandardDuration());
+		Duration duration = new Duration(time1.getMillis(), time2.getMillis());
+		Assert.assertEquals(duration.toStandardSeconds().getSeconds(), 10);
 	}
 
 	@Test
