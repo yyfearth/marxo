@@ -53,12 +53,23 @@ require ['lib/common'], ->
           else
             form[if email then 'password' else 'email'].select()
         false
+      'click a.dropdown-toggle': ->
+        if form = @$form[0]
+          setTimeout ->
+            form.email.focus() if $(form).is ':visible'
+          , 100
+        return
       'click #sign_out': (e) ->
         e.preventDefault()
         @signout()
         false
+      'click .btn-sign-up': ->
+        @dialog.popup()
+      'click #view_profile': ->
+        @dialog.popup User.current
     initialize: (options) ->
       @$form = @$el.find('form')
+      @dialog = new UserDialogView
       @$avatar = @$el.find('img#avatar')
       img = @$avatar.attr 'src'
       @$avatar.on 'error', -> @src = img
@@ -122,6 +133,126 @@ require ['lib/common'], ->
         $go_console.parent('li').remove()
       return
 
+  class UserDialogView extends Backbone.View
+    el: '#user_editor'
+    events:
+      'click .btn-save': ->
+        @$form.submit()
+      'submit form': (e) ->
+        e.preventDefault()
+        @save() if @validate()
+        false
+    initialize: (options) ->
+      super options
+      $el = @$el
+      $form = @$form = $el.find 'form'
+      @form = $form[0]
+      @$title = $el.find '.modal-title'
+      @$sex = $form.find '[name=sex]'
+      @$editOnly = $el.find '.edit-only'
+      @$passwords = $form.find '[type=password]'
+      @$avatar = $form.find '#user_avatar img'
+      @$openAccounts = $el.find('#link_fb').parents('.control-group').find('.btn')
+      @$openAccounts.each -> @_name = $(@).data 'name'
+      @
+    _setSex: (sex = '') ->
+      $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
+      if $sex.length and not $sex.hasClass 'active'
+        @$sex.not($sex).removeClass 'active'
+        $sex.addClass 'active'
+      $sex
+    _getSex: ->
+      @$sex.filter('.active').attr('value').toUpperCase()
+    fill: (attrs) ->
+      form = @form
+      for name, value of attrs
+        $input = $ form[name]
+        $input.val value if $input.is 'input'
+      @_setSex attrs.sex
+      @
+    read: ->
+      data =
+        sex: @_getSex(), email: @form.email.value.trim()
+      for kv in @$form.serializeArray()
+        data[kv.name] = kv.value.trim()
+      password = @$passwords.val()
+      data.password = password if password
+      data
+    popup: (data) ->
+      emailEl = @form.email
+      if data # edit mode
+        data = data.toJSON() if data instanceof User
+        @$editOnly.show()
+        if data.first_name or data.last_name
+          @$title.text "User: #{data.first_name} #{data.last_name}"
+        else
+          @$title.text "User: #{data.email}"
+        @fill data
+        @$passwords.removeAttr 'required'
+        disabled = true
+        btnTxt = 'Link'
+        @$avatar.attr 'src', "https://secure.gravatar.com/avatar/#{data.email_md5}?s=200&d=mm"
+        setTimeout ->
+          emailEl.focus()
+        , 200
+      else
+        @$title.text 'Sign Up'
+        @$editOnly.hide()
+        @$passwords.attr 'required', 'required'
+        disabled = false
+        btnTxt = 'Sign up with'
+      emailEl.disabled = disabled
+      @$openAccounts.each -> $(@).text "#{btnTxt} #{@_name} Account"
+      @$el.modal 'show'
+      @
+    validate: ->
+      $invalid = @$form.find(':invalid')
+      if $invalid.length
+        $invalid[0].select()
+        return false
+      psw = @$passwords[0].value
+      psw2 = @$passwords[1].value
+      if (psw or psw2) and psw isnt psw2
+        @$passwords[1].select()
+        alert 'Passwords are not matched!'
+        return false
+      true
+    _save: (data) ->
+      user = User.current
+      if user instanceof User
+        # update
+        throw new Error 'Emails not matched! Somebody hacked that?' if data.email isnt user.get('email')
+        console.log 'save user', data
+        user.save data,
+          success: (user) =>
+            @trigger 'updated', user
+            @$el.modal 'hide'
+            return
+          error: (ignored, xhr) ->
+            console.error 'sign up failed', xhr.responseJSON
+            alert  'Save user profile failed! '
+            return
+      else # sign up
+        console.log 'sign up user', data
+        new User(email: data.email).save data,
+          success: (user) =>
+            @trigger 'signedup', user
+            @$el.modal 'hide'
+            return
+          error: (ignored, xhr) ->
+            console.error 'sign up failed', xhr.responseJSON
+            alert 'Sign up failed! '
+            return
+      return
+    save: ->
+      data = @data = @read()
+      unless data.password
+        @_save data
+      else require ['crypto'], (crypto) =>
+        #console.log 'crypto', data.email, data.password
+        data.password = crypto.hashPassword data.email, data.password
+        @_save data
+      @
 
   new UserProfileView
 
