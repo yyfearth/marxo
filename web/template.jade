@@ -10,32 +10,31 @@ html(lang='en-US')
       .navbar-inner
         .container
           a.brand(href='#') MARXO
-          ul.nav.pull-right
+          ul.nav.pull-right#user_profile
             li.dropdown
               a.dropdown-toggle.pointer(data-toggle='dropdown')
                 img#avatar(src='data:image/gif;base64,R0lGODdhFAAUAPMKAPDw8Pz8/PPz89DQ0Onp6ff398DAwMrKysfHx+vr67a2tgAAAAAAAAAAAAAAAAAAACwAAAAAFAAUAAAERVDJSau9OM8BwNDVEIzBB0oCGQgnqrKtSJqxINBtrmsIURQERIugGhFAiSIpkTkoVQcM8WnEFKijAiaFhVkMXKXAsCuDIgA7')
                 span#username Sign In
-              ul.dropdown-menu
+              ul.dropdown-menu#sign_in_menu
                 li.nav-header Sign In
                 li.sign-in
                   form#sign_in
                     input.input-block-level(type='email', name='email', placeholder='Email', maxlength='255', required)
                     input.input-block-level(type='password', name='password', placeholder='Password', maxlength='2048', required)
-                    label.checkbox
-                      input(type='checkbox', name='remember')
-                      | Remember me
                     button.btn.btn-success(type='submit') Sign in
                     | &nbsp;
                     button.btn(type='button') Sign Up
                 li.divider
                 li.sign-in
                   button.btn.btn-facebook.icon-facebook Sign in with Facebook
-              ul.dropdown-menu.tpl
-                li(data-frame='profile')
-                  a.icon-user(href='#profile') Profile
+              ul.dropdown-menu#user_menu.tpl
+                li
+                  a.icon-user.pointer#view_profile Profile
+                li
+                  a.icon-manager#go_console Console
                 li.divider
                 li
-                  a.icon-logout(href='#signout') Sign Out
+                  a.icon-logout.pointer#sign_out Sign Out
           ul.nav
             li(data-frame='home')
               a.icon-home(href='#home') Home
