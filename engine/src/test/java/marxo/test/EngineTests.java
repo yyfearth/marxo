@@ -10,6 +10,9 @@ import marxo.engine.EngineWorker;
 import marxo.entity.FacebookData;
 import marxo.entity.Task;
 import marxo.entity.content.FacebookContent;
+import marxo.entity.content.FacebookMonitorContent;
+import marxo.entity.node.Event;
+import marxo.entity.node.MonitorFacebook;
 import marxo.entity.node.Node;
 import marxo.entity.node.PostFacebook;
 import marxo.entity.user.Tenant;
@@ -17,6 +20,8 @@ import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.joda.time.Period;
+import org.joda.time.Seconds;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
 import org.testng.SkipException;
@@ -62,12 +67,16 @@ public class EngineTests extends BasicDataTests {
 	public void afterClass() throws Exception {
 		super.afterClass();
 
-		BatchRequest.BatchRequestBuilder batchRequestBuilder = new BatchRequest.BatchRequestBuilder("me/feed");
-		List<BatchRequest> deleteRequests = new ArrayList<>(postIdsToRemove.size());
-		for (String postId : postIdsToRemove) {
-			deleteRequests.add(new BatchRequest.BatchRequestBuilder(postId).method("DELETE").build());
+		if (!postIdsToRemove.isEmpty()) {
+			List<BatchRequest> deleteRequests = new ArrayList<>(postIdsToRemove.size());
+			for (String postId : postIdsToRemove) {
+				deleteRequests.add(new BatchRequest.BatchRequestBuilder(postId).method("DELETE").build());
+			}
+			List<BatchResponse> batchResponses = facebookClient.executeBatch(deleteRequests.toArray(new BatchRequest[deleteRequests.size()]));
+			for (BatchResponse batchResponse : batchResponses) {
+				logger.info(String.format("Responses: %s", batchResponse.getBody()));
+			}
 		}
-		List<BatchResponse> batchResponses = facebookClient.executeBatch(deleteRequests.toArray(new BatchRequest[deleteRequests.size()]));
 	}
 
 	@Test
@@ -128,10 +137,10 @@ public class EngineTests extends BasicDataTests {
 		postFacebook.setName("Test Action for Engine");
 		node.addAction(postFacebook);
 
-		FacebookContent content = new FacebookContent();
-		content.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", content.id);
-		content.actionId = postFacebook.id;
-		postFacebook.setContent(content);
+		FacebookContent facebookContent = new FacebookContent();
+		facebookContent.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent.id);
+		facebookContent.actionId = postFacebook.id;
+		postFacebook.setContent(facebookContent);
 
 		workflow.setStartNode(node);
 
@@ -140,10 +149,9 @@ public class EngineTests extends BasicDataTests {
 		workflow.wire();
 
 		entitiesToInsert.addAll(Lists.newArrayList(
-				tenant,
 				workflow,
 				node,
-				content,
+				facebookContent,
 				task
 		));
 		insertEntities();
@@ -157,13 +165,83 @@ public class EngineTests extends BasicDataTests {
 		node = Node.get(node.id);
 		Assert.assertEquals(node.status, RunStatus.FINISHED);
 
-		FacebookContent facebookContent = (FacebookContent) node.getActions().get(0).getContent();
-		Assert.assertNotNull(facebookContent.postId);
-		Assert.assertEquals(facebookContent.message, content.message);
+		facebookContent = (FacebookContent) node.getActions().get(0).getContent();
+		Assert.assertNotNull(facebookContent.publishMessageResponse);
+		postIdsToRemove.add(facebookContent.publishMessageResponse.getId());
+		Assert.assertEquals(facebookContent.message, facebookContent.message);
+		Assert.assertNull(facebookContent.errorMessage);
+
+		Post post = facebookClient.fetchObject(facebookContent.postId, Post.class);
+		Assert.assertNotNull(post);
+	}
+
+	@Test
+	public void trackMessage() throws Exception {
+		Workflow workflow = new Workflow();
+		workflow.setTenant(tenant);
+		workflow.isProject = true;
+		workflow.status = RunStatus.STARTED;
+
+		Node node = new Node();
+		workflow.addNode(node);
+
+		PostFacebook postFacebook = new PostFacebook();
+		node.addAction(postFacebook);
+
+		FacebookContent facebookContent = new FacebookContent();
+		facebookContent.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent.id);
+		facebookContent.actionId = postFacebook.id;
+		postFacebook.setContent(facebookContent);
+
+		// Monitor action
+		MonitorFacebook monitorFacebook = new MonitorFacebook();
+		monitorFacebook.period = Period.seconds(5);
+		monitorFacebook.monitoredActionKey = String.format("%s.%s.%s", workflow.key, node.key, postFacebook.key);
+
+		FacebookMonitorContent facebookMonitorContent = new FacebookMonitorContent();
+		monitorFacebook.setContent(facebookMonitorContent);
+
+		Event event = new Event();
+		event.setDuration(Seconds.seconds(10).toStandardDuration());
+		monitorFacebook.setEvent(event);
+
+		node.addAction(monitorFacebook);
+
+		Task task = new Task(workflow.id);
+
+		// Save all entities
+		workflow.wire();
+		entitiesToInsert.addAll(Lists.newArrayList(
+				workflow,
+				node,
+				facebookContent,
+				facebookMonitorContent,
+				event,
+				task
+		));
+		insertEntities();
+
+		engineWorker.run();
+
+		// Verification
+		node = Node.get(node.id);
+		Assert.assertEquals(node.status, RunStatus.FINISHED);
+
+		facebookContent = (FacebookContent) node.getActions().get(0).getContent();
+		Assert.assertNotNull(facebookContent.publishMessageResponse);
+		postIdsToRemove.add(facebookContent.publishMessageResponse.getId());
+		Assert.assertEquals(facebookContent.message, facebookContent.message);
+		Assert.assertNull(facebookContent.errorMessage);
 
 		Post post = facebookClient.fetchObject(facebookContent.postId, Post.class);
 		Assert.assertNotNull(post);
 
-		postIdsToRemove.add(facebookContent.postId);
+		Thread.sleep(event.getDuration().getMillis());  // Wait for the worker to finish the monitoring.
+
+		monitorFacebook = (MonitorFacebook) node.getActions().get(1);
+		Assert.assertEquals(monitorFacebook.status, RunStatus.FINISHED);
+
+		facebookMonitorContent = monitorFacebook.getContent();
+		Assert.assertEquals(facebookMonitorContent.records.size(), 2);
 	}
 }

@@ -12,7 +12,7 @@ enum TaskType {
 public class Task extends BasicEntity {
 	public TaskType type = TaskType.DEFAULT;
 	public ObjectId workflowId;
-	public DateTime time;
+	public DateTime time = DateTime.now();
 
 	public Task(ObjectId workflowId) {
 		this.workflowId = workflowId;
@@ -26,7 +26,10 @@ public class Task extends BasicEntity {
 		return mongoTemplate.findById(id, Task.class);
 	}
 
-	public static Task findAndRemove() {
+	/**
+	 * Find and remove the next task from database.
+	 */
+	public static Task next() {
 		return mongoTemplate.findAndRemove(new Query().with(modifiedTimeSort), Task.class);
 	}
 

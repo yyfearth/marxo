@@ -25,4 +25,8 @@ public enum RunStatus {
 	 * Shit happens
 	 */
 	ERROR,
+	/**
+	 * Waited in the task queue.
+	 */
+	WAITING,
 }

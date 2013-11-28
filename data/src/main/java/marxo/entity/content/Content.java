@@ -20,4 +20,12 @@ public class Content extends BasicEntity {
 		this.action = action;
 		this.actionId = action.id;
 	}
+
+	/*
+	DAO
+	 */
+
+	public static Content get(ObjectId id) {
+		return mongoTemplate.findById(id, Content.class);
+	}
 }

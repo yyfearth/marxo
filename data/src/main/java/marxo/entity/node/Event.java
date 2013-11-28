@@ -7,9 +7,9 @@ import org.joda.time.Duration;
 import org.springframework.data.annotation.Transient;
 
 public class Event extends BasicEntity {
-	DateTime startTime;
-	DateTime endTime;
-	Duration duration;
+	protected DateTime startTime;
+	protected DateTime endTime;
+	protected Duration duration;
 
 	/*
 	Action
@@ -83,5 +83,9 @@ public class Event extends BasicEntity {
 		if (startTime != null) {
 			endTime = startTime.plus(duration);
 		}
+	}
+
+	public static Event get(ObjectId id) {
+		return mongoTemplate.findById(id, Event.class);
 	}
 }

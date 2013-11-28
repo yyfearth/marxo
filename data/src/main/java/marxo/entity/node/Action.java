@@ -5,6 +5,8 @@ import com.mongodb.WriteResult;
 import marxo.entity.content.Content;
 import marxo.entity.user.TenantChildEntity;
 import marxo.exception.DatabaseException;
+import marxo.exception.ValidationException;
+import marxo.validation.Errors;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -88,27 +90,39 @@ public class Action extends TenantChildEntity {
 	public void setNode(Node node) {
 		this.node = node;
 		this.nodeId = node.id;
+		this.tenantId = node.tenantId;
 	}
 
-	/**
-	 * @return true if the action is successfully processed.
-	 */
+	protected Errors errors = new Errors();
+
+	public Errors getErrors() {
+		return errors;
+	}
+
 	public boolean act() {
-		if (getTenant() == null) {
-			logger.error(String.format("%s [%s] has no tenant", getClass(), id));
-			return false;
-		}
-
-		if (getContent() == null) {
-			logger.error(String.format("%s [%s] has no content", getClass(), id));
-			return false;
-		}
-
 		return true;
 	}
 
 	@Override
+	public boolean validate(Errors errors) {
+		if (nodeId == null) {
+			errors.add(String.format("%s [%s] has no node", this, id));
+		}
+
+		if (contentId == null) {
+			errors.add(String.format("%s [%s] has no content", this, id));
+		}
+
+		return super.validate(errors);
+	}
+
+	@Override
 	public void save() {
+		Errors errors = new Errors();
+		if (!validate(errors)) {
+			throw new ValidationException(errors.getMessages());
+		}
+
 		Criteria criteria = Criteria.where("_id").is(nodeId).and("actions").elemMatch(Criteria.where("_id").is(id));
 		Update update = Update.update("actions.$", this);
 		WriteResult writeResult = mongoTemplate.updateFirst(Query.query(criteria), update, Node.class);

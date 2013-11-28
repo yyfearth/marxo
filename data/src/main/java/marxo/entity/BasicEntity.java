@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import marxo.tool.Loggable;
+import marxo.validation.Errors;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
@@ -17,7 +18,6 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Field;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Set;
 
@@ -55,7 +55,7 @@ public abstract class BasicEntity implements Loggable {
 	protected String objectType;
 
 	@JsonIgnore
-	protected static final Sort modifiedTimeSort = new Sort(Sort.Direction.ASC, "updateTime");
+	protected static final Sort modifiedTimeSort = new Sort(Sort.Direction.ASC, "time");
 
 	public String getName() {
 		return name;
@@ -119,8 +119,8 @@ public abstract class BasicEntity implements Loggable {
 
 	}
 
-	public boolean validate() {
-		throw new NotImplementedException();
+	public boolean validate(Errors errors) {
+		return errors.isEmpty();
 	}
 
 	/*
@@ -134,5 +134,10 @@ public abstract class BasicEntity implements Loggable {
 
 	public void remove() {
 		mongoTemplate.remove(this);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s:%s(%s)", getClass().getSimpleName(), name, id);
 	}
 }

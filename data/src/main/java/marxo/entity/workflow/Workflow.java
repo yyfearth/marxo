@@ -25,27 +25,10 @@ public class Workflow extends TenantChildEntity {
 	public boolean isProject = false;
 
 	/*
-	Nodes/links
+	links
 	 */
 
-	public List<ObjectId> nodeIds = new ArrayList<>();
 	public List<ObjectId> linkIds = new ArrayList<>();
-
-	@Transient
-	protected List<Node> nodes;
-
-	public List<Node> getNodes() {
-		return nodes;
-	}
-
-	public void setNodes(List<Node> nodes) {
-		this.nodes = nodes;
-		this.nodeIds = Lists.transform(nodes, SelectIdFunction.getInstance());
-		for (Node node : nodes) {
-			node.tenantId = tenantId;
-			node.workflowId = id;
-		}
-	}
 
 	@Transient
 	protected List<Link> links;
@@ -63,20 +46,45 @@ public class Workflow extends TenantChildEntity {
 		}
 	}
 
-	public void addNode(Node node) {
-		if (nodes != null) {
-			nodes.add(node);
-		}
-		nodeIds.add(node.id);
-		node.setWorkflow(this);
-	}
-
 	public void addLink(Link link) {
 		if (links != null) {
 			links.add(link);
 		}
 		linkIds.add(link.id);
 		link.setWorkflow(this);
+	}
+
+	/*
+	Nodes
+	 */
+
+	public List<ObjectId> nodeIds = new ArrayList<>();
+
+	@Transient
+	protected List<Node> nodes;
+
+	public List<Node> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(List<Node> nodes) {
+		this.nodes = nodes;
+		this.nodeIds = Lists.transform(nodes, SelectIdFunction.getInstance());
+		for (Node node : nodes) {
+			node.tenantId = tenantId;
+			node.workflowId = id;
+		}
+	}
+
+	public void addNode(Node node) {
+		if (nodes != null) {
+			nodes.add(node);
+		}
+		nodeIds.add(node.id);
+		if (nodeIds.size() == 1) {
+			startNodeId = node.id;
+		}
+		node.setWorkflow(this);
 	}
 
 	/*
@@ -90,6 +98,13 @@ public class Workflow extends TenantChildEntity {
 
 	@JsonIgnore
 	public Node getStartNode() {
+		if (startNodeId == null) {
+			if (nodeIds.isEmpty()) {
+				return null;
+			}
+			wire();
+
+		}
 		if (startNode == null) {
 			return startNode = mongoTemplate.findById(startNodeId, Node.class);
 		}
@@ -127,21 +142,28 @@ public class Workflow extends TenantChildEntity {
 
 	public List<ObjectId> currentNodeIds = new ArrayList<>();
 
+	@Transient
 	protected List<Node> currentNodes;
 
 	@JsonIgnore
 	public List<Node> getCurrentNodes() {
 		if (currentNodes == null) {
+			if (currentNodeIds.isEmpty()) {
+				return currentNodes = new ArrayList<>();
+			}
+
 			Criteria criteria = Criteria.where("id").in(currentNodeIds);
-			return currentNodes = mongoTemplate.find(Query.query(criteria), Node.class);
+			currentNodes = mongoTemplate.find(Query.query(criteria), Node.class);
+			wire();
 		}
 		return currentNodes;
 	}
 
 	public void addCurrentNode(Node node) {
 		if (currentNodes == null) {
-			currentNodes.add(node);
+			getCurrentNodes();
 		}
+		currentNodes.add(node);
 		currentNodeIds.add(node.id);
 		node.setWorkflow(this);
 	}

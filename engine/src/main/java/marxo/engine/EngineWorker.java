@@ -9,11 +9,12 @@ import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.tool.StringTool;
-import org.bson.types.ObjectId;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.UUID;
 
 public class EngineWorker implements Runnable, Loggable {
@@ -33,7 +34,7 @@ public class EngineWorker implements Runnable, Loggable {
 	@Override
 	public void run() {
 		try {
-			Task task = Task.findAndRemove();
+			Task task = Task.next();
 
 			if (task == null) {
 				return;
@@ -42,80 +43,79 @@ public class EngineWorker implements Runnable, Loggable {
 			Workflow workflow = Workflow.get(task.workflowId);
 
 			if (workflow == null) {
-				logger.debug(String.format("Cannot find workflow [%s]", task.workflowId));
+				logger.warn(String.format("Cannot find workflow [%s]", task.workflowId));
 				return;
 			}
 
 			if (workflow.startNodeId == null) {
-				logger.debug(String.format("Workflow [%s] has no start node", workflow.id));
+				logger.debug(String.format("%s has no start node", this));
 				workflow.status = RunStatus.ERROR;
 				workflow.save();
 				return;
 			}
 
-			if (workflow.currentNodeIds.isEmpty()) {
-				if (!workflow.nodeIds.isEmpty()) {
-					workflow.currentNodeIds.add(workflow.startNodeId);
+			if (workflow.getCurrentNodes().isEmpty()) {
+				if (workflow.nodeIds.isEmpty()) {
+					logger.warn(String.format("%s has no node", workflow));
+					return;
 				}
+				workflow.addCurrentNode(workflow.getStartNode());
 			}
 
-			for (int nodeIndex = 0; nodeIndex < workflow.currentNodeIds.size(); nodeIndex++) {
-				ObjectId nodeId = workflow.currentNodeIds.get(nodeIndex);
-				Node node = Node.get(nodeId);
+			Queue<Node> nodeQueue = new LinkedList<>(workflow.getCurrentNodes());
+			boolean isDone = true;
 
-				Node currentNode = node;
+			while (!nodeQueue.isEmpty()) {
+				Node node = nodeQueue.poll();
 
-				while (currentNode != null) {
-					Action currentAction = currentNode.getCurrentAction();
-					boolean isScheduled = false;
+				switch (node.status) {
+					case STARTED:
+					case IDLE:
+						break;
+					case FINISHED:
+						continue;
+					case PAUSED:
+					case STOPPED:
+					case ERROR:
+					case WAITING:
+						String message = String.format("%s shouldn't have %s status", node, node.status);
+						logger.error(message);
+						throw new IllegalStateException(message);
+				}
 
-					while (currentAction != null) {
-						if (currentAction.status.equals(RunStatus.FINISHED)) {
-							currentAction = currentAction.getNextAction();
-							continue;
-						}
-
-						Event event = currentAction.getEvent();
-						if (event == null || event.getStartTime().isBeforeNow()) {
-							boolean isOkay = currentAction.act();
-							if (isOkay) {
-								currentAction.status = RunStatus.FINISHED;
-								currentAction = currentAction.getNextAction();
-								node.save();
-							} else {
-								currentAction.status = RunStatus.ERROR;
-								node.save();
-								break;
-							}
-						} else {
-							// put a task into queue
-							Task newTask = new Task(workflow.id);
-							newTask.time = event.getStartTime();
-							task.save();
-							isScheduled = true;
+				Action action = node.getCurrentAction();
+				for (; action != null; action = action.getNextAction()) {
+					Event event = action.getEvent();
+					if (event == null || event.getStartTime().isBeforeNow()) {
+						boolean isOkay = action.act();
+						if (!isOkay) {
+							logger.error(String.format("%s encounters errors: %s", this, action.getErrors()));
+							node.save();
 							break;
 						}
-					}
-
-					if (isScheduled) {
+					} else {
+						Task newTask = new Task(workflow.id);
+						newTask.time = event.getStartTime();
+						task.save();
 						break;
 					}
+				}
 
-					currentNode.status = RunStatus.FINISHED;
-					currentNode.save();
+				if (action == null) {// if all actions have been run
+					node.status = RunStatus.FINISHED;
+					node.save();
+				}
 
-					for (Link link : currentNode.getToLinks()) {
-						// todo: add more currentNodes inside workflows.
-					}
-
-					currentNode = null;
+				// Check links
+				for (Link link : node.getToLinks()) {
+					// todo: add more currentNodes inside workflows.
 				}
 			}
 
 			workflow.status = RunStatus.FINISHED;
 			workflow.save();
 		} catch (Exception e) {
-			logger.error(String.format("Engine [%s] has error: %s", name, e.getMessage()));
+			logger.error(String.format("%s has error: %s", this, e.getMessage()));
 			logger.error(StringTool.exceptionToString(e));
 		}
 	}
