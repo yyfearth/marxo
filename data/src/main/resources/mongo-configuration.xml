@@ -6,6 +6,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <config:annotation-config/>
+    <config:component-scan base-package="marxo.serialization"/>
 
     <!-- The following is the backup MongoDB server -->
     <!--<mongo:db-factory id="mongoDbFactory" host="dharma.mongohq.com" port="10047" dbname="Marxo" username="web" password="web"/>-->
@@ -14,5 +15,15 @@
 
     <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
         <constructor-arg index="0" ref="mongoDbFactory"/>
+        <constructor-arg name="mongoConverter" ref="mappingConverter"/>
     </bean>
+
+    <mongo:mapping-converter>
+        <mongo:custom-converters>
+            <mongo:converter ref="durationReadConverter"/>
+            <mongo:converter ref="durationWriteConverter"/>
+            <mongo:converter ref="periodReadConverter"/>
+            <mongo:converter ref="periodWriteConverter"/>
+        </mongo:custom-converters>
+    </mongo:mapping-converter>
 </beans>
