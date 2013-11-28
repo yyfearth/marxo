@@ -625,7 +625,17 @@ Projects
       @$detail.empty()
       return unless model
       frag = document.createDocumentFragment()
-      frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
+      frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.name()}"
+      li = document.createElement 'li'
+      a = document.createElement 'a'
+      a.textContent = 'Condition'
+      console.warn model.attributes
+      if status = model.get 'status'
+        status = status.toLowerCase()
+        a.className = "status-#{status}"
+        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+      li.appendChild a
+      frag.appendChild li
       @$detail.removeClass('node-actions').addClass('link-condition').append frag
       return
     render: ->

@@ -299,12 +299,7 @@
       -moz-border-radius: 4px 0 4px 0;
       border-radius: 4px 0 4px 0;
     }
-  }
-  .node-actions {
-    &:after {
-      content: "Node - Actions";
-    }
-    .action > a {
+    li > a {
       &.status-started {
         background-color: #dff0d8;
       }
@@ -317,6 +312,11 @@
       &.status-finished {
         background-color: #dde;
       }
+    }
+  }
+  .node-actions {
+    &:after {
+      content: "Node - Actions";
     }
   }
   .link-condition:after {
