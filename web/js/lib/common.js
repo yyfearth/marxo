@@ -1,4 +1,4 @@
-// Libs: jQuery + Underscore + Backbone + Bootstrap + Backgrid + backbone-pageable
+// Libs: jQuery + Underscore + Backbone + Bootstrap + backbone-pageable
 "use strict";
 
 /**
