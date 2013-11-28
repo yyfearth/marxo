@@ -3,7 +3,7 @@ html(lang='en-US')
   head
     meta(charset='utf-8')
     title MARXO Website
-    link(href='css/website.css', rel='stylesheet', media='screen')
+    link(href='css/site.css', rel='stylesheet', media='screen')
     meta(name='viewport', content='width=device-width, initial-scale=1, user-scalable=no')
   body
     .navbar.navbar-fixed-top
@@ -64,4 +64,5 @@ html(lang='en-US')
         .form-actions
           input.btn.btn-primary(type='submit', disabled='', value='Submit')
           input.btn(type='reset')
-    script(src='js/lib/common.js')
+
+    script(data-main='js/site', src='js/lib/require.js', async)
