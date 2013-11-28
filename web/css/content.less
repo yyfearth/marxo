@@ -1,4 +1,26 @@
-@import "rich-editor";
+@import 'rich-editor';
+
+.preview {
+  &.container {
+    width: 90%;
+    min-width: 600px;
+    max-width: 900px;
+    margin: 20px auto;
+  }
+
+  section {
+    margin: 15px;
+    legend:after {
+      float: right;
+      content: '(Preview)';
+      font-size: 11pt;
+      color: #999;
+    }
+    .preview-desc {
+      margin: 10px 0;
+    }
+  }
+}
 
 #email_composer {
   left: 5%;
