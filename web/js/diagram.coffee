@@ -20,8 +20,11 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
     _data: (wf) ->
       @model = wf
       r = @r + 1
+      r2  = r + r
       w = 0
       h = 0
+      offset_x = @$el.innerWidth() or r
+      offset_y = @$el.innerHeight() or r
       fixed = true
       @_invalid = not wf.startNode? or not wf.sort()._sorted
 
@@ -35,8 +38,10 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
             fixed = false
             x: r * i * 0.56
             y: h / 2
-          x = r + Math.round((x or 0) / r / 2) * r
-          y = r + Math.round((y or 0) / r / 2) * r
+          x = Math.round((x or 0) / r2) * r
+          y = Math.round((y or 0) / r2) * r
+          offset_x = x if x < offset_x
+          offset_y = y if y < offset_y
           w = x if x > w
           h = y if y > h
           cls = []
@@ -70,6 +75,15 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           straight: tar > src
           model: link
 
+      offset_x -= r2
+      offset_y -= r2
+      w -= offset_x
+      h -= offset_y
+      @data.nodes.forEach (node) ->
+        node.x -= offset_x
+        node.y -= offset_y
+        return
+
       if fixed and h > w # swap to ensure w >= h
         [w, h] = [h, w]
         @data.nodes.forEach (node) ->
@@ -77,8 +91,8 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           node.x = node.y
           node.y = x
           return
-      w = @w = Math.max @$el.innerWidth(), w + r + r
-      h = @h = Math.max @$el.innerHeight(), h + r + r
+      w = @w = Math.max @$el.innerWidth(), w + r2
+      h = @h = Math.max @$el.innerHeight(), h + r2
       @fixed = fixed
 
       # mark, it will be removed when workflow re-wrap
