@@ -40,7 +40,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
     @get: -> # singleton
       @instance = new @ unless @instance?
       @instance
-    initialize: ->
+    initialize: (options) ->
       # init user
       user = null
       try
@@ -69,7 +69,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @$dropdowns = $(@navContainer).find('.dropdown')
       # init tooltips
       @$el.tooltip selector: '[title]'
-      @
+      super options
     _fixStyle: ->
       h = @navContainer.clientHeight or 41
       @framesContainer.style.top = h + 'px'

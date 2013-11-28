@@ -10,8 +10,8 @@ define 'models', ['module', 'lib/common'], (module) ->
   if Backbone.LocalStorage? # for local sync
     syncValidation = -> return
   else syncValidation = (method, model, options = {}) ->
+    options.dataType ?= 'json'
     options.headers ?= {}
-    options.headers.Accept ?= 'application/json'
     options.headers.Authorization ?= User.current?.get('credential') or ''
     throw new Error 'no auth, need user login' unless options.headers.Authorization
     if method isnt 'read'
