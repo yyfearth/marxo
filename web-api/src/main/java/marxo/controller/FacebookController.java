@@ -41,7 +41,7 @@ public class FacebookController implements InterceptorPreHandlable {
 	public Object readData() {
 		Tenant tenant = mongoTemplate.findOne(Query.query(criteria), Tenant.class);
 		if (tenant == null) {
-			throw new EntityNotFoundException(Tenant.class,user.tenantId);
+			throw new EntityNotFoundException(Tenant.class, user.tenantId);
 		}
 
 		return (tenant.facebookData == null) ? new FacebookData() : tenant.facebookData;

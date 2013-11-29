@@ -1,7 +1,6 @@
 package marxo.entity.content;
 
 import org.joda.time.DateTime;
-import org.joda.time.Period;
 
 import java.util.ArrayList;
 import java.util.List;

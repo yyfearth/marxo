@@ -6,8 +6,8 @@ public enum UserType {
 	 */
 	PARTICIPANT,
 	/**
-	* User who can manage other users.
-	*/
+	 * User who can manage other users.
+	 */
 	ADMIN,
 	/**
 	 * User who can interact with the system's form; defined by publishers.

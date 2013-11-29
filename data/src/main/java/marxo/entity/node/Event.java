@@ -1,10 +1,9 @@
 package marxo.entity.node;
 
-import marxo.entity.ActionChildEntity;
+import marxo.entity.action.ActionChildEntity;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.springframework.data.annotation.Transient;
 
 public class Event extends ActionChildEntity {
 	protected DateTime startTime;

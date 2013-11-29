@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
-import marxo.entity.RunnableEntity;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.validation.SelectIdFunction;
@@ -21,7 +20,6 @@ import java.util.Map;
 @JsonIgnoreProperties(value = {
 }, ignoreUnknown = true)
 public class Workflow extends RunnableEntity {
-	public WorkflowType type = WorkflowType.NONE;
 	public boolean isProject = false;
 
 	/*

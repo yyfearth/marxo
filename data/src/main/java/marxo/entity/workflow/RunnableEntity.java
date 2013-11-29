@@ -1,7 +1,6 @@
-package marxo.entity;
+package marxo.entity.workflow;
 
 import marxo.entity.user.TenantChildEntity;
-import marxo.entity.workflow.RunStatus;
 
 public abstract class RunnableEntity extends TenantChildEntity {
 	public RunStatus status = RunStatus.IDLE;

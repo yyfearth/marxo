@@ -1,14 +1,6 @@
-package marxo.entity.node;
+package marxo.entity.action;
 
-import com.restfb.DefaultFacebookClient;
-import com.restfb.FacebookClient;
-import com.restfb.Parameter;
-import com.restfb.exception.FacebookException;
-import com.restfb.types.FacebookType;
-import com.restfb.types.Post;
 import marxo.entity.Task;
-import marxo.entity.content.Content;
-import marxo.entity.content.FacebookContent;
 import marxo.entity.content.FacebookMonitorContent;
 import marxo.entity.workflow.RunStatus;
 import marxo.exception.KeyNotFoundException;
@@ -42,9 +34,9 @@ public class MonitorFacebookAction extends FacebookAction {
 			return false;
 		}
 
-		if (getEvent() != null && event.startTime.isBeforeNow()) {
+		if (getEvent() != null && event.getStartTime().isBeforeNow()) {
 			Task task = new Task(getNode().workflowId);
-			task.time = event.startTime;
+			task.time = event.getStartTime();
 			task.save();
 
 			status = RunStatus.WAITING;

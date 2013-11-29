@@ -1,5 +1,6 @@
-package marxo.entity.node;
+package marxo.entity.action;
 
+import marxo.entity.node.Action;
 import marxo.exception.Errors;
 
 public class FacebookAction extends Action {

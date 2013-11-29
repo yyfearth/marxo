@@ -1,6 +1,6 @@
 package marxo.entity.content;
 
-import marxo.entity.ActionChildEntity;
+import marxo.entity.action.ActionChildEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 

@@ -2,7 +2,6 @@ package marxo.entity.node;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mongodb.WriteResult;
-import marxo.entity.NodeChildEntity;
 import marxo.entity.content.Content;
 import marxo.exception.DatabaseException;
 import marxo.exception.Errors;

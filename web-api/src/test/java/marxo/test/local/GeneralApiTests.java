@@ -2,11 +2,11 @@ package marxo.test.local;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.net.MediaType;
+import marxo.entity.action.PostFacebookAction;
 import marxo.entity.content.FacebookContent;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
-import marxo.entity.node.PostFacebookAction;
 import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
 import marxo.test.ApiTestConfiguration;

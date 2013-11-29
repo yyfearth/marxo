@@ -2,7 +2,6 @@ package marxo.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import marxo.entity.BasicEntity;
-import marxo.entity.workflow.RunStatus;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 

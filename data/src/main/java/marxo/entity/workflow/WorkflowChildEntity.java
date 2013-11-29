@@ -1,6 +1,5 @@
 package marxo.entity.workflow;
 
-import marxo.entity.RunnableEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 

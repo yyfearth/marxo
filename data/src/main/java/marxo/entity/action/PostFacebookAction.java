@@ -1,4 +1,4 @@
-package marxo.entity.node;
+package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.restfb.DefaultFacebookClient;

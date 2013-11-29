@@ -1,7 +1,7 @@
 package marxo.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import marxo.entity.node.PostFacebookAction;
+import marxo.entity.action.PostFacebookAction;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
