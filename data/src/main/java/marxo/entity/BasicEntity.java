@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import marxo.tool.Loggable;
 import marxo.exception.Errors;
+import marxo.tool.Loggable;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
@@ -96,20 +96,6 @@ public abstract class BasicEntity implements Loggable {
 			field.set(newEntity, field.get(this));
 		}
 		return newEntity;
-	}
-
-	/*
-	Validation
-	 */
-
-	protected boolean isValidated = false;
-
-	public Boolean getValidated() {
-		return isValidated;
-	}
-
-	public void wire() {
-
 	}
 
 	/**

@@ -2,11 +2,11 @@ package marxo.entity.node;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mongodb.WriteResult;
+import marxo.entity.NodeChildEntity;
 import marxo.entity.content.Content;
-import marxo.entity.user.TenantChildEntity;
 import marxo.exception.DatabaseException;
-import marxo.exception.ValidationException;
 import marxo.exception.Errors;
+import marxo.exception.ValidationException;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 // todo: make this class abstract
-public class Action extends TenantChildEntity {
+public class Action extends NodeChildEntity {
 	public ObjectId nextActionId;
 
 	@Transient
@@ -72,25 +72,6 @@ public class Action extends TenantChildEntity {
 		this.content = content;
 		this.contentId = content.id;
 		content.setAction(this);
-	}
-
-	public ObjectId nodeId;
-	@Transient
-	protected Node node;
-
-	@JsonIgnore
-	public Node getNode() {
-		if (nodeId == null) {
-			return null;
-		}
-		return (node == null) ? (node = mongoTemplate.findById(this.nodeId, Node.class)) : node;
-	}
-
-	@JsonIgnore
-	public void setNode(Node node) {
-		this.node = node;
-		this.nodeId = node.id;
-		this.tenantId = node.tenantId;
 	}
 
 	protected Errors errors = new Errors();

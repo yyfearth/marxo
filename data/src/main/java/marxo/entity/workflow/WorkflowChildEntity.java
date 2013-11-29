@@ -1,10 +1,10 @@
 package marxo.entity.workflow;
 
-import marxo.entity.user.TenantChildEntity;
+import marxo.entity.RunnableEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 
-public abstract class WorkflowChildEntity extends TenantChildEntity {
+public abstract class WorkflowChildEntity extends RunnableEntity {
 	public ObjectId workflowId;
 	@Transient
 	protected Workflow workflow;

@@ -7,8 +7,6 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 
 public abstract class TenantChildEntity extends BasicEntity {
-	public RunStatus status = RunStatus.IDLE;
-
 	public ObjectId tenantId;
 	@Transient
 	protected Tenant tenant;
