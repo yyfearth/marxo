@@ -10,8 +10,10 @@
     <context:component-scan base-package="marxo.security"/>
 
     <http use-expressions="true" entry-point-ref="marxoAuthenticationEntryPoint" authentication-manager-ref="authenticationManager">
+        <!-- todo: enforces HTTPS -->
         <!-- Must allows all OPTIONS requests due to Chrome makes the request without credentials. -->
         <intercept-url pattern="/api/**" requires-channel="any" access="true" method="OPTIONS"/>
+        <intercept-url pattern="/api/user**" requires-channel="any" access="true" method="POST"/>
         <intercept-url pattern="/api/**" requires-channel="any" access="isAuthenticated()"/>
         <session-management>
             <!-- review: decide the value. -->

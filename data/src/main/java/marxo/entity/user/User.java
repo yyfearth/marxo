@@ -1,8 +1,9 @@
 package marxo.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -14,7 +15,6 @@ import java.util.regex.Pattern;
  */
 public class User extends TenantChildEntity implements Serializable {
 	public final static Pattern emailPattern = Pattern.compile("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$");
-	@JsonIgnore
 	protected String password;
 	protected String email;
 	public UserType type = UserType.UNKNOWN;
@@ -27,6 +27,10 @@ public class User extends TenantChildEntity implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public void clearPassword() {
+		this.password = null;
 	}
 
 	public String getEmail() {
@@ -44,5 +48,9 @@ public class User extends TenantChildEntity implements Serializable {
 
 	public static User get(ObjectId id) {
 		return mongoTemplate.findById(id, User.class);
+	}
+
+	public static User getByEmail(String email) {
+		return mongoTemplate.findOne(Query.query(Criteria.where("email").is(email.toLowerCase())), User.class);
 	}
 }

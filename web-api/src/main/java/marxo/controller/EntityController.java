@@ -73,7 +73,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	public Entity create(@Valid @RequestBody Entity entity, HttpServletResponse response) throws Exception {
 		entity.createUserId = entity.updateUserId = user.id;
 		entity.createTime = entity.updateTime = DateTime.now();
-		mongoTemplate.save(entity);
+		entity.save();
 
 		response.setHeader("Location", String.format("/%s/%s", entity.getClass().getSimpleName().toLowerCase(), entity.id));
 		return entity;

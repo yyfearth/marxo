@@ -12,6 +12,7 @@ import marxo.test.BasicApiTests;
 import marxo.test.Tester;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -19,28 +20,34 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 @ApiTestConfiguration
 public class UserApiTests extends BasicApiTests {
+	MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
+	User publisher;
+	User participant;
 
-	@Test
-	public void getOneUser() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpGet(baseUrl + "users/" + this.reusedUser.getEmail())
-					.send();
-			tester
-					.isOk()
-					.matchContentType(MediaType.JSON_UTF_8);
-			User user = tester.getContent(User.class);
-			Assert.assertEquals(user.getEmail(), this.reusedUser.getEmail());
-			Assert.assertEquals(user.id, this.reusedUser.id);
-			Assert.assertEquals(user.getName(), this.reusedUser.getName());
-			Assert.assertEquals(user.createTime.toLocalDateTime(), this.reusedUser.createTime.toLocalDateTime());
-			Assert.assertEquals(user.updateTime.toLocalDateTime(), this.reusedUser.updateTime.toLocalDateTime());
-			Assert.assertEquals(user.tenantId, this.reusedUser.tenantId);
-			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
-		}
+	@BeforeClass
+	@Override
+	public void beforeClass() throws Exception {
+		super.beforeClass();
+
+		publisher = new User();
+		publisher.setName("New " + UserType.PUBLISHER);
+		publisher.setEmail("publisher@test.com");
+		publisher.setPassword("test");
+		publisher.type = UserType.PUBLISHER;
+		publisher.tenantId = reusedUser.tenantId;
+		publisher.oAuthData = Maps.newHashMap();
+		publisher.oAuthData.put("facebook", "287762482");
+		entitiesToRemove.add(publisher);
+
+		participant = new User();
+		participant.setName("New " + UserType.PARTICIPANT);
+		participant.setEmail("participant@test.com");
+		participant.setPassword("test");
+		participant.type = UserType.PARTICIPANT;
+		participant.oAuthData = reusedUser.oAuthData;
+		entitiesToRemove.add(participant);
 	}
 
-	@Test(dependsOnMethods = {"getOneUser"})
 	public void searchUsers() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -76,50 +83,102 @@ public class UserApiTests extends BasicApiTests {
 
 	@Test
 	public void createPublisher() throws Exception {
-		User newUser = new User();
-		newUser.setName("New " + UserType.PUBLISHER);
-		newUser.type = UserType.PUBLISHER;
-		newUser.tenantId = reusedUser.tenantId;
-
-		insertEntities(
-				reusedUser
-		);
 
 		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
 			tester
-					.httpGet()
+					.httpPost(publisher)
+					.send();
+			tester
+					.isCreated()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user1 = tester.getContent(User.class);
+			Assert.assertNotNull(user1);
+			Assert.assertEquals(user1.getEmail(), publisher.getEmail());
+			Assert.assertNull(user1.getPassword(), "One shouldn't get user's password via API");
+			Assert.assertNotNull(user1.oAuthData);
+			Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(publisher.oAuthData));
+		}
+
+		User user1 = User.get(publisher.id);
+		Assert.assertNotNull(user1);
+		Assert.assertEquals(user1.getEmail(), publisher.getEmail());
+		Assert.assertNotNull(user1.getPassword());
+		Assert.assertNotNull(user1.oAuthData);
+		Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(publisher.oAuthData));
+	}
+
+	@Test
+	public void createParticipant() throws Exception {
+
+		try (Tester tester = new Tester().baseUrl(baseUrl + "users")) {
+			tester
+					.httpPost(participant)
+					.send();
+			tester
+					.isCreated()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user1 = tester.getContent(User.class);
+			Assert.assertNotNull(user1);
+			Assert.assertEquals(user1.getEmail(), participant.getEmail());
+			Assert.assertNull(user1.getPassword(), "One shouldn't get user's password via API");
+			Assert.assertNotNull(user1.oAuthData);
+			Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(participant.oAuthData));
+		}
+
+		User user1 = User.get(participant.id);
+		Assert.assertNotNull(user1);
+		Assert.assertEquals(user1.getEmail(), participant.getEmail());
+		Assert.assertNotNull(user1.getPassword());
+		Assert.assertNotNull(user1.oAuthData);
+		Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(participant.oAuthData));
+	}
+
+	@Test(dependsOnMethods = {"createPublisher"})
+	public void getPublisher() throws Exception {
+		try (Tester tester = new Tester().basicAuth(email, password)) {
+			tester
+					.httpGet(baseUrl + "users/" + publisher.getEmail())
 					.send();
 			tester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-
 			User user = tester.getContent(User.class);
-			Assert.assertNotNull(user);
-			Assert.assertEquals(user.getEmail(), email);
+			Assert.assertEquals(user.getEmail(), publisher.getEmail());
+			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
 		}
 	}
 
-	@Test
+	@Test(dependsOnMethods = {"getPublisher"})
 	public void udpateUser() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
+		User user = User.getByEmail(publisher.getEmail());
+		user.setPassword(publisher.getPassword());
+		user.setName("Updated user");
+
+		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet()
+					.httpPut(baseUrl + "users/" + publisher.getEmail(), user)
 					.send();
 			tester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			User user = tester.getContent(User.class);
-			Assert.assertNotNull(user);
-			Assert.assertEquals(user.getEmail(), email);
+			User user1 = tester.getContent(User.class);
+			Assert.assertNotNull(user1);
+			Assert.assertEquals(user1.getName(), user.getName());
+			Assert.assertNull(user1.getPassword(), "One shouldn't get user's password via API");
 		}
+
+		User user1 = User.getByEmail(publisher.getEmail());
+		Assert.assertEquals(user1.getName(), user.getName());
 	}
 
-	@Test
+	@Test(dependsOnMethods = {"udpateUser"})
 	public void deleteUser() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
+		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet()
+					.httpDelete(baseUrl + "users/" + publisher.getEmail())
 					.send();
 			tester
 					.isOk()
@@ -127,8 +186,12 @@ public class UserApiTests extends BasicApiTests {
 
 			User user = tester.getContent(User.class);
 			Assert.assertNotNull(user);
-			Assert.assertEquals(user.getEmail(), email);
+			Assert.assertEquals(user.getEmail(), publisher.getEmail());
+			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
 		}
+
+		User user = User.getByEmail(publisher.getEmail());
+		Assert.assertNull(user);
 	}
 
 	@Test
@@ -171,34 +234,6 @@ public class UserApiTests extends BasicApiTests {
 			errorJson = tester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
 		}
-	}
-
-	@Test
-	public void withOAuthData() throws Exception {
-		User user = new User();
-		user.setName("User with OAuth");
-		user.oAuthData = Maps.newHashMap();
-		user.oAuthData.put("facebook", "287762482");
-		entitiesToRemove.add(user);
-
-		MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
-
-		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
-			tester
-					.httpPost(user)
-					.send();
-			tester
-					.isCreated()
-					.matchContentType(MediaType.JSON_UTF_8);
-
-			User user1 = tester.getContent(User.class);
-			Assert.assertNotNull(user1.oAuthData);
-			Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(user.oAuthData));
-		}
-
-		User user1 = User.get(user.id);
-		Assert.assertNotNull(user1.oAuthData);
-		Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(user.oAuthData));
 	}
 
 	@Test
