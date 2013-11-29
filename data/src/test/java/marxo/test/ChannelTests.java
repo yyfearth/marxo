@@ -25,8 +25,7 @@ import sun.misc.BASE64Decoder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
+import java.net.URLEncoder;
 import java.util.List;
 
 public class ChannelTests extends BasicDataTests {
@@ -83,10 +82,12 @@ public class ChannelTests extends BasicDataTests {
 	public void testDebugToken() throws Exception {
 		CloseableHttpClient closeableHttpClient = HttpClients.createDefault();
 
-//		HttpGet httpGet = new HttpGet(String.format("https://graph.facebook.com/debug_token?input_token=%s&access_token=%s", userToken, appToken));
-		URL url = new URL("https://graph.facebook.com/debug_token?input_token=CAADCM9YpGYwBAGANsWfvdO3aEPcqWE8NM2AqeKZBjrjv3MquGBWMTDHBy8LKwd8klnZCigONqGubLv7ZAmX3dl5b2kmnx8b86ZAtK6XL63yb7BnxXd0OcYvZCjt6ZCINSd4wbdcwMzT3FHQfo91rAdWrKfSZBL47YDthTbmv1ZAbdZAZBdYaEkw6FG34gOL8P4qkkZD&access_token=213527892138380|eZgwp-1kegwB-CI-pYi7Q2WllKw");
-		URI uri = new URI(url.getProtocol(), url.getHost(), url.getPath(), url.getQuery());
-		HttpGet httpGet = new HttpGet(uri);
+		String url = String.format(
+				"https://graph.facebook.com/debug_token?input_token=%s&access_token=%s",
+				"CAADCM9YpGYwBAGANsWfvdO3aEPcqWE8NM2AqeKZBjrjv3MquGBWMTDHBy8LKwd8klnZCigONqGubLv7ZAmX3dl5b2kmnx8b86ZAtK6XL63yb7BnxXd0OcYvZCjt6ZCINSd4wbdcwMzT3FHQfo91rAdWrKfSZBL47YDthTbmv1ZAbdZAZBdYaEkw6FG34gOL8P4qkkZD",
+				URLEncoder.encode("213527892138380|eZgwp-1kegwB-CI-pYi7Q2WllKw", "UTF-8")
+		);
+		HttpGet httpGet = new HttpGet(url);
 
 		HttpEntity httpEntity = null;
 		try (CloseableHttpResponse closeableHttpResponse = closeableHttpClient.execute(httpGet)) {
