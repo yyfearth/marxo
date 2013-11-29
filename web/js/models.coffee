@@ -97,6 +97,8 @@ define 'models', ['module', 'lib/common'], (module) ->
 #  class Participant extends User
 
   class Publisher extends User
+    defaults:
+      type: 'PUBLISHER'
 
 #  class Evalutator extends User
 

@@ -22,12 +22,10 @@
           title='Repeat Password', data-placement='right', pattern='.{6,2048}', maxlength='2048')
           .help-inline.edit-only Leave them blank to keep current password.
       .control-group
-        label.control-label(for='first_name') Full Name
+        label.control-label(for='user_name') Name
         .controls
-          input#first_name(type='text', name='first_name', placeholder='First Name',
-          title='First Name', data-placement='right', maxlength='255', required)
-          input#last_name(type='text', name='last_name', placeholder='Last Name',
-          title='Last Name', data-placement='right', maxlength='255', required)
+          input#user_name(type='text', name='name', placeholder='First Last',
+          title='User Name', data-placement='right', maxlength='255', required)
       .control-group
         label.control-label(for='user_sex') Sex
         .controls
