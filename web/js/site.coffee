@@ -11,13 +11,18 @@ requirejs.config
       exports: 'FB'
   paths:
     'lib/facebook': '//connect.facebook.net/en_US/all'
-  config:
-    config:
-      FB_APP_ID: '213527892138380'
-      FB_SCOPES: 'publish_actions, email, read_stream'
+
+define 'fb', ['lib/facebook'], (FB) =>
+  FB.init
+    appId: '213527892138380'
+    scopes: 'email'
+    status: true # check login status
+    cookie: true # enable cookies to allow the server to access the session
+    xfbml: false
+  FB
 
 require ['lib/common'], ->
-  console.log 'ver', 'site', 0
+  console.log 'ver', 'site', 1
 
   class User extends Backbone.Model
     urlRoot: ROOT + '/users'
@@ -89,8 +94,15 @@ require ['lib/common'], ->
         auth = 'Basic ' + btoa "#{email}:#{hash}"
         @signin auth
       return
-    _signInFB: ->
-      # TODO: sign in using fb
+    _signInFB: -> require ['fb'], (FB) =>
+      FB.login (response) ->
+        response = response.authResponse
+        if response?.accessToken and response.expiresIn > 0
+          @signin 'Basic ' + btoa "facebook:#{response.accessToken}"
+        else
+          console.warn 'User cancelled login or did not fully authorize.', response
+          alert 'You cancelled login or did not fully authorize.'
+        return
       return
     signin: (auth) ->
       new User(id: 'me').fetch
