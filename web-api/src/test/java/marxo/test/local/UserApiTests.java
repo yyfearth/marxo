@@ -44,7 +44,7 @@ public class UserApiTests extends BasicApiTests {
 		participant.setEmail("participant@test.com");
 		participant.setPassword("test");
 		participant.type = UserType.PARTICIPANT;
-		participant.oAuthData = reusedUser.oAuthData;
+		participant.oAuthData.put("facebook", facebookId);
 		entitiesToRemove.add(participant);
 	}
 
@@ -236,9 +236,9 @@ public class UserApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test
+	@Test(dependsOnMethods = {"createParticipant"})
 	public void basicAuthWithFacebookAcessToken() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl + "user/me").basicAuth("facebook", reusedUser.oAuthData.get("facebook"))) {
+		try (Tester tester = new Tester().baseUrl(baseUrl + "user/me").basicAuth("facebook", facebookToken)) {
 			tester
 					.httpGet()
 					.send();
@@ -248,7 +248,7 @@ public class UserApiTests extends BasicApiTests {
 
 			User user = tester.getContent(User.class);
 			Assert.assertNotNull(user);
-			Assert.assertEquals(user.getEmail(), email);
+			Assert.assertEquals(user.id, participant.id);
 		}
 	}
 

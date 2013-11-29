@@ -14,6 +14,7 @@ public abstract class BasicApiTests extends BasicDataTests {
 	protected String baseUrl;
 	protected String email;
 	protected String password;
+	protected String facebookId;
 	protected String facebookToken;
 
 	protected Tenant reusedTenant;
@@ -32,6 +33,7 @@ public abstract class BasicApiTests extends BasicDataTests {
 		baseUrl = configuration.value();
 		email = getClass().getSimpleName().toLowerCase() + "@meow.com";
 		password = "test";
+		facebookId = configuration.facebookId();
 		facebookToken = configuration.facebookToken();
 	}
 
@@ -51,7 +53,6 @@ public abstract class BasicApiTests extends BasicDataTests {
 		reusedUser.setName("Test user");
 		reusedUser.setEmail(email);
 		reusedUser.setPassword(passwordEncryptor.encrypt(password));
-		reusedUser.oAuthData.put("facebook", facebookToken);
 
 		insertEntities(
 				reusedTenant,

@@ -20,7 +20,6 @@ import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import sun.misc.BASE64Decoder;
 
@@ -31,10 +30,11 @@ import java.net.URL;
 import java.util.List;
 
 public class ChannelTests extends BasicDataTests {
-	static String appId;
-	static String appSecret;
-	static String appToken;
-	static String userToken;
+	static final String appId;
+	static final String appSecret;
+	static final String appToken;
+	static final String userToken;
+	static final FacebookClient facebookClient;
 	static String extendedUserToken;
 
 	static {
@@ -43,10 +43,10 @@ public class ChannelTests extends BasicDataTests {
 		appSecret = (String) applicationContext.getBean("appSecret");
 		appToken = (String) applicationContext.getBean("appToken");
 		userToken = "CAADCM9YpGYwBAGANsWfvdO3aEPcqWE8NM2AqeKZBjrjv3MquGBWMTDHBy8LKwd8klnZCigONqGubLv7ZAmX3dl5b2kmnx8b86ZAtK6XL63yb7BnxXd0OcYvZCjt6ZCINSd4wbdcwMzT3FHQfo91rAdWrKfSZBL47YDthTbmv1ZAbdZAZBdYaEkw6FG34gOL8P4qkkZD";
+		facebookClient = new DefaultFacebookClient(userToken);
 	}
 
 	FacebookType publishMessageResponse;
-	FacebookClient facebookClient = new DefaultFacebookClient(userToken);
 	ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
@@ -58,7 +58,7 @@ public class ChannelTests extends BasicDataTests {
 			logger.info(objectMapper.writeValueAsString(user));
 		} catch (FacebookOAuthException e) {
 			logger.error(String.format("[%s] %s", e.getClass(), e.getMessage()), e);
-			assert false;
+			Assert.fail();
 		}
 	}
 

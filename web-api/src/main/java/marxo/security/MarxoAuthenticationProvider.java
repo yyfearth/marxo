@@ -1,6 +1,9 @@
 package marxo.security;
 
 import com.google.common.collect.Lists;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.exception.FacebookOAuthException;
 import marxo.entity.user.User;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
@@ -21,6 +24,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MarxoAuthenticationProvider implements AuthenticationProvider, Loggable {
+	static final String appId;
+	static final String appSecret;
+	static final String appToken;
+
+	static {
+		ApplicationContext applicationContext = new ClassPathXmlApplicationContext("security.xml");
+		appId = (String) applicationContext.getBean("appId");
+		appSecret = (String) applicationContext.getBean("appSecret");
+		appToken = (String) applicationContext.getBean("appToken");
+	}
+
 	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
 	@Autowired
@@ -28,10 +42,28 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+		User user;
+		if (authentication.getName().toLowerCase().equals("facebook")) {
+			String accessToken = authentication.getCredentials().toString();
+			FacebookClient facebookClient = new DefaultFacebookClient(accessToken);
+			try {
+				com.restfb.types.User fbUser = facebookClient.fetchObject("me", com.restfb.types.User.class);
+				Criteria criteria = Criteria.where("oAuthData.facebook").is(fbUser.getId());
+				user = mongoTemplate.findOne(Query.query(criteria), User.class);
+				if (user == null) {
+					throw new UsernameNotFoundException(String.format("Cannot find anyone with the Facebook account %s(%s)", fbUser.getUsername(), fbUser.getId()));
+				} else {
+					return new MarxoAuthentication(user, Lists.newArrayList(new SimpleGrantedAuthority("guest")));
+				}
+			} catch (FacebookOAuthException e) {
+				throw new BadCredentialsException(String.format("The access token %s is not valid: %s", accessToken, e.getMessage()));
+			}
+		}
+
 		String email = authentication.getName();
 
 		Criteria criteria = Criteria.where("email").is(email.toLowerCase());
-		User user = mongoTemplate.findOne(Query.query(criteria), User.class);
+		user = mongoTemplate.findOne(Query.query(criteria), User.class);
 
 		if (user == null) {
 			String message = email + " is not found";
@@ -45,8 +77,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 			return new MarxoAuthentication(user, Lists.newArrayList(new SimpleGrantedAuthority("user")));
 		}
 
-		String message = "The password '" + plainPassword + "' for '" + email + "' is not correct";
-		throw new BadCredentialsException(message);
+		throw new BadCredentialsException(String.format("The password '%s' for '%s' is not correct", plainPassword, email));
 	}
 
 	@Override
