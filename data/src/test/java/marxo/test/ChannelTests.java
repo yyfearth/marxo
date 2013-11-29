@@ -49,11 +49,6 @@ public class ChannelTests extends BasicDataTests {
 	FacebookClient facebookClient = new DefaultFacebookClient(userToken);
 	ObjectMapper objectMapper = new ObjectMapper();
 
-	@BeforeClass
-	public void beforeClass() throws Exception {
-
-	}
-
 	@Test
 	public void getUser() throws Exception {
 		User user = null;

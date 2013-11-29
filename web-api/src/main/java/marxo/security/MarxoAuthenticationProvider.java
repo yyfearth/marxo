@@ -1,5 +1,6 @@
 package marxo.security;
 
+import com.google.common.collect.Lists;
 import marxo.entity.user.User;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
@@ -14,13 +15,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class MarxoAuthenticationProvider implements AuthenticationProvider, Loggable {
@@ -44,10 +41,8 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 		String plainPassword = authentication.getCredentials().toString();
 		String encryptedPassword = passwordEncryptor.encrypt(plainPassword);
 
-		if (encryptedPassword.toLowerCase().equals(user.getPassword().toLowerCase())) {
-			List<GrantedAuthority> grantedAuths = new ArrayList<>();
-			grantedAuths.add(new SimpleGrantedAuthority("user"));
-			return new MarxoAuthentication(user, grantedAuths);
+		if (user.getPassword() != null && encryptedPassword.toLowerCase().equals(user.getPassword().toLowerCase())) {
+			return new MarxoAuthentication(user, Lists.newArrayList(new SimpleGrantedAuthority("user")));
 		}
 
 		String message = "The password '" + plainPassword + "' for '" + email + "' is not correct";
