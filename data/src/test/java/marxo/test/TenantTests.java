@@ -9,6 +9,8 @@ import marxo.tool.PasswordEncryptor;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
@@ -87,6 +89,8 @@ public class TenantTests extends BasicDataTests {
 			user.setEmail("otaru14204@hotmail.com");
 			user.setPassword(passwordEncryptor.encrypt("zhKhZMAp8rYymnIvM/rbcuNNrpG+Qgk+zVOS+x0n9mY"));
 			users.add(user);
+
+			mongoTemplate.indexOps(User.class).ensureIndex(new Index("email", Sort.Direction.ASC).unique().sparse());
 		}
 
 		for (User user : users) {
