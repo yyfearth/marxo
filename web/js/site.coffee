@@ -26,6 +26,8 @@ require ['lib/common'], ->
 
   class User extends Backbone.Model
     urlRoot: ROOT + '/users'
+    defaults:
+      type: 'PARTICIPANT'
     fullname: ->
       if @has 'full_name'
         @get 'full_name'
@@ -58,6 +60,7 @@ require ['lib/common'], ->
           else
             form[if email then 'password' else 'email'].select()
         false
+      'click .sign-in .btn-facebook': '_signInFB'
       'click a.dropdown-toggle': ->
         if form = @$form[0]
           setTimeout ->
@@ -78,6 +81,8 @@ require ['lib/common'], ->
       @$avatar = @$el.find('img#avatar')
       img = @$avatar.attr 'src'
       @$avatar.on 'error', -> @src = img
+      @listenTo @dialog, 'signedup update', (user) ->
+        @signin user.get 'credential'
       # auto login
       if sessionStorage.user
         try
@@ -91,11 +96,10 @@ require ['lib/common'], ->
     _signInEmail: (email, password) ->
       require ['crypto'], ({hashPassword}) =>
         hash = hashPassword email, password
-        auth = 'Basic ' + btoa "#{email}:#{hash}"
-        @signin auth
+        @signin 'Basic ' + btoa "#{email}:#{hash}"
       return
     _signInFB: -> require ['fb'], (FB) =>
-      FB.login (response) ->
+      FB.login (response) =>
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           @signin 'Basic ' + btoa "facebook:#{response.accessToken}"
@@ -150,6 +154,7 @@ require ['lib/common'], ->
         e.preventDefault()
         @save() if @validate()
         false
+      'click form .btn-facebook': '_signUpFB'
     initialize: (options) ->
       super options
       $el = @$el
@@ -165,36 +170,52 @@ require ['lib/common'], ->
       @
     _setSex: (sex = '') ->
       $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
-      if $sex.length and not $sex.hasClass 'active'
+      $sex = @$sex.filter "[value='']" unless $sex.length
+      if not $sex.hasClass 'active'
         @$sex.not($sex).removeClass 'active'
         $sex.addClass 'active'
       $sex
     _getSex: ->
       @$sex.filter('.active').attr('value').toUpperCase()
+    _setOauth: (oauth = {}) -> @$openAccounts.each ->
+      val = oauth[@_name.toLowerCase()]
+      @disabled = val
+      if val
+        @value = val
+        @textContent = "Linked #{@_name} Account"
+      return
+    _getOauth: ->
+      oauth = {}
+      @$openAccounts.each ->
+        oauth[@_name.toLowerCase()] = @value if @value
+      oauth
     fill: (attrs) ->
       form = @form
       for name, value of attrs
         $input = $ form[name]
         $input.val value if $input.is 'input'
       @_setSex attrs.sex
+      @_setOauth attrs.oauth
       @
     read: ->
       data =
-        sex: @_getSex(), email: @form.email.value.trim()
+        sex: @_getSex()
+        email: @form.email.value.trim()
+        oauth: @_getOauth()
       for kv in @$form.serializeArray()
         data[kv.name] = kv.value.trim()
       password = @$passwords.val()
       data.password = password if password
+      data.email = data.email.toLowerCase()
       data
     popup: (data) ->
       emailEl = @form.email
+      @form.reset()
+      @_auth = null
       if data # edit mode
         data = data.toJSON() if data instanceof User
         @$editOnly.show()
-        if data.first_name or data.last_name
-          @$title.text "User: #{data.first_name} #{data.last_name}"
-        else
-          @$title.text "User: #{data.email}"
+        @$title.text "User: #{data.name or data.email}"
         @fill data
         @$passwords.removeAttr 'required'
         disabled = true
@@ -210,7 +231,7 @@ require ['lib/common'], ->
         disabled = false
         btnTxt = 'Sign up with'
       emailEl.disabled = disabled
-      @$openAccounts.each -> $(@).text "#{btnTxt} #{@_name} Account"
+      @$openAccounts.each -> $(@).text "#{btnTxt} #{@_name} Account" unless @disabled
       @$el.modal 'show'
       @
     validate: ->
@@ -225,12 +246,43 @@ require ['lib/common'], ->
         alert 'Passwords are not matched!'
         return false
       true
+    _signUpFB: -> require ['fb'], (FB) =>
+      FB.login (response) =>
+        response = response.authResponse
+        if response?.accessToken and response.expiresIn > 0
+          @_auth = 'Basic ' + btoa "facebook:#{response.accessToken}"
+          if @form.email.disabled # edit
+            data = @read()
+            data.oauth = facebook: response.userID
+            @fill data
+            console.log 'facebook connected', response
+            setTimeout =>
+              alert 'Facebook account is bound, place click "Save".'
+              @$passwords[0].focus()
+            , 100
+          else FB.api '/me', (response) => # sign up
+            @fill
+              email: response.email
+              name: response.name
+              sex: response.gender
+              oauth:
+                facebook: response.id
+            setTimeout =>
+              alert 'Facebook account is bound, place setup a password then click "Save".'
+              @$passwords[0].focus()
+            , 100
+            console.log 'facebook connected', response
+        else
+          console.warn 'User cancelled login or did not fully authorize.', response
+          alert 'You cancelled login or did not fully authorize.'
+        return
     _save: (data) ->
       user = User.current
       if user instanceof User
         # update
         throw new Error 'Emails not matched! Somebody hacked that?' if data.email isnt user.get('email')
         console.log 'save user', data
+        user.unset 'credential'
         user.save data,
           success: (user) =>
             @trigger 'updated', user
@@ -244,6 +296,7 @@ require ['lib/common'], ->
         console.log 'sign up user', data
         new User(email: data.email).save data,
           success: (user) =>
+            user.set 'credential', @_auth or 'Basic ' + btoa "#{user.get 'email'}:#{data.password}"
             @trigger 'signedup', user
             @$el.modal 'hide'
             return
