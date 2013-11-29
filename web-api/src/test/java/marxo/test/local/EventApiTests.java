@@ -25,7 +25,7 @@ public class EventApiTests extends BasicApiTests {
 
 		reusedNode = new Node();
 		reusedNode.setName(getClass().getSimpleName());
-		reusedNode.tenantId = user.tenantId;
+		reusedNode.tenantId = reusedUser.tenantId;
 
 		reusedAction = new PostFacebookAction();
 		reusedNode.addAction(reusedAction);

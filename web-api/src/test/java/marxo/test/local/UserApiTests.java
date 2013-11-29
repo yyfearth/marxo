@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import com.google.common.net.MediaType;
 import marxo.entity.user.User;
+import marxo.entity.user.UserType;
 import marxo.exception.ErrorJson;
 import marxo.serialization.MarxoObjectMapper;
 import marxo.test.ApiTestConfiguration;
@@ -23,19 +24,110 @@ public class UserApiTests extends BasicApiTests {
 	public void getOneUser() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpGet(baseUrl + "users/" + this.user.getEmail())
+					.httpGet(baseUrl + "users/" + this.reusedUser.getEmail())
 					.send();
 			tester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 			User user = tester.getContent(User.class);
-			Assert.assertEquals(user.getEmail(), this.user.getEmail());
-			Assert.assertEquals(user.id, this.user.id);
-			Assert.assertEquals(user.getName(), this.user.getName());
-			Assert.assertEquals(user.createTime.toLocalDateTime(), this.user.createTime.toLocalDateTime());
-			Assert.assertEquals(user.updateTime.toLocalDateTime(), this.user.updateTime.toLocalDateTime());
-			Assert.assertEquals(user.tenantId, this.user.tenantId);
+			Assert.assertEquals(user.getEmail(), this.reusedUser.getEmail());
+			Assert.assertEquals(user.id, this.reusedUser.id);
+			Assert.assertEquals(user.getName(), this.reusedUser.getName());
+			Assert.assertEquals(user.createTime.toLocalDateTime(), this.reusedUser.createTime.toLocalDateTime());
+			Assert.assertEquals(user.updateTime.toLocalDateTime(), this.reusedUser.updateTime.toLocalDateTime());
+			Assert.assertEquals(user.tenantId, this.reusedUser.tenantId);
 			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
+		}
+	}
+
+	@Test(dependsOnMethods = {"getOneUser"})
+	public void searchUsers() throws Exception {
+		try (Tester tester = new Tester().basicAuth(email, password)) {
+			tester
+					.httpGet(baseUrl + "users")
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			List<User> users = tester.getContent(new TypeReference<List<User>>() {
+			});
+			Assert.assertNotNull(users);
+			for (User user : users) {
+				Assert.assertEquals(user.tenantId, this.reusedUser.tenantId);
+			}
+		}
+	}
+
+	public void getCurrentUser() throws Exception {
+		try (Tester tester = new Tester().baseUrl(baseUrl + "users/me").basicAuth(email, password)) {
+			tester
+					.httpGet()
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user = tester.getContent(User.class);
+			Assert.assertNotNull(user);
+			Assert.assertEquals(user.getEmail(), email);
+		}
+	}
+
+	@Test
+	public void createPublisher() throws Exception {
+		User newUser = new User();
+		newUser.setName("New " + UserType.PUBLISHER);
+		newUser.type = UserType.PUBLISHER;
+		newUser.tenantId = reusedUser.tenantId;
+
+		insertEntities(
+				reusedUser
+		);
+
+		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
+			tester
+					.httpGet()
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user = tester.getContent(User.class);
+			Assert.assertNotNull(user);
+			Assert.assertEquals(user.getEmail(), email);
+		}
+	}
+
+	@Test
+	public void udpateUser() throws Exception {
+		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
+			tester
+					.httpGet()
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user = tester.getContent(User.class);
+			Assert.assertNotNull(user);
+			Assert.assertEquals(user.getEmail(), email);
+		}
+	}
+
+	@Test
+	public void deleteUser() throws Exception {
+		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
+			tester
+					.httpGet()
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user = tester.getContent(User.class);
+			Assert.assertNotNull(user);
+			Assert.assertEquals(user.getEmail(), email);
 		}
 	}
 
@@ -81,41 +173,6 @@ public class UserApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnMethods = {"getOneUser", "wrongAuthentication"})
-	public void getUsers() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpGet(baseUrl + "users")
-					.send();
-			tester
-					.isOk()
-					.matchContentType(MediaType.JSON_UTF_8);
-
-			List<User> users = tester.getContent(new TypeReference<List<User>>() {
-			});
-			Assert.assertNotNull(users);
-			for (User user : users) {
-				Assert.assertEquals(user.tenantId, this.user.tenantId);
-			}
-		}
-	}
-
-	@Test(dependsOnMethods = {"getOneUser", "wrongAuthentication"})
-	public void getCurrentUser() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl + "users/me").basicAuth(email, password)) {
-			tester
-					.httpGet()
-					.send();
-			tester
-					.isOk()
-					.matchContentType(MediaType.JSON_UTF_8);
-
-			User user = tester.getContent(User.class);
-			Assert.assertNotNull(user);
-			Assert.assertEquals(user.getEmail(), email);
-		}
-	}
-
 	@Test
 	public void withOAuthData() throws Exception {
 		User user = new User();
@@ -157,6 +214,21 @@ public class UserApiTests extends BasicApiTests {
 			User user = tester.getContent(User.class);
 			Assert.assertNotNull(user);
 			Assert.assertEquals(user.getEmail(), email);
+		}
+	}
+
+	@Test
+	public void basicAuthWithWrongFacebookAcessToken() throws Exception {
+		try (Tester tester = new Tester().baseUrl(baseUrl + "user/me").basicAuth("facebook", reusedUser.oAuthData.get("facebook"))) {
+			tester
+					.httpGet()
+					.send();
+			tester
+					.is(HttpStatus.UNAUTHORIZED)
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			Assert.assertNotNull(errorJson);
 		}
 	}
 }

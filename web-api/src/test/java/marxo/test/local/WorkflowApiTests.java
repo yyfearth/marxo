@@ -22,16 +22,17 @@ import java.util.List;
 import java.util.Set;
 
 @ApiTestConfiguration
-@Test(groups = "workflow")
 public class WorkflowApiTests extends BasicApiTests {
 	Workflow workflow;
 	List<Workflow> workflows = new ArrayList<>();
 
 	@Test
 	public void createWorkflow() throws Exception {
+		Workflow newWorkflow = new Workflow();
+
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
-					.httpPost(baseUrl + "workflows", new Workflow())
+					.httpPost(baseUrl + "workflows", newWorkflow)
 					.send();
 			tester
 					.isCreated()
@@ -39,9 +40,9 @@ public class WorkflowApiTests extends BasicApiTests {
 
 			workflow = tester.getContent(Workflow.class);
 
-			Assert.assertEquals(workflow.tenantId, user.tenantId);
-			Assert.assertEquals(workflow.createUserId, user.id);
-			Assert.assertEquals(workflow.updateUserId, user.id);
+			Assert.assertEquals(workflow.tenantId, reusedUser.tenantId);
+			Assert.assertEquals(workflow.createUserId, reusedUser.id);
+			Assert.assertEquals(workflow.updateUserId, reusedUser.id);
 
 			DateTime now = DateTime.now();
 			Assert.assertEquals(workflow.createTime.dayOfYear().get(), now.dayOfYear().get());
@@ -64,13 +65,13 @@ public class WorkflowApiTests extends BasicApiTests {
 			Assert.assertNotNull(workflows);
 			for (Workflow workflow : workflows) {
 				if (workflow.tenantId != null) {
-					Assert.assertEquals(workflow.tenantId, this.user.tenantId);
+					Assert.assertEquals(workflow.tenantId, this.reusedUser.tenantId);
 				}
 				Assert.assertFalse(workflow.isProject);
 			}
 
 			Criteria criteria = Criteria.where("isProject").is(false);
-			Criteria criteria1 = Criteria.where("tenantId").is(user.tenantId);
+			Criteria criteria1 = Criteria.where("tenantId").is(reusedUser.tenantId);
 			Criteria criteria2 = Criteria.where("tenantId").exists(false);
 			criteria.orOperator(criteria1, criteria2);
 
@@ -100,7 +101,7 @@ public class WorkflowApiTests extends BasicApiTests {
 	public void searchWorkflows() throws Exception {
 		Workflow workflow = new Workflow();
 		workflow.setName("searchWorkflows");
-		workflow.createUserId = workflow.updateUserId = user.id;
+		workflow.createUserId = workflow.updateUserId = reusedUser.id;
 		workflow.save();
 		entitiesToRemove.add(workflow);
 
@@ -138,10 +139,10 @@ public class WorkflowApiTests extends BasicApiTests {
 			Assert.assertEquals(workflow.linkIds.size(), workflow.getLinks().size());
 
 			if (workflow.tenantId != null) {
-				Assert.assertEquals(workflow.tenantId, user.tenantId);
+				Assert.assertEquals(workflow.tenantId, reusedUser.tenantId);
 			}
-			Assert.assertEquals(workflow.createUserId, user.id);
-			Assert.assertEquals(workflow.updateUserId, user.id);
+			Assert.assertEquals(workflow.createUserId, reusedUser.id);
+			Assert.assertEquals(workflow.updateUserId, reusedUser.id);
 		}
 	}
 
@@ -159,7 +160,7 @@ public class WorkflowApiTests extends BasicApiTests {
 			});
 			Assert.assertNotNull(workflows);
 			for (Workflow workflow : workflows) {
-				Assert.assertEquals(workflow.tenantId, this.user.tenantId);
+				Assert.assertEquals(workflow.tenantId, this.reusedUser.tenantId);
 				Assert.assertTrue(workflow.isProject);
 			}
 		}
@@ -170,7 +171,7 @@ public class WorkflowApiTests extends BasicApiTests {
 		Workflow sharedWorkflow = new Workflow();
 		entitiesToRemove.add(sharedWorkflow);
 		sharedWorkflow.setName("Shared workflow");
-		sharedWorkflow.createUserId = sharedWorkflow.updateUserId = user.id;
+		sharedWorkflow.createUserId = sharedWorkflow.updateUserId = reusedUser.id;
 		mongoTemplate.insert(sharedWorkflow);
 
 		try (Tester tester = new Tester().basicAuth(email, password)) {

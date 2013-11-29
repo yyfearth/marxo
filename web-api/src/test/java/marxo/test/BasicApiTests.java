@@ -1,16 +1,28 @@
 package marxo.test;
 
+import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.testng.SkipException;
+import marxo.tool.PasswordEncryptor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.annotations.BeforeClass;
+
+import javax.crypto.SecretKeyFactory;
+import javax.xml.bind.DatatypeConverter;
 
 public abstract class BasicApiTests extends BasicDataTests {
 	protected String baseUrl;
 	protected String email;
 	protected String password;
-	protected User user;
+	protected String facebookToken;
+
+	protected Tenant reusedTenant;
+	protected User reusedUser;
+
+	ApplicationContext securityContext = new ClassPathXmlApplicationContext("classpath*:security.xml");
+	byte[] salt = DatatypeConverter.parseHexBinary((String) securityContext.getBean("passwordSaltHexString"));
+	SecretKeyFactory secretKeyFactory = (SecretKeyFactory) securityContext.getBean("secretKeyFactory");
+	PasswordEncryptor passwordEncryptor = new PasswordEncryptor(salt, secretKeyFactory);
 
 	protected BasicApiTests() {
 		ApiTestConfiguration configuration = getClass().getAnnotation(ApiTestConfiguration.class);
@@ -18,8 +30,9 @@ public abstract class BasicApiTests extends BasicDataTests {
 			return;
 		}
 		baseUrl = configuration.value();
-		email = configuration.email();
-		password = configuration.password();
+		email = getClass().getSimpleName().toLowerCase() + "@meow.com";
+		password = "test";
+		facebookToken = configuration.facebookToken();
 	}
 
 	@BeforeClass
@@ -27,11 +40,22 @@ public abstract class BasicApiTests extends BasicDataTests {
 	public void beforeClass() throws Exception {
 		super.beforeClass();
 
-		Criteria criteria = Criteria.where("email").is(email);
-		user = mongoTemplate.findOne(Query.query(criteria), User.class);
-		if (user == null) {
-			throw new SkipException(String.format("Cannot find email [%s]", email));
-		}
-	}
+		reusedTenant = new Tenant();
+		reusedTenant.setName("Marxo");
+		reusedTenant.description = "A tall, a good guy, and a cat.";
+		reusedTenant.phoneNumber = "(408) 888-8888";
+		reusedTenant.email = "marxo@gmail.com";
 
+		reusedUser = new User();
+		reusedUser.setTenant(reusedTenant);
+		reusedUser.setName("Test user");
+		reusedUser.setEmail(email);
+		reusedUser.setPassword(passwordEncryptor.encrypt(password));
+		reusedUser.oAuthData.put("facebook", facebookToken);
+
+		insertEntities(
+				reusedTenant,
+				reusedUser
+		);
+	}
 }
