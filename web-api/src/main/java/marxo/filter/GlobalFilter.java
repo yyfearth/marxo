@@ -18,7 +18,7 @@ public class GlobalFilter extends OncePerRequestFilter {
 			logger.debug(String.format("%s request from %s:%s for %s", request.getMethod(), ip, port, request.getRequestURL() + queryString));
 		}
 		response.addHeader("Server", "Fucking bad-ass Java-based Tomcat server (epic disasters!)");
-		response.addHeader("Version", "0.4");
+		response.addHeader("Version", "0.5");
 		filterChain.doFilter(request, response);
 	}
 }
