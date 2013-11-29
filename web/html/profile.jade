@@ -15,13 +15,9 @@ form#user_profile.form-horizontal
       .controls
         input#user_email(type='email', name='email', placeholder='user@company.com', maxlength='255', disabled)
     .control-group
-      label.control-label(for='first_name') First Name
+      label.control-label(for='first_name') Name
       .controls
-        input#first_name(type='text', name='first_name', placeholder='First Name', maxlength='255', readonly)
-    .control-group
-      label.control-label(for='last_name') Last Name
-      .controls
-        input#last_name(type='text', name='last_name', placeholder='Last Name', maxlength='255', readonly)
+        input#first_name(type='text', name='name', placeholder='User Name', maxlength='255', readonly)
     .control-group
       label.control-label(for='user_sex') Sex
       .controls

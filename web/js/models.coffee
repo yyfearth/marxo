@@ -4,45 +4,43 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   ## Common
 
-  ROOT = module.config().BASE_URL
+  ROOT = module.config().BASE_URL or '/api'
   ROOT = ROOT[...-1] if ROOT[-1..] is '/'
 
-  if Backbone.LocalStorage? # for local sync
-    syncValidation = -> return
-  else syncValidation = (method, model, options = {}) ->
-    options.dataType ?= 'json'
-    options.headers ?= {}
-    options.headers.Authorization ?= User.current?.get('credential') or ''
-    throw new Error 'no auth, need user login' unless options.headers.Authorization
-    if method isnt 'read'
-      cur_tenant_id = User.current?.get 'tenant_id'
-      throw new Error 'cannot create or update or delete without login user' unless cur_tenant_id?
-      switch method
-        when 'create', 'update'
-          unless model.has 'tenant_id'
-            model.set 'tenant_id', cur_tenant_id
-          else if cur_tenant_id isnt model.get 'tenant_id'
-            throw new Error 'cannot replace existing tenant_id'
-        when 'delete'
-          if cur_tenant_id isnt model.get 'tenant_id'
-            throw new Error 'cannot delete item not belong to your tenant'
-        when 'read'
-          break
-        else
-          throw new Error 'unsupported method ' + method
-    return
-
   class Entity extends Backbone.Model
+    syncValidation: (method, model, options = {}) ->
+      options.dataType ?= 'json'
+      options.headers ?= {}
+      options.headers.Authorization ?= User.current?.get('credential') or ''
+      throw new Error 'no auth, need user login' unless options.headers.Authorization
+      if method isnt 'read'
+        cur_tenant_id = User.current?.get 'tenant_id'
+        throw new Error 'cannot create or update or delete without login user' unless cur_tenant_id?
+        switch method
+          when 'create', 'update'
+            unless model.has 'tenant_id'
+              model.set 'tenant_id', cur_tenant_id
+            else if cur_tenant_id isnt model.get 'tenant_id'
+              throw new Error 'cannot replace existing tenant_id'
+          when 'delete'
+            if cur_tenant_id isnt model.get 'tenant_id'
+              throw new Error 'cannot delete item not belong to your tenant'
+          when 'read'
+            break
+          else
+            throw new Error 'unsupported method ' + method
+      return
     sync: (method, model, options = {}) ->
-      syncValidation method, model, options
+      @syncValidation method, model, options
       super method, model, options
 
   # just a alias, otherwise PageableCollection will not extends Collection
   Collection = Backbone.Collection
 
   class SimpleCollection extends Collection
+    syncValidation: Entity::syncValidation
     sync: (method, model, options = {}) ->
-      syncValidation method, model, options
+      @syncValidation method, model, options
       super method, model, options
 
   class ManagerCollection extends Backbone.PageableCollection
@@ -71,8 +69,9 @@ define 'models', ['module', 'lib/common'], (module) ->
       else
         callback? @, 'skipped'
       @
+    syncValidation: Entity::syncValidation
     sync: (method, model, options = {}) ->
-      syncValidation method, model, options
+      @syncValidation method, model, options
       super method, model, options
 
   ## Tenant / User
@@ -82,7 +81,6 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class User extends Entity
     urlRoot: ROOT + '/users'
-    idAttribute: 'email'
     fullname: ->
       if @has 'full_name'
         @get 'full_name'
@@ -99,6 +97,8 @@ define 'models', ['module', 'lib/common'], (module) ->
 #  class Participant extends User
 
   class Publisher extends User
+    defaults:
+      type: 'PUBLISHER'
 
 #  class Evalutator extends User
 
@@ -263,84 +263,72 @@ define 'models', ['module', 'lib/common'], (module) ->
         links: links
       @_warp @
       @
-    save: (attributes = {}, options = {}) -> # override for sync ids
-      if Backbone.LocalStorage? # for local sync
-        _getAttr = (r, i) ->
-          attr = r.attributes
-          attr.id ?= i
-          if Array.isArray attr.actions
-            action.id ?= i for action, i in attr.actions
-          attr
-        if @nodes? then attributes.nodes = @nodes.map _getAttr
-        if @links? then attributes.links = @links.map _getAttr
-        console.log 'save local', @_name, attributes
-        super attributes, options
-      else # for ajax sync
-        throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
-        console.log 'saving', @_name, attributes, @
-        # replace original callbacks
-        _success = options.success
-        _err = options.error
-        options.success = (wf, resp, opt) =>
-          # console.log 'saved wf', wf
-          # save nodes
-          workflow_id = wf.id
-          console.log 'workflow_id', workflow_id
-          save_opt = wait: true, reset: true
-          requests = []
-          @nodes?.forEach (node) =>
-            if node.isNew()
-              # console.log 'create node', workflow_id
-              requests.push node.save {workflow_id}, save_opt
-            else if node._changed
-              node.resetChangeFlag().save()
-            return
-          $.when.apply($, requests).then =>
-            # console.log 'new nodes created', @nodes
-            # then save links
-            requests = []
-            @links?.forEach (link) =>
-              if link.isNew()
-                if not link.prevNode? and 'number' is typeof idx = link.get 'prev_node_id'
-                  link.prevNode = @nodes.at idx
-                if not link.nextNode? and 'number' is typeof idx = link.get 'next_node_id'
-                  link.nextNode = @nodes.at idx
-                attr =
-                  workflow_id: workflow_id
-                  prev_node_id: link.prevNode.id
-                  next_node_id: link.nextNode.id
-                # console.log 'create link', attr
-                requests.push link.save attr, save_opt
-              else if link._changed
-                link.resetChangeFlag().save()
-              return
-            # update workflow for start node
-            unless @get('start_node_id') is @startNode.id
-              requests.push @save start_node_id: @startNode.id
-            if (typeof _success is 'function') or (typeof _err is 'function')
-              $.when.apply($, requests).then =>
-                # console.log 'new links created', @links
-                # finally done
-                console.log 'saved', @_name, attributes, @
-                _success wf, resp, opt
-              , =>
-                console.error 'fail to save links for wf', @
-                _err wf, null, options
-                return
-            console.log 'saving wf', @
-            return
-          , =>
-            console.error 'fail to save nodes for wf', @
-            _err? wf, null, options
-            return
-          # delete unused nodes/links (no wait)
-          @_deleted?.forEach (model) -> model.destroy()
+    save: (attributes = {}, options = {}) ->
+      throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
+      console.log 'saving', @_name, attributes, @
+      # replace original callbacks
+      _success = options.success
+      _err = options.error
+      options.success = (wf, resp, opt) =>
+        # console.log 'saved wf', wf
+        # save nodes
+        workflow_id = wf.id
+        console.log 'workflow_id', workflow_id
+        save_opt = wait: true, reset: true
+        requests = []
+        @nodes?.forEach (node) =>
+          if node.isNew()
+            # console.log 'create node', workflow_id
+            requests.push node.save {workflow_id}, save_opt
+          else if node._changed
+            node.resetChangeFlag().save()
           return
-        # save workflow
-        @unset 'start_node_id', silent: true if typeof @get 'start_node_id' is 'number'
-        @unset 'nodes', silent: true
-        @unset 'links', silent: true
-        super attributes, options
+        $.when.apply($, requests).then =>
+          # console.log 'new nodes created', @nodes
+          # then save links
+          requests = []
+          @links?.forEach (link) =>
+            if link.isNew()
+              if not link.prevNode? and 'number' is typeof idx = link.get 'prev_node_id'
+                link.prevNode = @nodes.at idx
+              if not link.nextNode? and 'number' is typeof idx = link.get 'next_node_id'
+                link.nextNode = @nodes.at idx
+              attr =
+                workflow_id: workflow_id
+                prev_node_id: link.prevNode.id
+                next_node_id: link.nextNode.id
+              # console.log 'create link', attr
+              requests.push link.save attr, save_opt
+            else if link._changed
+              link.resetChangeFlag().save()
+            return
+          # update workflow for start node
+          unless @get('start_node_id') is @startNode.id
+            requests.push @save start_node_id: @startNode.id
+          if (typeof _success is 'function') or (typeof _err is 'function')
+            $.when.apply($, requests).then =>
+              # console.log 'new links created', @links
+              # finally done
+              console.log 'saved', @_name, attributes, @
+              _success wf, resp, opt
+            , =>
+              console.error 'fail to save links for wf', @
+              _err wf, null, options
+              return
+          console.log 'saving wf', @
+          return
+        , =>
+          console.error 'fail to save nodes for wf', @
+          _err? wf, null, options
+          return
+        # delete unused nodes/links (no wait)
+        @_deleted?.forEach (model) -> model.destroy()
+        return
+      # save workflow
+      @unset 'start_node_id', silent: true if typeof @get 'start_node_id' is 'number'
+      @unset 'nodes', silent: true
+      @unset 'links', silent: true
+      super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
       n = @_name
       if @loaded()

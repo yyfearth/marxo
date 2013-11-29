@@ -18,24 +18,21 @@ define 'test_data', ['models'], (models) ->
     publishers: [
       email: 'test@example.com'
       password: 'B4driGpKjDrtdKaAoA8nUmm+D2Pl3kxoF5POX0sGSk4' # test
-      first_name: 'Test'
-      last_name: 'User'
+      name: 'Test User'
       tenant_id: 0
       created_at: '2013-09-05T02:18:13.621Z'
       updated_at: '2013-09-05T02:18:13.621Z'
     ,
       email: 'yyfearth@gmail.com'
       password: '2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8' # asdfasdf
-      first_name: 'Wilson'
-      last_name: 'Young'
+      name: 'Wilson Young'
       tenant_id: 0
       created_at: '2013-09-05T02:18:13.621Z'
       updated_at: '2013-09-05T02:18:13.621Z'
     ,
       email: 'otaru14204@hotmail.com'
-      password: 'XELXdnuv/p7QeCzPM7Pl7TLfd6o2NZSaPb/sGtYUg5Q' # @qwer123
-      first_name: 'Leo'
-      last_name: 'Chu'
+      password: 'zhKhZMAp8rYymnIvM/rbcuNNrpG+Qgk+zVOS+x0n9mY' # @qwer123
+      name: 'Leo Chu'
       tenant_id: 0
       created_at: '2013-09-05T02:18:13.621Z'
       updated_at: '2013-09-05T02:18:13.621Z'
