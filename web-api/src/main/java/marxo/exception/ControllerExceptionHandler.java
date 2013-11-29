@@ -93,6 +93,12 @@ public class ControllerExceptionHandler implements Loggable {
 		return new ResponseEntity<>(new ErrorJson(e.messages.toArray(new String[e.messages.size()])), HttpStatus.BAD_REQUEST);
 	}
 
+	@ExceptionHandler({ValidationException.class})
+	public ResponseEntity<ErrorJson> handleValidationException(ValidationException e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(e.reasons.toArray(new String[e.reasons.size()])), HttpStatus.BAD_REQUEST);
+	}
+
 	@ExceptionHandler({DataAccessResourceFailureException.class})
 	public ResponseEntity<ErrorJson> handleDataAccessResourceFailureException(DataAccessResourceFailureException e) {
 		logger.error(e.getMessage());

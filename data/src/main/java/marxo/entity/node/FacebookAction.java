@@ -1,6 +1,6 @@
 package marxo.entity.node;
 
-import marxo.validation.Errors;
+import marxo.exception.Errors;
 
 public class FacebookAction extends Action {
 

@@ -1,4 +1,4 @@
-package marxo.validation;
+package marxo.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;

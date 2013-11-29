@@ -6,10 +6,8 @@ import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.exception.FacebookException;
 import com.restfb.types.FacebookType;
-import marxo.entity.FacebookStatus;
 import marxo.entity.content.FacebookContent;
 import marxo.entity.workflow.RunStatus;
-import marxo.validation.Errors;
 import org.springframework.data.annotation.Transient;
 
 @JsonIgnoreProperties(value = {"tenantDao", "contentDao"})

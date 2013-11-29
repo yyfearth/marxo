@@ -6,7 +6,7 @@ import marxo.entity.content.Content;
 import marxo.entity.user.TenantChildEntity;
 import marxo.exception.DatabaseException;
 import marxo.exception.ValidationException;
-import marxo.validation.Errors;
+import marxo.exception.Errors;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.query.Criteria;

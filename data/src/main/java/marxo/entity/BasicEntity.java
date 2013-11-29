@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import marxo.tool.Loggable;
-import marxo.validation.Errors;
+import marxo.exception.Errors;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
