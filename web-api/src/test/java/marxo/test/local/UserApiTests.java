@@ -48,6 +48,7 @@ public class UserApiTests extends BasicApiTests {
 		entitiesToRemove.add(participant);
 	}
 
+	@Test
 	public void searchUsers() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
@@ -61,11 +62,14 @@ public class UserApiTests extends BasicApiTests {
 			});
 			Assert.assertNotNull(users);
 			for (User user : users) {
-				Assert.assertEquals(user.tenantId, this.reusedUser.tenantId);
+				if (user.tenantId != null) {
+					Assert.assertEquals(user.tenantId, this.reusedUser.tenantId);
+				}
 			}
 		}
 	}
 
+	@Test
 	public void getCurrentUser() throws Exception {
 		try (Tester tester = new Tester().baseUrl(baseUrl + "users/me").basicAuth(email, password)) {
 			tester
