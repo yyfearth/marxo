@@ -4,6 +4,11 @@
     h3.modal-title#user_editor_title Create User
   .modal-body
     form.form-horizontal
+      .control-group.edit-only
+        label.control-label(for='user_avatar') Avatar
+        .controls
+          a#user_avatar.thumbnail(href='http://gravatar.com/emails/', target='_blank', title='Change your avatar at gravatar.com')
+            img(alt='Avatar')
       .control-group
         label.control-label(for='user_email') Email
         .controls
@@ -15,7 +20,7 @@
           title='Length from 6 to 2048 characters', data-placement='right', pattern='.{6,2048}', maxlength='2048')
           input#user_password_confirm(type='password', placeholder='********',
           title='Repeat Password', data-placement='right', pattern='.{6,2048}', maxlength='2048')
-          .help-inline.edit-only Leave then blank to keep current password.
+          .help-inline.edit-only Leave them blank to keep current password.
       .control-group
         label.control-label(for='first_name') Full Name
         .controls
@@ -31,13 +36,14 @@
             button.btn.active(type='button', name='sex', value='') Unspecified
             button.btn(type='button', name='sex', value='female') Female
       .control-group
-        label.control-label(for='user_title') Title
-        .controls
-          input#user_title(type='text', name='title', placeholder='User Title', maxlength='32')
-      .control-group
         label.control-label(for='user_desc') Description
         .controls
           textarea#user_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
+      .control-group
+        label.control-label(for='link_fb') Open Accounts
+        .controls
+          button.btn.btn-facebook.icon-facebook#link_fb(type='button', data-name='Facebook') Link Facebook Account
+          button.btn.btn-twitter.icon-twitter.tmp(type='button', data-name='Twitter') Link Twitter Account
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save

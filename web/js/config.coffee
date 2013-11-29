@@ -286,6 +286,8 @@ Service
       @$sex = $ findAll '[name=sex]', @form
       @$editOnly = @$el.find '.edit-only'
       @passwords = findAll '[type=password]', @form
+      # remove elements not used in console
+      @$el.find('#user_avatar, #link_fb').parents('.control-group').remove()
       @
     _setSex: (sex = '') ->
       $sex = @$sex.filter "[value='#{sex}']"
