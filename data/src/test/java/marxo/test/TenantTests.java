@@ -85,7 +85,7 @@ public class TenantTests extends BasicDataTests {
 			user.setTenant(tenant);
 			user.setName("Leo");
 			user.setEmail("otaru14204@hotmail.com");
-			user.setPassword(passwordEncryptor.encrypt("XELXdnuv/p7QeCzPM7Pl7TLfd6o2NZSaPb/sGtYUg5Q"));
+			user.setPassword(passwordEncryptor.encrypt("zhKhZMAp8rYymnIvM/rbcuNNrpG+Qgk+zVOS+x0n9mY"));
 			users.add(user);
 		}
 
