@@ -23,7 +23,7 @@ html(lang='en-US')
                     input.input-block-level(type='password', name='password', placeholder='Password', maxlength='2048', required)
                     button.btn.btn-success(type='submit') Sign in
                     | &nbsp;
-                    button.btn(type='button') Sign Up
+                    button.btn.btn-sign-up(type='button') Sign Up
                 li.divider
                 li.sign-in
                   button.btn.btn-facebook.icon-facebook Sign in with Facebook
@@ -38,6 +38,9 @@ html(lang='en-US')
           ul.nav
             li(data-frame='home')
               a.icon-home(href='#home') Home
+
+    include html/config/user
+
     .content.container
       form
         h1 CMPE 275 Project Requirements
