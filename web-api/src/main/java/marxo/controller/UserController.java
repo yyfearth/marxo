@@ -39,6 +39,7 @@ public class UserController extends TenantChildController<User> {
 	public void preHandle() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+		// Since create API might be accessed by an anonymous user, `authentication` might be AnonymousAuthentication.
 		if (authentication instanceof MarxoAuthentication) {
 			user = ((MarxoAuthentication) authentication).getUser();
 		}
@@ -47,7 +48,6 @@ public class UserController extends TenantChildController<User> {
 	@Override
 	public User create(@RequestBody User user, HttpServletResponse response) throws Exception {
 		switch (user.type) {
-			case UNKNOWN:
 			case ADMIN:
 				throw new ValidationException(String.format("Cannot create user with type %s", user.type));
 			case EVALUATOR:
@@ -106,7 +106,6 @@ public class UserController extends TenantChildController<User> {
 	public User update(@PathVariable String idString, @Valid @RequestBody User user) throws Exception {
 		Assert.notNull(user.getPassword());
 		switch (user.type) {
-			case UNKNOWN:
 			case ADMIN:
 				throw new ValidationException(String.format("Cannot update user with type %s", user.type));
 			case EVALUATOR:
