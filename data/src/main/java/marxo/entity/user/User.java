@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -17,7 +19,7 @@ public class User extends TenantChildEntity implements Serializable {
 	protected String email;
 	public UserType type = UserType.UNKNOWN;
 	@JsonProperty("oauth")
-	public OAuthData oAuthData;
+	public Map<String, String> oAuthData = new HashMap<>();
 
 	public String getPassword() {
 		return password;
@@ -42,15 +44,5 @@ public class User extends TenantChildEntity implements Serializable {
 
 	public static User get(ObjectId id) {
 		return mongoTemplate.findById(id, User.class);
-	}
-
-	public static class OAuthData {
-		@JsonProperty("facebook")
-		public FacebookOAuthData facebookOAuthData;
-
-		public static class FacebookOAuthData {
-			public String userId;
-			public String username;
-		}
 	}
 }

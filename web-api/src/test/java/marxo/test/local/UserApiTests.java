@@ -1,6 +1,7 @@
 package marxo.test.local;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.Maps;
 import com.google.common.net.MediaType;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
@@ -145,10 +146,8 @@ public class UserApiTests extends BasicApiTests {
 	public void withOAuthData() throws Exception {
 		User user = new User();
 		user.setName("User with OAuth");
-		user.oAuthData = new User.OAuthData();
-		user.oAuthData.facebookOAuthData = new User.OAuthData.FacebookOAuthData();
-		user.oAuthData.facebookOAuthData.userId = "287762482";
-		user.oAuthData.facebookOAuthData.username = "meow";
+		user.oAuthData = Maps.newHashMap();
+		user.oAuthData.put("facebook", "287762482");
 		entitiesToRemove.add(user);
 
 		MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
@@ -163,13 +162,11 @@ public class UserApiTests extends BasicApiTests {
 
 			User user1 = tester.getContent(User.class);
 			Assert.assertNotNull(user1.oAuthData);
-			Assert.assertNotNull(user1.oAuthData.facebookOAuthData);
 			Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(user.oAuthData));
 		}
 
 		User user1 = User.get(user.id);
 		Assert.assertNotNull(user1.oAuthData);
-		Assert.assertNotNull(user1.oAuthData.facebookOAuthData);
 		Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(user.oAuthData));
 	}
 }
