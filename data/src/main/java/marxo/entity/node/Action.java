@@ -109,10 +109,6 @@ public class Action extends TenantChildEntity {
 			errors.add(String.format("%s [%s] has no node", this, id));
 		}
 
-		if (contentId == null) {
-			errors.add(String.format("%s [%s] has no content", this, id));
-		}
-
 		return super.validate(errors);
 	}
 
@@ -132,7 +128,7 @@ public class Action extends TenantChildEntity {
 	}
 
 	public static Action get(ObjectId id) {
-		Criteria criteria = new Criteria().elemMatch(Criteria.where("_id").is(id));
+		Criteria criteria = Criteria.where("actions").elemMatch(Criteria.where("_id").is(id));
 		Node node = mongoTemplate.findOne(Query.query(criteria), Node.class);
 		return (node == null) ? null : node.getActions().get(0);
 	}
