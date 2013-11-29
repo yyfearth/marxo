@@ -102,6 +102,22 @@ public class UserApiTests extends BasicApiTests {
 	}
 
 	@Test(dependsOnMethods = {"getOneUser", "wrongAuthentication"})
+	public void getCurrentUser() throws Exception {
+		try (Tester tester = new Tester().baseUrl(baseUrl + "users/me").basicAuth(email, password)) {
+			tester
+					.httpGet()
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user = tester.getContent(User.class);
+			Assert.assertNotNull(user);
+			Assert.assertEquals(user.getEmail(), email);
+		}
+	}
+
+	@Test
 	public void getTenants() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester

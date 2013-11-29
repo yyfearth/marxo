@@ -32,4 +32,11 @@ public class UserController extends TenantChildController<User> {
 
 		return user;
 	}
+
+	@RequestMapping(value = "/me", method = RequestMethod.GET)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public User getCurrentUser() throws Exception {
+		return user;
+	}
 }
