@@ -3,7 +3,6 @@ package marxo.test.local;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Maps;
 import com.google.common.net.MediaType;
-import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.exception.ErrorJson;
 import marxo.serialization.MarxoObjectMapper;
@@ -18,7 +17,6 @@ import java.util.List;
 
 @SuppressWarnings("unchecked")
 @ApiTestConfiguration
-@Test(groups = "user")
 public class UserApiTests extends BasicApiTests {
 
 	@Test
@@ -119,30 +117,6 @@ public class UserApiTests extends BasicApiTests {
 	}
 
 	@Test
-	public void getTenants() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpGet(baseUrl + "tenants")
-					.send();
-			tester
-					.isOk()
-					.matchContentType(MediaType.JSON_UTF_8);
-
-			List<Tenant> tenants = tester.getContent(new TypeReference<List<Tenant>>() {
-			});
-			Assert.assertNotNull(tenants);
-			boolean doesContainThisUser = false;
-			for (Tenant tenant : tenants) {
-				if (tenant.id.equals(user.tenantId)) {
-					doesContainThisUser = true;
-					break;
-				}
-			}
-			Assert.assertTrue(doesContainThisUser);
-		}
-	}
-
-	@Test
 	public void withOAuthData() throws Exception {
 		User user = new User();
 		user.setName("User with OAuth");
@@ -168,5 +142,21 @@ public class UserApiTests extends BasicApiTests {
 		User user1 = User.get(user.id);
 		Assert.assertNotNull(user1.oAuthData);
 		Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(user.oAuthData));
+	}
+
+	@Test
+	public void basicAuthWithFacebookAcessToken() throws Exception {
+		try (Tester tester = new Tester().baseUrl(baseUrl + "user/me").basicAuth("facebook", reusedUser.oAuthData.get("facebook"))) {
+			tester
+					.httpGet()
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user = tester.getContent(User.class);
+			Assert.assertNotNull(user);
+			Assert.assertEquals(user.getEmail(), email);
+		}
 	}
 }
