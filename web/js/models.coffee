@@ -82,7 +82,6 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class User extends Entity
     urlRoot: ROOT + '/users'
-    idAttribute: 'email'
     fullname: ->
       if @has 'full_name'
         @get 'full_name'

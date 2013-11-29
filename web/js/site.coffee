@@ -1,6 +1,7 @@
 "use strict"
 
 ROOT = localStorage.ROOT ? 'http://masonwan.com/marxo/api'
+ROOT = ROOT[...-1] if ROOT[-1..] is '/'
 
 requirejs.config
   shim:
@@ -20,7 +21,6 @@ require ['lib/common'], ->
 
   class User extends Backbone.Model
     urlRoot: ROOT + '/users'
-    idAttribute: 'email'
     fullname: ->
       if @has 'full_name'
         @get 'full_name'
@@ -77,38 +77,34 @@ require ['lib/common'], ->
       if sessionStorage.user
         try
           user = new User JSON.parse sessionStorage.user
-          email = user.get 'email'
           auth = user.get 'credential'
         catch e
           console.error 'pause user failed', e
           delete sessionStorage.user
-        @signin email, auth if email and auth
+        @signin auth if auth
       super options
     _signInEmail: (email, password) ->
       require ['crypto'], ({hashPassword}) =>
         hash = hashPassword email, password
         auth = 'Basic ' + btoa "#{email}:#{hash}"
-        @signin email, auth
+        @signin auth
       return
     _signInFB: ->
       # TODO: sign in using fb
       return
-    signin: (email, auth) ->
-      new User({email}).fetch
+    signin: (auth) ->
+      new User(id: 'me').fetch
         headers:
           Authorization: auth
+        reset: true
         success: (user) =>
-          if email is user.get 'email'
-            console.log 'logined', user
-            user.set 'credential', auth
-            if user.has 'email_md5'
-              @_signedIn user
-            else require ['crypto'], ({md5Email}) =>
-              user.set 'email_md5', md5Email email
-              @_signedIn user
-          else
-            console.error 'sign-in failed', 'email not matched'
-            alert 'Sign in failed'
+          console.log 'logined', user
+          user.set 'credential', auth
+          if user.has 'email_md5'
+            @_signedIn user
+          else require ['crypto'], ({md5Email}) =>
+            user.set 'email_md5', md5Email user.get 'email'
+            @_signedIn user
           return
         error: (ignored, response) =>
           console.error 'sign-in failed', response

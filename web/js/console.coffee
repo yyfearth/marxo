@@ -215,9 +215,10 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       unless email and auth and email_md5
         console.warn 'saved user is not valid', email, auth, email_md5
         @_fail()
-      else new User({email}).fetch
+      else new User({id: 'me', email}).fetch
         headers:
           Authorization: auth
+        reset: true
         success: (user) =>
           if user.has('password') and user.get('password') isnt atob(auth[6..]).slice(email.length + 1) # for test only
             @_fail '(TEST ONLY) Password not correct'
