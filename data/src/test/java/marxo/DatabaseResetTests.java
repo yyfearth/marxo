@@ -1,10 +1,11 @@
-package marxo.test;
+package marxo;
 
 import com.mongodb.DB;
 import marxo.entity.FacebookData;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.user.UserType;
+import marxo.test.BasicDataTests;
 import marxo.tool.PasswordEncryptor;
 import org.joda.time.DateTime;
 import org.springframework.context.ApplicationContext;
@@ -22,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings({"uncheck", "unchecked"})
-public class TenantTests extends BasicDataTests {
+@SuppressWarnings({"unchecked"})
+public class DatabaseResetTests extends BasicDataTests {
 
 	@Test(priority = 10000)
 	public void cleanDatabase() throws Exception {
