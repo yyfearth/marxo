@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.net.BindException;
+import java.util.Arrays;
 
 @ControllerAdvice
 public class ControllerExceptionHandler implements Loggable {
@@ -30,7 +31,7 @@ public class ControllerExceptionHandler implements Loggable {
 		logger.debug(e.getMessage());
 		logger.debug(StringTool.exceptionToString(e));
 
-		return new ResponseEntity<>(new ErrorJson(String.format("The shit you gave is bad (%s)", e.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ErrorJson(String.format("The request body is not acceptable [%s]", e.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({ConversionNotSupportedException.class, HttpMessageNotWritableException.class})
@@ -38,7 +39,7 @@ public class ControllerExceptionHandler implements Loggable {
 		logger.error(e.getMessage());
 		logger.error(StringTool.exceptionToString(e));
 
-		return new ResponseEntity<>(new ErrorJson("Sorry, I don't know how to translate your shit"), HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(new ErrorJson("Maybe the developer forget to write a converter"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
 	@ExceptionHandler({HttpMediaTypeNotAcceptableException.class})
@@ -46,20 +47,20 @@ public class ControllerExceptionHandler implements Loggable {
 		logger.debug(e.getMessage());
 		logger.debug(StringTool.exceptionToString(e));
 
-		return new ResponseEntity<>(new ErrorJson(String.format("Cannot accept your shit (%s)", e.getMessage())), HttpStatus.NOT_ACCEPTABLE);
+		return new ResponseEntity<>(new ErrorJson(String.format("The request media type is not acceptable [%s]", e.getMessage())), HttpStatus.NOT_ACCEPTABLE);
 	}
 
 	@ExceptionHandler({HttpMediaTypeNotSupportedException.class})
 	public ResponseEntity<ErrorJson> handleUnsupportedMediaType(Exception e) {
 		logger.debug(e.getMessage());
-		return new ResponseEntity<>(new ErrorJson(String.format("Doesn't support your shit (%s)", e.getMessage())), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+		return new ResponseEntity<>(new ErrorJson(String.format("Doesn't support your shit [%s]", e.getMessage())), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 	}
 
 	@ExceptionHandler({HttpRequestMethodNotSupportedException.class})
-	public ResponseEntity<ErrorJson> handleMethodNotAllowed(Exception e) {
+	public ResponseEntity<ErrorJson> handleMethodNotAllowed(HttpRequestMethodNotSupportedException e) {
 		logger.debug(e.getMessage());
 
-		return new ResponseEntity<>(new ErrorJson(String.format("Your shit is not allowed (%s) %s", e.getMessage(), StringTool.exceptionToString(e))), HttpStatus.METHOD_NOT_ALLOWED);
+		return new ResponseEntity<>(new ErrorJson(String.format("The request method [%s] is not supported. Acceptable methods are %s", e.getMethod(), Arrays.toString(e.getSupportedMethods()))), HttpStatus.METHOD_NOT_ALLOWED);
 	}
 
 	@ExceptionHandler({NoSuchRequestHandlingMethodException.class, IllegalArgumentException.class})
@@ -67,7 +68,7 @@ public class ControllerExceptionHandler implements Loggable {
 		logger.debug(e.getMessage());
 		logger.debug(StringTool.exceptionToString(e));
 
-		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit [%s] %s", e.getMessage(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit [%s] %s", e.getClass().getSimpleName(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
 	}
 
 	// This application only

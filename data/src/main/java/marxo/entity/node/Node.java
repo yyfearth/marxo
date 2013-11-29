@@ -59,13 +59,15 @@ public class Node extends WorkflowChildEntity {
 	public void wire() {
 		for (int i = 0, len = actions.size(); i < len; i++) {
 			Action action = actions.get(i);
-			action.setNode(this);
+			if (tenant != null) {
+				action.setTenant(tenant);
+			} else {
+				action.tenantId = tenantId;
+			}
+
 			if (i + 1 != len) {
 				action.setNextAction(actions.get(i + 1));
 			}
-
-			action.setNode(this);
-			action.tenantId = tenantId;
 
 			if (action.event != null) {
 				action.event.setAction(action);
@@ -97,13 +99,17 @@ public class Node extends WorkflowChildEntity {
 		return (actionMap == null) ? (actionMap = Maps.uniqueIndex(actions, SelectIdFunction.getInstance())) : actionMap;
 	}
 
-//	public Action getFirstAction() {
-//		return (actions.isEmpty()) ? null : actions.get(0);
-//	}
-
 	public void addAction(Action action) {
 		actions.add(action);
 		action.setNode(this);
+
+		if (actions.size() == 1) {
+			currentActionId = action.id;
+		} else {
+			int lastIndex = actions.size() - 1;
+			int secondLastIndex = lastIndex - 1;
+			actions.get(secondLastIndex).setNextAction(actions.get(lastIndex));
+		}
 	}
 
 	/*
@@ -132,7 +138,7 @@ public class Node extends WorkflowChildEntity {
 			}
 			return actions.get(0);
 		}
-		return (currentAction == null) ? (currentAction = getActionMap().get(currentActionId)) : null;
+		return (currentAction == null) ? (currentAction = getActionMap().get(currentActionId)) : currentAction;
 	}
 
 	public void setCurrentAction(Action currentAction) {

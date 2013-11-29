@@ -4,7 +4,7 @@ import com.google.common.net.MediaType;
 import marxo.entity.node.Action;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
-import marxo.entity.node.PostFacebook;
+import marxo.entity.node.PostFacebookAction;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
@@ -26,13 +26,13 @@ public class EventApiTests extends BasicApiTests {
 		reusedNode = new Node();
 		reusedNode.setName(getClass().getSimpleName());
 		reusedNode.tenantId = user.tenantId;
-		entitiesToInsert.add(reusedNode);
 
-		reusedAction = new PostFacebook();
+		reusedAction = new PostFacebookAction();
 		reusedNode.addAction(reusedAction);
-		entitiesToInsert.add(reusedNode);
 
-		insertEntities();
+		insertEntities(
+				reusedNode
+		);
 	}
 
 	@Test

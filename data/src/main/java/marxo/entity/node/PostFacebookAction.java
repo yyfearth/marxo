@@ -13,7 +13,7 @@ import marxo.validation.Errors;
 import org.springframework.data.annotation.Transient;
 
 @JsonIgnoreProperties(value = {"tenantDao", "contentDao"})
-public class PostFacebook extends Action {
+public class PostFacebookAction extends FacebookAction {
 	@Transient
 	protected FacebookContent content;
 
@@ -41,22 +41,5 @@ public class PostFacebook extends Action {
 		status = RunStatus.FINISHED;
 
 		return super.act();
-	}
-
-	@Override
-	public boolean validate(Errors errors) {
-		if (tenantId == null) {
-			errors.add(String.format("%s [%s] has no tenant", this, id));
-		}
-
-		if (getTenant().facebookData == null) {
-			errors.add(String.format("%s [%s] has no tenant", this, id));
-		}
-
-		if (getTenant().facebookData.status == FacebookStatus.DISCONNTECTED) {
-			errors.add(String.format("%s Tenant [%s] has no Facebook access", this, getTenant()));
-		}
-
-		return super.validate(errors);
 	}
 }

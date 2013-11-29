@@ -15,13 +15,13 @@ public class ContentApiTests extends BasicApiTests {
 	Content reusedContent;
 
 	@Test
-	public void testCreateContent() throws Exception {
+	public void createContent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			FacebookContent facebookContent = new FacebookContent();
 			reusedContent = facebookContent;
 			entitiesToRemove.add(facebookContent);
 			facebookContent.actionId = new ObjectId();
-			facebookContent.message = "testCreateContent";
+			facebookContent.message = "createContent";
 
 			tester
 					.httpPost(baseUrl + "content", facebookContent)
@@ -35,8 +35,8 @@ public class ContentApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnMethods = "testCreateContent")
-	public void testReadContent() throws Exception {
+	@Test(dependsOnMethods = "createContent")
+	public void readContent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			tester
 					.httpGet(baseUrl + "content/" + reusedContent.id)
@@ -49,11 +49,11 @@ public class ContentApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnMethods = "testReadContent")
-	public void testUpdateContent() throws Exception {
+	@Test(dependsOnMethods = "readContent")
+	public void updateContent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			FacebookContent facebookContent = (FacebookContent) reusedContent;
-			facebookContent.message = "testUpdateContent";
+			facebookContent.message = "updateContent";
 
 			tester
 					.httpPut(baseUrl + "content/" + reusedContent.id, facebookContent)
@@ -67,13 +67,13 @@ public class ContentApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnMethods = "testUpdateContent")
-	public void testDeleteContent() throws Exception {
+	@Test(dependsOnMethods = "updateContent")
+	public void deleteContent() throws Exception {
 		try (Tester tester = new Tester().basicAuth(email, password)) {
 			FacebookContent facebookContent = new FacebookContent();
 			entitiesToRemove.add(facebookContent);
 			facebookContent.actionId = new ObjectId();
-			facebookContent.message = "testCreateContent";
+			facebookContent.message = "createContent";
 
 			tester
 					.httpDelete(baseUrl + "content/" + reusedContent.id)

@@ -5,6 +5,7 @@ import com.google.common.net.MediaType;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.exception.ErrorJson;
+import marxo.serialization.MarxoObjectMapper;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.BasicApiTests;
 import marxo.test.Tester;
@@ -122,5 +123,37 @@ public class UserApiTests extends BasicApiTests {
 			}
 			Assert.assertTrue(doesContainThisUser);
 		}
+	}
+
+	@Test
+	public void withOAuthData() throws Exception {
+		User user = new User();
+		user.setName("User with OAuth");
+		user.oAuthData = new User.OAuthData();
+		user.oAuthData.facebookOAuthData = new User.OAuthData.FacebookOAuthData();
+		user.oAuthData.facebookOAuthData.userId = "287762482";
+		user.oAuthData.facebookOAuthData.username = "meow";
+		entitiesToRemove.add(user);
+
+		MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
+
+		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
+			tester
+					.httpPost(user)
+					.send();
+			tester
+					.isCreated()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user1 = tester.getContent(User.class);
+			Assert.assertNotNull(user1.oAuthData);
+			Assert.assertNotNull(user1.oAuthData.facebookOAuthData);
+			Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(user.oAuthData));
+		}
+
+		User user1 = User.get(user.id);
+		Assert.assertNotNull(user1.oAuthData);
+		Assert.assertNotNull(user1.oAuthData.facebookOAuthData);
+		Assert.assertEquals(marxoObjectMapper.writeValueAsString(user1.oAuthData), marxoObjectMapper.writeValueAsString(user.oAuthData));
 	}
 }

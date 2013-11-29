@@ -1,12 +1,12 @@
 package marxo.entity.node;
 
-import marxo.entity.BasicEntity;
+import marxo.entity.user.TenantChildEntity;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.springframework.data.annotation.Transient;
 
-public class Event extends BasicEntity {
+public class Event extends TenantChildEntity {
 	protected DateTime startTime;
 	protected DateTime endTime;
 	protected Duration duration;
@@ -27,6 +27,8 @@ public class Event extends BasicEntity {
 	public void setAction(Action action) {
 		this.action = action;
 		this.actionId = action.id;
+		this.nodeId = action.nodeId;
+		this.tenantId = action.tenantId;
 	}
 
 	/*
@@ -48,6 +50,7 @@ public class Event extends BasicEntity {
 	public void setNode(Node node) {
 		this.node = node;
 		this.nodeId = node.id;
+		this.tenantId = node.tenantId;
 	}
 
 	public DateTime getStartTime() {

@@ -7,7 +7,7 @@ import marxo.entity.link.Condition;
 import marxo.entity.link.Link;
 import marxo.entity.node.Action;
 import marxo.entity.node.Node;
-import marxo.entity.node.PostFacebook;
+import marxo.entity.node.PostFacebookAction;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
@@ -139,7 +139,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					node.setActions(new ArrayList<Action>());
 					int numActions = threadLocalRandom.nextInt(1, 3);
 					for (int k = 0; k < numActions; k++) {
-						Action action = new PostFacebook();
+						Action action = new PostFacebookAction();
 						node.getActions().add(action);
 						action.tenantId = user.tenantId;
 						action.setName("Action " + (k + 1));
@@ -192,7 +192,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 //				Action action;
 //				Link linkLeft, linkRight;
 //				Condition condition;
-//				PostFacebook facebookPost;
+//				PostFacebookAction facebookPost;
 //				Event event;
 //				Trigger trigger;
 //
@@ -201,7 +201,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 //				node.setName("Make the requirement");
 //				node.fillWithDefaultValues();
 //
-//				facebookPost = new PostFacebook();
+//				facebookPost = new PostFacebookAction();
 //				facebookPost.setName("Announce the requirement");
 //				facebookPost.content = "This is requirement.";
 //				facebookPost.actionId = action.id;
@@ -226,7 +226,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 //				action.setName("Open for voting");
 //				action.contextType = ContextType.POST_FACEBOOK;
 //
-//				facebookPost = new PostFacebook();
+//				facebookPost = new PostFacebookAction();
 //				facebookPost.content = "Please vote the design.";
 //				facebookPost.actionId = action.id;
 //				facebookPost.fillWithDefaultValues();
@@ -274,7 +274,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 //				node.actions.add(action);
 //				action.setName("Announce the client requirement");
 //
-//				facebookPost = new PostFacebook();
+//				facebookPost = new PostFacebookAction();
 //				facebookPost.content = "Please design the client";
 //				facebookPost.actionId = action.id;
 //				facebookPost.fillWithDefaultValues();
@@ -323,7 +323,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 //				action.setName("Announce the server requirement");
 //				action.contextType = ContextType.POST_FACEBOOK;
 //
-//				facebookPost = new PostFacebook();
+//				facebookPost = new PostFacebookAction();
 //				facebookPost.content = "Please design the server";
 //				facebookPost.actionId = action.id;
 //				facebookPost.fillWithDefaultValues();
@@ -373,7 +373,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 //				action.setName("Post result to Facebook");
 //				action.contextType = ContextType.POST_FACEBOOK;
 //
-//				facebookPost = new PostFacebook();
+//				facebookPost = new PostFacebookAction();
 //				facebookPost.content = "Please design the client";
 //				facebookPost.actionId = action.id;
 //				facebookPost.fillWithDefaultValues();

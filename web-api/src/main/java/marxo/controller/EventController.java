@@ -30,7 +30,7 @@ public class EventController extends EntityController<Event> {
 	}
 
 	@Override
-	public Event create(@Valid @RequestBody Event entity, HttpServletResponse response) throws Exception {
+	public Event create(@RequestBody Event entity, HttpServletResponse response) throws Exception {
 		return super.create(entity, response);
 	}
 

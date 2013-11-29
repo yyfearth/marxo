@@ -43,7 +43,7 @@ public class EngineWorker implements Runnable, Loggable {
 			Workflow workflow = Workflow.get(task.workflowId);
 
 			if (workflow == null) {
-				logger.warn(String.format("Cannot find workflow [%s]", task.workflowId));
+				logger.warn(String.format("%s Cannot find workflow %s", task, task.workflowId));
 				return;
 			}
 

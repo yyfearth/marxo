@@ -1,6 +1,7 @@
 package marxo.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 
 import java.io.Serializable;
@@ -15,6 +16,8 @@ public class User extends TenantChildEntity implements Serializable {
 	protected String password;
 	protected String email;
 	public UserType type = UserType.UNKNOWN;
+	@JsonProperty("oauth")
+	public OAuthData oAuthData;
 
 	public String getPassword() {
 		return password;
@@ -39,5 +42,15 @@ public class User extends TenantChildEntity implements Serializable {
 
 	public static User get(ObjectId id) {
 		return mongoTemplate.findById(id, User.class);
+	}
+
+	public static class OAuthData {
+		@JsonProperty("facebook")
+		public FacebookOAuthData facebookOAuthData;
+
+		public static class FacebookOAuthData {
+			public String userId;
+			public String username;
+		}
 	}
 }

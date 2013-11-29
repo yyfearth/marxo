@@ -6,7 +6,7 @@ import marxo.entity.content.FacebookContent;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
-import marxo.entity.node.PostFacebook;
+import marxo.entity.node.PostFacebookAction;
 import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
 import marxo.test.ApiTestConfiguration;
@@ -35,15 +35,16 @@ public class GeneralApiTests extends BasicApiTests {
 		reusedWorkflow.createUserId = reusedWorkflow.updateUserId = user.id;
 		reusedWorkflow.tenantId = user.tenantId;
 		reusedWorkflow.setName(getClass().getSimpleName());
-		entitiesToInsert.add(reusedWorkflow);
 
 		reusedNode = new Node();
 		reusedNode.setWorkflow(reusedWorkflow);
 		reusedNode.createUserId = reusedNode.updateUserId = user.id;
 		reusedWorkflow.setName(getClass().getSimpleName());
-		entitiesToInsert.add(reusedNode);
 
-		insertEntities();
+		insertEntities(
+				reusedWorkflow,
+				reusedNode
+		);
 	}
 
 	@Test
@@ -67,7 +68,7 @@ public class GeneralApiTests extends BasicApiTests {
 		workflow.setStartNode(node1);
 		node1.setWorkflow(workflow);
 
-		PostFacebook action = new PostFacebook();
+		PostFacebookAction action = new PostFacebookAction();
 		action.setNode(node1);
 		action.setEvent(new Event());
 

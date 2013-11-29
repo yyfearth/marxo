@@ -1,10 +1,12 @@
 package marxo.validation;
 
-import com.google.common.collect.ImmutableList;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonIgnoreProperties("empty")
 public class Errors {
 	List<String> messages = new ArrayList<>();
 
@@ -13,7 +15,7 @@ public class Errors {
 	}
 
 	public List<String> getMessages() {
-		return ImmutableList.copyOf(messages);
+		return Lists.newArrayList(messages);
 	}
 
 	public boolean isEmpty() {

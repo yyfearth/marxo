@@ -1,6 +1,5 @@
 package marxo.test;
 
-import com.google.common.collect.Lists;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.batch.BatchRequest;
@@ -12,9 +11,9 @@ import marxo.entity.Task;
 import marxo.entity.content.FacebookContent;
 import marxo.entity.content.FacebookMonitorContent;
 import marxo.entity.node.Event;
-import marxo.entity.node.MonitorFacebook;
+import marxo.entity.node.MonitorFacebookAction;
 import marxo.entity.node.Node;
-import marxo.entity.node.PostFacebook;
+import marxo.entity.node.PostFacebookAction;
 import marxo.entity.user.Tenant;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
@@ -133,14 +132,14 @@ public class EngineTests extends BasicDataTests {
 		node.setName("Test Node for Engine");
 		workflow.addNode(node);
 
-		PostFacebook postFacebook = new PostFacebook();
-		postFacebook.setName("Test Action for Engine");
-		node.addAction(postFacebook);
+		PostFacebookAction postFacebookAction = new PostFacebookAction();
+		postFacebookAction.setName("Test Action for Engine");
+		node.addAction(postFacebookAction);
 
 		FacebookContent facebookContent = new FacebookContent();
 		facebookContent.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent.id);
-		facebookContent.actionId = postFacebook.id;
-		postFacebook.setContent(facebookContent);
+		facebookContent.actionId = postFacebookAction.id;
+		postFacebookAction.setContent(facebookContent);
 
 		workflow.setStartNode(node);
 
@@ -148,13 +147,12 @@ public class EngineTests extends BasicDataTests {
 
 		workflow.wire();
 
-		entitiesToInsert.addAll(Lists.newArrayList(
+		insertEntities(
 				workflow,
 				node,
 				facebookContent,
 				task
-		));
-		insertEntities();
+		);
 
 		engineWorker.run();
 
@@ -185,41 +183,40 @@ public class EngineTests extends BasicDataTests {
 		Node node = new Node();
 		workflow.addNode(node);
 
-		PostFacebook postFacebook = new PostFacebook();
-		node.addAction(postFacebook);
+		PostFacebookAction postFacebookAction = new PostFacebookAction();
+		node.addAction(postFacebookAction);
 
 		FacebookContent facebookContent = new FacebookContent();
 		facebookContent.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent.id);
-		facebookContent.actionId = postFacebook.id;
-		postFacebook.setContent(facebookContent);
+		facebookContent.actionId = postFacebookAction.id;
+		postFacebookAction.setContent(facebookContent);
 
 		// Monitor action
-		MonitorFacebook monitorFacebook = new MonitorFacebook();
-		monitorFacebook.period = Period.seconds(5);
-		monitorFacebook.monitoredActionKey = String.format("%s.%s.%s", workflow.key, node.key, postFacebook.key);
+		MonitorFacebookAction monitorFacebookAction = new MonitorFacebookAction();
+		monitorFacebookAction.period = Period.seconds(5);
+		monitorFacebookAction.monitoredActionKey = String.format("%s.%s.%s", workflow.key, node.key, postFacebookAction.key);
 
 		FacebookMonitorContent facebookMonitorContent = new FacebookMonitorContent();
-		monitorFacebook.setContent(facebookMonitorContent);
+		monitorFacebookAction.setContent(facebookMonitorContent);
 
 		Event event = new Event();
 		event.setDuration(Seconds.seconds(10).toStandardDuration());
-		monitorFacebook.setEvent(event);
+		monitorFacebookAction.setEvent(event);
 
-		node.addAction(monitorFacebook);
+		node.addAction(monitorFacebookAction);
 
 		Task task = new Task(workflow.id);
 
 		// Save all entities
 		workflow.wire();
-		entitiesToInsert.addAll(Lists.newArrayList(
+		insertEntities(
 				workflow,
 				node,
 				facebookContent,
 				facebookMonitorContent,
 				event,
 				task
-		));
-		insertEntities();
+		);
 
 		engineWorker.run();
 
@@ -236,12 +233,12 @@ public class EngineTests extends BasicDataTests {
 		Post post = facebookClient.fetchObject(facebookContent.postId, Post.class);
 		Assert.assertNotNull(post);
 
-		Thread.sleep(event.getDuration().getMillis());  // Wait for the worker to finish the monitoring.
+//		Thread.sleep(event.getDuration().getMillis());  // Wait for the worker to finish the monitoring.
 
-		monitorFacebook = (MonitorFacebook) node.getActions().get(1);
-		Assert.assertEquals(monitorFacebook.status, RunStatus.FINISHED);
+		monitorFacebookAction = (MonitorFacebookAction) node.getActions().get(1);
+		Assert.assertEquals(monitorFacebookAction.status, RunStatus.FINISHED);
 
-		facebookMonitorContent = monitorFacebook.getContent();
+		facebookMonitorContent = monitorFacebookAction.getContent();
 		Assert.assertEquals(facebookMonitorContent.records.size(), 2);
 	}
 }

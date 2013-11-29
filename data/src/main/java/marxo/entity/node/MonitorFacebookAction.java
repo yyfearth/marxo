@@ -1,6 +1,14 @@
 package marxo.entity.node;
 
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.exception.FacebookException;
+import com.restfb.types.FacebookType;
+import com.restfb.types.Post;
 import marxo.entity.Task;
+import marxo.entity.content.Content;
+import marxo.entity.content.FacebookContent;
 import marxo.entity.content.FacebookMonitorContent;
 import marxo.entity.workflow.RunStatus;
 import marxo.exception.KeyNotFoundException;
@@ -9,7 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.springframework.data.annotation.Transient;
 
-public class MonitorFacebook extends Action {
+public class MonitorFacebookAction extends FacebookAction {
 	@Transient
 	protected FacebookMonitorContent content;
 	public String monitoredActionKey;
@@ -30,7 +38,7 @@ public class MonitorFacebook extends Action {
 		}
 
 		if (getTenant().facebookData == null) {
-			logger.debug(String.format("Tenant [%s] has no facebook info", getTenant().id));
+			logger.debug(String.format("[%s] has no facebook info", this));
 			return false;
 		}
 
@@ -83,7 +91,7 @@ public class MonitorFacebook extends Action {
 //			content.save();
 //		}
 
-		node.save();
+		status = RunStatus.FINISHED;
 
 		return true;
 	}
