@@ -33,7 +33,7 @@ define 'test_data', ['models'], (models) ->
       updated_at: '2013-09-05T02:18:13.621Z'
     ,
       email: 'otaru14204@hotmail.com'
-      password: 'XELXdnuv/p7QeCzPM7Pl7TLfd6o2NZSaPb/sGtYUg5Q' # @qwer123
+      password: 'zhKhZMAp8rYymnIvM/rbcuNNrpG+Qgk+zVOS+x0n9mY' # @qwer123
       first_name: 'Leo'
       last_name: 'Chu'
       tenant_id: 0
