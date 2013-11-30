@@ -93,9 +93,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 			criteria.and("name").regex(pattern);
 		}
 
-		workflows = mongoTemplate.find(getDefaultQuery(criteria), entityClass);
+		workflows = mongoTemplate.find(getDefaultQuery(criteria).with(defaultSort), entityClass);
 
-		Collections.sort(workflows, ModifiedDateComparator.SINGLETON);
 		return workflows;
 	}
 

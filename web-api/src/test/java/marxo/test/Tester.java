@@ -155,10 +155,14 @@ public class Tester implements Closeable {
 		}
 		response = client.execute(request);
 		httpEntity = response.getEntity();
-		mediaType = MediaType.parse(httpEntity.getContentType().getValue());
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		httpEntity.writeTo(stream);
-		content = new String(stream.toByteArray());
+		if (httpEntity == null) {
+			content = "";
+		} else {
+			mediaType = MediaType.parse(httpEntity.getContentType().getValue());
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			httpEntity.writeTo(stream);
+			content = new String(stream.toByteArray());
+		}
 		return this;
 	}
 

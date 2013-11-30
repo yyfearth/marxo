@@ -154,7 +154,23 @@ public class UserApiTests extends BasicApiTests {
 		}
 	}
 
-	@Test(dependsOnMethods = {"getPublisher"})
+	@Test(dependsOnMethods = {"createPublisher"})
+	public void getById() throws Exception {
+		try (Tester tester = new Tester().basicAuth(email, password)) {
+			tester
+					.httpGet(baseUrl + "users/" + publisher.id)
+					.send();
+			tester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+			User user = tester.getContent(User.class);
+			Assert.assertEquals(user.id, publisher.id);
+			Assert.assertEquals(user.getEmail(), publisher.getEmail());
+			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
+		}
+	}
+
+	@Test(dependsOnMethods = {"getPublisher", "getById", "getCurrentUser"})
 	public void udpateUser() throws Exception {
 		User user = User.getByEmail(publisher.getEmail());
 		user.setPassword(publisher.getPassword());

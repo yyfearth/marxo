@@ -33,11 +33,26 @@ public class FacebookController implements InterceptorPreHandlable {
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		Assert.notNull(marxoAuthentication);
 		user = marxoAuthentication.getUser();
-		criteria.and("tenantId").is(user.tenantId);
+		criteria = Criteria.where("_id").is(user.tenantId);
+	}
+
+	@RequestMapping(method = RequestMethod.PUT)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public FacebookData saveData(@Valid @RequestBody FacebookData facebookData) {
+		Assert.notNull(facebookData);
+
+		facebookData.status = FacebookStatus.CONNECTED;
+
+		Update update = Update.update("facebookData", facebookData);
+		mongoTemplate.updateFirst(Query.query(criteria), update, Tenant.class);
+
+		return facebookData;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
 	public Object readData() {
 		Tenant tenant = mongoTemplate.findOne(Query.query(criteria), Tenant.class);
 		if (tenant == null) {
@@ -47,26 +62,12 @@ public class FacebookController implements InterceptorPreHandlable {
 		return (tenant.facebookData == null) ? new FacebookData() : tenant.facebookData;
 	}
 
-	@RequestMapping(method = RequestMethod.PUT)
-	@ResponseBody
-	public FacebookData saveData(@Valid @RequestBody FacebookData facebookData) {
-		Assert.notNull(facebookData);
-		Tenant tenant = mongoTemplate.findOne(Query.query(criteria), Tenant.class);
-
-		// todo: call channel
-		facebookData.status = FacebookStatus.CONNECTED;
-
-		Update update = Update.update("facebookData", facebookData);
-		mongoTemplate.updateFirst(Query.query(criteria), update, Tenant.class);
-
-		return facebookData;
-	}
-
 	@RequestMapping(method = RequestMethod.DELETE)
 	@ResponseBody
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteData() {
+	@ResponseStatus(HttpStatus.OK)
+	public FacebookData deleteData() {
 		Update update = new Update().unset("facebookData");
-		mongoTemplate.updateFirst(Query.query(criteria), update, Tenant.class);
+		Tenant tenant = mongoTemplate.findAndModify(Query.query(criteria), update, Tenant.class);
+		return tenant.facebookData;
 	}
 }
