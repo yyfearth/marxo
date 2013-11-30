@@ -304,7 +304,7 @@ Service
     read: ->
       data = super
       password = @passwords[0].value
-      data.password = password unless password
+      data.password = password if password
       data.sex = @_getSex()
       data
     reset: ->
@@ -341,9 +341,9 @@ Service
       unless data.password
         @callback 'save'
         @hide true
-      else require ['crypto'], (crypto) =>
+      else require ['crypto'], ({hashPassword}) =>
         console.log 'crypto', email, data.password
-        data.password = crypto.hashPassword email, data.password
+        data.password = hashPassword email, data.password
         @callback 'save'
         @hide true
       @
