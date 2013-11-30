@@ -24,24 +24,12 @@ define 'fb', ['lib/facebook'], (FB) =>
 require ['lib/common'], ->
   console.log 'ver', 'site', 1
 
+  $.ajaxSetup dataType: 'json'
+
   class User extends Backbone.Model
     urlRoot: ROOT + '/users'
     defaults:
       type: 'PARTICIPANT'
-    fullname: ->
-      if @has 'full_name'
-        @get 'full_name'
-      else if @has('first_name') and @has('last_name')
-        "#{@get 'first_name'} #{@get 'last_name'}"
-      else if @has 'name'
-        @get 'name'
-      else
-        @get('first_name') or @get('last_name') or null
-    sync: (method, model, options = {}) ->
-      options.dataType = 'json'
-      options.headers ?= {}
-      options.headers.Authorization ?= @get('credential') or ''
-      super method, model, options
 
   class UserProfileView extends Backbone.View
     el: '#user_profile'
@@ -135,7 +123,7 @@ require ['lib/common'], ->
       User.current = user
       sessionStorage.user = JSON.stringify user.toJSON()
       @$avatar.attr 'src', "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
-      $el.click().find('#username').text user.fullname()
+      $el.click().find('#username').text user.get 'name'
       $el.find('#sign_in_menu').remove()
       $el.find('#user_menu').removeClass 'tpl'
       $go_console = $el.find('#go_console')
@@ -253,7 +241,8 @@ require ['lib/common'], ->
           @_auth = 'Basic ' + btoa "facebook:#{response.accessToken}"
           if @form.email.disabled # edit
             data = @read()
-            data.oauth = facebook: response.userID
+            data.oauth =
+              facebook: response.userID
             @fill data
             console.log 'facebook connected', response
             setTimeout =>
@@ -282,15 +271,24 @@ require ['lib/common'], ->
         # update
         throw new Error 'Emails not matched! Somebody hacked that?' if data.email isnt user.get('email')
         console.log 'save user', data
+        password_changed = Boolean user.get 'password'
+        auth = user.get 'credential'
         user.unset 'credential'
         user.save data,
+          headers:
+            Authorization: auth
           success: (user) =>
-            @trigger 'updated', user
+            if password_changed
+              alert 'You password is changed, please login again.'
+              @logout()
+            else
+              user.set 'credential', auth
+              @trigger 'updated', user
             @$el.modal 'hide'
             return
           error: (ignored, xhr) ->
             console.error 'sign up failed', xhr.responseJSON
-            alert  'Save user profile failed! '
+            alert 'Save user profile failed! '
             return
       else # sign up
         console.log 'sign up user', data
