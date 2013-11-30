@@ -155,6 +155,7 @@ require ['lib/common'], ->
       @$avatar = $form.find '#user_avatar img'
       @$openAccounts = $el.find('#link_fb').parents('.control-group').find('.btn')
       @$openAccounts.each -> @_name = $(@).data 'name'
+      @$el.find('[title]').tooltip placement: 'bottom', container: @$form, delay: 300
       @
     _setSex: (sex = '') ->
       $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
