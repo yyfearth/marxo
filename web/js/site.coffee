@@ -19,6 +19,22 @@ define 'fb', ['lib/facebook'], (FB) =>
     status: true # check login status
     cookie: true # enable cookies to allow the server to access the session
     xfbml: false
+  autoLogin = FB.autoLogin = (callback) ->
+    FB.getLoginStatus (response) ->
+      switch response.status
+        when 'connected'
+          console.log 'connected', response
+          callback response, FB
+        when 'not_authorized'
+          console.log 'not_authorized', response
+          # the user is logged in but has not authed
+          console.warn 'User cancelled login or did not fully authorize.', response
+          alert 'You cancelled login or did not fully authorize.'
+        else FB.login (response) -> # the user isn't logged in
+          console.log 'login', response
+          autoLogin callback
+      return
+    FB
   FB
 
 require ['lib/common'], ->
@@ -87,7 +103,7 @@ require ['lib/common'], ->
         @signin 'Basic ' + btoa "#{email}:#{hash}"
       return
     _signInFB: -> require ['fb'], (FB) =>
-      FB.login (response) =>
+      FB.autoLogin (response) =>
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           @signin 'Basic ' + btoa "facebook:#{response.accessToken}"
@@ -236,7 +252,7 @@ require ['lib/common'], ->
         return false
       true
     _signUpFB: -> require ['fb'], (FB) =>
-      FB.login (response) =>
+      FB.autoLogin (response) =>
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           @_auth = 'Basic ' + btoa "facebook:#{response.accessToken}"
