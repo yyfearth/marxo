@@ -290,13 +290,14 @@ Service
       @$el.find('#user_avatar, #link_fb').parents('.control-group').remove()
       @
     _setSex: (sex = '') ->
-      $sex = @$sex.filter "[value='#{sex}']"
-      if $sex.length and not $sex.hasClass 'active'
+      $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
+      $sex = @$sex.filter "[value='']" unless $sex.length
+      if not $sex.hasClass 'active'
         @$sex.not($sex).removeClass 'active'
         $sex.addClass 'active'
       $sex
     _getSex: ->
-      @$sex.filter('.active').attr 'value'
+      @$sex.filter('.active').attr('value').toUpperCase()
     fill: (data) ->
       super data
       @_setSex data.sex
