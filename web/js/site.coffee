@@ -19,29 +19,33 @@ define 'fb', ['lib/facebook'], (FB) =>
     status: true # check login status
     cookie: true # enable cookies to allow the server to access the session
     xfbml: false
+  autoLogin = FB.autoLogin = (callback) ->
+    FB.getLoginStatus (response) ->
+      switch response.status
+        when 'connected'
+          console.log 'connected', response
+          callback response, FB
+        when 'not_authorized'
+          console.log 'not_authorized', response
+          # the user is logged in but has not authed
+          console.warn 'User cancelled login or did not fully authorize.', response
+          alert 'You cancelled login or did not fully authorize.'
+        else FB.login (response) -> # the user isn't logged in
+          console.log 'login', response
+          autoLogin callback
+      return
+    FB
   FB
 
 require ['lib/common'], ->
   console.log 'ver', 'site', 1
 
+  $.ajaxSetup dataType: 'json'
+
   class User extends Backbone.Model
     urlRoot: ROOT + '/users'
     defaults:
       type: 'PARTICIPANT'
-    fullname: ->
-      if @has 'full_name'
-        @get 'full_name'
-      else if @has('first_name') and @has('last_name')
-        "#{@get 'first_name'} #{@get 'last_name'}"
-      else if @has 'name'
-        @get 'name'
-      else
-        @get('first_name') or @get('last_name') or null
-    sync: (method, model, options = {}) ->
-      options.dataType = 'json'
-      options.headers ?= {}
-      options.headers.Authorization ?= @get('credential') or ''
-      super method, model, options
 
   class UserProfileView extends Backbone.View
     el: '#user_profile'
@@ -81,17 +85,11 @@ require ['lib/common'], ->
       @$avatar = @$el.find('img#avatar')
       img = @$avatar.attr 'src'
       @$avatar.on 'error', -> @src = img
-      @listenTo @dialog, 'signedup update', (user) ->
-        @signin user.get 'credential'
+      @listenTo @dialog, 'signedup update', (user) -> @signin user.auth
       # auto login
-      if sessionStorage.user
-        try
-          user = new User JSON.parse sessionStorage.user
-          auth = user.get 'credential'
-        catch e
-          console.error 'pause user failed', e
-          delete sessionStorage.user
-        @signin auth if auth
+      if auth = sessionStorage[' ']
+        delete sessionStorage[' ']
+        @signin auth, true
       super options
     _signInEmail: (email, password) ->
       require ['crypto'], ({hashPassword}) =>
@@ -99,7 +97,7 @@ require ['lib/common'], ->
         @signin 'Basic ' + btoa "#{email}:#{hash}"
       return
     _signInFB: -> require ['fb'], (FB) =>
-      FB.login (response) =>
+      FB.autoLogin (response) =>
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           @signin 'Basic ' + btoa "facebook:#{response.accessToken}"
@@ -108,34 +106,37 @@ require ['lib/common'], ->
           alert 'You cancelled login or did not fully authorize.'
         return
       return
-    signin: (auth) ->
+    signin: (auth, silence) ->
+      $inputs = @$el.find('input,button').prop 'disabled', true
       new User(id: 'me').fetch
         headers:
           Authorization: auth
         reset: true
         success: (user) =>
           console.log 'logined', user
-          user.set 'credential', auth
+          user.auth = auth
           if user.has 'email_md5'
             @_signedIn user
           else require ['crypto'], ({md5Email}) =>
             user.set 'email_md5', md5Email user.get 'email'
             @_signedIn user
+          $inputs.prop 'disabled', false
           return
         error: (ignored, response) =>
           console.error 'sign-in failed', response
-          alert 'Sign in failed'
+          alert 'Sign in failed' unless silence
+          $inputs.prop 'disabled', false
       @
     signout: ->
+      User.current = null
       sessionStorage.clear()
       location.reload()
       @
     _signedIn: (user) ->
       $el = @$el
       User.current = user
-      sessionStorage.user = JSON.stringify user.toJSON()
       @$avatar.attr 'src', "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
-      $el.click().find('#username').text user.fullname()
+      $el.click().find('#username').text user.get 'name'
       $el.find('#sign_in_menu').remove()
       $el.find('#user_menu').removeClass 'tpl'
       $go_console = $el.find('#go_console')
@@ -143,6 +144,12 @@ require ['lib/common'], ->
         $go_console.prop 'href', ROOT + '/../console/'
       else
         $go_console.parent('li').remove()
+      window.onunload = ->
+        if User.current?.auth
+          sessionStorage[' '] = User.current.auth
+        else
+          delete sessionStorage[' ']
+        return
       return
 
   class UserDialogView extends Backbone.View
@@ -154,12 +161,12 @@ require ['lib/common'], ->
         e.preventDefault()
         @save() if @validate()
         false
-      'click form .btn-facebook': '_signUpFB'
     initialize: (options) ->
       super options
       $el = @$el
       $form = @$form = $el.find 'form'
       @form = $form[0]
+      @btnSave = $el.find('.btn-save')[0]
       @$title = $el.find '.modal-title'
       @$sex = $form.find '[name=sex]'
       @$editOnly = $el.find '.edit-only'
@@ -167,6 +174,21 @@ require ['lib/common'], ->
       @$avatar = $form.find '#user_avatar img'
       @$openAccounts = $el.find('#link_fb').parents('.control-group').find('.btn')
       @$openAccounts.each -> @_name = $(@).data 'name'
+      @$openAccounts.click (e) =>
+        $btn = $ e.target
+        if $btn.val() # disconnect
+          $btn.val ''
+          @_setOauth true
+          alert 'To disconnect please press "Save".\n\nAfter you save the change, you have to sign in with email and password next time.'
+          @btnSave.focus()
+        else
+          name = $btn.data('name').toLowerCase()
+          if name is 'facebook'
+            @_signUpFB()
+          else
+            throw new Error "connect #{name} not supported yet"
+        return
+      @$el.find('[title]').tooltip placement: 'bottom', container: @$form, delay: 300
       @
     _setSex: (sex = '') ->
       $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
@@ -178,11 +200,15 @@ require ['lib/common'], ->
     _getSex: ->
       @$sex.filter('.active').attr('value').toUpperCase()
     _setOauth: (oauth = {}) -> @$openAccounts.each ->
-      val = oauth[@_name.toLowerCase()]
-      @disabled = val
-      if val
-        @value = val
-        @textContent = "Linked #{@_name} Account"
+      @value = oauth[@_name.toLowerCase()] or '' unless oauth is true
+      if @value
+        txt = 'Disconnect from'
+      else if @form.email.disabled # edit
+        txt = 'Connect to'
+      else
+        txt = 'Sign up with'
+      @textContent = "#{txt} #{@_name} Account"
+      console.log @, @textContent
       return
     _getOauth: ->
       oauth = {}
@@ -191,9 +217,9 @@ require ['lib/common'], ->
       oauth
     fill: (attrs) ->
       form = @form
-      for name, value of attrs
-        $input = $ form[name]
-        $input.val value if $input.is 'input'
+      form.email.value = attrs.email
+      form.name.value = attrs.name
+      form.desc.textContent = attrs.desc
       @_setSex attrs.sex
       @_setOauth attrs.oauth
       @
@@ -212,14 +238,13 @@ require ['lib/common'], ->
       emailEl = @form.email
       @form.reset()
       @_auth = null
-      if data # edit mode
+      if data # edit
         data = data.toJSON() if data instanceof User
         @$editOnly.show()
         @$title.text "User: #{data.name or data.email}"
         @fill data
         @$passwords.removeAttr 'required'
         disabled = true
-        btnTxt = 'Link'
         @$avatar.attr 'src', "https://secure.gravatar.com/avatar/#{data.email_md5}?s=200&d=mm"
         setTimeout ->
           emailEl.focus()
@@ -228,10 +253,9 @@ require ['lib/common'], ->
         @$title.text 'Sign Up'
         @$editOnly.hide()
         @$passwords.attr 'required', 'required'
+        @_setOauth()
         disabled = false
-        btnTxt = 'Sign up with'
       emailEl.disabled = disabled
-      @$openAccounts.each -> $(@).text "#{btnTxt} #{@_name} Account" unless @disabled
       @$el.modal 'show'
       @
     validate: ->
@@ -247,18 +271,19 @@ require ['lib/common'], ->
         return false
       true
     _signUpFB: -> require ['fb'], (FB) =>
-      FB.login (response) =>
+      FB.autoLogin (response) =>
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           @_auth = 'Basic ' + btoa "facebook:#{response.accessToken}"
           if @form.email.disabled # edit
             data = @read()
-            data.oauth = facebook: response.userID
+            data.oauth =
+              facebook: response.userID
             @fill data
             console.log 'facebook connected', response
             setTimeout =>
-              alert 'Facebook account is bound, place click "Save".'
-              @$passwords[0].focus()
+              alert 'Facebook account is bound, please click "Save".'
+              @btnSave.focus()
             , 100
           else FB.api '/me', (response) => # sign up
             @fill
@@ -268,7 +293,7 @@ require ['lib/common'], ->
               oauth:
                 facebook: response.id
             setTimeout =>
-              alert 'Facebook account is bound, place setup a password then click "Save".'
+              alert 'Facebook account is bound, please setup a password then click "Save".'
               @$passwords[0].focus()
             , 100
             console.log 'facebook connected', response
@@ -282,21 +307,29 @@ require ['lib/common'], ->
         # update
         throw new Error 'Emails not matched! Somebody hacked that?' if data.email isnt user.get('email')
         console.log 'save user', data
-        user.unset 'credential'
+        password_changed = Boolean user.get 'password'
         user.save data,
+          headers:
+            Authorization: user.auth
           success: (user) =>
-            @trigger 'updated', user
+            if password_changed
+              User.current = null
+              alert 'You password is changed, please login again.'
+              sessionStorage.clear()
+              location.reload()
+            else
+              @trigger 'updated', user
             @$el.modal 'hide'
             return
           error: (ignored, xhr) ->
             console.error 'sign up failed', xhr.responseJSON
-            alert  'Save user profile failed! '
+            alert 'Save user profile failed! '
             return
       else # sign up
         console.log 'sign up user', data
         new User(email: data.email).save data,
           success: (user) =>
-            user.set 'credential', @_auth or 'Basic ' + btoa "#{user.get 'email'}:#{data.password}"
+            user.auth = @_auth or 'Basic ' + btoa "#{user.get 'email'}:#{data.password}"
             @trigger 'signedup', user
             @$el.modal 'hide'
             return
