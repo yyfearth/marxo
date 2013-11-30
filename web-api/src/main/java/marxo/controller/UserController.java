@@ -107,7 +107,6 @@ public class UserController extends TenantChildController<User> {
 	@ResponseStatus(HttpStatus.OK)
 	@Override
 	public User update(@PathVariable String idString, @Valid @RequestBody User user) throws Exception {
-		Assert.notNull(user.getPassword());
 		switch (user.type) {
 			case ADMIN:
 				throw new ValidationException(String.format("Cannot update user with type %s", user.type));
@@ -115,6 +114,13 @@ public class UserController extends TenantChildController<User> {
 			case PARTICIPANT:
 				Assert.isNull(user.tenantId);
 				break;
+		}
+
+		if (user.getPassword() == null) {
+			User user1 = User.get(this.user.id);
+			user.setPassword(user1.getPassword());
+		} else {
+			user.setPassword(passwordEncryptor.encrypt(user.getPassword()));
 		}
 
 		Query query;
@@ -136,7 +142,6 @@ public class UserController extends TenantChildController<User> {
 			throw new EntityExistsException(idString);
 		}
 
-		user.setPassword(passwordEncryptor.encrypt(user.getPassword()));
 		user.save();
 
 		user.clearPassword();
