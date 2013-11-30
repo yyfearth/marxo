@@ -20,6 +20,8 @@ public class User extends TenantChildEntity implements Serializable {
 	public UserType type = UserType.PARTICIPANT;
 	@JsonProperty("oauth")
 	public Map<String, String> oAuthData = new HashMap<>();
+	@JsonProperty("sex")
+	public String gender = "UNSPECIFIED";
 
 	public String getPassword() {
 		return password;

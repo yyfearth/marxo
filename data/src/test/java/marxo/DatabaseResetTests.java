@@ -75,12 +75,14 @@ public class DatabaseResetTests extends BasicDataTests {
 			user.setName("Tester");
 			user.setEmail("test@example.com");
 			user.setPassword(passwordEncryptor.encrypt("test"));
+			user.gender = "GAY";
 			users.add(user);
 
 			user = new User();
 			user.setTenant(tenant);
 			user.setName("Wilson");
 			user.setEmail("yyfearth@gmail.com");
+			user.gender = "MALE";
 			user.setPassword(passwordEncryptor.encrypt("2k96H29ECsJ05BJAkEGm6FC+UgjwVTc1qOd7SGG2uS8"));
 			users.add(user);
 
@@ -88,6 +90,7 @@ public class DatabaseResetTests extends BasicDataTests {
 			user.setTenant(tenant);
 			user.setName("Leo");
 			user.setEmail("otaru14204@hotmail.com");
+			user.gender = "MALE";
 			user.setPassword(passwordEncryptor.encrypt("zhKhZMAp8rYymnIvM/rbcuNNrpG+Qgk+zVOS+x0n9mY"));
 			users.add(user);
 
