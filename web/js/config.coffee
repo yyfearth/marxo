@@ -358,7 +358,7 @@ Service
       name: 'first_name'
       label: 'Username'
       cell: Backgrid.StringCell.extend render: ->
-        @$el.text @model.fullname()
+        @$el.text @model.name()
         @
       editable: false
     ,

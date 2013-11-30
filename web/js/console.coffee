@@ -131,7 +131,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         delete sessionStorage.user
       # update avatar
       @avatarEl.src = "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
-      $(@usernameEl).text user.fullname()
+      $(@usernameEl).text user.name()
       @show()
     show: ->
       @_hide_ts = clearTimeout @_hide_ts if @_hide_ts
