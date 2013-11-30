@@ -71,17 +71,20 @@ public class UserController extends TenantChildController<User> {
 	@ResponseStatus(HttpStatus.OK)
 	@Override
 	public User read(@PathVariable String idString) throws Exception {
+		User user;
+
 		if (ObjectId.isValid(idString)) {
-			return super.read(idString);
+			ObjectId objectId = new ObjectId(idString);
+			user = User.get(objectId);
+		} else {
+			if (!User.emailPattern.matcher(idString).find()) {
+				throw new InvalidObjectIdException(idString);
+			}
+
+			String email = idString;
+			user = User.getByEmail(email);
 		}
 
-		if (!User.emailPattern.matcher(idString).find()) {
-			throw new InvalidObjectIdException(idString);
-		}
-
-		String email = idString;
-
-		User user = User.getByEmail(email);
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, idString);
 		}
