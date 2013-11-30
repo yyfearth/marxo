@@ -85,17 +85,11 @@ require ['lib/common'], ->
       @$avatar = @$el.find('img#avatar')
       img = @$avatar.attr 'src'
       @$avatar.on 'error', -> @src = img
-      @listenTo @dialog, 'signedup update', (user) ->
-        @signin user.get 'credential'
+      @listenTo @dialog, 'signedup update', (user) -> @signin user.auth
       # auto login
-      if sessionStorage.user
-        try
-          user = new User JSON.parse sessionStorage.user
-          auth = user.get 'credential'
-        catch e
-          console.error 'pause user failed', e
-          delete sessionStorage.user
-        @signin auth if auth
+      if auth = sessionStorage[' ']
+        delete sessionStorage[' ']
+        @signin auth, true
       super options
     _signInEmail: (email, password) ->
       require ['crypto'], ({hashPassword}) =>
@@ -112,32 +106,35 @@ require ['lib/common'], ->
           alert 'You cancelled login or did not fully authorize.'
         return
       return
-    signin: (auth) ->
+    signin: (auth, silence) ->
+      $inputs = @$el.find('input,button').prop 'disabled', true
       new User(id: 'me').fetch
         headers:
           Authorization: auth
         reset: true
         success: (user) =>
           console.log 'logined', user
-          user.set 'credential', auth
+          user.auth = auth
           if user.has 'email_md5'
             @_signedIn user
           else require ['crypto'], ({md5Email}) =>
             user.set 'email_md5', md5Email user.get 'email'
             @_signedIn user
+          $inputs.prop 'disabled', false
           return
         error: (ignored, response) =>
           console.error 'sign-in failed', response
-          alert 'Sign in failed'
+          alert 'Sign in failed' unless silence
+          $inputs.prop 'disabled', false
       @
     signout: ->
+      User.current = null
       sessionStorage.clear()
       location.reload()
       @
     _signedIn: (user) ->
       $el = @$el
       User.current = user
-      sessionStorage.user = JSON.stringify user.toJSON()
       @$avatar.attr 'src', "https://secure.gravatar.com/avatar/#{user.get 'email_md5'}?s=20&d=mm"
       $el.click().find('#username').text user.get 'name'
       $el.find('#sign_in_menu').remove()
@@ -147,6 +144,12 @@ require ['lib/common'], ->
         $go_console.prop 'href', ROOT + '/../console/'
       else
         $go_console.parent('li').remove()
+      window.onunload = ->
+        if User.current?.auth
+          sessionStorage[' '] = User.current.auth
+        else
+          delete sessionStorage[' ']
+        return
       return
 
   class UserDialogView extends Backbone.View
@@ -196,9 +199,9 @@ require ['lib/common'], ->
       oauth
     fill: (attrs) ->
       form = @form
-      for name, value of attrs
-        $input = $ form[name]
-        $input.val value if $input.is 'input'
+      form.email.value = attrs.email
+      form.name.value = attrs.name
+      form.desc.textContent = attrs.desc
       @_setSex attrs.sex
       @_setOauth attrs.oauth
       @
@@ -289,17 +292,16 @@ require ['lib/common'], ->
         throw new Error 'Emails not matched! Somebody hacked that?' if data.email isnt user.get('email')
         console.log 'save user', data
         password_changed = Boolean user.get 'password'
-        auth = user.get 'credential'
-        user.unset 'credential'
         user.save data,
           headers:
-            Authorization: auth
+            Authorization: user.auth
           success: (user) =>
             if password_changed
+              User.current = null
               alert 'You password is changed, please login again.'
-              @logout()
+              sessionStorage.clear()
+              location.reload()
             else
-              user.set 'credential', auth
               @trigger 'updated', user
             @$el.modal 'hide'
             return
@@ -311,7 +313,7 @@ require ['lib/common'], ->
         console.log 'sign up user', data
         new User(email: data.email).save data,
           success: (user) =>
-            user.set 'credential', @_auth or 'Basic ' + btoa "#{user.get 'email'}:#{data.password}"
+            user.auth = @_auth or 'Basic ' + btoa "#{user.get 'email'}:#{data.password}"
             @trigger 'signedup', user
             @$el.modal 'hide'
             return
