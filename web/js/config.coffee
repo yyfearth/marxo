@@ -290,13 +290,14 @@ Service
       @$el.find('#user_avatar, #link_fb').parents('.control-group').remove()
       @
     _setSex: (sex = '') ->
-      $sex = @$sex.filter "[value='#{sex}']"
-      if $sex.length and not $sex.hasClass 'active'
+      $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
+      $sex = @$sex.filter "[value='']" unless $sex.length
+      if not $sex.hasClass 'active'
         @$sex.not($sex).removeClass 'active'
         $sex.addClass 'active'
       $sex
     _getSex: ->
-      @$sex.filter('.active').attr 'value'
+      @$sex.filter('.active').attr('value').toUpperCase()
     fill: (data) ->
       super data
       @_setSex data.sex
@@ -304,7 +305,7 @@ Service
     read: ->
       data = super
       password = @passwords[0].value
-      data.password = password unless password
+      data.password = password if password
       data.sex = @_getSex()
       data
     reset: ->
@@ -341,9 +342,9 @@ Service
       unless data.password
         @callback 'save'
         @hide true
-      else require ['crypto'], (crypto) =>
+      else require ['crypto'], ({hashPassword}) =>
         console.log 'crypto', email, data.password
-        data.password = crypto.hashPassword email, data.password
+        data.password = hashPassword email, data.password
         @callback 'save'
         @hide true
       @
@@ -358,7 +359,7 @@ Service
       name: 'first_name'
       label: 'Username'
       cell: Backgrid.StringCell.extend render: ->
-        @$el.text @model.fullname()
+        @$el.text @model.name()
         @
       editable: false
     ,

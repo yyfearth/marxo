@@ -167,7 +167,7 @@ Workflows
       @$el.empty()
       rawValue = @model.get @column.get 'name'
       formattedValue = @formatter.fromRaw rawValue
-      console.log rawValue, formattedValue
+      # console.log rawValue, formattedValue
       if val = rawValue or formattedValue
         val = val.toLowerCase()
         labelCls = 'label capitalized '
