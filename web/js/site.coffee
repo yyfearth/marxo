@@ -161,12 +161,12 @@ require ['lib/common'], ->
         e.preventDefault()
         @save() if @validate()
         false
-      'click form .btn-facebook': '_signUpFB'
     initialize: (options) ->
       super options
       $el = @$el
       $form = @$form = $el.find 'form'
       @form = $form[0]
+      @btnSave = $el.find('.btn-save')[0]
       @$title = $el.find '.modal-title'
       @$sex = $form.find '[name=sex]'
       @$editOnly = $el.find '.edit-only'
@@ -174,6 +174,20 @@ require ['lib/common'], ->
       @$avatar = $form.find '#user_avatar img'
       @$openAccounts = $el.find('#link_fb').parents('.control-group').find('.btn')
       @$openAccounts.each -> @_name = $(@).data 'name'
+      @$openAccounts.click (e) =>
+        $btn = $ e.target
+        if $btn.val() # disconnect
+          $btn.val ''
+          @_setOauth true
+          alert 'To disconnect please press "Save".\n\nAfter you save the change, you have to sign in with email and password next time.'
+          @btnSave.focus()
+        else
+          name = $btn.data('name').toLowerCase()
+          if name is 'facebook'
+            @_signUpFB()
+          else
+            throw new Error "connect #{name} not supported yet"
+        return
       @$el.find('[title]').tooltip placement: 'bottom', container: @$form, delay: 300
       @
     _setSex: (sex = '') ->
@@ -186,11 +200,15 @@ require ['lib/common'], ->
     _getSex: ->
       @$sex.filter('.active').attr('value').toUpperCase()
     _setOauth: (oauth = {}) -> @$openAccounts.each ->
-      val = oauth[@_name.toLowerCase()]
-      @disabled = val
-      if val
-        @value = val
-        @textContent = "Linked #{@_name} Account"
+      @value = oauth[@_name.toLowerCase()] or '' unless oauth is true
+      if @value
+        txt = 'Disconnect from'
+      else if @form.email.disabled # edit
+        txt = 'Connect to'
+      else
+        txt = 'Sign up with'
+      @textContent = "#{txt} #{@_name} Account"
+      console.log @, @textContent
       return
     _getOauth: ->
       oauth = {}
@@ -220,14 +238,13 @@ require ['lib/common'], ->
       emailEl = @form.email
       @form.reset()
       @_auth = null
-      if data # edit mode
+      if data # edit
         data = data.toJSON() if data instanceof User
         @$editOnly.show()
         @$title.text "User: #{data.name or data.email}"
         @fill data
         @$passwords.removeAttr 'required'
         disabled = true
-        btnTxt = 'Link'
         @$avatar.attr 'src', "https://secure.gravatar.com/avatar/#{data.email_md5}?s=200&d=mm"
         setTimeout ->
           emailEl.focus()
@@ -236,10 +253,9 @@ require ['lib/common'], ->
         @$title.text 'Sign Up'
         @$editOnly.hide()
         @$passwords.attr 'required', 'required'
+        @_setOauth()
         disabled = false
-        btnTxt = 'Sign up with'
       emailEl.disabled = disabled
-      @$openAccounts.each -> $(@).text "#{btnTxt} #{@_name} Account" unless @disabled
       @$el.modal 'show'
       @
     validate: ->
@@ -266,8 +282,8 @@ require ['lib/common'], ->
             @fill data
             console.log 'facebook connected', response
             setTimeout =>
-              alert 'Facebook account is bound, place click "Save".'
-              @$passwords[0].focus()
+              alert 'Facebook account is bound, please click "Save".'
+              @btnSave.focus()
             , 100
           else FB.api '/me', (response) => # sign up
             @fill
@@ -277,7 +293,7 @@ require ['lib/common'], ->
               oauth:
                 facebook: response.id
             setTimeout =>
-              alert 'Facebook account is bound, place setup a password then click "Save".'
+              alert 'Facebook account is bound, please setup a password then click "Save".'
               @$passwords[0].focus()
             , 100
             console.log 'facebook connected', response
