@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.net.MediaType;
 import marxo.entity.user.Tenant;
 import marxo.test.ApiTestConfiguration;
+import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,15 +17,15 @@ public class TenantApiTests extends BasicApiTests {
 
 	@Test
 	public void getTenants() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "tenants")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			List<Tenant> tenants = tester.getContent(new TypeReference<List<Tenant>>() {
+			List<Tenant> tenants = apiTester.getContent(new TypeReference<List<Tenant>>() {
 			});
 			Assert.assertNotNull(tenants);
 			boolean doesContainThisUser = false;

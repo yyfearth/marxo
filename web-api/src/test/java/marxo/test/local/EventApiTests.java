@@ -6,8 +6,8 @@ import marxo.entity.node.Action;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.test.ApiTestConfiguration;
+import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -42,15 +42,15 @@ public class EventApiTests extends BasicApiTests {
 		reusedEvent.setNode(reusedNode);
 		entitiesToRemove.add(reusedEvent);
 
-		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+			apiTester
 					.httpPost(reusedEvent)
 					.send();
-			tester
+			apiTester
 					.isCreated()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			Event event = tester.getContent(Event.class);
+			Event event = apiTester.getContent(Event.class);
 			Assert.assertNotNull(event);
 			Assert.assertEquals(event.id, reusedEvent.id);
 			Assert.assertEquals(event.actionId, reusedAction.id);
@@ -66,15 +66,15 @@ public class EventApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = "createEvent")
 	public void readEvent() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+			apiTester
 					.httpGet(reusedEvent.id.toString())
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			Event event = tester.getContent(Event.class);
+			Event event = apiTester.getContent(Event.class);
 			Assert.assertEquals(event.id, reusedEvent.id);
 			Assert.assertEquals(event.actionId, reusedAction.id);
 			Assert.assertEquals(event.nodeId, reusedNode.id);
@@ -91,15 +91,15 @@ public class EventApiTests extends BasicApiTests {
 	public void updateEvent() throws Exception {
 		reusedEvent.setName("Updated event");
 
-		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+			apiTester
 					.httpPut(reusedEvent.id.toString(), reusedEvent)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			Event event = tester.getContent(Event.class);
+			Event event = apiTester.getContent(Event.class);
 			Assert.assertNotNull(event);
 			Assert.assertEquals(event.id, reusedEvent.id);
 			Assert.assertEquals(event.actionId, reusedAction.id);
@@ -116,15 +116,15 @@ public class EventApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = "updateEvent")
 	public void deleteEvent() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+			apiTester
 					.httpDelete(reusedEvent.id.toString())
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			Event event = tester.getContent(Event.class);
+			Event event = apiTester.getContent(Event.class);
 			Assert.assertNotNull(event);
 			Assert.assertEquals(event.id, reusedEvent.id);
 			Assert.assertEquals(event.actionId, reusedAction.id);

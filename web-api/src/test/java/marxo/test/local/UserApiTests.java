@@ -8,8 +8,8 @@ import marxo.entity.user.UserType;
 import marxo.exception.ErrorJson;
 import marxo.serialization.MarxoObjectMapper;
 import marxo.test.ApiTestConfiguration;
+import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -50,15 +50,15 @@ public class UserApiTests extends BasicApiTests {
 
 	@Test
 	public void searchUsers() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpGet(baseUrl + "users")
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
+			apiTester
+					.httpGet("users")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			List<User> users = tester.getContent(new TypeReference<List<User>>() {
+			List<User> users = apiTester.getContent(new TypeReference<List<User>>() {
 			});
 			Assert.assertNotNull(users);
 			for (User user : users) {
@@ -71,15 +71,15 @@ public class UserApiTests extends BasicApiTests {
 
 	@Test
 	public void getCurrentUser() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl + "users/me").basicAuth(email, password)) {
-			tester
-					.httpGet()
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
+			apiTester
+					.httpGet("users/me")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			User user = tester.getContent(User.class);
+			User user = apiTester.getContent(User.class);
 			Assert.assertNotNull(user);
 			Assert.assertEquals(user.getEmail(), email);
 		}
@@ -88,15 +88,15 @@ public class UserApiTests extends BasicApiTests {
 	@Test
 	public void createPublisher() throws Exception {
 
-		try (Tester tester = new Tester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl + "users").basicAuth(email, password)) {
+			apiTester
 					.httpPost(publisher)
 					.send();
-			tester
+			apiTester
 					.isCreated()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			User user1 = tester.getContent(User.class);
+			User user1 = apiTester.getContent(User.class);
 			Assert.assertNotNull(user1);
 			Assert.assertEquals(user1.getEmail(), publisher.getEmail());
 			Assert.assertNull(user1.getPassword(), "One shouldn't get user's password via API");
@@ -115,15 +115,15 @@ public class UserApiTests extends BasicApiTests {
 	@Test
 	public void createParticipant() throws Exception {
 
-		try (Tester tester = new Tester().baseUrl(baseUrl + "users")) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl + "users")) {
+			apiTester
 					.httpPost(participant)
 					.send();
-			tester
+			apiTester
 					.isCreated()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			User user1 = tester.getContent(User.class);
+			User user1 = apiTester.getContent(User.class);
 			Assert.assertNotNull(user1);
 			Assert.assertEquals(user1.getEmail(), participant.getEmail());
 			Assert.assertNull(user1.getPassword(), "One shouldn't get user's password via API");
@@ -141,14 +141,14 @@ public class UserApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = {"createPublisher"})
 	public void getPublisher() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "users/" + publisher.getEmail())
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			User user = tester.getContent(User.class);
+			User user = apiTester.getContent(User.class);
 			Assert.assertEquals(user.getEmail(), publisher.getEmail());
 			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
 		}
@@ -156,14 +156,14 @@ public class UserApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = {"createPublisher"})
 	public void getById() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "users/" + publisher.id)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			User user = tester.getContent(User.class);
+			User user = apiTester.getContent(User.class);
 			Assert.assertEquals(user.id, publisher.id);
 			Assert.assertEquals(user.getEmail(), publisher.getEmail());
 			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
@@ -171,20 +171,19 @@ public class UserApiTests extends BasicApiTests {
 	}
 
 	@Test(dependsOnMethods = {"getPublisher", "getById", "getCurrentUser"})
-	public void udpateUser() throws Exception {
+	public void update() throws Exception {
 		User user = User.getByEmail(publisher.getEmail());
-		user.setPassword(publisher.getPassword());
 		user.setName("Updated user");
 
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpPut(baseUrl + "users/" + publisher.getEmail(), user)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			User user1 = tester.getContent(User.class);
+			User user1 = apiTester.getContent(User.class);
 			Assert.assertNotNull(user1);
 			Assert.assertEquals(user1.getName(), user.getName());
 			Assert.assertNull(user1.getPassword(), "One shouldn't get user's password via API");
@@ -194,17 +193,41 @@ public class UserApiTests extends BasicApiTests {
 		Assert.assertEquals(user1.getName(), user.getName());
 	}
 
-	@Test(dependsOnMethods = {"udpateUser"})
-	public void deleteUser() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
-					.httpDelete(baseUrl + "users/" + publisher.getEmail())
+	@Test(dependsOnMethods = {"getPublisher", "getById", "getCurrentUser"})
+	public void updateById() throws Exception {
+		User user = User.getByEmail(publisher.getEmail());
+		user.setPassword(publisher.getPassword());
+		user.setName("Updated user by id");
+
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
+					.httpPut(baseUrl + "users/" + publisher.id, user)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			User user = tester.getContent(User.class);
+			User user1 = apiTester.getContent(User.class);
+			Assert.assertNotNull(user1);
+			Assert.assertEquals(user1.getName(), user.getName());
+			Assert.assertNull(user1.getPassword(), "One shouldn't get user's password via API");
+		}
+
+		User user1 = User.getByEmail(publisher.getEmail());
+		Assert.assertEquals(user1.getName(), user.getName());
+	}
+
+	@Test(dependsOnMethods = {"update", "updateById"})
+	public void deleteUser() throws Exception {
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
+					.httpDelete(baseUrl + "users/" + publisher.getEmail())
+					.send();
+			apiTester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+
+			User user = apiTester.getContent(User.class);
 			Assert.assertNotNull(user);
 			Assert.assertEquals(user.getEmail(), publisher.getEmail());
 			Assert.assertNull(user.getPassword(), "One shouldn't get user's password via API");
@@ -219,54 +242,54 @@ public class UserApiTests extends BasicApiTests {
 		// Note that it seems that the tester must be created again in order to prevent the remote server returns Bad Request response after the first request.
 		ErrorJson errorJson;
 
-		try (Tester tester = new Tester()) {
-			tester
+		try (ApiTester apiTester = new ApiTester()) {
+			apiTester
 					.httpGet(baseUrl)
 					.basicAuth(email, "wrong password")
 					.send();
-			tester
+			apiTester
 					.is(HttpStatus.UNAUTHORIZED)
 					.matchContentType(MediaType.JSON_UTF_8);
-			errorJson = tester.getContent(ErrorJson.class);
+			errorJson = apiTester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
 		}
 
-		try (Tester tester = new Tester()) {
-			tester
+		try (ApiTester apiTester = new ApiTester()) {
+			apiTester
 					.httpGet(baseUrl)
 					.basicAuth("wrong email", password)
 					.send();
-			tester
+			apiTester
 					.is(HttpStatus.UNAUTHORIZED)
 					.matchContentType(MediaType.JSON_UTF_8);
-			errorJson = tester.getContent(ErrorJson.class);
+			errorJson = apiTester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
 		}
 
-		try (Tester tester = new Tester()) {
-			tester
+		try (ApiTester apiTester = new ApiTester()) {
+			apiTester
 					.httpGet(baseUrl)
 					.basicAuth("", "")
 					.send();
-			tester
+			apiTester
 					.is(HttpStatus.UNAUTHORIZED)
 					.matchContentType(MediaType.JSON_UTF_8);
-			errorJson = tester.getContent(ErrorJson.class);
+			errorJson = apiTester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
 		}
 	}
 
 	@Test(dependsOnMethods = {"createParticipant"})
 	public void basicAuthWithFacebookAcessToken() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl + "user/me").basicAuth("facebook", facebookToken)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl + "user/me").basicAuth("facebook", facebookToken)) {
+			apiTester
 					.httpGet()
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			User user = tester.getContent(User.class);
+			User user = apiTester.getContent(User.class);
 			Assert.assertNotNull(user);
 			Assert.assertEquals(user.id, participant.id);
 		}
@@ -274,15 +297,15 @@ public class UserApiTests extends BasicApiTests {
 
 	@Test
 	public void basicAuthWithWrongFacebookAcessToken() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl + "user/me").basicAuth("facebook", reusedUser.oAuthData.get("facebook"))) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl + "user/me").basicAuth("facebook", reusedUser.oAuthData.get("facebook"))) {
+			apiTester
 					.httpGet()
 					.send();
-			tester
+			apiTester
 					.is(HttpStatus.UNAUTHORIZED)
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			ErrorJson errorJson = apiTester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
 		}
 	}

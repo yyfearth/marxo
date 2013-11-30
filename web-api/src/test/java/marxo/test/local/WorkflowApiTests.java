@@ -6,8 +6,8 @@ import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
 import marxo.entity.workflow.Workflow;
 import marxo.test.ApiTestConfiguration;
+import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -30,15 +30,15 @@ public class WorkflowApiTests extends BasicApiTests {
 	public void createWorkflow() throws Exception {
 		Workflow newWorkflow = new Workflow();
 
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpPost(baseUrl + "workflows", newWorkflow)
 					.send();
-			tester
+			apiTester
 					.isCreated()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			workflow = tester.getContent(Workflow.class);
+			workflow = apiTester.getContent(Workflow.class);
 
 			Assert.assertEquals(workflow.tenantId, reusedUser.tenantId);
 			Assert.assertEquals(workflow.createUserId, reusedUser.id);
@@ -52,15 +52,15 @@ public class WorkflowApiTests extends BasicApiTests {
 
 	@Test
 	public void getAllWorkflows() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflows")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			workflows = tester.getContent(new TypeReference<List<Workflow>>() {
+			workflows = apiTester.getContent(new TypeReference<List<Workflow>>() {
 			});
 			Assert.assertNotNull(workflows);
 			for (Workflow workflow : workflows) {
@@ -88,11 +88,11 @@ public class WorkflowApiTests extends BasicApiTests {
 
 	@Test
 	public void getWrongWorkflow() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflows/000000000000000000000000")
 					.send();
-			tester
+			apiTester
 					.is(HttpStatus.NOT_FOUND);
 		}
 	}
@@ -105,15 +105,15 @@ public class WorkflowApiTests extends BasicApiTests {
 		workflow.save();
 		entitiesToRemove.add(workflow);
 
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflows")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			List<Workflow> workflows = tester.getContent(new TypeReference<List<Workflow>>() {
+			List<Workflow> workflows = apiTester.getContent(new TypeReference<List<Workflow>>() {
 			});
 			Assert.assertNotNull(workflows);
 
@@ -126,14 +126,14 @@ public class WorkflowApiTests extends BasicApiTests {
 			}
 			Assert.assertTrue(doesContain);
 
-			tester
+			apiTester
 					.httpGet(baseUrl + "workflows/" + workflow.id)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			workflow = tester.getContent(Workflow.class);
+			workflow = apiTester.getContent(Workflow.class);
 			Assert.assertNotNull(workflow);
 			Assert.assertEquals(workflow.nodeIds.size(), workflow.getNodes().size());
 			Assert.assertEquals(workflow.linkIds.size(), workflow.getLinks().size());
@@ -148,15 +148,15 @@ public class WorkflowApiTests extends BasicApiTests {
 
 	@Test
 	public void getProjects() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "projects")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			List<Workflow> workflows = tester.getContent(new TypeReference<List<Workflow>>() {
+			List<Workflow> workflows = apiTester.getContent(new TypeReference<List<Workflow>>() {
 			});
 			Assert.assertNotNull(workflows);
 			for (Workflow workflow : workflows) {
@@ -174,27 +174,27 @@ public class WorkflowApiTests extends BasicApiTests {
 		sharedWorkflow.createUserId = sharedWorkflow.updateUserId = reusedUser.id;
 		mongoTemplate.insert(sharedWorkflow);
 
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflow/" + sharedWorkflow.id)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
 			{
-				Workflow workflow = tester.getContent(Workflow.class);
+				Workflow workflow = apiTester.getContent(Workflow.class);
 				Assert.assertNull(workflow.tenantId);
 			}
 
-			tester
+			apiTester
 					.httpGet(baseUrl + "workflows")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			List<Workflow> workflows = tester.getContent(new TypeReference<List<Workflow>>() {
+			List<Workflow> workflows = apiTester.getContent(new TypeReference<List<Workflow>>() {
 			});
 			Assert.assertNotNull(workflows);
 			boolean doesContainSharedWorkflow = false;

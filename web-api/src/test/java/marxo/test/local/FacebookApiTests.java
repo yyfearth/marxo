@@ -8,8 +8,8 @@ import marxo.entity.FacebookData;
 import marxo.entity.FacebookStatus;
 import marxo.entity.user.Tenant;
 import marxo.test.ApiTestConfiguration;
+import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.Assert;
@@ -53,15 +53,15 @@ public class FacebookApiTests extends BasicApiTests {
 		reusedTenant.facebookData = facebookData;
 		reusedTenant.save();
 
-		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+			apiTester
 					.httpPut(facebookData)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			FacebookData facebookData1 = tester.getContent(FacebookData.class);
+			FacebookData facebookData1 = apiTester.getContent(FacebookData.class);
 			Assert.assertNotNull(facebookData1);
 		}
 
@@ -72,30 +72,30 @@ public class FacebookApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = {"saveData"})
 	public void readData() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+			apiTester
 					.httpGet()
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			FacebookData facebookData = tester.getContent(FacebookData.class);
+			FacebookData facebookData = apiTester.getContent(FacebookData.class);
 			Assert.assertNotNull(facebookData);
 		}
 	}
 
 	@Test(dependsOnMethods = {"readData"})
 	public void removeData() throws Exception {
-		try (Tester tester = new Tester().baseUrl(baseUrl).basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+			apiTester
 					.httpDelete()
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 
-			FacebookData facebookData = tester.getContent(FacebookData.class);
+			FacebookData facebookData = apiTester.getContent(FacebookData.class);
 			Assert.assertNotNull(facebookData);
 		}
 

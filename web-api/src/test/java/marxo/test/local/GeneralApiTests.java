@@ -10,8 +10,8 @@ import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
 import marxo.test.ApiTestConfiguration;
+import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
@@ -49,11 +49,11 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void createBadEntity() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpPost(baseUrl + "workflows", "1{}2")
 					.send();
-			tester
+			apiTester
 					.isBadRequest();
 		}
 	}
@@ -88,35 +88,35 @@ public class GeneralApiTests extends BasicApiTests {
 		link.setNextNode(node2);
 		node2.setWorkflow(workflow);
 
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpPost(baseUrl + "workflows", workflow)
 					.send();
-			tester
+			apiTester
 					.isCreated();
 
-			tester
+			apiTester
 					.httpPost(baseUrl + "node", node1)
 					.send();
-			tester
+			apiTester
 					.isCreated();
 
-			tester
+			apiTester
 					.httpPost(baseUrl + "content", content)
 					.send();
-			tester
+			apiTester
 					.isCreated();
 
-			tester
+			apiTester
 					.httpPost(baseUrl + "link", link)
 					.send();
-			tester
+			apiTester
 					.isCreated();
 
-			tester
+			apiTester
 					.httpPost(baseUrl + "node", node2)
 					.send();
-			tester
+			apiTester
 					.isCreated();
 		}
 	}
@@ -127,14 +127,14 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void getNodes() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			List<Node> nodes = tester.getContent(new TypeReference<List<Node>>() {
+			List<Node> nodes = apiTester.getContent(new TypeReference<List<Node>>() {
 			});
 			Assert.assertNotNull(nodes);
 			for (Node node : nodes) {
@@ -151,28 +151,28 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void wrongSubResource() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node/" + (new ObjectId()))
 					.send();
-			tester
+			apiTester
 					.is(HttpStatus.NOT_FOUND)
 					.matchContentType(MediaType.JSON_UTF_8);
-			ErrorJson errorJson = tester.getContent(ErrorJson.class);
+			ErrorJson errorJson = apiTester.getContent(ErrorJson.class);
 			Assert.assertNotNull(errorJson);
 		}
 	}
 
 	@Test
 	public void rightSubResource() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedNode.workflowId + "/node/" + reusedNode.id)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			Node node = tester.getContent(Node.class);
+			Node node = apiTester.getContent(Node.class);
 			Assert.assertEquals(node.id, reusedNode.id);
 		}
 	}
@@ -183,14 +183,14 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void getLinks() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/links/")
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			List<Link> links = tester.getContent(new TypeReference<List<Link>>() {
+			List<Link> links = apiTester.getContent(new TypeReference<List<Link>>() {
 			});
 			Assert.assertNotNull(links);
 			for (Link link : links) {

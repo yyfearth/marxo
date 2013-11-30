@@ -5,10 +5,12 @@ import marxo.entity.user.User;
 import marxo.tool.PasswordEncryptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
 
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
+import java.net.URISyntaxException;
 
 public abstract class BasicApiTests extends BasicDataTests {
 	protected String baseUrl;
@@ -19,6 +21,7 @@ public abstract class BasicApiTests extends BasicDataTests {
 
 	protected Tenant reusedTenant;
 	protected User reusedUser;
+	protected ApiTesterBuilder apiTesterBuilder;
 
 	ApplicationContext securityContext = new ClassPathXmlApplicationContext("classpath*:security.xml");
 	byte[] salt = DatatypeConverter.parseHexBinary((String) securityContext.getBean("passwordSaltHexString"));
@@ -35,6 +38,12 @@ public abstract class BasicApiTests extends BasicDataTests {
 		password = "test";
 		facebookId = configuration.facebookId();
 		facebookToken = configuration.facebookToken();
+
+		try {
+			apiTesterBuilder = new ApiTesterBuilder().baseUrl(baseUrl).basicAuth(email, password);
+		} catch (URISyntaxException e) {
+			throw new SkipException(String.format("Cannot start test case due to: [%s] %s", e.getClass().getSimpleName(), e.getMessage()), e);
+		}
 	}
 
 	@BeforeClass

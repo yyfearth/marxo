@@ -4,8 +4,8 @@ import com.google.common.net.MediaType;
 import marxo.entity.content.Content;
 import marxo.entity.content.FacebookContent;
 import marxo.test.ApiTestConfiguration;
+import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
-import marxo.test.Tester;
 import org.bson.types.ObjectId;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,20 +16,20 @@ public class ContentApiTests extends BasicApiTests {
 
 	@Test
 	public void createContent() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
 			FacebookContent facebookContent = new FacebookContent();
 			reusedContent = facebookContent;
 			entitiesToRemove.add(facebookContent);
 			facebookContent.actionId = new ObjectId();
 			facebookContent.message = "createContent";
 
-			tester
+			apiTester
 					.httpPost(baseUrl + "content", facebookContent)
 					.send();
-			tester
+			apiTester
 					.isCreated()
 					.matchContentType(MediaType.JSON_UTF_8);
-			Content content = tester.getContent(Content.class);
+			Content content = apiTester.getContent(Content.class);
 			Assert.assertNotNull(content);
 			Assert.assertEquals(content.getName(), facebookContent.getName());
 		}
@@ -37,31 +37,31 @@ public class ContentApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = "createContent")
 	public void readContent() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
-			tester
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+			apiTester
 					.httpGet(baseUrl + "content/" + reusedContent.id)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			Content content = tester.getContent(Content.class);
+			Content content = apiTester.getContent(Content.class);
 			Assert.assertEquals(content.id, reusedContent.id);
 		}
 	}
 
 	@Test(dependsOnMethods = "readContent")
 	public void updateContent() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
 			FacebookContent facebookContent = (FacebookContent) reusedContent;
 			facebookContent.message = "updateContent";
 
-			tester
+			apiTester
 					.httpPut(baseUrl + "content/" + reusedContent.id, facebookContent)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
-			Content content = tester.getContent(Content.class);
+			Content content = apiTester.getContent(Content.class);
 			Assert.assertNotNull(content);
 			Assert.assertEquals(content.getName(), facebookContent.getName());
 		}
@@ -69,16 +69,16 @@ public class ContentApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = "updateContent")
 	public void deleteContent() throws Exception {
-		try (Tester tester = new Tester().basicAuth(email, password)) {
+		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
 			FacebookContent facebookContent = new FacebookContent();
 			entitiesToRemove.add(facebookContent);
 			facebookContent.actionId = new ObjectId();
 			facebookContent.message = "createContent";
 
-			tester
+			apiTester
 					.httpDelete(baseUrl + "content/" + reusedContent.id)
 					.send();
-			tester
+			apiTester
 					.isOk()
 					.matchContentType(MediaType.JSON_UTF_8);
 

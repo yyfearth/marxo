@@ -26,7 +26,7 @@ import java.net.URISyntaxException;
 import java.util.regex.Pattern;
 
 // todo: create a builder for this
-public class Tester implements Closeable {
+public class ApiTester implements Closeable {
 	HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 	CloseableHttpClient client = httpClientBuilder.build();
 	CloseableHttpResponse response;
@@ -44,26 +44,26 @@ public class Tester implements Closeable {
 	Method
 	 */
 
-	public Tester baseUrl(String url) throws URISyntaxException {
+	public ApiTester baseUrl(String url) throws URISyntaxException {
 		this.baseUrl = url;
 		return this;
 	}
 
-	public Tester httpGet(String url) throws URISyntaxException {
+	public ApiTester httpGet(String url) throws URISyntaxException {
 		setUri(url);
 		request = new HttpGet(uri);
 		setAuthHeader();
 		return this;
 	}
 
-	public Tester httpGet() throws URISyntaxException {
+	public ApiTester httpGet() throws URISyntaxException {
 		setUri("");
 		request = new HttpGet(uri);
 		setAuthHeader();
 		return this;
 	}
 
-	public Tester httpPost(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
+	public ApiTester httpPost(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
 		setUri(url);
 
 		HttpPost httpPost = new HttpPost(uri);
@@ -78,15 +78,15 @@ public class Tester implements Closeable {
 		return this;
 	}
 
-	public Tester httpPost(String url, Object o) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
+	public ApiTester httpPost(String url, Object o) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
 		return httpPost(url, objectMapper.writeValueAsString(o));
 	}
 
-	public Tester httpPost(Object o) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
+	public ApiTester httpPost(Object o) throws JsonProcessingException, UnsupportedEncodingException, URISyntaxException {
 		return httpPost("", objectMapper.writeValueAsString(o));
 	}
 
-	public Tester httpPut(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
+	public ApiTester httpPut(String url, String content) throws URISyntaxException, UnsupportedEncodingException {
 		setUri(url);
 
 		HttpPut httpPut = new HttpPut(uri);
@@ -101,22 +101,22 @@ public class Tester implements Closeable {
 		return this;
 	}
 
-	public Tester httpPut(String url, Object o) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
+	public ApiTester httpPut(String url, Object o) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
 		return httpPut(url, objectMapper.writeValueAsString(o));
 	}
 
-	public Tester httpPut(Object o) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
+	public ApiTester httpPut(Object o) throws URISyntaxException, UnsupportedEncodingException, JsonProcessingException {
 		return httpPut("", objectMapper.writeValueAsString(o));
 	}
 
-	public Tester httpDelete(String url) throws URISyntaxException, UnsupportedEncodingException {
+	public ApiTester httpDelete(String url) throws URISyntaxException, UnsupportedEncodingException {
 		setUri(url);
 		request = new HttpDelete(uri);
 		setAuthHeader();
 		return this;
 	}
 
-	public Tester httpDelete() throws URISyntaxException, UnsupportedEncodingException {
+	public ApiTester httpDelete() throws URISyntaxException, UnsupportedEncodingException {
 		setUri("");
 		request = new HttpDelete(uri);
 		setAuthHeader();
@@ -135,7 +135,7 @@ public class Tester implements Closeable {
 	Auth
 	 */
 
-	public Tester basicAuth(String username, String password) {
+	public ApiTester basicAuth(String username, String password) {
 		String credentialString = username + ":" + password;
 		String credential = DatatypeConverter.printBase64Binary(credentialString.getBytes());
 		authorizationHeader = new BasicHeader("Authorization", "Basic " + credential);
@@ -149,7 +149,7 @@ public class Tester implements Closeable {
 		}
 	}
 
-	public Tester send() throws IOException {
+	public ApiTester send() throws IOException {
 		if (response != null) {
 			response.close();
 		}
@@ -170,29 +170,29 @@ public class Tester implements Closeable {
 	Validation
 	 */
 
-	public Tester is(HttpStatus httpStatus) {
+	public ApiTester is(HttpStatus httpStatus) {
 		StatusLine statusLine = response.getStatusLine();
 		Assert.assertEquals(statusLine.getStatusCode(), httpStatus.value(), "Status: " + statusLine.getReasonPhrase() + "\nMessage: " + content);
 		return this;
 	}
 
-	public Tester isOk() {
+	public ApiTester isOk() {
 		return is(HttpStatus.OK);
 	}
 
-	public Tester isNotFound() {
+	public ApiTester isNotFound() {
 		return is(HttpStatus.NOT_FOUND);
 	}
 
-	public Tester isBadRequest() {
+	public ApiTester isBadRequest() {
 		return is(HttpStatus.BAD_REQUEST);
 	}
 
-	public Tester isCreated() {
+	public ApiTester isCreated() {
 		return is(HttpStatus.CREATED);
 	}
 
-	public Tester matchContentType(MediaType mediaType) {
+	public ApiTester matchContentType(MediaType mediaType) {
 		assert this.mediaType.type().equals(mediaType.type());
 		assert this.mediaType.subtype().equals(mediaType.subtype());
 		return this;
