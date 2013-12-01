@@ -170,7 +170,7 @@ ProjectFilterView
     fill: (data) ->
       media = data.get 'media'
       @$el.find('small.media').text "(#{media.toLowerCase()})"
-      @form.title.value = data.get 'title'
+      @form.name.value = data.get 'name'
       @form.desc.value = data.get 'desc'
       textarea = @form.desc
       switch media
@@ -251,7 +251,7 @@ ProjectFilterView
       super data, callback
       #console.log 'content form', data.attributes
       page_desc =
-        title: data.get 'title'
+        name: data.get 'name'
         desc: data.get 'desc'
       @pageDesc.fill page_desc
       #@submitOptions.fill data.get 'options' if data.has 'options'
@@ -299,7 +299,7 @@ ProjectFilterView
       @read (data) =>
         if data
           console.log 'save content', data
-          @data.set 'title', data.page_desc.title
+          @data.set 'name', data.page_desc.name
           @data.set 'desc', data.page_desc.desc
           # TODO: deal with invalid settings
           @data.set 'sections', data.sections
@@ -370,7 +370,7 @@ ProjectFilterView
 
     _genPreview: ({page_desc, sections}) ->
       #console.log 'gen preview page', page_desc, sections
-      content = ["<h1>#{page_desc.title}</h1>\n<p>#{page_desc.desc or ''}</p>"]
+      content = ["<h1>#{page_desc.name}</h1>\n<p>#{page_desc.desc or ''}</p>"]
       for data, i in sections
         view = new SectionEditor idx: i
         content.push view.genPreview data
@@ -459,7 +459,7 @@ ProjectFilterView
       @
     _bind: ->
       # bind title change
-      titleEl = @_find 'title'
+      titleEl = @_find 'name'
       title = find '.box-title', @el
       titleEl.onchange = ->
         title.textContent = unless @value then 'New Section' else 'Section: ' + @value
@@ -685,12 +685,7 @@ ProjectFilterView
     columns: [
       # 'checkbox'
       'id'
-    ,
-      name: 'title'
-      tooltip: 'desc'
-      cell: 'tooltip'
-      label: 'Title'
-      editable: false
+      'name:content'
     ,
       name: 'media'
       label: 'Media'

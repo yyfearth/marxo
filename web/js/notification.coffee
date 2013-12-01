@@ -42,8 +42,8 @@ Notifications
     columns: [
       'id'
     ,
-      name: 'title'
-      label: 'Title'
+      name: 'name'
+      label: 'Name'
       cell: 'tooltip'
       placement: 'right'
       tooltip: 'desc'
