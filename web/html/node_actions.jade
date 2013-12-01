@@ -71,6 +71,13 @@ mixin actions_thumb
 //- show in the actions box
 #actions_tpl.tpl
 
+  .tpl(name='empty')
+    .box-header.well
+      h4 Empty Action (Test Only)
+      mixin box_icons
+    form.box-content
+      mixin action_name_key
+
   .tpl(name='create_page')
     .box-header.well
       h4 Post Page or Form

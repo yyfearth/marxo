@@ -70,15 +70,18 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
     _tpl: tplAll('#actions_tpl')
     initialize: (options) ->
       super options
+      unless options.model
+        throw new Error 'need action model'
+        console.dir options
       @projectMode = options.projectMode
       @containerEl = options.container
       @model = options.model
       @model.view = @
       type = @model.get?('type') or options.model.type or options.type
+      unless type
+        type = 'empty'
+        console.warn 'need action type (use empty type for test)', options
       @type = type?.toLowerCase()
-      unless @model and @type
-        console.dir options
-        throw new Error 'need action model and type'
       @
     remove: ->
       # remove only once
