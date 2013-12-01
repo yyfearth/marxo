@@ -394,7 +394,7 @@ Event
       'node_action'
       'type'
       'status'
-      'actions:event' # TODO: change color for skip btn by status
+      'actions:event'
     ]
     initialize: (options) ->
       super options

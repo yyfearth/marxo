@@ -891,7 +891,6 @@ nv.utils.windowSize = function() {
 
 
 // Easy way to bind multiple functions to window.onresize
-// TODO: give a way to remove a function after its bound, other than removing all of them
 nv.utils.windowResize = function(fun){
   if (fun === undefined) return;
   var oldresize = window.onresize;
@@ -1026,7 +1025,7 @@ nv.utils.optionsFunc = function(args) {
     , height = 60 //only used for tickLabel currently
     , scale = d3.scale.linear()
     , axisLabelText = null
-    , showMaxMin = true //TODO: showMaxMin should be disabled on all ordinal scaled axes
+    , showMaxMin = true
     , highlightZero = true
     , rotateLabels = 0
     , rotateYLabel = true
@@ -1074,9 +1073,6 @@ nv.utils.optionsFunc = function(args) {
         axis.ticks(ticks);
       else if (axis.orient() == 'top' || axis.orient() == 'bottom')
         axis.ticks(Math.abs(scale.range()[1] - scale.range()[0]) / 100);
-
-
-      //TODO: consider calculating width/height based on whether or not label is added, for reference in charts using this component
 
 
       g.transition().call(axis);
@@ -1183,7 +1179,7 @@ nv.utils.optionsFunc = function(args) {
           axisLabel
               .style('text-anchor', rotateYLabel ? 'middle' : 'begin')
               .attr('transform', rotateYLabel ? 'rotate(90)' : '')
-              .attr('y', rotateYLabel ? (-Math.max(margin.right,width) + 12) : -10) //TODO: consider calculating this based on largest tick width... OR at least expose this on chart
+              .attr('y', rotateYLabel ? (-Math.max(margin.right,width) + 12) : -10)
               .attr('x', rotateYLabel ? (scale.range()[0] / 2) : axis.tickPadding());
           if (showMaxMin) {
             var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
@@ -1225,7 +1221,7 @@ nv.utils.optionsFunc = function(args) {
           axisLabel
               .style('text-anchor', rotateYLabel ? 'middle' : 'end')
               .attr('transform', rotateYLabel ? 'rotate(-90)' : '')
-              .attr('y', rotateYLabel ? (-Math.max(margin.left,width) + axisLabelDistance) : -10) //TODO: consider calculating this based on largest tick width... OR at least expose this on chart
+              .attr('y', rotateYLabel ? (-Math.max(margin.left,width) + axisLabelDistance) : -10)
               .attr('x', rotateYLabel ? (-scale.range()[0] / 2) : -axis.tickPadding());
           if (showMaxMin) {
             var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
@@ -1310,7 +1306,7 @@ nv.utils.optionsFunc = function(args) {
       //highlight zero line ... Maybe should not be an option and should just be in CSS?
       if (highlightZero)
         g.selectAll('.tick')
-          .filter(function(d) { return !parseFloat(Math.round(d.__data__*100000)/1000000) && (d.__data__ !== undefined) }) //this is because sometimes the 0 tick is a very small fraction, TODO: think of cleaner technique
+          .filter(function(d) { return !parseFloat(Math.round(d.__data__*100000)/1000000) && (d.__data__ !== undefined) }) //this is because sometimes the 0 tick is a very small fraction
             .classed('zero', true);
 
       //store old scales for use in transitions on update
@@ -1429,7 +1425,7 @@ nv.models.bullet = function() {
   //------------------------------------------------------------
 
   var margin = {top: 0, right: 0, bottom: 0, left: 0}
-    , orient = 'left' // TODO top & bottom
+    , orient = 'left'
     , reverse = false
     , ranges = function(d) { return d.ranges }
     , markers = function(d) { return d.markers }
@@ -1506,7 +1502,7 @@ nv.models.bullet = function() {
 
 
 
-      var w0 = function(d) { return Math.abs(x0(d) - x0(0)) }, // TODO: could optimize by precalculating x0(0) and x1(0)
+      var w0 = function(d) { return Math.abs(x0(d) - x0(0)) },
           w1 = function(d) { return Math.abs(x1(d) - x1(0)) };
       var xp0 = function(d) { return d < 0 ? x0(d) : x0(0) },
           xp1 = function(d) { return d < 0 ? x1(d) : x1(0) };
@@ -1632,14 +1628,14 @@ nv.models.bullet = function() {
           .on('mouseover', function(d,i) { 
               dispatch.elementMouseover({
                 value: d,
-                label: (i <= 0) ? 'Maximum' : (i > 1) ? 'Minimum' : 'Mean', //TODO: make these labels a variable
+                label: (i <= 0) ? 'Maximum' : (i > 1) ? 'Minimum' : 'Mean',
                 pos: [x1(d), availableHeight/2]
               })
           })
           .on('mouseout', function(d,i) { 
               dispatch.elementMouseout({
                 value: d,
-                label: (i <= 0) ? 'Minimum' : (i >=1) ? 'Maximum' : 'Mean' //TODO: make these labels a variable
+                label: (i <= 0) ? 'Minimum' : (i >=1) ? 'Maximum' : 'Mean'
               })
           })
 
@@ -1663,14 +1659,14 @@ nv.models.bullet = function() {
           .on('mouseover', function(d) { 
               dispatch.elementMouseover({
                 value: d,
-                label: 'Current', //TODO: make these labels a variable
+                label: 'Current',
                 pos: [x1(d), availableHeight/2]
               })
           })
           .on('mouseout', function(d) { 
               dispatch.elementMouseout({
                 value: d,
-                label: 'Current' //TODO: make these labels a variable
+                label: 'Current'
               })
           })
 
@@ -1815,7 +1811,7 @@ nv.models.bulletChart = function() {
   var bullet = nv.models.bullet()
     ;
 
-  var orient = 'left' // TODO top & bottom
+  var orient = 'left'
     , reverse = false
     , margin = {top: 5, right: 40, bottom: 20, left: 120}
     , ranges = function(d) { return d.ranges }
@@ -1912,7 +1908,7 @@ nv.models.bulletChart = function() {
 
       // Compute the new x-scale.
       var x1 = d3.scale.linear()
-          .domain([0, Math.max(rangez[0], markerz[0], measurez[0])])  // TODO: need to allow forceX and forceY, and xDomain, yDomain
+          .domain([0, Math.max(rangez[0], markerz[0], measurez[0])])
           .range(reverse ? [availableWidth, 0] : [0, availableWidth]);
 
       // Retrieve the old x-scale, if this is an update.
@@ -1942,7 +1938,7 @@ nv.models.bulletChart = function() {
       }
       */
 
-      var w0 = function(d) { return Math.abs(x0(d) - x0(0)) }, // TODO: could optimize by precalculating x0(0) and x1(0)
+      var w0 = function(d) { return Math.abs(x0(d) - x0(0)) },
           w1 = function(d) { return Math.abs(x1(d) - x1(0)) };
 
 
@@ -2903,8 +2899,6 @@ nv.models.cumulativeLineChart = function() {
          return line;
       }
       var v = lines.y()(line.values[idx], idx);
-
-      //TODO: implement check below, and disable series if series loses 100% or more cause divide by 0 issue
       if (v < -.95) {
         //if a series loses more than 100%, calculations fail.. anything close can cause major distortion (but is mathematically correct till it hits 100)
         line.tempDisabled = true;
@@ -2927,7 +2921,6 @@ nv.models.cumulativeLineChart = function() {
 
   return chart;
 }
-//TODO: consider deprecating by adding necessary features to multiBar model
 nv.models.discreteBar = function() {
   "use strict";
   //============================================================
@@ -3024,10 +3017,6 @@ nv.models.discreteBar = function() {
       wrap.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
       //------------------------------------------------------------
-
-
-
-      //TODO: by definition, the discrete bar should not have multiple groups, will modify/remove later
       var groups = wrap.select('.nv-groups').selectAll('.nv-group')
           .data(function(d) { return d }, function(d) { return d.key });
       groups.enter().append('g')
@@ -3057,13 +3046,13 @@ nv.models.discreteBar = function() {
           .attr('transform', function(d,i,j) {
               return 'translate(' + (x(getX(d,i)) + x.rangeBand() * .05 ) + ', ' + y(0) + ')' 
           })
-          .on('mouseover', function(d,i) { //TODO: figure out why j works above, but not here
+          .on('mouseover', function(d,i) {
             d3.select(this).classed('hover', true);
             dispatch.elementMouseover({
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (d.series + .5) / data.length), y(getY(d,i))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (d.series + .5) / data.length), y(getY(d,i))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -3085,7 +3074,7 @@ nv.models.discreteBar = function() {
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (d.series + .5) / data.length), y(getY(d,i))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (d.series + .5) / data.length), y(getY(d,i))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -3097,7 +3086,7 @@ nv.models.discreteBar = function() {
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (d.series + .5) / data.length), y(getY(d,i))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (d.series + .5) / data.length), y(getY(d,i))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -3759,7 +3748,6 @@ nv.models.distribution = function() {
 
   return chart;
 }
-//TODO: consider deprecating and using multibar with single series for this
 nv.models.historicalBar = function() {
   "use strict";
   //============================================================
@@ -3882,7 +3870,7 @@ nv.models.historicalBar = function() {
             dispatch.elementMouseover({
                 point: d,
                 series: data[0],
-                pos: [x(getX(d,i)), y(getY(d,i))],  // TODO: Figure out why the value appears to be shifted
+                pos: [x(getX(d,i)), y(getY(d,i))],
                 pointIndex: i,
                 seriesIndex: 0,
                 e: d3.event
@@ -3931,8 +3919,7 @@ nv.models.historicalBar = function() {
           .attr('fill', function(d,i) { return color(d, i); })
           .attr('class', function(d,i,j) { return (getY(d,i) < 0 ? 'nv-bar negative' : 'nv-bar positive') + ' nv-bar-' + j + '-' + i })
           .transition()
-          .attr('transform', function(d,i) { return 'translate(' + (x(getX(d,i)) - availableWidth / data[0].values.length * .45) + ',0)'; }) 
-           //TODO: better width calculations that don't assume always uniform data spacing;w
+          .attr('transform', function(d,i) { return 'translate(' + (x(getX(d,i)) - availableWidth / data[0].values.length * .45) + ',0)'; })
           .attr('width', (availableWidth / data[0].values.length) * .9 );
 
 
@@ -4143,7 +4130,7 @@ nv.models.historicalBarChart = function() {
 
   var showTooltip = function(e, offsetElement) {
 
-    // New addition to calculate position if SVG is scaled with viewBox, may move TODO: consider implementing everywhere else
+    // New addition to calculate position if SVG is scaled with viewBox, may move
     if (offsetElement) {
       var svg = d3.select(offsetElement).select('svg');
       var viewBox = (svg.node()) ? svg.attr('viewBox') : null;
@@ -4515,7 +4502,7 @@ nv.models.indentedTree = function() {
   // Public Variables with Default Settings
   //------------------------------------------------------------
 
-  var margin = {top: 0, right: 0, bottom: 0, left: 0} //TODO: implement, maybe as margin on the containing div
+  var margin = {top: 0, right: 0, bottom: 0, left: 0}
     , width = 960
     , height = 500
     , color = nv.utils.defaultColor()
@@ -4524,9 +4511,9 @@ nv.models.indentedTree = function() {
     , filterZero = false
     , noData = "No Data Available."
     , childIndent = 20
-    , columns = [{key:'key', label: 'Name', type:'text'}] //TODO: consider functions like chart.addColumn, chart.removeColumn, instead of a block like this
+    , columns = [{key:'key', label: 'Name', type:'text'}]
     , tableClass = null
-    , iconOpen = 'images/grey-plus.png' //TODO: consider removing this and replacing with a '+' or '-' unless user defines images
+    , iconOpen = 'images/grey-plus.png'
     , iconClose = 'images/grey-minus.png'
     , dispatch = d3.dispatch('elementClick', 'elementDblclick', 'elementMouseover', 'elementMouseout')
     , getUrl = function(d) { return d.url }
@@ -4596,14 +4583,14 @@ nv.models.indentedTree = function() {
 
       //compute max generations
       depth = d3.max(nodes, function(node) { return node.depth });
-      tree.size([height, depth * childIndent]); //TODO: see if this is necessary at all
+      tree.size([height, depth * childIndent]);
 
 
       // Update the nodes…
       var node = tbody.selectAll('tr')
           // .data(function(d) { return d; }, function(d) { return d.id || (d.id == ++i)});
           .data(function(d) { return d.filter(function(d) { return (filterZero && !d.children) ? filterZero(d) :  true; } )}, function(d,i) { return d.id || (d.id || ++idx)});
-          //.style('display', 'table-row'); //TODO: see if this does anything
+          //.style('display', 'table-row');
 
       node.exit().remove();
 
@@ -4617,7 +4604,7 @@ nv.models.indentedTree = function() {
       columns.forEach(function(column, index) {
 
         var nodeName = nodeEnter.append('td')
-            .style('padding-left', function(d) { return (index ? 0 : d.depth * childIndent + 12 + (icon(d) ? 0 : 16)) + 'px' }, 'important') //TODO: check why I did the ternary here
+            .style('padding-left', function(d) { return (index ? 0 : d.depth * childIndent + 12 + (icon(d) ? 0 : 16)) + 'px' }, 'important')
             .style('text-align', column.type == 'numeric' ? 'right' : 'left');
 
 
@@ -4673,7 +4660,7 @@ nv.models.indentedTree = function() {
         .order()
         .on('click', function(d) { 
           dispatch.elementClick({
-            row: this, //TODO: decide whether or not this should be consistent with scatter/line events or should be an html link (a href)
+            row: this,
             data: d,
             pos: [d.x, d.y]
           });
@@ -4888,7 +4875,7 @@ nv.models.indentedTree = function() {
           .data(function(d) { return d });
       var seriesEnter = series.enter().append('g').attr('class', 'nv-series')
           .on('mouseover', function(d,i) {
-            dispatch.legendMouseover(d,i);  //TODO: Make consistent with other event objects
+            dispatch.legendMouseover(d,i);
           })
           .on('mouseout', function(d,i) {
             dispatch.legendMouseout(d,i);
@@ -4945,10 +4932,7 @@ nv.models.indentedTree = function() {
           .style('stroke', function(d,i) { return d.color || color(d, i) });
       series.select('text').text(getKey);
 
-
-      //TODO: implement fixed-width and max-width options (max-width is especially useful with the align option)
-
-      // NEW ALIGNING CODE, TODO: clean up
+      // NEW ALIGNING CODE
       if (align) {
 
         var seriesWidths = [];
@@ -6207,7 +6191,6 @@ nv.models.linePlusBarChart = function() {
   chart.y2Axis = y2Axis;
 
   d3.rebind(chart, lines, 'defined', 'size', 'clipVoronoi', 'interpolate');
-  //TODO: consider rebinding x, y and some other stuff, and simply do soemthign lile bars.x(lines.x()), etc.
   //d3.rebind(chart, lines, 'x', 'y', 'size', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi', 'id');
 
   chart.options = nv.utils.optionsFunc.bind(chart);
@@ -7444,7 +7427,6 @@ nv.models.linePlusBarWithFocusChart = function() {
   chart.y4Axis = y4Axis;
 
   d3.rebind(chart, lines, 'defined', 'size', 'clipVoronoi', 'interpolate');
-  //TODO: consider rebinding x, y and some other stuff, and simply do soemthign lile bars.x(lines.x()), etc.
   //d3.rebind(chart, lines, 'x', 'y', 'size', 'xDomain', 'yDomain', 'xRange', 'yRange', 'forceX', 'forceY', 'interactive', 'clipEdge', 'clipVoronoi', 'id');
 
   chart.options = nv.utils.optionsFunc.bind(chart);
@@ -7735,13 +7717,13 @@ nv.models.multiBar = function() {
       bars
           .style('fill', function(d,i,j){ return color(d, j, i);  })
           .style('stroke', function(d,i,j){ return color(d, j, i); })
-          .on('mouseover', function(d,i) { //TODO: figure out why j works above, but not here
+          .on('mouseover', function(d,i) {
             d3.select(this).classed('hover', true);
             dispatch.elementMouseover({
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -7763,7 +7745,7 @@ nv.models.multiBar = function() {
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -7775,7 +7757,7 @@ nv.models.multiBar = function() {
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -8687,7 +8669,7 @@ nv.models.multiBarHorizontal = function() {
           .attr('height', x.rangeBand() / (stacked ? 1 : data.length) )
 
       bars
-          .on('mouseover', function(d,i) { //TODO: figure out why j works above, but not here
+          .on('mouseover', function(d,i) {
             d3.select(this).classed('hover', true);
             dispatch.elementMouseover({
               value: getY(d,i),
@@ -8715,7 +8697,7 @@ nv.models.multiBarHorizontal = function() {
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -8727,7 +8709,7 @@ nv.models.multiBarHorizontal = function() {
               value: getY(d,i),
               point: d,
               series: data[d.series],
-              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],  // TODO: Figure out why the value appears to be shifted
+              pos: [x(getX(d,i)) + (x.rangeBand() * (stacked ? data.length / 2 : d.series + .5) / data.length), y(getY(d,i) + (stacked ? d.y0 : 0))],
               pointIndex: i,
               seriesIndex: d.series,
               e: d3.event
@@ -8774,7 +8756,6 @@ nv.models.multiBarHorizontal = function() {
       else
         bars.transition()
             .attr('transform', function(d,i) {
-              //TODO: stacked must be all positive or all negative, not both?
               return 'translate(' + 
               (getY(d,i) < 0 ? y(getY(d,i)) : y(0))
               + ',' +
@@ -9684,7 +9665,7 @@ nv.models.multiChart = function() {
 
   stack1.dispatch.on('tooltipShow', function(e) {
     //disable tooltips when value ~= 0
-    //// TODO: consider removing points from voronoi that have 0 value instead of this hack
+    //
     if (!Math.round(stack1.y()(e.point) * 100)) {  // 100 will not be good for very small numbers... will have to think about making this valu dynamic, based on data range
       setTimeout(function() { d3.selectAll('.point.hover').classed('hover', false) }, 0);
       return false;
@@ -9700,7 +9681,7 @@ nv.models.multiChart = function() {
 
   stack2.dispatch.on('tooltipShow', function(e) {
     //disable tooltips when value ~= 0
-    //// TODO: consider removing points from voronoi that have 0 value instead of this hack
+    //
     if (!Math.round(stack2.y()(e.point) * 100)) {  // 100 will not be good for very small numbers... will have to think about making this valu dynamic, based on data range
       setTimeout(function() { d3.selectAll('.point.hover').classed('hover', false) }, 0);
       return false;
@@ -9865,8 +9846,6 @@ nv.models.ohlcBar = function() {
   // Private Variables
   //------------------------------------------------------------
 
-  //TODO: store old scales for transitions
-
   //============================================================
 
 
@@ -9985,7 +9964,7 @@ nv.models.ohlcBar = function() {
             dispatch.elementMouseover({
                 point: d,
                 series: data[0],
-                pos: [x(getX(d,i)), y(getY(d,i))],  // TODO: Figure out why the value appears to be shifted
+                pos: [x(getX(d,i)), y(getY(d,i))],
                 pointIndex: i,
                 seriesIndex: 0,
                 e: d3.event
@@ -11646,7 +11625,6 @@ nv.models.scatterChart = function() {
   var x0, y0;
 
   var showTooltip = function(e, offsetElement) {
-    //TODO: make tooltip style an option between single or dual on axes (maybe on all charts with axes?)
 
     var left = e.pos[0] + ( offsetElement.offsetLeft || 0 ),
         top = e.pos[1] + ( offsetElement.offsetTop || 0),
@@ -12273,7 +12251,6 @@ nv.models.scatterPlusLineChart = function() {
   var x0, y0;
 
   var showTooltip = function(e, offsetElement) {
-    //TODO: make tooltip style an option between single or dual on axes (maybe on all charts with axes?)
 
     var left = e.pos[0] + ( offsetElement.offsetLeft || 0 ),
         top = e.pos[1] + ( offsetElement.offsetTop || 0),
@@ -12887,9 +12864,6 @@ nv.models.sparkline = function() {
             .x(function(d,i) { return x(getX(d,i)) })
             .y(function(d,i) { return y(getY(d,i)) })
           );
-
-
-      // TODO: Add CURRENT data point (Need Min, Mac, Current / Most recent)
       var points = wrap.selectAll('circle.nv-point')
           .data(function(data) {
               var yValues = data.map(function(d, i) { return getY(d,i); });
@@ -13387,7 +13361,7 @@ nv.models.stackedArea = function() {
       data = d3.layout.stack()
                .order(order)
                .offset(offset)
-               .values(function(d) { return d.values })  //TODO: make values customizeable in EVERY model in this fashion
+               .values(function(d) { return d.values })
                .x(getX)
                .y(getY)
                .out(function(d, y0, y) {
@@ -14131,7 +14105,7 @@ nv.models.stackedAreaChart = function() {
 
   stacked.dispatch.on('tooltipShow', function(e) {
     //disable tooltips when value ~= 0
-    //// TODO: consider removing points from voronoi that have 0 value instead of this hack
+    //
     /*
     if (!Math.round(stacked.y()(e.point) * 100)) {  // 100 will not be good for very small numbers... will have to think about making this valu dynamic, based on data range
       setTimeout(function() { d3.selectAll('.point.hover').classed('hover', false) }, 0);

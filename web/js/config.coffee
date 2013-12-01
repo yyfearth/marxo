@@ -58,7 +58,6 @@ Service
         when 'facebook'
           @facebookView.click false
         when 'twitter', 'email'
-        # TODO: click twitter and show email
           console.log 'connect service details', service
         else
           throw new Error 'unknown service'

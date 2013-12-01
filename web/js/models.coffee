@@ -201,22 +201,22 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     validate: (ignored, options) -> if options?.traverse # by default skip
       try
-        throw 'cannot validate a not loaded workflow' unless @loaded()
+        throw new Error 'cannot validate a not loaded workflow' unless @loaded()
         if @nodes.length
           startNode = @startNode
           nodes = @nodes
-          throw 'no start node' unless nodes.length and startNode?
+          throw new Error 'no start node' unless nodes.length and startNode?
           link = @links
           link_idx = {}
           nodes.forEach (n, i) -> if not n.inLinks.length and n isnt startNode
-            throw "find a node without in links and it is not the start node #{n.id ? i}"
+            throw new Error "find a node without in links and it is not the start node #{n.id ? i}"
           link.forEach (l, i) ->
             key = "#{l.prevNode.cid}-#{l.nextNode.cid}"
-            throw "duplicated link #{key} #{l.id or i}" if link_idx.hasOwnProperty key
-
-          throw 'after traversed workflow and find nodes or links not visited' unless @sort(force: true)._sorted
+            throw new Error "duplicated link #{key} #{l.id or i}" if link_idx.hasOwnProperty key
+          unless @sort(force: true)._sorted
+            throw new Error 'after traversed workflow and find nodes or links not visited'
       catch e
-        console.error 'validate workflow failed:', e, @
+        console.error 'validate workflow failed:', e.message, @
         return e
       return
     copy: (workflow, options = {}) -> # create form workflow as template

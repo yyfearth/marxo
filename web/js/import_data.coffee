@@ -165,7 +165,8 @@ Workflow, Workflows
     ,
       name: 'Conference Check-in Mobile App'
       key: 'conf_app_dev'
-      desc: 'Dev WorkflowBased on project requirements, use crowds sourcing idea to complete the development by steps from design, implementation, testing, until the final result of this web application.Based on project requirements, use crowds sourcing idea to complete the development by steps to the result of this application.'
+      desc: 'Based on project requirements, use crowds sourcing to complete the development steps from ' +
+      'design, implementation, testing, until the final result of this app. '
       start_node_id: 0
       nodes: [
         name: 'Requirement and Desgin'

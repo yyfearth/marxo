@@ -40,6 +40,9 @@ upload:
 	jade --DP --out test/ *.jade
 	scp -r test/* wilson@masonwan.com:web/marxo
 
+coffeelint:
+	coffeelint -f coffeelint.json js/*.coffee
+
 .PHONY: js css html
 
 clean: clean_js clean_css clean_res clean_html
