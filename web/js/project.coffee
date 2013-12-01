@@ -527,7 +527,7 @@ Projects
       _prefix = @_prefix
       if node
         id = "##{_prefix}_node_#{node}"
-        console.warn 'select node', node, @model, @model.nodes.get node
+        #console.log 'select node', node, @model, @model.nodes.get node
         @_renderNode @model.nodes.get node
         @$detail.find("##{_prefix}_action_#{action}").addClass('active')[0]?.scrollIntoViewIfNeeded() if action
       else if link
@@ -606,7 +606,7 @@ Projects
         a.href = "#{_href}/action/#{action.id}" if _href
         a.textContent = "Action #{i + 1}: "
         name = document.createElement 'strong'
-        name.textContent = action.get('name') or action.get('type') or action.type
+        name.textContent = action.name()
         a.appendChild name
         if status = action.get 'status'
           status = status.toLowerCase()
@@ -625,7 +625,7 @@ Projects
       li = document.createElement 'li'
       a = document.createElement 'a'
       a.textContent = 'Condition'
-      console.warn model.attributes
+      #console.log 'render link', model.attributes
       if status = model.get 'status'
         status = status.toLowerCase()
         a.className = "status-#{status}"
