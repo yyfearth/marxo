@@ -115,7 +115,6 @@ Projects
       @popup new Project(template_id: wf), (action) => if action is 'save'
         console.log 'wf created', action, @model
         @projects.create @model, wait: true
-        # TODO: save all nodes and links?
         @trigger 'create', @model, @
       @
     edit: (project, opt = {}) ->
@@ -505,8 +504,6 @@ Projects
       else
         highlight null
       @
-
-    # TODO: select this model in view
     render: ->
       @list.fetch()
       super
@@ -542,7 +539,6 @@ Projects
       #console.log 'select id', id
       @$list.find("li.active").removeClass 'active'
       @$list.find(id).addClass('active')[0]?.scrollIntoViewIfNeeded() if id
-      # TODO: action
       @
     _renderLabel: (text, cls) ->
       span = document.createElement 'span'
