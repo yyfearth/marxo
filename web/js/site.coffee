@@ -19,20 +19,22 @@ define 'fb', ['lib/facebook'], (FB) =>
     status: true # check login status
     cookie: true # enable cookies to allow the server to access the session
     xfbml: false
-  autoLogin = FB.autoLogin = (callback) ->
+  autoLogin = FB.autoLogin = (callback, tried) ->
     FB.getLoginStatus (response) ->
       switch response.status
         when 'connected'
           console.log 'connected', response
           callback response, FB
         when 'not_authorized'
-          console.log 'not_authorized', response
           # the user is logged in but has not authed
           console.warn 'User cancelled login or did not fully authorize.', response
           alert 'You cancelled login or did not fully authorize.'
-        else FB.login (response) -> # the user isn't logged in
-          console.log 'login', response
-          autoLogin callback
+        else
+          if tried
+            alert 'Failed to login your Facebook account.'
+          else FB.login (response) -> # the user isn't logged in
+            console.log 'login', response
+            autoLogin callback, true
       return
     FB
   FB
