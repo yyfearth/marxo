@@ -59,7 +59,7 @@ ProjectFilterView
       else
         throw new Error 'content editor can only load a content model or an id string'
     popup: (data, action, callback) ->
-      media = data.get 'media'
+      media = data.get 'type'
       editor = switch media
         when 'FACEBOOK', 'TWITTER'
           @editor
@@ -168,7 +168,7 @@ ProjectFilterView
       @btnSave.disabled = posted
       @
     fill: (data) ->
-      media = data.get 'media'
+      media = data.get 'type'
       @$el.find('small.media').text "(#{media.toLowerCase()})"
       @form.name.value = data.get 'name'
       @form.desc.value = data.get 'desc'
@@ -676,7 +676,7 @@ ProjectFilterView
         @_hide 'unblock'
       else
         @_hide report_btn
-        @_hide 'preview' if 'PAGE' isnt model.get 'media'
+        @_hide 'preview' if 'PAGE' isnt model.get 'type'
         # block / unblock
         @_hide if 'BLOCKED' is status then 'block' else 'unblock'
       @
@@ -687,7 +687,7 @@ ProjectFilterView
       'id'
       'name:content'
     ,
-      name: 'media'
+      name: 'type'
       label: 'Media'
       cell: 'label'
       cls:
@@ -726,7 +726,7 @@ ProjectFilterView
       collection = @collection.fullCollection
       @mediaFilter = new NavFilterView
         el: find('.media-filter', @el)
-        field: 'media'
+        field: 'type'
         collection: collection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
