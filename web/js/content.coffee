@@ -235,7 +235,7 @@ ProjectFilterView
       @btnSave = find '.btn-save', @el
       @btnPreview = find '.btn-preview', @el
       @pageDesc = new PageDescView el: find '#page_desc', @el
-      @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
+      #@submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
       @sections = []
       @sectionsEl = find '#sections', @el
       $(@sectionsEl).sortable
@@ -245,7 +245,7 @@ ProjectFilterView
         cancel: '.box-content'
       @on 'sections_update', =>
         count = (findAll '.section', @sectionsEl).length
-        @submitOptions.$el[if count then 'show' else 'hide']()
+        #@submitOptions.$el[if count then 'show' else 'hide']()
       @
     popup: (data, action, callback) ->
       super data, callback
@@ -254,7 +254,7 @@ ProjectFilterView
         title: data.get 'title'
         desc: data.get 'desc'
       @pageDesc.fill page_desc
-      @submitOptions.fill data.get 'options' if data.has 'options'
+      #@submitOptions.fill data.get 'options' if data.has 'options'
       sections = data.get('sections') or []
       if data.has 'sections'
         @addSection section for section in sections
@@ -288,7 +288,7 @@ ProjectFilterView
         _idx = el.dataset.idx
         data = read @sections[_idx]
         defered.push data
-      defered.push read @submitOptions
+      #defered.push read @submitOptions
 
       $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections..., submit_options) ->
         #console.log 'save content editor', page_desc, sections, submit_options
@@ -310,7 +310,7 @@ ProjectFilterView
       super
       @sectionsEl.innerHTML = ''
       @pageDesc.reset()
-      @submitOptions.reset()
+      #@submitOptions.reset()
       @iframe.classList.remove 'active'
       @btnPreview.classList.remove 'active'
       @btnSave.disabled = false
@@ -380,7 +380,7 @@ ProjectFilterView
 
     render: ->
       @pageDesc.render()
-      @submitOptions.render()
+      #@submitOptions.render()
       _body = find '.modal-body', @el
       $(_body).find('.btn[title]').tooltip container: _body
       super
@@ -434,15 +434,16 @@ ProjectFilterView
         @_type = type
       @
 
-  class SubmitOptionsEditor extends BoxFormView
-    @acts_as ChangeTypeMixin
-    events:
-      'change input[type=radio]': ->
-        @changeType @value if @checked
-    reset: ->
-      super
-      @$el.find('input[type=radio]').change()
-      @
+  #class SubmitOptionsEditor extends BoxFormView
+  #  @acts_as ChangeTypeMixin
+  #  events:
+  #    'change input[type=radio]': ->
+  #      @changeType @value if @checked
+  #  # TODO: support options
+  #  reset: ->
+  #    super
+  #    @$el.find('input[type=radio]').change()
+  #    @
 
   class SectionEditor extends BoxFormView
     @acts_as ChangeTypeMixin
