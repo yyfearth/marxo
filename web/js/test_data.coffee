@@ -1073,7 +1073,7 @@ define 'test_data', ['models'], (models) ->
 
     contents: [
       id: 'e57bf4f6aad752f9fc37fcf1'
-      title: 'Demo Project Initialization'
+      name: 'Demo Project Initialization'
       desc: 'Demo Project Initialization Page'
       media: 'PAGE'
       workflow_id: '50447afb4728cc2036cf9ca0'
@@ -1086,7 +1086,7 @@ define 'test_data', ['models'], (models) ->
       posted_at: new Date(1371191307656)
     ,
       id: 'e57bf4f6aad752f9fc37fcf2'
-      title: 'Demo Project Initialization'
+      name: 'Demo Project Initialization'
       desc: 'Demo Project Initialization Facebook Post'
       media: 'FACEBOOK'
       workflow_id: '50447afb4728cc2036cf9ca0'
@@ -1099,7 +1099,7 @@ define 'test_data', ['models'], (models) ->
       posted_at: new Date(1371191307656)
     ,
       id: 'e57bf4f6aad752f9fc37fcf3'
-      title: 'Demo Project Initialization'
+      name: 'Demo Project Initialization'
       desc: 'Demo Project Initialization Twitter Post'
       media: 'TWITTER'
       workflow_id: '50447afb4728cc2036cf9ca0'
@@ -1112,7 +1112,7 @@ define 'test_data', ['models'], (models) ->
       posted_at: new Date(1371191307656)
     ,
       id: 'e57bf4f6aad752f9fc37fef1'
-      title: 'Demo Project Post Requirements'
+      name: 'Demo Project Post Requirements'
       desc: 'Demo Project Post Requirements Page'
       media: 'PAGE'
       workflow_id: '50447afb4728cc2036cf9ca0'
@@ -1123,7 +1123,7 @@ define 'test_data', ['models'], (models) ->
       created_at: new Date(1371191309656)
     ,
       id: 'e57bf4f6aad752f9fc37fef2'
-      title: 'Demo Project Post Requirements'
+      name: 'Demo Project Post Requirements'
       desc: 'Demo Project Post Requirements Facebook Post'
       media: 'FACEBOOK'
       workflow_id: '50447afb4728cc2036cf9ca0'
@@ -1134,7 +1134,7 @@ define 'test_data', ['models'], (models) ->
       created_at: new Date(1371191309656)
     ,
       id: 'e57bf4f6aad752f9fc37fef3'
-      title: 'Demo Project Post Requirements'
+      name: 'Demo Project Post Requirements'
       desc: 'Demo Project Post Requirements Twitter Post'
       media: 'TWITTER'
       workflow_id: '50447afb4728cc2036cf9ca0'
@@ -1145,7 +1145,7 @@ define 'test_data', ['models'], (models) ->
       created_at: new Date(1371191309656)
     ,
       id: 'e57bf4f6aad752f9fc37feff'
-      title: 'Test Content'
+      name: 'Test Content'
       desc: 'Test Content'
       media: 'EMAIL'
       workflow_id: '50447afb4728cc2036cf9ca1'
@@ -1155,7 +1155,7 @@ define 'test_data', ['models'], (models) ->
       created_at: new Date(1371191309656)
     ,
       id: '655a3dd88b20999dd786d38b'
-      title: 'CMPE 275 Project Requirements'
+      name: 'CMPE 275 Project Requirements'
       desc: '<p>This is CMPE 275 course project.</p>\n<img src=\'http://upload.wikimedia.org/wikipedia/commons/e/e2/Waterfall_model.svg\'>'
       media: 'PAGE'
       workflow_id: '655a3dd88b20999dd786d38b'
@@ -1178,7 +1178,7 @@ define 'test_data', ['models'], (models) ->
 
     events: [
       id: 'e57bf4f6aae752e9fc37eef0'
-      title: 'Demo Scheduled Event'
+      name: 'Demo Scheduled Event'
       desc: 'Demo scheduled event test data'
       status: 'SCHEDULED'
       type: 'WAIT'
@@ -1190,7 +1190,7 @@ define 'test_data', ['models'], (models) ->
       duration: 86400000 # 1 day
     ,
       id: 'e57bf4f6aae752e9fc37eef1'
-      title: 'Demo Unscheduled Event'
+      name: 'Demo Unscheduled Event'
       desc: 'Demo unscheduled event test data'
       status: 'UNSCHEDULED'
       type: 'NOWAIT'
@@ -1200,7 +1200,7 @@ define 'test_data', ['models'], (models) ->
       duration: 86400000 # 1 day
     ,
       id: 'e57bf4f6aae752e9fc37eef2'
-      title: 'Demo Manual Event'
+      name: 'Demo Manual Event'
       desc: 'Demo manual event test data'
       status: 'MANUAL'
       type: 'NOWAIT'
@@ -1235,7 +1235,7 @@ define 'test_data', ['models'], (models) ->
 
     notifications: [
       id: 'e57bf4e6aad752f9ec51eee0'
-      title: 'Test Notification'
+      name: 'Test Notification'
       desc: 'Notification Content'
       type: 'ROUTINE' # ROUTINE/REQUISITE/EMERGENT (imply priority)
       scope: 'PROJECT' # PROJECT/TENANT
@@ -1246,7 +1246,7 @@ define 'test_data', ['models'], (models) ->
       expires_at: new Date(1380213873000)
     ,
       id: 'e57bf4e6aad752f9ec51eee1'
-      title: 'Project Start'
+      name: 'Project Start'
       desc: 'Demo Project started at {{date}}'
       workflow_id: '50447afb4728cc2036cf9ca0'
       type: 'ROUTINE'
@@ -1259,7 +1259,7 @@ define 'test_data', ['models'], (models) ->
       updated_at: new Date(1379614526000)
     ,
       id: 'e57bf4e6aad752f9ec51eee2'
-      title: 'Facebook login expired'
+      name: 'Facebook login expired'
       desc: 'The Facebook account binding was expired, please login again from Facebook Connector!'
       type: 'EMERGENT'
       scope: 'TENANT'

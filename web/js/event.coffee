@@ -272,7 +272,7 @@ Event
           events.push
             id: evt.id
             url: "#event/#{evt.id}"
-            title: evt.get('title')
+            title: evt.get('name')
             start: new Date evt.get('starts')
             end: new Date evt.get('ends')
             color: (if event is evt then '#468847' else null)
@@ -389,7 +389,7 @@ Event
     columns: [
       # 'checkbox'
       'id'
-      'title:event'
+      'name:event'
       'workflow'
       'node_action'
       'type'

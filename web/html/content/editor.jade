@@ -8,7 +8,7 @@ include rich_editor
       small.media.capitalized
   .modal-body
     form
-      input.input-block-level(type='text', name='title', maxlength='255', readonly)
+      input.input-block-level(type='text', name='name', maxlength='255', readonly)
       textarea.input-block-level(id='text_desc', name='desc',
       rows=3, placeholder='The content ...', maxlength='65535')
   .modal-footer
@@ -52,7 +52,7 @@ include rich_editor
             .control-group
               label.control-label(for='page_title') Page Title
               .controls
-                input#page_title.input-large(type='text', name='title',
+                input#page_title.input-large(type='text', name='name',
                 placeholder='The title of the page', maxlength='255', required)
                 span.help-inline(title='Required') *
             .control-group

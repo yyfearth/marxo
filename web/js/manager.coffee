@@ -389,11 +389,6 @@ Workflows
         label: 'Name'
         cell: 'tooltip'
         editable: false
-      title:
-        name: 'title'
-        label: 'Title'
-        cell: 'tooltip'
-        editable: false
       desc:
         name: 'desc'
         label: 'Description'
@@ -497,12 +492,6 @@ Workflows
                 editable: false
                 sortable: false
                 cell: 'actions'
-              when 'title'
-                name: 'title'
-                label: 'Title'
-                cell: 'link'
-                urlRoot: cfgs[1]
-                editable: false
               when 'name'
                 name: 'name'
                 label: 'Name'
