@@ -1,13 +1,29 @@
 package marxo;
 
+import com.google.common.collect.Lists;
 import com.mongodb.DB;
+import com.rits.cloning.Cloner;
+import marxo.entity.BasicEntity;
 import marxo.entity.FacebookData;
+import marxo.entity.action.Action;
+import marxo.entity.action.MonitorFacebookAction;
+import marxo.entity.action.PostFacebookAction;
+import marxo.entity.content.Content;
+import marxo.entity.content.FacebookContent;
+import marxo.entity.content.FacebookMonitorContent;
+import marxo.entity.link.Link;
+import marxo.entity.node.Event;
+import marxo.entity.node.Node;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.user.UserType;
+import marxo.entity.workflow.Workflow;
 import marxo.test.BasicDataTests;
 import marxo.tool.PasswordEncryptor;
+import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Minutes;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.domain.Sort;
@@ -19,12 +35,11 @@ import org.testng.annotations.Test;
 
 import javax.crypto.SecretKeyFactory;
 import javax.xml.bind.DatatypeConverter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings({"unchecked"})
 public class DatabaseResetTests extends BasicDataTests {
+	Workflow reusedWorkflow;
 
 	@Test(priority = 10000)
 	public void cleanDatabase() throws Exception {
@@ -104,5 +119,176 @@ public class DatabaseResetTests extends BasicDataTests {
 		mongoTemplate.insert(users, User.class);
 
 		Assert.assertEquals(mongoTemplate.count(new Query(), User.class), 3);
+	}
+
+	@Test(dependsOnMethods = {"addUsers"})
+	public void addWorkflow() throws Exception {
+		User user = User.getByEmail("yyfearth@gmail.com");
+		Tenant tenant = user.getTenant();
+
+		reusedWorkflow = new Workflow();
+		reusedWorkflow.setTenant(tenant);
+		reusedWorkflow.updateUserId = reusedWorkflow.updateUserId = user.id;
+		reusedWorkflow.createTime = reusedWorkflow.updateTime = DateTime.now();
+		reusedWorkflow.setName("Demo workflow");
+
+		int nodeCount = 1;
+		int contentCount = 1;
+
+		Node node1 = new Node();
+		node1.setName("Node " + nodeCount++);
+		reusedWorkflow.addNode(node1);
+
+		PostFacebookAction postFacebookAction1 = new PostFacebookAction();
+		postFacebookAction1.setName("Post to Facebook 1");
+		node1.addAction(postFacebookAction1);
+
+		FacebookContent facebookContent1 = new FacebookContent();
+		facebookContent1.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent1.id);
+		postFacebookAction1.setContent(facebookContent1);
+
+		MonitorFacebookAction monitorFacebookAction1 = new MonitorFacebookAction();
+		node1.addAction(monitorFacebookAction1);
+
+		FacebookMonitorContent facebookMonitorContent1 = new FacebookMonitorContent();
+		monitorFacebookAction1.setContent(facebookMonitorContent1);
+
+		Node node2 = new Node();
+		node2.setName("Node " + nodeCount++);
+		reusedWorkflow.addNode(node2);
+
+		PostFacebookAction postFacebookAction2 = new PostFacebookAction();
+		postFacebookAction2.setName("Post to Facebook 2");
+		node2.addAction(postFacebookAction2);
+
+		Event event = new Event();
+		event.setName("5 minutes later");
+		event.setStartTime(DateTime.now().plus(Minutes.minutes(5)));
+		event.setDuration(Days.days(1).toStandardDuration());
+		postFacebookAction2.setEvent(event);
+
+		FacebookContent facebookContent2 = new FacebookContent();
+		facebookContent2.message = String.format("Follow up post [%s]", facebookContent2.id);
+		postFacebookAction2.setContent(facebookContent2);
+
+		MonitorFacebookAction monitorFacebookAction2 = new MonitorFacebookAction();
+		node2.addAction(monitorFacebookAction2);
+
+		FacebookMonitorContent facebookMonitorContent2 = new FacebookMonitorContent();
+		monitorFacebookAction2.setContent(facebookMonitorContent2);
+
+		Link link = new Link();
+		link.setName("Just a link");
+		link.setPreviousNode(node1);
+		link.setNextNode(node2);
+		reusedWorkflow.addLink(link);
+
+		reusedWorkflow.wire();
+
+		mongoTemplate.insertAll(Lists.newArrayList(
+				reusedWorkflow,
+				node1,
+				facebookContent1,
+				facebookMonitorContent1,
+				node2,
+				facebookContent2,
+				event,
+				facebookMonitorContent2,
+				link
+		));
+
+		Assert.assertEquals(mongoTemplate.count(new Query(), Workflow.class), 1);
+		Assert.assertEquals(mongoTemplate.count(new Query(), Node.class), 2);
+		Assert.assertEquals(mongoTemplate.count(new Query(), Link.class), 1);
+		Assert.assertEquals(mongoTemplate.count(new Query(), Content.class), 4);
+
+		node1 = Node.get(node1.id);
+		node2 = Node.get(node2.id);
+		link = Link.get(link.id);
+		Assert.assertEquals(node1.getToLinkIds().get(0), link.id);
+	}
+
+	@Test(dependsOnMethods = {"addWorkflow"})
+	public void addProject() throws Exception {
+		User user = User.getByEmail("yyfearth@gmail.com");
+		Tenant tenant = user.getTenant();
+
+		List<BasicEntity> entities = new ArrayList<>();
+		Workflow workflow = new Cloner().deepClone(reusedWorkflow);
+		workflow.id = new ObjectId();
+		workflow.templateId = reusedWorkflow.id;
+		workflow.isProject = true;
+		workflow.updateUserId = workflow.createUserId = user.id;
+		workflow.createTime = workflow.updateTime = DateTime.now();
+
+		Map<ObjectId, ObjectId> linkMap = new HashMap<>();
+		for (ObjectId objectId : workflow.linkIds) {
+			linkMap.put(objectId, new ObjectId());
+		}
+		Map<ObjectId, ObjectId> nodeMap = new HashMap<>();
+		for (ObjectId objectId : workflow.nodeIds) {
+			nodeMap.put(objectId, new ObjectId());
+		}
+
+		for (Node node : workflow.getNodes()) {
+			node.id = nodeMap.get(node.id);
+			node.setWorkflow(workflow);
+
+			for (Link link : node.getFromLinks()) {
+				link.id = linkMap.get(link.id);
+			}
+			node.setFromLinks(node.getFromLinks());
+			for (Link link : node.getToLinks()) {
+				link.id = linkMap.get(link.id);
+			}
+			node.setToLinks(node.getToLinks());
+
+			List<ObjectId> list = new ArrayList();
+			for (ObjectId objectId : node.getFromNodeIds()) {
+				list.add(nodeMap.get(objectId));
+			}
+			node.setFromNodeIds(list);
+			list = new ArrayList();
+			for (ObjectId objectId : node.getToNodeIds()) {
+				list.add(nodeMap.get(objectId));
+			}
+			node.setToNodeIds(list);
+
+			for (Action action : node.getActions()) {
+				action.id = new ObjectId();
+				action.setNode(node);
+
+				Event event = action.getEvent();
+				if (event != null) {
+					event.id = new ObjectId();
+					event.setNode(node);
+					entities.add(event);
+				}
+
+				Content content = action.getContent();
+				if (content != null) {
+					content.id = new ObjectId();
+					content.setNode(node);
+					entities.add(content);
+				}
+			}
+		}
+		for (Link link : workflow.getLinks()) {
+			link.id = linkMap.get(link.id);
+			link.setWorkflow(workflow);
+			link.previousNodeId = nodeMap.get(link.previousNodeId);
+			link.nextNodeId = nodeMap.get(link.nextNodeId);
+		}
+
+		entities.addAll(workflow.getNodes());
+		entities.addAll(workflow.getLinks());
+		entities.add(workflow);
+		mongoTemplate.insertAll(entities);
+
+		Criteria criteria = Criteria.where("workflowId").is(workflow.id);
+		Query query = Query.query(criteria);
+		Assert.assertEquals(mongoTemplate.count(query, Node.class), 2);
+		Assert.assertEquals(mongoTemplate.count(query, Link.class), 1);
+		Assert.assertEquals(mongoTemplate.count(query, Content.class), 4);
 	}
 }

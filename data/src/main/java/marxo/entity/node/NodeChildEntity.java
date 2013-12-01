@@ -23,7 +23,7 @@ public abstract class NodeChildEntity extends WorkflowChildEntity {
 	public void setNode(Node node) {
 		this.node = node;
 		this.nodeId = node.id;
-		this.tenantId = node.tenantId;
 		this.workflowId = node.workflowId;
+		this.tenantId = node.tenantId;
 	}
 }

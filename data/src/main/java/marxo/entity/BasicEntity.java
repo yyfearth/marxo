@@ -58,7 +58,7 @@ public abstract class BasicEntity implements Loggable {
 	@JsonProperty("id")
 	public ObjectId id = new ObjectId();
 	@Field(order = 4)
-	public String key = id.toString();
+	public String key;
 	@Field(order = 50)
 	@JsonProperty("created_at")
 	public DateTime createTime = DateTime.now();

@@ -15,7 +15,6 @@ public abstract class WorkflowChildEntity extends RunnableEntity {
 	public void setWorkflow(Workflow workflow) {
 		this.workflow = workflow;
 		this.workflowId = workflow.id;
-
-		tenantId = workflow.tenantId;
+		this.tenantId = workflow.tenantId;
 	}
 }

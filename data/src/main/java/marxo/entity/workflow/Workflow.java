@@ -2,10 +2,15 @@ package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.rits.cloning.Cloner;
 import marxo.entity.BasicEntity;
+import marxo.entity.action.Action;
+import marxo.entity.content.Content;
 import marxo.entity.link.Link;
+import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
@@ -14,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,22 +38,25 @@ public class Workflow extends RunnableEntity {
 	protected List<Link> links;
 
 	public List<Link> getLinks() {
-		return links;
+		if (linkIds.isEmpty()) {
+			return links = new ArrayList<>();
+		}
+		return (links == null) ? (links = mongoTemplate.find(Query.query(Criteria.where("_id").in(linkIds)), Link.class)) : links;
 	}
 
 	public void setLinks(List<Link> links) {
 		this.links = links;
 		this.linkIds = Lists.transform(links, SelectIdFunction.getInstance());
 		for (Link link : links) {
-			link.tenantId = tenantId;
-			link.workflowId = id;
+			link.setWorkflow(this);
 		}
 	}
 
 	public void addLink(Link link) {
-		if (links != null) {
-			links.add(link);
+		if (links == null) {
+			getLinks();
 		}
+		links.add(link);
 		linkIds.add(link.id);
 		link.setWorkflow(this);
 	}
@@ -62,22 +71,25 @@ public class Workflow extends RunnableEntity {
 	protected List<Node> nodes;
 
 	public List<Node> getNodes() {
-		return nodes;
+		if (nodeIds.isEmpty()) {
+			return nodes = new ArrayList<>();
+		}
+		return (nodes == null) ? (nodes = mongoTemplate.find(Query.query(Criteria.where("_id").in(nodeIds)), Node.class)) : nodes;
 	}
 
 	public void setNodes(List<Node> nodes) {
 		this.nodes = nodes;
 		this.nodeIds = Lists.transform(nodes, SelectIdFunction.getInstance());
 		for (Node node : nodes) {
-			node.tenantId = tenantId;
-			node.workflowId = id;
+			node.setWorkflow(this);
 		}
 	}
 
 	public void addNode(Node node) {
-		if (nodes != null) {
-			nodes.add(node);
+		if (nodes == null) {
+			getNodes();
 		}
+		nodes.add(node);
 		nodeIds.add(node.id);
 		if (nodeIds.size() == 1) {
 			startNodeId = node.id;
@@ -100,13 +112,8 @@ public class Workflow extends RunnableEntity {
 			if (nodeIds.isEmpty()) {
 				return null;
 			}
-			wire();
-
 		}
-		if (startNode == null) {
-			return startNode = mongoTemplate.findById(startNodeId, Node.class);
-		}
-		return startNode;
+		return (startNode == null) ? (startNode = mongoTemplate.findById(startNodeId, Node.class)) : startNode;
 	}
 
 	@JsonIgnore
@@ -119,19 +126,96 @@ public class Workflow extends RunnableEntity {
 	Template
 	 */
 
+	public ObjectId templateId;
 	@Transient
 	protected Workflow template;
-	public ObjectId templateId;
 
 	@JsonIgnore
 	public Workflow getTemplate() {
-		return template;
+		if (templateId == null) {
+			return null;
+		}
+		return (template == null) ? (template = mongoTemplate.findById(templateId, Workflow.class)) : template;
 	}
 
 	@JsonIgnore
 	public void setTemplate(Workflow template) {
 		this.template = template;
 		templateId = template.id;
+		this.tenantId = template.tenantId;
+
+//		if (Strings.isNullOrEmpty(this.getName())) {
+//			this.setName(template.getName() + " (Copied)");
+//		}
+//
+//		Cloner cloner = new Cloner();
+//
+//		Map<ObjectId, ObjectId> linkMap = new HashMap<>();
+//		for (ObjectId objectId : linkIds) {
+//			linkMap.put(objectId, new ObjectId());
+//		}
+//		Map<ObjectId, ObjectId> nodeMap = new HashMap<>();
+//		for (ObjectId objectId : nodeIds) {
+//			nodeMap.put(objectId, new ObjectId());
+//		}
+//
+//		// Copy nodes
+//		List<Node> nodes = new ArrayList<>();
+//		List<Event> events = new ArrayList<>();
+//		List<Content> contents = new ArrayList<>();
+//		for (Node node : template.getNodes()) {
+//			Node newNode = cloner.deepClone(node);
+//			newNode.id = nodeMap.get(node.id);
+//			newNode.setWorkflow(this);
+//			nodes.add(newNode);
+//
+//			for (ObjectId objectId : newNode.getFromLinkIds()) {
+//
+//			}
+//
+//			for (Action action : newNode.getActions()) {
+//				action.id = new ObjectId();
+//
+//				Event event = action.getEvent();
+//				if (event != null) {
+//					event.id = new ObjectId();
+//					event.workflowId = id;
+//					events.add(event);
+//				}
+//
+//				Content content = action.getContent();
+//				if (content != null) {
+//					content.id = new ObjectId();
+//					content.workflowId = id;
+//					contents.add(content);
+//				}
+//			}
+//		}
+//		setNodes(nodes);
+//
+//		// Copy links
+//		List<Link> links = new ArrayList<>();
+//		for (Link link : template.getLinks()) {
+//			Link newLink = cloner.deepClone(link);
+//			newLink.id = linkMap.get(link.id);
+//			newLink.setWorkflow(this);
+//			if (newLink.previousNodeId != null) {
+//				newLink.previousNodeId = nodeMap.get(newLink.previousNodeId);
+//			}
+//			if (newLink.nextNodeId != null) {
+//				newLink.nextNodeId = nodeMap.get(newLink.nextNodeId);
+//			}
+//			links.add(newLink);
+//		}
+//		setLinks(links);
+//
+//		List<BasicEntity> entities = new ArrayList<>();
+//		entities.addAll(nodes);
+//		entities.addAll(links);
+//		entities.addAll(events);
+//		entities.addAll(contents);
+//
+//		mongoTemplate.insertAll(entities);
 	}
 
 	/*
