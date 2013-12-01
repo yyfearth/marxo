@@ -73,20 +73,20 @@ include rich_editor
         .box-content
           form.form-horizontal(id='section_#_form')
             .control-group
-              label.control-label(for='section_#_title') Section Title
+              label.control-label(for='section_#_name') Section Title
               .controls
-                input.input-large(id='section_#_title', name='section_title', type='text',
+                input.input-large(id='section_#_name', name='name', type='text',
                 placeholder='The title of the section', maxlength='255', required)
                 span.help-inline(title='Required') *
             .control-group
               label.control-label(for='section_#_desc') Section Description
               .controls
-                textarea.input-block-level(id='section_#_desc', name='section_desc',
+                textarea.input-block-level(id='section_#_desc', name='desc',
                 rows=3, placeholder='The description of the section', maxlength='65535')
             .control-group
               label.control-label(for='section_#_type') Section Type
               .controls
-                select.input-xlarge(id='section_#_type', name='section_type')
+                select.input-xlarge(id='section_#_type', name='type')
                   option(value='', checked) Description Only (No Question)
                   option(value='text') Simple Text
                   option(value='html') Rich Text
@@ -126,7 +126,7 @@ include rich_editor
 
       button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
 
-      section.box#submit_options
+      //-- section.box#submit_options
         .box-header.well
           h4 Submit Options
           .box-icon

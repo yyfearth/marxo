@@ -59,7 +59,7 @@ ProjectFilterView
       else
         throw new Error 'content editor can only load a content model or an id string'
     popup: (data, action, callback) ->
-      media = data.get 'media'
+      media = data.get 'type'
       editor = switch media
         when 'FACEBOOK', 'TWITTER'
           @editor
@@ -168,7 +168,7 @@ ProjectFilterView
       @btnSave.disabled = posted
       @
     fill: (data) ->
-      media = data.get 'media'
+      media = data.get 'type'
       @$el.find('small.media').text "(#{media.toLowerCase()})"
       @form.name.value = data.get 'name'
       @form.desc.value = data.get 'desc'
@@ -235,7 +235,7 @@ ProjectFilterView
       @btnSave = find '.btn-save', @el
       @btnPreview = find '.btn-preview', @el
       @pageDesc = new PageDescView el: find '#page_desc', @el
-      @submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
+      #@submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
       @sections = []
       @sectionsEl = find '#sections', @el
       $(@sectionsEl).sortable
@@ -245,7 +245,7 @@ ProjectFilterView
         cancel: '.box-content'
       @on 'sections_update', =>
         count = (findAll '.section', @sectionsEl).length
-        @submitOptions.$el[if count then 'show' else 'hide']()
+        #@submitOptions.$el[if count then 'show' else 'hide']()
       @
     popup: (data, action, callback) ->
       super data, callback
@@ -254,7 +254,7 @@ ProjectFilterView
         name: data.get 'name'
         desc: data.get 'desc'
       @pageDesc.fill page_desc
-      @submitOptions.fill data.get 'options' if data.has 'options'
+      #@submitOptions.fill data.get 'options' if data.has 'options'
       sections = data.get('sections') or []
       if data.has 'sections'
         @addSection section for section in sections
@@ -288,7 +288,7 @@ ProjectFilterView
         _idx = el.dataset.idx
         data = read @sections[_idx]
         defered.push data
-      defered.push read @submitOptions
+      #defered.push read @submitOptions
 
       $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections..., submit_options) ->
         #console.log 'save content editor', page_desc, sections, submit_options
@@ -310,7 +310,7 @@ ProjectFilterView
       super
       @sectionsEl.innerHTML = ''
       @pageDesc.reset()
-      @submitOptions.reset()
+      #@submitOptions.reset()
       @iframe.classList.remove 'active'
       @btnPreview.classList.remove 'active'
       @btnSave.disabled = false
@@ -380,7 +380,7 @@ ProjectFilterView
 
     render: ->
       @pageDesc.render()
-      @submitOptions.render()
+      #@submitOptions.render()
       _body = find '.modal-body', @el
       $(_body).find('.btn[title]').tooltip container: _body
       super
@@ -434,15 +434,16 @@ ProjectFilterView
         @_type = type
       @
 
-  class SubmitOptionsEditor extends BoxFormView
-    @acts_as ChangeTypeMixin
-    events:
-      'change input[type=radio]': ->
-        @changeType @value if @checked
-    reset: ->
-      super
-      @$el.find('input[type=radio]').change()
-      @
+  #class SubmitOptionsEditor extends BoxFormView
+  #  @acts_as ChangeTypeMixin
+  #  events:
+  #    'change input[type=radio]': ->
+  #      @changeType @value if @checked
+  #  # TODO: support options
+  #  reset: ->
+  #    super
+  #    @$el.find('input[type=radio]').change()
+  #    @
 
   class SectionEditor extends BoxFormView
     @acts_as ChangeTypeMixin
@@ -499,17 +500,29 @@ ProjectFilterView
       find "##{@id}_#{part_id}", @el
     fill: (data) ->
       @reset()
+      data = unless data? then {} else $.extend {}, data, data.options
       super data
-      if data?.section_type is 'radio' and not data.gen_from_list and data.manual_options
+      if data.type is 'radio' and not data.gen_from_list and data.manual_options
         # manual options
         @autoIncOptionList.fill data.manual_options
       @
     read: ->
       data = super()
       # manual options
-      if data?.section_type is 'radio' and not data.gen_from_list
+      if data?.type is 'radio' and not data.gen_from_list
         data.manual_options = @autoIncOptionList.read()
       # TODO: stop if invalid
+
+      # convert to data and data.options
+      options = data
+      data =
+        name: options.name
+        desc: options.desc
+        type: options.type
+        options: options
+      delete options.name
+      delete options.desc
+      delete options.type
       data
     render: ->
       @el.id = @id
@@ -531,24 +544,25 @@ ProjectFilterView
     genPreview: (data) ->
       #console.log 'gen preview', @id, data
       tpl = @_preview_tpl
-      type = data.section_type or ''
+      type = data.type or ''
+      options = data.options or {}
       switch type
         when ''
           body = ''
         when 'text'
-          body = if data.text_multiline then tpl.textarea else tpl.text
+          body = if options.text_multiline then tpl.textarea else tpl.text
         when 'html'
           body = tpl.html
         when 'radio'
           el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
-          list = unless data.gen_from_list then data.manual_options else [
+          list = unless options.gen_from_list then options.manual_options else [
             'List item 1 (Auto Genearted)'
             'List item 2 (Auto Genearted)'
             '... (Auto Genearted)'
           ]
           body = list.map((item) -> el.replace '{{text}}', item).join '\n'
         when 'file'
-          accept = data.file_accept
+          accept = options.file_accept
           if accept is 'image/*'
             body = tpl.image
           else
@@ -557,8 +571,8 @@ ProjectFilterView
         else
           throw new Error 'unknown section type ' + type
       tpl.section
-        .replace('{{title}}', data.section_title or '(Need a Title)')
-        .replace('{{desc}}', data.section_desc?.replace(/\n/g, '<br/>') or '')
+        .replace('{{title}}', data.name or '(Need a Title)')
+        .replace('{{desc}}', data.desc?.replace(/\n/g, '<br/>') or '')
         .replace('{{body}}', body)
     updatePreview: ->
       data = @read()
@@ -675,7 +689,7 @@ ProjectFilterView
         @_hide 'unblock'
       else
         @_hide report_btn
-        @_hide 'preview' if 'PAGE' isnt model.get 'media'
+        @_hide 'preview' if 'PAGE' isnt model.get 'type'
         # block / unblock
         @_hide if 'BLOCKED' is status then 'block' else 'unblock'
       @
@@ -686,7 +700,7 @@ ProjectFilterView
       'id'
       'name:content'
     ,
-      name: 'media'
+      name: 'type'
       label: 'Media'
       cell: 'label'
       cls:
@@ -725,7 +739,7 @@ ProjectFilterView
       collection = @collection.fullCollection
       @mediaFilter = new NavFilterView
         el: find('.media-filter', @el)
-        field: 'media'
+        field: 'type'
         collection: collection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
