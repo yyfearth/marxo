@@ -2,7 +2,7 @@ package marxo.engine;
 
 import marxo.entity.Task;
 import marxo.entity.link.Link;
-import marxo.entity.node.Action;
+import marxo.entity.action.Action;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.RunStatus;

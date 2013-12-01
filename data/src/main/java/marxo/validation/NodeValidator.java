@@ -1,6 +1,6 @@
 package marxo.validation;
 
-import marxo.entity.node.Action;
+import marxo.entity.action.Action;
 import marxo.entity.node.Node;
 import org.springframework.validation.Errors;
 

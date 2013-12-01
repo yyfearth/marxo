@@ -1,8 +1,11 @@
-package marxo.entity.node;
+package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mongodb.WriteResult;
 import marxo.entity.content.Content;
+import marxo.entity.node.Event;
+import marxo.entity.node.Node;
+import marxo.entity.node.NodeChildEntity;
 import marxo.exception.DatabaseException;
 import marxo.exception.Errors;
 import marxo.exception.ValidationException;
@@ -14,6 +17,17 @@ import org.springframework.data.mongodb.core.query.Update;
 
 // todo: make this class abstract
 public class Action extends NodeChildEntity {
+
+	public String getType() {
+		return getClass().toString().replaceAll("[A-Z]", "_$0").toUpperCase();
+	}
+
+	public boolean isTracked = true;
+
+	/*
+	Next action
+	 */
+
 	public ObjectId nextActionId;
 
 	@Transient

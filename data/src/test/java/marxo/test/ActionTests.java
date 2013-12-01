@@ -1,8 +1,8 @@
 package marxo.test;
 
+import marxo.entity.action.Action;
 import marxo.entity.action.PostFacebookAction;
 import marxo.entity.action.WaitUserAction;
-import marxo.entity.node.Action;
 import marxo.entity.node.Node;
 import org.bson.types.ObjectId;
 import org.testng.Assert;
