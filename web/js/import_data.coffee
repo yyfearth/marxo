@@ -183,6 +183,10 @@ Workflow, Workflows
           type: 'POST_FACEBOOK'
           name: 'Post Requirement to Facebook'
           key: 'post_req_fb'
+          content:
+            type: 'FACEBOOK'
+            desc: '''Attention! Conference Check-in Mobile App start to receive submission.
+            See requirements and submit your desgin in {{post_req.url}}'''
         ,
           type: 'MAKE_SCHEDULE'
           name: 'Wait for Design Submit'
@@ -207,6 +211,9 @@ Workflow, Workflows
           type: 'POST_FACEBOOK'
           name: 'Post Vote to Facebook'
           key: 'design_vote_fb'
+          content:
+            type: 'FACEBOOK'
+            desc: 'Vote your favorite desgin for our Conference Check-in Mobile App.\n {{post_design_vote_form.url}}'
         ,
           type: 'MAKE_SCHEDULE'
           name: 'Wait for Design Vote'
@@ -259,6 +266,10 @@ Workflow, Workflows
           type: 'POST_FACEBOOK'
           name: 'Post Design to Facebook'
           key: 'desgin_impl_fb'
+          content:
+            type: 'FACEBOOK'
+            desc: '''The final desgin of Conference Check-in Mobile App is ready!
+            Please submit your code in {{post_design_submit_impl.url}}'''
         ,
           type: 'MAKE_SCHEDULE'
           name: 'Wait for Implementation'
@@ -311,6 +322,10 @@ Workflow, Workflows
           type: 'POST_FACEBOOK'
           name: 'Post Implementation to Facebook'
           key: 'impl_fb'
+          content:
+            type: 'FACEBOOK'
+            desc: '''Our committee have the final result of the winner of implemetation of our app.
+            Welcome to feedback any bugs or leave comments in {{post_impl_test.url}}'''
         ,
           type: 'MAKE_SCHEDULE'
           name: 'Wait for Testing'
@@ -339,6 +354,10 @@ Workflow, Workflows
           type: 'POST_FACEBOOK'
           name: 'Post Final Result to Facebook'
           key: 'result_fb'
+          content:
+            type: 'FACEBOOK'
+            desc: '''The Conference Check-in Mobile App is ready!
+            See our demo here {{post_result.url}}'''
         ]
       ]
       links: [
