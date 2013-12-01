@@ -1,6 +1,5 @@
 package marxo.entity.action;
 
-import marxo.entity.node.Action;
 import marxo.entity.node.NodeChildEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
@@ -24,5 +23,6 @@ public abstract class ActionChildEntity extends NodeChildEntity {
 		this.actionId = action.id;
 		this.nodeId = action.nodeId;
 		this.tenantId = action.tenantId;
+		this.workflowId = action.workflowId;
 	}
 }

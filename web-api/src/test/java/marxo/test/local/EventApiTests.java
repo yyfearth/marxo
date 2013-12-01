@@ -1,8 +1,8 @@
 package marxo.test.local;
 
 import com.google.common.net.MediaType;
-import marxo.entity.action.PostFacebookAction;
 import marxo.entity.action.Action;
+import marxo.entity.action.PostFacebookAction;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.test.ApiTestConfiguration;

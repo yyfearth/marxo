@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import marxo.entity.action.Action;
 import marxo.entity.link.Link;
 import marxo.entity.workflow.WorkflowChildEntity;
 import marxo.validation.NodeValidator;
@@ -69,9 +70,9 @@ public class Node extends WorkflowChildEntity {
 				action.setNextAction(actions.get(i + 1));
 			}
 
-			if (action.event != null) {
-				action.event.setAction(action);
-				action.event.setNode(this);
+			if (action.getEvent() != null) {
+				action.getEvent().setAction(action);
+				action.getEvent().setNode(this);
 			}
 		}
 	}

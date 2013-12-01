@@ -1,12 +1,15 @@
 package marxo.entity.node;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import marxo.entity.action.ActionChildEntity;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 public class Event extends ActionChildEntity {
+	@JsonProperty("starts")
 	protected DateTime startTime;
+	@JsonProperty("ends")
 	protected DateTime endTime;
 	protected Duration duration;
 

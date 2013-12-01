@@ -23,7 +23,31 @@ import java.util.Set;
 
 // review: it's fucking weird that the entities are coupled with Jackson annotation.
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
-@JsonPropertyOrder({"id", "email", "object_type", "tenant_id", "workflow_id", "name", "key", "desc", "context_type", "status", "content", "nodes", "node_ids", "links", "link_ids", "created_at", "created_by", "updated_at", "modified_by"})
+@JsonPropertyOrder({
+		"id",
+		"key",
+		"email",
+
+		"type",
+		"object_type",
+		"name",
+		"desc",
+		"status",
+
+		"created_at",
+		"created_by",
+		"updated_at",
+		"modified_by",
+
+		"tenant_id",
+		"workflow_id",
+		"node_ids",
+		"nodes",
+		"link_ids",
+		"links",
+		"contentId",
+		"eventId",
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class BasicEntity implements Loggable {
 	@JsonIgnore
