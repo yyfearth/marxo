@@ -500,17 +500,29 @@ ProjectFilterView
       find "##{@id}_#{part_id}", @el
     fill: (data) ->
       @reset()
+      data = unless data? then {} else $.extend {}, data, data.options
       super data
-      if data?.section_type is 'radio' and not data.gen_from_list and data.manual_options
+      if data.type is 'radio' and not data.gen_from_list and data.manual_options
         # manual options
         @autoIncOptionList.fill data.manual_options
       @
     read: ->
       data = super()
       # manual options
-      if data?.section_type is 'radio' and not data.gen_from_list
+      if data?.type is 'radio' and not data.gen_from_list
         data.manual_options = @autoIncOptionList.read()
       # TODO: stop if invalid
+
+      # convert to data and data.options
+      options = data
+      data =
+        name: options.name
+        desc: options.desc
+        type: options.type
+        options: options
+      delete options.name
+      delete options.desc
+      delete options.type
       data
     render: ->
       @el.id = @id
@@ -532,24 +544,25 @@ ProjectFilterView
     genPreview: (data) ->
       #console.log 'gen preview', @id, data
       tpl = @_preview_tpl
-      type = data.section_type or ''
+      type = data.type or ''
+      options = data.options or {}
       switch type
         when ''
           body = ''
         when 'text'
-          body = if data.text_multiline then tpl.textarea else tpl.text
+          body = if options.text_multiline then tpl.textarea else tpl.text
         when 'html'
           body = tpl.html
         when 'radio'
           el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
-          list = unless data.gen_from_list then data.manual_options else [
+          list = unless options.gen_from_list then options.manual_options else [
             'List item 1 (Auto Genearted)'
             'List item 2 (Auto Genearted)'
             '... (Auto Genearted)'
           ]
           body = list.map((item) -> el.replace '{{text}}', item).join '\n'
         when 'file'
-          accept = data.file_accept
+          accept = options.file_accept
           if accept is 'image/*'
             body = tpl.image
           else
@@ -558,8 +571,8 @@ ProjectFilterView
         else
           throw new Error 'unknown section type ' + type
       tpl.section
-        .replace('{{title}}', data.section_title or '(Need a Title)')
-        .replace('{{desc}}', data.section_desc?.replace(/\n/g, '<br/>') or '')
+        .replace('{{title}}', data.name or '(Need a Title)')
+        .replace('{{desc}}', data.desc?.replace(/\n/g, '<br/>') or '')
         .replace('{{body}}', body)
     updatePreview: ->
       data = @read()

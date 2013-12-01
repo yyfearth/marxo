@@ -1164,15 +1164,17 @@ define 'test_data', ['models'], (models) ->
       status: 'WAITING'
       created_at: '2013-06-14T06:28:29.656Z'
       sections: [
-        section_title: 'Group Registration'
-        section_desc: 'Please enter your group name'
-        section_type: 'text'
-        text_multiline: false
+        name: 'Group Registration'
+        desc: 'Please enter your group name'
+        type: 'text'
+        options:
+          text_multiline: false
       ,
-        section_title: 'Group Members'
-        section_desc: 'Please enter your group members as:\nLast Name, First Name <email> (SID)\ne.g. Young, Wilson <yyfearth@gmail.com> 008060123'
-        section_type: 'text'
-        text_multiline: true
+        name: 'Group Members'
+        desc: 'Please enter your group members as:\nLast Name, First Name <email> (SID)\ne.g. Young, Wilson <yyfearth@gmail.com> 008060123'
+        type: 'text'
+        options:
+          text_multiline: true
       ]
     ]
 
