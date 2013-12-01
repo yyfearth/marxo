@@ -14,7 +14,7 @@ do -> # browser test
     fail 'Your browser is out-of-date!'
   return
 
-console.log 'ver', 3
+console.log 'ver', 'console', 4
 
 requirejs.config
   shim:
