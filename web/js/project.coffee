@@ -606,7 +606,7 @@ Projects
         a.href = "#{_href}/action/#{action.id}" if _href
         a.textContent = "Action #{i + 1}: "
         name = document.createElement 'strong'
-        name.textContent = action.get('name') or action.get('type') or action.type
+        name.textContent = action.name()
         a.appendChild name
         if status = action.get 'status'
           status = status.toLowerCase()

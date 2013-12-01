@@ -488,6 +488,7 @@ define 'models', ['module', 'lib/common'], (module) ->
   # url: -> @workflow.url() + '/links'
 
   class Action extends Entity
+    name: -> @get('name') or @get('type')?.replace(/_/, ' ').capitalize() or '(No Name)'
   # idAttribute: 'index'
 
   class Actions extends SimpleCollection

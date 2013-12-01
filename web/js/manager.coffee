@@ -145,7 +145,7 @@ Workflows
           if workflow and node and action
             url = "##{workflow._name}/#{workflow.id}/node/#{node.id}/action/#{action.id}"
             node_name = _.escape node.get 'name'
-            action_name = _.escape action.get('name') or action.get('type').replace(/_/, ' ').capitalize()
+            action_name = _.escape action.name()
             tooltip = "#{node_name}: #{action_name}"
             html = "<span class='node-title'>#{node_name}</span>: #{action_name}"
             @$el.addClass('action-link-cell').append $('<a>',
@@ -154,7 +154,7 @@ Workflows
             ).attr(title: tooltip).html html
             @delegateEvents()
           else
-            console.warn 'failed to get node action for url', url
+            console.warn 'failed to get node action', @model.attributes
       @
 
   # single label tag
