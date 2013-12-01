@@ -2,15 +2,10 @@ package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.rits.cloning.Cloner;
 import marxo.entity.BasicEntity;
-import marxo.entity.action.Action;
-import marxo.entity.content.Content;
 import marxo.entity.link.Link;
-import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
@@ -19,7 +14,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +40,7 @@ public class Workflow extends RunnableEntity {
 
 	public void setLinks(List<Link> links) {
 		this.links = links;
-		this.linkIds = Lists.transform(links, SelectIdFunction.getInstance());
+		this.linkIds = new ArrayList<>(Lists.transform(links, SelectIdFunction.getInstance()));
 		for (Link link : links) {
 			link.setWorkflow(this);
 		}
@@ -79,7 +73,7 @@ public class Workflow extends RunnableEntity {
 
 	public void setNodes(List<Node> nodes) {
 		this.nodes = nodes;
-		this.nodeIds = Lists.transform(nodes, SelectIdFunction.getInstance());
+		this.nodeIds = new ArrayList<>(Lists.transform(nodes, SelectIdFunction.getInstance()));
 		for (Node node : nodes) {
 			node.setWorkflow(this);
 		}

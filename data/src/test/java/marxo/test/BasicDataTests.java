@@ -2,6 +2,7 @@ package marxo.test;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import marxo.entity.BasicEntity;
 import marxo.tool.Loggable;
 import marxo.validation.SelectIdFunction;
@@ -37,7 +38,7 @@ public abstract class BasicDataTests implements Loggable {
 //	}
 	public void insertEntities(BasicEntity... entities) {
 		if (entities.length > 0) {
-			List<BasicEntity> list = Arrays.asList(entities);
+			List<BasicEntity> list = Lists.newArrayList(entities);
 			mongoTemplate.insertAll(list);
 			entitiesToRemove.addAll(list);
 		}

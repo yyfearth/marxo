@@ -186,7 +186,7 @@ public class Node extends WorkflowChildEntity {
 
 	public void setFromLinks(List<Link> fromLinks) {
 		this.fromLinks = fromLinks;
-		this.fromLinkIds = Lists.transform(fromLinks, SelectIdFunction.getInstance());
+		this.fromLinkIds = new ArrayList<>(Lists.transform(fromLinks, SelectIdFunction.getInstance()));
 	}
 
 	public List<Link> getToLinks() {

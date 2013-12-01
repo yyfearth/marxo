@@ -144,6 +144,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.addAction(postFacebookAction1);
 
 		FacebookContent facebookContent1 = new FacebookContent();
+		facebookContent1.setName("Contnet " + contentCount++);
 		facebookContent1.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent1.id);
 		postFacebookAction1.setContent(facebookContent1);
 
@@ -151,6 +152,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.addAction(monitorFacebookAction1);
 
 		FacebookMonitorContent facebookMonitorContent1 = new FacebookMonitorContent();
+		facebookMonitorContent1.setName("Contnet " + contentCount++);
 		monitorFacebookAction1.setContent(facebookMonitorContent1);
 
 		Node node2 = new Node();
@@ -168,6 +170,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		postFacebookAction2.setEvent(event);
 
 		FacebookContent facebookContent2 = new FacebookContent();
+		facebookContent2.setName("Contnet " + contentCount++);
 		facebookContent2.message = String.format("Follow up post [%s]", facebookContent2.id);
 		postFacebookAction2.setContent(facebookContent2);
 
@@ -175,6 +178,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node2.addAction(monitorFacebookAction2);
 
 		FacebookMonitorContent facebookMonitorContent2 = new FacebookMonitorContent();
+		facebookMonitorContent2.setName("Contnet " + contentCount++);
 		monitorFacebookAction2.setContent(facebookMonitorContent2);
 
 		Link link = new Link();
@@ -216,6 +220,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		List<BasicEntity> entities = new ArrayList<>();
 		Workflow workflow = new Cloner().deepClone(reusedWorkflow);
 		workflow.id = new ObjectId();
+		workflow.setName("Demo project");
 		workflow.templateId = reusedWorkflow.id;
 		workflow.isProject = true;
 		workflow.updateUserId = workflow.createUserId = user.id;
@@ -279,6 +284,8 @@ public class DatabaseResetTests extends BasicDataTests {
 			link.previousNodeId = nodeMap.get(link.previousNodeId);
 			link.nextNodeId = nodeMap.get(link.nextNodeId);
 		}
+
+		workflow.wire();
 
 		entities.addAll(workflow.getNodes());
 		entities.addAll(workflow.getLinks());
