@@ -7,10 +7,6 @@
       .control-group
         label.control-label(for='event_name') Name
         .controls
-      .control-group
-        label.control-label(for='event_key') Key
-        .controls
-          input#event_key(type='text', name='key', placeholder='event_name', required)
           input#event_name(type='text', name='name', placeholder='Event Name', required)
       .control-group
         label.control-label(for='event_desc') Description
@@ -56,8 +52,6 @@
         .controls
           input#event_status(type='text', name='status', readonly)
   .modal-footer
-    button.btn.btn-info.pull-left.btn-view(title='View event in Calendar') View
+    a.btn.btn-info.pull-left.btn-view(title='View event in Calendar') View
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save
-
-//- TODO: use Auto Start or not

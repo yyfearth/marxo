@@ -122,6 +122,7 @@ Event
       super options
       @$info = $ find '.info', @form
       @$form = $ @form
+      @btnView = find '.btn-view', @el
       @_dateToLocale = (date) -> if date then new Date(date).toLocaleString() else ''
       if @form.starts.type is 'text'
         # not support datetime type
@@ -200,7 +201,6 @@ Event
       console.log JSON.stringify data
       data.starts = @_dateToString data.starts
       data.ends = @_dateToString data.ends
-      console.log JSON.stringify data
       console.log 'fill event data', data
       super data
       @_changed()
@@ -214,6 +214,7 @@ Event
       data
     reset: ->
       @$info.empty()
+      @btnView.href = ''
       super
     popup: (data, callback) ->
       super data, callback
@@ -221,6 +222,7 @@ Event
       @$form.off q...
       @fill data
       @$form.on q...
+      @btnView.href = "#event/calendar/#{data.id}"
       @
     save: ->
       @data = @read()
@@ -407,6 +409,7 @@ Event
       @
     skip: (models) ->
       console.log 'skip', models
+      # TODO: support skip event
       @
     reload: ->
       super
