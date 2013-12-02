@@ -20,13 +20,6 @@ Project
 Projects
 }, WorkflowDiagramView, ActionsMixin) ->
 
-  STATUS_CLS =
-    started: 'label-success'
-    paused: 'label-warning'
-    stopped: 'label-inverse'
-    finished: 'label-info'
-    error: 'label-important'
-
   class ProjectFrameView extends FrameView
     initialize: (options) ->
       super options
@@ -510,6 +503,12 @@ Projects
 
   class ProjectStatusView extends View
     _prefix: 'prj_status_lst'
+    _cls:
+      started: 'label-success'
+      paused: 'label-warning'
+      stopped: 'label-inverse'
+      finished: 'label-info'
+      error: 'label-important'
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
       @$detail = $ find '.node-link-detail', @el
@@ -565,7 +564,7 @@ Projects
       if status = model.get 'status'
         status = status.toLowerCase()
         a.className = "status-#{status}"
-        a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+        a.appendChild _label status.toUpperCase(), 'pull-right ' + @_cls[status]
       li.appendChild a
       li
     _renderHeaderItem: (text) ->
@@ -596,6 +595,7 @@ Projects
       _prefix = @_prefix
       _label = @_renderLabel
       _href = model._href
+      _cls = @_cls
       frag = document.createDocumentFragment()
       frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
       model.actions().forEach (action, i) ->
@@ -611,7 +611,7 @@ Projects
         if status = action.get 'status'
           status = status.toLowerCase()
           a.className = "status-#{status}"
-          a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+          a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status]
         li.appendChild a
         frag.appendChild li
         return
@@ -629,7 +629,7 @@ Projects
       if status = model.get 'status'
         status = status.toLowerCase()
         a.className = "status-#{status}"
-        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + @_cls[status]
       li.appendChild a
       frag.appendChild li
       @$detail.removeClass('node-actions').addClass('link-condition').append frag
@@ -700,12 +700,7 @@ Projects
       editable: false
       cell: WorkflowCell
     ,
-      name: 'status'
-      label: 'Status'
-      cell: 'label'
-      cls: STATUS_CLS
-      editable: false
-    ,
+      'status'
       'updated_at'
     ,
       name: 'project'

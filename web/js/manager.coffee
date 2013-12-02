@@ -423,7 +423,12 @@ Workflows
         name: 'status'
         label: 'Status'
         cell: 'label'
-        cls: 'label-info'
+        cls:
+          started: 'label-success'
+          paused: 'label-warning'
+          stopped: 'label-inverse'
+          finished: 'label-info'
+          error: 'label-important'
         editable: false
       created_at:
         name: 'created_at'
