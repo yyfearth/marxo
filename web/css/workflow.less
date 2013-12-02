@@ -245,10 +245,6 @@
     margin: 0 3px;
   }
   .nodes-links-list {
-    .active > a {
-      color: #fff;
-      background-color: #08c;
-    }
     a.status-finished, a.status-passed, a.status-failed {
       text-decoration: line-through;
     }
@@ -299,20 +295,6 @@
       -moz-border-radius: 4px 0 4px 0;
       border-radius: 4px 0 4px 0;
     }
-    li > a {
-      &.status-started {
-        background-color: #dff0d8;
-      }
-      &.status-error {
-        background-color: #f2dede;
-      }
-      &.status-paused {
-        background-color: #fcf8e3;
-      }
-      &.status-finished {
-        background-color: #dde;
-      }
-    }
   }
   .node-actions {
     &:after {
@@ -321,6 +303,36 @@
   }
   .link-condition:after {
     content: "Link - Condition";
+  }
+  li > a {
+    &.status-started {
+      background-color: #dff0d8;
+    }
+    &.status-error {
+      background-color: #f2dede;
+    }
+    &.status-paused {
+      background-color: #fcf8e3;
+    }
+    &.status-finished {
+      background-color: #d9edf7;
+    }
+  }
+  li.active > a {
+    color: #fff;
+    background-color: #0088cc;
+    &.status-started {
+      background-color: #468847;
+    }
+    &.status-error {
+      background-color: #b94a48;
+    }
+    &.status-paused {
+      background-color: #f89406;
+    }
+    &.status-finished {
+      background-color: #3a87ad;
+    }
   }
 }
 
