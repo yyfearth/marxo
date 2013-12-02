@@ -307,42 +307,42 @@
     }
     .ref-link {
       margin-top: -1px;
-      color: #0088cc;
+      color: @status-default-color;
       padding: 2px 4px;
-      border: 1px solid #0088cc;
+      border: 1px solid @status-default-color;
       border-radius: 3px;
     }
     &.status-started {
-      background-color: #dff0d8;
+      background-color: @status-started-bkg-color;
     }
     &.status-error {
-      background-color: #f2dede;
+      background-color: @status-error-bkg-color;
     }
     &.status-paused {
-      background-color: #fcf8e3;
+      background-color: @status-paused-bkg-color;
     }
     &.status-finished {
-      background-color: #d9edf7;
+      background-color: @status-finished-bkg-color;
     }
   }
   li.active > a {
     color: #fff;
-    background-color: #0088cc;
+    background-color: @status-default-color;
     .ref-link {
       color: #fff;
       border: 1px solid #fff;
     }
     &.status-started {
-      background-color: #468847;
+      background-color: @status-started-color;
     }
     &.status-error {
-      background-color: #b94a48;
+      background-color: @status-error-color;
     }
     &.status-paused {
-      background-color: #f89406;
+      background-color: @status-paused-color;
     }
     &.status-finished {
-      background-color: #3a87ad;
+      background-color: @status-finished-color;
     }
   }
 }
@@ -361,9 +361,9 @@
   min-height: 150px;
   padding: 0;
   &.invalid {
-    -webkit-box-shadow: 0 0 30px #b94a48 inset;
-    -moz-box-shadow: 0 0 30px #b94a48 inset;
-    box-shadow: 0 0 30px #b94a48 inset;
+    -webkit-box-shadow: 0 0 30px @status-error-color inset;
+    -moz-box-shadow: 0 0 30px @status-error-color inset;
+    box-shadow: 0 0 30px @status-error-color inset;
   }
   svg {
     cursor: default;
@@ -384,7 +384,7 @@
         stroke: #c09853;
       }
       &.status-error {
-        stroke: #b94a48;
+        stroke: @status-error-color;
       }
       &.status-passed {
         stroke: #565;
@@ -395,7 +395,7 @@
     }
 
     .node {
-      fill: #eee;
+      fill: @status-default-bkg-color;
       stroke-width: 2px;
       stroke: #000;
       cursor: pointer;
@@ -404,17 +404,34 @@
         stroke-dasharray: 7, 2;
       }
       &.status-started {
-        fill: #dff0d8;
+        fill: @status-started-bkg-color;
       }
       &.status-error {
-        fill: #f2dede;
+        fill: @status-error-bkg-color;
       }
       &.status-paused, &.status-waiting {
-        fill: #fcf8e3;
+        fill: @status-paused-bkg-color;
       }
       &.status-finished {
         stroke: #565;
-        fill: #dde;
+        fill: @status-finished-bkg-color;
+      }
+    }
+
+    .active .node {
+      stroke-width: 4px;
+      fill: @status-default-color;
+      &.status-started {
+        fill: @status-started-color;
+      }
+      &.status-error {
+        fill: @status-error-color;
+      }
+      &.status-paused {
+        fill: @status-paused-color;
+      }
+      &.status-finished {
+        fill: @status-finished-color;
       }
     }
 
@@ -425,16 +442,6 @@
       font-size: 30px;
       cursor: pointer;
     }
-
-    .active .node {
-      stroke-width: 4px;
-      fill: #0088cc;
-    }
-
-    /*.label {
-      font: 12px sans-serif;
-      pointer-events: none;
-    }*/
 
   }
   .tooltip {
@@ -457,3 +464,14 @@
     pointer-events: none;
   }
 }
+
+@status-default-color: #0088cc;
+@status-started-color: #468847;
+@status-error-color: #b94a48;
+@status-paused-color: #f89406;
+@status-finished-color: #3a87ad;
+@status-default-bkg-color: #eee;
+@status-started-bkg-color: #dff0d8;
+@status-error-bkg-color: #f2dede;
+@status-paused-bkg-color: #fcf8e3;
+@status-finished-bkg-color: #d9edf7;
