@@ -9,7 +9,6 @@
     <context:component-scan base-package="marxo.controller"/>
     <context:component-scan base-package="marxo.exception"/>
     <context:component-scan base-package="marxo.filter"/>
-    <context:component-scan base-package="marxo.dao"/>
 
     <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
         <mvc:message-converters>

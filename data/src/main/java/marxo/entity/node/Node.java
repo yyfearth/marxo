@@ -94,6 +94,7 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	@Transient
+	@JsonIgnore
 	Map<ObjectId, Action> actionMap;
 
 	public Map<ObjectId, Action> getActionMap() {
@@ -172,8 +173,10 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	@Transient
+	@JsonIgnore
 	protected List<Link> fromLinks;
 	@Transient
+	@JsonIgnore
 	protected List<Link> toLinks;
 
 	public List<Link> getFromLinks() {

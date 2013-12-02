@@ -1,11 +1,13 @@
 package marxo.entity.workflow;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 
 public abstract class WorkflowChildEntity extends RunnableEntity {
 	public ObjectId workflowId;
 	@Transient
+	@JsonIgnore
 	protected Workflow workflow;
 
 	public Workflow getWorkflow() {

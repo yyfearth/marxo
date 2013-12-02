@@ -8,10 +8,10 @@ import org.springframework.data.annotation.Transient;
 public abstract class TenantChildEntity extends BasicEntity {
 	public ObjectId tenantId;
 	@Transient
+	@JsonIgnore
 	protected Tenant tenant;
 
 	@Transient
-
 	@JsonIgnore
 	public Tenant getTenant() {
 		if (tenantId == null) {
