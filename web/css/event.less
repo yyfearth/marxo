@@ -1,40 +1,40 @@
 @import 'fullcalendar';
 
-//#calendar {
-//
-//}
-
-#external-events {
-  float: left;
-  padding: 0 10px;
-  border: 1px solid #ccc;
-  background: #eee;
-  text-align: left;
+@media screen and (max-width: 1024px) {
+  #event_calendar .btn-mgr {
+    opacity: .5;
+    &:hover {
+      opacity: .8;
+    }
+  }
 }
 
-#external-events h4 {
-  font-size: 16px;
-  margin-top: 0;
-  padding-top: 1em;
-}
-
-.external-event {
-  // try to mimick the look of a real event
-  margin: 10px 0;
-  padding: 2px 4px;
-  background: #3366CC;
-  color: #fff;
-  font-size: .85em;
-  cursor: pointer;
-}
-
-#external-events p {
-  margin: 1.5em 0;
-  font-size: 11px;
-  color: #666;
-}
-
-#external-events p input {
-  margin: 0;
-  vertical-align: middle;
+#event_calendar {
+  .btn-mgr {
+    position: absolute;
+    right: 160px;
+    width: 120px;
+    left: auto;
+    .transition(opacity, .2s);
+  }
+  .fc-event.active {
+    @grow-color: #ff6; // #558cee;
+    border: @grow-color solid 1px;
+    -webkit-box-shadow: inset 0 0 7px @grow-color, 0 0 3px @grow-color;
+    -moz-box-shadow: inset 0 0 7px @grow-color, 0 0 3px @grow-color;
+    box-shadow: inset 0 0 7px @grow-color, 0 0 3px @grow-color;
+  }
+  .external-event {
+    // try to mimick the look of a real event
+    margin: 10px 0;
+    padding: 2px 4px;
+    background: #3a87ad; // #3366cc;
+    color: #fff;
+    font-size: .85em;
+    cursor: pointer;
+    &.ui-draggable-dragging {
+      white-space: nowrap;
+      border-radius: 3px;
+    }
+  }
 }

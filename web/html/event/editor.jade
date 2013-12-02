@@ -52,6 +52,7 @@
         .controls
           input#event_status(type='text', name='status', readonly)
   .modal-footer
-    a.btn.btn-info.pull-left.btn-view(title='View event in Calendar') View
+    a.btn.btn-info.pull-left.btn-view(title='View event in Calendar', data-container='#event_editor') View
+    button.btn.btn-warning.pull-left.btn-skip(title='Skip event to the end', data-container='#event_editor') Skip
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save
