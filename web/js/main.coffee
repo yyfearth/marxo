@@ -31,15 +31,22 @@ requirejs.config
       FB_APP_ID: '213527892138380'
       FB_SCOPES: 'publish_actions, email, read_stream, '
 
-define 'main', ['console'], ({ConsoleView, SignInView, Router}) ->
-  # EP
-  window.app = app =
+define 'main', ['console'], ({findAll, ConsoleView, SignInView, Router}) -> # EP
+  cls = document.body.classList
+
+  if localStorage.no_transition
+    cls.remove 'fade'
+    cls.add 'no-transition'
+    el.classList.remove 'fade' for el in findAll '.fade'
+
+  window.app =
     console: ConsoleView.get()
     signin: SignInView.get()
     router: Router.get()
 
   Backbone.history.start()
 
-  document.body.style.opacity = 1
+  cls.add 'in'
   document.title = document.title.replace /^.*?(?=MARXO)/i, ''
+
   return

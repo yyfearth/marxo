@@ -357,6 +357,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
   View::router = Router.get()
 
   { # exports
+  findAll
   ConsoleView
   SignInView
   Router

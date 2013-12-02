@@ -5,7 +5,26 @@
 
 html, body {
   height: 100%;
-  .transition;
+}
+
+body.fade {
+  -webkit-transition: opacity .5s ease-in-out;
+  -moz-transition: opacity .5s ease-in-out;
+  transition: opacity .5s ease-in-out;
+}
+
+.transition (@properties: opacity, @duration: .5s, @transition: ease-in-out, @delay: 0) {
+  body.fade & {
+    -webkit-transition: @properties @duration @transition @delay;
+    -moz-transition: @properties @duration @transition @delay;
+    transition: @properties @duration @transition @delay;
+  }
+}
+
+body.no-transition .fade {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  transition: none !important;
 }
 
 .btn:focus {
