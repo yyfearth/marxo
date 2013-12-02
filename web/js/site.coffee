@@ -91,7 +91,7 @@ require ['lib/common'], ->
       # auto login
       if auth = sessionStorage[' ']
         delete sessionStorage[' ']
-        @signin auth, true
+        @signin auth, true # sign in without alert when fail
       super options
     _signInEmail: (email, password) ->
       require ['crypto'], ({hashPassword}) =>
@@ -102,10 +102,13 @@ require ['lib/common'], ->
       FB.autoLogin (response) =>
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
-          @signin 'Basic ' + btoa "facebook:#{response.accessToken}"
+          auth = 'Basic ' + btoa "facebook:#{response.accessToken}"
+          @signin auth, =>
+            if confirm 'Your Facebook account is not signed up!\n\nDo you want to sign up with this account?'
+              @dialog.popup()._signUpFB silence: true # sign up when failed
         return
       return
-    signin: (auth, silence) ->
+    signin: (auth, error_callback) ->
       $inputs = @$el.find('input,button').prop 'disabled', true
       new User(id: 'me').fetch
         headers:
@@ -121,9 +124,12 @@ require ['lib/common'], ->
             @_signedIn user
           $inputs.prop 'disabled', false
           return
-        error: (ignored, response) =>
-          console.error 'sign-in failed', response
-          alert 'Sign in failed' unless silence
+        error: (ignored, xhr) =>
+          console.error 'sign-in failed', xhr
+          if typeof error_callback is 'function'
+            error_callback null, xhr
+          else unless error_callback
+            alert 'Sign in failed'
           $inputs.prop 'disabled', false
       @
     signout: ->
@@ -216,9 +222,9 @@ require ['lib/common'], ->
       oauth
     fill: (attrs) ->
       form = @form
-      form.email.value = attrs.email
-      form.name.value = attrs.name
-      form.desc.textContent = attrs.desc
+      form.email.value = attrs.email or ''
+      form.name.value = attrs.name or ''
+      form.desc.textContent = attrs.desc or ''
       @_setSex attrs.sex
       @_setOauth attrs.oauth
       @
@@ -269,7 +275,7 @@ require ['lib/common'], ->
         alert 'Passwords are not matched!'
         return false
       true
-    _signUpFB: -> require ['fb'], (FB) =>
+    _signUpFB: (options = {}) -> require ['fb'], (FB) =>
       FB.autoLogin (response) =>
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
@@ -281,7 +287,7 @@ require ['lib/common'], ->
             @fill data
             console.log 'facebook connected', response
             setTimeout =>
-              alert 'Facebook account is bound, please click "Save".'
+              alert 'Facebook account is bound, please click "Save".' unless options.silence
               @btnSave.focus()
             , 100
           else FB.api '/me', (response) => # sign up
@@ -292,7 +298,7 @@ require ['lib/common'], ->
               oauth:
                 facebook: response.id
             setTimeout =>
-              alert 'Facebook account is bound, please setup a password then click "Save".'
+              alert 'Facebook account is bound, please setup a password then click "Save".' unless options.silence
               @$passwords[0].focus()
             , 100
             console.log 'facebook connected', response
