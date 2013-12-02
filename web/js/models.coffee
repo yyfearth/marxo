@@ -328,33 +328,17 @@ define 'models', ['module', 'lib/common'], (module) ->
       @unset 'links', silent: true
       super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
-      n = @_name
-      if @loaded()
+      _cb = (wf) ->
         if linkId
-          link = @links.get linkId
+          link = wf.links.get linkId
         else if nodeId
-          node = @nodes.get nodeId
-          action = node.actions().get actionId if actionId
+          node = wf.nodes.get nodeId
+          action = node.actions().get actionId if node and actionId
         callback? {node, link, action}
-      else if linkId
-        id = @id
-        new Link(id: linkId).fetch
-          error: ->
-            callback? {}
-          success: (link) ->
-            link = null if id isnt link.get n + '_id'
-            callback? {link}
-      else if nodeId
-        projectId = @id
-        new Node(id: nodeId).fetch
-          error: ->
-            callback? {}
-          success: (node) ->
-            node = null if projectId isnt node.get n + '_id'
-            action = node.actions().get actionId if node and actionId
-            callback? {node, action}
+      if @loaded()
+        _cb @
       else
-        callback? {}
+        @fetch reset: true, success: _cb
       @
     createNode: (data) ->
       data.workflow_id ?= @id
