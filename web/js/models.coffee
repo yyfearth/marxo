@@ -116,8 +116,8 @@ define 'models', ['module', 'lib/common'], (module) ->
     urlRoot: ROOT + '/workflows'
     constructor: (model, options) ->
       super model, options
-      @_warp model
-    _warp: (model = @) ->
+      @_wire model
+    _wire: (model = @) ->
       model = model.attributes if model instanceof @constructor
       url = @url?() or @url or ''
       nodes = if Array.isArray(model.nodes) then model.nodes else []
@@ -147,14 +147,15 @@ define 'models', ['module', 'lib/common'], (module) ->
       # start node
       start_node_id = model.start_node_id
       if start_node_id?
-        @startNode = @nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
-      else if nodes.length
+        unless @startNode = @nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+          console.error 'cannot find node specified by start_node_id', start_node_id, @
+      if not @startNode and nodes.length
         starts = nodes.filter (n) -> not n.inLinks.length
         if starts.length is 1
           console.warn 'auto detecting start node', model
           @startNode = starts[0]
         else
-          console.warn 'cannot find or more than one start node detected', model
+          console.error 'cannot find or more than one start node detected', model
           @startNode = null
 
       @_sorted = null
@@ -164,7 +165,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     fetch: (options = {}) -> # override for warp
       _success = options.success?.bind @
       options.success = (model, response, options) =>
-        @_warp model
+        @_wire model
         @nodes._loaded = @links._loaded = true
         @trigger 'loaded', model
         _success? model, response, options
@@ -259,7 +260,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         template_id: workflow.id
         nodes: nodes
         links: links
-      @_warp @
+      @_wire @
       @
     save: (attributes = {}, options = {}) ->
       throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
