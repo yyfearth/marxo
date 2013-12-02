@@ -2,6 +2,7 @@ package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mongodb.WriteResult;
+import marxo.entity.Report;
 import marxo.entity.content.Content;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -19,7 +20,7 @@ import org.springframework.data.mongodb.core.query.Update;
 public class Action extends NodeChildEntity {
 
 	public String getType() {
-		return getClass().toString().replaceAll("[A-Z]", "_$0").toUpperCase();
+		return getClass().getSimpleName().toString().replaceAll("[A-Z]", "_$0").toUpperCase();
 	}
 
 	public boolean isTracked = true;
@@ -67,12 +68,15 @@ public class Action extends NodeChildEntity {
 		event.setAction(this);
 	}
 
+	/*
+	Content
+	 */
+
 	public ObjectId contentId;
 	@Transient
 	protected Content content;
 	public String contentType;
 
-	@JsonIgnore
 	public Content getContent() {
 		if (contentId == null) {
 			return null;
@@ -80,12 +84,38 @@ public class Action extends NodeChildEntity {
 		return (content == null) ? (content = Content.get(contentId)) : content;
 	}
 
-	@JsonIgnore
 	public void setContent(Content content) {
 		this.content = content;
 		this.contentId = content.id;
 		content.setAction(this);
 	}
+
+	/*
+	Report
+	 */
+
+	public ObjectId reportId;
+
+	@Transient
+	public Report report;
+
+	public Report getReport() {
+		if (reportId == null) {
+			return report = null;
+		}
+		return (report == null) ? (report = Report.get(reportId)) : report;
+	}
+
+	public void setReport(Report report) {
+		this.report = report;
+		if (report != null) {
+			this.reportId = report.id;
+		}
+	}
+
+	/*
+	Error
+	 */
 
 	protected Errors errors = new Errors();
 
