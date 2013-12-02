@@ -104,15 +104,15 @@ Event
           delay += n * _delays[i] if n
         delay
     stringify: (delay, short) ->
-      throw new Error 'delay should be number >= 0' unless delay >= 0
-      unless delay
-        ''
-      else
+      if delay >= 0
         str = _stringify delay, short
         if not short? and str.length > AUTO_SHORT_MAX
           _stringify delay, true
         else
           str
+      else
+        console.error "delay should be number >= 0 but it is #{delay}", delay if delay
+        ''
 
   # Event Editor
 
@@ -219,10 +219,10 @@ Event
     popup: (data, callback) ->
       super data, callback
       q = ['change', '[name=starts],[name=ends],[name=duration]', @_changed]
+      @btnView.href = "#event/calendar/#{data.id}"
       @$form.off q...
       @fill data
       @$form.on q...
-      @btnView.href = "#event/calendar/#{data.id}"
       @
     save: ->
       @data = @read()
@@ -238,77 +238,105 @@ Event
       super options
       #@sidebarListEl = find '.sidebar-list', @el
       update = @update.bind @
+      @$sidebar = $ find '.sidebar-list', @el
       @calView = new FullCalendarView parent: @, el: find '#calendar_view', @el
       @listenTo @collection, 'reset add remove change', =>
         update() if @$el.is ':visible'
-      @listenTo @calView, 'modify', (event) -> # (event, revertFunc)
-        console.log 'modify event', event.start, event.end, event
-        if event.model and event.start
-          unless event.end
-            end = new Date event.start
-            # set to next midnight
-            end.setHours 24, 0, 0, 0
-            event.end = end
-            console.log 'fix end', end
-          # TODO: deal with allDay
-          # TODO: validation and revert
-          # TODO: start date limits
-          event.model.save
-            starts: event.start
-            ends: event.end
-            duration: event.end.getTime() - event.start.getTime()
+      @listenTo @calView, 'modify', @_modify.bind @
       #@on 'activate', update # use show instead
       @on 'update', @_update.bind @
-      # TODO: events sidebar list
       @
+    _modify: (event) -> # (event, revertFunc)
+      console.log 'modify event', event.start, event.end, event
+      if event.model and event.start
+        unless event.end
+          end = new Date event.start
+          # set to next midnight
+          end.setHours 24, 0, 0, 0
+          event.end = end
+          console.log 'fix end', end
+        # TODO: deal with allDay
+        # TODO: validation and revert
+        # TODO: start date limits
+        event.model.save
+          starts: event.start
+          ends: event.end
+          duration: event.end.getTime() - event.start.getTime()
+      return
     _update: (event) ->
       id = event?.id or event
+      console.log 'cur', id
       cal = @calView
       col = @collection
       cal.render() unless cal.rendered
       events = []
+      unsched = []
       col.forEach (evt) ->
-        event = evt if id and id is evt.id
-        if evt.has('starts') and evt.has('ends')
-          # TODO: depend on status
-          events.push
-            id: evt.id
-            url: "#event/#{evt.id}"
-            title: evt.get('name')
-            start: new Date evt.get('starts')
-            end: new Date evt.get('ends')
-            color: (if event is evt then '#468847' else null)
-            allDay: false
-            model: evt
-      cal.setEvents editable: true, events: events
-      if event instanceof Event and event.has 'starts'
-        @_curEvent = event
-        cal.goto new Date event.get 'starts'
-      @
-    goto: (event) ->
-      @delayedTrigger 'update', 100, event
-    update: ->
-      @delayedTrigger 'update', 100, @_curEvent
-    render: ->
-      @calView.render()
+        _evt =
+          id: evt.id
+          url: "#event/#{evt.id}"
+          title: evt.get('name') or '(No Name)'
+          model: evt
+        _evt.start = new Date evt.get 'starts' if evt.has 'starts'
+        _evt.end = new Date evt.get 'ends' if evt.has 'ends'
+        _evt.allDay = _evt.start? and not _evt.end? # if no ends, by default it is allday
+        switch status = evt.get('status').toUpperCase()
+          when 'FINISHED'
+            _evt.color = '#ccc'
+            _evt.editable = false
+          when 'IDLE'
+            # default color
+            _evt.editable = true
+            _evt.color = '#006dcc' if _evt.allDay
+          when 'STARTED'
+            _evt.color = if _evt.end? then '#468847' else '#faa732'
+            _evt.startEditable = false
+            _evt.durationEditable = true
+          when 'ERROR'
+            _evt.color = '#da4f49'
+            _evt.editable = false
+          else
+            # default color
+            _evt.editable = false
+            console.warn 'unsupported event status', status
+        if id and id is evt.id # current active event
+          event = evt
+          _evt.className = 'active'
+        if _evt.start?
+          events.push _evt
+        else
+          unsched.push _evt
+        return
 
-      @$el.find('.external-event').each ->
+      cal.setEvents events: events
 
-        # create an Event Object (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
-        # it doesn't need to have a start or end
-        # use the element's text as the event title
+      # TODO: project filter
 
-        # store the Event Object in the DOM element so we can get to it later
-        $(@).data 'event', title: $.trim($(@).text())
-
-        # make the event draggable using jQuery UI
-        $(@).draggable
+      #console.log 'unsched events', unsched
+      $frag = $ document.createDocumentFragment()
+      $frag.append '<li class="nav-header">Unscheduled Events</li>'
+      for _evt in unsched
+        $frag.append $('<li>').append $('<a>', class: 'external-event', text: _evt.title, href: "#event/#{_evt.id}")
+        .data('event', _evt).draggable
           helper: 'clone'
           zIndex: 999
           revert: true # will cause the event to go back to its
           revertDuration: 0
+      @$sidebar.empty().append $frag
 
+      if event instanceof Event and event.has 'starts'
+        cal.goto new Date event.get 'starts'
+      else
+        @_curEvent = null
       @
+    goto: (event = @_curEvent) ->
+      @_curEvent = event
+      @delayedTrigger 'update', 100, event
+    update: ->
+      @goto null
+    render: ->
+      @calView.render()
+      super
 
   class FullCalendarView extends View
     cfg:
@@ -328,8 +356,19 @@ Event
       @cfg.drop = (date, allDay, e) =>
         # this function is called when something is dropped
         $thumb = $(e.target)
-        @addEvent $.extend({}, $thumb.data('event'), {date, allDay})
+        event = $thumb.data 'event'
+        console.log 'drop', date, allDay, event
+        event.start = date
+        unless event.end?
+          if event.model.has 'duration'
+            duration = event.model.get 'duration'
+            event.end = new Date date.getTime() + duration if duration > 0
+          else
+            event.allDay = allDay
+        @addEvent event
         $thumb.remove()
+        @trigger 'modify', event
+        return
 
       @cfg.eventResize = (event, dayDelta, minuteDelta, revertFunc) =>
         @trigger 'modify', event, revertFunc
@@ -341,7 +380,7 @@ Event
       @on 'resize', ->
         h = $el.parents('.inner-frame').innerHeight()
         fullCalendar 'option', 'height', h
-      $(window).resize(@_resize).resize()
+      $(window).resize @_resize
 
       # mouse scroll to nav monthes
       @$el.on 'mousewheel DOMMouseScroll', (e) ->
@@ -367,6 +406,7 @@ Event
     render: ->
       @$el.empty()
       @fullCalendar @cfg
+      @_resize()
       @
 
     setEvents: (events) ->
