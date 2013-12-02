@@ -509,6 +509,10 @@ Projects
       stopped: 'label-inverse'
       finished: 'label-info'
       error: 'label-important'
+    _refCls:
+      content: 'icon-page'
+      event: 'icon-calendar'
+      report: 'icon-report'
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
       @$detail = $ find '.node-link-detail', @el
@@ -564,7 +568,7 @@ Projects
       if status = model.get 'status'
         status = status.toLowerCase()
         a.className = "status-#{status}"
-        a.appendChild _label status.toUpperCase(), 'pull-right ' + @_cls[status]
+        a.appendChild _label status.toUpperCase(), 'pull-right ' + @_cls[status] or ''
       li.appendChild a
       li
     _renderHeaderItem: (text) ->
@@ -596,6 +600,7 @@ Projects
       _label = @_renderLabel
       _href = model._href
       _cls = @_cls
+      _refs = @_refCls
       frag = document.createDocumentFragment()
       frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
       model.actions().forEach (action, i) ->
@@ -611,7 +616,15 @@ Projects
         if status = action.get 'status'
           status = status.toLowerCase()
           a.className = "status-#{status}"
-          a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status]
+          a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status] or ''
+        for own name, cls of _refs
+          name = name.toLowerCase()
+          if id = action.get(name + '_id')?.toString()
+            btn = document.createElement 'a'
+            btn.className = 'ref-link pull-right ' + cls or ''
+            btn.textContent = name.capitalize()
+            btn.href = "#content/#{id}"
+            a.appendChild btn
         li.appendChild a
         frag.appendChild li
         return
@@ -629,7 +642,7 @@ Projects
       if status = model.get 'status'
         status = status.toLowerCase()
         a.className = "status-#{status}"
-        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + @_cls[status]
+        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + @_cls[status] or ''
       li.appendChild a
       frag.appendChild li
       @$detail.removeClass('node-actions').addClass('link-condition').append frag

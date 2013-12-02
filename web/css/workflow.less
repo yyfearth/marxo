@@ -241,9 +241,6 @@
       }
     }
   }
-  li .label {
-    margin: 0 3px;
-  }
   .nodes-links-list {
     a.status-finished, a.status-passed, a.status-failed {
       text-decoration: line-through;
@@ -305,6 +302,16 @@
     content: "Link - Condition";
   }
   li > a {
+    .label, .ref-link {
+      margin: 0 3px;
+    }
+    .ref-link {
+      margin-top: -1px;
+      color: #0088cc;
+      padding: 2px 4px;
+      border: 1px solid #0088cc;
+      border-radius: 3px;
+    }
     &.status-started {
       background-color: #dff0d8;
     }
@@ -321,6 +328,10 @@
   li.active > a {
     color: #fff;
     background-color: #0088cc;
+    .ref-link {
+      color: #fff;
+      border: 1px solid #fff;
+    }
     &.status-started {
       background-color: #468847;
     }
