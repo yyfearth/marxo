@@ -77,11 +77,10 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       @containerEl = options.container
       @model = options.model
       @model.view = @
-      type = @model.get?('type') or options.model.type or options.type
-      unless type
-        type = 'empty'
-        console.warn 'need action type (use empty type for test)', options
-      @type = type?.toLowerCase()
+      type = @type = (@model.get?('type') or options.model.type or options.type or '').toLowerCase()
+      unless @_tpl.hasOwnProperty type
+        @type = 'unknown'
+        console.warn 'unknown action type', options
       @
     remove: ->
       # remove only once

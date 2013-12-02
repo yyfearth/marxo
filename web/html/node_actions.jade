@@ -71,12 +71,14 @@ mixin actions_thumb
 //- show in the actions box
 #actions_tpl.tpl
 
-  .tpl(name='empty')
+  .tpl(name='unknown')
     .box-header.well
-      h4 Empty Action (Test Only)
+      h4 Unknown Action (Error)
       mixin box_icons
     form.box-content
       mixin action_name_key
+      input(type='text', name='type', maxlength='45', title='Action Type', placeholder='Action Type')
+      .help-inline (Unknown Type)
 
   .tpl(name='create_page')
     .box-header.well
