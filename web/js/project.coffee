@@ -402,6 +402,7 @@ Projects
         @list.$el.find("li:has(a[data-id='#{@model.id}'])").addClass 'active'
       @listenTo @wfDiagram, 'select', (model) =>
         @router.navigate "project/#{@model.id}/#{model._name}/#{model.id}", trigger: true
+      @_updateStatus = @_updateStatus.bind @
       super options
     load: (project, force) ->
       if force or @model isnt project
@@ -478,9 +479,7 @@ Projects
       else
         status = status.toUpperCase()
         if status isnt @model.get('status').toUpperCase()
-          @model.set 'status', status
-          @_updateStatus()
-          # TODO: save status
+          @model.save {status}, success: @_updateStatus
         else console.log 'status not changed', status
       @
     select: (opt = {}) ->
