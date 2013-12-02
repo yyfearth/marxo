@@ -57,7 +57,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       options = delay: options if typeof options is 'number'
       options.delay ?= @_delay
       options.reset ?= true
-      if not @_last_load or options.delay < 1 or (Date.now() - @_last_load) > options.delay
+      if not @length or not @_last_load or options.delay < 1 or (Date.now() - @_last_load) > options.delay
         @fetch
           reset: options.reset
           success: (collection, response, options) =>
@@ -393,19 +393,25 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Workflows extends ManagerCollection
     @workflows: new Workflows
     @find: (options) ->
-      unless @workflows.length
-        @workflows.load (wfs) ->
-          wfs.find options
+      wfs = @workflows
+      unless wfs.length
+        if queue = @_find_queue
+          queue.push options
+        else
+          queue = @_find_queue = [options]
+          wfs.load (wfs) =>
+            wfs.find options for options in queue
+            @_find_queue = null
       else
-        @workflows.find options
-      @workflows
+        wfs.find options
+      wfs
     model: Workflow
     url: Workflow::urlRoot
     _delay: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, fetch}) ->
       throw new Error 'workflowId is required' unless workflowId
       throw new Error 'async callback is required' unless typeof callback is 'function'
-      workflow = @fullCollection.get workflowId
+
       _find = (workflow) ->
         if nodeId or linkId or actionId
           workflow.find {
@@ -421,7 +427,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         else
           callback {workflow}
 
-      if workflow
+      if workflow = @fullCollection.get workflowId
         _find workflow
       else if fetch is true
         new @model(id: workflowId).fetch
@@ -488,12 +494,18 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Projects extends Workflows
     @projects: new Projects
     @find: (options) ->
-      unless @projects.length
-        @projects.load (projects) ->
-          projects.find options
+      wfs = @projects
+      unless wfs.length
+        if queue = @_find_queue
+          queue.push options
+        else
+          queue = @_find_queue = [options]
+          wfs.load (wfs) =>
+            wfs.find options for options in queue
+            @_find_queue = null
       else
-        @projects.find options
-      @projects
+        wfs.find options
+      wfs
     model: Project
     url: Project::urlRoot
     _delay: 60000 # 1 min
