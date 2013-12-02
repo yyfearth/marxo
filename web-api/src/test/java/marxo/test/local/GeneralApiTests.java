@@ -65,30 +65,27 @@ public class GeneralApiTests extends BasicApiTests {
 
 		Node node1 = new Node();
 		entitiesToRemove.add(node1);
-		workflow.setStartNode(node1);
-		node1.setWorkflow(workflow);
+		workflow.addNode(node1);
 
 		PostFacebookAction action = new PostFacebookAction();
-		action.setNode(node1);
-		action.setEvent(new Event());
+		node1.addAction(action);
 
 		FacebookContent content = new FacebookContent();
+		content.message = "Action run by Marxo Engine";
 		entitiesToRemove.add(content);
 		action.setContent(content);
-		content.message = "Action run by Marxo Engine";
 
 		Link link = new Link();
-		entitiesToRemove.add(link);
-		link.setWorkflow(workflow);
 		link.setPreviousNode(node1);
+		entitiesToRemove.add(link);
+		workflow.addLink(link);
 
 		Node node2 = new Node();
 		entitiesToRemove.add(node2);
-		workflow.setStartNode(node2);
 		link.setNextNode(node2);
-		node2.setWorkflow(workflow);
+		workflow.addNode(node2);
 
-		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpPost(baseUrl + "workflows", workflow)
 					.send();
