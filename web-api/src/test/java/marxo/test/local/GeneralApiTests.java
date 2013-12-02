@@ -5,7 +5,6 @@ import com.google.common.net.MediaType;
 import marxo.entity.action.PostFacebookAction;
 import marxo.entity.content.FacebookContent;
 import marxo.entity.link.Link;
-import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
 import marxo.exception.ErrorJson;
@@ -136,12 +135,6 @@ public class GeneralApiTests extends BasicApiTests {
 			Assert.assertNotNull(nodes);
 			for (Node node : nodes) {
 				Assert.assertEquals(node.workflowId, reusedWorkflow.id);
-//				Assert.assertEquals(node.tenantId, this.user.tenantId);
-//				for (Action action : node.actions) {
-//					if (action.contextId != null) {
-//						Assert.assertNotNull(action.contextType);
-//					}
-//				}
 			}
 		}
 	}
@@ -192,13 +185,6 @@ public class GeneralApiTests extends BasicApiTests {
 			Assert.assertNotNull(links);
 			for (Link link : links) {
 				Assert.assertEquals(link.workflowId, reusedWorkflow.id);
-//				Assert.assertEquals(link.tenantId, this.user.tenantId);
-//				if (link.condition != null) {
-//					Assert.assertNotNull(link.condition.leftOperand);
-//					Assert.assertNotNull(link.condition.leftOperandType);
-//					Assert.assertNotNull(link.condition.rightOperand);
-//					Assert.assertNotNull(link.condition.rightOperandType);
-//				}
 			}
 		}
 	}
