@@ -1,7 +1,12 @@
 package marxo.entity.action;
 
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.exception.FacebookException;
+import com.restfb.types.Post;
 import marxo.entity.Task;
 import marxo.entity.content.FacebookMonitorContent;
+import marxo.entity.user.Notification;
 import marxo.entity.workflow.RunStatus;
 import marxo.exception.KeyNotFoundException;
 import org.bson.types.ObjectId;
@@ -34,20 +39,14 @@ public class MonitorFacebookAction extends FacebookAction {
 			return false;
 		}
 
-		if (getEvent() != null && event.getStartTime().isBeforeNow()) {
-			Task task = new Task(getNode().workflowId);
-			task.time = event.getStartTime();
-			task.save();
-
-			status = RunStatus.WAITING;
-			save();
-			return true;
+		if (getContent() == null) {
+			logger.error(String.format("[%s] has no content", this));
+			return false;
 		}
 
-		if (getEvent().getStartTime() == null || event.getStartTime().isAfterNow()) {
-			// do it.
-		} else {
-			// reschedule.
+		if (content.postId == null) {
+			logger.error(String.format("[%s] has no post ID", this));
+			return false;
 		}
 
 		if (nextTriggerTime != null) {
@@ -60,13 +59,10 @@ public class MonitorFacebookAction extends FacebookAction {
 			}
 		}
 
-//		try {
-//			FacebookClient facebookClient = new DefaultFacebookClient(tenant.facebookData.accessToken);
-//
-//			if (getContent().postId == null) {
-//				FacebookContent facebookContent = (FacebookContent) Content.get(facebookContentId);
-//				content.postId = facebookContent.publishMessageResponse.getId();
-//			}
+		try {
+			FacebookClient facebookClient = new DefaultFacebookClient(tenant.facebookData.accessToken);
+			Post post = facebookClient.fetchObject(content.postId, Post.class);
+//			post.
 //
 //			Post post = facebookClient.fetchObject(content.postId, Post.class);
 //			Record
@@ -74,28 +70,21 @@ public class MonitorFacebookAction extends FacebookAction {
 //			content.publishMessageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", content.message));
 //			content.postId = content.publishMessageResponse.getId();
 //			logger.debug(String.format("Submit Facebook post [%s]", content.publishMessageResponse));
-//		} catch (FacebookException e) {
-//			logger.debug(String.format("[%s] %s", e.getClass().getSimpleName(), e.getMessage()));
-//			content.errorMessage = e.getMessage();
-//			// todo: put a notification under the tenant domain.
-//			return false;
-//		} finally {
-//			content.save();
-//		}
+		} catch (FacebookException e) {
+			logger.debug(String.format("[%s] %s", e.getClass().getSimpleName(), e.getMessage()));
+//			errors.add();
+
+			// todo: put a notification under the tenant domain.
+			Notification notification = new Notification();
+//			notification
+
+			return false;
+		} finally {
+			content.save();
+		}
 
 		status = RunStatus.FINISHED;
 
 		return true;
-	}
-
-	@Override
-	public void wire() {
-		super.wire();
-
-		if (monitoredActionKey == null) {
-			throw new KeyNotFoundException(monitoredActionKey, this);
-		}
-
-		String[] keys = monitoredActionKey.split("\\.");
 	}
 }
