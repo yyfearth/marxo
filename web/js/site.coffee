@@ -103,9 +103,6 @@ require ['lib/common'], ->
         response = response.authResponse
         if response?.accessToken and response.expiresIn > 0
           @signin 'Basic ' + btoa "facebook:#{response.accessToken}"
-        else
-          console.warn 'User cancelled login or did not fully authorize.', response
-          alert 'You cancelled login or did not fully authorize.'
         return
       return
     signin: (auth, silence) ->
@@ -299,9 +296,6 @@ require ['lib/common'], ->
               @$passwords[0].focus()
             , 100
             console.log 'facebook connected', response
-        else
-          console.warn 'User cancelled login or did not fully authorize.', response
-          alert 'You cancelled login or did not fully authorize.'
         return
     _save: (data) ->
       user = User.current
