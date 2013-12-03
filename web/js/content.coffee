@@ -243,9 +243,9 @@ ProjectFilterView
         delay: 150
         distance: 15
         cancel: '.box-content'
-      @on 'sections_update', =>
-        count = (findAll '.section', @sectionsEl).length
-        #@submitOptions.$el[if count then 'show' else 'hide']()
+      #@on 'sections_update', =>
+      #  count = (findAll '.section', @sectionsEl).length
+      #  @submitOptions.$el[if count then 'show' else 'hide']()
       @
     popup: (data, action, callback) ->
       super data, callback
@@ -674,24 +674,26 @@ ProjectFilterView
       else
         @_hide view_btn
 
-      # report & block
-      status = model.get 'status'
+      # report
       report_btn =  @_find 'report', 'a'
-
-      if 'POSTED' is status
-        if model.has 'report_id'
-          report_btn.href = '#report/' + model.get 'report_id'
-        else
-          @_hide report_btn
-        # buttons pre post
-        @_hide 'edit'
-        @_hide 'block'
-        @_hide 'unblock'
+      if model.has('records') or model.has('submissions')
+        report_btn.href = "#content/#{model.id}/report"
       else
+        @_hide report_btn
+
+      # status
+      status = model.get('status').toUpperCase()
+      if 'IDLE' is status
         @_hide report_btn
         @_hide 'preview' if 'PAGE' isnt model.get 'type'
         # block / unblock
-        @_hide if 'BLOCKED' is status then 'block' else 'unblock'
+        #@_hide if 'PAUSED' is status then 'block' else 'unblock'
+      else
+        # buttons pre post
+        @_hide 'edit'
+
+      @_hide 'block'
+      @_hide 'unblock'
       @
 
   class ContentManagerView extends ManagerView
