@@ -132,6 +132,7 @@ Action
             else
               wf.fetch reset: true, success: _do_create
           else
+            delete data.template_id # api not accept empty template_id
             @collection.create data, wait: true
       @
     remove: (models) ->
