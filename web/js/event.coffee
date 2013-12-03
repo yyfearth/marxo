@@ -198,7 +198,7 @@ Event
           data.ends = new Date data.ends
           data.duration ?= data.ends.getTime() - starts
       data.duration = unless data.duration then '' else DurationConvertor.stringify data.duration
-      console.log JSON.stringify data
+      #console.log JSON.stringify data
       data.starts = @_dateToString data.starts
       data.ends = @_dateToString data.ends
       console.log 'fill event data', data

@@ -233,7 +233,7 @@ require [
       else
         txt = 'Sign up with'
       @textContent = "#{txt} #{@_name} Account"
-      console.log @, @textContent
+      #console.log @, @textContent
       return
     _getOauth: ->
       oauth = {}
@@ -537,7 +537,6 @@ require [
       @model.fetch
         reset: true
         success: (model) =>
-          console.warn model
           if 'PAGE' is model.get('type').toUpperCase()
             @_render model
           else

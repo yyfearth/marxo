@@ -112,7 +112,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         $form = $ @form
         @form.key.readOnly = @projectMode
         $(@btn_close).remove() if @projectMode
-        console.warn @form, @readOnly
+        #console.warn @form, @readOnly
         $form.find(':input').prop 'readOnly', true if @readOnly
         @fill @model?.toJSON()
         @$el.data model: @model, view: @
