@@ -47,14 +47,14 @@ define 'models', ['module', 'lib/common'], (module) ->
     mode: 'client'
     defaultState:
       pageSize: 255
-    _delay: 1000 # 1s
+    _throttle: 1000 # 1s
     constructor: (options...) ->
       @state ?= {}
       for key, value of @defaultState
         @state[key] = value
       super options...
     load: (callback, {throttle} = {}) ->
-      throttle ?= @_delay
+      throttle ?= @_throttle
       if not @length or not @_last_load or throttle < 1 or (Date.now() - @_last_load) > throttle
         queue = @_loading_cb_queue
         if queue?
@@ -409,7 +409,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       wfs
     model: Workflow
     url: Workflow::urlRoot
-    _delay: 600000 # 10 min
+    _throttle: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, fetch}) ->
       throw new Error 'workflowId is required' unless workflowId
       throw new Error 'async callback is required' unless typeof callback is 'function'
@@ -504,7 +504,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       wfs
     model: Project
     url: Project::urlRoot
-    _delay: 60000 # 1 min
+    _throttle: 60000 # 1 min
 
   ## Home
 

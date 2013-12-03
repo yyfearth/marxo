@@ -254,11 +254,11 @@ Service
         $btns.prop 'disabled', false
         return
       @
-    _delay: 60000 # 1min
+    _throttle: 60000 # 1min
     _last_load: 0
     _load: (force, callback) ->
       throw new Error 'invalid user logined' unless User.current?.has 'tenant_id'
-      if force or Date.now() - @_last_load > @_delay
+      if force or Date.now() - @_last_load > @_throttle
         @model = null
         @form.reset()
         @model ?= new Tenant id: User.current.get 'tenant_id'
