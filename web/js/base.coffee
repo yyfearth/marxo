@@ -223,6 +223,17 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
         submit_btn.style.display = 'none'
         @form.appendChild submit_btn
       @_submit_btn = submit_btn
+      _save = @save?.bind? @
+      _submit = (e) =>
+        e.stopImmediatePropagation()
+        if _save
+          @submit _save
+        else
+          submit_btn.click()
+        false
+      $form = $(@form).on 'keypress', 'input', (e) -> _submit e if e.which is 13
+      $form.on 'keydown', 'textarea', (e) -> _submit e if e.which is 13 and (e.ctrlKey or e.metaKey)
+      # auto name key
       if @form.key and title = (@form.name or @form.title)
         matched = false
         cached = ''
