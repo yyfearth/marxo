@@ -41,6 +41,42 @@ html(lang='en-US')
 
     include html/config/user
 
+    #content_tpl.tpl
+      .tpl(name='section')
+        section
+          legend.session-title {{title}}
+          p.session-desc {{desc}}
+          .session-body {{body}}
+      .tpl(name='text')
+        input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
+      .tpl(name='textarea')
+        textarea.input-block-level(rows=3, placeholder='Simple Text (Multiple Line)')
+      .tpl(name='html')
+        include html/content/rich_editor
+        mixin rich_editor('html')
+      .tpl(name='radio')
+        label.radio
+          input(type='radio', name='{{name}}')
+          | {{text}}
+      .tpl(name='image')
+        .fileupload.fileupload-new(data-provides='fileupload')
+          .fileupload-preview.thumbnail(style='width: 200px; height: 150px;')
+          div
+            span.btn.btn-file
+              span.fileupload-new Select
+              span.fileupload-exists Change
+              input(type='file', accept='image/*')
+            a.btn.fileupload-exists(href='#', data-dismiss='fileupload') Remove
+      .tpl(name='file')
+        .fileupload.fileupload-new(data-provides='fileupload')
+          span.btn.btn-file
+            span.fileupload-new Select
+            span.fileupload-exists Change
+            input(type='file', accept)
+          | &nbsp;
+          span.fileupload-preview
+          button.close.fileupload-exists(data-dismiss='fileupload') &times;
+
     .content.container
       form
         h1 CMPE 275 Project Requirements
