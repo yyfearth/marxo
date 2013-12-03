@@ -41,30 +41,53 @@ html(lang='en-US')
 
     include html/config/user
 
+    #content_tpl.tpl
+      .tpl(name='page')
+        h1 {{title}}
+        p {{desc}}
+        form
+          .sections {{body}}
+          .form-actions.hide
+            input.btn.btn-primary(type='submit', value='Submit')
+            | &nbsp;
+            input.btn(type='reset')
+      .tpl(name='section')
+        section
+          legend.session-title {{title}}
+          p.session-desc {{desc}}
+          .session-body {{body}}
+      .tpl(name='text')
+        input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
+      .tpl(name='textarea')
+        textarea.input-block-level(rows=3, placeholder='Simple Text (Multiple Line)')
+      .tpl(name='html')
+        include html/content/rich_editor
+        mixin rich_editor('html')
+      .tpl(name='radio')
+        label.radio
+          input(type='radio', name='{{name}}')
+          | {{text}}
+      .tpl(name='image')
+        .fileupload.fileupload-new(data-provides='fileupload')
+          .fileupload-preview.thumbnail(style='width: 200px; height: 150px;')
+          div
+            span.btn.btn-file
+              span.fileupload-new Select
+              span.fileupload-exists Change
+              input(type='file', accept='image/*')
+            a.btn.fileupload-exists(href='#', data-dismiss='fileupload') Remove
+      .tpl(name='file')
+        .fileupload.fileupload-new(data-provides='fileupload')
+          span.btn.btn-file
+            span.fileupload-new Select
+            span.fileupload-exists Change
+            input(type='file', accept)
+          | &nbsp;
+          span.fileupload-preview
+          button.close.fileupload-exists(data-dismiss='fileupload') &times;
+
     .content.container
-      form
-        h1 CMPE 275 Project Requirements
-        p This is CMPE 275 course project.
-        img(src='http://upload.wikimedia.org/wikipedia/commons/e/e2/Waterfall_model.svg')
-        section
-          legend.preview-title Group Registration
-          p.preview-desc Please enter your group name
-          .preview-body
-            input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
-        section
-          legend.preview-title Group Members
-          p.preview-desc
-            | Please enter your group members as:
-            br
-            | Last Name, First Name
-            email
-              | (SID)
-              br
-              | e.g. Young, Wilson
-          .preview-body
-            textarea.input-block-level(rows='3', placeholder='Simple Text (Multiple Line)')
-        .form-actions
-          input.btn.btn-primary(type='submit', disabled='', value='Submit')
-          input.btn(type='reset')
+      .page-list
+      .page-content
 
     script(data-main='js/site', src='js/lib/require.js', async)
