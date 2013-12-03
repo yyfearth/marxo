@@ -152,18 +152,19 @@ define 'models', ['module', 'lib/common'], (module) ->
         return
 
       # start node
-      start_node_id = attr.start_node_id
-      if start_node_id?
-        unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
-          console.error 'cannot find node specified by start_node_id', start_node_id, @, @nodes
-      if not @startNode and nodes.length
-        starts = nodes.filter (n) -> not n.inLinks.length
-        if starts.length is 1
-          console.warn 'auto detecting start node', attr
-          @startNode = starts[0]
-        else
-          console.error 'cannot find or more than one start node detected', attr
-          @startNode = null
+      if nodes.length
+        start_node_id = attr.start_node_id
+        if start_node_id?
+          unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+            console.error 'cannot find node specified by start_node_id', start_node_id, @toJSON()
+        if not @startNode and nodes.length
+          starts = nodes.filter (n) -> not n.inLinks.length
+          if starts.length is 1
+            console.warn 'auto detecting start node', attr
+            @startNode = starts[0]
+          else
+            console.error 'cannot find or more than one start node detected', attr
+            @startNode = null
 
       @_sorted = null
       @set {}
@@ -256,8 +257,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         cloned_link.idx = link.idx
         return
       attr = workflow.attributes
-      start_node_id = workflow.get 'start_node_id'
-      start_node_id = if start_node_id? then node_index[start_node_id]?.idx else null
+      start_node_id = if attr.start_node_id? then node_index[attr.start_node_id]?.idx else null
       @clear silent
       @set
         name: attr.name
