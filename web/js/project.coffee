@@ -101,6 +101,7 @@ Projects
       @$projectForm = $ @form
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
+      @_renderSelect = _.debounce @_renderSelect.bind(@), 100
       @
     create: (wf) ->
       wf = wf?.id or wf
@@ -188,7 +189,6 @@ Projects
       item = $sidebar.find(if model then ".sidebar-item:has(a[data-cid='#{model.cid}'])" else ".project-item").addClass 'active'
       item[0].scrollIntoViewIfNeeded()
       @wfDiagram.highlight model
-      @_renderSelect = _.throttle @_renderSelect.bind(@), 100
       @
     _readData: ->
       if model = @_cur_model

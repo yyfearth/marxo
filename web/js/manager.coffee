@@ -457,7 +457,7 @@ Workflows
       throw new Error 'collection must be a instance of ManagerCollection' unless collection instanceof ManagerCollection
 
       # selection may change after remove
-      @listenTo collection, 'remove', @_selection_changed.bind @
+      @listenTo collection, 'remove', @_selection_changed
 
       collection.setPageSize options.pageSize or 15
 
@@ -480,6 +480,8 @@ Workflows
         _render()
 
       @$enable_if_selected = @$el.find '.enable_if_selected'
+
+      @_selection_changed = _.debounce @_selection_changed.bind(@), 100
 
       # tooltip on bottom
       $('.action-buttons .btn[title]').attr 'data-placement': 'bottom', 'data-container': 'body'
@@ -562,7 +564,7 @@ Workflows
     _selection_changed: ->
       selected = @getSelected()
       @$enable_if_selected.prop 'disabled', not selected?.length
-      @delayedTrigger 'selection_changed', 100, selected, @grid, @
+      @trigger 'selection_changed', selected, @grid, @
       # reflect to select all
       checkboxes = findAll '.select-row-cell input[type=checkbox]', @el
       if checkAll?

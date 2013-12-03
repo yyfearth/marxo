@@ -22,8 +22,8 @@ NotificationListView
       super options
       list = @notificationList = new NotificationListView el: find('.sidebar-list', @el), parent: @
       @viewEl = find '#home_view', @el
-      @on 'loaded', @_render.bind @
-      @listenTo @collection, 'reset', => @delayedTrigger 'loaded', 100
+      @_render = _.debounce @_render.bind(@), 100
+      @listenTo @collection, 'reset', @_render
       @listenTo @collection, 'add', (project) =>
         view = @views.index['_idx_' + project.cid] = new ProjectOverview model: project, parent: @
         $(@viewEl).prepend view.render().$el
@@ -53,7 +53,7 @@ NotificationListView
       @viewEl.appendChild list
       return
     render: ->
-      @collection.load => @delayedTrigger 'loaded', 100
+      @collection.load @_render
       @notificationList.fetch()
       super
 

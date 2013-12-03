@@ -244,7 +244,7 @@ Event
         update() if @$el.is ':visible'
       @listenTo @calView, 'modify', @_modify.bind @
       #@on 'activate', update # use show instead
-      @on 'update', @_update.bind @
+      @_update = _.debounce @_update.bind(@), 100
       @
     _modify: (event) -> # (event, revertFunc)
       console.log 'modify event', event.start, event.end, event
@@ -330,10 +330,12 @@ Event
         @_curEvent = null
       @
     goto: (event = @_curEvent) ->
-      @_curEvent = event
-      @delayedTrigger 'update', 100, event
+      # TODO: not efficent re-render all events for just select
+      @_update @_curEvent = event
+      @
     update: ->
-      @goto null
+      @_update @_curEvent
+      @
     render: ->
       @calView.render()
       super
@@ -376,11 +378,9 @@ Event
         @trigger 'modify', event, revertFunc
 
       # auto delayed resize
-      @_resize = => @delayedTrigger 'resize', 150
-      @on 'resize', ->
-        h = $el.parents('.inner-frame').innerHeight()
-        fullCalendar 'option', 'height', h
-      $(window).resize @_resize
+      $(window).resize @_resize = _.debounce ->
+        fullCalendar 'option', 'height', $el.parents('.inner-frame').innerHeight()
+      , 150
 
       # mouse scroll to nav monthes
       @$el.on 'mousewheel DOMMouseScroll', (e) ->

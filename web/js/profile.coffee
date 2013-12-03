@@ -19,11 +19,11 @@ User
       @initForm()
       @btn = find '#update_user', @el
       @avatar = find '#user_avatar img', @el
-      @on 'load', @load.bind @
-      @on 'activate', => @delayedTrigger 'load', 100
+      @load = _.debounce @load.bind(@), 100
+      @on 'activate', @load
     render: ->
       super
-      @delayedTrigger 'load', 100
+      @load()
     load: ->
       (@model = User.current).fetch success: (data) =>
         unless User.current?

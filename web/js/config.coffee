@@ -217,31 +217,22 @@ Service
   class TenantProfileView extends InnerFrameView
     @acts_as FormViewMixin
     events:
-      'click .btn-reset': 'reset'
-      'click .btn-reload': 'reload'
-    initialize: (options) ->
-      super options
-      @initForm()
-      @form.onreset = =>
+      'reset form': ->
         if @model then setTimeout =>
           @fill @model.attributes
         , 1
         return
-      $btnReload = $ find '.btn-reload', @el
-      $btns = $ findAll '.btn', @form
+      'click .btn-reload': -> @reload true
+    initialize: (options) ->
+      super options
+      @initForm()
+      @$btnReload = $ find '.btn-reload', @el
+      @$btns = $ findAll '.btn', @form
       @on 'submit', =>
-        $btns.prop 'disabled', true
+        @$btns.prop 'disabled', true
         @save() # it will call reload, while will enable btns
         return
-      @on 'reload', (force) =>
-        console.log 'reload'
-        $btnReload.button 'loading'
-        $btns.prop 'disabled', true
-        @load force, ->
-          $btnReload.button 'reset'
-          $btns.prop 'disabled', false
-          return
-        return
+      @reload = _.debounce @reload.bind(@), 100
       @
     save: ->
       $btn = $(@_submit_btn)
@@ -250,19 +241,24 @@ Service
       console.log 'save', data
       @model.save data, wait: true, success: =>
         $btn.button 'reset'
-        @reload()
+        @reload true
       @
     render: ->
-      @reload()
+      @reload false
       super
-    reload: (force) ->
-      @delayedTrigger 'reload', 100, force
+    reload: (force) =>
+      $btnReload = @$btnReload.button 'loading'
+      $btns = @$btns.prop 'disabled', true
+      @_load force, ->
+        $btnReload.button 'reset'
+        $btns.prop 'disabled', false
+        return
+      @
     _delay: 60000 # 1min
     _last_load: 0
-    load: (force, callback) ->
+    _load: (force, callback) ->
       throw new Error 'invalid user logined' unless User.current?.has 'tenant_id'
-      ts = new Date().getTime()
-      if force or ts - @_last_load > @_delay
+      if force or Date.now() - @_last_load > @_delay
         @model = null
         @form.reset()
         @model ?= new Tenant id: User.current.get 'tenant_id'
@@ -274,7 +270,7 @@ Service
           callback? data
       else
         callback? null
-      @
+      return
 
   # User Editor
   class UserEditor extends FormDialogView
