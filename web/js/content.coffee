@@ -493,7 +493,7 @@ ProjectFilterView
         @trigger 'change', e.target, @data
       # bind update preview on any changes
       @previewEl = find '.preview', @el
-      @updatePreview = _.debounce @updatePreview.bind(@), 500
+      @updatePreview = _.throttle @updatePreview.bind(@), 500
       @on 'change fill reset', => @updatePreview @data
       @
     _find: (part_id) ->

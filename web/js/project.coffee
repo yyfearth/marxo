@@ -101,7 +101,7 @@ Projects
       @$projectForm = $ @form
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
-      @_renderSelect = _.debounce @_renderSelect.bind(@), 100
+      @_renderSelect = _.throttle @_renderSelect.bind(@), 100
       @
     create: (wf) ->
       wf = wf?.id or wf

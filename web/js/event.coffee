@@ -237,14 +237,13 @@ Event
     initialize: (options) ->
       super options
       #@sidebarListEl = find '.sidebar-list', @el
-      update = @update.bind @
       @$sidebar = $ find '.sidebar-list', @el
       @calView = new FullCalendarView parent: @, el: find '#calendar_view', @el
       @listenTo @collection, 'reset add remove change', =>
-        update() if @$el.is ':visible'
+        @update() if @$el.is ':visible'
       @listenTo @calView, 'modify', @_modify.bind @
+      @update = _.throttle @update.bind(@), 500
       #@on 'activate', update # use show instead
-      @_update = _.debounce @_update.bind(@), 100
       @
     _modify: (event) -> # (event, revertFunc)
       console.log 'modify event', event.start, event.end, event
@@ -263,7 +262,7 @@ Event
           ends: event.end
           duration: event.end.getTime() - event.start.getTime()
       return
-    _update: (event) ->
+    update: (event = @_curEvent) ->
       id = event?.id or event
       console.log 'cur', id
       cal = @calView
@@ -329,12 +328,9 @@ Event
       else
         @_curEvent = null
       @
-    goto: (event = @_curEvent) ->
+    goto: (event) ->
       # TODO: not efficent re-render all events for just select
-      @_update @_curEvent = event
-      @
-    update: ->
-      @_update @_curEvent
+      @update @_curEvent = event
       @
     render: ->
       @calView.render()

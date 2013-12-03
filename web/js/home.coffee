@@ -22,7 +22,7 @@ NotificationListView
       super options
       list = @notificationList = new NotificationListView el: find('.sidebar-list', @el), parent: @
       @viewEl = find '#home_view', @el
-      @_render = _.debounce @_render.bind(@), 100
+      @_render = _.throttle @_render.bind(@), 100
       @listenTo @collection, 'reset', @_render
       @listenTo @collection, 'add', (project) =>
         view = @views.index['_idx_' + project.cid] = new ProjectOverview model: project, parent: @

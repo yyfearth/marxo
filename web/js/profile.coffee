@@ -19,7 +19,7 @@ User
       @initForm()
       @btn = find '#update_user', @el
       @avatar = find '#user_avatar img', @el
-      @load = _.debounce @load.bind(@), 100
+      @load = _.throttle @load.bind(@), 100
       @on 'activate', @load
     render: ->
       super
