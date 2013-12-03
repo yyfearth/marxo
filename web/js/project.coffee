@@ -210,7 +210,7 @@ Projects
       # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
       console.log 'selected wf for project', wf.name
       _copy = (wf) =>
-        unless wf.isValid(traverse: true)
+        unless wf.isValid(traverse: true) and wf.nodes.length
           @model.set 'template_id', ''
           @sidebar.classList.remove 'active'
           @btnSave.disabled = true
