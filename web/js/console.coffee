@@ -335,11 +335,11 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         if _frame._cur? and not name
           name = _frame._cur?._name
           @navigate "##{frame}/#{name}", replace: true if name
-        _cur = _frame[name]
-        unless _cur? or not name or /^content$/.test(frame) or /^new&|^signout$/.test name
-          _cur = _name: name
-        _frame._cur = _cur
-        @frames._cur = _frame
+        unless /^new$|^signout$/.test name
+          _cur = _frame[name]
+          _cur = _name: name unless _cur? or not name or /^content$/.test(frame)
+          _frame._cur = _cur
+          @frames._cur = _frame
         #console.log 'frames data', frame, name, @frames
 
         ConsoleView.get()?.showFrame frame, name, sub
