@@ -232,11 +232,9 @@ Action
         else if id
           node ?= @model.nodes.get id
         @view.createNode node
-
-      @_changed = @_changed.bind @
       @
     _enableBtns: (enable) ->
-      @btnSave.disabled = not enable
+      @btnSave.disabled = not enable or @readonly
       $btn = $ @btnReset
       if enable
         $btn.addClass('btn-danger').text 'Reset'
@@ -250,7 +248,11 @@ Action
       @
     save: ->
       wf = @model
-      unless wf.nodes.length
+      if @readonly
+        console.error 'not allow to change readonly workflow!'
+        @reset true
+        return @
+      else unless wf.nodes.length
         alert 'Cannot save a workflow without any node!'
         return @
       else unless wf.has('start_node_id') and wf.nodes.get wf.get 'start_node_id'
@@ -267,12 +269,9 @@ Action
         success: (wf) ->
           console.log 'saved', wf
         error: ->
-          @_changed()
+          @_enableBtns true
           console.error 'save failed', @model
       @
-    _changed: ->
-      @_enableBtns true
-      return
     _loaded: (wf, sub) ->
       @id = wf.id
       @nameEl.textContent = wf.get 'name'
@@ -291,8 +290,10 @@ Action
       @view.setOrientation orientation
       @view.load wf, sub
       @nodeList.setNodes wf.nodes
+      # TODO: show warning in workflow editor view
+      @readonly = not @model.has 'tenant_id'
       @listenTo wf, 'changed', (action, entity) ->
-        @_changed()
+        @_enableBtns true
         console.log 'workflow changed', action, entity
       return
     _clear: ->
@@ -302,6 +303,7 @@ Action
       @nameEl.textContent = ''
       @descEl.textContent = ''
       @_enableBtns false
+      @readonly = false
       @view.clear()
       return
     load: (wf, sub) ->
@@ -576,6 +578,8 @@ Action
       return
     clear: ->
       # TODO: destroy all views of nodes and links
+      @startNode?.remove()
+      @startNode = null
       @el.innerHTML = ''
       # unbind model events
       @stopListening @model
@@ -673,15 +677,18 @@ Action
         startNodes = @model.nodes.filter (node) -> not node.inLinks.length
         node = startNodes[0] or @model.nodes.at 0
         node = node?.id
-      #console.log 'set start node', node
-      @model.set 'start_node_id', node
-      startNode = @startNode
-      jsPlumb.detach startNode.conn if startNode.conn
-      if node? then startNode.conn = jsPlumb.connect
-        source: startNode.srcEndpoint
-        target: "node_#{node}"
-        cssClass: 'link'
-        hoverClass: 'hover'
+      console.log 'set start node', node
+      if node?
+        if node isnt @model.get 'start_node_id'
+          @model.set 'start_node_id', node
+          @model.trigger 'changed', 'set_start_node', @model
+        startNode = @startNode
+        jsPlumb.detach startNode.conn if startNode.conn
+        startNode.conn = jsPlumb.connect
+          source: startNode.srcEndpoint
+          target: "node_#{node}"
+          cssClass: 'link'
+          hoverClass: 'hover'
       @
     addNode: (node = 'emtpy') ->
       if node is 'new' or node is 'empty'
