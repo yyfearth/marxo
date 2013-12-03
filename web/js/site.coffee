@@ -13,6 +13,7 @@ requirejs.config
     'lib/facebook': '//connect.facebook.net/en_US/all'
 
 define 'fb', ['lib/facebook'], (FB) =>
+  return alert 'Local test data only support sign-in with email!' # test
   FB.init
     appId: '213527892138380'
     scopes: 'email'
@@ -39,12 +40,13 @@ define 'fb', ['lib/facebook'], (FB) =>
     FB
   FB
 
-require ['lib/common'], ->
+require ['lib/common', 'lib/backbone.localstorage'], -> # test
   console.log 'ver', 'site', 1
 
   $.ajaxSetup dataType: 'json'
 
   class User extends Backbone.Model
+    idAttribute: 'email' # test
     urlRoot: ROOT + '/users'
     defaults:
       type: 'PARTICIPANT'
@@ -110,7 +112,10 @@ require ['lib/common'], ->
       return
     signin: (auth, error_callback) ->
       $inputs = @$el.find('input,button').prop 'disabled', true
-      new User(id: 'me').fetch
+      # test
+      email = atob(auth.slice(6)).split(':')[0]
+      throw new Error 'local test data only support sign-in with email' if email.indexOf('@') < 1
+      new User({id: 'me', email}).fetch
         headers:
           Authorization: auth
         reset: true
