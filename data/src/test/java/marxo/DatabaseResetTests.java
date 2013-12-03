@@ -235,6 +235,8 @@ public class DatabaseResetTests extends BasicDataTests {
 			nodeMap.put(objectId, new ObjectId());
 		}
 
+		workflow.startNodeId = nodeMap.get(workflow.startNodeId);
+
 		for (Node node : workflow.getNodes()) {
 			node.id = nodeMap.get(node.id);
 			node.setWorkflow(workflow);
@@ -278,12 +280,14 @@ public class DatabaseResetTests extends BasicDataTests {
 				}
 			}
 		}
+		workflow.setNodes(workflow.getNodes());
 		for (Link link : workflow.getLinks()) {
 			link.id = linkMap.get(link.id);
 			link.setWorkflow(workflow);
 			link.previousNodeId = nodeMap.get(link.previousNodeId);
 			link.nextNodeId = nodeMap.get(link.nextNodeId);
 		}
+		workflow.setLinks(workflow.getLinks());
 
 		workflow.wire();
 
