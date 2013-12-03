@@ -37,8 +37,12 @@ Projects
         else
           throw new Error 'open project with a name or id is needed' unless name
           Projects.find workflowId: name, fetch: true, callback: ({workflow}) =>
-            throw new Error "project with id #{name} cannot found" unless workflow
-            if sub?.edit
+            unless workflow
+              console.error "project with id #{name} cannot found", name, sub
+              alert 'Project not found!'
+              @router.navigate 'project/mgr'
+              @switchTo @manager
+            else if sub?.edit
               @editor.edit workflow, sub
             else
               @switchTo @viewer
@@ -625,7 +629,7 @@ Projects
             btn = document.createElement 'a'
             btn.className = 'ref-link pull-right ' + cls or ''
             btn.textContent = name.capitalize()
-            btn.href = "#content/#{id}"
+            btn.href = "##{name}/#{id}"
             a.appendChild btn
         li.appendChild a
         frag.appendChild li
