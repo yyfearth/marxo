@@ -242,7 +242,7 @@ Event
       @listenTo @collection, 'reset add remove change', =>
         @update() if @$el.is ':visible'
       @listenTo @calView, 'modify', @_modify.bind @
-      @update = @update.bind(@)
+      @update = _.throttle @update.bind(@), 500
       #@on 'activate', update # use show instead
       @
     _modify: (event) -> # (event, revertFunc)

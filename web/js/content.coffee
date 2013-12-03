@@ -324,8 +324,8 @@ ProjectFilterView
       @sections.push view
       @listenTo view, 'remove', =>
         @sections[view.id] = null
-        @delayedTrigger 'sections_update', 100
-      @delayedTrigger 'sections_update', 1
+        #@delayedTrigger 'sections_update', 100
+      #@delayedTrigger 'sections_update', 1
       @
     removeSection: (view) ->
       view.remove()
@@ -493,8 +493,8 @@ ProjectFilterView
         @trigger 'change', e.target, @data
       # bind update preview on any changes
       @previewEl = find '.preview', @el
-      @on 'change fill reset', => @delayedTrigger 'update_preview', 500, @data
-      @on 'update_preview', @updatePreview.bind @
+      @updatePreview = _.throttle @updatePreview.bind(@), 500
+      @on 'change fill reset', => @updatePreview @data
       @
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el

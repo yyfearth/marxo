@@ -232,7 +232,7 @@ Service
         @$btns.prop 'disabled', true
         @save() # it will call reload, while will enable btns
         return
-      @reload = @reload.bind(@)
+      @reload = _.debounce @reload.bind(@), 100
       @
     save: ->
       $btn = $(@_submit_btn)
