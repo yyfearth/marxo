@@ -53,19 +53,26 @@ define 'models', ['module', 'lib/common'], (module) ->
       for key, value of @defaultState
         @state[key] = value
       super options...
-    load: (callback, options = {}) ->
-      options = delay: options if typeof options is 'number'
-      options.delay ?= @_delay
-      options.reset ?= true
-      if not @length or not @_last_load or options.delay < 1 or (Date.now() - @_last_load) > options.delay
-        @fetch
-          reset: options.reset
-          success: (collection, response, options) =>
-            @_last_load = Date.now()
-            @trigger 'loaded', collection
-            callback? collection, 'loaded', response, options
-          error: (collection, response, options) =>
-            callback? @, 'error', response, options
+    load: (callback, {throttle} = {}) ->
+      throttle ?= @_delay
+      if not @length or not @_last_load or throttle < 1 or (Date.now() - @_last_load) > throttle
+        queue = @_loading_cb_queue
+        if queue?
+          queue.push callback if typeof callback is 'function'
+        else
+          queue = @_loading_cb_queue = if typeof callback is 'function' then [callback] else []
+          @fetch
+            reset: true
+            success: (collection, response, options) =>
+              @_loading_cb_queue = null
+              @_last_load = Date.now()
+              @trigger 'loaded', collection
+              cb collection, 'loaded', response, options for cb in queue
+              return
+            error: (collection, response, options) =>
+              @_loading_cb_queue = null
+              cb @, 'error', response, options for cb in queue
+              return
       else
         callback? @, 'skipped'
       @
@@ -116,15 +123,15 @@ define 'models', ['module', 'lib/common'], (module) ->
     urlRoot: ROOT + '/workflows'
     constructor: (model, options) ->
       super model, options
-      @_wire model
-    _wire: (model = @) ->
-      model = model.attributes if model instanceof @constructor
+      @_wire()
+    _wire: ->
+      attr = @attributes
       url = @url?() or @url or ''
-      nodes = if Array.isArray(model.nodes) then model.nodes else []
+      nodes = if Array.isArray(attr.nodes) then attr.nodes else []
       nodes = @nodes = new Nodes nodes, url: url + '/nodes'
       nodes._loaded = nodes.length > 0
 
-      links = if Array.isArray(model.links) then model.links else []
+      links = if Array.isArray(attr.links) then attr.links else []
       links = @links = new Links links, url: url + '/links'
       links._loaded = links.length > 0
 
@@ -145,17 +152,17 @@ define 'models', ['module', 'lib/common'], (module) ->
         return
 
       # start node
-      start_node_id = model.start_node_id
+      start_node_id = attr.start_node_id
       if start_node_id?
-        unless @startNode = @nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
-          console.error 'cannot find node specified by start_node_id', start_node_id, @
+        unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+          console.error 'cannot find node specified by start_node_id', start_node_id, @, @nodes
       if not @startNode and nodes.length
         starts = nodes.filter (n) -> not n.inLinks.length
         if starts.length is 1
-          console.warn 'auto detecting start node', model
+          console.warn 'auto detecting start node', attr
           @startNode = starts[0]
         else
-          console.error 'cannot find or more than one start node detected', model
+          console.error 'cannot find or more than one start node detected', attr
           @startNode = null
 
       @_sorted = null
@@ -164,10 +171,10 @@ define 'models', ['module', 'lib/common'], (module) ->
       return
     fetch: (options = {}) -> # override for warp
       _success = options.success?.bind @
-      options.success = (model, response, options) =>
-        @_wire model
-        @nodes._loaded = @links._loaded = true
-        @trigger 'loaded', model
+      options.success = (model, response, options) ->
+        model._wire()
+        model.nodes._loaded = model.links._loaded = true
+        model.trigger 'loaded', model
         _success? model, response, options
       super options
       @
@@ -260,7 +267,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         template_id: workflow.id
         nodes: nodes
         links: links
-      @_wire @
+      @_wire()
       @
     save: (attributes = {}, options = {}) ->
       throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
@@ -396,13 +403,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     @find: (options) ->
       wfs = @workflows
       unless wfs.length
-        if queue = @_find_queue
-          queue.push options
-        else
-          queue = @_find_queue = [options]
-          wfs.load (wfs) =>
-            wfs.find options for options in queue
-            @_find_queue = null
+        wfs.load (wfs) -> wfs.find options
       else
         wfs.find options
       wfs
@@ -497,13 +498,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     @find: (options) ->
       wfs = @projects
       unless wfs.length
-        if queue = @_find_queue
-          queue.push options
-        else
-          queue = @_find_queue = [options]
-          wfs.load (wfs) =>
-            wfs.find options for options in queue
-            @_find_queue = null
+        wfs.load (wfs) -> wfs.find options
       else
         wfs.find options
       wfs
