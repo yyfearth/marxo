@@ -106,6 +106,12 @@ Action
       _remove = @remove.bind @
       @on remove: _remove, remove_selected: _remove
       @list.on 'select', @create.bind @
+      # sync collection with shared collection
+      @listenTo @collection, 'add', (model) =>
+        Workflows.workflows.add model
+        @refresh()
+      @listenTo @collection, 'remove', (model) =>
+        Workflows.workflows.remove model
       @
     create: (template_id) ->
       template_id = '' if not template_id or /^(?:new|empty)$/i.test template_id
