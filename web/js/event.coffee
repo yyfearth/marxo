@@ -185,7 +185,7 @@ Event
         msg = msg.join '<br/>'
 
       @$info.html(msg).parents('.control-group')
-        .removeClass('success error').addClass cls
+      .removeClass('success error').addClass cls
       @
 
     fill: (data) ->
@@ -379,13 +379,21 @@ Event
       , 150
 
       # mouse scroll to nav monthes
-      @$el.on 'mousewheel DOMMouseScroll', (e) ->
-        if e.shiftKey or fullCalendar('getView').name is 'month'
-          e.preventDefault()
-          e = e.originalEvent
-          fullCalendar if e.wheelDelta > 0 or e.detail < 0 then 'prev' else 'next'
-          false
-
+      parent = @el.parentNode
+      $el.on 'mousewheel DOMMouseScroll', _.throttle (e) ->
+        # always next/prev when shift or ctrl pressed
+        # never next/prev when alt or meta pressed
+        force = e.shiftKey or e.ctrlKey
+        if force or not (e.altKey or e.metaKey) and fullCalendar('getView').name is 'month'
+          prev = e.originalEvent.wheelDelta > 0 or e.originalEvent.detail < 0
+          if force or prev and parent.scrollTop is 0 or
+          not prev and parent.scrollTop >= parent.scrollHeight - parent.offsetHeight
+            e.preventDefault()
+            fullCalendar if prev then 'prev' else 'next'
+            parent.scrollTop = 0
+            false
+        return
+      , 350
       @
     _view_map:
       month: 'month', week: 'agendaWeek', day: 'agendaDay'
