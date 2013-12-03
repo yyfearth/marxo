@@ -181,7 +181,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
     sort: (options = {}) ->
-      unless options.force or @_sorted
+      if options.force or not @_sorted
         cindex = {}
         nodes_count = 0
         links_count = 0
@@ -309,7 +309,7 @@ define 'models', ['module', 'lib/common'], (module) ->
               link.resetChangeFlag().save()
             return
           # update workflow for start node
-          unless @get('start_node_id') is @startNode.id
+          if @startNode and @get('start_node_id') isnt @startNode.id
             requests.push @save start_node_id: @startNode.id
           if (typeof _success is 'function') or (typeof _err is 'function')
             $.when.apply($, requests).then =>
