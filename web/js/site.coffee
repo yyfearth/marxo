@@ -26,8 +26,7 @@ define 'fb', ['lib/facebook'], (FB) =>
         when 'connected'
           console.log 'connected', response
           callback response, FB
-        when 'not_authorized'
-          # the user is logged in but has not authed
+        when 'not_authorized' # the user is logged in but has not authed
           console.warn 'User cancelled login or did not fully authorize.', response
           alert 'You cancelled login or did not fully authorize.'
         else
@@ -40,16 +39,32 @@ define 'fb', ['lib/facebook'], (FB) =>
     FB
   FB
 
-require ['lib/common', 'lib/backbone.localstorage'], -> # test
+require [
+  'lib/common'
+  'lib/bootstrap-fileupload'
+  'lib/bootstrap-wysiwyg'
+  'lib/backbone.localstorage' # test
+], ->
   console.log 'ver', 'site', 1
 
   $.ajaxSetup dataType: 'json'
+
+  # Models
 
   class User extends Backbone.Model
     idAttribute: 'email' # test
     urlRoot: ROOT + '/users'
     defaults:
       type: 'PARTICIPANT'
+
+  class Page extends Backbone.Model
+    urlRoot: ROOT + '/contents'
+
+  class Pages extends Backbone.Collection
+    model: Page
+    url: Page::urlRoot + '?type=page'
+
+  # Views
 
   class UserProfileView extends Backbone.View
     el: '#user_profile'
@@ -355,6 +370,210 @@ require ['lib/common', 'lib/backbone.localstorage'], -> # test
         @_save data
       @
 
-  new UserProfileView
+  class RichEditorView extends Backbone.View
+    _fonts: [
+      'Serif', 'Sans', 'Arial', 'Arial Black'
+      'Courier', 'Courier New', 'Comic Sans MS'
+      'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
+      'Tahoma', 'Times', 'Times New Roman', 'Verdana'
+    ]
+    events:
+      'click .btn.hyperlink': (e) ->
+        setTimeout ->
+          $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
+        , 200
+      'click .btn-switch': '_switch'
+    readOnlyHtml: (val) ->
+      @readOnly = val
+      @$editor.attr 'contenteditable', not val
+      @$code.attr 'readonly', val
+      @$edits.prop 'disabled', val
+      @
+    fillHtml: (html) -> # can only be called after rendered
+      @$editor.html html or ''
+      @
+    readHtml: ->
+      if @$code.is(':visible') then @$code.val() else @$editor.cleanHtml()
+    resetHtml: ->
+      @$code.val('')
+      @_switch false
+      @$el.find('.btn-switch').removeClass 'active'
+      @
+    _renderFonts: ->
+      fontTarget = find '.fonts-select', @el
+      fontTarget.innerHTML = ''
+      flagment = document.createDocumentFragment()
+      for fontName in @_fonts
+        li = document.createElement 'li'
+        a = document.createElement 'a'
+        a.dataset.edit = "fontName #{fontName}"
+        a.style.fontFamily = fontName
+        a.textContent = fontName
+        li.appendChild a
+        flagment.appendChild li
+      fontTarget.appendChild flagment
+      return
+    render: ->
+      @_renderFonts()
+      @$el.find('.dropdown-menu input').click(-> false).change(->
+        $(@).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
+      ).keydown (e) ->
+        if e.which is 27 # esc
+          @value = ''
+          $(@).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
+        true
+      @$el.find('[type=file]').each ->
+        overlay = $(@)
+        target = $(overlay.data('target'))
+        overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
+        .width(target.outerWidth()).height target.outerHeight()
+      @$editor = @$el.find('.rich-editor').wysiwyg()
+      @$code = @$editor.siblings('.rich-editor-html')
+      @$edits = @$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit')
+      @$edits.tooltip container: @el
+      @
+    _switch: (toCode) ->
+      $editor = @$editor
+      $code = @$code
+      toCode = not $code.is ':visible' unless typeof toCode is 'boolean'
+      if toCode
+        $editor.hide()
+        $code.show().val $editor.cleanHtml()
+      else
+        $code.hide()
+        $editor.show().html $code.val()
+      @$edits.prop 'disabled', toCode unless @readOnly
+      return
+
+  class PageView extends Backbone.View
+    _tpl: {}
+    tpl: (name, attrs) ->
+      _tpl = @_tpl
+      # lazy load
+      unless _tpl.section
+        $('#content_tpl').remove().children('.tpl[name]').each ->
+          $el = $ @
+          _tpl[$el.attr 'name'] = $el.html().trim().replace(/\s+/g, ' ').replace(/> </g, '>\n<')
+          return
+      # returns
+      unless name
+        _tpl
+      else unless attrs
+        _tpl[name] ? ''
+      else unless _tpl[name]
+        ''
+      else
+        _tpl[name].replace /{{\s*\w+\s*}}/g, (name) ->
+          name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
+          attrs[name] or ''
+    el: '.content.container > .page-content'
+    initialize: (options) ->
+      throw new Error 'page id must be given' unless options?.id
+      super options
+      @id = options.id
+      @model = new Page id: @id
+      @tpl = @tpl.bind @
+      @_renderInput = @_renderInput.bind @
+      @
+    show: ->
+      @render() unless @rendered
+      @$el.html @html if @html
+      @
+    showNotFound: ->
+      @$el.html '404'
+      @
+    _render: (model = @model) ->
+      tpl = @tpl
+      _renderInput = @_renderInput
+      # '<div class="text-center"><em>(Please sign-in to see the details)</em></div>'
+      hasInput = false
+      sections = model.get('sections')?.map (section) ->
+        hasInput = true if section.type
+        tpl 'section',
+          title: _.escape(section.name)
+          desc: section.desc
+          body: _renderInput(section)
+      html = tpl 'page',
+        title: model.escape('name')
+        desc: model.get('desc')
+        body: unless sections?.length then '' else sections.join '\n'
+      html = @html = if hasInput then html.replace('form-actions hide', 'form-actions') else html
+      @$el.html html
+      html
+    _renderInput: (data) ->
+      type = data.type or ''
+      options = data.options or {}
+      tpl = @tpl()
+      switch type
+        when ''
+          body = ''
+        when 'text'
+          body = if options.text_multiline then tpl.textarea else tpl.text
+        when 'html'
+          body = tpl.html
+        when 'radio'
+          el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
+          list = unless options.gen_from_list then options.manual_options else [
+            'List item 1 (Auto Genearted)'
+            'List item 2 (Auto Genearted)'
+            '... (Auto Genearted)'
+          ]
+          body = list.map((item) -> el.replace '{{text}}', item).join '\n'
+        when 'file'
+          accept = options.file_accept
+          if accept is 'image/*'
+            body = tpl.image
+          else
+            accept = unless accept then '' else "accept='#{accept}' "
+            body = tpl.file.replace /accept(?:=['"]{2})?/, accept
+        else
+          throw new Error 'unknown section type ' + type
+      body
+    render: ->
+      @update() unless @model.has 'name'
+      @rendered = true
+      @
+    update: ->
+      @model.fetch
+        reset: true
+        success: (model) =>
+          console.warn model
+          if 'PAGE' is model.get('type').toUpperCase()
+            @_render model
+          else
+            @showNotFound()
+          return
+        error: ->
+          @showNotFound()
+      @
+
+
+  class PageListView extends Backbone.View
+    el: '.content.container > .page-list'
+    collection: new Pages
+
+  # Router
+
+  class Router extends Backbone.Router
+    routes:
+      'home': 'showPageList'
+      ':id': 'showPage'
+    cache:
+      page: {}
+    showPage: (id) ->
+      console.log 'show page:', id
+      view = @cache[id] ?= new PageView {id}
+      view.show()
+      @
+    showPageList: ->
+      list = @cache.list ?= new PageListView
+      list.show()
+      console.log 'show page list'
+      @
+
+  # EP
+  window.user_profile = new UserProfileView
+  window.router = new Router
+  Backbone.history.start()
 
   return
