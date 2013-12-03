@@ -215,7 +215,7 @@ Projects
           , 500
           return
         project.copy wf, traverse: false # already traversed
-        project.set 'status', 'NONE'
+        project.set 'status', 'IDLE'
         unless @form.name.value
           @form.name.value = wf.get 'name'
           $(@form.name).trigger 'input'
