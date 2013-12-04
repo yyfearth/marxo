@@ -30,13 +30,13 @@ ProjectFilterView
     initialize: (options) ->
       super options
       @manager = new ContentManagerView el: @el, parent: @
-      @editor = new TextEditor el: '#text_editor', parent: @
+      @editor = new MessageEditor el: '#msg_editor', parent: @
       @composer = new EmailComposer el: '#email_composer', parent: @
       @designer = new PageDesigner el: '#page_designer', parent: @
       @
     open: (name, arg) ->
       if name
-        @load name, arg, (action, data) ->
+        @popup name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
@@ -51,16 +51,14 @@ ProjectFilterView
         @editor.cancel()
         @composer.cancel()
       @
-    load: (id, action, callback) ->
-      if id instanceof Content
-        @popup id, callback
-      else if typeof id is 'string'
-        new Content({id}).fetch success: (data) => @popup data, action, callback
-      else
-        throw new Error 'content editor can only load a content model or an id string'
     popup: (data, action, callback) ->
-      media = data.get 'type'
-      editor = switch media
+      if typeof data is 'string'
+        new Content(id: data).fetch success: (data) => @popup data, action, callback
+        return @
+      else unless data instanceof Content
+        data = new Content data
+      type = data.get('type')?.toUpperCase()
+      editor = switch type
         when 'FACEBOOK', 'TWITTER'
           @editor
         when 'PAGE'
@@ -68,7 +66,7 @@ ProjectFilterView
         when 'EMAIL'
           @composer
         else
-          throw new Error 'unsupported media type ' + media
+          throw new Error 'unsupported media type ' + type
       editor.render() unless editor.rendered
       editor.popup data, action, callback
       @
@@ -115,7 +113,7 @@ ProjectFilterView
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
       fontTarget.innerHTML = ''
-      flagment = document.createDocumentFragment()
+      fragment = document.createDocumentFragment()
       for fontName in @_fonts
         li = document.createElement 'li'
         a = document.createElement 'a'
@@ -123,8 +121,8 @@ ProjectFilterView
         a.style.fontFamily = fontName
         a.textContent = fontName
         li.appendChild a
-        flagment.appendChild li
-      fontTarget.appendChild flagment
+        fragment.appendChild li
+      fontTarget.appendChild fragment
       return
     renderRichEditor: ->
       @_renderFonts()
@@ -135,13 +133,12 @@ ProjectFilterView
           @value = ''
           $(@).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
         true
-      @$el.find('[type=file]').each ->
+      @$el.find('input[type=file]').each ->
         overlay = $(@)
-        target = $(overlay.data('target'))
-        overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
-        .width(target.outerWidth()).height target.outerHeight()
+        target = overlay.parents('.btn-edit')
+        overlay.width(target.outerWidth()).height target.outerHeight()
       @$editor = @$el.find('.rich-editor').wysiwyg()
-      @$code = @$editor.siblings('.rich-editor-html')
+      @$code = @$editor.siblings('.rich-editor-html').removeAttr 'name'
       @$edits = @$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit')
       @$edits.tooltip container: @el
       @
@@ -158,34 +155,35 @@ ProjectFilterView
       @$edits.prop 'disabled', toCode unless @readOnly
       return
 
-  class TextEditor extends FormDialogView
+  class MessageEditor extends FormDialogView
     @acts_as ContentEditorMixin
     popup: (data, ignored, callback) ->
       super data, callback
+      @field = @form.message
       @fill data
-      posted = 'POSTED' is data.get 'status'
-      @form.desc.readOnly = posted
+      posted = 'IDLE' isnt data.get('status').toUpperCase()
+      @field.readOnly = posted
       @btnSave.disabled = posted
       @
     fill: (data) ->
-      media = data.get 'type'
-      @$el.find('small.media').text "(#{media.toLowerCase()})"
+      type = data.get 'type'
+      field = @field
+      @$el.find('small.media').text "(#{type.toLowerCase()})"
       @form.name.value = data.get 'name'
-      @form.desc.value = data.get 'desc'
-      textarea = @form.desc
-      switch media
+      field.value = data.get 'message'
+      switch type
         when 'FACEBOOK'
-          textarea.maxLength = 65535
-          textarea.rows = 10
+          field.maxLength = 65535
+          field.rows = 10
         when 'TWITTER'
-          textarea.maxLength = 140
-          textarea.rows = 5
+          field.maxLength = 140
+          field.rows = 5
         else
-          console.warn 'text editor is only for socal media, not for page or email!', media
+          console.warn 'text editor is only for socal media, not for page or email!', type
       @
-    read: -> @form.desc.value
+    read: -> @field.value
     save: ->
-      @data.set 'desc', @read()
+      @data.set 'message', @read()
       @callback 'save'
       @hide true
       @
@@ -195,7 +193,7 @@ ProjectFilterView
     popup: (data, ignored, callback) ->
       super data, callback
       @fill data
-      posted = 'POSTED' is data.get 'status'
+      posted = 'IDLE' isnt data.get('status').toUpperCase()
       @readOnlyHtml posted
       @btnSave.disabled = posted
       @
@@ -217,9 +215,8 @@ ProjectFilterView
       @resetHtml()
       @
     render: ->
-      super
       @renderRichEditor()
-      @
+      super
 
   class PageDesigner extends ModalDialogView
     @acts_as ContentEditorMixin
@@ -290,9 +287,9 @@ ProjectFilterView
         defered.push data
       #defered.push read @submitOptions
 
-      $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections..., submit_options) ->
+      $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections...) -> # , submit_options
         #console.log 'save content editor', page_desc, sections, submit_options
-        callback {page_desc, sections, submit_options}
+        callback {page_desc, sections} # , submit_options
       @
     save: ->
       @togglePreview() if @iframe.classList.contains 'active'
@@ -384,12 +381,12 @@ ProjectFilterView
       _body = find '.modal-body', @el
       $(_body).find('.btn[title]').tooltip container: _body
       super
-      @
 
   class BoxFormView extends BoxView
     @acts_as FormViewMixin
     render: ->
       @initForm()
+      super
     reset: ->
       @form.reset()
       @
@@ -501,15 +498,17 @@ ProjectFilterView
     fill: (data) ->
       @reset()
       data = unless data? then {} else $.extend {}, data, data.options
+      data.type = if data.type then data.type.toLowerCase() else 'none'
       super data
-      if data.type is 'radio' and not data.gen_from_list and data.manual_options
+      if /^radio$/i.test data.type and not data.gen_from_list and data.manual_options
         # manual options
         @autoIncOptionList.fill data.manual_options
       @
     read: ->
       data = super()
+      return {} unless data
       # manual options
-      if data?.type is 'radio' and not data.gen_from_list
+      if /^radio$/i.test data?.type and not data.gen_from_list
         data.manual_options = @autoIncOptionList.read()
       # TODO: stop if invalid
 
@@ -518,7 +517,7 @@ ProjectFilterView
       data =
         name: options.name
         desc: options.desc
-        type: options.type
+        type: (options.type or 'none').toUpperCase()
         options: options
       delete options.name
       delete options.desc
@@ -546,8 +545,8 @@ ProjectFilterView
       tpl = @_preview_tpl
       type = data.type or ''
       options = data.options or {}
-      switch type
-        when ''
+      switch type.toLowerCase()
+        when '', 'none'
           body = ''
         when 'text'
           body = if options.text_multiline then tpl.textarea else tpl.text
@@ -555,7 +554,9 @@ ProjectFilterView
           body = tpl.html
         when 'radio'
           el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
-          list = unless options.gen_from_list then options.manual_options else [
+          list = unless options.gen_from_list
+            options.manual_options or []
+          else [
             'List item 1 (Auto Genearted)'
             'List item 2 (Auto Genearted)'
             '... (Auto Genearted)'
@@ -714,15 +715,7 @@ ProjectFilterView
     ,
       'workflow'
       'node_action'
-    ,
-      name: 'status'
-      label: 'Status'
-      cell: 'label'
-      cls:
-        posted: 'label-success'
-        waiting: 'label-info'
-        blocked: 'label-inverse'
-      editable: false
+      'status'
     ,
       name: 'posted_at'
       label: 'Date Posted'
@@ -739,8 +732,8 @@ ProjectFilterView
     initialize: (options) ->
       super options
       collection = @collection.fullCollection
-      @mediaFilter = new NavFilterView
-        el: find('.media-filter', @el)
+      @typeFilter = new NavFilterView
+        el: find('.type-filter', @el)
         field: 'type'
         collection: collection
       @projectFilter = new ProjectFilterView
@@ -762,11 +755,11 @@ ProjectFilterView
       @
     reload: ->
       super
-      @mediaFilter.clear()
+      @typeFilter.clear()
       @projectFilter.clear()
     render: ->
       super
-      @mediaFilter.render()
+      @typeFilter.render()
       @projectFilter.render()
       @
 
