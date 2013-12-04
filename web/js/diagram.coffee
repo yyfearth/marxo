@@ -200,9 +200,11 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       #force.stop()
       # auto stop
       fixed = @fixed
-      if @max_t and not fixed
-        t = @max_t
-        fixed = true
+
+      # tmp disable
+      #if @max_t and not fixed
+      #  t = @max_t
+      #  fixed = true
       setTimeout (-> force.stop()), t if t and fixed
 
       @svg.classed 'invalid', @_invalid

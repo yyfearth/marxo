@@ -54,6 +54,12 @@
       span.fileupload-preview
       button.close.fileupload-exists(data-dismiss='fileupload') &times;
 
+#preview_submit_tpl.tpl(name='submit')
+  .form-actions
+    input.btn.btn-primary(type='submit', value='Submit', disabled)
+    | &nbsp;
+    input.btn(type='reset')
+
 script#preview_html_tpl.tpl(name='html', type='text/html')
   <!doctype html>
   <html_tpl lang="en-US">
@@ -70,9 +76,3 @@ script#preview_html_tpl.tpl(name='html', type='text/html')
   <scrip_tpl_t src="js/lib/preview.js"></scrip_tpl_t>
   </body_tpl>
   </html_tpl>
-script#preview_submit_tpl.tpl(name='submit', type='text/html')
-  <div class="form-actions">
-  <input type="submit" class="btn btn-primary" disabled value="Submit"/>
-  &nbsp;
-  <input class="btn" type="reset"/>
-  </div>

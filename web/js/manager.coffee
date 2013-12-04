@@ -137,8 +137,11 @@ Workflows
   class Backgrid.NodeActionCell extends Backgrid.UriCell
     render: ->
       @$el.empty()
-      findProjectOrWorkflow
-        workflowId: @model.get 'workflow_id'
+      id = @model.get('workflow_id')
+      unless id
+        console.warn 'node action cell cannot get worklfow id', @model
+      else findProjectOrWorkflow
+        workflowId: id
         nodeId: @model.get 'node_id'
         actionId: @model.get 'action_id'
         callback: ({workflow, node, action}) =>
@@ -423,7 +426,12 @@ Workflows
         name: 'status'
         label: 'Status'
         cell: 'label'
-        cls: 'label-info'
+        cls:
+          started: 'label-success'
+          paused: 'label-warning'
+          stopped: 'label-inverse'
+          finished: 'label-info'
+          error: 'label-important'
         editable: false
       created_at:
         name: 'created_at'
