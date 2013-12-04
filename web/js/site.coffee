@@ -61,8 +61,9 @@ require [
     urlRoot: ROOT + '/contents'
 
   class Pages extends Backbone.Collection
+    @pages: new Pages
     model: Page
-    url: Page::urlRoot + '?type=page'
+    url: Page::urlRoot #+ '?type=page' # test
 
   # Views
 
@@ -442,7 +443,7 @@ require [
       throw new Error 'page id must be given' unless options?.id
       super options
       @id = options.id
-      @model = new Page id: @id
+      @model = Pages.pages.get(@id) or new Page id: @id
       @tpl = @tpl.bind @
       $el = @$el
       $('#user_profile').on 'signedin', ->
@@ -452,10 +453,8 @@ require [
       @_renderInput = @_renderInput.bind @
       @
     show: ->
-      if @rendered
-        @_render()
-      else
-        @render()
+      @render()
+      @$el.show().siblings().hide()
       @
     showNotFound: ->
       @$el.html '<h1>404: Page not found!</h1>'
@@ -491,7 +490,8 @@ require [
         html = @html = if hasInput then html.replace('form-actions hide', 'form-actions') else html
       $el = @$el.html(html)
       setTimeout -> # defer
-        $el.find('.rich-editor').attr('contenteditable', 'true').wysiwyg()
+        $el.find('.rich-editor').attr('contenteditable', 'true').each ->
+          $("##{@id}.rich-editor").wysiwyg()
         $el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit').tooltip container: $el
         # check login user
         if User.current?.id
@@ -528,7 +528,10 @@ require [
           throw new Error 'unknown section type ' + type
       body.replace /{{name}}/g, 'section_' + i
     render: ->
-      @update() unless @model.has 'name'
+      if @rendered or @model.has 'name'
+        @_render()
+      else
+        @update()
       @rendered = true
       @
     update: ->
@@ -546,13 +549,29 @@ require [
 
   class PageListView extends Backbone.View
     el: '.content.container > .page-list'
-    collection: new Pages
+    collection: Pages.pages
+    render: ->
+      @collection.fetch
+        reset: true
+        success: (col) =>
+          $list = $('<ul>')
+          col.forEach (page) -> if /^PAGE$/i.test page.get('type')
+            $list.append $('<li>').append $ '<a>', href: "##{page.id}", text: page.get 'name'
+          @$el.empty().append $list
+        error: =>
+          @$el.html("Failed to get the page list")
+      @
+    show: ->
+      @render()
+      @$el.show().siblings().hide()
+      @
 
   # Router
 
   class Router extends Backbone.Router
     routes:
       'home': 'showPageList'
+      'list': 'showPageList'
       ':id': 'showPage'
     cache:
       page: {}

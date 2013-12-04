@@ -64,7 +64,7 @@ html(lang='en-US')
         textarea.input-block-level(rows=3, name='{{name}}', placeholder='Simple Text (Multiple Line)')
       .tpl(name='html')
         include html/content/rich_editor
-        mixin rich_editor('rich_editor')
+        mixin rich_editor('{{name}}')
       .tpl(name='radio')
         label.radio
           input(type='radio', name='{{name}}')
