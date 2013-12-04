@@ -289,9 +289,9 @@ ProjectFilterView
         defered.push data
       #defered.push read @submitOptions
 
-      $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections..., submit_options) ->
+      $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections...) -> # , submit_options
         #console.log 'save content editor', page_desc, sections, submit_options
-        callback {page_desc, sections, submit_options}
+        callback {page_desc, sections} # , submit_options
       @
     save: ->
       @togglePreview() if @iframe.classList.contains 'active'
