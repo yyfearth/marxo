@@ -4,11 +4,9 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import marxo.entity.BasicEntity;
+import marxo.entity.MongoDbAware;
 import marxo.tool.Loggable;
 import marxo.validation.SelectIdFunction;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.ITestResult;
@@ -32,6 +30,13 @@ public abstract class BasicDataTests implements MongoDbAware, Loggable {
 			List<BasicEntity> list = Lists.newArrayList(entities);
 			mongoTemplate.insertAll(list);
 			entitiesToRemove.addAll(list);
+		}
+	}
+
+	public void insertEntities(List<? extends BasicEntity> entities) {
+		if (entities.size() > 0) {
+			mongoTemplate.insertAll(entities);
+			entitiesToRemove.addAll(entities);
 		}
 	}
 
