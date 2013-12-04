@@ -115,7 +115,7 @@ ProjectFilterView
     _renderFonts: ->
       fontTarget = find '.fonts-select', @el
       fontTarget.innerHTML = ''
-      flagment = document.createDocumentFragment()
+      fragment = document.createDocumentFragment()
       for fontName in @_fonts
         li = document.createElement 'li'
         a = document.createElement 'a'
@@ -123,8 +123,8 @@ ProjectFilterView
         a.style.fontFamily = fontName
         a.textContent = fontName
         li.appendChild a
-        flagment.appendChild li
-      fontTarget.appendChild flagment
+        fragment.appendChild li
+      fontTarget.appendChild fragment
       return
     renderRichEditor: ->
       @_renderFonts()
@@ -135,13 +135,12 @@ ProjectFilterView
           @value = ''
           $(@).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
         true
-      @$el.find('[type=file]').each ->
+      @$el.find('input[type=file]').each ->
         overlay = $(@)
-        target = $(overlay.data('target'))
-        overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
-        .width(target.outerWidth()).height target.outerHeight()
+        target = overlay.parents('.btn-edit')
+        overlay.width(target.outerWidth()).height target.outerHeight()
       @$editor = @$el.find('.rich-editor').wysiwyg()
-      @$code = @$editor.siblings('.rich-editor-html')
+      @$code = @$editor.siblings('.rich-editor-html').removeAttr 'name'
       @$edits = @$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit')
       @$edits.tooltip container: @el
       @

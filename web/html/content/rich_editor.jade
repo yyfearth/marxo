@@ -6,7 +6,7 @@ mixin rich_editor(id)
       button.btn.dropdown-toggle(data-toggle='dropdown', title='Font')
         i.icon-font
         b.caret
-      ul.fonts-select.dropdown-menu
+      ul.fonts-select.dropdown-menu {{fonts}}
     .btn-group
       button.btn.dropdown-toggle(data-toggle='dropdown', title='Font Size')
         i.icon-text-height
@@ -58,7 +58,7 @@ mixin rich_editor(id)
           input(placeholder='URL', type='text', data-edit='createLink')
           button.btn(type='button') Add
     .btn-group
-      button.btn.btn-edit(id='btn_picture_#{id}', type='button', title='Insert picture (or just drag & drop)')
+      button.btn.btn-edit.btn-picture(id='btn_picture_#{id}', type='button', title='Insert picture (or just drag & drop)')
         i.icon-picture
         input(type='file', data-target='#btn_picture_' + id, data-edit='insertImage')
     .btn-group
@@ -67,4 +67,4 @@ mixin rich_editor(id)
       button.btn(type='button', data-edit='redo', title='Redo (Ctrl/Cmd+Y)')
         i.icon-redo
     .rich-editor(id=id)
-    textarea.rich-editor-html.input-block-level(id='#{id}_html')
+    textarea.rich-editor-html.input-block-level(id='#{id}_html', name='{{name}}')
