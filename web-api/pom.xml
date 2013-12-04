@@ -30,6 +30,12 @@
             <version>LATEST</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.marxo</groupId>
+            <artifactId>engine</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- Java EE -->
         <dependency>
