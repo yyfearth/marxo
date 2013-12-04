@@ -11,13 +11,11 @@ import marxo.exception.Errors;
 import marxo.tool.Loggable;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Set;
 
@@ -33,6 +31,7 @@ import java.util.Set;
 		"name",
 		"desc",
 		"status",
+		"is_project",
 
 		"created_at",
 		"created_by",
@@ -41,6 +40,8 @@ import java.util.Set;
 
 		"tenant_id",
 		"workflow_id",
+		"start_node_id",
+		"current_node_ids",
 		"node_ids",
 		"nodes",
 		"link_ids",
@@ -49,11 +50,7 @@ import java.util.Set;
 		"eventId",
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class BasicEntity implements Loggable {
-	@JsonIgnore
-	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-	@JsonIgnore
-	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
+public abstract class BasicEntity implements MongoDbAware, Loggable {
 	@Id
 	@JsonProperty("id")
 	public ObjectId id = new ObjectId();
@@ -149,5 +146,9 @@ public abstract class BasicEntity implements Loggable {
 	@Override
 	public String toString() {
 		return String.format("%s:%s(%s)", getClass().getSimpleName(), name, id);
+	}
+
+	public static long count(Class<? extends BasicEntity> aClass) {
+		return mongoTemplate.count(new Query(), aClass);
 	}
 }

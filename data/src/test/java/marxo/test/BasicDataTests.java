@@ -18,24 +18,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public abstract class BasicDataTests implements Loggable {
-	protected final static ApplicationContext dataContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-	protected final static MongoTemplate mongoTemplate = dataContext.getBean(MongoTemplate.class);
-	//	protected List<BasicEntity> entitiesToInsert = new ArrayList<>();
+public abstract class BasicDataTests implements MongoDbAware, Loggable {
 	protected List<BasicEntity> entitiesToRemove = new ArrayList<>();
 
 	/**
 	 * Save everything in `entitiesToInsert`, and add them in `entitiesToRemove`. Also clear `entitiesToInsert`.
 	 */
-//	public void insertEntities() {
-//		mongoTemplate.insertAll(entitiesToInsert);
-//		entitiesToRemove.addAll(entitiesToInsert);
-//		entitiesToInsert.clear();
-//	}
 	public void insertEntities(BasicEntity... entities) {
 		if (entities.length > 0) {
 			List<BasicEntity> list = Lists.newArrayList(entities);
