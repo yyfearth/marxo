@@ -50,7 +50,11 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
     addAction: (model, options) ->
       try
         model = new Action model unless model instanceof Action
-        actionView = new ActionView model: model, parent: @, container: @actionsEl, projectMode: @projectMode
+        actionView = new ActionView
+          model: model
+          parent: @, container: @actionsEl
+          projectMode: @projectMode
+          readOnly: @projectMode and model.get('status')?.toUpperCase() isnt 'IDLE'
         @listenTo actionView, 'remove', @removeAction.bind @
         actionView.render()
         actionView.el.scrollIntoViewIfNeeded() if options?.scrollIntoView
@@ -73,15 +77,15 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       unless options.model
         throw new Error 'need action model'
         console.dir options
-      @projectMode = options.projectMode
+      @projectMode = options.projectMode or options.readOnly
+      @readOnly = options.readOnly
       @containerEl = options.container
       @model = options.model
       @model.view = @
-      type = @model.get?('type') or options.model.type or options.type
-      unless type
-        type = 'empty'
-        console.warn 'need action type (use empty type for test)', options
-      @type = type?.toLowerCase()
+      type = @type = (@model.get?('type') or options.model.type or options.type or '').toLowerCase()
+      unless @_tpl.hasOwnProperty type
+        @type = 'unknown'
+        console.warn 'unknown action type', options
       @
     remove: ->
       # remove only once
@@ -105,8 +109,11 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         else
           $('.box-header, .btn', @el).disableSelection()
         @form = find 'form', @el
+        $form = $ @form
         @form.key.readOnly = @projectMode
         $(@btn_close).remove() if @projectMode
+        #console.warn @form, @readOnly
+        $form.find(':input').prop 'readOnly', true if @readOnly
         @fill @model?.toJSON()
         @$el.data model: @model, view: @
         @listenTo @model, 'destroy', @remove.bind @

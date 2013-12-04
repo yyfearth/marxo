@@ -20,13 +20,6 @@ Project
 Projects
 }, WorkflowDiagramView, ActionsMixin) ->
 
-  STATUS_CLS =
-    started: 'label-success'
-    paused: 'label-warning'
-    stopped: 'label-inverse'
-    finished: 'label-info'
-    error: 'label-important'
-
   class ProjectFrameView extends FrameView
     initialize: (options) ->
       super options
@@ -44,8 +37,12 @@ Projects
         else
           throw new Error 'open project with a name or id is needed' unless name
           Projects.find workflowId: name, fetch: true, callback: ({workflow}) =>
-            throw new Error "project with id #{name} cannot found" unless workflow
-            if sub?.edit
+            unless workflow
+              console.error "project with id #{name} cannot found", name, sub
+              alert 'Project not found!'
+              @router.navigate 'project/mgr'
+              @switchTo @manager
+            else if sub?.edit
               @editor.edit workflow, sub
             else
               @switchTo @viewer
@@ -213,7 +210,7 @@ Projects
       # return @ unless confirm 'Change workflow will discard existing settings!\n\nAre you sure to change?'
       console.log 'selected wf for project', wf.name
       _copy = (wf) =>
-        unless wf.isValid(traverse: true)
+        unless wf.isValid(traverse: true) and wf.nodes.length
           @model.set 'template_id', ''
           @sidebar.classList.remove 'active'
           @btnSave.disabled = true
@@ -222,7 +219,7 @@ Projects
           , 500
           return
         project.copy wf, traverse: false # already traversed
-        project.set 'status', 'NONE'
+        project.set 'status', 'IDLE'
         unless @form.name.value
           @form.name.value = wf.get 'name'
           $(@form.name).trigger 'input'
@@ -268,7 +265,9 @@ Projects
       el.appendChild a
       el
     render: ->
-      @workflows.load => @_renderSelect()
+      unless @rendered
+        @workflows.load => @_renderSelect()
+        @listenTo @workflows, 'reset add remove sync', @_renderSelect
       super
     reset: ->
       @$wfbtns.hide()
@@ -410,6 +409,7 @@ Projects
         @list.$el.find("li:has(a[data-id='#{@model.id}'])").addClass 'active'
       @listenTo @wfDiagram, 'select', (model) =>
         @router.navigate "project/#{@model.id}/#{model._name}/#{model.id}", trigger: true
+      @_updateStatus = @_updateStatus.bind @
       super options
     load: (project, force) ->
       if force or @model isnt project
@@ -486,9 +486,7 @@ Projects
       else
         status = status.toUpperCase()
         if status isnt @model.get('status').toUpperCase()
-          @model.set 'status', status
-          @_updateStatus()
-          # TODO: save status
+          @model.save {status}, success: @_updateStatus
         else console.log 'status not changed', status
       @
     select: (opt = {}) ->
@@ -511,6 +509,16 @@ Projects
 
   class ProjectStatusView extends View
     _prefix: 'prj_status_lst'
+    _cls:
+      started: 'label-success'
+      paused: 'label-warning'
+      stopped: 'label-inverse'
+      finished: 'label-info'
+      error: 'label-important'
+    _refCls:
+      content: 'icon-page'
+      event: 'icon-calendar'
+      report: 'icon-report'
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
       @$detail = $ find '.node-link-detail', @el
@@ -566,7 +574,7 @@ Projects
       if status = model.get 'status'
         status = status.toLowerCase()
         a.className = "status-#{status}"
-        a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+        a.appendChild _label status.toUpperCase(), 'pull-right ' + @_cls[status] or ''
       li.appendChild a
       li
     _renderHeaderItem: (text) ->
@@ -597,6 +605,8 @@ Projects
       _prefix = @_prefix
       _label = @_renderLabel
       _href = model._href
+      _cls = @_cls
+      _refs = @_refCls
       frag = document.createDocumentFragment()
       frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
       model.actions().forEach (action, i) ->
@@ -612,7 +622,15 @@ Projects
         if status = action.get 'status'
           status = status.toLowerCase()
           a.className = "status-#{status}"
-          a.appendChild _label status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+          a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status] or ''
+        for own name, cls of _refs
+          name = name.toLowerCase()
+          if id = action.get(name + '_id')?.toString()
+            btn = document.createElement 'a'
+            btn.className = 'ref-link pull-right ' + cls or ''
+            btn.textContent = name.capitalize()
+            btn.href = "##{name}/#{id}"
+            a.appendChild btn
         li.appendChild a
         frag.appendChild li
         return
@@ -630,7 +648,7 @@ Projects
       if status = model.get 'status'
         status = status.toLowerCase()
         a.className = "status-#{status}"
-        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + STATUS_CLS[status]
+        a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + @_cls[status] or ''
       li.appendChild a
       frag.appendChild li
       @$detail.removeClass('node-actions').addClass('link-condition').append frag
@@ -701,12 +719,7 @@ Projects
       editable: false
       cell: WorkflowCell
     ,
-      name: 'status'
-      label: 'Status'
-      cell: 'label'
-      cls: STATUS_CLS
-      editable: false
-    ,
+      'status'
       'updated_at'
     ,
       name: 'project'
