@@ -12,6 +12,6 @@ public class DurationDeserializer extends JsonDeserializer<Duration> {
 	@Override
 	public Duration deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 		String text = jp.getText();
-		return Duration.parse(text);
+		return Duration.millis(Long.parseLong(text));
 	}
 }
