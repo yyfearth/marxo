@@ -1,7 +1,6 @@
 package marxo.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import marxo.entity.action.PostFacebookAction;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
@@ -33,14 +32,6 @@ public class AdHocTest implements Loggable {
 		}
 		matcher.appendTail(sb);
 		System.out.println(sb.toString());
-	}
-
-	@Test
-	public void createInstance() throws Exception {
-		String fullName = PostFacebookAction.class.getName();
-		Class<?> aClass = Class.forName(fullName);
-		PostFacebookAction postFacebookAction = (PostFacebookAction) aClass.newInstance();
-		Assert.assertNotNull(postFacebookAction);
 	}
 
 	@Test

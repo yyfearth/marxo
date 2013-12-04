@@ -3,16 +3,17 @@ package marxo.engine;
 import marxo.entity.MongoDbAware;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
-import marxo.entity.action.MonitorableAction;
 import marxo.entity.link.Link;
-import marxo.entity.node.Event;
 import marxo.entity.node.Node;
+import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.Seconds;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -20,8 +21,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import java.util.*;
 
 public class EngineWorker implements Runnable, MongoDbAware, Loggable {
+
 	String name;
-	public boolean isStopped = false;
 
 	public EngineWorker() {
 		this(UUID.randomUUID().toString());
@@ -31,148 +32,207 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		this.name = name;
 	}
 
+	/*
+	Concurrent control
+	 */
+
+	public static Thread thread;
+	public static EngineWorker engineWorker;
+	public boolean isStopped = false;
+
+	public static void startAsync() {
+		engineWorker = new EngineWorker("Singleton");
+		thread = new Thread(engineWorker);
+		thread.start();
+	}
+
+	public static void stopAsync() {
+		if (engineWorker != null) {
+			engineWorker.isStopped = true;
+		}
+		try {
+			if (thread != null) {
+				thread.join(Seconds.seconds(10).toStandardDuration().getMillis());
+			}
+		} catch (InterruptedException e) {
+			logger.error(String.format("%s got error [%s] %s", engineWorker, e.getClass().getSimpleName(), e.getMessage()));
+		} finally {
+			thread = null;
+			engineWorker = null;
+		}
+	}
+
+	/*
+	Worker
+	 */
+
+	final Duration idleDuration = Seconds.seconds(1).toStandardDuration();
+	final Duration normalDuration = Seconds.seconds(1).toStandardDuration();
+	Duration duration = idleDuration;
+
+	public void setDuration(Duration duration) {
+		if (!this.duration.equals(duration)) {
+			this.duration = duration;
+			logger.info(String.format("%s's wait duration is set to %s second(s)", this, duration.getStandardSeconds()));
+		}
+	}
+
 	// todo: make the method thread-safe, ready for multi-thread.
 	@Override
 	public void run() {
-		logger.debug(String.format("%s starts", this));
+		logger.info(String.format("%s starts", this));
 
 		Task task = null;
 		Workflow workflow = null;
 
 		try {
-			task = Task.next();
+			for (; !isStopped; Thread.sleep(duration.getMillis())) {
+				try {
+					task = Task.next();
 
-			if (task == null) {
-				logger.debug(String.format("%s finds no task", this));
-				return;
-			}
-
-			workflow = Workflow.get(task.workflowId);
-
-			if (workflow == null) {
-				logger.warn(String.format("%s Cannot find workflow %s", task, task.workflowId));
-				return;
-			}
-
-			if (workflow.startNodeId == null) {
-				logger.debug(String.format("%s has no start node", this));
-				workflow.status = RunStatus.ERROR;
-				workflow.save();
-				return;
-			}
-
-			if (workflow.getCurrentNodes().isEmpty()) {
-				if (workflow.nodeIds.isEmpty()) {
-					logger.warn(String.format("%s has no node", workflow));
-					return;
-				}
-				workflow.addCurrentNode(workflow.getStartNode());
-			}
-
-			Queue<Node> nodeQueue = new LinkedList<>(workflow.getCurrentNodes());
-			List<ObjectId> pendingNodeIds = new ArrayList<>();
-			boolean isScheduled = false;
-
-			while (!nodeQueue.isEmpty()) {
-				Node node = nodeQueue.poll();
-				logger.debug(String.format("%s is processing %s", this, node));
-
-				switch (node.status) {
-					case STARTED:
-					case IDLE:
-						break;
-					case FINISHED:
+					if (task == null) {
+						setDuration(idleDuration);
 						continue;
-					case PAUSED:
-					case STOPPED:
-					case ERROR:
-					case WAITING:
-					case MONITORING:
-						String message = String.format("%s shouldn't have %s status", node, node.status);
-						logger.error(message);
-						throw new IllegalStateException(message);
-				}
+					} else {
+						setDuration(normalDuration);
+					}
 
-				Action action = node.getCurrentAction();
-				for (; action != null; action = action.getNextAction()) {
-					logger.debug(String.format("%s is processing %s", this, action));
+					workflow = Workflow.get(task.workflowId);
 
-					Event event = action.getEvent();
-					if (event == null || event.getStartTime() == null || event.getStartTime().isBeforeNow()) {
-						if (event == null) {
-							event = new Event();
+					if (workflow == null) {
+						logger.warn(String.format("%s Cannot find workflow %s", task, task.workflowId));
+						continue;
+					}
+
+					logger.info(String.format("%s is processing %s", this, workflow));
+
+					if (workflow.startNodeId == null) {
+						logger.info(String.format("%s has no start node", this));
+						workflow.status = RunStatus.ERROR;
+						workflow.save();
+						continue;
+					}
+
+					if (workflow.getCurrentNodes().isEmpty()) {
+						if (workflow.nodeIds.isEmpty()) {
+							logger.warn(String.format("%s has no node", workflow));
+							continue;
+						}
+						workflow.addCurrentNode(workflow.getStartNode());
+					}
+
+					Queue<Node> nodeQueue = new LinkedList<>(workflow.getCurrentNodes());
+					List<ObjectId> pendingNodeIds = new ArrayList<>();
+					boolean isScheduled = false;
+
+					while (!nodeQueue.isEmpty()) {
+						Node node = nodeQueue.poll();
+						logger.info(String.format("%s is processing %s", this, node));
+
+						switch (node.status) {
+							case STARTED:
+							case IDLE:
+								break;
+							case FINISHED:
+								continue;
+							case PAUSED:
+							case STOPPED:
+							case ERROR:
+							case WAITING:
+							case MONITORING:
+								String message = String.format("%s shouldn't have %s status", node, node.status);
+								logger.error(message);
+								throw new IllegalStateException(message);
 						}
 
-						if (event.getStartTime() == null) {
-							event.setStartTime(DateTime.now());
-							event.save();
-						}
+						Action action = node.getCurrentAction();
+						for (; action != null; action = action.getNextAction()) {
+							logger.info(String.format("%s is processing %s", this, action));
 
-						boolean isOkay = action.act();
+//							Event event = action.getEvent();
+//							if (event == null || event.getStartTime() == null || event.getStartTime().isBeforeNow()) {
+//								if (event == null) {
+//									event = new Event();
+//								}
+//
+//								if (event.getStartTime() == null) {
+//									event.setStartTime(DateTime.now());
+//									event.save();
+//								}
 
-						if (isOkay) {
-							if (action instanceof MonitorableAction) {
-								MonitorableAction monitorableAction = (MonitorableAction) action;
-								if (monitorableAction.isTracked) {
-									workflow.addTracableAction(monitorableAction);
-								}
-								action.status = RunStatus.MONITORING;
-							} else {
-								action.status = RunStatus.FINISHED;
+							boolean isOkay = action.act();
+
+							if (!isOkay) {
+								break;
 							}
+//							} else {
+//								reschedule(workflow.id, event.getStartTime());
+//								isScheduled = true;
+//								pendingNodeIds.add(node.id);
+//								break;
+//							}
+						}
+
+						if (action == null) {// if all actions have been run
+							node.status = RunStatus.FINISHED;
+
+							Notification notification = new Notification(Notification.Level.NORMAL, String.format("Node %s finished", node.getName()));
+							notification.setNode(node);
+							notification.save();
+						}
+
+						node.save();
+
+						// Check links
+						for (Link link : node.getToLinks()) {
+							logger.info(String.format("%s is processing %s", this, link));
+
+							if (link.determine()) {
+								link.status = RunStatus.FINISHED;
+								link.save();
+
+								Notification notification = new Notification(Notification.Level.NORMAL, String.format("Link %s finished", link.getName()));
+								notification.setLink(link);
+								notification.save();
+
+								if (link.getNextNode() != null) {
+									nodeQueue.add(link.getNextNode());
+								}
+							} else {
+								reschedule(workflow.id, DateTime.now());
+								isScheduled = true;
+							}
+						}
+					}
+
+					if (pendingNodeIds.isEmpty()) {
+						if (workflow.tracedActionIds.isEmpty()) {
+							workflow.status = RunStatus.FINISHED;
+
+							Notification notification = new Notification(Notification.Level.NORMAL, String.format("Workflow %s finished", workflow.getName()));
+							notification.setWorkflow(workflow);
+							notification.save();
 						} else {
-							logger.error(String.format("%s encounters errors: %s", this, action.getErrors()));
-							node.save();
-							break;
+							workflow.status = RunStatus.MONITORING;
 						}
 					} else {
-						reschedule(workflow.id, event.getStartTime());
-						isScheduled = true;
-						pendingNodeIds.add(node.id);
-						break;
+						workflow.currentNodeIds = pendingNodeIds;
 					}
-				}
-
-				if (action == null) {// if all actions have been run
-					node.status = RunStatus.FINISHED;
-				}
-
-				node.save();
-
-				// Check links
-				for (Link link : node.getToLinks()) {
-					logger.debug(String.format("%s is processing %s", this, link));
-					if (link.determine()) {
-						link.status = RunStatus.FINISHED;
-						link.save();
-
-						if (link.getNextNode() != null) {
-							nodeQueue.add(link.getNextNode());
-						}
-					} else {
-						reschedule(workflow.id, DateTime.now());
-						isScheduled = true;
+				} catch (Exception e) {
+					logger.error(String.format("%s has error:", this));
+					logger.error(StringTool.exceptionToString(e));
+				} finally {
+					if (workflow != null) {
+						workflow.save();
+						workflow = null;
 					}
 				}
 			}
-
-			if (pendingNodeIds.isEmpty()) {
-				if (workflow.tracableActionIds.isEmpty()) {
-					workflow.status = RunStatus.FINISHED;
-				} else {
-					workflow.status = RunStatus.MONITORING;
-				}
-			} else {
-				workflow.currentNodeIds = pendingNodeIds;
-			}
-		} catch (Exception e) {
-			logger.error(String.format("%s has error:", this));
-			logger.error(StringTool.exceptionToString(e));
-		} finally {
-			if (workflow != null) {
-				workflow.save();
-			}
+		} catch (InterruptedException e) {
+			logger.info(String.format("%s is interruppted [%s]", this, e.getClass().getSimpleName()));
 		}
+
+		logger.info(String.format("%s ends", this));
 	}
 
 	public Task reschedule(ObjectId workdflowId, DateTime time) {
@@ -189,11 +249,16 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		}
 
 		if (task == null) {
-			logger.debug(String.format("%s skips reschedule due to earlier task is found", this));
+			logger.info(String.format("%s skips reschedule due to earlier task is found", this));
 		} else {
-			logger.debug(String.format("%s schedule a task [%s] on %s", this, workdflowId, time));
+			logger.info(String.format("%s schedule a task [%s] on %s", this, workdflowId, time));
 		}
 
 		return task;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Worker[%s]", name);
 	}
 }

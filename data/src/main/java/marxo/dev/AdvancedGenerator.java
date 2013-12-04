@@ -3,7 +3,6 @@ package marxo.dev;
 import com.google.common.collect.Maps;
 import com.rits.cloning.Cloner;
 import marxo.entity.action.Action;
-import marxo.entity.action.PostFacebookAction;
 import marxo.entity.link.Condition;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
@@ -139,7 +138,7 @@ public class AdvancedGenerator extends BasicGenerator implements Loggable {
 					node.setActions(new ArrayList<Action>());
 					int numActions = threadLocalRandom.nextInt(1, 3);
 					for (int k = 0; k < numActions; k++) {
-						Action action = new PostFacebookAction();
+						Action action = new Action();
 						node.getActions().add(action);
 						action.tenantId = user.tenantId;
 						action.setName("Action " + (k + 1));

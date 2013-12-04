@@ -1,8 +1,7 @@
 package marxo.test.local;
 
 import com.google.common.net.MediaType;
-import marxo.entity.content.Content;
-import marxo.entity.content.FacebookContent;
+import marxo.entity.action.Content;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
@@ -17,21 +16,21 @@ public class ContentApiTests extends BasicApiTests {
 	@Test
 	public void createContent() throws Exception {
 		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
-			FacebookContent facebookContent = new FacebookContent();
-			reusedContent = facebookContent;
-			entitiesToRemove.add(facebookContent);
-			facebookContent.actionId = new ObjectId();
-			facebookContent.message = "createContent";
+			Content content1 = new Content(Content.Type.FACEBOOK);
+			reusedContent = content1;
+			entitiesToRemove.add(content1);
+			content1.actionId = new ObjectId();
+			content1.message = "createContent";
 
 			apiTester
-					.httpPost(baseUrl + "content", facebookContent)
+					.httpPost(baseUrl + "content", content1)
 					.send();
 			apiTester
 					.isCreated()
 					.matchContentType(MediaType.JSON_UTF_8);
 			Content content = apiTester.getContent(Content.class);
 			Assert.assertNotNull(content);
-			Assert.assertEquals(content.getName(), facebookContent.getName());
+			Assert.assertEquals(content.getName(), content1.getName());
 		}
 	}
 
@@ -52,7 +51,7 @@ public class ContentApiTests extends BasicApiTests {
 	@Test(dependsOnMethods = "readContent")
 	public void updateContent() throws Exception {
 		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
-			FacebookContent facebookContent = (FacebookContent) reusedContent;
+			Content facebookContent = (Content) reusedContent;
 			facebookContent.message = "updateContent";
 
 			apiTester
@@ -70,7 +69,7 @@ public class ContentApiTests extends BasicApiTests {
 	@Test(dependsOnMethods = "updateContent")
 	public void deleteContent() throws Exception {
 		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
-			FacebookContent facebookContent = new FacebookContent();
+			Content facebookContent = new Content(Content.Type.FACEBOOK);
 			entitiesToRemove.add(facebookContent);
 			facebookContent.actionId = new ObjectId();
 			facebookContent.message = "createContent";

@@ -6,17 +6,14 @@ import com.rits.cloning.Cloner;
 import marxo.entity.BasicEntity;
 import marxo.entity.FacebookData;
 import marxo.entity.action.Action;
-import marxo.entity.action.MonitorFacebookAction;
-import marxo.entity.action.PostFacebookAction;
-import marxo.entity.content.Content;
-import marxo.entity.content.FacebookContent;
-import marxo.entity.content.FacebookMonitorContent;
+import marxo.entity.action.Content;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.user.UserType;
+import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.Workflow;
 import marxo.test.BasicDataTests;
 import marxo.tool.PasswordEncryptor;
@@ -39,7 +36,10 @@ import java.util.*;
 
 @SuppressWarnings({"unchecked"})
 public class DatabaseResetTests extends BasicDataTests {
+	Tenant reusedTenant;
 	Workflow reusedWorkflow;
+	Node reusedNode;
+	Action reusedAction;
 
 	@Test(priority = 10000)
 	public void cleanDatabase() throws Exception {
@@ -57,18 +57,18 @@ public class DatabaseResetTests extends BasicDataTests {
 
 	@Test(dependsOnMethods = {"cleanDatabase"})
 	public void addTenant() throws Exception {
-		Tenant tenant = new Tenant();
-		tenant.setName("Marxo");
-		tenant.description = "A tall, a good guy, and a cat.";
-		tenant.phoneNumber = "(408) 888-8888";
-		tenant.email = "marxo@gmail.com";
+		reusedTenant = new Tenant();
+		reusedTenant.setName("Marxo");
+		reusedTenant.description = "A tall, a good guy, and a cat.";
+		reusedTenant.phoneNumber = "(408) 888-8888";
+		reusedTenant.email = "marxo@gmail.com";
 
 		FacebookData facebookData = new FacebookData();
 		facebookData.accessToken = "CAADCM9YpGYwBANeLvBD7aswljKFqsBYZAAUZC9ohrKoPkR0OQ8yZA1kMZAIwBuLFsxPnnRaUsuIjB40Q9i8qn2BNlaITfkKsQYE4LFatfAY6okQgYe4b8fYcr400YdQP98Wp4SFZBG6MOMCtC3pJNsZCVB3bBpXZCyKvbj66SwBWjBW1ZAAZBYT2a";
 		facebookData.expireTime = DateTime.parse("2014-01-14T08:22:54.541Z");
 //		Assert.assertTrue(facebookData.updateToken());
-		tenant.facebookData = facebookData;
-		tenant.save();
+		reusedTenant.facebookData = facebookData;
+		reusedTenant.save();
 
 		Assert.assertTrue(mongoTemplate.exists(Query.query(Criteria.where("name").is("Marxo")), Tenant.class));
 	}
@@ -139,27 +139,20 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.setName("Node " + nodeCount++);
 		reusedWorkflow.addNode(node1);
 
-		PostFacebookAction postFacebookAction1 = new PostFacebookAction();
+		Action postFacebookAction1 = new Action(Action.Type.FACEBOOK);
 		postFacebookAction1.setName("Post to Facebook 1");
 		node1.addAction(postFacebookAction1);
 
-		FacebookContent facebookContent1 = new FacebookContent();
+		Content facebookContent1 = new Content(Content.Type.FACEBOOK);
 		facebookContent1.setName("Contnet " + contentCount++);
 		facebookContent1.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent1.id);
 		postFacebookAction1.setContent(facebookContent1);
-
-		MonitorFacebookAction monitorFacebookAction1 = new MonitorFacebookAction();
-		node1.addAction(monitorFacebookAction1);
-
-		FacebookMonitorContent facebookMonitorContent1 = new FacebookMonitorContent();
-		facebookMonitorContent1.setName("Contnet " + contentCount++);
-		monitorFacebookAction1.setContent(facebookMonitorContent1);
 
 		Node node2 = new Node();
 		node2.setName("Node " + nodeCount++);
 		reusedWorkflow.addNode(node2);
 
-		PostFacebookAction postFacebookAction2 = new PostFacebookAction();
+		Action postFacebookAction2 = new Action(Action.Type.FACEBOOK);
 		postFacebookAction2.setName("Post to Facebook 2");
 		node2.addAction(postFacebookAction2);
 
@@ -169,17 +162,10 @@ public class DatabaseResetTests extends BasicDataTests {
 		event.setDuration(Days.days(1).toStandardDuration());
 		postFacebookAction2.setEvent(event);
 
-		FacebookContent facebookContent2 = new FacebookContent();
+		Content facebookContent2 = new Content(Content.Type.FACEBOOK);
 		facebookContent2.setName("Contnet " + contentCount++);
 		facebookContent2.message = String.format("Follow up post [%s]", facebookContent2.id);
 		postFacebookAction2.setContent(facebookContent2);
-
-		MonitorFacebookAction monitorFacebookAction2 = new MonitorFacebookAction();
-		node2.addAction(monitorFacebookAction2);
-
-		FacebookMonitorContent facebookMonitorContent2 = new FacebookMonitorContent();
-		facebookMonitorContent2.setName("Contnet " + contentCount++);
-		monitorFacebookAction2.setContent(facebookMonitorContent2);
 
 		Link link = new Link();
 		link.setName("Just a link");
@@ -194,22 +180,18 @@ public class DatabaseResetTests extends BasicDataTests {
 				node1,
 				postFacebookAction1,
 				facebookContent1,
-				monitorFacebookAction1,
-				facebookMonitorContent1,
 				node2,
 				postFacebookAction2,
 				facebookContent2,
 				event,
-				monitorFacebookAction2,
-				facebookMonitorContent2,
 				link
 		));
 
 		Assert.assertEquals(mongoTemplate.count(new Query(), Workflow.class), 1);
 		Assert.assertEquals(mongoTemplate.count(new Query(), Node.class), 2);
 		Assert.assertEquals(mongoTemplate.count(new Query(), Link.class), 1);
-		Assert.assertEquals(mongoTemplate.count(new Query(), Action.class), 4);
-		Assert.assertEquals(mongoTemplate.count(new Query(), Content.class), 4);
+		Assert.assertEquals(mongoTemplate.count(new Query(), Action.class), 2);
+		Assert.assertEquals(mongoTemplate.count(new Query(), Content.class), 2);
 
 		node1 = Node.get(node1.id);
 		node2 = Node.get(node2.id);
@@ -296,6 +278,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		workflow.setLinks(workflow.getLinks());
 
 		workflow.wire();
+		reusedWorkflow = workflow;
 
 		entities.addAll(workflow.getNodes());
 		entities.addAll(workflow.getLinks());
@@ -306,7 +289,27 @@ public class DatabaseResetTests extends BasicDataTests {
 		Query query = Query.query(criteria);
 		Assert.assertEquals(mongoTemplate.count(query, Node.class), 2);
 		Assert.assertEquals(mongoTemplate.count(query, Link.class), 1);
-		Assert.assertEquals(mongoTemplate.count(query, Action.class), 4);
-		Assert.assertEquals(mongoTemplate.count(query, Content.class), 4);
+		Assert.assertEquals(mongoTemplate.count(query, Action.class), 2);
+		Assert.assertEquals(mongoTemplate.count(query, Content.class), 2);
+	}
+
+	@Test(dependsOnMethods = {"addProject"})
+	public void addNotifications() throws Exception {
+
+		Notification notification1 = new Notification(Notification.Level.MINOR, "Welcome to use Marxo");
+		notification1.setWorkflow(reusedWorkflow);
+		notification1.save();
+
+		Notification notification2 = new Notification(Notification.Level.NORMAL, "Normal notification");
+		notification2.setNode(reusedWorkflow.getNodes().get(0));
+		notification2.save();
+
+		Notification notification3 = new Notification(Notification.Level.CRITICAL, "Critical notification");
+		notification3.setAction(reusedWorkflow.getNodes().get(0).getCurrentAction());
+		notification3.save();
+
+		Notification notification4 = new Notification(Notification.Level.ERROR, "Error notification");
+		notification1.setTenant(reusedTenant);
+		notification4.save();
 	}
 }

@@ -64,4 +64,6 @@
         <!--</map>-->
         <!--</property>-->
     </bean>
+
+    <bean class="marxo.engine.EngineWorker" init-method="startAsync" destroy-method="stopAsync"/>
 </beans>

@@ -160,7 +160,9 @@ public class WorkflowApiTests extends BasicApiTests {
 			});
 			Assert.assertNotNull(workflows);
 			for (Workflow workflow : workflows) {
-				Assert.assertEquals(workflow.tenantId, this.reusedUser.tenantId);
+				if (workflow.tenantId != null) {
+					Assert.assertEquals(workflow.tenantId, this.reusedUser.tenantId);
+				}
 				Assert.assertTrue(workflow.isProject);
 			}
 		}

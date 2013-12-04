@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
-import marxo.entity.action.MonitorableAction;
+import marxo.entity.action.Action;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.user.RunnableEntity;
@@ -28,26 +28,26 @@ public class Workflow extends RunnableEntity {
 	Tracable actions
 	 */
 
-	public List<ObjectId> tracableActionIds = new ArrayList<>();
+	public List<ObjectId> tracedActionIds = new ArrayList<>();
 
 	@Transient
 	@JsonIgnore
-	protected List<MonitorableAction> monitorableActions = new ArrayList<>();
+	protected List<Action> tracedActions = new ArrayList<>();
 
 	@JsonIgnore
-	public List<MonitorableAction> getMonitorableActions() {
-		return monitorableActions;
+	public List<Action> getTracedActions() {
+		return tracedActions;
 	}
 
 	@JsonIgnore
-	public void setMonitorableActions(List<MonitorableAction> monitorableActions) {
-		this.monitorableActions = monitorableActions;
-		this.tracableActionIds = new ArrayList<>(Lists.transform(monitorableActions, SelectIdFunction.getInstance()));
+	public void setTracedActions(List<Action> tracedActions) {
+		this.tracedActions = tracedActions;
+		this.tracedActionIds = new ArrayList<>(Lists.transform(tracedActions, SelectIdFunction.getInstance()));
 	}
 
-	public void addTracableAction(MonitorableAction monitorableAction) {
-		monitorableActions.add(monitorableAction);
-		tracableActionIds.add(monitorableAction.id);
+	public void addTracableAction(Action monitorableAction) {
+		tracedActions.add(monitorableAction);
+		tracedActionIds.add(monitorableAction.id);
 	}
 
 	/*

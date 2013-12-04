@@ -2,8 +2,8 @@ package marxo.test.local;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.net.MediaType;
-import marxo.entity.action.PostFacebookAction;
-import marxo.entity.content.FacebookContent;
+import marxo.entity.action.Action;
+import marxo.entity.action.Content;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
@@ -48,7 +48,7 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void createBadEntity() throws Exception {
-		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpPost(baseUrl + "workflows", "1{}2")
 					.send();
@@ -66,11 +66,11 @@ public class GeneralApiTests extends BasicApiTests {
 		entitiesToRemove.add(node1);
 		workflow.addNode(node1);
 
-		PostFacebookAction action = new PostFacebookAction();
+		Action action = new Action();
 		node1.addAction(action);
 		entitiesToRemove.add(action);
 
-		FacebookContent content = new FacebookContent();
+		Content content = new Content(Content.Type.FACEBOOK);
 		content.message = "Action run by Marxo Engine";
 		entitiesToRemove.add(content);
 		action.setContent(content);
@@ -124,7 +124,7 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void getNodes() throws Exception {
-		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node")
 					.send();
@@ -142,7 +142,7 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void wrongSubResource() throws Exception {
-		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/node/" + (new ObjectId()))
 					.send();
@@ -154,9 +154,10 @@ public class GeneralApiTests extends BasicApiTests {
 		}
 	}
 
+	// review: sometimes this doesn't pass.
 	@Test
 	public void rightSubResource() throws Exception {
-		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedNode.workflowId + "/node/" + reusedNode.id)
 					.send();
@@ -174,7 +175,7 @@ public class GeneralApiTests extends BasicApiTests {
 
 	@Test
 	public void getLinks() throws Exception {
-		try (ApiTester apiTester = new ApiTester().basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/links/")
 					.send();

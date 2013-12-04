@@ -18,9 +18,6 @@ import java.util.List;
 
 @Document
 public class Node extends WorkflowChildEntity {
-	public Node() {
-	}
-
 	/*
 	From/to nodes
 	 */
@@ -199,5 +196,15 @@ public class Node extends WorkflowChildEntity {
 			node.wire();
 		}
 		return node;
+	}
+
+	@Override
+	public void save() {
+		super.save();
+		if (actions != null) {
+			for (Action action : actions) {
+				action.save();
+			}
+		}
 	}
 }

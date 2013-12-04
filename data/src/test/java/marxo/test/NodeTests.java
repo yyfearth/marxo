@@ -1,7 +1,7 @@
 package marxo.test;
 
 import marxo.entity.action.Action;
-import marxo.entity.action.PostFacebookAction;
+import marxo.entity.action.Action;
 import marxo.entity.node.Node;
 import marxo.entity.user.Tenant;
 import org.testng.Assert;
@@ -12,8 +12,8 @@ public class NodeTests extends BasicDataTests {
 	@Test
 	public void wireNode() throws Exception {
 		Node node = new Node();
-		Action action1 = new PostFacebookAction();
-		Action action2 = new PostFacebookAction();
+		Action action1 = new Action();
+		Action action2 = new Action();
 		node.addAction(action1);
 		node.addAction(action2);
 

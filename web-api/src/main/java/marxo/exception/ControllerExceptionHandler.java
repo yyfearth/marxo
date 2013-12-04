@@ -29,7 +29,6 @@ public class ControllerExceptionHandler implements Loggable {
 	@ExceptionHandler({BindException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, TypeMismatchException.class})
 	public ResponseEntity<ErrorJson> handleBadRequest(Exception e) {
 		logger.debug(e.getMessage());
-		logger.debug(StringTool.exceptionToString(e));
 
 		return new ResponseEntity<>(new ErrorJson(String.format("The request body is not acceptable [%s]", e.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
 	}
@@ -97,6 +96,12 @@ public class ControllerExceptionHandler implements Loggable {
 	public ResponseEntity<ErrorJson> handleValidationException(ValidationException e) {
 		logger.debug(e.getMessage());
 		return new ResponseEntity<>(new ErrorJson(e.reasons.toArray(new String[e.reasons.size()])), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler({EntityTypeException.class})
+	public ResponseEntity<ErrorJson> handleEntityTypeException(EntityTypeException e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(e.getMessage()), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({DataAccessResourceFailureException.class})

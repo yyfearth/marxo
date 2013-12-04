@@ -4,9 +4,7 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.batch.BatchRequest;
 import com.restfb.batch.BatchResponse;
-import com.restfb.types.Post;
-import marxo.engine.EngineWorker;
-import marxo.entity.FacebookData;
+import marxo.entity.BasicEntity;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
@@ -20,6 +18,7 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Minutes;
 import org.joda.time.Period;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
 import org.testng.SkipException;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public class EngineTests extends BasicDataTests {
+public class RemoteEngineTests extends BasicDataTests {
 	List<String> postIdsToRemove = new ArrayList<>();
 	Tenant reusedTenant;
 	FacebookClient facebookClient;
@@ -41,32 +40,20 @@ public class EngineTests extends BasicDataTests {
 	public void beforeClass() throws Exception {
 		super.beforeClass();
 
-		reusedTenant = new Tenant();
-		reusedTenant.setName("Marxo");
-		reusedTenant.description = "A tall, a good guy, and a cat.";
-		reusedTenant.phoneNumber = "(408) 888-8888";
-		reusedTenant.email = "marxo@gmail.com";
-
-		FacebookData facebookData = new FacebookData();
-		facebookData.accessToken = "CAADCM9YpGYwBANeLvBD7aswljKFqsBYZAAUZC9ohrKoPkR0OQ8yZA1kMZAIwBuLFsxPnnRaUsuIjB40Q9i8qn2BNlaITfkKsQYE4LFatfAY6okQgYe4b8fYcr400YdQP98Wp4SFZBG6MOMCtC3pJNsZCVB3bBpXZCyKvbj66SwBWjBW1ZAAZBYT2a";
-		facebookData.expireTime = DateTime.parse("2014-01-14T08:22:54.541Z");
-		reusedTenant.facebookData = facebookData;
-
-		insertEntities(
-				reusedTenant
-		);
-
+		reusedTenant = mongoTemplate.findOne(Query.query(Criteria.where("name").is("Marxo")), Tenant.class);
 		facebookClient = new DefaultFacebookClient(reusedTenant.facebookData.accessToken);
 
-//		EngineWorker.startAsync();
+		Query queryForTest = Query.query(Criteria.where("name").regex("[tT]est"));
+		mongoTemplate.remove(queryForTest, Workflow.class);
+		mongoTemplate.remove(queryForTest, Node.class);
+		mongoTemplate.remove(queryForTest, Action.class);
+		mongoTemplate.remove(queryForTest, Content.class);
+		mongoTemplate.remove(new Query(), Task.class);
 	}
 
 	@AfterClass
 	@Override
 	public void afterClass() throws Exception {
-		EngineWorker.stopAsync();
-
-		super.afterClass();
 
 		if (!postIdsToRemove.isEmpty()) {
 			logger.info(String.format("Remove %d posts", postIdsToRemove.size()));
@@ -96,26 +83,18 @@ public class EngineTests extends BasicDataTests {
 	public void notExistWorkflow() throws Exception {
 		Task task = new Task(new ObjectId());
 		task.save();
-		entitiesToRemove.add(task);
-
-		Assert.assertNull(Task.get(task.id));
 	}
 
 	@Test
 	public void workflowWithoutNode() throws Exception {
 		Workflow workflow = new Workflow();
-		workflow.setName(getClass().toString());
+		workflow.setName("Test");
 		workflow.isProject = true;
 		workflow.status = RunStatus.STARTED;
 		workflow.save();
-		entitiesToRemove.add(workflow);
 
 		Task task = new Task(workflow.id);
 		task.save();
-		entitiesToRemove.add(task);
-
-		workflow = Workflow.get(workflow.id);
-		Assert.assertEquals(workflow.status, RunStatus.ERROR);
 	}
 
 	@Test
@@ -130,15 +109,15 @@ public class EngineTests extends BasicDataTests {
 		node.setName("Test Node for Engine");
 		workflow.addNode(node);
 
-		Action postFacebookAction = new Action();
-		postFacebookAction.setName("Test Action for Engine");
-		postFacebookAction.isTracked = false;
-		node.addAction(postFacebookAction);
+		Action action = new Action(Action.Type.FACEBOOK);
+		action.setName("Test Action for Engine");
+		action.isTracked = false;
+		node.addAction(action);
 
-		Content facebookContent = new Content(Content.Type.FACEBOOK);
-		facebookContent.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent.id);
-		facebookContent.actionId = postFacebookAction.id;
-		postFacebookAction.setContent(facebookContent);
+		Content content = new Content(Content.Type.FACEBOOK);
+		content.message = String.format("Oh yes!!! The damn thing works! %s", content.id);
+		content.actionId = action.id;
+		action.setContent(content);
 
 		workflow.setStartNode(node);
 
@@ -146,27 +125,11 @@ public class EngineTests extends BasicDataTests {
 
 		workflow.wire();
 
-		insertEntities(
-				workflow,
-				node,
-				facebookContent,
-				task
-		);
-
-		workflow = Workflow.get(workflow.id);
-		Assert.assertEquals(workflow.status, RunStatus.FINISHED);
-		Assert.assertEquals(Task.count(), 0);
-
-		node = Node.get(node.id);
-		Assert.assertEquals(node.status, RunStatus.FINISHED);
-
-		facebookContent = (Content) node.getActions().get(0).getContent();
-		Assert.assertNotNull(facebookContent.messageResponse);
-		postIdsToRemove.add(facebookContent.getPostId());
-		Assert.assertEquals(facebookContent.message, facebookContent.message);
-
-		Post post = facebookClient.fetchObject(postFacebookAction.getContent().getPostId(), Post.class);
-		Assert.assertNotNull(post);
+		action.save();
+		content.save();
+		node.save();
+		workflow.save();
+		task.save();
 	}
 
 	@Test
@@ -199,49 +162,49 @@ public class EngineTests extends BasicDataTests {
 
 	@Test
 	public void moreComplicatedWorkflow() throws Exception {
+		List<BasicEntity> entities = new ArrayList<>();
+
 		Workflow workflow = new Workflow();
+		entities.add(workflow);
 		workflow.setTenant(reusedTenant);
 		workflow.isProject = true;
-		workflow.status = RunStatus.STARTED;
+//		workflow.status = RunStatus.STARTED;
 
 		Node node = new Node();
+		entities.add(node);
 		workflow.addNode(node);
 
-		Action action = new Action();
-		action.setName("Test Action for Engine");
-		action.isTracked = false;
-		node.addAction(action);
+		Action action1 = new Action(Action.Type.FACEBOOK);
+		entities.add(action1);
+		action1.setName("Test Action for Engine");
+		action1.isTracked = false;
+		node.addAction(action1);
 
-		Content facebookContent = new Content(Content.Type.FACEBOOK);
-		facebookContent.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent.id);
-		facebookContent.actionId = action.id;
-		action.setContent(facebookContent);
+		Content facebookContent1 = new Content(Content.Type.FACEBOOK);
+		entities.add(facebookContent1);
+		facebookContent1.message = String.format("First!! %s", facebookContent1.id);
+		action1.setContent(facebookContent1);
+
+		Action action2 = new Action(Action.Type.FACEBOOK);
+		entities.add(action2);
+		action2.setName("Test Action for Engine");
+		action2.isTracked = false;
+		node.addAction(action2);
+
+		Content facebookContent2 = new Content(Content.Type.FACEBOOK);
+		entities.add(facebookContent2);
+		facebookContent2.message = String.format("Second!! %s", facebookContent2.id);
+		action2.setContent(facebookContent2);
 
 		Task task = new Task(workflow.id);
 
 		workflow.wire();
 
-		insertEntities(
-				workflow,
-				node,
-				facebookContent,
-				task
-		);
-
-		workflow = Workflow.get(workflow.id);
-		Assert.assertEquals(workflow.status, RunStatus.FINISHED);
-		Assert.assertEquals(Task.count(), 0);
-
-		node = Node.get(node.id);
-		Assert.assertEquals(node.status, RunStatus.FINISHED);
-
-		facebookContent = (Content) node.getActions().get(0).getContent();
-		Assert.assertNotNull(facebookContent.messageResponse);
-		postIdsToRemove.add(facebookContent.getPostId());
-		Assert.assertEquals(facebookContent.message, facebookContent.message);
-
-		Post post = facebookClient.fetchObject(action.getContent().getPostId(), Post.class);
-		Assert.assertNotNull(post);
+		for (BasicEntity entity : entities) {
+			entity.setName("Engine test");
+			entity.save();
+		}
+		task.save();
 	}
 
 	@Test

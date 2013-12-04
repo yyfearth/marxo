@@ -30,7 +30,7 @@ public enum RunStatus {
 	 */
 	WAITING,
 	/**
-	 * For monitorable action
+	 *
 	 */
 	MONITORING,
 }

@@ -1,9 +1,16 @@
 package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import marxo.entity.content.Content;
+import com.restfb.DefaultFacebookClient;
+import com.restfb.FacebookClient;
+import com.restfb.Parameter;
+import com.restfb.exception.FacebookException;
+import com.restfb.types.FacebookType;
+import com.restfb.types.Post;
 import marxo.entity.node.Event;
 import marxo.entity.node.NodeChildEntity;
+import marxo.entity.workflow.Notification;
+import marxo.entity.workflow.RunStatus;
 import marxo.exception.Errors;
 import org.bson.types.ObjectId;
 import org.joda.time.Duration;
@@ -18,13 +25,34 @@ import java.util.List;
 @Document(collection = "action")
 public class Action extends NodeChildEntity {
 
-	public ActionType type = ActionType.DEFAULT;
+	public Action(Type type) {
+		this.type = type;
+	}
+
+	public Action() {
+		this(Type.DEFAULT);
+	}
+
+	/*
+	Type
+	 */
+
+	public static enum Type {
+		DEFAULT,
+		FACEBOOK,
+		TWITTER,
+		EMAIL,
+		PAGE,
+		WAIT,
+		TRIGGER,
+	}
+
+	public Type type = Type.DEFAULT;
 
 	/*
 	Post
 	 */
 
-	public String postId;
 	public boolean isTracked = true;
 
 	public Duration monitorDuration = Duration.standardDays(1);
@@ -108,8 +136,71 @@ public class Action extends NodeChildEntity {
 		return errors;
 	}
 
+	/**
+	 * @return whether it should continue.
+	 */
 	public boolean act() {
-		return true;
+		switch (status) {
+			case PAUSED:
+			case STOPPED:
+			case FINISHED:
+			case ERROR:
+			case WAITING:
+				logger.debug(String.format("%s skips with status %s", this, status));
+				break;
+		}
+
+		if (type.equals(Type.DEFAULT)) {
+			errors.add("A default action is only for demo");
+			status = RunStatus.ERROR;
+			return false;
+		}
+
+		if (type.equals(Type.FACEBOOK)) {
+			if (getTenant().facebookData == null || getTenant().facebookData.accessToken == null) {
+				logger.info(String.format("%s doesn't have Facebook to continue", this));
+
+				Notification notification = new Notification(Notification.Level.CRITICAL, "Please update your Facebook permission");
+				notification.setTenant(getTenant());
+				notification.save();
+				status = RunStatus.ERROR;
+				return false;
+			}
+
+			FacebookClient facebookClient = new DefaultFacebookClient(getTenant().facebookData.accessToken);
+
+			try {
+				if (getContent().getPostId() == null) {
+					getContent().messageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", getContent().message));
+					content.save();
+					logger.info(String.format("Submit Facebook post [%s]", content.messageResponse));
+
+					if (isTracked) {
+						status = RunStatus.FINISHED;
+					} else {
+						status = RunStatus.MONITORING;
+					}
+					return true;
+				} else {
+					Post post = facebookClient.fetchObject(getContent().getPostId(), Post.class);
+					Content.FacebookRecord facebookRecord = Content.FacebookRecord.fromPost(post);
+					getContent().records.add(facebookRecord);
+					return true;
+				}
+			} catch (FacebookException e) {
+				logger.info(String.format("%s [%s] %s", this, e.getClass().getSimpleName(), e.getMessage()));
+
+				Notification notification = new Notification(Notification.Level.CRITICAL, "Please update the Facebook permission");
+				notification.setTenant(getTenant());
+				notification.save();
+				status = RunStatus.ERROR;
+				return false;
+			}
+		}
+
+		errors.add("Unknown action type is discovered");
+		status = RunStatus.ERROR;
+		return false;
 	}
 
 	@Override
@@ -121,14 +212,20 @@ public class Action extends NodeChildEntity {
 		return super.validate(errors);
 	}
 
-	@Override
-	public void save() {
-		mongoTemplate.save(this);
-	}
-
 	/*
 	DAO
 	 */
+
+	@Override
+	public void save() {
+		super.save();
+		if (event != null) {
+			event.save();
+		}
+		if (content != null) {
+			content.save();
+		}
+	}
 
 	public static Action get(ObjectId id) {
 		return mongoTemplate.findById(id, Action.class);
