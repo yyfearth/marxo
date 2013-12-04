@@ -10,7 +10,8 @@ public class DataTests extends BasicDataTests {
 	@Test
 	public void whetherInsertDoUpdate() throws Exception {
 		Notification notification = new Notification();
-		mongoTemplate.insert(notification);
+
+		insertEntities(notification);
 
 		notification.setName("Hello world");
 		mongoTemplate.insert(notification);
