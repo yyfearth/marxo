@@ -47,25 +47,32 @@ define 'models', ['module', 'lib/common'], (module) ->
     mode: 'client'
     defaultState:
       pageSize: 255
-    _delay: 1000 # 1s
+    _throttle: 1000 # 1s
     constructor: (options...) ->
       @state ?= {}
       for key, value of @defaultState
         @state[key] = value
       super options...
-    load: (callback, options = {}) ->
-      options = delay: options if typeof options is 'number'
-      options.delay ?= @_delay
-      options.reset ?= true
-      if not @_last_load or options.delay < 1 or (Date.now() - @_last_load) > options.delay
-        @fetch
-          reset: options.reset
-          success: (collection, response, options) =>
-            @_last_load = Date.now()
-            @trigger 'loaded', collection
-            callback? collection, 'loaded', response, options
-          error: (collection, response, options) =>
-            callback? @, 'error', response, options
+    load: (callback, {throttle} = {}) ->
+      throttle ?= @_throttle
+      if not @length or not @_last_load or throttle < 1 or (Date.now() - @_last_load) > throttle
+        queue = @_loading_cb_queue
+        if queue?
+          queue.push callback if typeof callback is 'function'
+        else
+          queue = @_loading_cb_queue = if typeof callback is 'function' then [callback] else []
+          @fetch
+            reset: true
+            success: (collection, response, options) =>
+              @_loading_cb_queue = null
+              @_last_load = Date.now()
+              @trigger 'loaded', collection
+              cb collection, 'loaded', response, options for cb in queue
+              return
+            error: (collection, response, options) =>
+              @_loading_cb_queue = null
+              cb @, 'error', response, options for cb in queue
+              return
       else
         callback? @, 'skipped'
       @
@@ -116,15 +123,15 @@ define 'models', ['module', 'lib/common'], (module) ->
     urlRoot: ROOT + '/workflows'
     constructor: (model, options) ->
       super model, options
-      @_warp model
-    _warp: (model = @) ->
-      model = model.attributes if model instanceof @constructor
+      @_wire()
+    _wire: ->
+      attr = @attributes
       url = @url?() or @url or ''
-      nodes = if Array.isArray(model.nodes) then model.nodes else []
+      nodes = if Array.isArray(attr.nodes) then attr.nodes else []
       nodes = @nodes = new Nodes nodes, url: url + '/nodes'
       nodes._loaded = nodes.length > 0
 
-      links = if Array.isArray(model.links) then model.links else []
+      links = if Array.isArray(attr.links) then attr.links else []
       links = @links = new Links links, url: url + '/links'
       links._loaded = links.length > 0
 
@@ -145,17 +152,19 @@ define 'models', ['module', 'lib/common'], (module) ->
         return
 
       # start node
-      start_node_id = model.start_node_id
-      if start_node_id?
-        @startNode = @nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
-      else if nodes.length
-        starts = nodes.filter (n) -> not n.inLinks.length
-        if starts.length is 1
-          console.warn 'auto detecting start node', model
-          @startNode = starts[0]
-        else
-          console.warn 'cannot find or more than one start node detected', model
-          @startNode = null
+      if nodes.length
+        start_node_id = attr.start_node_id
+        if start_node_id?
+          unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+            console.error 'cannot find node specified by start_node_id', start_node_id, @toJSON()
+        if not @startNode and nodes.length
+          starts = nodes.filter (n) -> not n.inLinks.length
+          if starts.length is 1
+            console.warn 'auto detecting start node', attr
+            @startNode = starts[0]
+          else
+            console.error 'cannot find or more than one start node detected', attr
+            @startNode = null
 
       @_sorted = null
       @set {}
@@ -163,17 +172,17 @@ define 'models', ['module', 'lib/common'], (module) ->
       return
     fetch: (options = {}) -> # override for warp
       _success = options.success?.bind @
-      options.success = (model, response, options) =>
-        @_warp model
-        @nodes._loaded = @links._loaded = true
-        @trigger 'loaded', model
+      options.success = (model, response, options) ->
+        model._wire()
+        model.nodes._loaded = model.links._loaded = true
+        model.trigger 'loaded', model
         _success? model, response, options
       super options
       @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
     sort: (options = {}) ->
-      unless options.force or @_sorted
+      if options.force or not @_sorted
         cindex = {}
         nodes_count = 0
         links_count = 0
@@ -248,8 +257,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         cloned_link.idx = link.idx
         return
       attr = workflow.attributes
-      start_node_id = workflow.get 'start_node_id'
-      start_node_id = if start_node_id? then node_index[start_node_id]?.idx else null
+      start_node_id = if attr.start_node_id? then node_index[attr.start_node_id]?.idx else null
       @clear silent
       @set
         name: attr.name
@@ -259,7 +267,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         template_id: workflow.id
         nodes: nodes
         links: links
-      @_warp @
+      @_wire()
       @
     save: (attributes = {}, options = {}) ->
       throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
@@ -301,7 +309,7 @@ define 'models', ['module', 'lib/common'], (module) ->
               link.resetChangeFlag().save()
             return
           # update workflow for start node
-          unless @get('start_node_id') is @startNode.id
+          if @startNode and @get('start_node_id') isnt @startNode.id
             requests.push @save start_node_id: @startNode.id
           if (typeof _success is 'function') or (typeof _err is 'function')
             $.when.apply($, requests).then =>
@@ -328,33 +336,17 @@ define 'models', ['module', 'lib/common'], (module) ->
       @unset 'links', silent: true
       super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
-      n = @_name
-      if @loaded()
+      _cb = (wf) ->
         if linkId
-          link = @links.get linkId
+          link = wf.links.get linkId
         else if nodeId
-          node = @nodes.get nodeId
-          action = node.actions().get actionId if actionId
+          node = wf.nodes.get nodeId
+          action = node.actions().get actionId if node and actionId
         callback? {node, link, action}
-      else if linkId
-        id = @id
-        new Link(id: linkId).fetch
-          error: ->
-            callback? {}
-          success: (link) ->
-            link = null if id isnt link.get n + '_id'
-            callback? {link}
-      else if nodeId
-        projectId = @id
-        new Node(id: nodeId).fetch
-          error: ->
-            callback? {}
-          success: (node) ->
-            node = null if projectId isnt node.get n + '_id'
-            action = node.actions().get actionId if node and actionId
-            callback? {node, action}
+      if @loaded()
+        _cb @
       else
-        callback? {}
+        @fetch reset: true, success: _cb
       @
     createNode: (data) ->
       data.workflow_id ?= @id
@@ -409,19 +401,19 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Workflows extends ManagerCollection
     @workflows: new Workflows
     @find: (options) ->
-      unless @workflows.length
-        @workflows.load (wfs) ->
-          wfs.find options
+      wfs = @workflows
+      unless wfs.length
+        wfs.load (wfs) -> wfs.find options
       else
-        @workflows.find options
-      @workflows
+        wfs.find options
+      wfs
     model: Workflow
     url: Workflow::urlRoot
-    _delay: 600000 # 10 min
+    _throttle: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, fetch}) ->
       throw new Error 'workflowId is required' unless workflowId
       throw new Error 'async callback is required' unless typeof callback is 'function'
-      workflow = @fullCollection.get workflowId
+
       _find = (workflow) ->
         if nodeId or linkId or actionId
           workflow.find {
@@ -437,7 +429,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         else
           callback {workflow}
 
-      if workflow
+      if workflow = @fullCollection.get workflowId
         _find workflow
       else if fetch is true
         new @model(id: workflowId).fetch
@@ -504,15 +496,15 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Projects extends Workflows
     @projects: new Projects
     @find: (options) ->
-      unless @projects.length
-        @projects.load (projects) ->
-          projects.find options
+      wfs = @projects
+      unless wfs.length
+        wfs.load (wfs) -> wfs.find options
       else
-        @projects.find options
-      @projects
+        wfs.find options
+      wfs
     model: Project
     url: Project::urlRoot
-    _delay: 60000 # 1 min
+    _throttle: 60000 # 1 min
 
   ## Home
 
