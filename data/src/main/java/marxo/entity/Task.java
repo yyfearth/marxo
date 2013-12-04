@@ -2,6 +2,7 @@ package marxo.entity;
 
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 enum TaskType {
@@ -30,7 +31,9 @@ public class Task extends BasicEntity {
 	 * Find and remove the next task from database.
 	 */
 	public static Task next() {
-		return mongoTemplate.findAndRemove(new Query().with(modifiedTimeSort), Task.class);
+		Criteria criteria = Criteria.where("time").lte(DateTime.now());
+		Query query = Query.query(criteria);
+		return mongoTemplate.findAndRemove(query, Task.class);
 	}
 
 	public static long count() {

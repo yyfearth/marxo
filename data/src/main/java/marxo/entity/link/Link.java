@@ -1,5 +1,6 @@
 package marxo.entity.link;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.WorkflowChildEntity;
@@ -9,19 +10,26 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 public class Link extends WorkflowChildEntity {
+	public Condition condition;
+
 	@JsonProperty("prev_node_id")
 	public ObjectId previousNodeId;
-	@JsonProperty("next_node_id")
-	public ObjectId nextNodeId;
-	public Condition condition;
 	@Transient
+	@JsonIgnore
 	protected Node previousNode;
-	@Transient
-	protected Node nextNode;
 
 	public Node getPreviousNode() {
-		return previousNode;
+		if (previousNodeId == null) {
+			return null;
+		}
+		return (previousNode == null) ? (previousNode = Node.get(previousNodeId)) : previousNode;
 	}
+
+	@JsonProperty("next_node_id")
+	public ObjectId nextNodeId;
+	@Transient
+	@JsonIgnore
+	protected Node nextNode;
 
 	public void setPreviousNode(Node previousNode) {
 		this.previousNode = previousNode;
@@ -29,12 +37,19 @@ public class Link extends WorkflowChildEntity {
 	}
 
 	public Node getNextNode() {
-		return nextNode;
+		if (nextNodeId == null) {
+			return null;
+		}
+		return (nextNode == null) ? (nextNode = Node.get(nextNodeId)) : nextNode;
 	}
 
 	public void setNextNode(Node nextNode) {
 		this.nextNode = nextNode;
 		this.nextNodeId = nextNode.id;
+	}
+
+	public boolean determine() {
+		return true;
 	}
 
 	/*
