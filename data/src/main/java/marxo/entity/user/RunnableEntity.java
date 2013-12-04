@@ -1,6 +1,5 @@
 package marxo.entity.user;
 
-import marxo.entity.user.TenantChildEntity;
 import marxo.entity.workflow.RunStatus;
 
 public abstract class RunnableEntity extends TenantChildEntity {

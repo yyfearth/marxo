@@ -192,11 +192,15 @@ public class DatabaseResetTests extends BasicDataTests {
 		mongoTemplate.insertAll(Lists.newArrayList(
 				reusedWorkflow,
 				node1,
+				postFacebookAction1,
 				facebookContent1,
+				monitorFacebookAction1,
 				facebookMonitorContent1,
 				node2,
+				postFacebookAction2,
 				facebookContent2,
 				event,
+				monitorFacebookAction2,
 				facebookMonitorContent2,
 				link
 		));
@@ -204,6 +208,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		Assert.assertEquals(mongoTemplate.count(new Query(), Workflow.class), 1);
 		Assert.assertEquals(mongoTemplate.count(new Query(), Node.class), 2);
 		Assert.assertEquals(mongoTemplate.count(new Query(), Link.class), 1);
+		Assert.assertEquals(mongoTemplate.count(new Query(), Action.class), 4);
 		Assert.assertEquals(mongoTemplate.count(new Query(), Content.class), 4);
 
 		node1 = Node.get(node1.id);
@@ -263,6 +268,7 @@ public class DatabaseResetTests extends BasicDataTests {
 
 			for (Action action : node.getActions()) {
 				action.id = new ObjectId();
+				entities.add(action);
 				action.setNode(node);
 
 				Event event = action.getEvent();
@@ -300,6 +306,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		Query query = Query.query(criteria);
 		Assert.assertEquals(mongoTemplate.count(query, Node.class), 2);
 		Assert.assertEquals(mongoTemplate.count(query, Link.class), 1);
+		Assert.assertEquals(mongoTemplate.count(query, Action.class), 4);
 		Assert.assertEquals(mongoTemplate.count(query, Content.class), 4);
 	}
 }

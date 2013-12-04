@@ -3,11 +3,9 @@ package marxo.entity.node;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import marxo.entity.action.Action;
 import marxo.entity.link.Link;
 import marxo.entity.workflow.WorkflowChildEntity;
-import marxo.validation.NodeValidator;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
@@ -17,15 +15,10 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Document
 public class Node extends WorkflowChildEntity {
 	public Node() {
-	}
-
-	public Node(ObjectId workflowId) {
-		this.workflowId = workflowId;
 	}
 
 	/*
@@ -58,94 +51,74 @@ public class Node extends WorkflowChildEntity {
 
 	@Override
 	public void wire() {
-		for (int i = 0, len = actions.size(); i < len; i++) {
-			Action action = actions.get(i);
-			if (tenant != null) {
-				action.setTenant(tenant);
-			} else {
-				action.tenantId = tenantId;
-			}
-
-			if (i + 1 != len) {
-				action.setNextAction(actions.get(i + 1));
-			}
-
-			if (action.getEvent() != null) {
-				action.getEvent().setAction(action);
-				action.getEvent().setNode(this);
-			}
-		}
+		super.wire();
 	}
 
 	/*
 	Actions
 	 */
 
-	protected List<Action> actions = new ArrayList<>();
-
-	public List<Action> getActions() {
-		return actions;
-	}
-
-	// review: could be optimized
-	public void setActions(List<Action> actions) {
-		this.actions = actions;
-		NodeValidator.wire(this);
-	}
+	public List<ObjectId> actionIds = new ArrayList<>();
 
 	@Transient
-	@JsonIgnore
-	Map<ObjectId, Action> actionMap;
+	protected List<Action> actions;
 
-	public Map<ObjectId, Action> getActionMap() {
-		return (actionMap == null) ? (actionMap = Maps.uniqueIndex(actions, SelectIdFunction.getInstance())) : actionMap;
+	public List<Action> getActions() {
+		if (actionIds.isEmpty()) {
+			return actions = new ArrayList<>();
+		}
+		return (actions == null) ? (actions = mongoTemplate.find(Query.query(Criteria.where("_id").in(actionIds)), Action.class)) : actions;
+	}
+
+	public void setActions(List<Action> actions) {
+		this.actions = actions;
+		this.actionIds = new ArrayList<>(Lists.transform(actions, SelectIdFunction.getInstance()));
 	}
 
 	public void addAction(Action action) {
+		if (actions == null) {
+			if (actionIds.isEmpty()) {
+				actions = new ArrayList<>();
+			} else {
+				actions = mongoTemplate.find(Query.query(Criteria.where("_id").in(actionIds)), Action.class);
+			}
+		}
+		actionIds.add(action.id);
+		if (actions.isEmpty()) {
+			currentActionId = action.id;
+			currentAction = action;
+		} else {
+			actions.get(actions.size() - 1).setNextAction(action);
+		}
 		actions.add(action);
 		action.setNode(this);
-
-		if (actions.size() == 1) {
-			currentActionId = action.id;
-		} else {
-			int lastIndex = actions.size() - 1;
-			int secondLastIndex = lastIndex - 1;
-			actions.get(secondLastIndex).setNextAction(actions.get(lastIndex));
-		}
 	}
 
 	/*
-	Next action
+	Current action
 	 */
 
 	protected ObjectId currentActionId;
 
 	public ObjectId getCurrentActionId() {
+		if (currentActionId == null) {
+			if (actionIds.isEmpty()) {
+				return null;
+			}
+			return currentActionId = actionIds.get(0);
+		}
 		return currentActionId;
 	}
 
 	@Transient
 	protected Action currentAction;
 
-	public void setCurrentActionId(ObjectId currentActionId) {
-		this.currentActionId = currentActionId;
-		currentAction = getActionMap().get(currentActionId);
-	}
-
 	@JsonIgnore
 	public Action getCurrentAction() {
-		if (currentActionId == null) {
-			if (actions.isEmpty()) {
-				return null;
-			}
-			return actions.get(0);
+		if (getCurrentActionId() == null) {
+			return null;
 		}
-		return (currentAction == null) ? (currentAction = getActionMap().get(currentActionId)) : currentAction;
-	}
-
-	public void setCurrentAction(Action currentAction) {
-		this.currentAction = currentAction;
-		this.currentActionId = currentAction.id;
+		return (currentAction == null) ? (currentAction = Action.get(getCurrentActionId())) : currentAction;
 	}
 
 	/*

@@ -5,8 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
+import marxo.entity.action.MonitorableAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
+import marxo.entity.user.RunnableEntity;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
@@ -21,6 +23,32 @@ import java.util.Map;
 }, ignoreUnknown = true)
 public class Workflow extends RunnableEntity {
 	public boolean isProject = false;
+
+	/*
+	Tracable actions
+	 */
+
+	public List<ObjectId> tracableActionIds = new ArrayList<>();
+
+	@Transient
+	@JsonIgnore
+	protected List<MonitorableAction> monitorableActions = new ArrayList<>();
+
+	@JsonIgnore
+	public List<MonitorableAction> getMonitorableActions() {
+		return monitorableActions;
+	}
+
+	@JsonIgnore
+	public void setMonitorableActions(List<MonitorableAction> monitorableActions) {
+		this.monitorableActions = monitorableActions;
+		this.tracableActionIds = new ArrayList<>(Lists.transform(monitorableActions, SelectIdFunction.getInstance()));
+	}
+
+	public void addTracableAction(MonitorableAction monitorableAction) {
+		monitorableActions.add(monitorableAction);
+		tracableActionIds.add(monitorableAction.id);
+	}
 
 	/*
 	links
@@ -84,10 +112,10 @@ public class Workflow extends RunnableEntity {
 			getNodes();
 		}
 		nodes.add(node);
-		nodeIds.add(node.id);
-		if (nodeIds.size() == 1) {
-			startNodeId = node.id;
+		if (nodes.size() == 1) {
+			setStartNode(node);
 		}
+		nodeIds.add(node.id);
 		node.setWorkflow(this);
 	}
 

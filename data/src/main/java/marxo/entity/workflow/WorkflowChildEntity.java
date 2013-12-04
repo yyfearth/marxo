@@ -1,6 +1,7 @@
 package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import marxo.entity.user.RunnableEntity;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 

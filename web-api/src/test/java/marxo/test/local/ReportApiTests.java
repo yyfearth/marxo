@@ -1,10 +1,9 @@
 package marxo.test.local;
 
 import com.google.common.net.MediaType;
-import marxo.entity.Report;
-import marxo.entity.action.Action;
-import marxo.entity.action.PostFacebookAction;
+import marxo.entity.action.GenerateReportAction;
 import marxo.entity.node.Node;
+import marxo.entity.report.Report;
 import marxo.entity.workflow.Workflow;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.ApiTester;
@@ -19,7 +18,7 @@ public class ReportApiTests extends BasicApiTests {
 
 	Workflow reusedWorkflow;
 	Node reusedNode;
-	Action ueusedAction;
+	GenerateReportAction ueusedAction;
 
 	@BeforeClass
 	@Override
@@ -31,7 +30,7 @@ public class ReportApiTests extends BasicApiTests {
 		reusedNode = new Node();
 		reusedWorkflow.addNode(reusedNode);
 
-		ueusedAction = new PostFacebookAction();
+		ueusedAction = new GenerateReportAction();
 		reusedNode.addAction(ueusedAction);
 
 		insertEntities(

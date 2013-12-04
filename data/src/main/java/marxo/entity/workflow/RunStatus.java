@@ -29,4 +29,8 @@ public enum RunStatus {
 	 * Waited in the task queue.
 	 */
 	WAITING,
+	/**
+	 * For monitorable action
+	 */
+	MONITORING,
 }

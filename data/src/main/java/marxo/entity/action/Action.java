@@ -1,29 +1,34 @@
 package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mongodb.WriteResult;
-import marxo.entity.Report;
 import marxo.entity.content.Content;
 import marxo.entity.node.Event;
-import marxo.entity.node.Node;
 import marxo.entity.node.NodeChildEntity;
-import marxo.exception.DatabaseException;
 import marxo.exception.Errors;
-import marxo.exception.ValidationException;
 import org.bson.types.ObjectId;
+import org.joda.time.Duration;
+import org.joda.time.Period;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 
-// todo: make this class abstract
+import java.util.List;
+
+@Document(collection = "action")
 public class Action extends NodeChildEntity {
 
-	public String getType() {
-		return getClass().getSimpleName().toString().replaceAll("[A-Z]", "_$0").toUpperCase();
-	}
+	public ActionType type = ActionType.DEFAULT;
 
+	/*
+	Post
+	 */
+
+	public String postId;
 	public boolean isTracked = true;
+
+	public Duration monitorDuration = Duration.standardDays(1);
+	public Period monitorPeriod = Period.days(1);
 
 	/*
 	Next action
@@ -36,7 +41,10 @@ public class Action extends NodeChildEntity {
 	protected Action nextAction;
 
 	public Action getNextAction() {
-		return nextAction;
+		if (nextActionId == null) {
+			return nextAction = null;
+		}
+		return (nextAction == null) ? (nextAction = mongoTemplate.findById(nextActionId, Action.class)) : nextAction;
 	}
 
 	public void setNextAction(Action nextAction) {
@@ -91,29 +99,6 @@ public class Action extends NodeChildEntity {
 	}
 
 	/*
-	Report
-	 */
-
-	public ObjectId reportId;
-
-	@Transient
-	public Report report;
-
-	public Report getReport() {
-		if (reportId == null) {
-			return report = null;
-		}
-		return (report == null) ? (report = Report.get(reportId)) : report;
-	}
-
-	public void setReport(Report report) {
-		this.report = report;
-		if (report != null) {
-			this.reportId = report.id;
-		}
-	}
-
-	/*
 	Error
 	 */
 
@@ -138,22 +123,18 @@ public class Action extends NodeChildEntity {
 
 	@Override
 	public void save() {
-		Errors errors = new Errors();
-		if (!validate(errors)) {
-			throw new ValidationException(errors.getMessages());
-		}
-
-		Criteria criteria = Criteria.where("_id").is(nodeId).and("actions").elemMatch(Criteria.where("_id").is(id));
-		Update update = Update.update("actions.$", this);
-		WriteResult writeResult = mongoTemplate.updateFirst(Query.query(criteria), update, Node.class);
-		if (writeResult.getError() != null) {
-			throw new DatabaseException(writeResult.getError());
-		}
+		mongoTemplate.save(this);
 	}
 
+	/*
+	DAO
+	 */
+
 	public static Action get(ObjectId id) {
-		Criteria criteria = Criteria.where("actions").elemMatch(Criteria.where("_id").is(id));
-		Node node = mongoTemplate.findOne(Query.query(criteria), Node.class);
-		return (node == null) ? null : node.getActions().get(0);
+		return mongoTemplate.findById(id, Action.class);
+	}
+
+	public static List<Action> get(List<ObjectId> actionIds) {
+		return mongoTemplate.find(Query.query(Criteria.where("_id").in(actionIds)), Action.class);
 	}
 }

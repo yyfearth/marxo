@@ -68,6 +68,7 @@ public class GeneralApiTests extends BasicApiTests {
 
 		PostFacebookAction action = new PostFacebookAction();
 		node1.addAction(action);
+		entitiesToRemove.add(action);
 
 		FacebookContent content = new FacebookContent();
 		content.message = "Action run by Marxo Engine";

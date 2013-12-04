@@ -1,4 +1,4 @@
 package marxo.entity.action;
 
-public class WaitUserAction extends Action {
+public abstract class WaitUserAction extends Action {
 }

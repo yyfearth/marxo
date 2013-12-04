@@ -6,15 +6,14 @@ import com.restfb.exception.FacebookException;
 import com.restfb.types.Post;
 import marxo.entity.Task;
 import marxo.entity.content.FacebookMonitorContent;
-import marxo.entity.user.Notification;
+import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
-import marxo.exception.KeyNotFoundException;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.springframework.data.annotation.Transient;
 
-public class MonitorFacebookAction extends FacebookAction {
+public class MonitorFacebookAction extends Action {
 	@Transient
 	protected FacebookMonitorContent content;
 	public String monitoredActionKey;
@@ -30,10 +29,6 @@ public class MonitorFacebookAction extends FacebookAction {
 
 	@Override
 	public boolean act() {
-		if (!super.act()) {
-			return false;
-		}
-
 		if (getTenant().facebookData == null) {
 			logger.debug(String.format("[%s] has no facebook info", this));
 			return false;
