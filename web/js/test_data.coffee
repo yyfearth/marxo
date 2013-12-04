@@ -1081,7 +1081,7 @@ define 'test_data', ['models'], (models) ->
       action_id: '50447afb4728cc2036cf9f00'
       url: 'about:blank'
       report_id: 'e57bf4f6aad752f9fc51fef0'
-      status: 'POSTED'
+      status: 'FINISHED'
       created_at: new Date(1371191307656)
       posted_at: new Date(1371191307656)
     ,
@@ -1094,7 +1094,7 @@ define 'test_data', ['models'], (models) ->
       action_id: '50447afb4728cc2036cf9f01'
       url: 'http://facebook.com/'
       report_id: 'e57bf4f6aad752f9fc51fef0'
-      status: 'POSTED'
+      status: 'FINISHED'
       created_at: new Date(1371191307656)
       posted_at: new Date(1371191307656)
     ,
@@ -1107,7 +1107,7 @@ define 'test_data', ['models'], (models) ->
       action_id: '50447afb4728cc2036cf9f01'
       report_id: 'e57bf4f6aad752f9fc51fef1'
       url: 'http://twitter.com/'
-      status: 'POSTED'
+      status: 'FINISHED'
       created_at: new Date(1371191307656)
       posted_at: new Date(1371191307656)
     ,
@@ -1119,7 +1119,7 @@ define 'test_data', ['models'], (models) ->
       node_id: '50447afb4728cc2036cf9cb1'
       action_id: '50447afb4728cc2036cf9f03'
       report_id: 'e57bf4f6aad752f9fc51fef1'
-      status: 'WAITING'
+      status: 'STARTED'
       created_at: new Date(1371191309656)
     ,
       id: 'e57bf4f6aad752f9fc37fef2'
@@ -1130,7 +1130,7 @@ define 'test_data', ['models'], (models) ->
       node_id: '50447afb4728cc2036cf9cb1'
       action_id: '50447afb4728cc2036cf9ce4'
       report_id: 'e57bf4f6aad752f9fc51fef1'
-      status: 'WAITING'
+      status: 'STARTED'
       created_at: new Date(1371191309656)
     ,
       id: 'e57bf4f6aad752f9fc37fef3'
@@ -1141,7 +1141,7 @@ define 'test_data', ['models'], (models) ->
       node_id: '50447afb4728cc2036cf9cb1'
       action_id: '50447afb4728cc2036cf9ce4'
       report_id: 'e57bf4f6aad752f9fc51fef1'
-      status: 'WAITING'
+      status: 'IDLE'
       created_at: new Date(1371191309656)
     ,
       id: 'e57bf4f6aad752f9fc37feff'
@@ -1151,7 +1151,7 @@ define 'test_data', ['models'], (models) ->
       workflow_id: '50447afb4728cc2036cf9ca1'
       node_id: '507f81413d070321728ffe10'
       action_id: '50447afb4728cc2036cfaca0'
-      status: 'WAITING'
+      status: 'IDLE'
       created_at: new Date(1371191309656)
     ,
       id: '655a3dd88b20999dd786d38b'
@@ -1161,7 +1161,7 @@ define 'test_data', ['models'], (models) ->
       workflow_id: '655a3dd88b20999dd786d38b'
       node_id: 'ec21b6896dd7a39b2e4ae470'
       action_id: 'ec21b6896dd7a39b2e4ae471'
-      status: 'WAITING'
+      status: 'IDLE'
       created_at: '2013-06-14T06:28:29.656Z'
       sections: [
         name: 'Group Registration'

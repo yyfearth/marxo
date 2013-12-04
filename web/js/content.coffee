@@ -507,6 +507,7 @@ ProjectFilterView
       @
     read: ->
       data = super()
+      return {} unless data
       # manual options
       if data?.type is 'radio' and not data.gen_from_list
         data.manual_options = @autoIncOptionList.read()
@@ -713,15 +714,7 @@ ProjectFilterView
     ,
       'workflow'
       'node_action'
-    ,
-      name: 'status'
-      label: 'Status'
-      cell: 'label'
-      cls:
-        posted: 'label-success'
-        waiting: 'label-info'
-        blocked: 'label-inverse'
-      editable: false
+      'status'
     ,
       name: 'posted_at'
       label: 'Date Posted'
