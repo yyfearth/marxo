@@ -258,7 +258,7 @@ Action
       else unless wf.has('start_node_id') and wf.nodes.get wf.get 'start_node_id'
         startNodes = wf.nodes.filter (node) -> not node.inLinks.length
         if startNodes.length is 1
-          @view.setStartNode()
+          @view.setStartNode startNodes[0].id
         else
           alert 'Please set the start node!'
           return @
@@ -673,7 +673,7 @@ Action
       return
     setStartNode: (node) ->
       unless node?
-        console.log 'auto detach start node'
+        console.log 'auto detect start node'
         startNodes = @model.nodes.filter (node) -> not node.inLinks.length
         node = startNodes[0] or @model.nodes.at 0
         node = node?.id
@@ -683,7 +683,9 @@ Action
           @model.set 'start_node_id', node
           @model.trigger 'changed', 'set_start_node', @model
         startNode = @startNode
-        jsPlumb.detach startNode.conn if startNode.conn
+        throw new Error 'startNodeView not exist' unless startNode
+        if startNode.conn then try
+          jsPlumb.detach startNode.conn
         startNode.conn = jsPlumb.connect
           source: startNode.srcEndpoint
           target: "node_#{node}"
