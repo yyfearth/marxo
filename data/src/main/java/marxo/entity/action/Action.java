@@ -1,6 +1,7 @@
 package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
@@ -53,6 +54,7 @@ public class Action extends NodeChildEntity {
 	Post
 	 */
 
+	@JsonProperty("tracked")
 	public boolean isTracked = true;
 
 	public Duration monitorDuration = Duration.standardDays(1);
