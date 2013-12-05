@@ -14,8 +14,8 @@ mixin multi_social_media_group_btns
     button.btn.active(type='button', value='twitter') Twitter
     button.btn.active(type='button', value='facebook') Facebook
 
-mixin post_content(media, max, rows)
-  textarea.input-block-level(name='post_content', placeholder='Post Content...',
+mixin content(media, max, rows)
+  textarea.input-block-level(name='content.message', placeholder='Post Content...',
   title='Content post to ' + media + ' (' + max + ' max)', rows=rows, maxlength=max)
 
 mixin action_template_select
@@ -36,37 +36,32 @@ mixin track_checkbox_disabled
 mixin actions_thumb
   li.nav-header Content Page
   li
-    a.action-thumb(href='#action:create_page', data-placement='bottom'
+    a.action-thumb(href='#action:page', data-placement='bottom'
     title='Generate an information page or survey form using templates and post as a web page')
       | Create Page or Form
   li.nav-header Social Media
   li
-    a.action-thumb(href='#action:post_twitter',
+    a.action-thumb(href='#action:twitter',
     title='Post message to Twitter')
       | Post to Twitter
   li
-    a.action-thumb(href='#action:post_facebook',
+    a.action-thumb(href='#action:facebook',
     title='Post message to Facebook')
       | Post to Facebook
   li.nav-header Email
   li
-    a.action-thumb(href='#action:send_email',
+    a.action-thumb(href='#action:email',
     title='Send email to selected email addresses')
       | Send Email
   li.nav-header Schedule
   li
-    a.action-thumb(href='#action:make_schedule',
-    title='Create an event in calendar')
-      | Make Schedule
-  li.nav-header Report
+    a.action-thumb(href='#action:wait',
+    title='Create an event in calendar and wait')
+      | Wait
   li
-    a.action-thumb(href='#action:generate_report',
-    title='Generate report from selected tracking data')
-      | Generate Report
-  li.tmp
-    a.action-thumb(href='#action:calc_data',
-    title='Do some calculation on existing tracking data')
-      | Calculate Data
+    a.action-thumb(href='#action:trigger',
+    title='Pause until user trigger')
+      | User Trigger
 
 //- show in the actions box
 #actions_tpl.tpl
@@ -103,7 +98,7 @@ mixin actions_thumb
         br
         | Click "Preview" button to preview the generated page.
 
-  .tpl(name='post_twitter')
+  .tpl(name='twitter')
     .box-header.well
       h4 Post to Twitter
       mixin box_icons
@@ -114,10 +109,10 @@ mixin actions_thumb
           mixin action_template_select
         li
           mixin track_checkbox
-      mixin post_content('Twitter', 140, 2)
+      mixin content('Twitter', 140, 2)
       .help-block The maximium content length is 140, which is limited by Twitter.
 
-  .tpl(name='post_facebook')
+  .tpl(name='facebook')
     .box-header.well
       h4 Post to Facebook
       mixin box_icons
@@ -128,10 +123,10 @@ mixin actions_thumb
           mixin action_template_select
         li
           mixin track_checkbox
-      mixin post_content('Facebook', 63206, 3)
+      mixin content('Facebook', 63206, 3)
       .help-block The maximium content length is 63206, which is limited by Facebook.
 
-  .tpl(name='send_email')
+  .tpl(name='email')
     .box-header.well
       h4 Send Email
       mixin box_icons
@@ -148,39 +143,27 @@ mixin actions_thumb
       textarea.input-block-level(name='email_content', placeholder='Email Content...',
       title='Content for email (1000 max)', rows=5, maxlength=1000)
 
-  .tpl(name='generate_report')
+  .tpl(name='wait')
     .box-header.well
-      h4 Generate Report
+      h4 Wait
       mixin box_icons
     form.box-content
       mixin action_name_key
-      label.checkbox
-        input(type='checkbox', name='auto', checked)
-        | Generate form all tracked sources of this node.
-      label Tracked Sources (Input the name of tracked sources in each line)
-        textarea.input-block-level(name='sources')
-      .help-block Generate Report for selected tracked sources
-
-  .tpl(name='calc_data')
-    .box-header.well
-      h4 Calculate Data
-      mixin box_icons
-    form.box-content
-      mixin action_name_key
-      .help-block Calculate Data
-
-  .tpl(name='make_schedule')
-    .box-header.well
-      h4 Make Schedule
-      mixin box_icons
-    form.box-content
-      mixin action_name_key
-      .btn-group(data-toggle='buttons-radio')
-        button.btn.active(type='button', name='start_type', value='auto') Starts Automatically
-        button.btn(type='button', name='start_type', value='manual') Starts Manually
       label Duration
         input(type='text', name='duration', placeholder='1 day 2 hours')
       .help-block
         | It will create an event in the Calendar, and notifications will be sent before its starts or ends.
         br
         | Leave Druation blank or 0 to make it ends manually or schedule it later.
+
+  .tpl(name='trigger')
+    .box-header.well
+      h4 User Trigger
+      mixin box_icons
+    form.box-content
+      mixin action_name_key
+      input(type='hidden', name='duration', value="")
+      .help-block
+        | It will create an event in the Calendar, and notifications will be sent before its starts.
+        br
+        | It will pause until user trigger to continue.
