@@ -1,5 +1,6 @@
 package marxo.controller;
 
+import marxo.entity.action.Action;
 import marxo.entity.node.Node;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +29,10 @@ public class NodeController extends TenantChildController<Node> {
 	public Node read(@PathVariable String idString) throws Exception {
 		Node node = super.read(idString);
 
-		node.getActions();
+		for (Action action : node.getActions()) {
+			action.getContent();
+			action.getEvent();
+		}
 
 		return node;
 	}
