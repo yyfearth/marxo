@@ -21,6 +21,7 @@ define 'models', ['module', 'lib/common'], (module) ->
             unless model.has 'tenant_id'
               model.set 'tenant_id', cur_tenant_id
             else if cur_tenant_id isnt model.get 'tenant_id'
+              console.log cur_tenant_id, model.get 'tenant_id'
               throw new Error 'cannot replace existing tenant_id'
           when 'delete'
             if cur_tenant_id isnt model.get 'tenant_id'
@@ -39,6 +40,9 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class SimpleCollection extends Collection
     syncValidation: Entity::syncValidation
+    constructor: (models, options) ->
+      @url = options.url if options?.url
+      super models, options
     sync: (method, model, options = {}) ->
       @syncValidation method, model, options
       super method, model, options
@@ -467,7 +471,6 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Nodes extends SimpleCollection
     model: Node
     url: Node::urlRoot
-  # url: -> @workflow.url() + '/nodes'
 
   class Link extends ChangeObserableEntity
     _name: 'link'
@@ -477,7 +480,6 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Links extends SimpleCollection
     model: Link
     url: Link::urlRoot
-  # url: -> @workflow.url() + '/links'
 
   class Action extends Entity
     name: -> @get('name') or @get('type')?.replace(/_/, ' ').capitalize() or '(No Name)'

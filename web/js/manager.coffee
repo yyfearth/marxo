@@ -48,7 +48,7 @@ Workflows
       super options
       @urlRoot = @column.get('urlRoot') or @urlRoot
       @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
-    render: ->
+    render: -> # replace super
       @$el.empty()
       field = @column.get 'name'
       placement = @column.get 'placement'
@@ -100,7 +100,7 @@ Workflows
     _tpl: {}
     tpl: (type) -> # load form html template
       unless type then '' else @_tpl[type] ?= tpl "#t_#{type}_action_cell"
-    render: ->
+    render: -> # replace super
       html = @tpl @column.get('name') or @name
       @el.innerHTML = html.replace /\{\{id\}\}/g, @model.id
       @el.dataset.model = @model.id
@@ -116,7 +116,7 @@ Workflows
       _btn
 
   class Backgrid.WorkflowCell extends Backgrid.UriCell
-    render: ->
+    render: -> # replace super
       @$el.empty()
       id = @model.get('workflow_id')
       unless id
@@ -135,7 +135,7 @@ Workflows
       @
 
   class Backgrid.NodeActionCell extends Backgrid.UriCell
-    render: ->
+    render: -> # replace super
       @$el.empty()
       id = @model.get('workflow_id')
       unless id
@@ -166,7 +166,7 @@ Workflows
     formatter:
       fromRaw: (raw) -> if raw? then raw.toLowerCase() else ''
       toRaw: (formatted) -> formatted.toUpperCase()
-    render: ->
+    render: -> # replace super
       @$el.empty()
       rawValue = @model.get @column.get 'name'
       formattedValue = @formatter.fromRaw rawValue
@@ -325,7 +325,7 @@ Workflows
             regexp.test value
     search: (query) ->
       @_search query
-    render: ->
+    render: -> # replace render
       @delegateEvents()
       @
     clear: ->

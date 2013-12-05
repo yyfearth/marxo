@@ -83,6 +83,7 @@ Action
     render: ->
       @_clear()
       @_render()
+      @_super_render()
       @
 
   class WorkflowManagerView extends ManagerView
@@ -258,7 +259,7 @@ Action
       else unless wf.has('start_node_id') and wf.nodes.get wf.get 'start_node_id'
         startNodes = wf.nodes.filter (node) -> not node.inLinks.length
         if startNodes.length is 1
-          @view.setStartNode()
+          @view.setStartNode startNodes[0].id
         else
           alert 'Please set the start node!'
           return @
@@ -332,7 +333,7 @@ Action
       @load @id, reload: true
     render: ->
       @nodeList.render()
-      @
+      super
 
   class NodeListView extends NavListView
     urlRoot: 'node'
@@ -374,15 +375,16 @@ Action
       if @nodes
         @el.appendChild @_renderHeader 'Used Nodes'
         @_render @nodes
+      @_super_render()
       @
 
   class EditorView extends FormDialogView
     popup: (data, callback) ->
       throw new Error 'data must be an model entity' unless data instanceof Entity
-      same = data is @data
       super data, callback
-      @fill data.attributes unless same
-      @form.name.select() # auto focus
+      @fill data.attributes
+      @btnSave.textContent = if data.isNew() then 'OK' else 'Save'
+      @on 'shown', => @form.name.select()
       @
     save: ->
       @data.set @read()
@@ -427,6 +429,7 @@ Action
       console.log 'save node', @data
       # save the node
       super
+      @data.save() unless @data.isNew() # auto save
       @
     reset: ->
       @clearActions()
@@ -673,7 +676,7 @@ Action
       return
     setStartNode: (node) ->
       unless node?
-        console.log 'auto detach start node'
+        console.log 'auto detect start node'
         startNodes = @model.nodes.filter (node) -> not node.inLinks.length
         node = startNodes[0] or @model.nodes.at 0
         node = node?.id
@@ -683,7 +686,9 @@ Action
           @model.set 'start_node_id', node
           @model.trigger 'changed', 'set_start_node', @model
         startNode = @startNode
-        jsPlumb.detach startNode.conn if startNode.conn
+        throw new Error 'startNodeView not exist' unless startNode
+        if startNode.conn then try
+          jsPlumb.detach startNode.conn
         startNode.conn = jsPlumb.connect
           source: startNode.srcEndpoint
           target: "node_#{node}"
@@ -746,11 +751,11 @@ Action
         else
           console.log 'canceled or ignored edit node', action
         # restore url to workflow only
-        location.hash = @hash if action isnt 'ignored'
+        @router.navigate @hash if action isnt 'ignored'
       # add node to url
       hash = "#{@hash}/node/#{node.id}"
       if location.hash.indexOf(hash) is -1
-        @nodeEditor.$el.one 'shown', -> location.hash = hash
+        @nodeEditor.$el.one 'shown', => @router.navigate hash
       @
     removeNode: (node) ->
       return @ unless node?.id
@@ -791,11 +796,11 @@ Action
         else # canceled
           console.log 'canceled or ignored edit link', action
         # restore url to workflow only
-        location.hash = @hash if action isnt 'ignored'
+        @router.navigate @hash if action isnt 'ignored'
       # add link to url
       hash = "#{@hash}/link/#{link.id}"
       if location.hash.indexOf(hash) is -1
-        @linkEditor.$el.one 'shown', -> location.hash = hash
+        @linkEditor.$el.one 'shown', => @router.navigate hash
       @
     removeLink: (link) ->
       return @ unless link?.id
@@ -810,7 +815,7 @@ Action
       # @$el.draggable axis: 'x'
       # chrome fix
       @el.onselectstart = -> false
-      @
+      super
 
   class StartNodeView extends View
     id: 'node_start'
@@ -843,7 +848,7 @@ Action
       @srcEndpoint = jsPlumb.addEndpoint @$el, @sourceEndpointStyle, parameters:
         start: true
         view: @
-      @
+      super
     remove: ->
       if @srcEndpoint and @conn then try
         jsPlumb.deleteEndpoint @srcEndpoint
@@ -916,7 +921,7 @@ Action
           view: @
       @srcEndpoint = jsPlumb.addEndpoint @$el, @sourceEndpointStyle, param
       jsPlumb.makeTarget @$el, @targetEndpointStyle, param
-      @
+      super
     update: (node = @model) ->
       @$el.popover 'destroy'
       @_renderModel node
@@ -968,7 +973,7 @@ Action
       @label = conn.getOverlay 'label'
       @labelEl = @label.canvas
       @_renderLabel link
-      @
+      super
     update: (link = @model) ->
       @_destroyPopover()
       @_renderLabel link

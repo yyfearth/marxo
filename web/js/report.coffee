@@ -932,7 +932,7 @@ Report
         ]
 
       , 550
-      @
+      super
     pieChart: (el, data, labelType) ->
       nv.addGraph ->
         chart = nv.models.pieChart()

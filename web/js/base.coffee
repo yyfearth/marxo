@@ -1,64 +1,7 @@
 "use strict"
 
-define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tenant, User}) ->
-
-  ## Utils
-
-  find = (selector, parent) ->
-    parent ?= document
-    parent.querySelector selector
-
-  findAll = (selector, parent) ->
-    parent ?= document
-    [].slice.call parent.querySelectorAll selector
-
-  _html = (el) ->
-    el.innerHTML.trim().replace(/\s+/g, ' ').replace(/> </g, '>\n<')
-
-  tpl = (selector, returnDom) ->
-    tpl_el = find selector
-    throw new Error 'cannot load template from ' + selector unless tpl_el
-    tpl_el.parentNode.removeChild tpl_el
-    if returnDom then tpl_el else _html tpl_el
-
-  tplAll = (selector, multi) ->
-    hash = {}
-    unless multi # default
-      tpl_els = findAll '.tpl[name]', tpl selector, true
-    else
-      tpl_els = findAll selector
-    throw new Error 'unable to find tpl elements or empty in ' + selector unless tpl_els.length
-    for tpl_el in tpl_els
-      name = tpl_el.getAttribute 'name'
-      throw new Error 'to get a tpl dict, tpl element must have a "name" attribute' unless name
-      hash[name] = _html tpl_el
-    hash
-
-  fill = (html, model) ->
-    html.replace /{{\s*\w+\s*}}/g, (name) ->
-      name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
-      model[name] or model.escape?(name) or ''
-
-  # Polyfill
-  Date::now ?= -> +new Date
-  String::capitalize ?= ->
-    @charAt(0).toUpperCase() + @slice(1).toLowerCase()
-
-  # Fallback
-  Element::scrollIntoViewIfNeeded ?= Element::scrollIntoView
-
-  # Enable CoffeeScript class for Javascript Mixin
-  # https://github.com/yi/coffee-acts-as
-  # e.g.: class A ...   class B ...
-  #       class C
-  #         @acts_as A, B
-  Function::acts_as = (argv...) ->
-    #console.log "[Function::acts_as]: argv #{argv}"
-    for cl in argv
-      @::["__is#{cl}"] = true
-      for key, value of cl::
-        @::[key] = value
-    @
+define 'base', ['utils', 'models', 'lib/common'],
+({find,  findAll,  tpl,  tplAll,  fill}, {Collection, Tenant, User}) ->
 
   ## Common Views
 
@@ -80,6 +23,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       , delay
       @
     render: ->
+      @_super_render()
+    _super_render: ->
       @rendered = true
       @el.view = @
       @$el.data 'view', @
@@ -129,7 +74,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @btn_min = find '.btn-minimize', @el
       @btn_close = find '.btn-close', @el
       @contentEl = find '.box-content', @el
-      @
+      super
     minimize: ->
       btn_min = @btn_min or find '.btn-minimize', @el
       content = @contentEl or find '.box-content', @el
@@ -152,11 +97,19 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @$el.modal
         show: false
         backdrop: 'static'
-      @$el.on 'hidden', (e) =>
-        if e.target is @el and false isnt @trigger 'hidden', @
+      autoFocusEl = find '[autofocus]', @el
+      @$el.on
+        hide: (e) => if e.target is @el
+          @trigger 'hide', @
+        hidden: (e) => if e.target is @el and false isnt @trigger 'hidden', @
           @callback()
           @goBack() if @goBackOnHidden and location.hash[1..] isnt @goBackOnHidden
           @reset()
+        show: (e) => if e.target is @el
+          @trigger 'show', @
+        shown: (e) => if e.target is @el
+          autoFocusEl?.focus()
+          @trigger 'shown', @
       # cancel dialog if hash changed
       @listenTo @router, 'route', =>
         # cancel if current hash isnt start with saved hash while popup
@@ -382,7 +335,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @_clear()
       @_render()
       @trigger 'updated', @
-      @
+      super
     _clear: ->
       @el.innerHTML = ''
       @el.appendChild @_renderHeader null
@@ -393,9 +346,12 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       models = models.fullCollection if models.fullCollection
       #console.log 'render models', models
       fragments = document.createDocumentFragment()
-      models.forEach (model) =>
-        fragments.appendChild @_renderItem model
+      _renderItem = @_renderItem.bind @
+      models.forEach (model) ->
+        fragments.appendChild _renderItem model
       @el.appendChild fragments
+      @trigger 'updated', @
+      return
     _renderHeader: (title = @headerTitle) ->
       header = document.createElement 'li'
       header.className = 'nav-header'

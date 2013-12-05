@@ -106,6 +106,13 @@ Projects
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
       @_renderSelect = _.throttle @_renderSelect.bind(@), 100
+      @on 'shown', => # auto foucs
+        select = @form.template_id
+        if select.value
+          @form.name.select()
+        else
+          select.focus()
+        return
       @
     create: (wf) ->
       wf = wf?.id or wf
@@ -122,7 +129,7 @@ Projects
       console.log 'popup node/link editor', {link, node, action}
       @popup project, (action, data) => if action is 'save'
         console.log 'project saved', action, data
-        @model.save @model
+        @model.save()
         @trigger 'edit', @model, @
       @
     popup: (model, callback) ->
@@ -145,13 +152,6 @@ Projects
           @_renderProject model
         else
           @_selectWorkflow()
-        # auto foucs
-        setTimeout =>
-          if select.value
-            @form.name.select()
-          else
-            select.focus()
-        , 550
       @
     navTo: (model) ->
       type = (if typeof model is 'string' then model else model?._name) or 'project'
@@ -655,7 +655,7 @@ Projects
       return
     render: ->
       @_renderList()
-      @
+      super
 
   # Manager
 
@@ -676,6 +676,7 @@ Projects
     render: ->
       @_clear()
       @_render()
+      @_super_render()
       @
 
   class WorkflowCell extends Backgrid.UriCell
@@ -683,7 +684,7 @@ Projects
       super options
       @urlRoot = @column.get('urlRoot') or @urlRoot
       @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
-    render: ->
+    render: -> # replace super
       @$el.empty()
       id = @model.get('template_id')
       unless id

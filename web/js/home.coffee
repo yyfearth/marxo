@@ -70,7 +70,7 @@ NotificationListView
       @el.innerHTML = @_tpl
       @diagram = new WorkflowDiagramView maxTimeout: 1000, el: find '.wf-diagram', @el
       @model.fetch reset: true
-      @
+      super
     _find: (name) ->
       find "[name='#{name}']", @el
     _render: ->

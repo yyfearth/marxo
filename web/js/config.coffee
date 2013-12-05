@@ -65,7 +65,7 @@ Service
       @facebookView.render()
       @twitterView.render()
       @emailView.render()
-      @
+      super
 
   class ServiceStatusView extends View
     initialize: (options) ->
@@ -202,16 +202,7 @@ Service
           alert 'You cancelled login or did not fully authorize.'
         return
       , scope: @cfg.scopes
-    #disconnect: (callback = @changed) ->
-    #  @FB (FB) -> FB.getLoginStatus (response) ->
-    #    if response.status is 'connected'
-    #      FB.logout (response) ->
-    #        # user is now logged out
-    #        console.log 'logout', response
-    #        callback null
-    #    else
-    #      callback null
-    #  @
+      @
 
   # Tenant Profile
   class TenantProfileView extends InnerFrameView
@@ -420,9 +411,8 @@ Service
         user.destroy()
     render: ->
       super
+      @signin_user = User.current.toJSON() # logined user
       @projectFilter.render()
-      # logined user
-      @signin_user = User.current.toJSON()
       @
 
   ConfigFrameView
