@@ -21,6 +21,7 @@ define 'models', ['module', 'lib/common'], (module) ->
             unless model.has 'tenant_id'
               model.set 'tenant_id', cur_tenant_id
             else if cur_tenant_id isnt model.get 'tenant_id'
+              console.log cur_tenant_id, model.get 'tenant_id'
               throw new Error 'cannot replace existing tenant_id'
           when 'delete'
             if cur_tenant_id isnt model.get 'tenant_id'
