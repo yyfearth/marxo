@@ -379,10 +379,8 @@ Action
   class EditorView extends FormDialogView
     popup: (data, callback) ->
       throw new Error 'data must be an model entity' unless data instanceof Entity
-      same = data is @data
       super data, callback
-      @fill data.attributes unless same
-      @form.name.select() # auto focus
+      @fill data.attributes
       @on 'shown', => @form.name.select()
       @
     save: ->
@@ -749,11 +747,11 @@ Action
         else
           console.log 'canceled or ignored edit node', action
         # restore url to workflow only
-        location.hash = @hash if action isnt 'ignored'
+        @router.navigate @hash if action isnt 'ignored'
       # add node to url
       hash = "#{@hash}/node/#{node.id}"
       if location.hash.indexOf(hash) is -1
-        @nodeEditor.$el.one 'shown', -> location.hash = hash
+        @nodeEditor.$el.one 'shown', => @router.navigate hash
       @
     removeNode: (node) ->
       return @ unless node?.id
@@ -794,11 +792,11 @@ Action
         else # canceled
           console.log 'canceled or ignored edit link', action
         # restore url to workflow only
-        location.hash = @hash if action isnt 'ignored'
+        @router.navigate @hash if action isnt 'ignored'
       # add link to url
       hash = "#{@hash}/link/#{link.id}"
       if location.hash.indexOf(hash) is -1
-        @linkEditor.$el.one 'shown', -> location.hash = hash
+        @linkEditor.$el.one 'shown', => @router.navigate hash
       @
     removeLink: (link) ->
       return @ unless link?.id
