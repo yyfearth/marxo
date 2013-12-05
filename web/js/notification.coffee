@@ -54,13 +54,17 @@ Notifications
       cell: 'workflow'
       editable: false
     ,
-      name: 'type'
-      label: 'Type'
+      name: 'level'
+      label: 'Level'
       cell: 'label'
       cls:
-        routine: 'label-info'
-        requisite: 'label-warning'
-        emergent: 'label-important'
+        #minor: ''
+        #trivial: ''
+        normal: 'label-info'
+        major: 'label-warning'
+        critical: 'label-important'
+        fatal: 'label-important'
+        error: 'label-important'
       editable: false
     ,
       name: 'status'
@@ -81,10 +85,19 @@ Notifications
       sortable: false
       cell: NotificationActionCell
     ]
+    _levelCls:
+      minor: ''
+      trivial: ''
+      normal: 'label-info'
+      major: 'label-warning'
+      critical: 'label-important'
+      fatal: 'label-important'
+      error: 'label-important'
     collection: new Notifications
     initialize: (options) ->
       super options
       collection = @collection.fullCollection
+      # TODO: need update or replaced by level
       @statusFilter = new NavFilterView
         el: find('.status-filter', @el)
         field: 'status'
@@ -148,13 +161,13 @@ Notifications
       p = document.createElement 'p'
       p.innerHTML = model.escape 'desc'
       div.appendChild p
-      if 'ACTIVE' is model.get 'status'
+      unless /finished|stopped|expired/i.test model.get 'status'
         if model.has 'expires_at'
           small = document.createElement 'small'
           expires_at = new Date(model.get 'expires_at').toLocaleString()
           small.innerHTML = "Expected expires at #{expires_at}"
           div.appendChild small
-        if model.has 'target_url'
+        if model.has 'target_url' # TODO: gen url by ids
           type = model.get 'type'
           btn = document.createElement 'a'
           btn.href = model.get 'target_url'
@@ -176,7 +189,7 @@ Notifications
         switch model.get 'status'
           when 'EXPIRED'
             false
-          when 'PROCESSED'
+          when 'FINISHED'
             model._before < 86400000 # 1d
           else
             model._before < 2592000000 # 30d
@@ -191,10 +204,14 @@ Notifications
             20000000000 + t
       ).forEach (model) => fragments.appendChild @_renderItem model
       @el.appendChild fragments
-    _statusCls:
-      'ROUTINE': 'text-info'
-      'REQUISITE': 'text-warning'
-      'EMERGENT': 'text-error'
+    _levelCls:
+      minor: 'muted'
+      trivial: ''
+      normal: 'text-info'
+      major: 'text-warning'
+      critical: 'text-error'
+      fatal: 'text-error'
+      error: 'text-error'
     _renderItem: (model = @defaultItem) ->
       #console.log 'render item', model
       li = document.createElement 'li'
@@ -204,9 +221,9 @@ Notifications
         a.className = "pointer #{cls}"
         a.dataset.id = model.id
         $.data a, 'model', model
-        cls = @_statusCls[model.get('type')] or ''
+        cls = @_levelCls[model.get('level')?.toLowerCase()] or ''
         span = document.createElement 'span'
-        span.textContent = model.get 'title'
+        span.textContent = model.get 'name'
         span.className = cls
         # TODO: only new notification add icon
         i = document.createElement 'i'
