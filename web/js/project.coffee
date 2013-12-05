@@ -106,6 +106,13 @@ Projects
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
       @_renderSelect = _.throttle @_renderSelect.bind(@), 100
+      @on 'shown', => # auto foucs
+        select = @form.template_id
+        if select.value
+          @form.name.select()
+        else
+          select.focus()
+        return
       @
     create: (wf) ->
       wf = wf?.id or wf
@@ -145,13 +152,6 @@ Projects
           @_renderProject model
         else
           @_selectWorkflow()
-        # auto foucs
-        setTimeout =>
-          if select.value
-            @form.name.select()
-          else
-            select.focus()
-        , 550
       @
     navTo: (model) ->
       type = (if typeof model is 'string' then model else model?._name) or 'project'

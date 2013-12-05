@@ -152,11 +152,19 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @$el.modal
         show: false
         backdrop: 'static'
-      @$el.on 'hidden', (e) =>
-        if e.target is @el and false isnt @trigger 'hidden', @
+      autoFocusEl = find '[autofocus]', @el
+      @$el.on
+        hide: (e) => if e.target is @el
+          @trigger 'hide', @
+        hidden: (e) => if e.target is @el and false isnt @trigger 'hidden', @
           @callback()
           @goBack() if @goBackOnHidden and location.hash[1..] isnt @goBackOnHidden
           @reset()
+        show: (e) => if e.target is @el
+          @trigger 'show', @
+        shown: (e) => if e.target is @el
+          autoFocusEl?.focus()
+          @trigger 'shown', @
       # cancel dialog if hash changed
       @listenTo @router, 'route', =>
         # cancel if current hash isnt start with saved hash while popup

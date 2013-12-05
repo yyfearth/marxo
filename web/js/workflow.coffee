@@ -383,6 +383,7 @@ Action
       super data, callback
       @fill data.attributes unless same
       @form.name.select() # auto focus
+      @on 'shown', => @form.name.select()
       @
     save: ->
       @data.set @read()
