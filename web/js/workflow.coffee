@@ -381,6 +381,7 @@ Action
       throw new Error 'data must be an model entity' unless data instanceof Entity
       super data, callback
       @fill data.attributes
+      @btnSave.textContent = if data.isNew() then 'OK' else 'Save'
       @on 'shown', => @form.name.select()
       @
     save: ->
@@ -426,6 +427,7 @@ Action
       console.log 'save node', @data
       # save the node
       super
+      @data.save() unless @data.isNew() # auto save
       @
     reset: ->
       @clearActions()
