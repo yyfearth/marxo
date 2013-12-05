@@ -131,9 +131,9 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           if $.isPlainObject value
             _travel name + '.', value
           else if form[name]?.name is name
-            console.log name, value
+            #console.log name, value
             el = form[name]
-            if el.checked? and typeof value is 'boolean'
+            if /^checkbox$/i.test el.type and typeof value is 'boolean'
               el.checked = value
             else
               $(el).val value
@@ -144,8 +144,8 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       data.type = @type.toUpperCase()
       for el in [].slice.call @form.elements
         $el = $ el
-        val = if el.checked? then el.checked else $el.val()
-        names = $el.attr('name')?.split '.'
+        val = if /^checkbox$/i.test el.type then el.checked else $el.val()
+        names = el.name?.split '.'
         if names?.length
           _data = data
           name = names.pop()
