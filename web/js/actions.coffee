@@ -123,22 +123,34 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       data.name = @_name unless data.name
       data.key = data.type unless data.key
       form = @form
-      for name, value of data
-        el = form[name]
-        #form[key].value = value
-        $(el).val value if el?.getAttribute?('name') is name
-      # TODO: support customized controls
+      namespace = ''
+      do _travel = (namespace, data) ->
+        for name, value of data
+          continue if '_' is name.charAt(0)
+          name = namespace + name
+          if $.isPlainObject value
+            _travel name + '.', value
+          else if form[name]?.name is name
+            console.log name, value
+            el = form[name]
+            if el.checked? and typeof value is 'boolean'
+              el.checked = value
+            else
+              $(el).val value
       @
     read: -> # read form the form to get a json data
       throw new Error 'cannot find the form, may not rendered yet' unless @form
       data = @model.toJSON()
       data.type = @type.toUpperCase()
-      els = [].slice.call @form.elements
-      els.forEach (el) ->
+      for el in [].slice.call @form.elements
         $el = $ el
-        name = $el.attr 'name'
-        data[name] = $el.val() if name
-      # TODO: support customized controls
+        val = if el.checked? then el.checked else $el.val()
+        names = $el.attr('name')?.split '.'
+        if names?.length
+          _data = data
+          name = names.pop()
+          _data = _data[key] ?= {} for key in names
+          _data[name] = val
       data
 
   ActionsMixin

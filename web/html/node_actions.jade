@@ -24,12 +24,7 @@ mixin action_template_select
 
 mixin track_checkbox
   label.checkbox.inline
-    input(type='checkbox', name='track', checked)
-    | Track
-
-mixin track_checkbox_disabled
-  label.checkbox.inline
-    input(type='checkbox', name='track', checked, disabled)
+    input(type='checkbox', name='tracked', checked)
     | Track
 
 //- show in sidebar
