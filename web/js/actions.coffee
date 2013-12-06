@@ -137,20 +137,22 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
               el.checked = value
             else
               $(el).val value
+        return
       @
     read: -> # read form the form to get a json data
       throw new Error 'cannot find the form, may not rendered yet' unless @form
       data = @model.toJSON()
       data.type = @type.toUpperCase()
       for el in [].slice.call @form.elements
-        $el = $ el
-        val = if /^checkbox$/i.test el.type then el.checked else $el.val()
-        names = el.name?.split '.'
-        if names?.length
-          _data = data
-          name = names.pop()
-          _data = _data[key] ?= {} for key in names
-          _data[name] = val
+        if el.name and not el.disabled
+          $el = $ el
+          val = if /^checkbox$/i.test el.type then el.checked else $el.val()
+          names = el.name.split '.'
+          if names?.length
+            _data = data
+            name = names.pop()
+            _data = _data[key] ?= {} for key in names
+            _data[name] = val
       data
 
   ActionsMixin
