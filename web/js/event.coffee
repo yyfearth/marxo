@@ -411,7 +411,7 @@ Event
       @$el.empty()
       @fullCalendar @cfg
       @_resize()
-      @
+      super
 
     setEvents: (events) ->
       # clear
