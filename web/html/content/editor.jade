@@ -1,15 +1,15 @@
 include rich_editor
 
-#text_editor.modal.hide.fade(aria-labelledby='text_editor_title', aria-hidden='true')
+#msg_editor.modal.hide.fade(aria-labelledby='msg_editor_title', aria-hidden='true')
   .modal-header
     button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
-    h3#text_editor_title
+    h3#msg_editor_title
       | Text Content&nbsp;
       small.media.capitalized
   .modal-body
     form
       input.input-block-level(type='text', name='name', maxlength='255', readonly)
-      textarea.input-block-level(id='text_desc', name='desc',
+      textarea.input-block-level(id='msg_desc', name='message',
       rows=3, placeholder='The content ...', maxlength='65535')
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close

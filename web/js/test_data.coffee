@@ -1074,7 +1074,7 @@ define 'test_data', ['models'], (models) ->
     contents: [
       id: 'e57bf4f6aad752f9fc37fcf1'
       name: 'Demo Project Initialization'
-      desc: 'Demo Project Initialization Page'
+      message: 'Demo Project Initialization Page'
       type: 'PAGE'
       workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
@@ -1087,7 +1087,7 @@ define 'test_data', ['models'], (models) ->
     ,
       id: 'e57bf4f6aad752f9fc37fcf2'
       name: 'Demo Project Initialization'
-      desc: 'Demo Project Initialization Facebook Post'
+      message: 'Demo Project Initialization Facebook Post'
       type: 'FACEBOOK'
       workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
@@ -1100,7 +1100,7 @@ define 'test_data', ['models'], (models) ->
     ,
       id: 'e57bf4f6aad752f9fc37fcf3'
       name: 'Demo Project Initialization'
-      desc: 'Demo Project Initialization Twitter Post'
+      message: 'Demo Project Initialization Twitter Post'
       type: 'TWITTER'
       workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb0'
@@ -1113,7 +1113,7 @@ define 'test_data', ['models'], (models) ->
     ,
       id: 'e57bf4f6aad752f9fc37fef1'
       name: 'Demo Project Post Requirements'
-      desc: 'Demo Project Post Requirements Page'
+      message: 'Demo Project Post Requirements Page'
       type: 'PAGE'
       workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'
@@ -1124,7 +1124,7 @@ define 'test_data', ['models'], (models) ->
     ,
       id: 'e57bf4f6aad752f9fc37fef2'
       name: 'Demo Project Post Requirements'
-      desc: 'Demo Project Post Requirements Facebook Post'
+      message: 'Demo Project Post Requirements Facebook Post'
       type: 'FACEBOOK'
       workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'
@@ -1135,7 +1135,7 @@ define 'test_data', ['models'], (models) ->
     ,
       id: 'e57bf4f6aad752f9fc37fef3'
       name: 'Demo Project Post Requirements'
-      desc: 'Demo Project Post Requirements Twitter Post'
+      message: 'Demo Project Post Requirements Twitter Post'
       type: 'TWITTER'
       workflow_id: '50447afb4728cc2036cf9ca0'
       node_id: '50447afb4728cc2036cf9cb1'
@@ -1146,7 +1146,7 @@ define 'test_data', ['models'], (models) ->
     ,
       id: 'e57bf4f6aad752f9fc37feff'
       name: 'Test Content'
-      desc: 'Test Content'
+      message: 'Test Content'
       type: 'EMAIL'
       workflow_id: '50447afb4728cc2036cf9ca1'
       node_id: '507f81413d070321728ffe10'

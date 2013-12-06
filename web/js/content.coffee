@@ -30,7 +30,7 @@ ProjectFilterView
     initialize: (options) ->
       super options
       @manager = new ContentManagerView el: @el, parent: @
-      @editor = new TextEditor el: '#text_editor', parent: @
+      @editor = new MessageEditor el: '#msg_editor', parent: @
       @composer = new EmailComposer el: '#email_composer', parent: @
       @designer = new PageDesigner el: '#page_designer', parent: @
       @
@@ -157,34 +157,35 @@ ProjectFilterView
       @$edits.prop 'disabled', toCode unless @readOnly
       return
 
-  class TextEditor extends FormDialogView
+  class MessageEditor extends FormDialogView
     @acts_as ContentEditorMixin
     popup: (data, ignored, callback) ->
       super data, callback
+      @field = @form.message
       @fill data
-      posted = 'POSTED' is data.get 'status'
-      @form.desc.readOnly = posted
+      posted = 'IDLE' isnt data.get('status').toUpperCase()
+      @field.readOnly = posted
       @btnSave.disabled = posted
       @
     fill: (data) ->
-      media = data.get 'type'
-      @$el.find('small.media').text "(#{media.toLowerCase()})"
+      type = data.get 'type'
+      field = @field
+      @$el.find('small.media').text "(#{type.toLowerCase()})"
       @form.name.value = data.get 'name'
-      @form.desc.value = data.get 'desc'
-      textarea = @form.desc
-      switch media
+      field.value = data.get 'message'
+      switch type
         when 'FACEBOOK'
-          textarea.maxLength = 65535
-          textarea.rows = 10
+          field.maxLength = 65535
+          field.rows = 10
         when 'TWITTER'
-          textarea.maxLength = 140
-          textarea.rows = 5
+          field.maxLength = 140
+          field.rows = 5
         else
-          console.warn 'text editor is only for socal media, not for page or email!', media
+          console.warn 'text editor is only for socal media, not for page or email!', type
       @
-    read: -> @form.desc.value
+    read: -> @field.value
     save: ->
-      @data.set 'desc', @read()
+      @data.set 'message', @read()
       @callback 'save'
       @hide true
       @
@@ -194,7 +195,7 @@ ProjectFilterView
     popup: (data, ignored, callback) ->
       super data, callback
       @fill data
-      posted = 'POSTED' is data.get 'status'
+      posted = 'IDLE' isnt data.get('status').toUpperCase()
       @readOnlyHtml posted
       @btnSave.disabled = posted
       @
