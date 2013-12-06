@@ -1,0 +1,4 @@
+{
+	"exts": ["js", "css", "html"],
+	"exclusions": ["dist/", "test/", "font/"]
+}
