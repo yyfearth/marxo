@@ -129,7 +129,7 @@ Projects
       console.log 'popup node/link editor', {link, node, action}
       @popup project, (action, data) => if action is 'save'
         console.log 'project saved', action, data
-        @model.save @model
+        @model.save()
         @trigger 'edit', @model, @
       @
     popup: (model, callback) ->
