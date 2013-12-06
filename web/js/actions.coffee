@@ -133,7 +133,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           else if form[name]?.name is name
             #console.log name, value
             el = form[name]
-            if /^checkbox$/i.test el.type and typeof value is 'boolean'
+            if /^checkbox$/i.test(el.type) and typeof value is 'boolean'
               el.checked = value
             else
               $(el).val value
@@ -146,7 +146,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       for el in [].slice.call @form.elements
         if el.name and not el.disabled
           $el = $ el
-          val = if /^checkbox$/i.test el.type then el.checked else $el.val()
+          val = if /^checkbox$/i.test(el.type) then el.checked else $el.val()
           names = el.name.split '.'
           if names?.length
             _data = data
