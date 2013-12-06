@@ -19,13 +19,18 @@ mixin content(media, max, rows)
   title='Content post to ' + media + ' (' + max + ' max)', rows=rows, maxlength=max)
 
 mixin action_template_select
-  select(disabled)
+  select.tmp(disabled)
     option (Select from Template)
 
 mixin track_checkbox
   label.checkbox.inline
     input(type='checkbox', name='tracked', checked)
     | Track
+
+mixin event_schedule(msg)
+  label.inline
+    | #{msg}
+    input.input-small(type='text', name='event.duration', title='Duration', placeholder='10 days')
 
 //- show in sidebar
 mixin actions_thumb
