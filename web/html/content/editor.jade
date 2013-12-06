@@ -27,7 +27,7 @@ include rich_editor
         placeholder='email_1@example.com; email_2@example.com')
       input#page_title.input-block-level(type='text', name='title',
       placeholder='Title of Email', maxlength='255', required)
-      mixin rich_editor('email_desc')
+      +rich_editor('email_desc')
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close
     button.btn.btn-primary.btn-save Save
@@ -58,7 +58,7 @@ include rich_editor
             .control-group
               label.control-label(for='desc') Page Description
               .controls
-                mixin rich_editor('desc')
+                +rich_editor('desc')
 
       #sections
 

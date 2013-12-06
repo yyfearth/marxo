@@ -69,27 +69,27 @@ mixin actions_thumb
   .tpl(name='unknown')
     .box-header.well
       h4 Unknown Action (Error)
-      mixin box_icons
+      +box_icons
     form.box-content
-      mixin action_name_key
+      +action_name_key
       input(type='text', name='type', maxlength='45', title='Action Type', placeholder='Action Type')
       .help-inline (Unknown Type)
 
   .tpl(name='create_page')
     .box-header.well
       h4 Post Page or Form
-      mixin box_icons
+      +box_icons
     form.box-content
-      mixin action_name_key
+      +action_name_key
       ul.action-bar
         li
-          mixin action_template_select
+          +action_template_select
         li
           a.btn.btn-primary(href='#page') Design
         li
           a.btn.btn-info(href='about:blank') Preview
         li
-          mixin track_checkbox
+          +track_checkbox
       .info (Page Info)
       .help-block
         | Information Page is a web page to display information.
@@ -101,43 +101,47 @@ mixin actions_thumb
   .tpl(name='twitter')
     .box-header.well
       h4 Post to Twitter
-      mixin box_icons
+      +box_icons
     form.box-content
-      mixin action_name_key
+      +action_name_key
       ul.action-bar
         li
-          mixin action_template_select
+          +action_template_select
         li
-          mixin track_checkbox
-      mixin content('Twitter', 140, 2)
+          +track_checkbox
+        li
+          +event_schedule
+      +content('Twitter', 140, 2)
       .help-block The maximium content length is 140, which is limited by Twitter.
 
   .tpl(name='facebook')
     .box-header.well
       h4 Post to Facebook
-      mixin box_icons
+      +box_icons
     form.box-content
-      mixin action_name_key
+      +action_name_key
       ul.action-bar
         li
-          mixin action_template_select
+          +action_template_select
         li
-          mixin track_checkbox
-      mixin content('Facebook', 63206, 3)
+          +track_checkbox
+        li
+          +event_schedule
+      +content('Facebook', 63206, 3)
       .help-block The maximium content length is 63206, which is limited by Facebook.
 
   .tpl(name='email')
     .box-header.well
       h4 Send Email
-      mixin box_icons
+      +box_icons
     form.box-content
-      mixin action_name_key
+      +action_name_key
       .input-prepend.input-block-level
         span.add-on To
         input.span11(name="email_to", title='Send To', type='text',
         placeholder='email_1@example.com; email_2@example.com')
-      mixin action_template_select
-      mixin track_checkbox
+      +action_template_select
+      +track_checkbox
       input#page_title.input-block-level(type='text', name='title',
       placeholder='Title of Email', maxlength='255', required)
       textarea.input-block-level(name='email_content', placeholder='Email Content...',
@@ -146,11 +150,10 @@ mixin actions_thumb
   .tpl(name='wait')
     .box-header.well
       h4 Wait
-      mixin box_icons
+      +box_icons
     form.box-content
-      mixin action_name_key
-      label Duration
-        input(type='text', name='duration', placeholder='1 day 2 hours')
+      +action_name_key
+      +event_schedule('Duration')
       .help-block
         | It will create an event in the Calendar, and notifications will be sent before its starts or ends.
         br
@@ -159,10 +162,10 @@ mixin actions_thumb
   .tpl(name='trigger')
     .box-header.well
       h4 User Trigger
-      mixin box_icons
+      +box_icons
     form.box-content
-      mixin action_name_key
-      input(type='hidden', name='duration', value="")
+      +action_name_key
+      input(type='hidden', name='duration', value='')
       .help-block
         | It will create an event in the Calendar, and notifications will be sent before its starts.
         br
