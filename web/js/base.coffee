@@ -401,9 +401,12 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       models = models.fullCollection if models.fullCollection
       #console.log 'render models', models
       fragments = document.createDocumentFragment()
-      models.forEach (model) =>
-        fragments.appendChild @_renderItem model
+      _renderItem = @_renderItem.bind @
+      models.forEach (model) ->
+        fragments.appendChild _renderItem model
       @el.appendChild fragments
+      @trigger 'updated', @
+      return
     _renderHeader: (title = @headerTitle) ->
       header = document.createElement 'li'
       header.className = 'nav-header'
