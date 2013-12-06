@@ -83,6 +83,7 @@ Action
     render: ->
       @_clear()
       @_render()
+      @_super_render()
       @
 
   class WorkflowManagerView extends ManagerView
@@ -332,7 +333,7 @@ Action
       @load @id, reload: true
     render: ->
       @nodeList.render()
-      @
+      super
 
   class NodeListView extends NavListView
     urlRoot: 'node'
@@ -374,6 +375,7 @@ Action
       if @nodes
         @el.appendChild @_renderHeader 'Used Nodes'
         @_render @nodes
+      @_super_render()
       @
 
   class EditorView extends FormDialogView
@@ -813,7 +815,7 @@ Action
       # @$el.draggable axis: 'x'
       # chrome fix
       @el.onselectstart = -> false
-      @
+      super
 
   class StartNodeView extends View
     id: 'node_start'
@@ -846,7 +848,7 @@ Action
       @srcEndpoint = jsPlumb.addEndpoint @$el, @sourceEndpointStyle, parameters:
         start: true
         view: @
-      @
+      super
     remove: ->
       if @srcEndpoint and @conn then try
         jsPlumb.deleteEndpoint @srcEndpoint
@@ -919,7 +921,7 @@ Action
           view: @
       @srcEndpoint = jsPlumb.addEndpoint @$el, @sourceEndpointStyle, param
       jsPlumb.makeTarget @$el, @targetEndpointStyle, param
-      @
+      super
     update: (node = @model) ->
       @$el.popover 'destroy'
       @_renderModel node
@@ -971,7 +973,7 @@ Action
       @label = conn.getOverlay 'label'
       @labelEl = @label.canvas
       @_renderLabel link
-      @
+      super
     update: (link = @model) ->
       @_destroyPopover()
       @_renderLabel link

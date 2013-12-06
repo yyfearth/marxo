@@ -22,8 +22,8 @@ User
       @load = _.throttle @load.bind(@), 100
       @on 'activate', @load
     render: ->
-      super
       @load()
+      super
     load: ->
       (@model = User.current).fetch success: (data) =>
         unless User.current?

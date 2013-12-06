@@ -655,7 +655,7 @@ Projects
       return
     render: ->
       @_renderList()
-      @
+      super
 
   # Manager
 
@@ -676,6 +676,7 @@ Projects
     render: ->
       @_clear()
       @_render()
+      @_super_render()
       @
 
   class WorkflowCell extends Backgrid.UriCell
@@ -683,7 +684,7 @@ Projects
       super options
       @urlRoot = @column.get('urlRoot') or @urlRoot
       @urlRoot += '/' if @urlRoot and @urlRoot[-1..] isnt '/'
-    render: ->
+    render: -> # replace super
       @$el.empty()
       id = @model.get('template_id')
       unless id

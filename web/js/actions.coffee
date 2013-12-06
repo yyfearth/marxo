@@ -117,7 +117,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         @fill @model?.toJSON()
         @$el.data model: @model, view: @
         @listenTo @model, 'destroy', @remove.bind @
-      @
+      super
     fill: (data) -> # filling the form with data
       return unless data and @form
       data.name = @_name unless data.name

@@ -24,7 +24,7 @@ Notifications
       @center = new NotificationCenterView el: @el, parent: @
     render: ->
       @center.render()
-      @
+      super
 
   class NotificationActionCell extends Backgrid.ActionsCell
     render: ->
@@ -241,6 +241,7 @@ Notifications
       @el.appendChild @_renderItem
         title: 'View All >'
         href: '#notification'
+      @_super_render()
       @
 
   # exporet

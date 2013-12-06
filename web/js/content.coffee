@@ -217,9 +217,8 @@ ProjectFilterView
       @resetHtml()
       @
     render: ->
-      super
       @renderRichEditor()
-      @
+      super
 
   class PageDesigner extends ModalDialogView
     @acts_as ContentEditorMixin
@@ -384,12 +383,12 @@ ProjectFilterView
       _body = find '.modal-body', @el
       $(_body).find('.btn[title]').tooltip container: _body
       super
-      @
 
   class BoxFormView extends BoxView
     @acts_as FormViewMixin
     render: ->
       @initForm()
+      super
     reset: ->
       @form.reset()
       @

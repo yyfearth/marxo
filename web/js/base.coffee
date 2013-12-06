@@ -80,6 +80,8 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       , delay
       @
     render: ->
+      @_super_render()
+    _super_render: ->
       @rendered = true
       @el.view = @
       @$el.data 'view', @
@@ -129,7 +131,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @btn_min = find '.btn-minimize', @el
       @btn_close = find '.btn-close', @el
       @contentEl = find '.box-content', @el
-      @
+      super
     minimize: ->
       btn_min = @btn_min or find '.btn-minimize', @el
       content = @contentEl or find '.box-content', @el
@@ -390,7 +392,7 @@ define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tena
       @_clear()
       @_render()
       @trigger 'updated', @
-      @
+      super
     _clear: ->
       @el.innerHTML = ''
       @el.appendChild @_renderHeader null
