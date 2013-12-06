@@ -1,64 +1,7 @@
 "use strict"
 
-define 'base', ['models', 'lib/common', 'lib/html5-dataset'], ({Collection, Tenant, User}) ->
-
-  ## Utils
-
-  find = (selector, parent) ->
-    parent ?= document
-    parent.querySelector selector
-
-  findAll = (selector, parent) ->
-    parent ?= document
-    [].slice.call parent.querySelectorAll selector
-
-  _html = (el) ->
-    el.innerHTML.trim().replace(/\s+/g, ' ').replace(/> </g, '>\n<')
-
-  tpl = (selector, returnDom) ->
-    tpl_el = find selector
-    throw new Error 'cannot load template from ' + selector unless tpl_el
-    tpl_el.parentNode.removeChild tpl_el
-    if returnDom then tpl_el else _html tpl_el
-
-  tplAll = (selector, multi) ->
-    hash = {}
-    unless multi # default
-      tpl_els = findAll '.tpl[name]', tpl selector, true
-    else
-      tpl_els = findAll selector
-    throw new Error 'unable to find tpl elements or empty in ' + selector unless tpl_els.length
-    for tpl_el in tpl_els
-      name = tpl_el.getAttribute 'name'
-      throw new Error 'to get a tpl dict, tpl element must have a "name" attribute' unless name
-      hash[name] = _html tpl_el
-    hash
-
-  fill = (html, model) ->
-    html.replace /{{\s*\w+\s*}}/g, (name) ->
-      name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
-      model[name] or model.escape?(name) or ''
-
-  # Polyfill
-  Date::now ?= -> +new Date
-  String::capitalize ?= ->
-    @charAt(0).toUpperCase() + @slice(1).toLowerCase()
-
-  # Fallback
-  Element::scrollIntoViewIfNeeded ?= Element::scrollIntoView
-
-  # Enable CoffeeScript class for Javascript Mixin
-  # https://github.com/yi/coffee-acts-as
-  # e.g.: class A ...   class B ...
-  #       class C
-  #         @acts_as A, B
-  Function::acts_as = (argv...) ->
-    #console.log "[Function::acts_as]: argv #{argv}"
-    for cl in argv
-      @::["__is#{cl}"] = true
-      for key, value of cl::
-        @::[key] = value
-    @
+define 'base', ['utils', 'models', 'lib/common'],
+({find,  findAll,  tpl,  tplAll,  fill}, {Collection, Tenant, User}) ->
 
   ## Common Views
 
