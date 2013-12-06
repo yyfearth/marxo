@@ -16,21 +16,30 @@ mixin multi_social_media_group_btns
 
 mixin content(media, max, rows)
   textarea.input-block-level(name='content.message', placeholder='Post Content...',
-  title='Content post to ' + media + ' (' + max + ' max)', rows=rows, maxlength=max)
+  title='Content post to #{media} (#{max} max)', rows=rows, maxlength=max)
+  .help-block The maximium content length is #{max}, which is limited by #{media}.
 
 mixin action_template_select
-  select.tmp(disabled)
+  select(disabled)
     option (Select from Template)
 
 mixin track_checkbox
-  label.checkbox.inline
+  label.checkbox.inline(title='Enable track will generate report automatically', data-placement='right')
     input(type='checkbox', name='tracked', checked)
     | Track
 
 mixin event_schedule(msg)
-  label.inline
+  label.inline(title='Duration (e.g. 10 days)\nLeft blank for available until project ends', data-placement='right')
     | #{msg}
-    input.input-small(type='text', name='event.duration', title='Duration', placeholder='10 days')
+    .input-append
+      input.input-small(type='text', name='event.duration', placeholder='e.g. 30 days')
+      a.btn.btn-event.icon-calendar
+
+mixin page_ref
+  label.inline Inset URL for
+    select(name='ref_page_id')
+      option(value='') (No URL)
+      option(value='auto', selected) (Auto select the first page of this node)
 
 //- show in sidebar
 mixin actions_thumb
@@ -112,7 +121,7 @@ mixin actions_thumb
         li
           +event_schedule
       +content('Twitter', 140, 2)
-      .help-block The maximium content length is 140, which is limited by Twitter.
+      +page_ref
 
   .tpl(name='facebook')
     .box-header.well
@@ -128,7 +137,7 @@ mixin actions_thumb
         li
           +event_schedule
       +content('Facebook', 63206, 3)
-      .help-block The maximium content length is 63206, which is limited by Facebook.
+      +page_ref
 
   .tpl(name='email')
     .box-header.well

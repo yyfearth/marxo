@@ -82,6 +82,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       @containerEl = options.container
       @model = options.model
       @model.view = @
+      @alertEl = find '.alert', @containerEl
       type = @type = (@model.get?('type') or options.model.type or options.type or '').toLowerCase()
       unless @_tpl.hasOwnProperty type
         @type = 'unknown'
@@ -96,27 +97,41 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       unless _tpl
         console.error 'unable to find tpl for action type', @type
         @remove()
+      else unless @model?
+        console.error 'no action model to render', @
+        @remove()
       else
+        model = @model
+        data = model.toJSON()
         @el.innerHTML = _tpl
-        @el.id = 'action_' + @model.id or 'no_id'
+        @el.id = 'action_' + model.id or model.cid
         @_name = @$el.find('.box-header h4').text()
-        #@containerEl.appendChild @el
-        @containerEl.insertBefore @el, find '.alert', @containerEl
+        # add to container
+        if @alertEl?
+          @containerEl.insertBefore @el, @alertEl
+        else
+          @containerEl.appendChild @el
         # get els in super
         super
         if /webkit/i.test navigator.userAgent
           $(@el).disableSelection()
         else
           $('.box-header, .btn', @el).disableSelection()
+        # deal with form
         @form = find 'form', @el
         $form = $ @form
         @form.key.readOnly = @projectMode
         $(@btn_close).remove() if @projectMode
-        #console.warn @form, @readOnly
         $form.find(':input').prop 'readOnly', true if @readOnly
-        @fill @model?.toJSON()
-        @$el.data model: @model, view: @
-        @listenTo @model, 'destroy', @remove.bind @
+        # for event button
+        $eventBtn = $ find '.btn-event', @el
+        if $eventBtn.length and (model.isNew() or not data.event?.id?)
+          $eventBtn.parent().removeClass 'input-append'
+          $eventBtn.remove()
+        # auto fill data and build ref
+        @fill data
+        @$el.data model: model, view: @
+        @listenTo model, 'destroy', @remove.bind @
       super
     fill: (data) -> # filling the form with data
       return unless data and @form
