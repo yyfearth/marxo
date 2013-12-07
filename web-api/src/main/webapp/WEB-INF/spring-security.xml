@@ -14,6 +14,7 @@
         <!-- Must allows all OPTIONS requests due to Chrome makes the request without credentials. -->
         <intercept-url pattern="/api/**" requires-channel="any" access="true" method="OPTIONS"/>
         <intercept-url pattern="/api/user**" requires-channel="any" access="true" method="POST"/>
+        <intercept-url pattern="/api/page**" requires-channel="any" access="true" method="POST"/>
         <intercept-url pattern="/api/**" requires-channel="any" access="isAuthenticated()"/>
         <session-management>
             <!-- review: decide the value. -->
