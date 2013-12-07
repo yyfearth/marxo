@@ -7,7 +7,6 @@ import marxo.entity.action.Submission;
 import marxo.entity.user.User;
 import marxo.entity.workflow.RunStatus;
 import marxo.exception.EntityNotFoundException;
-import marxo.exception.RequestParameterException;
 import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -49,8 +48,11 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 	@RequestMapping(value = "/{pageIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public Content read(@PathVariable ObjectId pageIdString) {
-		Query query = Query.query(criteria);
+	public Content read(@PathVariable String pageIdString) {
+		Assert.isTrue(ObjectId.isValid(pageIdString));
+		ObjectId pageId = new ObjectId(pageIdString);
+
+		Query query = Query.query(criteria.and("_id").is(pageId));
 		Content content = mongoTemplate.findOne(query, Content.class);
 
 		if (content == null) {
@@ -70,6 +72,8 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<Content> search(@RequestParam(value = "tenant_id", required = false) ObjectId tenantId, @RequestParam(value = "project_id", required = false) ObjectId projectId) {
+		criteria.and("status").is(RunStatus.STARTED);
+
 		if (tenantId != null) {
 			criteria.and("tenantId").is(tenantId);
 		}
@@ -77,10 +81,6 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 		if (projectId != null) {
 			criteria.and("workflowId").is(projectId);
 			criteria.and("isProject").is(true);
-		}
-
-		if (tenantId == null && projectId == null) {
-			throw new RequestParameterException("You must give either one Tenant or Project ID.");
 		}
 
 		Query query = Query.query(criteria).with(defaultSort);
