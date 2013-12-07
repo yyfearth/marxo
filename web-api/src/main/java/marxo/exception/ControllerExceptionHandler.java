@@ -67,7 +67,7 @@ public class ControllerExceptionHandler implements Loggable {
 		logger.debug(e.getMessage());
 		logger.debug(StringTool.exceptionToString(e));
 
-		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find your shit [%s] %s", e.getClass().getSimpleName(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find handling [%s] %s", e.getClass().getSimpleName(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
 	}
 
 	// This application only
@@ -100,6 +100,12 @@ public class ControllerExceptionHandler implements Loggable {
 
 	@ExceptionHandler({EntityTypeException.class})
 	public ResponseEntity<ErrorJson> handleEntityTypeException(EntityTypeException e) {
+		logger.debug(e.getMessage());
+		return new ResponseEntity<>(new ErrorJson(e.getMessage()), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler({RequestParameterException.class})
+	public ResponseEntity<ErrorJson> handleRequestParameterException(RequestParameterException e) {
 		logger.debug(e.getMessage());
 		return new ResponseEntity<>(new ErrorJson(e.getMessage()), HttpStatus.BAD_REQUEST);
 	}

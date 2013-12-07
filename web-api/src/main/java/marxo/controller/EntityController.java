@@ -1,6 +1,7 @@
 package marxo.controller;
 
 import marxo.entity.BasicEntity;
+import marxo.entity.MongoDbAware;
 import marxo.entity.user.User;
 import marxo.exception.EntityInvalidException;
 import marxo.exception.EntityNotFoundException;
@@ -10,10 +11,7 @@ import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -29,10 +27,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-public abstract class EntityController<Entity extends BasicEntity> extends BasicController implements InterceptorPreHandlable {
-	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
-	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime"));
+public abstract class EntityController<Entity extends BasicEntity> extends BasicController implements MongoDbAware, InterceptorPreHandlable {
+	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime")).and(new Sort(new Sort.Order(Sort.Direction.DESC, "createTime")));
 	protected Class<Entity> entityClass;
 	// review: not sure storing a query is a better idea.
 	protected Criteria criteria;
@@ -120,7 +116,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 			entity.createUserId = oldEntity.createUserId;
 			entity.createTime = oldEntity.createTime;
 			entity.updateUserId = user.id;
-			mongoTemplate.save(entity);
+			entity.save();
 		} catch (ValidationException ex) {
 			for (int i = 0; i < ex.reasons.size(); i++) {
 				logger.error(ex.reasons.get(i));

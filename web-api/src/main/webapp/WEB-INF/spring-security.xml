@@ -13,8 +13,10 @@
         <!-- todo: enforces HTTPS -->
         <!-- Must allows all OPTIONS requests due to Chrome makes the request without credentials. -->
         <intercept-url pattern="/api/**" requires-channel="any" access="true" method="OPTIONS"/>
+        <!-- Anonymous user should be able to create account. -->
         <intercept-url pattern="/api/user**" requires-channel="any" access="true" method="POST"/>
-        <intercept-url pattern="/api/page**" requires-channel="any" access="true" method="POST"/>
+        <!-- Public page should be accessable to anyone. -->
+        <intercept-url pattern="/api/page/[\da-fA-F]{24}" requires-channel="any" access="true" method="GET"/>
         <intercept-url pattern="/api/**" requires-channel="any" access="isAuthenticated()"/>
         <session-management>
             <!-- review: decide the value. -->

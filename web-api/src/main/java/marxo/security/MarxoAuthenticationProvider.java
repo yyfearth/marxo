@@ -53,7 +53,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 				if (user == null) {
 					throw new UsernameNotFoundException(String.format("Cannot find anyone with the Facebook account %s(%s)", fbUser.getUsername(), fbUser.getId()));
 				} else {
-					return new MarxoAuthentication(user, Lists.newArrayList(new SimpleGrantedAuthority("guest")));
+					return new MarxoAuthentication(user, Lists.newArrayList(new SimpleGrantedAuthority(user.type.toString())));
 				}
 			} catch (FacebookOAuthException e) {
 				throw new BadCredentialsException(String.format("The access token %s is not valid: %s", accessToken, e.getMessage()));
