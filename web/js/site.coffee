@@ -165,6 +165,8 @@ require [
       $el.click().find('#username').text user.get 'name'
       $el.find('#sign_in_menu').remove()
       $el.find('#user_menu').removeClass 'tpl'
+      $.ajaxSetup headers:
+        Authorization: user.auth
       $el.trigger 'signedin', [user]
       $go_console = $el.find('#go_console')
       if user.has 'tenant_id'
