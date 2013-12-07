@@ -13,7 +13,7 @@ requirejs.config
     'lib/facebook': '//connect.facebook.net/en_US/all'
 
 define 'fb', ['lib/facebook'], (FB) =>
-  return alert 'Local test data only support sign-in with email!' # test
+  #return alert 'Local test data only support sign-in with email!' # test
   FB.init
     appId: '213527892138380'
     scopes: 'email'
@@ -43,7 +43,7 @@ require [
   'lib/common'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
-  'lib/backbone.localstorage' # test
+  #'lib/backbone.localstorage' # test
 ], ->
   console.log 'ver', 'site', 1
 
@@ -52,17 +52,18 @@ require [
   # Models
 
   class User extends Backbone.Model
-    idAttribute: 'email' # test
+    #idAttribute: 'email' # test
     urlRoot: ROOT + '/users'
     defaults:
       type: 'PARTICIPANT'
 
   class Page extends Backbone.Model
-    urlRoot: ROOT + '/contents'
+    urlRoot: ROOT + '/pages'
 
   class Pages extends Backbone.Collection
+    @pages: new Pages
     model: Page
-    url: Page::urlRoot + '?type=page'
+    url: Page::urlRoot
 
   # Views
 
@@ -128,9 +129,9 @@ require [
     signin: (auth, error_callback) ->
       $inputs = @$el.find('input,button').prop 'disabled', true
       # test
-      email = atob(auth.slice(6)).split(':')[0]
-      throw new Error 'local test data only support sign-in with email' if email.indexOf('@') < 1
-      new User({id: 'me', email}).fetch
+      #email = atob(auth.slice(6)).split(':')[0]
+      #throw new Error 'local test data only support sign-in with email' if email.indexOf('@') < 1
+      new User({id: 'me'}).fetch
         headers:
           Authorization: auth
         reset: true
@@ -164,6 +165,9 @@ require [
       $el.click().find('#username').text user.get 'name'
       $el.find('#sign_in_menu').remove()
       $el.find('#user_menu').removeClass 'tpl'
+      $.ajaxSetup headers:
+        Authorization: user.auth
+      $el.trigger 'signedin', [user]
       $go_console = $el.find('#go_console')
       if user.has 'tenant_id'
         $go_console.prop 'href', ROOT + '/../console/'
@@ -370,82 +374,27 @@ require [
         @_save data
       @
 
-  class RichEditorView extends Backbone.View
+  class ContentView extends Backbone.View
+    $container: $('#content')
+    show: ->
+      @render() unless @rendered
+      @$container.empty().append @$el
+      @
+    hide: ->
+      @$el.detach()
+      @$container.empty()
+      @
+    render: ->
+      @rendered = true
+      @
+
+  class PageView extends ContentView
     _fonts: [
       'Serif', 'Sans', 'Arial', 'Arial Black'
       'Courier', 'Courier New', 'Comic Sans MS'
       'Helvetica', 'Impact', 'Lucida Grande', 'Lucida Sans'
       'Tahoma', 'Times', 'Times New Roman', 'Verdana'
     ]
-    events:
-      'click .btn.hyperlink': (e) ->
-        setTimeout ->
-          $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
-        , 200
-      'click .btn-switch': '_switch'
-    readOnlyHtml: (val) ->
-      @readOnly = val
-      @$editor.attr 'contenteditable', not val
-      @$code.attr 'readonly', val
-      @$edits.prop 'disabled', val
-      @
-    fillHtml: (html) -> # can only be called after rendered
-      @$editor.html html or ''
-      @
-    readHtml: ->
-      if @$code.is(':visible') then @$code.val() else @$editor.cleanHtml()
-    resetHtml: ->
-      @$code.val('')
-      @_switch false
-      @$el.find('.btn-switch').removeClass 'active'
-      @
-    _renderFonts: ->
-      fontTarget = find '.fonts-select', @el
-      fontTarget.innerHTML = ''
-      flagment = document.createDocumentFragment()
-      for fontName in @_fonts
-        li = document.createElement 'li'
-        a = document.createElement 'a'
-        a.dataset.edit = "fontName #{fontName}"
-        a.style.fontFamily = fontName
-        a.textContent = fontName
-        li.appendChild a
-        flagment.appendChild li
-      fontTarget.appendChild flagment
-      return
-    render: ->
-      @_renderFonts()
-      @$el.find('.dropdown-menu input').click(-> false).change(->
-        $(@).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
-      ).keydown (e) ->
-        if e.which is 27 # esc
-          @value = ''
-          $(@).change().parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
-        true
-      @$el.find('[type=file]').each ->
-        overlay = $(@)
-        target = $(overlay.data('target'))
-        overlay.css(opacity: 0, position: 'absolute', cursor: 'pointer').offset(target.offset())
-        .width(target.outerWidth()).height target.outerHeight()
-      @$editor = @$el.find('.rich-editor').wysiwyg()
-      @$code = @$editor.siblings('.rich-editor-html')
-      @$edits = @$el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit')
-      @$edits.tooltip container: @el
-      @
-    _switch: (toCode) ->
-      $editor = @$editor
-      $code = @$code
-      toCode = not $code.is ':visible' unless typeof toCode is 'boolean'
-      if toCode
-        $editor.hide()
-        $code.show().val $editor.cleanHtml()
-      else
-        $code.hide()
-        $editor.show().html $code.val()
-      @$edits.prop 'disabled', toCode unless @readOnly
-      return
-
-  class PageView extends Backbone.View
     _tpl: {}
     tpl: (name, attrs) ->
       _tpl = @_tpl
@@ -455,7 +404,6 @@ require [
           $el = $ @
           _tpl[$el.attr 'name'] = $el.html().trim().replace(/\s+/g, ' ').replace(/> </g, '>\n<')
           return
-      # returns
       unless name
         _tpl
       else unless attrs
@@ -466,41 +414,103 @@ require [
         _tpl[name].replace /{{\s*\w+\s*}}/g, (name) ->
           name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
           attrs[name] or ''
-    el: '.content.container > .page-content'
+    events:
+      'click .form-mask': (e) ->
+        e.preventDefault()
+        $('#user_profile a.dropdown-toggle').click()
+        false
+      'click .dropdown-menu input': (e) ->
+        e.preventDefault()
+        false
+      'change .dropdown-menu input': (e) ->
+        $(e.currentTarget).parent('.dropdown-menu')
+        .siblings('.dropdown-toggle').dropdown 'toggle'
+        return
+      'keydown .dropdown-menu input': (e) -> if e.which is 27 # esc
+        $(e.currentTarget).val('').change()
+        .parents('.dropdown-menu').siblings('.dropdown-toggle').dropdown 'toggle'
+        return
+      'click .btn.hyperlink': (e) ->
+        setTimeout ->
+          $(e.currentTarget).siblings('.dropdown-menu').find('input').focus()
+        , 200
+        return
+      'blur .rich-editor[contenteditable]:visible': (e) ->
+        $el = $(e.currentTarget)
+        $el.siblings('textarea.rich-editor-html').val $el.cleanHtml()
+        return
+      'click .btn-switch': (e) ->
+        $btn = $(e.currentTarget)
+        $parent = $btn.parents('[data-role="editor-toolbar"]')
+        $code = $parent.find('textarea.rich-editor-html')
+        $editor = $parent.find('.rich-editor')
+        $edits = $parent.find('[data-edit],.btn.dropdown-toggle,.btn-edit')
+        if $code.is ':visible' # to editor
+          $code.hide()
+          $editor.html($code.val()).show()[0].focus()
+          $edits.prop 'disabled', false
+        else # to code
+          $editor.hide()
+          $code.show()[0].focus()
+          $edits.prop 'disabled', true
+        return
     initialize: (options) ->
       throw new Error 'page id must be given' unless options?.id
       super options
       @id = options.id
-      @model = new Page id: @id
+      @model = Pages.pages.get(@id) or new Page id: @id
       @tpl = @tpl.bind @
+      $el = @$el
+      $('#user_profile').on 'signedin', ->
+        $el.find('.form-mask').hide()
+        $el.find('form').show()
+        return
       @_renderInput = @_renderInput.bind @
       @
-    show: ->
-      @render() unless @rendered
-      @$el.html @html if @html
+    renderNotFound: ->
+      @$el.html '<h1>404: Page not found!</h1>'
       @
-    showNotFound: ->
-      @$el.html '404'
-      @
-    _render: (model = @model) ->
-      tpl = @tpl
-      _renderInput = @_renderInput
-      # '<div class="text-center"><em>(Please sign-in to see the details)</em></div>'
-      hasInput = false
-      sections = model.get('sections')?.map (section) ->
-        hasInput = true if section.type
-        tpl 'section',
-          title: _.escape(section.name)
-          desc: section.desc
-          body: _renderInput(section)
-      html = tpl 'page',
-        title: model.escape('name')
-        desc: model.get('desc')
-        body: unless sections?.length then '' else sections.join '\n'
-      html = @html = if hasInput then html.replace('form-actions hide', 'form-actions') else html
-      @$el.html html
+    _renderFonts: ->
+      unless html = @_fonts_html
+        el = document.createElement 'ul'
+        for fontName in @_fonts
+          li = document.createElement 'li'
+          a = document.createElement 'a'
+          a.dataset.edit = "fontName #{fontName}"
+          a.style.fontFamily = fontName
+          a.textContent = fontName
+          li.appendChild a
+          el.appendChild li
+        html = @_fonts_html = el.innerHTML
       html
-    _renderInput: (data) ->
+    _render: (model = @model) ->
+      unless html = @html
+        tpl = @tpl
+        _renderInput = @_renderInput
+        hasInput = false
+        sections = model.get('sections')?.map (section, i) ->
+          hasInput = true if section.type
+          tpl 'section',
+            title: _.escape(section.name)
+            desc: section.desc
+            body: _renderInput(section, i)
+        html = tpl 'page',
+          title: model.escape('name')
+          desc: model.get('desc')
+          body: unless sections?.length then '' else sections.join '\n'
+        html = @html = if hasInput then html.replace('form-actions hide', 'form-actions') else html
+      $el = @$el.html(html)
+      setTimeout -> # defer
+        $el.find('.rich-editor').attr('contenteditable', 'true').each ->
+          $("##{@id}.rich-editor").wysiwyg()
+        $el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit').tooltip container: $el
+        # check login user
+        if User.current?.id
+          $el.find('.form-mask').hide()
+          $el.find('form').show()
+      , 10
+      html
+    _renderInput: (data, i) ->
       type = data.type or ''
       options = data.options or {}
       tpl = @tpl()
@@ -510,15 +520,14 @@ require [
         when 'text'
           body = if options.text_multiline then tpl.textarea else tpl.text
         when 'html'
-          body = tpl.html
+          body = tpl.html.replace '{{fonts}}', @_renderFonts()
         when 'radio'
-          el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
           list = unless options.gen_from_list then options.manual_options else [
             'List item 1 (Auto Genearted)'
             'List item 2 (Auto Genearted)'
             '... (Auto Genearted)'
           ]
-          body = list.map((item) -> el.replace '{{text}}', item).join '\n'
+          body = list.map((item) -> tpl.radio.replace '{{text}}', item).join '\n'
         when 'file'
           accept = options.file_accept
           if accept is 'image/*'
@@ -528,11 +537,13 @@ require [
             body = tpl.file.replace /accept(?:=['"]{2})?/, accept
         else
           throw new Error 'unknown section type ' + type
-      body
+      body.replace /{{name}}/g, 'section_' + i
     render: ->
-      @update() unless @model.has 'name'
-      @rendered = true
-      @
+      if @rendered or @model.has 'name'
+        @_render()
+      else
+        @update()
+      super
     update: ->
       @model.fetch
         reset: true
@@ -540,35 +551,53 @@ require [
           if 'PAGE' is model.get('type').toUpperCase()
             @_render model
           else
-            @showNotFound()
+            @renderNotFound()
           return
-        error: ->
-          @showNotFound()
+        error: =>
+          @renderNotFound()
       @
 
+  class PageListView extends ContentView
+    collection: Pages.pages
+    render: ->
+      @collection.fetch
+        reset: true
+        success: (col) =>
+          $list = $('<ul>')
+          col.forEach (page) -> if /^PAGE$/i.test page.get('type')
+            $list.append $('<li>').append $ '<a>', href: "##{page.id}", text: page.get 'name'
+          @$el.empty().append $list
+        error: =>
+          @$el.html("Failed to get the page list")
+      super
 
-  class PageListView extends Backbone.View
-    el: '.content.container > .page-list'
-    collection: new Pages
+  class HomeView extends ContentView
+    el: $('#home_page').removeClass('tpl').detach()
 
   # Router
 
   class Router extends Backbone.Router
     routes:
-      'home': 'showPageList'
+      '': -> @navigate 'home', trigger: true, replace: true
+      'home': 'showHome'
+      'list': 'showPageList'
+      'page/:id': 'showPage'
       ':id': 'showPage'
     cache:
       page: {}
+    $container: $('#content')
+    _show: (view) ->
+      if view isnt @_cur
+        @_cur?.hide()
+        @_cur = view.show()
+      @
+    showHome: ->
+      @_show @cache.home ?= new HomeView
     showPage: (id) ->
       console.log 'show page:', id
-      view = @cache[id] ?= new PageView {id}
-      view.show()
-      @
+      @_show @cache[id] ?= new PageView {id}
     showPageList: ->
-      list = @cache.list ?= new PageListView
-      list.show()
-      console.log 'show page list'
-      @
+      @_show @cache.list ?= new PageListView
 
   # EP
   window.user_profile = new UserProfileView

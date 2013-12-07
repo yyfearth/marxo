@@ -36,16 +36,72 @@ html(lang='en-US')
                 li
                   a.icon-logout.pointer#sign_out Sign Out
           ul.nav
-            li(data-frame='home')
+            li
               a.icon-home(href='#home') Home
+            li
+              a.icon-project(href='#list') Projects
 
     include html/config/user
+
+    #home_page.tpl
+      #carousel.carousel.slide
+        .carousel-inner
+          .item.active
+            img(src='img/top_pic_1.png', alt='Spread your idea')
+            .container
+              .carousel-caption
+                h1 Spread your idea.
+                p.lead
+                  | Through Marxo, we spread your thoughts or mind to people, and make more people can see, and get their feebacks back to you.
+                  br
+                  | Then let you know, what others think about your ideas.
+          .item
+            img(src='img/top_pic_2.png', alt='Connect your dream')
+            .container
+              .carousel-caption
+                h1 Connect your dream.
+                p.lead
+                  | At Marxo, we connect you to those dreams, and those unhappened possibilities. From small to large, we can make you dream real.
+                  br
+                  | Don'e be afraid, take a look of Marxo today!
+          .item
+            img(src='img/top_pic_2.png', alt='Powerful your project')
+            .container
+              .carousel-caption
+                h1 Powerful your project.
+                p.lead
+                  | With Marxo's powerful functions, techniques, and abilities, we can help you to achieve your goal step by step.
+                  br
+                  | Take the free trial, then you'll find out.
+          .item
+            img(src='img/top_pic_3.png', alt='Speak loud')
+            .container
+              .carousel-caption
+                h1 Speak loud.
+                p.lead
+                  | If you don't have any idea to get start, don't worry. You can contribute other people's idea and make yourself greater.
+                  br
+                  | Find interesting projects on Marxo, and let your opinion become valuable.
+          .item
+            img(src='img/top_pic_4.png', alt='What are you waiting')
+            .container
+              .carousel-caption
+                h1 What are you waiting?
+                p.lead
+                  | People are wealth and benefits to Marxo. By connecting more people, thoughts and knowledge become better and greater everyday.
+                  br
+                  | We definetily need you, join Marxo, it's today!
+        a.left.carousel-control(href='#carousel', data-slide='prev') ‹
+        a.right.carousel-control(href='#carousel', data-slide='next') ›
+
 
     #content_tpl.tpl
       .tpl(name='page')
         h1 {{title}}
         p {{desc}}
-        form
+        .form-mask.text-center.well
+          em (Please sign-in to see the details)
+        form.hide
           .sections {{body}}
           .form-actions.hide
             input.btn.btn-primary(type='submit', value='Submit')
@@ -57,12 +113,12 @@ html(lang='en-US')
           p.session-desc {{desc}}
           .session-body {{body}}
       .tpl(name='text')
-        input.input-block-level(type='text', placeholder='Simple Text (Single Line)')
+        input.input-block-level(type='text', name='{{name}}', placeholder='Simple Text (Single Line)')
       .tpl(name='textarea')
-        textarea.input-block-level(rows=3, placeholder='Simple Text (Multiple Line)')
+        textarea.input-block-level(rows=3, name='{{name}}', placeholder='Simple Text (Multiple Line)')
       .tpl(name='html')
         include html/content/rich_editor
-        mixin rich_editor('html')
+        mixin rich_editor('{{name}}')
       .tpl(name='radio')
         label.radio
           input(type='radio', name='{{name}}')
@@ -74,20 +130,18 @@ html(lang='en-US')
             span.btn.btn-file
               span.fileupload-new Select
               span.fileupload-exists Change
-              input(type='file', accept='image/*')
+              input(type='file', name='{{name}}', accept='image/*')
             a.btn.fileupload-exists(href='#', data-dismiss='fileupload') Remove
       .tpl(name='file')
         .fileupload.fileupload-new(data-provides='fileupload')
           span.btn.btn-file
             span.fileupload-new Select
             span.fileupload-exists Change
-            input(type='file', accept)
+            input(type='file', name='{{name}}', accept)
           | &nbsp;
           span.fileupload-preview
           button.close.fileupload-exists(data-dismiss='fileupload') &times;
 
-    .content.container
-      .page-list
-      .page-content
+    #content.container
 
     script(data-main='js/site', src='js/lib/require.js', async)

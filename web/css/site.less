@@ -1,6 +1,10 @@
 @import 'common';
 @import 'rich-editor';
 
+body {
+  margin-top: 50px;
+}
+
 .container {
   width: 90%;
   min-width: 600px;
@@ -26,7 +30,50 @@
   height: 200px;
 }
 
-.content {
+#carousel {
+  margin-bottom: 60px;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  min-width: 100%;
+  height: 500px;
+  .item {
+    height: 500px;
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      height: 500px;
+    }
+  }
+  .container {
+    position: relative;
+    z-index: 9;
+    width: 90%;
+    min-width: 500px;
+    max-width: none;
+    height: 500px;
+  }
+  .carousel-caption h1, .carousel-caption .lead {
+    margin: 0;
+    line-height: 1.25;
+    color: #222;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, .4);
+  }
+  .carousel-caption {
+    background-color: transparent;
+    position: static;
+    max-width: 550px;
+    padding: 0 20px;
+    margin-top: 200px;
+    .btn {
+      margin-top: 10px;
+    }
+  }
+}
+
+#content {
   margin: 50px auto 20px auto;
 }
 
