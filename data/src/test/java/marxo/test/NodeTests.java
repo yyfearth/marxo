@@ -1,7 +1,6 @@
 package marxo.test;
 
 import marxo.entity.action.Action;
-import marxo.entity.action.Action;
 import marxo.entity.node.Node;
 import marxo.entity.user.Tenant;
 import org.testng.Assert;

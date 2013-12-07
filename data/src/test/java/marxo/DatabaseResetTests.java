@@ -66,7 +66,6 @@ public class DatabaseResetTests extends BasicDataTests {
 		FacebookData facebookData = new FacebookData();
 		facebookData.accessToken = "CAADCM9YpGYwBANeLvBD7aswljKFqsBYZAAUZC9ohrKoPkR0OQ8yZA1kMZAIwBuLFsxPnnRaUsuIjB40Q9i8qn2BNlaITfkKsQYE4LFatfAY6okQgYe4b8fYcr400YdQP98Wp4SFZBG6MOMCtC3pJNsZCVB3bBpXZCyKvbj66SwBWjBW1ZAAZBYT2a";
 		facebookData.expireTime = DateTime.parse("2014-01-14T08:22:54.541Z");
-//		Assert.assertTrue(facebookData.updateToken());
 		reusedTenant.facebookData = facebookData;
 		reusedTenant.save();
 
