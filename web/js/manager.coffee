@@ -325,9 +325,9 @@ Workflows
             regexp.test value
     search: (query) ->
       @_search query
-    render: ->
+    render: -> # replace render
       @delegateEvents()
-      super
+      @
     clear: ->
       @select null
     select: (a) ->
