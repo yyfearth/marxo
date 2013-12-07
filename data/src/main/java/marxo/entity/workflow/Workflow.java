@@ -384,6 +384,11 @@ public class Workflow extends RunnableEntity {
 		mongoTemplate.insertAll(entitiesToSave);
 	}
 
+	@Override
+	public String toString() {
+		return String.format("%s:%s(%s)", isProject ? "Project" : "Workflow", name, id);
+	}
+
 	/*
 	DAO
 	 */
