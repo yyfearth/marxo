@@ -41,6 +41,8 @@ html(lang='en-US')
 
     include html/config/user
 
+    #home_page.tpl
+
     #content_tpl.tpl
       .tpl(name='page')
         h1 {{title}}
@@ -88,8 +90,6 @@ html(lang='en-US')
           span.fileupload-preview
           button.close.fileupload-exists(data-dismiss='fileupload') &times;
 
-    .content.container
-      .page-list
-      .page-content
+    #content.container
 
     script(data-main='js/site', src='js/lib/require.js', async)

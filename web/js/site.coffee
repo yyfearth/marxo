@@ -13,7 +13,7 @@ requirejs.config
     'lib/facebook': '//connect.facebook.net/en_US/all'
 
 define 'fb', ['lib/facebook'], (FB) =>
-  return alert 'Local test data only support sign-in with email!' # test
+  #return alert 'Local test data only support sign-in with email!' # test
   FB.init
     appId: '213527892138380'
     scopes: 'email'
@@ -43,7 +43,7 @@ require [
   'lib/common'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
-  'lib/backbone.localstorage' # test
+  #'lib/backbone.localstorage' # test
 ], ->
   console.log 'ver', 'site', 1
 
@@ -52,18 +52,18 @@ require [
   # Models
 
   class User extends Backbone.Model
-    idAttribute: 'email' # test
+    #idAttribute: 'email' # test
     urlRoot: ROOT + '/users'
     defaults:
       type: 'PARTICIPANT'
 
   class Page extends Backbone.Model
-    urlRoot: ROOT + '/contents'
+    urlRoot: ROOT + '/pages'
 
   class Pages extends Backbone.Collection
     @pages: new Pages
     model: Page
-    url: Page::urlRoot #+ '?type=page' # test
+    url: Page::urlRoot
 
   # Views
 
@@ -129,9 +129,9 @@ require [
     signin: (auth, error_callback) ->
       $inputs = @$el.find('input,button').prop 'disabled', true
       # test
-      email = atob(auth.slice(6)).split(':')[0]
-      throw new Error 'local test data only support sign-in with email' if email.indexOf('@') < 1
-      new User({id: 'me', email}).fetch
+      #email = atob(auth.slice(6)).split(':')[0]
+      #throw new Error 'local test data only support sign-in with email' if email.indexOf('@') < 1
+      new User({id: 'me'}).fetch
         headers:
           Authorization: auth
         reset: true
@@ -372,7 +372,21 @@ require [
         @_save data
       @
 
-  class PageView extends Backbone.View
+  class ContentView extends Backbone.View
+    $container: $('#content')
+    show: ->
+      @render() unless @rendered
+      @$container.empty().append @$el
+      @
+    hide: ->
+      @$el.detach()
+      @$container.empty()
+      @
+    render: ->
+      @rendered = true
+      @
+
+  class PageView extends ContentView
     _fonts: [
       'Serif', 'Sans', 'Arial', 'Arial Black'
       'Courier', 'Courier New', 'Comic Sans MS'
@@ -398,7 +412,6 @@ require [
         _tpl[name].replace /{{\s*\w+\s*}}/g, (name) ->
           name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
           attrs[name] or ''
-    el: '.content.container > .page-content'
     events:
       'click .form-mask': (e) ->
         e.preventDefault()
@@ -452,11 +465,7 @@ require [
         return
       @_renderInput = @_renderInput.bind @
       @
-    show: ->
-      @render()
-      @$el.show().siblings().hide()
-      @
-    showNotFound: ->
+    renderNotFound: ->
       @$el.html '<h1>404: Page not found!</h1>'
       @
     _renderFonts: ->
@@ -532,8 +541,7 @@ require [
         @_render()
       else
         @update()
-      @rendered = true
-      @
+      super
     update: ->
       @model.fetch
         reset: true
@@ -541,14 +549,13 @@ require [
           if 'PAGE' is model.get('type').toUpperCase()
             @_render model
           else
-            @showNotFound()
+            @renderNotFound()
           return
         error: =>
-          @showNotFound()
+          @renderNotFound()
       @
 
-  class PageListView extends Backbone.View
-    el: '.content.container > .page-list'
+  class PageListView extends ContentView
     collection: Pages.pages
     render: ->
       @collection.fetch
@@ -560,31 +567,35 @@ require [
           @$el.empty().append $list
         error: =>
           @$el.html("Failed to get the page list")
-      @
-    show: ->
-      @render()
-      @$el.show().siblings().hide()
-      @
+      super
+
+  class HomeView extends ContentView
+    el: $('#home_page').removeClass('tpl').detach()
 
   # Router
 
   class Router extends Backbone.Router
     routes:
-      'home': 'showPageList'
+      '': -> @navigate 'home', trigger: true, replace: true
+      'home': 'showHome'
       'list': 'showPageList'
+      'page/:id': 'showPage'
       ':id': 'showPage'
     cache:
       page: {}
+    $container: $('#content')
+    _show: (view) ->
+      if view isnt @_cur
+        @_cur?.hide()
+        @_cur = view.show()
+      @
+    showHome: ->
+      @_show @cache.home ?= new HomeView
     showPage: (id) ->
       console.log 'show page:', id
-      view = @cache[id] ?= new PageView {id}
-      view.show()
-      @
+      @_show @cache[id] ?= new PageView {id}
     showPageList: ->
-      list = @cache.list ?= new PageListView
-      list.show()
-      console.log 'show page list'
-      @
+      @_show @cache.list ?= new PageListView
 
   # EP
   window.user_profile = new UserProfileView
