@@ -9,12 +9,19 @@ public class Condition extends TenantChildEntity {
 	@JsonProperty("left_operand")
 	public String leftOperand;
 	@JsonProperty("left_operand_type")
-	public String leftOperandType;
+	public OperandType leftOperandType = OperandType.NONE;
 	@JsonProperty("right_operand")
 	public String rightOperand;
 	@JsonProperty("right_operand_type")
-	public String rightOperandType;
+	public OperandType rightOperandType = OperandType.NONE;
 	public String operator;
+
+	public static enum OperandType {
+		NONE,
+		NUMBER,
+		LIKES_COUNT,
+		RUN_STATUS,
+	}
 
 	@Override
 	public void save() {
