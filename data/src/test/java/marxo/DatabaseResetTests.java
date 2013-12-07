@@ -131,11 +131,11 @@ public class DatabaseResetTests extends BasicDataTests {
 		reusedWorkflow.createTime = reusedWorkflow.updateTime = DateTime.now();
 		reusedWorkflow.setName("Demo workflow");
 
-		int nodeCount = 1;
-		int contentCount = 1;
+		int nodeCount = 0;
+		int contentCount = 0;
 
 		Node node1 = new Node();
-		node1.setName("Node " + nodeCount++);
+		node1.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node1);
 
 		Action postFacebookAction1 = new Action(Action.Type.FACEBOOK);
@@ -143,12 +143,12 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.addAction(postFacebookAction1);
 
 		Content facebookContent1 = new Content(Content.Type.FACEBOOK);
-		facebookContent1.setName("Contnet " + contentCount++);
+		facebookContent1.setName("Contnet " + ++contentCount);
 		facebookContent1.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent1.id);
 		postFacebookAction1.setContent(facebookContent1);
 
 		Node node2 = new Node();
-		node2.setName("Node " + nodeCount++);
+		node2.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node2);
 
 		Action postFacebookAction2 = new Action(Action.Type.FACEBOOK);
@@ -162,7 +162,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		postFacebookAction2.setEvent(event);
 
 		Content facebookContent2 = new Content(Content.Type.FACEBOOK);
-		facebookContent2.setName("Contnet " + contentCount++);
+		facebookContent2.setName("Contnet " + ++contentCount);
 		facebookContent2.message = String.format("Follow up post [%s]", facebookContent2.id);
 		postFacebookAction2.setContent(facebookContent2);
 
@@ -206,7 +206,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		List<BasicEntity> entities = new ArrayList<>();
 		Workflow workflow = new Cloner().deepClone(reusedWorkflow);
 		workflow.id = new ObjectId();
-		workflow.setName("Demo project");
+		workflow.setName("Demo project with Facebook post");
 		workflow.templateId = reusedWorkflow.id;
 		workflow.isProject = true;
 		workflow.updateUserId = workflow.createUserId = user.id;
@@ -290,6 +290,44 @@ public class DatabaseResetTests extends BasicDataTests {
 		Assert.assertEquals(mongoTemplate.count(query, Link.class), 1);
 		Assert.assertEquals(mongoTemplate.count(query, Action.class), 2);
 		Assert.assertEquals(mongoTemplate.count(query, Content.class), 2);
+	}
+
+	@Test(dependsOnMethods = {"addProject"})
+	public void addProjectWithPageAction() throws Exception {
+		User user = User.getByEmail("yyfearth@gmail.com");
+		Tenant tenant = user.getTenant();
+
+		reusedWorkflow = new Workflow();
+		reusedWorkflow.setTenant(tenant);
+		reusedWorkflow.updateUserId = reusedWorkflow.updateUserId = user.id;
+		reusedWorkflow.createTime = reusedWorkflow.updateTime = DateTime.now();
+		reusedWorkflow.setName("Demo project with Page action");
+		reusedWorkflow.isProject = true;
+
+		int nodeCount = 0;
+		int contentCount = 0;
+
+		Node node1 = new Node();
+		node1.setName("Node " + ++nodeCount);
+		reusedWorkflow.addNode(node1);
+
+		Action postFacebookAction1 = new Action(Action.Type.PAGE);
+		postFacebookAction1.setName("Post to Facebook 1");
+		node1.addAction(postFacebookAction1);
+
+		Content facebookContent1 = new Content(Content.Type.PAGE);
+		facebookContent1.setName("Contnet " + ++contentCount);
+		facebookContent1.description = String.format("Hello world for %s [%s]", getClass(), reusedWorkflow);
+		postFacebookAction1.setContent(facebookContent1);
+
+		reusedWorkflow.wire();
+
+		mongoTemplate.insertAll(Lists.newArrayList(
+				reusedWorkflow,
+				node1,
+				postFacebookAction1,
+				facebookContent1
+		));
 	}
 
 	@Test(dependsOnMethods = {"addProject"})

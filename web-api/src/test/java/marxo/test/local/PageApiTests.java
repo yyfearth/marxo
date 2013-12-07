@@ -79,9 +79,7 @@ public class PageApiTests extends BasicApiTests {
 					.matchContentType(MediaType.JSON_UTF_8);
 			List<Content> contents = apiTester.getContent(new TypeReference<List<Content>>() {
 			});
-			Assert.assertEquals(contents.size(), 1);
-			Content content = contents.get(0);
-			Assert.assertEquals(content.id, reusedContent.id);
+			Assert.assertEquals(contents.size(), 0);
 		}
 	}
 
