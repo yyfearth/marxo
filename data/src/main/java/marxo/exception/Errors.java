@@ -1,6 +1,7 @@
 package marxo.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 
 @JsonIgnoreProperties("empty")
 public class Errors {
+	@JsonUnwrapped
 	List<String> messages = new ArrayList<>();
 
 	public void add(String message) {
