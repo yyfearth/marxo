@@ -27,7 +27,7 @@ import java.util.List;
 public class Action extends NodeChildEntity {
 
 	public Action(Type type) {
-		this.type = type;
+		setType(type);
 	}
 
 	public Action() {
@@ -48,17 +48,60 @@ public class Action extends NodeChildEntity {
 		TRIGGER,
 	}
 
-	public Type type = Type.DEFAULT;
+	protected Type type = Type.DEFAULT;
+
+	public Type getType() {
+		return type;
+	}
+
+	@Override
+	public void wire() {
+		if (content != null) {
+			content.setAction(this);
+		}
+		super.wire();
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+
+		switch (type) {
+			case DEFAULT:
+				break;
+			case FACEBOOK:
+				isTracked = true;
+
+				if (monitorDuration == null) {
+					monitorDuration = Duration.standardDays(1);
+				}
+
+				if (monitorPeriod == null) {
+					monitorPeriod = Period.days(1);
+				}
+
+				break;
+			case TWITTER:
+				break;
+			case EMAIL:
+				break;
+			case PAGE:
+				break;
+			case WAIT:
+				break;
+			case TRIGGER:
+				break;
+		}
+	}
 
 	/*
 	Post
 	 */
 
 	@JsonProperty("tracked")
-	public boolean isTracked = true;
+	public Boolean isTracked;
 
-	public Duration monitorDuration = Duration.standardDays(1);
-	public Period monitorPeriod = Period.days(1);
+	public Duration monitorDuration;
+	public Period monitorPeriod;
 
 	/*
 	Next action
