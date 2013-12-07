@@ -46,10 +46,9 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		thread.start();
 	}
 
-	public static void stopAsync() {
-		if (engineWorker != null) {
-			engineWorker.isStopped = true;
-		}
+	public static void stop() {
+		stopAsync();
+
 		try {
 			if (thread != null) {
 				thread.join(Seconds.seconds(10).toStandardDuration().getMillis());
@@ -62,11 +61,21 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		}
 	}
 
+	public static void stopAsync() {
+		if (engineWorker != null) {
+			engineWorker.isStopped = true;
+		}
+	}
+
+	public static boolean isAlive() {
+		return thread != null && thread.isAlive();
+	}
+
 	/*
 	Worker
 	 */
 
-	final Duration idleDuration = Seconds.seconds(1).toStandardDuration();
+	final Duration idleDuration = Seconds.seconds(10).toStandardDuration();
 	final Duration normalDuration = Seconds.seconds(1).toStandardDuration();
 	Duration duration = idleDuration;
 
@@ -149,28 +158,11 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						for (; action != null; action = action.getNextAction()) {
 							logger.info(String.format("%s is processing %s", this, action));
 
-//							Event event = action.getEvent();
-//							if (event == null || event.getStartTime() == null || event.getStartTime().isBeforeNow()) {
-//								if (event == null) {
-//									event = new Event();
-//								}
-//
-//								if (event.getStartTime() == null) {
-//									event.setStartTime(DateTime.now());
-//									event.save();
-//								}
-
 							boolean isOkay = action.act();
 
 							if (!isOkay) {
 								break;
 							}
-//							} else {
-//								reschedule(workflow.id, event.getStartTime());
-//								isScheduled = true;
-//								pendingNodeIds.add(node.id);
-//								break;
-//							}
 						}
 
 						if (action == null) {// if all actions have been run

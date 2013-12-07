@@ -65,5 +65,5 @@
         <!--</property>-->
     </bean>
 
-    <bean class="marxo.engine.EngineWorker" init-method="startAsync" destroy-method="stopAsync"/>
+    <bean class="marxo.engine.EngineWorker" init-method="startAsync" destroy-method="stop"/>
 </beans>

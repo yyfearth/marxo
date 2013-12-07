@@ -64,7 +64,7 @@ public class EngineTests extends BasicDataTests {
 	@AfterClass
 	@Override
 	public void afterClass() throws Exception {
-		EngineWorker.stopAsync();
+		EngineWorker.stop();
 
 		super.afterClass();
 
