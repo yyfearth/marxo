@@ -29,9 +29,8 @@ mixin track_checkbox
     input(type='checkbox', name='tracked', checked)
     | Track
 
-mixin event_schedule(msg)
+mixin event_schedule
   label.inline(title='Duration (e.g. 10 days)\nLeft blank for available until project ends', data-placement='right')
-    | #{msg}
     .input-append
       input.input-small(type='text', name='event.duration', placeholder='e.g. 30 days')
       a.btn.btn-event.icon-calendar
@@ -101,6 +100,8 @@ mixin actions_thumb
           a.btn.btn-info.btn-preview(disabled) Preview
         li
           +track_checkbox
+        li
+          +event_schedule
       .info.tmp (Page Info)
       .help-block
         | Information Page is a web page to display information.
