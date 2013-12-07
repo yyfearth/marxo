@@ -17,6 +17,7 @@ mixin multi_social_media_group_btns
 mixin content(media, max, rows)
   textarea.input-block-level(name='content.message', placeholder='Post Content...',
   title='Content post to #{media} (#{max} max)', rows=rows, maxlength=max)
+  input(type='hidden', name='content.type', value='#{media.toUpperCase()}')
   .help-block The maximium content length is #{max}, which is limited by #{media}.
 
 mixin action_template_select
@@ -84,28 +85,31 @@ mixin actions_thumb
       input(type='text', name='type', maxlength='45', title='Action Type', placeholder='Action Type')
       .help-inline (Unknown Type)
 
-  .tpl(name='create_page')
+  .tpl(name='page')
     .box-header.well
-      h4 Post Page or Form
+      h4 Create Page or Form
       +box_icons
     form.box-content
       +action_name_key
+      input(type='hidden', name='content.type', value='PAGE')
       ul.action-bar
         li
           +action_template_select
         li
-          a.btn.btn-primary(href='#page') Design
+          a.btn.btn-primary.btn-design(disabled) Design
         li
-          a.btn.btn-info(href='about:blank') Preview
+          a.btn.btn-info.btn-preview(disabled) Preview
         li
           +track_checkbox
-      .info (Page Info)
+      .info.tmp (Page Info)
       .help-block
         | Information Page is a web page to display information.
         br
         | Click "Design" button to design the page.
         br
         | Click "Preview" button to preview the generated page.
+        br
+        | For newly created action, you can only Desgin it next time after Save.
 
   .tpl(name='twitter')
     .box-header.well
@@ -145,6 +149,7 @@ mixin actions_thumb
       +box_icons
     form.box-content
       +action_name_key
+      input(type='hidden', name='content.type', value='EMAIL')
       .input-prepend.input-block-level
         span.add-on To
         input.span11(name="email_to", title='Send To', type='text',

@@ -36,7 +36,7 @@ ProjectFilterView
       @
     open: (name, arg) ->
       if name
-        @load name, arg, (action, data) ->
+        @popup name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
@@ -51,16 +51,14 @@ ProjectFilterView
         @editor.cancel()
         @composer.cancel()
       @
-    load: (id, action, callback) ->
-      if id instanceof Content
-        @popup id, callback
-      else if typeof id is 'string'
-        new Content({id}).fetch success: (data) => @popup data, action, callback
-      else
-        throw new Error 'content editor can only load a content model or an id string'
     popup: (data, action, callback) ->
-      media = data.get 'type'
-      editor = switch media
+      if typeof data is 'string'
+        new Content(id: data).fetch success: (data) => @popup data, action, callback
+        return @
+      else unless data instanceof Content
+        data = new Content data
+      type = data.get('type')?.toUpperCase()
+      editor = switch type
         when 'FACEBOOK', 'TWITTER'
           @editor
         when 'PAGE'
@@ -68,7 +66,7 @@ ProjectFilterView
         when 'EMAIL'
           @composer
         else
-          throw new Error 'unsupported media type ' + media
+          throw new Error 'unsupported media type ' + type
       editor.render() unless editor.rendered
       editor.popup data, action, callback
       @
@@ -500,8 +498,9 @@ ProjectFilterView
     fill: (data) ->
       @reset()
       data = unless data? then {} else $.extend {}, data, data.options
+      data.type = if data.type then data.type.toLowerCase() else 'none'
       super data
-      if data.type is 'radio' and not data.gen_from_list and data.manual_options
+      if /^radio$/i.test data.type and not data.gen_from_list and data.manual_options
         # manual options
         @autoIncOptionList.fill data.manual_options
       @
@@ -509,7 +508,7 @@ ProjectFilterView
       data = super()
       return {} unless data
       # manual options
-      if data?.type is 'radio' and not data.gen_from_list
+      if /^radio$/i.test data?.type and not data.gen_from_list
         data.manual_options = @autoIncOptionList.read()
       # TODO: stop if invalid
 
@@ -518,7 +517,7 @@ ProjectFilterView
       data =
         name: options.name
         desc: options.desc
-        type: options.type
+        type: (options.type or 'none').toUpperCase()
         options: options
       delete options.name
       delete options.desc
@@ -546,8 +545,8 @@ ProjectFilterView
       tpl = @_preview_tpl
       type = data.type or ''
       options = data.options or {}
-      switch type
-        when ''
+      switch type.toLowerCase()
+        when '', 'none'
           body = ''
         when 'text'
           body = if options.text_multiline then tpl.textarea else tpl.text
@@ -555,7 +554,9 @@ ProjectFilterView
           body = tpl.html
         when 'radio'
           el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
-          list = unless options.gen_from_list then options.manual_options else [
+          list = unless options.gen_from_list
+            options.manual_options or []
+          else [
             'List item 1 (Auto Genearted)'
             'List item 2 (Auto Genearted)'
             '... (Auto Genearted)'
@@ -731,8 +732,8 @@ ProjectFilterView
     initialize: (options) ->
       super options
       collection = @collection.fullCollection
-      @mediaFilter = new NavFilterView
-        el: find('.media-filter', @el)
+      @typeFilter = new NavFilterView
+        el: find('.type-filter', @el)
         field: 'type'
         collection: collection
       @projectFilter = new ProjectFilterView
@@ -754,11 +755,11 @@ ProjectFilterView
       @
     reload: ->
       super
-      @mediaFilter.clear()
+      @typeFilter.clear()
       @projectFilter.clear()
     render: ->
       super
-      @mediaFilter.render()
+      @typeFilter.render()
       @projectFilter.render()
       @
 

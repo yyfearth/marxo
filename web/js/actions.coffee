@@ -128,6 +128,16 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         if $eventBtn.length and (model.isNew() or not data.event?.id?)
           $eventBtn.parent().removeClass 'input-append'
           $eventBtn.remove()
+        # for page buttons
+        if @type is 'page' and contentId = model.get('content')?.id
+          url = "#content/#{contentId}"
+          console.warn @type, url
+          btnDesgin = find 'a.btn-design', @el
+          btnDesgin.removeAttribute 'disabled'
+          btnDesgin.href = url
+          btnPreview = find 'a.btn-preview', @el
+          btnPreview.removeAttribute 'disabled'
+          btnPreview.href = url + '/preview'
         # auto fill data and build ref
         @fill data
         @$el.data model: model, view: @
@@ -168,6 +178,13 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
             name = names.pop()
             _data = _data[key] ?= {} for key in names
             _data[name] = val
+      for n in ['content', 'event']
+        if data[n]?
+          _data = data[n]
+          _data.action_id = data.id if data.id?
+          _data.node_id = data.node_id if data.node_id?
+          _data.workflow_id = data.workflow_id if data.workflow_id?
+          _data.name or= data.name
       data
 
   ActionsMixin
