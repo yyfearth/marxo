@@ -15,42 +15,4 @@ import java.util.List;
 @Controller
 @RequestMapping("event{:s?}")
 public class EventController extends EntityController<Event> {
-	protected EventController() {
-		super();
-	}
-
-	@Override
-	public void preHandle() {
-		super.preHandle();
-	}
-
-	@Override
-	protected Query getDefaultQuery(Criteria criteria) {
-		return super.getDefaultQuery(criteria);
-	}
-
-	@Override
-	public Event create(@RequestBody Event entity, HttpServletResponse response) throws Exception {
-		return super.create(entity, response);
-	}
-
-	@Override
-	public Event read(@PathVariable String idString) throws Exception {
-		return super.read(idString);
-	}
-
-	@Override
-	public Event update(@Valid @PathVariable String idString, @Valid @RequestBody Event entity) throws Exception {
-		return super.update(idString, entity);
-	}
-
-	@Override
-	public Event delete(@PathVariable String idString) throws Exception {
-		return super.delete(idString);
-	}
-
-	@Override
-	public List<Event> search() {
-		return super.search();
-	}
 }

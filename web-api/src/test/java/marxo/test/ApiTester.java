@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Strings;
 import com.google.common.net.MediaType;
 import marxo.serialization.MarxoObjectMapper;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.StatusLine;
@@ -193,8 +194,15 @@ public class ApiTester implements Closeable {
 	}
 
 	public ApiTester matchContentType(MediaType mediaType) {
-		assert this.mediaType.type().equals(mediaType.type());
-		assert this.mediaType.subtype().equals(mediaType.subtype());
+		Assert.assertEquals(this.mediaType.type(), mediaType.type());
+		Assert.assertEquals(this.mediaType.subtype(), mediaType.subtype());
+		return this;
+	}
+
+	public ApiTester matchHeader(String name, String value) {
+		Header header = response.getFirstHeader(name);
+		Assert.assertNotNull(header);
+		Assert.assertEquals(value, header.getValue());
 		return this;
 	}
 
@@ -220,6 +228,14 @@ public class ApiTester implements Closeable {
 	/*
 	Others
 	 */
+
+	public CloseableHttpResponse getResponse() {
+		return response;
+	}
+
+	public Header getHeader(String name) {
+		return response.getFirstHeader(name);
+	}
 
 	@Override
 	public void close() throws IOException {

@@ -25,19 +25,18 @@ public abstract class BasicDataTests implements MongoDbAware, Loggable {
 	/**
 	 * Save everything in `entitiesToInsert`, and add them in `entitiesToRemove`. Also clear `entitiesToInsert`.
 	 */
-	public void insertEntities(BasicEntity... entities) {
-		if (entities.length > 0) {
-			List<BasicEntity> list = Lists.newArrayList(entities);
-			mongoTemplate.insertAll(list);
-			entitiesToRemove.addAll(list);
-		}
-	}
-
 	public void insertEntities(List<? extends BasicEntity> entities) {
 		if (entities.size() > 0) {
+			for (BasicEntity entity : entities) {
+				entity.setName(entity.getName() + " for " + getClass().getSimpleName());
+			}
 			mongoTemplate.insertAll(entities);
 			entitiesToRemove.addAll(entities);
 		}
+	}
+
+	public void insertEntities(BasicEntity... entities) {
+		insertEntities(Lists.newArrayList(entities));
 	}
 
 	@BeforeClass

@@ -51,7 +51,7 @@
 //	@Override
 //	public void afterClass() throws Exception {
 //
-//		FacebookWorker.stopAsync();
+//		FacebookWorker.stop();
 //
 //		super.afterClass();
 //	}

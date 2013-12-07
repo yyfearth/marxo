@@ -32,7 +32,7 @@
 //		thread.start();
 //	}
 //
-//	public static void stopAsync() {
+//	public static void stop() {
 //		facebookWorker.isStopped = true;
 //		try {
 //			thread.join(Seconds.seconds(10).toStandardDuration().getMillis());
