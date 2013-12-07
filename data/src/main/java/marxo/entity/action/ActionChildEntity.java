@@ -18,7 +18,10 @@ public abstract class ActionChildEntity extends NodeChildEntity {
 
 	@JsonIgnore
 	public Action getAction() {
-		return action;
+		if (actionId == null) {
+			return action = null;
+		}
+		return (action == null) ? (action = mongoTemplate.findById(actionId, Action.class)) : action;
 	}
 
 	@JsonIgnore
