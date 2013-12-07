@@ -6,6 +6,8 @@ import com.restfb.types.Post;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,5 +108,9 @@ public class Content extends ActionChildEntity {
 
 	public static Content get(ObjectId id) {
 		return mongoTemplate.findById(id, Content.class);
+	}
+
+	public static void remove(ObjectId objectId) {
+		mongoTemplate.findAndRemove(Query.query(Criteria.where("_id").is(objectId)), Content.class);
 	}
 }

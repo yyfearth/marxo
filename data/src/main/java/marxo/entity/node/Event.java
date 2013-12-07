@@ -5,6 +5,8 @@ import marxo.entity.action.ActionChildEntity;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 public class Event extends ActionChildEntity {
 	@JsonProperty("starts")
@@ -50,5 +52,9 @@ public class Event extends ActionChildEntity {
 
 	public static Event get(ObjectId id) {
 		return mongoTemplate.findById(id, Event.class);
+	}
+
+	public static void remove(ObjectId objectId) {
+		mongoTemplate.findAndRemove(Query.query(Criteria.where("_id").is(objectId)), Event.class);
 	}
 }

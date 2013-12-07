@@ -14,8 +14,4 @@ public abstract class RunnableEntity extends TenantChildEntity {
 	public Boolean getValidated() {
 		return isValidated;
 	}
-
-	public void wire() {
-
-	}
 }

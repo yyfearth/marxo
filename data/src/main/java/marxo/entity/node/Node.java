@@ -51,6 +51,7 @@ public class Node extends WorkflowChildEntity {
 		if (actions != null) {
 			for (Action action : actions) {
 				action.setNode(this);
+				action.wire();
 			}
 		}
 		super.wire();
@@ -211,5 +212,14 @@ public class Node extends WorkflowChildEntity {
 				action.save();
 			}
 		}
+	}
+
+	@Override
+	public void remove() {
+		for (Action action : getActions()) {
+			action.getContent().remove();
+			action.getEvent().remove();
+		}
+		super.remove();
 	}
 }

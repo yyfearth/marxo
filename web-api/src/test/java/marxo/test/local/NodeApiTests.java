@@ -2,7 +2,9 @@ package marxo.test.local;
 
 import com.google.common.net.MediaType;
 import marxo.entity.action.Action;
+import marxo.entity.action.Content;
 import marxo.entity.node.Node;
+import marxo.serialization.MarxoObjectMapper;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.ApiTester;
 import marxo.test.BasicApiTests;
@@ -15,6 +17,8 @@ import java.util.List;
 @ApiTestConfiguration("http://localhost:8080/api/nodes/")
 public class NodeApiTests extends BasicApiTests {
 	Node reusedNode;
+	Action reusedAction;
+	Content reusedContent;
 
 	@Test
 	public void createNode() throws Exception {
@@ -84,6 +88,63 @@ public class NodeApiTests extends BasicApiTests {
 
 		Node node = Node.get(reusedNode.id);
 		Assert.assertEquals(node.getName(), reusedNode.getName());
+	}
+
+	@Test(dependsOnMethods = "readNode")
+	public void updateNodeWithActionAndContent() throws Exception {
+		reusedNode.setName("Updated");
+
+		reusedAction = new Action(Action.Type.FACEBOOK);
+		reusedNode.addAction(reusedAction);
+		reusedAction.id = null;
+		reusedAction.nodeId = null;
+
+		entitiesToRemove.add(reusedAction);
+
+		reusedContent = new Content(Content.Type.FACEBOOK);
+		reusedAction.setContent(reusedContent);
+		reusedContent.id = null;
+		entitiesToRemove.add(reusedContent);
+
+		MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
+
+		logger.info(String.format("Node: %s", marxoObjectMapper.writeValueAsString(reusedNode)));
+
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
+			apiTester
+					.httpPut(reusedNode.id.toString(), reusedNode)
+					.send();
+			apiTester
+					.isOk()
+					.matchContentType(MediaType.JSON_UTF_8);
+			Node node = apiTester.getContent(Node.class);
+			Assert.assertNotNull(node);
+			Assert.assertEquals(node.getName(), reusedNode.getName());
+
+			Assert.assertEquals(node.getActions().size(), 4);
+			Action action = node.getActions().get(3);
+			Assert.assertNotNull(action);
+			Assert.assertEquals(action.nodeId, reusedNode.id);
+
+			Content content = action.getContent();
+			Assert.assertNotNull(content);
+			Assert.assertEquals(content.nodeId, reusedNode.id);
+			Assert.assertNotNull(content.actionId);
+		}
+
+		Node node = Node.get(reusedNode.id);
+		Assert.assertNotNull(node);
+		Assert.assertEquals(node.getName(), reusedNode.getName());
+
+		Assert.assertEquals(node.getActions().size(), 4);
+		Action action = node.getActions().get(3);
+		Assert.assertNotNull(action);
+		Assert.assertEquals(action.nodeId, reusedNode.id);
+
+		Content content = action.getContent();
+		Assert.assertNotNull(content);
+		Assert.assertEquals(content.nodeId, reusedNode.id);
+		Assert.assertNotNull(content.actionId);
 	}
 
 	@Test(dependsOnMethods = "updateNode")

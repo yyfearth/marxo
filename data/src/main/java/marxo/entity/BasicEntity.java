@@ -119,11 +119,13 @@ public abstract class BasicEntity implements MongoDbAware, Loggable {
 		return newEntity;
 	}
 
+	public void wire() {
+	}
+
 	/**
 	 * Also wire all references, which means database access. This means performance-critical.
 	 */
 	public void deepWire() {
-
 	}
 
 	public boolean validate(Errors errors) {
@@ -135,6 +137,7 @@ public abstract class BasicEntity implements MongoDbAware, Loggable {
 	 */
 
 	public void save() {
+		wire();
 		// After a little test, it seems that insert also update the document with the same ID.
 		mongoTemplate.save(this);
 	}

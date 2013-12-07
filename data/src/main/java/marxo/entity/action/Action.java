@@ -59,6 +59,9 @@ public class Action extends NodeChildEntity {
 		if (content != null) {
 			content.setAction(this);
 		}
+		if (event != null) {
+			event.setAction(this);
+		}
 		super.wire();
 	}
 
@@ -272,8 +275,25 @@ public class Action extends NodeChildEntity {
 		}
 	}
 
+	@Override
+	public void remove() {
+		if (contentId != null) {
+			Content.remove(contentId);
+		}
+
+		if (eventId != null) {
+			Event.remove(eventId);
+		}
+
+		super.remove();
+	}
+
 	public static Action get(ObjectId id) {
 		return mongoTemplate.findById(id, Action.class);
+	}
+
+	public static void remove(ObjectId id) {
+		mongoTemplate.findAndRemove(Query.query(Criteria.where("_id").is(id)), Action.class);
 	}
 
 	public static List<Action> get(List<ObjectId> actionIds) {
