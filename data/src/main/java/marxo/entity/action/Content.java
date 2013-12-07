@@ -17,8 +17,12 @@ public class Content extends ActionChildEntity {
 	}
 
 	public Content(Type type) {
-		this.type = type;
+		setType(type);
 	}
+
+	/*
+	Type
+	 */
 
 	public static enum Type {
 		DEFAULT,
@@ -28,7 +32,33 @@ public class Content extends ActionChildEntity {
 		PAGE,
 	}
 
-	public Type type = Type.DEFAULT;
+	protected Type type = Type.DEFAULT;
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
+
+		switch (type) {
+			case DEFAULT:
+				break;
+			case FACEBOOK:
+				records = new ArrayList<>();
+				comments = new ArrayList<>();
+
+				break;
+			case TWITTER:
+				break;
+			case EMAIL:
+				break;
+			case PAGE:
+				records = new ArrayList<>();
+				submissions = new ArrayList<>();
+				break;
+		}
+	}
 
 	/*
 	Facebook
@@ -43,8 +73,6 @@ public class Content extends ActionChildEntity {
 		}
 		return messageResponse.getId();
 	}
-
-	public List<Post> posts = new ArrayList<>();
 
 	public static class FacebookRecord {
 		public DateTime time;
@@ -61,8 +89,16 @@ public class Content extends ActionChildEntity {
 		}
 	}
 
-	public List<FacebookRecord> records = new ArrayList<>();
-	public List<Comment> comments = new ArrayList<>();
+	public List<FacebookRecord> records;
+	public List<Comment> comments;
+
+	/*
+	Page
+	 */
+
+	public String parsedMessage;
+	public List<Submission> submissions;
+	public List<Section> sections;
 
 	/*
 	DAO
