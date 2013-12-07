@@ -25,6 +25,6 @@ public class Condition extends TenantChildEntity {
 
 	@Override
 	public void save() {
-		throw new UnsupportedOperationException(String.format("%s should not be saved into database", getClass().getSimpleName()));
+		throw new UnsupportedOperationException(String.format("%s should not be saved into database", this));
 	}
 }
