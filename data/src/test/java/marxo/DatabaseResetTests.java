@@ -14,6 +14,7 @@ import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.user.UserType;
 import marxo.entity.workflow.Notification;
+import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.test.BasicDataTests;
 import marxo.tool.PasswordEncryptor;
@@ -312,10 +313,12 @@ public class DatabaseResetTests extends BasicDataTests {
 		reusedWorkflow.addNode(node1);
 
 		Action postFacebookAction1 = new Action(Action.Type.PAGE);
+		postFacebookAction1.status = RunStatus.STARTED;
 		postFacebookAction1.setName("Post to Facebook 1");
 		node1.addAction(postFacebookAction1);
 
 		Content facebookContent1 = new Content(Content.Type.PAGE);
+		facebookContent1.status = RunStatus.STARTED;
 		facebookContent1.setName("Contnet " + ++contentCount);
 		facebookContent1.description = String.format("Hello world for %s [%s]", getClass(), reusedWorkflow);
 		postFacebookAction1.setContent(facebookContent1);
