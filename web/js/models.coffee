@@ -56,6 +56,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       @state ?= {}
       for key, value of @defaultState
         @state[key] = value
+      @on 'add remove', => @_last_load = Date.now() - @_throttle + 100
       super options...
     load: (callback, {throttle} = {}) ->
       throttle ?= @_throttle
@@ -340,12 +341,24 @@ define 'models', ['module', 'lib/common'], (module) ->
       @unset 'links', silent: true
       super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
-      _cb = (wf) ->
+      _cb = (wf) =>
         if linkId
           link = wf.links.get linkId
         else if nodeId
           node = wf.nodes.get nodeId
           action = node.actions().get actionId if node and actionId
+        else if actionId # only action id
+          unless idx = @_action_index
+            idx = @_action_index = {}
+            wf.nodes.forEach (node) ->
+              node.actions().forEach (action) -> if action.id?
+                action.node = node
+                console.warn 'duplicated action id', action.id, action, node if idx[action.id]
+                idx[action.id] = action
+                return
+              return
+          action = idx[actionId]
+          node = action?.node
         callback? {node, link, action}
       if @loaded()
         _cb @

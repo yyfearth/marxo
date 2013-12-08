@@ -30,6 +30,8 @@ upload:
 	cp robots.txt test/
 	mkdir test/font
 	cp font/* test/font/
+	mkdir test/img
+	cp img/* test/img/
 	mkdir -p test/js/lib
 	cp js/lib/*.js test/js/lib
 	rm test/js/lib/*.min.js
