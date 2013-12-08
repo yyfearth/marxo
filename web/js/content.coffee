@@ -684,22 +684,27 @@ ProjectFilterView
     render: ->
       super
       model = @model
+      type = model.get('type').toUpperCase()
+      status = model.get('status').toUpperCase()
+
       # view
       view_btn = @_find 'view', 'a'
-      if model.has 'url'
-        view_btn.href = model.get 'url'
+      if type is 'PAGE' and status isnt 'IDLE'
+        view_btn.href = 'site.html#' + model.id
+        view_btn.title = 'View page in new window'
+      else if model.has('post_id') and type is 'FACEBOOK'
+        view_btn.href = 'https://www.facebook.com/' + model.get 'post_id'
       else
         @_hide view_btn
 
       # report
-      report_btn =  @_find 'report', 'a'
+      report_btn = @_find 'report', 'a'
       if model.has('records') or model.has('submissions')
         report_btn.href = "#content/#{model.id}/report"
       else
         @_hide report_btn
 
       # status
-      status = model.get('status').toUpperCase()
       if 'IDLE' is status
         @_hide report_btn
         @_hide 'preview' if 'PAGE' isnt model.get 'type'
@@ -709,6 +714,7 @@ ProjectFilterView
         # buttons pre post
         @_hide 'edit'
 
+      # currently not supported
       @_hide 'block'
       @_hide 'unblock'
       @
