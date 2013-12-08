@@ -54,8 +54,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @avatarEl.dataset.src ?= @avatarEl.src
       @avatarEl.onerror = -> @src = @dataset.src
       # init frames
-      @frames = {}
-      findAll('.frame', @el).forEach (frame) =>
+      @frames = el: find '#frames', @el
+      findAll('#frames > .frame', @el).forEach (frame) =>
+        $(frame).detach()
         @frames[frame.id] =
           id: frame.id
           el: frame
@@ -78,6 +79,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       super
     showFrame: (frame, name, sub) ->
       frame = @frames[frame]
+      $frames = $ @frames.el
       return unless frame?
       # console.log 'frame', frame
       unless frame.el.classList.contains 'active'
@@ -87,8 +89,10 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
           view = $.data oldFrame, 'view'
           if view then setTimeout ->
             view.trigger 'deactivate'
+            view.$el.detach()
           , 10
         find('#navbar li.active')?.classList.remove 'active'
+        $frames.append frame.el
         frame.el.classList.add 'active'
         $(window).resize()
         # console.log 'frame', frame
@@ -135,6 +139,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @show()
     show: ->
       @_hide_ts = clearTimeout @_hide_ts if @_hide_ts
+      @$parent.append @$el
       @el.style.visibility = 'visible'
       @el.classList.add 'active'
       @el.style.opacity = 1
@@ -144,6 +149,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @_hide_ts = setTimeout =>
         @_hide_ts = null
         @el.style.visibility = 'hidden'
+        @$el.detach()
       , SignInView::delay
       @
 
@@ -249,6 +255,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         @el.style.opacity = 0
         @el.style.display = 'block'
         @_disable false
+        @$parent.append @$el
         setTimeout =>
           @el.classList.add 'active'
           @el.style.opacity = 1
@@ -261,6 +268,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         @form.password.value = ''
         @_disable false
         @el.style.display = 'none'
+        @$el.detach()
       , @delay
       @
 

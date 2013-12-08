@@ -73,7 +73,6 @@ Service
       @model = new Service service: @service
       @events ?= {}
       @events.click ?= 'click'
-      @render = @render.bind @
       @_render = @_render.bind @
       @click = @click.bind @
       @changed = @changed.bind @
