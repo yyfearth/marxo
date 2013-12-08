@@ -9,6 +9,7 @@ define 'base', ['utils', 'models', 'lib/common'],
     initialize: (options) ->
       if @el?.tagName
         @el.view = @
+        @$parent = @$el.parent()
         @$el.data 'view', @
       if options?.parent
         @parent = options.parent
@@ -36,9 +37,6 @@ define 'base', ['utils', 'models', 'lib/common'],
       super
 
   class InnerFrameView extends View
-    # initialize: (options) ->
-    #   super options
-    #   return
 
   class FrameView extends View
     initialize: (options) ->
@@ -48,6 +46,7 @@ define 'base', ['utils', 'models', 'lib/common'],
     switchTo: (innerframe) ->
       innerframe = @[innerframe] if typeof innerframe is 'string'
       if innerframe and innerframe instanceof InnerFrameView
+        innerframe.$parent.append innerframe.$el
         unless innerframe.rendered
           innerframe.render()
           innerframe.rendered = true
@@ -58,6 +57,7 @@ define 'base', ['utils', 'models', 'lib/common'],
             oldFrame.classList.remove 'active'
             view = $.data oldFrame, 'view'
             view?.trigger 'deactivate'
+            view.$el.detach()
           innerframe.el.classList.add 'active'
           innerframe.trigger 'activate'
       else
@@ -103,19 +103,26 @@ define 'base', ['utils', 'models', 'lib/common'],
       @$el.on
         hide: (e) => if e.target is @el
           @trigger 'hide', @
+          return
         hidden: (e) => if e.target is @el and false isnt @trigger 'hidden', @
           @callback()
           @goBack() if @goBackOnHidden and location.hash[1..] isnt @goBackOnHidden
           @reset()
+          @$el.detach() if e.target is @el
+          return
         show: (e) => if e.target is @el
+          @$parent.append @$el if e.target is @el
           @trigger 'show', @
+          return
         shown: (e) => if e.target is @el
           autoFocusEl?.focus()
           @trigger 'shown', @
+          return
       # cancel dialog if hash changed
       @listenTo @router, 'route', =>
         # cancel if current hash isnt start with saved hash while popup
         @cancel() if @_hash and @_hash isnt location.hash.slice 0, @_hash.length
+      @$el.detach()
       @
     goBack: ->
       if @_hash is location.hash
@@ -316,7 +323,7 @@ define 'base', ['utils', 'models', 'lib/common'],
       @targetClassName = options.targetClassName or @targetClassName
       @allowEmpty = options.allowEmpty or @allowEmpty
       @emptyItem = options.emptyItem ? @emptyItem
-      @listenTo @collection, 'reset add remove', @render.bind @
+      @listenTo @collection, 'reset add remove', @render
       @events ?= {}
       @events['click .btn-refresh'] = => @fetch true
       @fetch false if options.auto
