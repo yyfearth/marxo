@@ -255,6 +255,7 @@ ProjectFilterView
       page_desc =
         name: data.get 'name'
         desc: data.get 'desc'
+      @url = "content/#{data.id}"
       @pageDesc.fill page_desc
       #@submitOptions.fill data.get 'options' if data.has 'options'
       sections = data.get('sections') or []
@@ -316,6 +317,7 @@ ProjectFilterView
       @iframe.classList.remove 'active'
       @btnPreview.classList.remove 'active'
       @btnSave.disabled = false
+      @url = ''
       @
     addSection: (data) ->
       view = new SectionEditor idx: @sections.length, parent: @
@@ -357,8 +359,10 @@ ProjectFilterView
         cls.remove 'active'
         btnCls.remove 'active'
         @btnSave.disabled = false
+        @router.navigate @url
       else
         # gen preview and show
+        @router.navigate @url + '/preview'
         @btnPreview.disabled = true
         @read (data) =>
           #console.log 'read', data
