@@ -200,6 +200,7 @@ ProjectFilterView
       @fill data
       posted = 'IDLE' isnt data.get('status').toUpperCase()
       @readOnlyHtml posted
+      @$el.find('form :input').prop 'readOnly', posted
       @btnSave.disabled = posted
       @
     fill: (data) -> # can only be called after rendered
@@ -263,6 +264,11 @@ ProjectFilterView
         @addSection section for section in sections
       else # add an empty section if sections have never been defined
         @addSection()
+      posted = @readonly = 'IDLE' isnt data.get('status').toUpperCase()
+      @pageDesc.readOnlyHtml posted
+      @$el.find('form :input').prop 'readOnly', posted
+      @$el.find('#new_section, form select').prop 'disabled', posted
+      @btnSave.disabled = true
       if action is 'preview'
         @showPreview {page_desc, sections}
         @btnSave.disabled = true
@@ -318,6 +324,7 @@ ProjectFilterView
       @btnPreview.classList.remove 'active'
       @btnSave.disabled = false
       @url = ''
+      @readonly = false
       @
     addSection: (data) ->
       view = new SectionEditor idx: @sections.length, parent: @
@@ -358,7 +365,7 @@ ProjectFilterView
         # hide
         cls.remove 'active'
         btnCls.remove 'active'
-        @btnSave.disabled = false
+        @btnSave.disabled = false or @readonly
         @router.navigate @url
       else
         # gen preview and show
