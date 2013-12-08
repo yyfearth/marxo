@@ -105,7 +105,7 @@ Projects
       @$projectForm = $ @form
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
-      @_renderSelect = _.throttle @_renderSelect.bind(@), 100
+      @_renderSelect = _.throttle @_renderSelect.bind(@), 100, trailing: false
       @on 'shown', => # auto foucs
         select = @form.template_id
         if select.value
@@ -139,7 +139,7 @@ Projects
       select = @form.template_id
       select.disabled = true
       @workflows.load (ignored, ret) =>
-        @_renderSelect() if 'loaded' is ret
+        @_renderSelect() if 'loaded' is ret or not @sidebar.rendered
         @fill data
         unless model.isNew()
           if model.has 'created_by'
@@ -252,6 +252,7 @@ Projects
         frag_links.appendChild _renderSidebarItem link, i
       $sidebar.find('.node-header').after frag_nodes
       $sidebar.find('.link-header').after frag_links
+      @sidebar.rendered = true
       @wfDiagram.draw project
       return
     _renderSidebarItem: (model, i) ->
@@ -264,11 +265,6 @@ Projects
       $a.tooltip title: name, placement: 'right', container: @el if name.length > 15
       el.appendChild a
       el
-    render: ->
-      unless @rendered
-        @workflows.load => @_renderSelect()
-        @listenTo @workflows, 'reset add remove sync', @_renderSelect
-      super
     reset: ->
       @$wfbtns.hide()
       @$el.find('.control-group:has(#project_created_at)').hide()
@@ -388,12 +384,13 @@ Projects
         return
     collection: Projects.projects
     initialize: (options) ->
+      diagramEl = find '.wf-diagram', @el
+      @wfDiagram = new WorkflowDiagramView el: diagramEl
+      @statusView = new ProjectStatusView el: $(diagramEl).next()
       @$title = $ find '.project-name', @el
       @$desc = $ find '.project-desc', @el
       @$status = $ find '.label-status > span', @el
       @btnEdit = find '.btn-edit', @el
-      @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
-      @statusView = new ProjectStatusView el: $(@wfDiagram).next()
       @list = new NavListView
         el: find('.project-list', @el)
         auto: false
@@ -504,6 +501,7 @@ Projects
         highlight null
       @
     render: ->
+      @statusView.render()
       @list.fetch()
       super
 
@@ -526,7 +524,7 @@ Projects
     load: (wf, force) ->
       if force or @model isnt wf
         @model = wf
-        @render()
+        @_renderList()
       @
     reset: -> @load null, true
     select: ({link, node, action} = {}) ->
@@ -653,9 +651,6 @@ Projects
       frag.appendChild li
       @$detail.removeClass('node-actions').addClass('link-condition').append frag
       return
-    render: ->
-      @_renderList()
-      super
 
   # Manager
 
@@ -705,8 +700,9 @@ Projects
 
   class ProjectActionCell extends Backgrid.ActionsCell
     render: ->
-      # TODO: show buttons depend on status
       super
+      @_hide 'remove' if /^STARTED$|^PAUSED$/i.test @model.get 'status'
+      @
 
   class ProjectManagemerView extends ManagerView
     columns: [
@@ -750,6 +746,7 @@ Projects
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
+      models = models.filter (model) -> /^STARTED$|^PAUSED$/i.test model.get 'status'
       names = models.map (model) -> model.get 'name'
       # TODO: project life cycle (engine)
       # TODO: started projects cannot be deleted
