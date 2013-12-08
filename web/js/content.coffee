@@ -1,7 +1,7 @@
 "use strict"
 
 define 'content', [
-  'base', 'models', 'manager'
+  'base', 'models', 'manager', 'report'
   'lib/jquery-ui'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
@@ -24,7 +24,7 @@ Content
 ManagerView
 NavFilterView
 ProjectFilterView
-}) ->
+}, ReportView) ->
 
   class ContentFrameView extends FrameView
     initialize: (options) ->
@@ -33,10 +33,14 @@ ProjectFilterView
       @editor = new MessageEditor el: '#msg_editor', parent: @
       @composer = new EmailComposer el: '#email_composer', parent: @
       @designer = new PageDesigner el: '#page_designer', parent: @
+      @reporter = new ReportView el: '#report_viewer', parent: @
       @
     open: (name, arg) ->
       if name
-        @popup name, arg, (action, data) ->
+        if arg is 'report'
+          @reporter.popup {}, (action, data) ->
+            console.log 'report dialog', action, data
+        else @popup name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
@@ -50,6 +54,7 @@ ProjectFilterView
         @designer.cancel()
         @editor.cancel()
         @composer.cancel()
+        @reporter.cancel()
       @
     popup: (data, action, callback) ->
       if typeof data is 'string'

@@ -1,6 +1,6 @@
 'use strict'
 
-define 'report', ['base', 'models', 'lib/d3v3', 'lib/nvd3'],
+define 'report', ['base', 'models'],
 ({
 find
 #findAll
@@ -9,9 +9,8 @@ find
 ModalDialogView
 }, {
 # Tenant
-Reports
 Report
-}, d3, nv) ->
+}) ->
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'
@@ -21,6 +20,9 @@ Report
       @$el.find('.nav-tabs a[data-toggle=tab]:eq(1)').tab 'show'
       @
     render: ->
+      @_render() unless @rendered
+      super
+    _render: -> require ['lib/d3v3', 'lib/nvd3'], (d3, nv) =>
       setTimeout => # after shown (test only)
 
         vote = [
@@ -932,7 +934,7 @@ Report
         ]
 
       , 550
-      super
+      return
     pieChart: (el, data, labelType) ->
       nv.addGraph ->
         chart = nv.models.pieChart()

@@ -1,0 +1,34 @@
+#report_viewer.modal.modal-full.hide.fade(aria-labelledby='report_viewer_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    ul.nav.nav-tabs
+      li
+        h3 Report Details
+      li
+        a(href='#report_overview', data-toggle='tab') Overview
+      li.active
+        a(href='#report_charts', data-toggle='tab') Evaluated Charts
+      li
+        a(href='#report_feedback', data-toggle='tab') Feedback Collection
+      li
+        a(href='#report_files', data-toggle='tab') Submitted Results
+  .modal-body.tab-content
+    #report_overview.tab-pane
+      h4 Report Overview
+    #report_charts.tab-pane.active
+      //- stacked area chart must be in top for tooltip position
+      div.chart.with-3d-shadow.with-transitions#stacked
+        h4 Stacked Area Chart
+        svg
+      div.span5.chart#pie
+        h4 Pie Chart
+        svg
+      div.span6.chart#bar
+        h4 Bar Chart
+        svg
+    #report_feedback.tab-pane
+      h4 Feedback Collection
+    #report_files.tab-pane
+      h4 Submitted Results
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
