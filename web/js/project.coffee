@@ -388,12 +388,13 @@ Projects
         return
     collection: Projects.projects
     initialize: (options) ->
+      diagramEl = find '.wf-diagram', @el
+      @wfDiagram = new WorkflowDiagramView el: diagramEl
+      @statusView = new ProjectStatusView el: $(diagramEl).next()
       @$title = $ find '.project-name', @el
       @$desc = $ find '.project-desc', @el
       @$status = $ find '.label-status > span', @el
       @btnEdit = find '.btn-edit', @el
-      @wfDiagram = new WorkflowDiagramView el: find '.wf-diagram', @el
-      @statusView = new ProjectStatusView el: $(@wfDiagram).next()
       @list = new NavListView
         el: find('.project-list', @el)
         auto: false
@@ -504,6 +505,7 @@ Projects
         highlight null
       @
     render: ->
+      @statusView.render()
       @list.fetch()
       super
 
@@ -526,7 +528,7 @@ Projects
     load: (wf, force) ->
       if force or @model isnt wf
         @model = wf
-        @render()
+        @_renderList()
       @
     reset: -> @load null, true
     select: ({link, node, action} = {}) ->
@@ -653,9 +655,6 @@ Projects
       frag.appendChild li
       @$detail.removeClass('node-actions').addClass('link-condition').append frag
       return
-    render: ->
-      @_renderList()
-      super
 
   # Manager
 
