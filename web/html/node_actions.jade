@@ -29,9 +29,10 @@ mixin track_checkbox
     input(type='checkbox', name='tracked', checked)
     | Track
 
-mixin event_schedule
-  label.inline(title='Duration (e.g. 10 days)\nLeft blank for available until project ends', data-placement='right')
-    .input-append
+mixin event_schedule(msg)
+  label.inline
+    | #{msg}
+    .input-append(title='Duration (e.g. 10 days)\nLeft blank for available until project ends', data-placement='right')
       input.input-small(type='text', name='event.duration', placeholder='e.g. 30 days')
       a.btn.btn-event.icon-calendar
 
@@ -62,7 +63,7 @@ mixin actions_thumb
     a.action-thumb(href='#action:email',
     title='Send email to selected email addresses')
       | Send Email
-  li.nav-header Schedule
+  li.nav-header Scheduling
   li
     a.action-thumb(href='#action:wait',
     title='Create an event in calendar and wait')
@@ -70,7 +71,7 @@ mixin actions_thumb
   li
     a.action-thumb(href='#action:trigger',
     title='Pause until user trigger')
-      | User Trigger
+      | Pause
 
 //- show in the actions box
 #actions_tpl.tpl
@@ -168,7 +169,9 @@ mixin actions_thumb
       +box_icons
     form.box-content
       +action_name_key
-      +event_schedule('Duration')
+      ul.action-bar
+        li
+          +event_schedule('Duration')
       .help-block
         | It will create an event in the Calendar, and notifications will be sent before its starts or ends.
         br
@@ -176,12 +179,12 @@ mixin actions_thumb
 
   .tpl(name='trigger')
     .box-header.well
-      h4 User Trigger
+      h4 Pause
       +box_icons
     form.box-content
       +action_name_key
       input(type='hidden', name='duration', value='')
       .help-block
-        | It will create an event in the Calendar, and notifications will be sent before its starts.
-        br
         | It will pause until user trigger to continue.
+        br
+        | It will not create an event in the Calendar.
