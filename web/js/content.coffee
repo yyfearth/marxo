@@ -749,19 +749,19 @@ ProjectFilterView
         el: find('ul.project-list', @el)
         collection: collection
       @refresh = @refresh.bind @
-      @on
-        block: @block.bind @
-        unblock: @unblock.bind @
+      #@on
+      #  block: @block.bind @
+      #  unblock: @unblock.bind @
       @
-    block: (model) ->
-      if confirm 'Are you sure to block this content to post to its media?'
-        model.save {status: 'BLOCKED'}, wait: true, success: @refresh
-      @
-    unblock: (model) ->
-      # TODO: check if it can be unlocked (it may expired)
-      if confirm 'Are you sure to unblock this content and post to its media?'
-        model.save {status: 'WAITING'}, wait: true, success: @refresh
-      @
+    #block: (model) ->
+    #  if confirm 'Are you sure to block this content to post to its media?'
+    #    model.save {status: 'BLOCKED'}, wait: true, success: @refresh
+    #  @
+    #unblock: (model) ->
+    #  # TODO: check if it can be unlocked (it may expired)
+    #  if confirm 'Are you sure to unblock this content and post to its media?'
+    #    model.save {status: 'WAITING'}, wait: true, success: @refresh
+    #  @
     reload: ->
       super
       @typeFilter.clear()
