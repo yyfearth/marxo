@@ -170,7 +170,7 @@ require [
       $el.trigger 'signedin', [user]
       $go_console = $el.find('#go_console')
       if user.has 'tenant_id'
-        $go_console.prop 'href', ROOT + '/../console/'
+        $go_console.prop 'href', './' # !!! ROOT + '/../console/'
       else
         $go_console.parent('li').remove()
       window.onunload = ->
@@ -218,6 +218,16 @@ require [
             throw new Error "connect #{name} not supported yet"
         return
       @$el.find('[title]').tooltip placement: 'bottom', container: @$form, delay: 300
+      @$el.on
+        show: (e) =>
+          @$parent.append @$el if e.target is @el
+          return
+        hidden: (e) =>
+          @$el.detach() if e.target is @el
+          return
+      @$parent = $el.parent()
+      @$el.detach()
+      return
       @
     _setSex: (sex = '') ->
       $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
@@ -377,12 +387,15 @@ require [
   class ContentView extends Backbone.View
     $container: $('#content')
     show: ->
+      @hide()
       @render() unless @rendered
-      @$container.empty().append @$el
+      @$container.append @$el
+      @$thumb?.addClass 'active'
       @
     hide: ->
       @$el.detach()
       @$container.empty()
+      @$thumb?.removeClass 'active'
       @
     render: ->
       @rendered = true
@@ -511,7 +524,7 @@ require [
       , 10
       html
     _renderInput: (data, i) ->
-      type = data.type or ''
+      type = (data.type or '').toLowerCase()
       options = data.options or {}
       tpl = @tpl()
       switch type
@@ -541,6 +554,7 @@ require [
     render: ->
       if @rendered or @model.has 'name'
         @_render()
+        @model.fetch reset: true # for visit count inc
       else
         @update()
       super
@@ -559,19 +573,32 @@ require [
 
   class PageListView extends ContentView
     collection: Pages.pages
-    render: ->
+    $thumb: $('.navbar li:has(>a.icon-project)')
+    _render: ->
+      projects = @collection.groupBy 'workflow_id'
+      $list = $('<ul>', class: 'nav nav-pills nav-stacked')
+      for own id, project of projects
+        # TODO: add project name
+        for page in project #if /^PAGE$/i.test page.get('type')
+          name = page.get 'name'
+          name += ' (Ended)' if /^FINISHED$/i.test page.get 'status'
+          $list.append $('<li>').append $ '<a>',
+            href: "##{page.id}"
+            text: page.get 'name'
+      @$el.html('<h3>Projects</h3>').append $list
+      return
+    update: ->
       @collection.fetch
         reset: true
-        success: (col) =>
-          $list = $('<ul>')
-          col.forEach (page) -> if /^PAGE$/i.test page.get('type')
-            $list.append $('<li>').append $ '<a>', href: "##{page.id}", text: page.get 'name'
-          @$el.empty().append $list
-        error: =>
-          @$el.html("Failed to get the page list")
+        success: => @_render()
+        error: => @$el.html('<h3>Projects</h3><p>Failed to get the page list</p>')
+      @
+    show: ->
+      @update() unless @collection.length
       super
 
   class HomeView extends ContentView
+    $thumb: $('.navbar li:has(>a.icon-home)')
     el: $('#home_page').removeClass('tpl').detach()
 
   # Router
@@ -601,7 +628,7 @@ require [
 
   # EP
   window.user_profile = new UserProfileView
-  window.router = new Router
+  Backbone.View::router = new Router
   Backbone.history.start()
 
   return
