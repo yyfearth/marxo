@@ -524,7 +524,7 @@ require [
       , 10
       html
     _renderInput: (data, i) ->
-      type = data.type or ''
+      type = (data.type or '').toLowerCase()
       options = data.options or {}
       tpl = @tpl()
       switch type
