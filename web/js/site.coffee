@@ -170,7 +170,7 @@ require [
       $el.trigger 'signedin', [user]
       $go_console = $el.find('#go_console')
       if user.has 'tenant_id'
-        $go_console.prop 'href', ROOT + '/../console/'
+        $go_console.prop 'href', './' # !!! ROOT + '/../console/'
       else
         $go_console.parent('li').remove()
       window.onunload = ->
