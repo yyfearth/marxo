@@ -218,6 +218,16 @@ require [
             throw new Error "connect #{name} not supported yet"
         return
       @$el.find('[title]').tooltip placement: 'bottom', container: @$form, delay: 300
+      @$el.on
+        show: (e) =>
+          @$parent.append @$el if e.target is @el
+          return
+        hidden: (e) =>
+          @$el.detach() if e.target is @el
+          return
+      @$parent = $el.parent()
+      @$el.detach()
+      return
       @
     _setSex: (sex = '') ->
       $sex = @$sex.filter "[value='#{sex.toLowerCase()}']"
@@ -377,12 +387,15 @@ require [
   class ContentView extends Backbone.View
     $container: $('#content')
     show: ->
+      @hide()
       @render() unless @rendered
-      @$container.empty().append @$el
+      @$container.append @$el
+      @$thumb?.addClass 'active'
       @
     hide: ->
       @$el.detach()
       @$container.empty()
+      @$thumb?.removeClass 'active'
       @
     render: ->
       @rendered = true
@@ -559,6 +572,7 @@ require [
 
   class PageListView extends ContentView
     collection: Pages.pages
+    $thumb: $('.navbar li:has(>a.icon-project)')
     render: ->
       @collection.fetch
         reset: true
@@ -572,6 +586,7 @@ require [
       super
 
   class HomeView extends ContentView
+    $thumb: $('.navbar li:has(>a.icon-home)')
     el: $('#home_page').removeClass('tpl').detach()
 
   # Router
