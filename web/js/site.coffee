@@ -573,16 +573,27 @@ require [
   class PageListView extends ContentView
     collection: Pages.pages
     $thumb: $('.navbar li:has(>a.icon-project)')
-    render: ->
+    _render: ->
+      projects = @collection.groupBy 'workflow_id'
+      $list = $('<ul>', class: 'nav nav-pills nav-stacked')
+      for own id, project of projects
+        # TODO: add project name
+        for page in project #if /^PAGE$/i.test page.get('type')
+          name = page.get 'name'
+          name += ' (Ended)' if /^FINISHED$/i.test page.get 'status'
+          $list.append $('<li>').append $ '<a>',
+            href: "##{page.id}"
+            text: page.get 'name'
+      @$el.html('<h3>Projects</h3>').append $list
+      return
+    update: ->
       @collection.fetch
         reset: true
-        success: (col) =>
-          $list = $('<ul>')
-          col.forEach (page) -> if /^PAGE$/i.test page.get('type')
-            $list.append $('<li>').append $ '<a>', href: "##{page.id}", text: page.get 'name'
-          @$el.empty().append $list
-        error: =>
-          @$el.html("Failed to get the page list")
+        success: => @_render()
+        error: => @$el.html('<h3>Projects</h3><p>Failed to get the page list</p>')
+      @
+    show: ->
+      @update() unless @collection.length
       super
 
   class HomeView extends ContentView
