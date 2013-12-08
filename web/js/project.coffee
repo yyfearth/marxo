@@ -105,7 +105,7 @@ Projects
       @$projectForm = $ @form
       @$actions = $ find '.node-actions', @el
       @dataEditor = new NodeLinkDataEditor el: @$nodeLinkSection[0], actionEl: @$actions[0]
-      @_renderSelect = _.throttle @_renderSelect.bind(@), 100
+      @_renderSelect = _.throttle @_renderSelect.bind(@), 100, trailing: false
       @on 'shown', => # auto foucs
         select = @form.template_id
         if select.value
@@ -264,11 +264,6 @@ Projects
       $a.tooltip title: name, placement: 'right', container: @el if name.length > 15
       el.appendChild a
       el
-    render: ->
-      unless @rendered
-        @workflows.load => @_renderSelect()
-        @listenTo @workflows, 'reset add remove sync', @_renderSelect
-      super
     reset: ->
       @$wfbtns.hide()
       @$el.find('.control-group:has(#project_created_at)').hide()
