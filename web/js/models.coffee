@@ -56,6 +56,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       @state ?= {}
       for key, value of @defaultState
         @state[key] = value
+      @on 'add remove', => @_last_load = Date.now() - @_throttle + 100
       super options...
     load: (callback, {throttle} = {}) ->
       throttle ?= @_throttle
