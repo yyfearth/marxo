@@ -190,7 +190,7 @@ Workflows
     initialize: (options) ->
       super options
       # fix for backgrid.paginator re-render
-      @listenTo @collection, 'reset', @render.bind @
+      @listenTo @collection, 'reset', @render
     render: ->
       super
       if @collection.state.totalPages < 2

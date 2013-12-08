@@ -362,7 +362,7 @@ Action
         @stopListening @nodes if @nodes
         @nodes = nodes
         if nodes
-          render = @render.bind @
+          render = @render
           @listenTo nodes, 'reset', render
           @listenTo nodes, 'add', render
           @listenTo nodes, 'remove', render

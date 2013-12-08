@@ -13,6 +13,8 @@ define 'base', ['utils', 'models', 'lib/common'],
       if options?.parent
         @parent = options.parent
         @parentEl = @parent.el
+      @render = @render.bind @
+      @_super_render = @_super_render.bind @
       @
     delayedTrigger: (eventName, delay = 10, args...) ->
       timeout_key = "_#{eventName}_timtout"
