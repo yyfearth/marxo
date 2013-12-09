@@ -64,10 +64,14 @@ public class ControllerExceptionHandler implements Loggable {
 
 	@ExceptionHandler({NoSuchRequestHandlingMethodException.class, IllegalArgumentException.class})
 	public ResponseEntity<ErrorJson> handleNotFound(Exception e) {
-		logger.debug(e.getMessage());
-		logger.debug(StringTool.exceptionToString(e));
+		if (logger.isDebugEnabled()) {
+			logger.debug(e.getMessage());
+			logger.debug(StringTool.exceptionToString(e));
 
-		return new ResponseEntity<>(new ErrorJson(String.format("Cannot find handling [%s] %s", e.getClass().getSimpleName(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(new ErrorJson(String.format("Cannot find handling [%s] %s", e.getClass().getSimpleName(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
+		}
+
+		return new ResponseEntity<>(new ErrorJson("Cannot find handling"), HttpStatus.NOT_FOUND);
 	}
 
 	// This application only
