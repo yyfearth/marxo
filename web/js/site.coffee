@@ -554,6 +554,7 @@ require [
     render: ->
       if @rendered or @model.has 'name'
         @_render()
+        @model.fetch reset: true # for visit count inc
       else
         @update()
       super
@@ -627,7 +628,7 @@ require [
 
   # EP
   window.user_profile = new UserProfileView
-  window.router = new Router
+  Backbone.View::router = new Router
   Backbone.history.start()
 
   return
