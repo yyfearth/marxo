@@ -13,7 +13,6 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -72,11 +71,6 @@ public abstract class BasicEntity implements MongoDbAware, Loggable {
 	public String description = "";
 	@Field(order = 3)
 	protected String name = "";
-	@Transient
-	protected String objectType;
-
-	@JsonIgnore
-	protected static final Sort modifiedTimeSort = new Sort(Sort.Direction.ASC, "time");
 
 	public String getName() {
 		return name;
@@ -88,6 +82,9 @@ public abstract class BasicEntity implements MongoDbAware, Loggable {
 			key = name.replaceAll("[^\\w]+", "_").toLowerCase();
 		}
 	}
+
+	@Transient
+	protected String objectType;
 
 	public String getObjectType() {
 		if (objectType == null) {
