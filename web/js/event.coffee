@@ -376,6 +376,42 @@ Event
 
   # Event Manager
 
+  class EventSchduleCell extends Backgrid.StringCell
+    className: 'datetime-cell'
+    render: ->
+      starts = @_getDate 'starts'
+      ends = @_getDate 'ends'
+      duration = Number(@model.get 'duration') or 0
+      buf = []
+      if starts
+        buf.push starts.toLocaleString()
+        buf.push '-'
+        if ends
+          buf.push ends.toLocaleString()
+          duration = ends.getTime() - starts.getTime() unless duration
+        else
+          buf.push 'Project ends'
+      if duration
+        if duration isnt ends.getTime() - starts.getTime()
+          console.error 'duration and starts/ends not matched', duration, starts, ends
+        buf.push "(#{DurationConvertor.stringify duration})"
+      else
+        buf.push '(Skip manully or until project ends)'
+      @el.textContent = buf.join ' '
+      @
+    _getDate: (name) ->
+      datetime = @model.get name
+      if datetime
+        try
+          date = new Date datetime
+          date = null if isNaN date.getTime()
+        catch
+          date = null
+        console.error 'unsupported datetime', datetime unless date?
+        date
+      else
+        null
+
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
       @_hide 'skip' unless /^IDLE$|^STARTED$/i.test @model.get 'status'
@@ -388,8 +424,13 @@ Event
       'name:event'
       'workflow'
       'node_action'
-      'type'
+      #'type'
       'status'
+    ,
+      name: 'duration'
+      label: 'Schedule'
+      cell: EventSchduleCell
+      editable: false
     ,
       name: 'event'
       label: ''
