@@ -139,7 +139,7 @@ Projects
       select = @form.template_id
       select.disabled = true
       @workflows.load (ignored, ret) =>
-        @_renderSelect() if 'loaded' is ret
+        @_renderSelect() if 'loaded' is ret or not @sidebar.rendered
         @fill data
         unless model.isNew()
           if model.has 'created_by'
@@ -252,6 +252,7 @@ Projects
         frag_links.appendChild _renderSidebarItem link, i
       $sidebar.find('.node-header').after frag_nodes
       $sidebar.find('.link-header').after frag_links
+      @sidebar.rendered = true
       @wfDiagram.draw project
       return
     _renderSidebarItem: (model, i) ->
