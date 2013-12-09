@@ -268,7 +268,7 @@ ProjectFilterView
       @pageDesc.readOnlyHtml posted
       @$el.find('form :input').prop 'readOnly', posted
       @$el.find('#new_section, form select').prop 'disabled', posted
-      @btnSave.disabled = true
+      @btnSave.disabled = posted
       if action is 'preview'
         @showPreview {page_desc, sections}
         @btnSave.disabled = true
