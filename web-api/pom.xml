@@ -80,6 +80,14 @@
             <version>${spring-security.version}</version>
         </dependency>
 
+        <!-- Utilities -->
+        <dependency>
+            <!-- For multipart resolver -->
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>com.marxo</groupId>

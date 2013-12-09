@@ -16,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -122,6 +123,11 @@ public class ControllerExceptionHandler implements Loggable {
 		return new ResponseEntity<>(new ErrorJson("Cannot connect to the database"), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	@ExceptionHandler({MaxUploadSizeExceededException.class})
+	public ResponseEntity<ErrorJson> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+		return new ResponseEntity<>(new ErrorJson(String.format("The file is too large to be saved")), HttpStatus.BAD_REQUEST);
+	}
+
 	@ExceptionHandler({NotImplementedException.class})
 	public ResponseEntity<ErrorJson> handleNotImplementedException(NotImplementedException e) {
 		return new ResponseEntity<>(new ErrorJson("Well... you are using a working-in-progress project. This part isn't done yet."), HttpStatus.NOT_IMPLEMENTED);
@@ -129,7 +135,8 @@ public class ControllerExceptionHandler implements Loggable {
 
 	@ExceptionHandler({Exception.class})
 	public ResponseEntity<ErrorJson> handleOtherException(Exception e) {
-		logger.error(StringTool.exceptionToString(e));
-		return new ResponseEntity<>(new ErrorJson("Congratulations! You broke the server: [" + e.getClass().getSimpleName() + "] " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+		String message = String.format("Exception is not captured [%s] %s", e.getClass(), e.getMessage());
+		logger.error(message);
+		return new ResponseEntity<>(new ErrorJson(message), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

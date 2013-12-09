@@ -17,6 +17,7 @@
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
                 <property name="objectMapper" ref="marxoObjectMapper"/>
             </bean>
+            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
         </mvc:message-converters>
     </mvc:annotation-driven>
     <bean id="marxoObjectMapper" class="marxo.serialization.MarxoObjectMapper"/>
@@ -43,6 +44,10 @@
                 </bean>
             </list>
         </property>
+    </bean>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="100000000"/>
     </bean>
 
     <!--<bean name="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">-->
