@@ -1,6 +1,6 @@
 'use strict'
 
-define 'report', ['base', 'models', 'lib/d3v3', 'lib/nvd3'],
+define 'report', ['base', 'models'],
 ({
 find
 #findAll
@@ -9,18 +9,103 @@ find
 ModalDialogView
 }, {
 # Tenant
-Reports
+ROOT
 Report
-}, d3, nv) ->
+}) ->
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'
-    goBackOnHidden: 'report'
+    goBackOnHidden: 'content'
+    events:
+      'click .nav-tabs li.disabled': (e) ->
+        e.stopImmediatePropagation()
+        false
+    popup: (model, callback) ->
+      super model, callback
+      @model = model
+      console.log model
+      @_renderRecords()
+      @_renderSubmissions()
+      @
+    _disableTab: (el) ->
+      @$el.find("[target=#{el}]").removeAttr('href').parent('li').addClass 'disabled'
+      return
+    _renderRecords: ->
+      el = '#report_feedback'
+      records = @model.get 'records'
+      unless records?.length
+        @_disableTab el
+      else
+        # TODO: stack area chart with records
+        @$el.find(el).html "<pre><code>#{JSON.stringify records, null, 4}</code></pre>"
+      return
+    _renderSubmissions: ->
+      el = '#report_submissions'
+      sections = @model.get 'sections'
+      unless sections?.length
+        @_disableTab el
+      else
+        submissions = @model.get 'submissions'
+        unless submissions?.length
+          $table = '<div class="text-center"><em class="muted">No submission yet</em></div>'
+        else
+          col = []
+          $thead = $('<tr>').append '<th>#</th>'
+          for section, i in sections
+            if section.type and 'none' isnt section.type.toLowerCase()
+              $thead.append $('<th>', text: section.name)
+              section.index = i
+              col.push section
+          $thead.append '<th>Submitted By</th><th>Submitted At</th>'
+          $table = $('<table>', class: 'table table-hover').append $thead
+          for submission, i in submissions then if submission.sections?.length
+            $row = $('<tr>').append $('<td>', text: i + 1)
+            for {index, type, options} in col
+              $row.append $cell = $('<td>')
+              val = submission.sections[index]
+              unless val?
+                $cell.html '<td class="muted">-</td>'
+                continue
+              console.log 'type', type
+              switch type.toLowerCase()
+                when 'file'
+                  $cell.append $ '<a>', class: 'icon-download', href: "#{ROOT}/#{val}/download", text: 'Download'
+                  $cell.append ' '
+                  $cell.append $ '<a>',
+                    class: 'icon-link-ext'
+                    href: "#{ROOT}/#{val}", target: '_blank'
+                when 'radio'
+                  if options.manual_options?.length
+                    $cell.text options.manual_options[val]
+                  else
+                    # TODO: auto gen list
+                    console.log 'TODO: auto gen list'
+                when 'html'
+                  $cell.text $('<div>').html(val).text()
+                else
+                  $cell.text val
+            $row.append $('<td>', text: "#{submission.name} <#{submission.key}>")
+            $row.append $('<td>', text: new Date(submission.created_at).toLocaleString())
+            $table.append $row
+        @$el.find(el).empty().append($table)
+        .append "<pre><code>#{JSON.stringify submissions, null, 4}</code></pre>" # test
+      return
     reset: ->
+      @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
+        ($thumb = $ @).attr('href', $thumb.attr 'target').parent('li').removeClass 'disabled'
+        return
+      #@$el.find('.tab-content > .tab-pane').empty()
       # test only
       @$el.find('.nav-tabs a[data-toggle=tab]:eq(1)').tab 'show'
       @
     render: ->
+      @_render() unless @rendered
+
+      super
+    _render: -> require ['lib/d3v3', 'lib/nvd3'], (d3, nv) =>
+      $el = @$el.find("[target='#report_charts']")
+      $el.prop 'href', $el.attr 'target'
+
       setTimeout => # after shown (test only)
 
         vote = [
@@ -932,7 +1017,7 @@ Report
         ]
 
       , 550
-      super
+      return
     pieChart: (el, data, labelType) ->
       nv.addGraph ->
         chart = nv.models.pieChart()

@@ -572,6 +572,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       /CONNECTED/i.test @get 'status'
 
   { # exports
+  ROOT
   Entity
   Collection
   ManagerCollection
