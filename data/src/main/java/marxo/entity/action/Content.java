@@ -78,15 +78,15 @@ public class Content extends ActionChildEntity {
 
 	public static class FacebookRecord {
 		public DateTime time;
-		public long likesCount = 0;
-		public long commentsCount = 0;
-		public long sharesCount = 0;
+		public long likesCount;
+		public long commentsCount;
+		public long sharesCount;
 
 		public static FacebookRecord fromPost(Post post) {
 			FacebookRecord facebookRecord = new FacebookRecord();
-			facebookRecord.likesCount = post.getLikesCount();
-			facebookRecord.sharesCount = post.getSharesCount();
-			facebookRecord.commentsCount = post.getComments().getCount();
+			facebookRecord.likesCount = (post.getLikesCount() == null) ? 0 : post.getLikesCount();
+			facebookRecord.sharesCount = (post.getSharesCount() == null) ? 0 : post.getSharesCount();
+			facebookRecord.commentsCount = (post.getComments() == null || post.getComments().getCount() == null) ? 0 : post.getComments().getCount();
 			return facebookRecord;
 		}
 	}
