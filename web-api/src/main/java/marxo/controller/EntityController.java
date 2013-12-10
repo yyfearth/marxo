@@ -82,12 +82,9 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Entity read(@PathVariable String idString) throws Exception {
-		if (!ObjectId.isValid(idString)) {
-			throw new InvalidObjectIdException(idString);
-		}
+		ObjectId objectId = stringToObjectId(idString);
 
-		ObjectId objectId = new ObjectId(idString);
-		criteria.and("id").is(objectId);
+		criteria.and("_id").is(objectId);
 		Entity entity = mongoTemplate.findOne(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
@@ -101,12 +98,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Entity update(@Valid @PathVariable String idString, @Valid @RequestBody Entity entity) throws Exception {
-		if (!ObjectId.isValid(idString)) {
-			throw new InvalidObjectIdException(idString);
-		}
-
-		ObjectId objectId = new ObjectId(idString);
-		assert objectId.equals(entity.id);
+		ObjectId objectId = stringToObjectId(idString);
 
 		Entity oldEntity = mongoTemplate.findById(objectId, entityClass);
 
@@ -119,6 +111,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 			entity.createUserId = oldEntity.createUserId;
 			entity.createTime = oldEntity.createTime;
 			entity.updateUserId = user.id;
+			entity.updateTime = DateTime.now();
 			entity.save();
 		} catch (ValidationException ex) {
 			for (int i = 0; i < ex.reasons.size(); i++) {
@@ -134,12 +127,10 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Entity delete(@PathVariable String idString) throws Exception {
-		if (!ObjectId.isValid(idString)) {
-			throw new InvalidObjectIdException(idString);
-		}
+		throwIfInvalidObjectId(idString);
 
 		ObjectId objectId = new ObjectId(idString);
-		criteria.and("id").is(objectId);
+		criteria.and("_id").is(objectId);
 		Entity entity = mongoTemplate.findAndRemove(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
@@ -155,4 +146,14 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		return mongoTemplate.find(getDefaultQuery(criteria), entityClass);
 	}
 
+	protected void throwIfInvalidObjectId(String idString) {
+		if (!ObjectId.isValid(idString)) {
+			throw new InvalidObjectIdException(idString);
+		}
+	}
+
+	protected ObjectId stringToObjectId(String idString) {
+		throwIfInvalidObjectId(idString);
+		return new ObjectId(idString);
+	}
 }
