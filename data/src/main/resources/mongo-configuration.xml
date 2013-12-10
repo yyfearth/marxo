@@ -14,8 +14,13 @@
     <mongo:db-factory id="mongoDbFactory" host="masonwan.com" port="27017" dbname="marxo"/>
 
     <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
-        <constructor-arg index="0" ref="mongoDbFactory"/>
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory"/>
         <constructor-arg name="mongoConverter" ref="mappingConverter"/>
+    </bean>
+
+    <bean id="gridFsTemplate" class="org.springframework.data.mongodb.gridfs.GridFsTemplate">
+        <constructor-arg name="dbFactory" ref="mongoDbFactory"/>
+        <constructor-arg name="converter" ref="mappingConverter"/>
     </bean>
 
     <mongo:mapping-converter>

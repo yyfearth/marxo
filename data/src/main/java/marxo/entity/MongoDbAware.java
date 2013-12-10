@@ -5,12 +5,20 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 
 public interface MongoDbAware {
 	@JsonIgnore
 	@Transient
-	public static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
 	@JsonIgnore
 	@Transient
-	public static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
+	MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
+	@JsonIgnore
+	@Transient
+	GridFsTemplate gridFsTemplate = applicationContext.getBean(GridFsTemplate.class);
+	@JsonIgnore
+	@Transient
+	MappingMongoConverter mappingConverter = applicationContext.getBean(MappingMongoConverter.class);
 }

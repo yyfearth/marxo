@@ -1,11 +1,15 @@
 package marxo.controller;
 
-import com.google.common.io.Files;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSFile;
 import marxo.entity.FileInfo;
 import marxo.entity.MongoDbAware;
 import marxo.exception.EntityNotFoundException;
 import marxo.exception.RequestParameterException;
+import marxo.serialization.MarxoObjectMapper;
 import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -14,12 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Controller
-@RequestMapping(value = "file")
+@RequestMapping(value = "file{:s?}")
 public class FileController extends BasicController implements MongoDbAware {
+
+	static MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
 
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.CREATED)
@@ -29,24 +35,16 @@ public class FileController extends BasicController implements MongoDbAware {
 
 		if (file != null && !file.isEmpty()) {
 			fileInfo = new FileInfo();
-
-			// todo: use configurable directory for files.
-			File file1 = new File(fileInfo.id.toString());
-			if (file1.exists()) {
-				throw new IOException(String.format("File [%s] already exists", file1.getAbsolutePath()));
-			}
-			try {
-				file.transferTo(file1);
-				logger.debug(String.format("File is saved to [%s]", file1.getAbsolutePath()));
-			} catch (IOException | IllegalStateException e) {
-				throw new IOException(String.format("Cannot transfer file to %s", file1.getAbsolutePath()));
-			}
-
 			fileInfo.originalFilename = file.getOriginalFilename();
 			fileInfo.size = file.getSize();
 			fileInfo.contentType = file.getContentType();
 
-			fileInfo.save();
+			try (InputStream stream = file.getInputStream()) {
+				GridFSFile gridFSFile = gridFsTemplate.store(stream, fileInfo.id.toString(), fileInfo.contentType, fileInfo);
+				logger.debug(String.format("%s is saved", gridFSFile));
+			} catch (IOException e) {
+				throw new IOException(String.format("Cannot save %s", fileInfo));
+			}
 		}
 
 		if (fileInfo == null) {
@@ -60,29 +58,56 @@ public class FileController extends BasicController implements MongoDbAware {
 	@RequestMapping(value = "{fileIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public byte[] downloadFile(@PathVariable String fileIdString, HttpServletResponse response) throws Exception {
+	public void downloadFile(@PathVariable String fileIdString, HttpServletResponse response) throws Exception {
 		Assert.isTrue(ObjectId.isValid(fileIdString));
 		ObjectId fileId = new ObjectId(fileIdString);
 
-		FileInfo fileInfo = FileInfo.get(fileId);
+		GridFSDBFile gridFSDBFile = gridFsTemplate.findOne(Query.query(Criteria.where("filename").is(fileIdString)));
 
-		if (fileInfo == null) {
-			throw new EntityNotFoundException(FileInfo.class, fileId);
+		if (gridFSDBFile == null) {
+			throw new EntityNotFoundException("File", fileId);
 		}
 
-		File file = new File(fileInfo.id.toString());
+		response.addHeader("Content-Type", gridFSDBFile.getContentType());
+		response.addHeader("Content-Length", String.valueOf(gridFSDBFile.getLength()));
+		response.addHeader("File-Meta", gridFSDBFile.getMetaData().toString());
 
-		response.addHeader("Content-Type", fileInfo.contentType);
-		response.addHeader("Content-Length", fileInfo.size.toString());
-		response.addHeader("Content-Disposition", "attachment; " + fileInfo.originalFilename);
+		gridFSDBFile.writeTo(response.getOutputStream());
+	}
 
-		return Files.toByteArray(file);
+	@RequestMapping(value = "{fileIdString:[\\da-fA-F]{24}}/download", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public void forceDownloadFile(@PathVariable String fileIdString, HttpServletResponse response) throws Exception {
+		Assert.isTrue(ObjectId.isValid(fileIdString));
+		ObjectId fileId = new ObjectId(fileIdString);
+
+		GridFSDBFile gridFSDBFile = gridFsTemplate.findOne(Query.query(Criteria.where("filename").is(fileIdString)));
+
+		if (gridFSDBFile == null) {
+			throw new EntityNotFoundException("File", fileId);
+		}
+
+		response.addHeader("Content-Type", "application/octet-stream");
+		response.addHeader("Content-Length", String.valueOf(gridFSDBFile.getLength()));
+		response.addHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", gridFSDBFile.getMetaData().get("originalFilename")));
+
+		gridFSDBFile.writeTo(response.getOutputStream());
 	}
 
 	@RequestMapping(value = "{fileIdString:[\\da-fA-F]{24}}/info", method = RequestMethod.GET)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public void getInfo(@PathVariable String fileIdString) {
+	public FileInfo getInfo(@PathVariable String fileIdString) throws Exception {
+		Assert.isTrue(ObjectId.isValid(fileIdString));
+		ObjectId fileId = new ObjectId(fileIdString);
 
+		GridFSDBFile gridFSDBFile = gridFsTemplate.findOne(Query.query(Criteria.where("filename").is(fileIdString)));
+
+		if (gridFSDBFile == null) {
+			throw new EntityNotFoundException("File", fileId);
+		}
+
+		return mappingConverter.read(FileInfo.class, gridFSDBFile.getMetaData());
 	}
 }

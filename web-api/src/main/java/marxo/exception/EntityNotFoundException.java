@@ -2,27 +2,28 @@ package marxo.exception;
 
 import marxo.entity.BasicEntity;
 
-import java.util.List;
-
 public class EntityNotFoundException extends EntityException {
 	protected String message;
 
-	public EntityNotFoundException(String message, String message1) {
-		super(message);
-		message = message1;
-	}
-
-	public EntityNotFoundException(List<String> messages, String message) {
-		super(messages);
-		this.message = message;
+	public EntityNotFoundException(String entityName, Object identity) {
+		this(String.format("Cannot find [%s] with identity [%s]", entityName, identity.toString()));
 	}
 
 	public EntityNotFoundException(Class<? extends BasicEntity> aClass, Object identity) {
-		this(String.format("The %s of the given ID (%s) does not exist", aClass.getSimpleName(), identity.toString()));
+		this(aClass.getSimpleName(), identity);
+	}
+
+	public EntityNotFoundException(Object identity) {
+		this("Entity", identity);
 	}
 
 	protected EntityNotFoundException(String message) {
 		super(message);
 		this.message = message;
+	}
+
+	@Override
+	public String getMessage() {
+		return message;
 	}
 }
