@@ -565,7 +565,7 @@ Projects
       i.className = 'icon-right-open pull-right'
       a.appendChild i
       name = document.createElement 'strong'
-      name.textContent = model.get('name') or model.name?()
+      name.textContent = model.get('name') or model.name?().replace /_/g, ' '
       _label = @_renderLabel
       a.appendChild name
       a.appendChild _label '(Start Node)', 'label-info start-node' if model is wf.startNode
@@ -746,11 +746,16 @@ Projects
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
-      models = models.filter (model) -> /^STARTED$|^PAUSED$/i.test model.get 'status'
+      models = models.filter (model) -> not /^STARTED$|^PAUSED$/i.test model.get 'status'
+      unless models.length
+        alert '''None of selected project can be removed.
+        Projects already STARTED or PAUSED cannot be removed.
+        If you really want to remove them, STOP them first.'''
+        return @
       names = models.map (model) -> model.get 'name'
       # TODO: project life cycle (engine)
       # TODO: started projects cannot be deleted
-      if confirm "Are you sure to remove these projects: #{names.join ', '}?\n\nThis action cannot be undone!"
+      if confirm "Are you sure to remove these projects? \n#{names.join '\n'}\n\nThis action cannot be undone!"
         models.forEach (model) -> model.destroy()
       # TODO: remove related data?
       @
