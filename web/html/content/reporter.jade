@@ -5,13 +5,13 @@
       li
         h3 Report Details
       li
-        a(href='#report_overview', data-toggle='tab') Overview
+        a(target='#report_overview', data-toggle='tab') Overview
       li.active
-        a(href='#report_charts', data-toggle='tab') Evaluated Charts
+        a(target='#report_charts', data-toggle='tab') Evaluated Charts
       li
-        a(href='#report_feedback', data-toggle='tab') Feedback Collection
+        a(target='#report_feedback', data-toggle='tab') Feedbacks
       li
-        a(href='#report_files', data-toggle='tab') Submitted Results
+        a(target='#report_submissions', data-toggle='tab') Submissions
   .modal-body.tab-content
     #report_overview.tab-pane
       h4 Report Overview
@@ -27,8 +27,8 @@
         h4 Bar Chart
         svg
     #report_feedback.tab-pane
-      h4 Feedback Collection
-    #report_files.tab-pane
-      h4 Submitted Results
+      h4 Feedbacks
+    #report_submissions.tab-pane
+      h4 Submissions
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close

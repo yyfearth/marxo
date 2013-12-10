@@ -37,10 +37,7 @@ ProjectFilterView
       @
     open: (name, arg) ->
       if name
-        if arg is 'report'
-          @reporter.popup {}, (action, data) ->
-            console.log 'report dialog', action, data
-        else @popup name, arg, (action, data) ->
+        @popup name, arg, (action, data) ->
           if action is 'save'
             data.save {},
               success: (content) ->
@@ -63,17 +60,19 @@ ProjectFilterView
       else unless data instanceof Content
         data = new Content data
       type = data.get('type')?.toUpperCase()
-      editor = switch type
-        when 'FACEBOOK', 'TWITTER'
-          @editor
-        when 'PAGE'
-          @designer
-        when 'EMAIL'
-          @composer
-        else
-          throw new Error 'unsupported media type ' + type
-      editor.render() unless editor.rendered
-      editor.popup data, action, callback
+      if action is 'report'
+        @reporter.popup data, callback
+      else
+        editor = switch type
+          when 'FACEBOOK', 'TWITTER'
+            @editor
+          when 'PAGE'
+            @designer
+          when 'EMAIL'
+            @composer
+          else
+            throw new Error 'unsupported media type ' + type
+        editor.popup data, action, callback
       @
 
   class ContentEditorMixin
@@ -719,7 +718,7 @@ ProjectFilterView
 
       # report
       report_btn = @_find 'report', 'a'
-      if model.has('records') or model.has('submissions')
+      if model.get('records')?.length or model.get('submissions')?.length
         report_btn.href = "#content/#{model.id}/report"
       else
         @_hide report_btn
