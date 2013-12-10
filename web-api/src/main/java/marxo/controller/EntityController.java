@@ -131,11 +131,13 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 
 		ObjectId objectId = new ObjectId(idString);
 		criteria.and("_id").is(objectId);
-		Entity entity = mongoTemplate.findAndRemove(getDefaultQuery(criteria), entityClass);
 
+		Entity entity = mongoTemplate.findOne(Query.query(criteria), entityClass);
 		if (entity == null) {
 			throw new EntityNotFoundException(entityClass, objectId);
 		}
+
+		entity.remove();
 
 		return entity;
 	}
