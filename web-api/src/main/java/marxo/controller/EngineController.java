@@ -7,26 +7,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("engine")
 public class EngineController extends BasicController {
 
 	@RequestMapping(value = "status", method = RequestMethod.GET)
+	@ResponseBody
 	public ResponseEntity<Status> getStatus() {
 		return new ResponseEntity<>(new Status(EngineWorker.isAlive()), HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "start", method = RequestMethod.PUT)
+	@ResponseBody
 	public ResponseEntity start() {
 		EngineWorker.startAsync();
-		return new ResponseEntity<Response>(new Response(), HttpStatus.OK);
+		return new ResponseEntity<>(new Response(), HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "stop", method = RequestMethod.PUT)
+	@ResponseBody
 	public ResponseEntity stop() {
-		EngineWorker.stop();
-		return new ResponseEntity<Response>(new Response(), HttpStatus.OK);
+		EngineWorker.stopAsync();
+		return new ResponseEntity<>(new Response(), HttpStatus.OK);
 	}
 
 	@JsonSerialize
