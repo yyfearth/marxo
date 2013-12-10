@@ -39,4 +39,10 @@ public class Task extends BasicEntity {
 	public static long count() {
 		return mongoTemplate.count(new Query(), Task.class);
 	}
+
+	@Override
+	public void save() {
+		super.save();
+		logger.debug(String.format("%s is created", this));
+	}
 }
