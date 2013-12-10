@@ -1,0 +1,177 @@
+include rich_editor
+
+#msg_editor.modal.hide.fade(aria-labelledby='msg_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#msg_editor_title
+      | Text Content&nbsp;
+      small.media.capitalized
+  .modal-body
+    form
+      input.input-block-level(type='text', name='name', maxlength='255', readonly)
+      textarea.input-block-level(id='msg_desc', name='message',
+      rows=3, placeholder='The content ...', maxlength='65535')
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save
+
+#email_composer.modal.hide.fade(aria-labelledby='email_composer_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#email_composer_title Email Content
+  .modal-body
+    form
+      .input-prepend.input-block-level
+        span.add-on To
+        input.span11(name="email_to", title='Send To', type='text', required,
+        placeholder='email_1@example.com; email_2@example.com')
+      input#page_title.input-block-level(type='text', name='title',
+      placeholder='Title of Email', maxlength='255', required)
+      +rich_editor('email_desc')
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save
+
+#page_designer.modal.modal-full.hide.fade(aria-labelledby='page_designer_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#page_designer_title Page Designer
+  .modal-body
+
+    iframe
+
+    article
+
+      section.box#page_desc
+        .box-header.well
+          h4 Page Description
+          .box-icon
+            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+        .box-content
+          form.form-horizontal#page_desc_form
+            .control-group
+              label.control-label(for='page_title') Page Title
+              .controls
+                input#page_title.input-large(type='text', name='name',
+                placeholder='The title of the page', maxlength='255', required)
+                span.help-inline(title='Required') *
+            .control-group
+              label.control-label(for='desc') Page Description
+              .controls
+                +rich_editor('desc')
+
+      #sections
+
+      include preview_tpl
+
+      section#section_tpl.tpl
+        .box-header.well
+          h4.box-title New Section
+          .box-icon
+            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+            button.btn.btn-close.btn-round.icon-close(type='button')
+        .box-content
+          form.form-horizontal(id='section_#_form')
+            .control-group
+              label.control-label(for='section_#_name') Section Title
+              .controls
+                input.input-large(id='section_#_name', name='name', type='text',
+                placeholder='The title of the section', maxlength='255', required)
+                span.help-inline(title='Required') *
+            .control-group
+              label.control-label(for='section_#_desc') Section Description
+              .controls
+                textarea.input-block-level(id='section_#_desc', name='desc',
+                rows=3, placeholder='The description of the section', maxlength='65535')
+            .control-group
+              label.control-label(for='section_#_type') Section Type
+              .controls
+                select.input-xlarge(id='section_#_type', name='type')
+                  option(value='none', checked) Description Only (No Question)
+                  option(value='text') Simple Text
+                  option(value='html') Rich Text
+                  option(value='radio') Multiple Selection
+                  option(value='file') File Upload
+                | &nbsp;
+                label.checkbox.inline(title='This question must be answered')
+                  input(type='checkbox', name='required', checked)
+                  | Required
+            .control-group.hide.option-field.text-option
+              label.control-label(for='section_#_multiline') Simple Text Option
+              .controls
+                label.checkbox
+                  input(id='section_#_multiline', name='text_multiline', type='checkbox')
+                  | Support Multiple Line
+            .control-group.hide.option-field.file-option
+              label.control-label(for='section_#_file_accept') File Type
+              .controls
+                select(id='section_#_file_accept', name='file_accept')
+                  option(value='', checked) Any
+                  option(value='image/*') Image Only
+                  option(value='video/*') Video Only
+                  option(value='audio/*') Audio Only
+                  option(value='audio/*|video/*|image/*') Image, Video or Audio
+            .control-group.hide.option-field.radio-option
+              label.control-label(for='section_#_gen_from_list') Auto Generate Rows
+              .controls
+                input(id='section_#_gen_from_list', name='gen_from_list',
+                type='checkbox', title='Generate rows from a list', checked)
+                | &nbsp;
+                input(id='section_#_gen_list_key', name='gen_list_key', type='text',
+                title='Context Key for the List', placeholder='Context Key for the List', data-option-required)
+            .control-group.hide.option-field(id='section_#_manual_options')
+              label.control-label Manual Set Options
+              ul.controls
+                li.manual_option
+                  i.fake-radio
+                  input.manual_option_text.new(type='text', data-option-required)
+                  button.close(type='button', tabindex='-1') &times;
+          .preview.well
+
+      button#new_section.btn.btn-info.btn-round(type='button', title='Add a new section') +
+
+      //-- section.box#submit_options
+        .box-header.well
+          h4 Submit Options
+          .box-icon
+            button.btn.btn-minimize.btn-round.icon-up-open(type='button')
+        .box-content
+          form.form-horizontal#submit_options_form
+            .control-group
+              label.control-label(for='next_page_type') Next Page Type
+              .controls
+                label.radio
+                  input(type='radio', name='next_page_type', value='thanks', checked)
+                  | Thanks Only
+                label.radio
+                  input(type='radio', name='next_page_type', value='results', disabled)
+                  | Results Page
+                label.radio
+                  input(type='radio', name='next_page_type', value='page')
+                  | Another Page
+                label.radio
+                  input(type='radio', name='next_page_type', value='url')
+                  | Jump to URL
+            .control-group.option-field.thanks-option.results-option
+              label.control-label(for='another_response') Next Page Option
+              .controls
+                label.checkbox
+                  input#another_response(type='checkbox', name='another_response')
+                  | Allow Another Response
+            .control-group.option-field.page-option.hide
+              label.control-label(for='next_page_key') Next Page Key
+              .controls
+                input#next_page_key(type='text', name='next_page_key', data-option-required)
+                span.help-inline(title='Required') *
+            .control-group.option-field.url-option.hide
+              label.control-label(for='next_page_url') Next Page URL
+              .controls
+                input#next_page_url(type='url', name='next_page_url', data-option-required)
+                span.help-inline(title='Required') *
+
+  .modal-footer
+    button.btn.btn-info.pull-left.btn-preview Preview
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save Save
+
+//- TODO: some question should have key

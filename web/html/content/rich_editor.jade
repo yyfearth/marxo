@@ -1,0 +1,70 @@
+mixin rich_editor(id)
+  .btn-toolbar(id='#{id}_editor', data-role='editor-toolbar', data-target='##{id}')
+    .btn-group.pull-right
+      button.btn.btn-info.icon-code.btn-switch(type='button', title='Switch to Code', data-toggle='button')
+    .btn-group
+      button.btn.dropdown-toggle(data-toggle='dropdown', title='Font')
+        i.icon-font
+        b.caret
+      ul.fonts-select.dropdown-menu {{fonts}}
+    .btn-group
+      button.btn.dropdown-toggle(data-toggle='dropdown', title='Font Size')
+        i.icon-text-height
+        b.caret
+      ul.dropdown-menu
+        li
+          a(data-edit='fontSize 5')
+            font(size='5') Large
+        li
+          a(data-edit='fontSize 3')
+            font(size='3') Normal
+        li
+          a(data-edit='fontSize 1')
+            font(size='1') Small
+    .btn-group
+      button.btn(type='button', data-edit='bold', title='Bold (Ctrl/Cmd+B)')
+        i.icon-bold
+      button.btn(type='button', data-edit='italic', title='Italic (Ctrl/Cmd+I)')
+        i.icon-italic
+      button.btn(type='button', data-edit='strikethrough', title='Strikethrough')
+        i.icon-strike
+      button.btn(type='button', data-edit='underline', title='Underline (Ctrl/Cmd+U)')
+        i.icon-underline
+    .btn-group
+      button.btn(type='button', data-edit='insertunorderedlist', title='Bullet list')
+        i.icon-list-bullet
+      button.btn(type='button', data-edit='insertorderedlist', title='Number list')
+        i.icon-list-numbered
+      button.btn(type='button', data-edit='outdent', title='Reduce indent (Shift+Tab)')
+        i.icon-indent-left
+      button.btn(type='button', data-edit='indent', title='Indent (Tab)')
+        i.icon-indent-right
+    .btn-group
+      button.btn(type='button', data-edit='justifyleft', title='Align Left')
+        i.icon-align-left
+      button.btn(type='button', data-edit='justifycenter', title='Center')
+        i.icon-align-center
+      button.btn(type='button', data-edit='justifyright', title='Align Right')
+        i.icon-align-right
+      button.btn(type='button', data-edit='justifyfull', title='Justify')
+        i.icon-align-justify
+    .btn-group
+      button.btn(type='button', data-edit='unlink', title='Remove Hyperlink')
+        i.icon-unlink
+      button.btn.hyperlink.dropdown-toggle(type='button', data-toggle='dropdown', title='Hyperlink')
+        i.icon-link
+      ul.dropdown-menu
+        li.input-append
+          input(placeholder='URL', type='text', data-edit='createLink')
+          button.btn(type='button') Add
+    .btn-group
+      button.btn.btn-edit.btn-picture(id='btn_picture_#{id}', type='button', title='Insert picture (or just drag & drop)')
+        i.icon-picture
+        input(type='file', data-target='#btn_picture_' + id, data-edit='insertImage')
+    .btn-group
+      button.btn(type='button', data-edit='undo', title='Undo (Ctrl/Cmd+Z)')
+        i.icon-undo
+      button.btn(type='button', data-edit='redo', title='Redo (Ctrl/Cmd+Y)')
+        i.icon-redo
+    .rich-editor(id=id)
+    textarea.rich-editor-html.input-block-level(id='#{id}_html', name='{{name}}')

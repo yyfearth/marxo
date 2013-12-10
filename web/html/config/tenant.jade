@@ -1,0 +1,56 @@
+.span2.sidebar
+  .well.sidebar-nav
+    ul.sidebar-list.nav.nav-list
+      li.nav-header Configuration
+      li.active
+        a Tenant Profile
+      li.nav-header Connection
+      li
+        a(href='#config/service') Services Status
+      li.nav-header Members
+      li
+        a(href='#config/users') Member List
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips Enter or update your tenant information to the form and press save.
+.span10.workspace
+  .page-header
+    h3 Tenant Profile
+  form.form-horizontal
+    .control-group
+      label.control-label(for='tenant_name') Name
+      .controls
+        input#tenant_name.input-large(type='text', placeholder='Organization Name', name='name', maxlength='255')
+    .control-group
+      label.control-label(for='tenant_desc') Description
+      .controls
+        textarea#tenant_desc(placeholder='Description about the organization ...', rows='4', name='desc')
+    hr
+    .control-group
+      label.control-label(for='contact_name') Contact Name
+      .controls
+        input#contact_name.input-large(type='text', name='contact', placeholder='Contact Name')
+    .control-group
+      label.control-label(for='contact_email') E-mail
+      .controls
+        input#contact_email.input-large(type='email', name='email', placeholder='contact@email.org')
+    .control-group
+      label.control-label(for='contact_tel') Tel #
+      .controls
+        input#contact_tel.input-large(type='tel', name='tel', placeholder='(408) 888-8888')
+    .control-group
+      label.control-label(for='contact_fax') Fax
+      .controls
+        input#contact_fax.input-large(type='tel', name='fax', placeholder='(408) 888-9999')
+    .control-group
+      label.control-label(for='contact_addr') Address
+      .controls
+        input#contact_addr.input-xxlarge(type='text', name='addr', placeholder='Contact Street Address')
+    .form-actions
+      input.btn.btn-primary(type='submit', value='Save', data-loading-text='Saving...')
+      | &nbsp;
+      input.btn(type='reset', value='Reset')
+      | &nbsp;
+      input.btn.btn-warning.btn-reload(type='reset', value='Reload',
+      title='Reset and Reload', data-loading-text='Loading...')

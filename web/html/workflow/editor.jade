@@ -1,0 +1,57 @@
+.span2.sidebar
+  .well
+    ul#node_list.sidebar-list.nav
+      li.nav-header Common Nodes
+      li
+        a.node(href='#node:new') Empty Node
+      li.nav-header Used Nodes
+      li.nav-header Shared Nodes
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips
+        | Click a Node above
+        | or Drag a Node from Sidebar to Workflow Editor
+        | to Add a new Node.
+.span10.workspace
+  .page-header
+    .action-buttons.pull-right
+      a.btn(href='#workflow/mgr', title='Go back to Workflow Manager', data-placement='bottom') Back to List
+      select.btn#wf_orientation(name='orientation', title='Orientation', data-placement='bottom')
+        option(value='h') Horizontal
+        option(value='v') Vertical
+      button.btn.btn-danger.wf-reset(title='Reset workflow to previous save', data-placement='bottom') Reset
+      button.btn.btn-primary.wf-save(title='Save the workflow', data-placement='bottom') Save
+    h3#workflow_header(title='Change Workflow Name and Description', data-placement='bottom')
+      span.editable-name
+      small.editable-desc
+  #workflow_view.content-view
+  #t_popover.tpl
+    .popover-desc {desc}
+    .popover-buttons
+      button.btn.btn-danger.btn-delete.pull-left Delete
+      button.btn.btn-primary.btn-edit Edit
+include editor/node_editor
+include editor/link_editor
+
+#workflow_name_editor.modal.hide.fade(aria-labelledby='workflow_name_editor_header', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#workflow_name_editor_header Rename Workflow
+  .modal-body
+    form.form-horizontal
+      .control-group
+        label.control-label(for='wf_rename_name') Name
+        .controls
+          input#wf_rename_name(type='text', name='name', placeholder='Workflow Name')
+      .control-group
+        label.control-label(for='wf_rename_key') Key
+        .controls
+          input#wf_rename_key(type='text', name='key', placeholder='workflow_name', required)
+      .control-group
+        label.control-label(for='wf_rename_desc') Description
+        .controls
+          textarea#wf_rename_desc(name='desc', cols='30', rows='3', placeholder='Description')
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Cancel
+    button.btn.btn-primary.btn-save OK

@@ -1,0 +1,484 @@
+#workflow_editor {
+  .node {
+    // shared by workflow and sidebar
+    border: 1px solid #346789;
+    -webkit-box-shadow: 2px 2px 13px #aaa;
+    -moz-box-shadow: 2px 2px 13px #aaa;
+    box-shadow: 2px 2px 13px #aaa;
+    -moz-border-radius: 0.5em;
+    border-radius: 0.5em;
+    opacity: 0.8;
+    text-align: center;
+    background-color: #eeeeef;
+    color: black;
+    font-family: helvetica;
+    padding: 0.5em;
+    min-width: 5em;
+    margin: 10px;
+    font-size: 0.9em;
+
+    &:hover {
+      -webkit-box-shadow: 2px 2px 13px #444;
+      -moz-box-shadow: 2px 2px 13px #444;
+      box-shadow: 2px 2px 13px #444;
+      opacity: 0.6;
+    }
+  }
+  #wf_orientation {
+    width: auto;
+    margin: 0 5px;
+  }
+}
+
+#workflow_view {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  bottom: 0; // 100px;
+  overflow: auto;
+
+  .node {
+    height: 5em;
+    line-height: 5em;
+    position: absolute;
+    white-space: nowrap;
+    padding: .5em 1em;
+    cursor: pointer;
+    margin: 0;
+    z-index: 20;
+
+    &:hover {
+      z-index: 21 !important;
+    }
+
+    &.active {
+      border: 1px dotted green;
+    }
+
+    &.hover {
+      border: 1px dotted blue;
+    }
+
+    &.jsPlumb_dragged {
+      cursor: move;
+    }
+
+    &.node-start {
+      padding: .7em;
+      height: auto;
+      line-height: 1em;
+      min-width: 0;
+      font-weight: bold;
+      background-color: #eea;
+      border-radius: 2em;
+      left: 25px;
+      top: 25px;
+      &:hover {
+        -webkit-box-shadow: 2px 2px 13px #888;
+        -moz-box-shadow: 2px 2px 13px #888;
+        box-shadow: 2px 2px 13px #888;
+        opacity: 1;
+      }
+    }
+  }
+
+  .link {
+    z-index: 4;
+    cursor: pointer;
+    &.hover, &:hover {
+      z-index: 10;
+    }
+  }
+
+  .endpoint {
+    z-index: 22;
+    cursor: move;
+    &:after {
+      // for padding
+      position: absolute;
+      visibility: hidden;
+      content: ' ';
+      padding: 30px;
+    }
+  }
+
+  .link-label {
+    background-color: #fff;
+    padding: 0.4em;
+    font: 12px sans-serif;
+    color: #444;
+    z-index: 21;
+    border: 1px dotted #999;
+    opacity: 0.8;
+    cursor: pointer;
+  }
+
+  .popover-buttons {
+    min-width: 125px;
+    overflow: hidden;
+    margin: 10px 0 5px;
+    text-align: right;
+  }
+
+}
+
+#workflow_header {
+  cursor: pointer;
+}
+
+#node_editor {
+  min-width: 600px;
+
+  form.form-horizontal {
+    display: block;
+    margin-bottom: 0;
+    .control-group {
+      display: inline-block;
+      vertical-align: top;
+      margin-bottom: 10px;
+    }
+    .control-label {
+      width: 80px;
+    }
+    .controls {
+      margin-left: 90px;
+    }
+  }
+
+  .node-actions {
+    position: absolute;
+    top: 100px;
+    left: 200px;
+    right: 10px;
+    bottom: 13px;
+    padding: 0;
+    margin-bottom: 0;
+    overflow-y: auto;
+  }
+
+  #too_many_actions_alert {
+    margin: 0;
+    margin-top: -10px;
+    height: 0;
+    opacity: 0;
+    padding: 0;
+    border: none;
+    .transition;
+    &.active {
+      margin-top: 0;
+      height: auto;
+      opacity: 1;
+      padding: 8px 35px 8px 14px;
+      border: 1px solid #fbeed5;
+    }
+  }
+}
+
+.action.box {
+  .box-header {
+    cursor: move;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  form.box-content {
+    margin: 0;
+
+    > * {
+      margin-bottom: 10px;
+    }
+    > :last-child {
+      margin-bottom: 0;
+    }
+    label > select {
+      margin-bottom: 0;
+      width: auto;
+    }
+  }
+}
+
+// Project Frame
+
+#project_editor {
+  .sidebar {
+    left: -200px;
+    opacity: 0;
+    .transition(all);
+    &.active {
+      left: 0;
+      opacity: 1;
+    }
+    li.sidebar-item > a {
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+  }
+  .wf-diagram {
+    height: 150px;
+    margin-bottom: 10px;
+  }
+}
+
+#project_viewer {
+  .workspace {
+    overflow: hidden !important;
+    > .row-fluid {
+      position: absolute;
+      top: 270px;
+      height: auto;
+      bottom: 0;
+      overflow: hidden;
+      > ul.nav {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        height: auto;
+        overflow: auto;
+        right: 0;
+        left: auto;
+        &.nodes-links-list {
+          left: 0;
+          right: auto;
+        }
+      }
+    }
+  }
+  .nodes-links-list {
+    a.status-finished, a.status-passed, a.status-failed {
+      text-decoration: line-through;
+    }
+  }
+  .page-header {
+    height: 40px;
+    .label-status {
+      display: inline-block;
+      padding: 5px;
+      padding-bottom: 3px;
+      vertical-align: bottom;
+      font-size: 20px;
+      margin-left: 10px;
+      small {
+        font-size: 12px;
+        font-weight: normal;
+        margin: 3px .5em 3px 0;
+      }
+    }
+    .btn {
+      margin: 0 2px;
+    }
+  }
+  .wf-diagram {
+    height: 200px;
+    margin-bottom: 10px;
+  }
+  .node-actions, .link-condition {
+    position: relative;
+    padding: 18px 10px 10px 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    &:after {
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      padding: 3px 7px;
+      line-height: 18px;
+      font-size: 12px;
+      font-weight: bold;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+      color: #9da0a4;
+      -webkit-border-radius: 4px 0 4px 0;
+      -moz-border-radius: 4px 0 4px 0;
+      border-radius: 4px 0 4px 0;
+    }
+  }
+  .node-actions {
+    &:after {
+      content: "Node - Actions";
+    }
+  }
+  .link-condition:after {
+    content: "Link - Condition";
+  }
+  li > a {
+    .label, .ref-link {
+      margin: 0 3px;
+    }
+    .ref-link {
+      margin-top: -1px;
+      color: @status-default-color;
+      padding: 2px 4px;
+      border: 1px solid @status-default-color;
+      border-radius: 3px;
+    }
+    &.status-started {
+      background-color: @status-started-bkg-color;
+    }
+    &.status-error {
+      background-color: @status-error-bkg-color;
+    }
+    &.status-paused {
+      background-color: @status-paused-bkg-color;
+    }
+    &.status-finished {
+      background-color: @status-finished-bkg-color;
+    }
+  }
+  li.active > a {
+    color: #fff;
+    background-color: @status-default-color;
+    .ref-link {
+      color: #fff;
+      border: 1px solid #fff;
+    }
+    &.status-started {
+      background-color: @status-started-color;
+    }
+    &.status-error {
+      background-color: @status-error-color;
+    }
+    &.status-paused {
+      background-color: @status-paused-color;
+    }
+    &.status-finished {
+      background-color: @status-finished-color;
+    }
+  }
+}
+
+#home_view .wf-diagram {
+  display: inline-block;
+  height: 150px;
+  width: 50%;
+  max-width: 450px;
+  margin: 0 5px 5px 0;
+}
+
+.wf-diagram {
+  position: relative;
+  min-width: 250px;
+  min-height: 150px;
+  padding: 0;
+  &.invalid {
+    -webkit-box-shadow: 0 0 30px @status-error-color inset;
+    -moz-box-shadow: 0 0 30px @status-error-color inset;
+    box-shadow: 0 0 30px @status-error-color inset;
+  }
+  svg {
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+
+    // TODO: update status
+    .link {
+      fill: none;
+      stroke: #000;
+      stroke-width: 3px;
+      cursor: pointer;
+      &.active {
+        stroke-width: 4.5px;
+      }
+      &.status-waiting {
+        stroke: #c09853;
+      }
+      &.status-error {
+        stroke: @status-error-color;
+      }
+      &.status-passed {
+        stroke: #565;
+      }
+      &.status-failed {
+        stroke: #666;
+      }
+    }
+
+    .node {
+      fill: @status-default-bkg-color;
+      stroke-width: 2px;
+      stroke: #000;
+      cursor: pointer;
+      &.start-node {
+        stroke-width: 3px;
+        stroke-dasharray: 7, 2;
+      }
+      &.status-started {
+        fill: @status-started-bkg-color;
+      }
+      &.status-error {
+        fill: @status-error-bkg-color;
+      }
+      &.status-paused, &.status-waiting {
+        fill: @status-paused-bkg-color;
+      }
+      &.status-finished {
+        stroke: #565;
+        fill: @status-finished-bkg-color;
+      }
+    }
+
+    .active .node {
+      stroke-width: 4px;
+      fill: @status-default-color;
+      &.status-started {
+        fill: @status-started-color;
+      }
+      &.status-error {
+        fill: @status-error-color;
+      }
+      &.status-paused {
+        fill: @status-paused-color;
+      }
+      &.status-finished {
+        fill: @status-finished-color;
+      }
+    }
+
+    text.index {
+      fill: #000;
+      stroke-width: 2px;
+      text-anchor: middle;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+  }
+  .tooltip {
+    position: absolute;
+    text-align: center;
+    margin-top: -1.5em;
+    margin-left: .5em;
+    padding: 5px .5em;
+    font: 12px sans-serif;
+    background: #fff;
+    border: 1px solid #aaa;
+    border-radius: .5em;
+    -webkit-box-shadow: 1px 1px 5px #aaa;
+    -moz-box-shadow: 1px 1px 5px #aaa;
+    box-shadow: 1px 1px 5px #aaa;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    pointer-events: none;
+  }
+}
+
+@status-default-color: #0088cc;
+@status-started-color: #468847;
+@status-error-color: #b94a48;
+@status-paused-color: #f89406;
+@status-finished-color: #3a87ad;
+@status-default-bkg-color: #eee;
+@status-started-bkg-color: #dff0d8;
+@status-error-bkg-color: #f2dede;
+@status-paused-bkg-color: #fcf8e3;
+@status-finished-bkg-color: #d9edf7;

@@ -1,0 +1,32 @@
+#link_editor.modal.hide.fade(aria-labelledby='link_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#link_editor_title Link Editor
+  .modal-body
+    form.form-horizontal
+      .control-group
+        label.control-label(for='link_title') Name
+        .controls
+          input#link_title(type='text', name='name', placeholder='Link Name')
+      .control-group
+        label.control-label(for='link_name') Key
+        .controls
+          input#link_name(type='text', name='key', placeholder='link_name', required)
+      .control-group
+        label.control-label(for='link_desc') Description
+        .controls
+          textarea#link_desc(name='desc', cols='30', rows='3', placeholder='Description')
+      .control-group
+        label.control-label(for='link_conditional') Condition
+        .controls
+          label#link_conditional.checkbox(title='Wait until the condition is fulfilled')
+            input(type='checkbox', name='conditional')
+            | Enable
+          select(disabled)
+            option (Select Option)
+          .block
+            button.btn.btn-round(type='button', title='Add another OR condition') or
+            button.btn.btn-info.btn-round(type='button', title='Add another AND condition') and
+  .modal-footer
+    button.btn(data-dismiss='modal', aria-hidden='true') Cancel
+    button.btn.btn-primary.btn-save OK

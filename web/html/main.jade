@@ -1,0 +1,58 @@
+doctype 5
+html(lang='en-US')
+  head
+    meta(charset='utf-8')
+    title Loading... - MARXO Console
+    link(href='css/console.css', rel='stylesheet', media='screen')
+    meta(name='viewport', content='width=device-width, initial-scale=1, user-scalable=no')
+    meta(name='apple-mobile-web-app-capable', content='yes')
+  body.fade
+    include signin
+    #main
+      #navbar.navbar.navbar-static-top
+        .navbar-inner.container-fluid
+          a.brand(href='#') MARXO
+          include navbar
+      #frames
+        #home.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include home
+        include node_actions
+        #project.frame.container-fluid
+          include project/editor
+          #project_viewer.row-fluid.inner-frame(name='viewer')
+            include project/viewer
+          #project_manager.active.row-fluid.inner-frame(name='manager')
+            include project/manager
+        #workflow.frame.container-fluid
+          #workflow_editor.row-fluid.inner-frame(name='editor')
+            include workflow/editor
+          #workflow_manager.active.row-fluid.inner-frame(name='manager')
+            include workflow/manager
+        #event.frame.container-fluid
+          include event/editor
+          #event_calendar.active.row-fluid.inner-frame(name='calendar')
+            include event/calendar
+          #event_manager.row-fluid.inner-frame(name='manager')
+            include event/manager
+        #content.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include content/manager
+        #config.frame.container-fluid
+          #tenant_profile.row-fluid.inner-frame(name='tenant')
+            include config/tenant
+          #service_connector.row-fluid.inner-frame(name='connector')
+            include config/service
+          #user_manager.row-fluid.inner-frame(name='manager')
+            include config/manager
+        #notification.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include notification
+        #profile.frame.container-fluid
+          .active.row-fluid.inner-frame
+            include profile
+
+    - if (!test)
+      script(data-main='js/main', src='js/lib/require.js', async)
+    - else
+      script(data-main='js/test', src='js/lib/require.js', async)

@@ -1,0 +1,67 @@
+.span2.sidebar
+  .well.sidebar-nav
+    ul.sidebar-list.nav.nav-list
+      li.nav-header Configuration
+      li
+        a(href='#config/tenant') Tenant Profile
+      li.nav-header Connection
+      li.active
+        a(href='#config/service') Services Status
+      li
+        a(href='#config/service/facebook') Facebook
+      li
+        a(href='#config/service/twitter') Twitter
+      li
+        a(href='#config/service/email') Email
+      li.nav-header Members
+      li
+        a(href='#config/users') Member List
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips Click large buttons to connect services. Already connected services will show its status.
+.span10.workspace
+  h3 Service Connector
+  #service_status
+    button.btn.btn-block.btn-large.btn-facebook.icon-facebook Connect to Facebook
+    button.btn.btn-block.btn-large.btn-twitter.icon-twitter(disabled) Connect to Twitter
+    button.btn.btn-block.btn-large.btn-email.icon-mail(disabled) Email Service
+
+    #facebook_status.modal.hide.fade(aria-hidden='true')
+      .modal-header
+        button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+        h3.modal-title(name='title') Facebook
+      .modal-body
+        form.form-horizontal
+          .control-group
+            label.control-label User ID
+            .controls
+              pre(name='user_id') ?
+          .control-group
+            label.control-label Full Name
+            .controls
+              pre(name='fullname') ?
+          .control-group
+            label.control-label User Name
+            .controls
+              pre(name='username') ?
+          .control-group
+            label.control-label Locale
+            .controls
+              pre(name='locale') ?
+          .control-group
+            label.control-label Home Page
+            .controls
+              pre
+                a(name='link', href='?') ?
+          .control-group
+            label.control-label Expect Expires At
+            .controls
+              pre(name='expires_at') ?
+          .control-group
+            label.control-label Status
+            .controls
+              pre.capitalized(name='status') ?
+      .modal-footer
+        button.btn.btn-danger.btn-disconnect.pull-left Disconnect
+        button.btn(data-dismiss='modal', aria-hidden='true') Close

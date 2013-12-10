@@ -1,0 +1,190 @@
+mixin box_icons
+  .box-icon
+    button.btn.btn-minimize.btn-round.icon-up-open
+    button.btn.btn-close.btn-round.icon-close
+
+mixin action_name_key
+  .action-name-key
+    input(type='text', name='name', maxlength='255', title='Action Name', placeholder='Action Name')
+    input.input-medium(type='text', name='key',maxlength='255', title='Action Key', placeholder='action_name')
+    .help-inline (Action Name and Key)
+
+mixin multi_social_media_group_btns
+  .btn-group(data-toggle='buttons-checkbox')
+    button.btn.active(type='button', value='twitter') Twitter
+    button.btn.active(type='button', value='facebook') Facebook
+
+mixin content(media, max, rows)
+  textarea.input-block-level(name='content.message', placeholder='Post Content...',
+  title='Content post to #{media} (#{max} max)', rows=rows, maxlength=max)
+  input(type='hidden', name='content.type', value='#{media.toUpperCase()}')
+  .help-block The maximium content length is #{max}, which is limited by #{media}.
+
+mixin action_template_select
+  select(disabled)
+    option (Select from Template)
+
+mixin track_checkbox
+  label.checkbox.inline(title='Enable track will generate report automatically', data-placement='right')
+    input(type='checkbox', name='tracked', checked)
+    | Track
+
+mixin event_schedule(msg)
+  label.inline
+    | #{msg}
+    .input-append(title='Duration (e.g. 10 days)\nLeft blank for available until project ends', data-placement='right')
+      input.input-small(type='text', name='event.duration', placeholder='e.g. 30 days')
+      a.btn.btn-event.icon-calendar
+
+mixin page_ref
+  label.inline Inset URL for
+    select(name='ref_page_id')
+      option(value='') (No URL)
+      option(value='auto', selected) (Auto select the first page of this node)
+
+//- show in sidebar
+mixin actions_thumb
+  li.nav-header Content Page
+  li
+    a.action-thumb(href='#action:page', data-placement='bottom'
+    title='Generate an information page or survey form using templates and post as a web page')
+      | Create Page or Form
+  li.nav-header Social Media
+  li
+    a.action-thumb(href='#action:twitter',
+    title='Post message to Twitter')
+      | Post to Twitter
+  li
+    a.action-thumb(href='#action:facebook',
+    title='Post message to Facebook')
+      | Post to Facebook
+  li.nav-header Email
+  li
+    a.action-thumb(href='#action:email',
+    title='Send email to selected email addresses')
+      | Send Email
+  li.nav-header Scheduling
+  li
+    a.action-thumb(href='#action:wait',
+    title='Create an event in calendar and wait')
+      | Wait
+  li
+    a.action-thumb(href='#action:trigger',
+    title='Pause until user trigger')
+      | Pause
+
+//- show in the actions box
+#actions_tpl.tpl
+
+  .tpl(name='unknown')
+    .box-header.well
+      h4 Unknown Action (Error)
+      +box_icons
+    form.box-content
+      +action_name_key
+      input(type='text', name='type', maxlength='45', title='Action Type', placeholder='Action Type')
+      .help-inline (Unknown Type)
+
+  .tpl(name='page')
+    .box-header.well
+      h4 Create Page or Form
+      +box_icons
+    form.box-content
+      +action_name_key
+      input(type='hidden', name='content.type', value='PAGE')
+      ul.action-bar
+        li
+          +action_template_select
+        li
+          a.btn.btn-primary.btn-design(disabled) Design
+        li
+          a.btn.btn-info.btn-preview(disabled) Preview
+        li
+          +track_checkbox
+        li
+          +event_schedule
+      .info.tmp (Page Info)
+      .help-block
+        | Information Page is a web page to display information.
+        br
+        | Click "Design" button to design the page.
+        br
+        | Click "Preview" button to preview the generated page.
+        br
+        | For newly created action, you can only Desgin it next time after Save.
+
+  .tpl(name='twitter')
+    .box-header.well
+      h4 Post to Twitter
+      +box_icons
+    form.box-content
+      +action_name_key
+      ul.action-bar
+        li
+          +action_template_select
+        li
+          +track_checkbox
+        li
+          +event_schedule
+      +content('Twitter', 140, 2)
+      +page_ref
+
+  .tpl(name='facebook')
+    .box-header.well
+      h4 Post to Facebook
+      +box_icons
+    form.box-content
+      +action_name_key
+      ul.action-bar
+        li
+          +action_template_select
+        li
+          +track_checkbox
+        li
+          +event_schedule
+      +content('Facebook', 63206, 3)
+      +page_ref
+
+  .tpl(name='email')
+    .box-header.well
+      h4 Send Email
+      +box_icons
+    form.box-content
+      +action_name_key
+      input(type='hidden', name='content.type', value='EMAIL')
+      .input-prepend.input-block-level
+        span.add-on To
+        input.span11(name="email_to", title='Send To', type='text',
+        placeholder='email_1@example.com; email_2@example.com')
+      +action_template_select
+      +track_checkbox
+      input#page_title.input-block-level(type='text', name='title',
+      placeholder='Title of Email', maxlength='255', required)
+      textarea.input-block-level(name='email_content', placeholder='Email Content...',
+      title='Content for email (1000 max)', rows=5, maxlength=1000)
+
+  .tpl(name='wait')
+    .box-header.well
+      h4 Wait
+      +box_icons
+    form.box-content
+      +action_name_key
+      ul.action-bar
+        li
+          +event_schedule('Duration')
+      .help-block
+        | It will create an event in the Calendar, and notifications will be sent before its starts or ends.
+        br
+        | Leave Druation blank or 0 to make it ends manually or schedule it later.
+
+  .tpl(name='trigger')
+    .box-header.well
+      h4 Pause
+      +box_icons
+    form.box-content
+      +action_name_key
+      input(type='hidden', name='duration', value='')
+      .help-block
+        | It will pause until user trigger to continue.
+        br
+        | It will not create an event in the Calendar.
