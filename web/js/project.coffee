@@ -700,8 +700,9 @@ Projects
 
   class ProjectActionCell extends Backgrid.ActionsCell
     render: ->
-      # TODO: show buttons depend on status
       super
+      @_hide 'remove' if /^STARTED$|^PAUSED$/i.test @model.get 'status'
+      @
 
   class ProjectManagemerView extends ManagerView
     columns: [
@@ -745,6 +746,7 @@ Projects
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
+      models = models.filter (model) -> /^STARTED$|^PAUSED$/i.test model.get 'status'
       names = models.map (model) -> model.get 'name'
       # TODO: project life cycle (engine)
       # TODO: started projects cannot be deleted
