@@ -87,11 +87,15 @@ include rich_editor
               label.control-label(for='section_#_type') Section Type
               .controls
                 select.input-xlarge(id='section_#_type', name='type')
-                  option(value='', checked) Description Only (No Question)
+                  option(value='none', checked) Description Only (No Question)
                   option(value='text') Simple Text
                   option(value='html') Rich Text
                   option(value='radio') Multiple Selection
                   option(value='file') File Upload
+                | &nbsp;
+                label.checkbox.inline(title='This question must be answered')
+                  input(type='checkbox', name='required', checked)
+                  | Required
             .control-group.hide.option-field.text-option
               label.control-label(for='section_#_multiline') Simple Text Option
               .controls

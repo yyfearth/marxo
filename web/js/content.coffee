@@ -1,7 +1,7 @@
 "use strict"
 
 define 'content', [
-  'base', 'models', 'manager'
+  'base', 'models', 'manager', 'report'
   'lib/jquery-ui'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
@@ -24,7 +24,7 @@ Content
 ManagerView
 NavFilterView
 ProjectFilterView
-}) ->
+}, ReportView) ->
 
   class ContentFrameView extends FrameView
     initialize: (options) ->
@@ -33,6 +33,7 @@ ProjectFilterView
       @editor = new MessageEditor el: '#msg_editor', parent: @
       @composer = new EmailComposer el: '#email_composer', parent: @
       @designer = new PageDesigner el: '#page_designer', parent: @
+      @reporter = new ReportView el: '#report_viewer', parent: @
       @
     open: (name, arg) ->
       if name
@@ -50,6 +51,7 @@ ProjectFilterView
         @designer.cancel()
         @editor.cancel()
         @composer.cancel()
+        @reporter.cancel()
       @
     popup: (data, action, callback) ->
       if typeof data is 'string'
@@ -58,17 +60,19 @@ ProjectFilterView
       else unless data instanceof Content
         data = new Content data
       type = data.get('type')?.toUpperCase()
-      editor = switch type
-        when 'FACEBOOK', 'TWITTER'
-          @editor
-        when 'PAGE'
-          @designer
-        when 'EMAIL'
-          @composer
-        else
-          throw new Error 'unsupported media type ' + type
-      editor.render() unless editor.rendered
-      editor.popup data, action, callback
+      if action is 'report'
+        @reporter.popup data, callback
+      else
+        editor = switch type
+          when 'FACEBOOK', 'TWITTER'
+            @editor
+          when 'PAGE'
+            @designer
+          when 'EMAIL'
+            @composer
+          else
+            throw new Error 'unsupported media type ' + type
+        editor.popup data, action, callback
       @
 
   class ContentEditorMixin
@@ -195,6 +199,7 @@ ProjectFilterView
       @fill data
       posted = 'IDLE' isnt data.get('status').toUpperCase()
       @readOnlyHtml posted
+      @$el.find('form :input').prop 'readOnly', posted
       @btnSave.disabled = posted
       @
     fill: (data) -> # can only be called after rendered
@@ -246,17 +251,24 @@ ProjectFilterView
       @
     popup: (data, action, callback) ->
       super data, callback
+      @model = data
       #console.log 'content form', data.attributes
       page_desc =
         name: data.get 'name'
         desc: data.get 'desc'
+      @url = "content/#{data.id}"
       @pageDesc.fill page_desc
       #@submitOptions.fill data.get 'options' if data.has 'options'
+      posted = @readonly = 'IDLE' isnt data.get('status').toUpperCase()
       sections = data.get('sections') or []
       if data.has 'sections'
         @addSection section for section in sections
       else # add an empty section if sections have never been defined
         @addSection()
+      @pageDesc.readOnlyHtml posted
+      @$el.find('form :input').prop 'readOnly', posted
+      @$el.find('#new_section, form select, form input[type=checkbox]').prop 'disabled', posted
+      @btnSave.disabled = posted
       if action is 'preview'
         @showPreview {page_desc, sections}
         @btnSave.disabled = true
@@ -311,9 +323,11 @@ ProjectFilterView
       @iframe.classList.remove 'active'
       @btnPreview.classList.remove 'active'
       @btnSave.disabled = false
+      @url = ''
+      @readonly = false
       @
     addSection: (data) ->
-      view = new SectionEditor idx: @sections.length, parent: @
+      view = new SectionEditor idx: @sections.length, readonly: @readonly, parent: @
       view.render()
       view.fill data
       #console.log data
@@ -351,18 +365,25 @@ ProjectFilterView
         # hide
         cls.remove 'active'
         btnCls.remove 'active'
-        @btnSave.disabled = false
+        @btnSave.disabled = false or @readonly
+        @router.navigate @url
       else
         # gen preview and show
-        @btnPreview.disabled = true
-        @read (data) =>
-          #console.log 'read', data
-          if data
-            @showPreview data
-          else
-            cls.remove 'active'
-            btnCls.remove 'active'
-          @btnPreview.disabled = false
+        @router.navigate @url + '/preview'
+        if @readonly
+          data = @model.toJSON()
+          data.page_desc = data
+          @showPreview data
+        else
+          @btnPreview.disabled = true
+          @read (data) =>
+            #console.log 'read', data
+            if data
+              @showPreview data
+            else
+              cls.remove 'active'
+              btnCls.remove 'active'
+            @btnPreview.disabled = false
       @
 
     _genPreview: ({page_desc, sections}) ->
@@ -447,24 +468,31 @@ ProjectFilterView
     tagName: 'section'
     className: 'box section'
     tpl: tpl('#section_tpl')
+    events:
+      'change select[name=type]': (e) -> unless @readonly
+        $el = $ e.currentTarget
+        @_changeType $el.val()
+        return
+      'change form input[name=name]': (e) ->
+        value = e.currentTarget.value
+        title = find '.box-title', @el
+        title.textContent = unless value then 'New Section' else 'Section: ' + value
+        return
     initialize: (options) ->
       super options
       @idx = options.idx
       @id ?= options.id or @idx
       @id = 'section_' + @id if typeof @id is 'number'
+      @readonly = options.readonly
       throw new Error 'id must be given for a section' unless @id
       @
+    _changeType: (type) ->
+      @changeType type
+      @$typeEl.siblings('label.checkbox').css 'visibility',
+        if not type or type is 'none' then 'hidden' else 'visible'
+      return
     _bind: ->
-      # bind title change
-      titleEl = @_find 'name'
-      title = find '.box-title', @el
-      titleEl.onchange = ->
-        title.textContent = unless @value then 'New Section' else 'Section: ' + @value
-        true
-      # bind type change
-      typeEl = @_find 'type'
-      @$typeEl = $ typeEl
-      do typeEl.onchange = => @changeType typeEl.value
+      @$typeEl = $ @_find 'type'
       # bind radio type change
       auto_gen = @_find 'gen_from_list'
       auto_gen_key = @_find 'gen_list_key'
@@ -484,14 +512,16 @@ ProjectFilterView
         true
       @autoIncOptionList = new AutoIncOptionList el: manual_options
       # bind change event
-      @listenTo @autoIncOptionList, 'change', (el) =>
-        @trigger 'change', el, @data
-      $(@form).on 'change', 'input, textarea, select', (e) =>
-        @trigger 'change', e.target, @data
+      unless @readonly
+        @listenTo @autoIncOptionList, 'change', (el) =>
+          @trigger 'change', el, @data
+        $(@form).on 'change', 'input, textarea, select', (e) =>
+          @trigger 'change', e.target, @data
       # bind update preview on any changes
       @previewEl = find '.preview', @el
-      @updatePreview = _.throttle @updatePreview.bind(@), 500
-      @on 'change fill reset', => @updatePreview @data
+      @updatePreview = _.debounce @updatePreview.bind(@), 100
+      unless @readonly
+        @on 'change fill reset', => @updatePreview @data
       @
     _find: (part_id) ->
       find "##{@id}_#{part_id}", @el
@@ -500,41 +530,42 @@ ProjectFilterView
       data = unless data? then {} else $.extend {}, data, data.options
       data.type = if data.type then data.type.toLowerCase() else 'none'
       super data
-      if /^radio$/i.test data.type and not data.gen_from_list and data.manual_options
+      if /^radio$/i.test(data.type) and not data.gen_from_list and data.manual_options
         # manual options
         @autoIncOptionList.fill data.manual_options
+      @_changeType data.type if @readonly
+      @updatePreview data
       @
     read: ->
       data = super()
       return {} unless data
       # manual options
-      if /^radio$/i.test data?.type and not data.gen_from_list
+      if /^radio$/i.test(data?.type) and not data.gen_from_list
         data.manual_options = @autoIncOptionList.read()
-      # TODO: stop if invalid
 
       # convert to data and data.options
+      type = (data.type or 'none').toUpperCase()
       options = data
       data =
         name: options.name
         desc: options.desc
-        type: (options.type or 'none').toUpperCase()
-        options: options
+        type: type
+        options: if type is 'NONE' then {} else options
       delete options.name
       delete options.desc
       delete options.type
       data
     render: ->
-      @el.id = @id
-      @el.dataset.idx = @idx
-      @el.innerHTML = @tpl.replace /section_#/g, @id
-      super
-      @_bind()
-      # init read
-      @fill()
+      unless @rendered
+        @el.id = @id
+        @el.dataset.idx = @idx
+        @el.innerHTML = @tpl.replace /section_#/g, @id
+        @_bind()
+        super # ready fill
       @
     reset: ->
       super
-      @$typeEl.change()
+      @_changeType 'none'
       @
     _preview_tpl: do ->
       tpls = tplAll '#preview_tpl'
@@ -544,7 +575,7 @@ ProjectFilterView
       #console.log 'gen preview', @id, data
       tpl = @_preview_tpl
       type = data.type or ''
-      options = data.options or {}
+      options = data.options or data
       switch type.toLowerCase()
         when '', 'none'
           body = ''
@@ -575,8 +606,7 @@ ProjectFilterView
         .replace('{{title}}', data.name or '(Need a Title)')
         .replace('{{desc}}', data.desc?.replace(/\n/g, '<br/>') or '')
         .replace('{{body}}', body)
-    updatePreview: ->
-      data = @read()
+    updatePreview: (data = @read()) ->
       console.log 'update preview', @id, data
       if Object.keys(data).length
         @previewEl.innerHTML = @genPreview data
@@ -633,18 +663,23 @@ ProjectFilterView
           input.classList.remove 'new'
           frag.appendChild el
         $(@_container).prepend frag
-        @validate()
       else
         console.error 'values should be an string array', values
+      @validate()
       @
     read: ->
       @validate()
       @values
     validate: (silence) -> # it will generate value
       silence = Boolean silence
+      $els = @$el.find 'input.manual_option_text:not(.new)'
+      find('input.manual_option_text', @el).required = true
+      unless $els.length
+        @values = null
+        return false
       values = {}
       valid = true
-      @$el.find('input.manual_option_text:not(.new)').removeClass('error').each ->
+      $els.removeClass('error').each ->
         val = @value.trim()
         if not val
           valid = false
@@ -668,22 +703,27 @@ ProjectFilterView
     render: ->
       super
       model = @model
+      type = model.get('type').toUpperCase()
+      status = model.get('status').toUpperCase()
+
       # view
       view_btn = @_find 'view', 'a'
-      if model.has 'url'
-        view_btn.href = model.get 'url'
+      if type is 'PAGE' and status isnt 'IDLE'
+        view_btn.href = 'site.html#' + model.id
+        view_btn.title = 'View page in new window'
+      else if model.has('post_id') and type is 'FACEBOOK'
+        view_btn.href = 'https://www.facebook.com/' + model.get 'post_id'
       else
         @_hide view_btn
 
       # report
-      report_btn =  @_find 'report', 'a'
-      if model.has('records') or model.has('submissions')
+      report_btn = @_find 'report', 'a'
+      if model.get('records')?.length or model.get('submissions')?.length
         report_btn.href = "#content/#{model.id}/report"
       else
         @_hide report_btn
 
       # status
-      status = model.get('status').toUpperCase()
       if 'IDLE' is status
         @_hide report_btn
         @_hide 'preview' if 'PAGE' isnt model.get 'type'
@@ -693,6 +733,7 @@ ProjectFilterView
         # buttons pre post
         @_hide 'edit'
 
+      # currently not supported
       @_hide 'block'
       @_hide 'unblock'
       @
@@ -740,19 +781,18 @@ ProjectFilterView
         el: find('ul.project-list', @el)
         collection: collection
       @refresh = @refresh.bind @
-      @on
-        block: @block.bind @
-        unblock: @unblock.bind @
+      #@on
+      #  block: @block.bind @
+      #  unblock: @unblock.bind @
       @
-    block: (model) ->
-      if confirm 'Are you sure to block this content to post to its media?'
-        model.save {status: 'BLOCKED'}, wait: true, success: @refresh
-      @
-    unblock: (model) ->
-      # TODO: check if it can be unlocked (it may expired)
-      if confirm 'Are you sure to unblock this content and post to its media?'
-        model.save {status: 'WAITING'}, wait: true, success: @refresh
-      @
+    #block: (model) ->
+    #  if confirm 'Are you sure to block this content to post to its media?'
+    #    model.save {status: 'BLOCKED'}, wait: true, success: @refresh
+    #  @
+    #unblock: (model) ->
+    #  if confirm 'Are you sure to unblock this content and post to its media?'
+    #    model.save {status: 'WAITING'}, wait: true, success: @refresh
+    #  @
     reload: ->
       super
       @typeFilter.clear()
