@@ -74,7 +74,9 @@ public class FileController extends BasicController implements MongoDbAware {
 
 		response.addHeader("Content-Type", gridFSDBFile.getContentType());
 		response.addHeader("Content-Length", String.valueOf(gridFSDBFile.getLength()));
-		response.addHeader("File-Meta", gridFSDBFile.getMetaData().toString());
+
+		FileInfo fileInfo = mappingConverter.read(FileInfo.class, gridFSDBFile.getMetaData());
+		response.addHeader("File-Meta", marxoObjectMapper.writeValueAsString(fileInfo));
 
 		gridFSDBFile.writeTo(response.getOutputStream());
 	}
