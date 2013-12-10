@@ -82,7 +82,6 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 	public void setDuration(Duration duration) {
 		if (!this.duration.equals(duration)) {
 			this.duration = duration;
-			logger.info(String.format("%s's wait duration is set to %s second(s)", this, duration.getStandardSeconds()));
 		}
 	}
 

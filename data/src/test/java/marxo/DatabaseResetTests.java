@@ -5,6 +5,7 @@ import com.mongodb.DB;
 import com.rits.cloning.Cloner;
 import marxo.entity.BasicEntity;
 import marxo.entity.FacebookData;
+import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
 import marxo.entity.link.Link;
@@ -351,5 +352,19 @@ public class DatabaseResetTests extends BasicDataTests {
 		Notification notification4 = new Notification(Notification.Level.ERROR, "Error notification");
 		notification1.setTenant(reusedTenant);
 		notification4.save();
+	}
+
+	@Test(dependsOnMethods = {"addProject", "addProjectWithPageAction"})
+	public void startAllProjects() throws Exception {
+		List<Workflow> workflows = mongoTemplate.find(Query.query(Criteria.where("isProject").is(true)), Workflow.class);
+		for (Workflow workflow : workflows) {
+			if (workflow.status.equals(RunStatus.IDLE)) {
+				workflow.status = RunStatus.STARTED;
+				workflow.save();
+
+				Task task = new Task(workflow.id);
+				task.save();
+			}
+		}
 	}
 }
