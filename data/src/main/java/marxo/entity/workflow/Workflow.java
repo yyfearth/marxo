@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
+import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
@@ -392,6 +393,26 @@ public class Workflow extends RunnableEntity {
 	/*
 	DAO
 	 */
+
+	@Override
+	public void remove() {
+		if (getNodes() != null) {
+			for (Node node : getNodes()) {
+				node.remove();
+			}
+		}
+		if (getLinks() != null) {
+			for (Link link : getLinks()) {
+				link.remove();
+			}
+		}
+
+		// Remove all related tasks.
+		Criteria criteria = Criteria.where("workflowId").is(id);
+		mongoTemplate.remove(Query.query(criteria), Task.class);
+
+		super.remove();
+	}
 
 	public static Workflow get(ObjectId id) {
 		Workflow workflow = mongoTemplate.findById(id, Workflow.class);
