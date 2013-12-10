@@ -6,7 +6,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
-public class PasswordEncryptor implements ILoggable {
+public class PasswordEncryptor implements Loggable {
 	// review: increase the following numbers in production, in order to better secure the users.
 	static final int iterationCount = 64;
 	static final int keyLength = 128;

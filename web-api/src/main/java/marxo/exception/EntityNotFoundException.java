@@ -1,22 +1,29 @@
 package marxo.exception;
 
-import org.bson.types.ObjectId;
+import marxo.entity.BasicEntity;
 
 public class EntityNotFoundException extends EntityException {
-	protected String identity;
 	protected String message;
 
-	public EntityNotFoundException(ObjectId objectId) {
-		this(objectId.toString());
+	public EntityNotFoundException(String entityName, Object identity) {
+		this(String.format("Cannot find [%s] with identity [%s]", entityName, identity.toString()));
 	}
 
-	public EntityNotFoundException(String identity) {
-		this(identity, String.format("The entity of the given ID (%s) does not exist", identity));
+	public EntityNotFoundException(Class<? extends BasicEntity> aClass, Object identity) {
+		this(aClass.getSimpleName(), identity);
 	}
 
-	protected EntityNotFoundException(String identity, String message) {
+	public EntityNotFoundException(Object identity) {
+		this("Entity", identity);
+	}
+
+	protected EntityNotFoundException(String message) {
 		super(message);
-		this.identity = identity;
 		this.message = message;
+	}
+
+	@Override
+	public String getMessage() {
+		return message;
 	}
 }

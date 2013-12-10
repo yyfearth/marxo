@@ -16,20 +16,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        <spring.version>3.2.4.RELEASE</spring.version>
-        <spring-data.version>1.3.1.RELEASE</spring-data.version>
+        <spring.version>3.2.5.RELEASE</spring.version>
         <spring-security.version>3.1.4.RELEASE</spring-security.version>
         <mongo-driver.version>2.11.2</mongo-driver.version>
         <jackson.version>2.2.3</jackson.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.marxo</groupId>
-            <artifactId>utility</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
-        </dependency>
+        <!-- Modules -->
         <dependency>
             <groupId>com.marxo</groupId>
             <artifactId>data</artifactId>
@@ -38,11 +32,12 @@
         </dependency>
         <dependency>
             <groupId>com.marxo</groupId>
-            <artifactId>channel</artifactId>
+            <artifactId>engine</artifactId>
             <version>LATEST</version>
             <scope>compile</scope>
         </dependency>
 
+        <!-- Java EE -->
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
@@ -85,17 +80,40 @@
             <version>${spring-security.version}</version>
         </dependency>
 
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.0-beta9</version>
+        </dependency>
+
+        <!-- Utilities -->
+        <dependency>
+            <!-- For multipart resolver -->
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
+            <groupId>com.marxo</groupId>
+            <artifactId>data</artifactId>
+            <version>LATEST</version>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8.7</version>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- For some fucking reasons, Spring starts to complain about that it doesn't find a validation provider when runs TestNG. Current solution is to feed it a hibernate validator. -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

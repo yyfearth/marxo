@@ -1,23 +1,27 @@
 package marxo.controller;
 
-import marxo.dao.TenantChildDao;
-import marxo.entity.TenantChildEntity;
-import marxo.security.MarxoAuthentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.Assert;
+import marxo.entity.user.TenantChildEntity;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.web.bind.annotation.RequestBody;
 
-public class TenantChildController<E extends TenantChildEntity> extends EntityController<E> implements IInterceptroPreHandlable {
-	TenantChildDao<E> tenantChildDao;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
-	protected TenantChildController(TenantChildDao<E> tenantChildDao) {
-		super(tenantChildDao);
-		this.tenantChildDao = tenantChildDao;
+public abstract class TenantChildController<Entity extends TenantChildEntity> extends EntityController<Entity> {
+	/**
+	 * The user object will be set before each controller method is called.
+	 */
+	@Override
+	public void preHandle() {
+		super.preHandle();
+		Criteria criteria1 = Criteria.where("tenantId").is(user.tenantId);
+		Criteria criteria2 = Criteria.where("tenantId").exists(false);
+		criteria.orOperator(criteria1, criteria2);
 	}
 
-	public void preHandle() {
-		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
-		Assert.notNull(marxoAuthentication);
-		user = marxoAuthentication.getUser();
-		tenantChildDao.setTenantId(user.tenantId);
+	@Override
+	public Entity create(@Valid @RequestBody Entity entity, HttpServletResponse response) throws Exception {
+		entity.tenantId = user.tenantId;
+		return super.create(entity, response);
 	}
 }

@@ -10,7 +10,18 @@
     <context:component-scan base-package="marxo.exception"/>
     <context:component-scan base-package="marxo.filter"/>
 
-    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
+    <mvc:annotation-driven content-negotiation-manager="contentNegotiationManager">
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper" ref="marxoObjectMapper"/>
+            </bean>
+            <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <bean id="marxoObjectMapper" class="marxo.serialization.MarxoObjectMapper"/>
+
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
@@ -35,6 +46,10 @@
         </property>
     </bean>
 
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="100000000"/>
+    </bean>
+
     <!--<bean name="handlerAdapter" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">-->
     <!--<property name="useSuffixPatternMatch" value="true"/>-->
     <!--<property name="useRegisteredSuffixPatternMatch" value="true"/>-->
@@ -43,9 +58,9 @@
 
     <bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
         <property name="defaultContentType" value="application/json"/>
-        <!-- Disable it for it will disrupted by end url with email, e.g. test@example.com, it will use .com as media type -->
+        <!-- Disable it for it will disrupted by end url with email, e.g. test@example.com, it will use .com as media contextType -->
         <property name="favorPathExtension" value="false"/>
-        <!-- The following accept .json as the path extension and set the media header to related type. -->
+        <!-- The following accept .json as the path extension and set the media header to related contextType. -->
         <!--<property name="favorPathExtension" value="true"/>-->
         <!--<property name="useJaf" value="false"/>-->
         <!--<property name="mediaTypes">-->
@@ -54,4 +69,6 @@
         <!--</map>-->
         <!--</property>-->
     </bean>
+
+    <bean class="marxo.engine.EngineWorker" destroy-method="stopAsync"/>
 </beans>

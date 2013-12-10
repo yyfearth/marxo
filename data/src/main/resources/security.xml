@@ -15,4 +15,14 @@
         <constructor-arg name="salt" ref="passwordSaltHexString"/>
         <constructor-arg name="secretKeyFactory" ref="secretKeyFactory"/>
     </bean>
+
+    <bean id="appId" class="java.lang.String">
+        <constructor-arg type="java.lang.String" value="213527892138380"/>
+    </bean>
+    <bean id="appSecret" class="java.lang.String">
+        <constructor-arg type="java.lang.String" value="8157179216ad4e065d10c425f382499d"/>
+    </bean>
+    <bean id="appToken" class="java.lang.String">
+        <constructor-arg type="java.lang.String" value="213527892138380|eZgwp-1kegwB-CI-pYi7Q2WllKw"/>
+    </bean>
 </beans>

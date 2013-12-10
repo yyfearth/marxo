@@ -30,14 +30,6 @@ public class MarxoBasicAuthenticationFilter extends BasicAuthenticationFilter {
 	private RememberMeServices rememberMeServices = new NullRememberMeServices();
 	private String credentialsCharset = "UTF-8";
 
-	public MarxoBasicAuthenticationFilter() {
-	}
-
-//	public MarxoBasicAuthenticationFilter(AuthenticationManager authenticationManager) {
-//		super(authenticationManager);
-//		this.authenticationManager = authenticationManager;
-//	}
-
 	public MarxoBasicAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationEntryPoint authenticationEntryPoint) {
 		super(authenticationManager, authenticationEntryPoint);
 		this.authenticationManager = authenticationManager;
@@ -73,10 +65,6 @@ public class MarxoBasicAuthenticationFilter extends BasicAuthenticationFilter {
 			String username = tokens[0];
 			String password = tokens[1];
 
-			if (debug) {
-				logger.debug("Basic Authentication Authorization header found for user '" + username + "'");
-			}
-
 			if (authenticationIsRequired(username, password)) {
 				UsernamePasswordAuthenticationToken authRequest =
 						new UsernamePasswordAuthenticationToken(username, password);
@@ -84,7 +72,7 @@ public class MarxoBasicAuthenticationFilter extends BasicAuthenticationFilter {
 				Authentication authResult = authenticationManager.authenticate(authRequest);
 
 				if (debug) {
-					logger.debug("Authentication success: " + authResult);
+					logger.debug("Authentication success: " + username + ":" + password);
 				}
 
 				SecurityContextHolder.getContext().setAuthentication(authResult);
@@ -98,7 +86,7 @@ public class MarxoBasicAuthenticationFilter extends BasicAuthenticationFilter {
 			SecurityContextHolder.clearContext();
 
 			if (debug) {
-				logger.debug("Authentication request for failed: " + failed);
+				logger.debug("Authentication failed: " + failed);
 			}
 
 			rememberMeServices.loginFail(request, response);

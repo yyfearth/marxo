@@ -28,7 +28,7 @@ public class MarxoAuthenticationEntryPoint implements AuthenticationEntryPoint {
 			response.addHeader("WWW-Authenticate", "Basic realm=\"marxo\"");
 		}
 
-		ErrorJson errorJson = new ErrorJson("Either you give me your old ID card or you are fired.");
+		ErrorJson errorJson = new ErrorJson("Cannot find the combination of username and password.");
 		String body = objectMapper.writeValueAsString(errorJson);
 		response.getWriter().print(body);
 	}

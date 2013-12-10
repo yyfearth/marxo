@@ -6,12 +6,29 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
     <config:annotation-config/>
+    <config:component-scan base-package="marxo.serialization"/>
 
-    <mongo:db-factory id="mongoDbFactory" host="dharma.mongohq.com" port="10047" dbname="Marxo" username="web" password="web"/>
     <!-- The following is the backup MongoDB server -->
+    <!--<mongo:db-factory id="mongoDbFactory" host="dharma.mongohq.com" port="10047" dbname="Marxo" username="web" password="web"/>-->
     <!--<mongo:db-factory id="mongoDbFactory" host="ds041167.mongolab.com" port="41167" dbname="marxo" username="web" password="web"/>-->
+    <mongo:db-factory id="mongoDbFactory" host="masonwan.com" port="27017" dbname="marxo"/>
 
     <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
-        <constructor-arg index="0" ref="mongoDbFactory"/>
+        <constructor-arg name="mongoDbFactory" ref="mongoDbFactory"/>
+        <constructor-arg name="mongoConverter" ref="mappingConverter"/>
     </bean>
+
+    <bean id="gridFsTemplate" class="org.springframework.data.mongodb.gridfs.GridFsTemplate">
+        <constructor-arg name="dbFactory" ref="mongoDbFactory"/>
+        <constructor-arg name="converter" ref="mappingConverter"/>
+    </bean>
+
+    <mongo:mapping-converter>
+        <mongo:custom-converters>
+            <mongo:converter ref="durationReadConverter"/>
+            <mongo:converter ref="durationWriteConverter"/>
+            <mongo:converter ref="periodReadConverter"/>
+            <mongo:converter ref="periodWriteConverter"/>
+        </mongo:custom-converters>
+    </mongo:mapping-converter>
 </beans>

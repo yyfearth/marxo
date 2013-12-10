@@ -1,6 +1,6 @@
 package marxo.security;
 
-import marxo.entity.User;
+import marxo.entity.user.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 

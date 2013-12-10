@@ -1,64 +1,94 @@
 package marxo.controller;
 
-import marxo.dao.BasicDao;
 import marxo.entity.BasicEntity;
-import marxo.entity.User;
-import marxo.exception.*;
+import marxo.entity.MongoDbAware;
+import marxo.entity.user.User;
+import marxo.exception.EntityInvalidException;
+import marxo.exception.EntityNotFoundException;
+import marxo.exception.InvalidObjectIdException;
+import marxo.exception.ValidationException;
+import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.Date;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.List;
 
-public abstract class EntityController<E extends BasicEntity> extends BasicController {
-	BasicDao<E> dao;
+@SuppressWarnings("unchecked")
+public abstract class EntityController<Entity extends BasicEntity> extends BasicController implements MongoDbAware, InterceptorPreHandlable {
+	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime")).and(new Sort(new Sort.Order(Sort.Direction.DESC, "createTime")));
+	protected Class<Entity> entityClass;
+	// review: not sure storing a query is a better idea.
+	protected Criteria criteria;
 	/**
 	 * The user who is using the controller.
 	 */
-	User user;
+	protected User user;
+	@Autowired
+	HttpServletRequest request;
 
-	protected EntityController(BasicDao<E> dao) {
-		this.dao = dao;
+	protected EntityController() {
+		Class<?> targetClass = getClass();
+		Type type = targetClass.getGenericSuperclass();
+		while (!(type instanceof ParameterizedType)) {
+			targetClass = getClass().getSuperclass();
+			type = targetClass.getGenericSuperclass();
+		}
+
+		ParameterizedType parameterizedType = (ParameterizedType) type;
+		this.entityClass = (Class<Entity>) parameterizedType.getActualTypeArguments()[0];
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
-	@ResponseBody
-	public List<E> getAll(@RequestParam(required = false) String name, @RequestParam(required = false) Date modified, @RequestParam(required = false) Date created) {
-		return dao.findAll();
+	@Override
+	public void preHandle() {
+		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
+		Assert.notNull(marxoAuthentication);
+		user = marxoAuthentication.getUser();
+		criteria = new Criteria();
+	}
+
+	protected Query getDefaultQuery(Criteria criteria) {
+		return Query.query(criteria).with(defaultSort);
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
-	public E create(@Valid @RequestBody E entity, HttpServletResponse response) throws Exception {
-		if (dao.exists(entity.id)) {
-			throw new EntityExistsException(entity.id);
-		}
+	public Entity create(@Valid @RequestBody Entity entity, HttpServletResponse response) throws Exception {
+		entity.createUserId = entity.updateUserId = user.id;
+		entity.createTime = entity.updateTime = DateTime.now();
+		entity.save();
 
-		entity.createdByUserId = entity.modifiedByUserId = user.id;
-		entity.fillWithDefaultValues();
-		dao.save(entity);
-
-		response.setHeader("Location", String.format("/%s/%s", entity.getClass().getSimpleName().toLowerCase(), entity.id));
+		URI location = ServletUriComponentsBuilder.fromServletMapping(request).path("/{entityName}/{id}").build().expand(entity.getClass().getSimpleName().toLowerCase(), entity.id).toUri();
+		response.setHeader("Localtion", location.toString());
 		return entity;
 	}
 
 	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public E read(@PathVariable String idString) {
-		if (!ObjectId.isValid(idString)) {
-			throw new InvalidObjectIdException(idString);
-		}
+	public Entity read(@PathVariable String idString) throws Exception {
+		ObjectId objectId = stringToObjectId(idString);
 
-		ObjectId objectId = new ObjectId(idString);
-		E entity = dao.get(objectId);
+		criteria.and("_id").is(objectId);
+		Entity entity = mongoTemplate.findOne(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
-			throw new EntityNotFoundException(objectId);
+			throw new EntityNotFoundException(entityClass, objectId);
 		}
 
 		return entity;
@@ -67,31 +97,22 @@ public abstract class EntityController<E extends BasicEntity> extends BasicContr
 	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	public E update(@Valid @PathVariable String idString, @Valid @RequestBody E entity) {
-		if (!ObjectId.isValid(idString)) {
-			throw new InvalidObjectIdException(idString);
-		}
+	public Entity update(@Valid @PathVariable String idString, @Valid @RequestBody Entity entity) throws Exception {
+		ObjectId objectId = stringToObjectId(idString);
 
-		ObjectId objectId = new ObjectId(idString);
-
-		// todo: check consistency of given id and entity id.
-		E oldEntity = dao.get(objectId);
+		Entity oldEntity = mongoTemplate.findById(objectId, entityClass);
 
 		if (oldEntity == null) {
-			throw new EntityNotFoundException(objectId);
+			throw new EntityNotFoundException(entityClass, objectId);
 		}
 
-		entity.modifiedDate = new Date();
-
 		try {
-			// todo: use validation.
 			entity.id = oldEntity.id;
-			entity.createdByUserId = oldEntity.createdByUserId;
-			entity.createdDate = oldEntity.createdDate;
-			entity.modifiedByUserId = new ObjectId("000000000000000000000000");
-			entity.modifiedDate = new Date();
-			dao.save(entity);
+			entity.createUserId = oldEntity.createUserId;
+			entity.createTime = oldEntity.createTime;
+			entity.updateUserId = user.id;
+			entity.updateTime = DateTime.now();
+			entity.save();
 		} catch (ValidationException ex) {
 			for (int i = 0; i < ex.reasons.size(); i++) {
 				logger.error(ex.reasons.get(i));
@@ -105,19 +126,34 @@ public abstract class EntityController<E extends BasicEntity> extends BasicContr
 	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	// fixme: get ObjectId from Spring MVC, and let the global validator do the validation.
-	public E delete(@PathVariable String idString) {
-		if (!ObjectId.isValid(idString)) {
-			throw new InvalidObjectIdException(idString);
-		}
+	public Entity delete(@PathVariable String idString) throws Exception {
+		throwIfInvalidObjectId(idString);
 
 		ObjectId objectId = new ObjectId(idString);
-		E entity = dao.deleteById(objectId);
+		criteria.and("_id").is(objectId);
+		Entity entity = mongoTemplate.findAndRemove(getDefaultQuery(criteria), entityClass);
 
 		if (entity == null) {
-			throw new EntityNotFoundException(objectId);
+			throw new EntityNotFoundException(entityClass, objectId);
 		}
 
 		return entity;
+	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	public List<Entity> search() {
+		return mongoTemplate.find(getDefaultQuery(criteria), entityClass);
+	}
+
+	protected void throwIfInvalidObjectId(String idString) {
+		if (!ObjectId.isValid(idString)) {
+			throw new InvalidObjectIdException(idString);
+		}
+	}
+
+	protected ObjectId stringToObjectId(String idString) {
+		throwIfInvalidObjectId(idString);
+		return new ObjectId(idString);
 	}
 }

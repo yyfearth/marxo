@@ -55,25 +55,25 @@ public class TestController extends BasicController {
 	public ResponseEntity<String> logout() {
 		return new ResponseEntity<String>("You are signed out", HttpStatus.UNAUTHORIZED);
 	}
-}
 
-@JsonSerialize
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-class RemoteInfomation {
-	protected String ip;
-	protected String host;
-	protected int port;
-	protected Map<String, String> headers;
+	@JsonSerialize
+	@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+	class RemoteInfomation {
+		protected String ip;
+		protected String host;
+		protected int port;
+		protected Map<String, String> headers;
 
-	public RemoteInfomation(HttpServletRequest request) {
-		ip = request.getRemoteAddr();
-		host = request.getRemoteHost();
-		port = request.getRemotePort();
+		public RemoteInfomation(HttpServletRequest request) {
+			ip = request.getRemoteAddr();
+			host = request.getRemoteHost();
+			port = request.getRemotePort();
 
-		headers = new HashMap<>();
-		List<String> headerNames = Collections.list(request.getHeaderNames());
-		for (String headerName : headerNames) {
-			headers.put(headerName, request.getHeader(headerName));
+			headers = new HashMap<>();
+			List<String> headerNames = Collections.list(request.getHeaderNames());
+			for (String headerName : headerNames) {
+				headers.put(headerName, request.getHeader(headerName));
+			}
 		}
 	}
 }
