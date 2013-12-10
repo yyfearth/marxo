@@ -65,6 +65,7 @@ define 'utils', ['lib/html5-dataset'], ->
     AUTO_SHORT_MAX = 30
     _regex = /(?:(\d+)w(?:eek)?s?)?(?:(\d+)d(?:ay)?s?)?(?:(\d+)h(?:our)?s?)?(?:(\d+)m(?:in(?:use?)?s?)?)?(?:(\d+)s(?:ec(?:ond)?)?s?)?(?:(\d+)ms)?/i
     _delays = [604800000, 86400000, 3600000, 60000, 1000, 1]
+    _day_delay = _delays[1]
     _units = [
       # set week to null if only use days
       ['week', 's'],
@@ -81,7 +82,10 @@ define 'utils', ['lib/html5-dataset'], ->
         continue unless s
         next = delay % ms
         d = (delay - next) / ms
-        delay = next
+        if i is 0 and d < 5 and (next - next % _day_delay) % 7 isnt 0 # is week
+          d = 0
+        else
+          delay = next
         if d
           unless Array.isArray s # is ms
             str.push if short then "#{d}#{s}" else "#{d} #{s}"

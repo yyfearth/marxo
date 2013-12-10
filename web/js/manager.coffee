@@ -162,6 +162,13 @@ Workflows
 
   # single label tag
   class Backgrid.LabelCell extends Backgrid.StringCell
+    status_cls:
+      started: 'label-success'
+      monitoring: 'label-success'
+      paused: 'label-warning'
+      stopped: 'label-inverse'
+      finished: 'label-info'
+      error: 'label-important'
     className: 'label-cell'
     formatter:
       fromRaw: (raw) -> if raw? then raw.toLowerCase() else ''
@@ -426,12 +433,7 @@ Workflows
         name: 'status'
         label: 'Status'
         cell: 'label'
-        cls:
-          started: 'label-success'
-          paused: 'label-warning'
-          stopped: 'label-inverse'
-          finished: 'label-info'
-          error: 'label-important'
+        cls: Backgrid.LabelCell::status_cls
         editable: false
       created_at:
         name: 'created_at'

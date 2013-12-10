@@ -100,7 +100,6 @@ Event
             console.warn 'starts <= ends', starts, ends
           else unless duration # starts and ends but duration
             duration = ends - starts
-            form.duration.value = DurationConvertor.stringify duration
         else if duration # starts and duration but ends
           ends = new Date starts + duration
           form.ends.value = @_dateToString ends
@@ -113,6 +112,7 @@ Event
         cls = 'error'
       else
         console.log 'starts, ends, duration:', starts, ends, duration
+        form.duration.value = DurationConvertor.stringify duration if duration
         cls = ''
         msg = []
         if starts
@@ -159,6 +159,9 @@ Event
       data
     reset: ->
       @$info.empty()
+      @form.starts.readOnly = false
+      @form.ends.readOnly = false
+      @form.duration.readOnly = false
       @btnView.href = ''
       super
     popup: (data, callback) ->
@@ -167,6 +170,21 @@ Event
       @btnView.href = "#event/calendar/#{data.id}"
       @$form.off q...
       @fill data
+      form = @form
+      status = (data.status or '').toUpperCase()
+      switch status
+        when 'FINISHED', 'ERROR', 'STOPPED'
+          form.starts.readOnly = true
+          form.ends.readOnly = true
+          form.duration.readOnly = true
+        when 'STARTED', 'MONITORING', 'PAUSED'
+          form.starts.readOnly = true
+          form.ends.readOnly = false
+          form.duration.readOnly = false
+        else
+          form.starts.readOnly = false
+          form.ends.readOnly = false
+          form.duration.readOnly = false
       @$form.on q...
       @
     save: ->
@@ -232,7 +250,7 @@ Event
           # default color
             _evt.editable = true
             _evt.color = '#006dcc' if _evt.allDay
-          when 'STARTED'
+          when 'STARTED', 'MONITORING'
             _evt.color = if _evt.end? then '#468847' else '#faa732'
             _evt.startEditable = false
             _evt.durationEditable = true
@@ -397,7 +415,9 @@ Event
         buf.push "(#{DurationConvertor.stringify duration})"
       else
         buf.push '(Skip manully or until project ends)'
-      @el.textContent = buf.join ' '
+      buf = buf.join ' '
+      @el.title = @el.textContent = buf
+      @el.dataset.container = '#event_manager table'
       @
     _getDate: (name) ->
       datetime = @model.get name
@@ -414,7 +434,7 @@ Event
 
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
-      @_hide 'skip' unless /^IDLE$|^STARTED$/i.test @model.get 'status'
+      @_hide 'skip' unless /^(?:IDLE$|STARTED|MONITORING|PAUSED)$/i.test @model.get 'status'
       super
 
   class EventManagemerView extends ManagerView
@@ -448,6 +468,7 @@ Event
       @on 'skip remove_selected', @skip.bind @
       @
     skip: (event) ->
+      # TODO: use action status api instead
       console.log 'skip', event
       if confirm """Are you sure to skip event "#{event.get 'name'}"?\n
       Skip means event and its related action will be end in a short time and it will be marked as FINISHED after engine processed it.
@@ -479,8 +500,8 @@ Event
           alert 'Event is failed to update'
       @
     reload: ->
-      super
       @projectFilter.clear()
+      super
     render: ->
       super
       @projectFilter.render()
