@@ -3,13 +3,18 @@ package marxo.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import marxo.entity.Task;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
 import marxo.entity.workflow.WorkflowChildEntity;
 import marxo.entity.workflow.WorkflowPredicate;
+import marxo.exception.EntityInvalidException;
+import marxo.exception.EntityNotFoundException;
+import marxo.exception.ValidationException;
 import marxo.tool.StringTool;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -42,10 +47,6 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		return false;
 	}
 
-	/*
-	Search
-	 */
-
 	@Override
 	public Workflow read(@PathVariable String idString) throws Exception {
 		Workflow workflow = super.read(idString);
@@ -58,6 +59,52 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		workflow.setNodes(Lists.newArrayList(workflowNodes));
 		Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
 		workflow.setLinks(Lists.newArrayList(workflowLinks));
+
+		return workflow;
+	}
+
+	@Override
+	public Workflow update(@Valid @PathVariable String idString, @Valid @RequestBody Workflow workflow) throws Exception {
+		ObjectId objectId = stringToObjectId(idString);
+
+		Workflow oldWorkflow = mongoTemplate.findById(objectId, entityClass);
+		if (oldWorkflow == null) {
+			throw new EntityNotFoundException(entityClass, objectId);
+		}
+
+		if (!oldWorkflow.status.equals(workflow.status)) {
+			switch (workflow.status) {
+				case STARTED:
+					Task task = new Task(workflow.id);
+					task.save();
+					break;
+				case PAUSED:
+				case STOPPED:
+					mongoTemplate.remove(Query.query(Criteria.where("workflowId").is(workflow.id)), Task.class);
+					logger.debug(String.format("%s is %s. Remove all associated tasks", workflow, workflow.status));
+					break;
+				case IDLE:
+				case FINISHED:
+				case ERROR:
+				case WAITING:
+				case MONITORING:
+					throw new IllegalArgumentException(String.format("You cannot change a project's status to %s", workflow.status));
+			}
+
+			try {
+				workflow.id = oldWorkflow.id;
+				workflow.createUserId = oldWorkflow.createUserId;
+				workflow.createTime = oldWorkflow.createTime;
+				workflow.updateUserId = user.id;
+				workflow.updateTime = DateTime.now();
+				workflow.save();
+			} catch (ValidationException ex) {
+				for (int i = 0; i < ex.reasons.size(); i++) {
+					logger.error(ex.reasons.get(i));
+				}
+				throw new EntityInvalidException(objectId, ex.reasons);
+			}
+		}
 
 		return workflow;
 	}
