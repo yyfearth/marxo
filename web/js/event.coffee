@@ -376,6 +376,47 @@ Event
 
   # Event Manager
 
+  class EventSchduleCell extends Backgrid.StringCell
+    className: 'datetime-cell'
+    render: ->
+      starts = @_getDate 'starts'
+      ends = @_getDate 'ends'
+      duration = Number(@model.get 'duration') or 0
+      buf = []
+      if starts
+        buf.push starts.toLocaleString()
+        buf.push '-'
+        if ends
+          buf.push ends.toLocaleString()
+          duration = ends.getTime() - starts.getTime() unless duration
+        else
+          buf.push 'Project ends'
+      if duration
+        if duration isnt ends.getTime() - starts.getTime()
+          console.error 'duration and starts/ends not matched', duration, starts, ends
+        buf.push "(#{DurationConvertor.stringify duration})"
+      else
+        buf.push '(Skip manully or until project ends)'
+      @el.textContent = buf.join ' '
+      @
+    _getDate: (name) ->
+      datetime = @model.get name
+      if datetime
+        try
+          date = new Date datetime
+          date = null if isNaN date.getTime()
+        catch
+          date = null
+        console.error 'unsupported datetime', datetime unless date?
+        date
+      else
+        null
+
+  class EventActionCell extends Backgrid.ActionsCell
+    render: ->
+      @_hide 'skip' unless /^IDLE$|^STARTED$/i.test @model.get 'status'
+      super
+
   class EventManagemerView extends ManagerView
     columns: [
       # 'checkbox'
@@ -383,9 +424,19 @@ Event
       'name:event'
       'workflow'
       'node_action'
-      'type'
+      #'type'
       'status'
-      'actions:event'
+    ,
+      name: 'duration'
+      label: 'Schedule'
+      cell: EventSchduleCell
+      editable: false
+    ,
+      name: 'event'
+      label: ''
+      editable: false
+      sortable: false
+      cell: EventActionCell
     ]
     initialize: (options) ->
       super options
@@ -396,9 +447,36 @@ Event
         collection: collection
       @on 'skip remove_selected', @skip.bind @
       @
-    skip: (models) ->
-      console.log 'skip', models
-      # TODO: support skip event
+    skip: (event) ->
+      console.log 'skip', event
+      if confirm """Are you sure to skip event "#{event.get 'name'}"?\n
+      Skip means event and its related action will be end in a short time and it will be marked as FINISHED after engine processed it.
+      In the meanwhile, for page action, it will be close to submission, and tracked action will be stop tracking too."""
+        if starts = event.get 'starts'
+          starts = new Date(starts).getTime()
+          ends = new Date(event.get 'ends').getTime() or 0
+          now = Date.now()
+          if starts <= now
+            if ends and ends <= now
+              console.error 'ends is before now', event.get('ends'), '<', new Date
+              alert '''This event should be marked as FINISHED since it readly passed its ends.
+              It may caused by the engine have not processed it yet, or it is caused by an engine error!'''
+              return @
+            xhr = event.save
+              ends: new Date now
+              duration: now - starts
+            , wait: true
+        xhr ?= event.save
+          starts: new Date now
+          ends: new Date now + 1
+          duration: 1
+        , wait: true
+        xhr.then =>
+          @reload()
+          alert 'Selected event has been updated, \nbut the status may not changed until engine processed.\nPress Reload to see the changes.'
+        , =>
+          @reload()
+          alert 'Event is failed to update'
       @
     reload: ->
       super
