@@ -1,0 +1,130 @@
+@import 'rich-editor';
+
+.preview {
+  &.container {
+    width: 90%;
+    min-width: 600px;
+    max-width: 900px;
+    margin: 20px auto;
+  }
+
+  section {
+    margin: 15px;
+    legend:after {
+      float: right;
+      content: '(Preview)';
+      font-size: 11pt;
+      color: #999;
+    }
+    .preview-desc {
+      margin: 10px 0;
+    }
+  }
+}
+
+#email_composer {
+  left: 5%;
+  width: 90%;
+  margin: 0;
+}
+
+#page_designer {
+
+  article {
+    max-width: 1000px;
+    min-width: 600px;
+    margin: 0 auto;
+  }
+
+  .section.box {
+    .box-header {
+      cursor: move;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .box-content {
+      background: #fff;
+    }
+  }
+
+  li.manual_option {
+    line-height: 30px;
+    list-style: none;
+    .close {
+      float: none;
+      cursor: pointer;
+    }
+    .fake-radio, .fake-checkbox {
+      color: #aaa;
+    }
+    .fake-radio:before {
+      content: '\25CB';
+      font-size: 32px;
+      line-height: 32px;
+      vertical-align: middle;
+    }
+    .fake-checkbox:before {
+      content: '\25A1';
+      font-size: 26px;
+      line-height: 32px;
+      vertical-align: middle;
+    }
+    .manual_option_text {
+      cursor: text;
+      margin: 0 5px;
+    }
+    .new + .close {
+      display: none;
+    }
+    .error {
+      color: #b94a48;
+      border-color: #b94a48;
+      outline-color: #b94a48;
+    }
+  }
+
+  #new_section {
+    display: block;
+    font-size: 32px;
+    margin: 10px 47%;
+    width: 48px;
+    height: 48px;
+    line-height: 32px;
+    text-align: center;
+  }
+
+  .preview {
+    margin: 0 20%;
+    padding: 5px 5% 15px 5%;
+    legend:after {
+      float: right;
+      content: '(Preview)';
+      font-size: 11pt;
+      color: #999;
+    }
+    .preview-desc {
+      margin: 10px 0;
+    }
+  }
+
+  iframe {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: #fff;
+    border: none;
+    margin: 0;
+    &.active {
+      display: block;
+      & + article {
+        display: none;
+      }
+    }
+  }
+}

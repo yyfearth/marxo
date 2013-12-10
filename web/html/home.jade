@@ -1,0 +1,23 @@
+.span2.sidebar
+  .well.sidebar-nav
+    ul.sidebar-list.nav.nav-list
+      li.nav-header Notification
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips ...
+.span10.workspace
+  #home_view.content-view
+    #project_overview_tpl.tpl
+      .row-fluid.project-overview
+        .well
+          .page-header
+            h3
+              span(name='name')
+              small(name='counts')
+              small(name='desc')
+          .wf-diagram.well
+          .action-bar
+            a.btn.btn-view View details &raquo;
+            | &nbsp;
+            span.label(name='status')

@@ -1,0 +1,67 @@
+@import 'bootstrap';
+@import 'bootstrap-fileupload.less';
+@import 'font-icon';
+
+.ellipsis(@max_width: 5em) {
+  max-width: @max_width;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.btn-color(@bkg-color, @font-color: #fff, @disabled-font-color: #ccc) {
+  @bkg-from-color: lighten(@bkg-color, 10%);
+  @bkg-to-color: darken(@bkg-color, 10%);
+  color: @font-color;
+  background-color: @bkg-color;
+  background-image: -moz-linear-gradient(top, @bkg-from-color, @bkg-to-color);
+  background-image: -webkit-linear-gradient(top, @bkg-from-color, @bkg-to-color);
+  background-image: linear-gradient(to bottom, @bkg-from-color, @bkg-to-color);
+  background-repeat: repeat-x;
+  border-color: @bkg-from-color @bkg-color @bkg-to-color;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
+    background-color: @bkg-to-color;
+  }
+  &:hover, &:focus, &:active, &.active {
+    color: @font-color;
+  }
+  &.disabled, &[disabled] {
+    color: @disabled-font-color;
+  }
+}
+
+.tpl, .tmp {
+  // template or tmp hide
+  display: none !important;
+}
+
+a.pointer {
+  cursor: pointer;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+}
+
+#avatar {
+  width: 20px;
+  height: 20px;
+  float: left;
+  margin: auto 5px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+@facebook-color: #3b5998;
+@twitter-color: #00aced;
+
+.btn-twitter {
+  .btn-color(@twitter-color);
+}
+
+.btn-facebook {
+  .btn-color(@facebook-color);
+}

@@ -1,0 +1,85 @@
+#project_editor.modal.modal-full.hide.fade(aria-labelledby='project_editor_title', aria-hidden='true')
+  .modal-header
+    button.close(type='button', data-dismiss='modal', aria-hidden='true') &times;
+    h3#project_editor_title Project Editor
+  .modal-body
+    .sidebar.well
+      ul.sidebar-list.nav.nav-list
+        li.nav-header Project
+        li.sidebar-item.project-item
+          a(data-item='project') Project Info
+        li.sidebar-item.users-item
+          a.muted(data-item='users') Members
+        li.nav-header.node-header Nodes
+        li.nav-header.link-header Links
+      ul.sidebar-bottom.nav.nav-list
+        li.divider
+        li.nav-header Tips
+        li.tips ...
+    .content
+      #wf_preview.well.wf-diagram
+        h1.muted Workflow Preview
+      form.form-project.form-horizontal
+        .control-group
+          label.control-label(for='project_template_id') Workflow
+          .controls
+            select#project_template_id(name='template_id', required)
+              option(value='') (Please Select)
+            button.btn.btn-primary.btn-select.hide(type='button') Select
+            button.btn.btn-revert.hide(type='button') Revert
+        .control-group
+          label.control-label(for='project_name') Name
+          .controls
+            input#project_name(type='text', name='name', placeholder='Project Name', maxlength='255', required)
+        .control-group
+          label.control-label(for='project_key') Key
+          .controls
+            input#project_key(type='text', name='key', placeholder='project_name', pattern='[a-z0-9_\\-]{3,32}', maxlength='32', required)
+        .control-group
+          label.control-label(for='project_desc') Description
+          .controls
+            textarea#project_desc(name='desc', cols='30', rows='3', maxlength='2048', placeholder='Description')
+        .control-group.hide
+          label.control-label Created By
+          .controls
+            input#project_created_by(type='text', readonly)
+        .control-group.hide
+          label.control-label Created At
+          .controls
+            input#project_created_at(type='text', readonly)
+      section.node-link.hide
+        legend
+          span.node-link-name
+          | &nbsp;
+          small.node-link-key(title='key')
+        form.form-horizontal
+          .name-desc
+            .control-group
+              label.control-label(for='node_link_title') Name
+              .controls
+                input#node_link_title(type='text', name='name', placeholder='Node or Link Name', required)
+            .control-group
+              label.control-label(for='node_link_desc') Description
+              .controls
+                textarea#node_link_desc.input-xlarge(name='desc', rows='1', placeholder='Description')
+          .node-options.hide
+            .control-group
+              label.control-label Income Links
+              .controls(name='in_links')
+            .control-group
+              label.control-label Outgoing Links
+              .controls(name='out_links')
+          .link-options.hide
+            .control-group
+              label.control-label Linked From Node
+              .controls(name='prev_node')
+            .control-group
+              label.control-label Linked To Node
+              .controls(name='next_node')
+            em TODO: conditions
+        .node-actions
+
+  .modal-footer
+    a.btn.btn-info.pull-left.btn-view.hide View
+    button.btn(data-dismiss='modal', aria-hidden='true') Close
+    button.btn.btn-primary.btn-save(disabled) Save

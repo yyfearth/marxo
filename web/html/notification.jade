@@ -1,0 +1,33 @@
+.span2.sidebar
+  .well.sidebar-nav
+    ul.project-list.sidebar-list.nav.nav-list
+      li.nav-header Project Filter
+      li
+        a(href='#project:all') All
+    ul.sidebar-bottom.nav.nav-list
+      li.divider
+      li.nav-header Tips
+      li.tips
+        | Click Project List above to filter by project.
+.span10.workspace
+  #notification_view.notification-view
+    ul.action-bar
+      li.pull-left
+        ul.status-filter.nav.nav-pills
+          li.active
+            a(href='#status:all') All
+          li
+            a(href='#status:active') Active
+          li
+            a(href='#status:processed') Processed
+          li
+            a(href='#status:expired') Expired
+      li.action-buttons.pull-right
+        button.btn(name='reload', title='Reload Table') Reload
+      li.grid-filter
+    #t_notification_action_cell.tpl
+      a.btn.btn-primary.btn-round.icon-right-open(title='Process', name='process')
+    .grid-scroller
+      table#notification_table.grid-table
+        caption.loading.icon-spinner.animate-spin
+    .grid-paginator
