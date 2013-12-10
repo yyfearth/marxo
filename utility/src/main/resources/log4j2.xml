@@ -3,7 +3,7 @@
     <properties>
         <property name="name">app</property>
         <!-- http://logging.apache.org/log4j/2.x/manual/layouts.html -->
-        <property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS}[%p] %c{2}:%L(%M) | %msg%n</property>
+        <property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS}[%p] %C{2}:%L(%M) | %msg%n</property>
         <!--
         Example:
         2013-12-09 02:00:27.660[FATAL] Program:main:13 | Hello world
