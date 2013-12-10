@@ -113,15 +113,15 @@ html(lang='en-US')
           p.session-desc {{desc}}
           .session-body {{body}}
       .tpl(name='text')
-        input.input-block-level(type='text', name='{{name}}', placeholder='Simple Text (Single Line)')
+        input.input-block-level(type='text', name='{{name}}', placeholder='Simple Text (Single Line)', required)
       .tpl(name='textarea')
-        textarea.input-block-level(rows=3, name='{{name}}', placeholder='Simple Text (Multiple Line)')
+        textarea.input-block-level(rows=3, name='{{name}}', placeholder='Simple Text (Multiple Line)', required)
       .tpl(name='html')
         include html/content/rich_editor
         mixin rich_editor('{{name}}')
       .tpl(name='radio')
         label.radio
-          input(type='radio', name='{{name}}')
+          input(type='radio', name='{{name}}', value='{{i}}', required)
           | {{text}}
       .tpl(name='image')
         .fileupload.fileupload-new(data-provides='fileupload')
@@ -130,14 +130,14 @@ html(lang='en-US')
             span.btn.btn-file
               span.fileupload-new Select
               span.fileupload-exists Change
-              input(type='file', name='{{name}}', accept='image/*')
+              input(type='file', name='{{name}}', accept='image/*', required)
             a.btn.fileupload-exists(href='#', data-dismiss='fileupload') Remove
       .tpl(name='file')
         .fileupload.fileupload-new(data-provides='fileupload')
           span.btn.btn-file
             span.fileupload-new Select
             span.fileupload-exists Change
-            input(type='file', name='{{name}}', accept)
+            input(type='file', name='{{name}}', accept, required)
           | &nbsp;
           span.fileupload-preview
           button.close.fileupload-exists(data-dismiss='fileupload') &times;

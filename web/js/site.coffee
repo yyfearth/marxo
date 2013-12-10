@@ -41,13 +41,12 @@ define 'fb', ['lib/facebook'], (FB) =>
 
 require [
   'lib/common'
+  'lib/html5-dataset'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
   #'lib/backbone.localstorage' # test
 ], ->
   console.log 'ver', 'site', 1
-
-  $.ajaxSetup dataType: 'json'
 
   # Models
 
@@ -64,6 +63,9 @@ require [
     @pages: new Pages
     model: Page
     url: Page::urlRoot
+
+  class Submission extends Backbone.Model
+    url: -> "#{ROOT}/pages/#{@get 'content_id'}/submissions"
 
   # Views
 
@@ -467,6 +469,14 @@ require [
           $code.show()[0].focus()
           $edits.prop 'disabled', true
         return
+      'change form input[type=file]': (e) ->
+        delete e.currentTarget.info
+        $.removeData e.currentTarget, 'info'
+        return
+      'submit form': (e) ->
+        e.preventDefault()
+        @submit()
+        false
     initialize: (options) ->
       throw new Error 'page id must be given' unless options?.id
       super options
@@ -498,6 +508,7 @@ require [
       html
     _render: (model = @model) ->
       unless html = @html
+        console.log 'render', model.attributes
         tpl = @tpl
         _renderInput = @_renderInput
         hasInput = false
@@ -505,7 +516,7 @@ require [
           hasInput = true if section.type
           tpl 'section',
             title: _.escape(section.name)
-            desc: section.desc
+            desc: section.desc + if section.options?.required then '' else ' <em>(Optional)</em>'
             body: _renderInput(section, i)
         html = tpl 'page',
           title: model.escape('name')
@@ -528,19 +539,20 @@ require [
       options = data.options or {}
       tpl = @tpl()
       switch type
-        when ''
+        when '', 'none'
           body = ''
         when 'text'
           body = if options.text_multiline then tpl.textarea else tpl.text
         when 'html'
           body = tpl.html.replace '{{fonts}}', @_renderFonts()
+          body = body.replace '<textarea ', '<textarea data-required="required" ' if options.required
         when 'radio'
           list = unless options.gen_from_list then options.manual_options else [
             'List item 1 (Auto Genearted)'
             'List item 2 (Auto Genearted)'
             '... (Auto Genearted)'
           ]
-          body = list.map((item) -> tpl.radio.replace '{{text}}', item).join '\n'
+          body = list?.map((item, i) -> tpl.radio.replace('{{i}}', i).replace '{{text}}', item).join '\n'
         when 'file'
           accept = options.file_accept
           if accept is 'image/*'
@@ -550,6 +562,7 @@ require [
             body = tpl.file.replace /accept(?:=['"]{2})?/, accept
         else
           throw new Error 'unknown section type ' + type
+      body = body.replace /\s*required(?:="\w*")?/ig, '' unless options.required
       body.replace /{{name}}/g, 'section_' + i
     render: ->
       if @rendered or @model.has 'name'
@@ -570,6 +583,96 @@ require [
         error: =>
           @renderNotFound()
       @
+    upload: (file, auth) ->
+      unless file.files?.length
+        null
+      else if info = file.info or $.data file, 'info'
+        info
+      else
+        data = new FormData
+        data.append 'file', file.files[0]
+        $.ajax
+          url: ROOT + '/files'
+          type: 'POST'
+          data: data
+          processData: false
+          contentType: false
+          headers:
+            Authorization: auth
+          success: (info) ->
+            file.info = info
+            $(file).data id: info.id, info: info
+            console.log 'upload success', info
+          error: (info) ->
+            console.error 'upload failed', info
+    validate: ->
+      unless User.current?.auth
+        alert 'Only sign-in user can submit!'
+        return false
+      $els = @$el.find('form').find ':input[required]:visible:enabled, textarea.rich-editor-html[data-required]:enabled'
+      for input in [].slice.call $els
+        unless input.value.trim()
+          $input = $(input)
+          if $input.is ':visible'
+            input.focus()
+          else
+            $input.siblings('.rich-editor').focus()
+          alert 'This field is required!'
+          return false
+      try
+        for input in [].slice.call @$el.find 'form :invalid'
+          input.focus()
+          alert 'This field is invalid!'
+          return false
+      true
+    submit: ->
+      return @ unless @validate()
+      @_disableSubmit true
+      # upload files
+      files = [].slice.call @$el.find 'form input[type=file][name^=section_]'
+      requests = for file in files then @upload file, User.current.auth
+      $.when.apply($, requests).then (results...) =>
+        data = []
+        console.log 'infos', results
+        for info, i in results
+          if id = info?[0]?.id
+            data.push name: files[i].name, value: "files/#{id}"
+        console.log 'files', data
+        @_submit data
+      , =>
+        alert 'File upload failed!'
+        @_disableSubmit false
+      @
+    _disableSubmit: (disabled) ->
+      (@$submit ?= @$el.find 'form :submit').prop 'disabled', disabled
+      return
+    _submit: (data) ->
+      # prepare data
+      sections = []
+      for {name, value} in @$el.find('form').serializeArray().concat data or []
+        if value and /^section_\d+$/i.test name
+          name = Number name[8..]
+          sections[name] = value
+      user = User.current
+      name = user.get 'name'
+      email = user.get 'email'
+      # submit
+      new Submission().save {
+        content_id: @model.id
+        name
+        key: email
+        desc: "Submitted by #{name}&lt;#{email}&gt;"
+        sections
+      }, success: (submission) =>
+        console.log 'submit success', submission
+        alert "Submit successful."
+        # TODO: show result page
+        @_disableSubmit false
+      , error: (err) =>
+        console.error 'submit failed', err
+        alert "Failed to submit!"
+        @_disableSubmit false
+      return
 
   class PageListView extends ContentView
     collection: Pages.pages
