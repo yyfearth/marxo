@@ -35,7 +35,7 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 	public void preHandle() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		if (authentication != null) {
+		if (authentication != null && authentication instanceof MarxoAuthentication) {
 			MarxoAuthentication marxoAuthentication = (MarxoAuthentication) authentication;
 			user = marxoAuthentication.getUser();
 		} else {
