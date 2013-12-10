@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
 enum TaskType {
 	DEFAULT,
@@ -34,6 +35,28 @@ public class Task extends BasicEntity {
 		Criteria criteria = Criteria.where("time").lte(DateTime.now());
 		Query query = Query.query(criteria);
 		return mongoTemplate.findAndRemove(query, Task.class);
+	}
+
+	public static Task reschedule(ObjectId workdflowId, DateTime time) {
+		Criteria workflowIdCriteria = Criteria.where("workflowId").is(workdflowId);
+		Update update = Update.update("time", time).set("workflowId", workdflowId);
+		Task task;
+
+		if (mongoTemplate.exists(Query.query(workflowIdCriteria), Task.class)) {
+			task = mongoTemplate.findAndModify(Query.query(workflowIdCriteria.and("time").gt(time)), update, Task.class);
+		} else {
+			task = new Task(workdflowId);
+			task.time = time;
+			task.save();
+		}
+
+		if (task == null) {
+			logger.info("Skips reschedule due to earlier task is found");
+		} else {
+			logger.info(String.format("Reschedule [%s] at %s", task, time));
+		}
+
+		return task;
 	}
 
 	public static long count() {

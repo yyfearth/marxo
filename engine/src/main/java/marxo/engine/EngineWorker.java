@@ -14,9 +14,6 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Seconds;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.*;
 
@@ -135,6 +132,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 
 					while (!nodeQueue.isEmpty()) {
 						Node node = nodeQueue.poll();
+						node.setWorkflow(workflow);
 						logger.info(String.format("%s is processing %s", this, node));
 
 						switch (node.status) {
@@ -157,9 +155,9 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						for (; action != null; action = action.getNextAction()) {
 							logger.info(String.format("%s is processing %s", this, action));
 
-							boolean isOkay = action.act();
+							boolean shouldContinue = action.act();
 
-							if (!isOkay) {
+							if (!shouldContinue) {
 								break;
 							}
 						}
@@ -190,12 +188,13 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 									nodeQueue.add(link.getNextNode());
 								}
 							} else {
-								reschedule(workflow.id, DateTime.now());
+								Task.reschedule(workflow.id, DateTime.now());
 								isScheduled = true;
 							}
 						}
 					}
 
+					workflow = Workflow.get(workflow.id);
 					if (pendingNodeIds.isEmpty()) {
 						if (workflow.tracedActionIds.isEmpty()) {
 							workflow.status = RunStatus.FINISHED;
@@ -224,28 +223,6 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		}
 
 		logger.info(String.format("%s ends", this));
-	}
-
-	public Task reschedule(ObjectId workdflowId, DateTime time) {
-		Criteria workflowIdCriteria = Criteria.where("workflowId").is(workdflowId);
-		Update update = Update.update("time", time).set("workflowId", workdflowId);
-		Task task;
-
-		if (mongoTemplate.exists(Query.query(workflowIdCriteria), Task.class)) {
-			task = mongoTemplate.findAndModify(Query.query(workflowIdCriteria.and("time").gt(time)), update, Task.class);
-		} else {
-			task = new Task(workdflowId);
-			task.time = time;
-			task.save();
-		}
-
-		if (task == null) {
-			logger.info(String.format("%s skips reschedule due to earlier task is found", this));
-		} else {
-			logger.info(String.format("%s schedule a task [%s] on %s", this, workdflowId, time));
-		}
-
-		return task;
 	}
 
 	@Override
