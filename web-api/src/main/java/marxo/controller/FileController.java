@@ -15,11 +15,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 @Controller
 @RequestMapping(value = "file{:s?}")
@@ -51,7 +53,9 @@ public class FileController extends BasicController implements MongoDbAware {
 			throw new RequestParameterException(String.format("Request contains no data"));
 		}
 
-		response.addHeader("Localtion", String.format("/file/%s", fileInfo.id));
+		URI location = ServletUriComponentsBuilder.fromServletMapping(request).path("/file/{id}").build().expand(fileInfo.id.toString()).toUri();
+		response.setHeader("Localtion", location.toString());
+
 		return fileInfo;
 	}
 

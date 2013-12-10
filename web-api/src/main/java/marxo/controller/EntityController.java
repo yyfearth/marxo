@@ -18,12 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -71,7 +73,8 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		entity.createTime = entity.updateTime = DateTime.now();
 		entity.save();
 
-		response.setHeader("Location", String.format("/%s/%s", entity.getClass().getSimpleName().toLowerCase(), entity.id));
+		URI location = ServletUriComponentsBuilder.fromServletMapping(request).path("/{entityName}/{id}").build().expand(entity.getClass().getSimpleName().toLowerCase(), entity.id).toUri();
+		response.setHeader("Localtion", location.toString());
 		return entity;
 	}
 
