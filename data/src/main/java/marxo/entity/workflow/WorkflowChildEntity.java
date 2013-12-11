@@ -12,7 +12,10 @@ public abstract class WorkflowChildEntity extends RunnableEntity {
 	protected Workflow workflow;
 
 	public Workflow getWorkflow() {
-		return workflow;
+		if (workflowId == null) {
+			return workflow = null;
+		}
+		return (workflow == null) ? (workflow = mongoTemplate.findById(workflowId, Workflow.class)) : workflow;
 	}
 
 	public void setWorkflow(Workflow workflow) {
