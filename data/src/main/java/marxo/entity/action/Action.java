@@ -8,12 +8,14 @@ import com.restfb.Parameter;
 import com.restfb.exception.FacebookException;
 import com.restfb.types.FacebookType;
 import com.restfb.types.Post;
+import marxo.entity.Task;
 import marxo.entity.node.Event;
 import marxo.entity.node.NodeChildEntity;
 import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
 import marxo.exception.Errors;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.springframework.data.annotation.Transient;
@@ -178,28 +180,33 @@ public class Action extends NodeChildEntity {
 	Error
 	 */
 
-	protected Errors errors = new Errors();
-
-	public Errors getErrors() {
-		return errors;
-	}
+	public Errors errors = new Errors();
 
 	/**
 	 * @return whether it should continue.
 	 */
 	public boolean act() {
+		boolean result = onAct();
+		save();
+		return result;
+	}
+
+	protected boolean onAct() {
 		switch (status) {
+			case FINISHED:
+				return true;
 			case PAUSED:
 			case STOPPED:
-			case FINISHED:
 			case ERROR:
 			case WAITING:
-				logger.debug(String.format("%s skips with status %s", this, status));
-				break;
+				logger.info(String.format("%s doesn't continue because status is [%s]", this, status));
+				return false;
 		}
 
 		if (type.equals(Type.DEFAULT)) {
-			errors.add("A default action is only for demo");
+			String message = String.format("%s has type [%s]", this, type);
+			logger.error(message);
+			errors.add(message);
 			status = RunStatus.ERROR;
 			return false;
 		}
@@ -212,6 +219,7 @@ public class Action extends NodeChildEntity {
 				notification.setTenant(getTenant());
 				notification.save();
 				status = RunStatus.ERROR;
+
 				return false;
 			}
 
@@ -223,13 +231,35 @@ public class Action extends NodeChildEntity {
 					content.save();
 					logger.info(String.format("Submit Facebook post [%s]", content.messageResponse));
 
-					if (isTracked) {
-						status = RunStatus.FINISHED;
-					} else {
+					getEvent();
+					if (isTracked && event != null) {
 						status = RunStatus.MONITORING;
+
+						getWorkflow().addTracableAction(this);
+						getWorkflow().save();
+
+						Notification notification = new Notification(Notification.Level.NORMAL, "Start monitoring");
+						notification.setAction(this);
+						notification.save();
+
+						getEvent();
+						if (event.getStartTime() == null) {
+							event.setStartTime(DateTime.now());
+							event.save();
+						}
+						Task.reschedule(workflowId, event.getStartTime());
+					} else {
+						status = RunStatus.FINISHED;
 					}
+
 					return true;
 				} else {
+					if (!isTracked || getEvent() == null) {
+						status = RunStatus.FINISHED;
+						return true;
+					}
+
+
 					Post post = facebookClient.fetchObject(getContent().getPostId(), Post.class);
 					Content.FacebookRecord facebookRecord = Content.FacebookRecord.fromPost(post);
 					getContent().records.add(facebookRecord);
@@ -243,11 +273,57 @@ public class Action extends NodeChildEntity {
 				notification.save();
 				status = RunStatus.ERROR;
 				return false;
+			} catch (Exception e) {
+				logger.error(e.getMessage());
 			}
 		}
 
-		errors.add("Unknown action type is discovered");
+		if (type.equals(Type.PAGE)) {
+			getEvent();
+
+			if (event == null) {
+				Event event1 = new Event();
+				setEvent(event1);
+			}
+
+			if (event.getStartTime() == null) {
+				event.setStartTime(DateTime.now());
+				event.save();
+			}
+
+			if (event.getStartTime().isBeforeNow()) {
+				status = RunStatus.STARTED;
+
+				Notification notification = new Notification(Notification.Level.NORMAL, "Page is posted");
+				notification.setAction(this);
+				notification.save();
+
+				getWorkflow().addTracableAction(this);
+				workflow.save();
+
+				return true;
+			}
+
+			if (event.getEndTime().isBeforeNow()) {
+				status = RunStatus.FINISHED;
+
+				Notification notification = new Notification(Notification.Level.NORMAL, "Page is finished");
+				notification.setAction(this);
+				notification.save();
+
+				return true;
+			}
+
+			Task.reschedule(workflowId, event.getStartTime());
+
+			return false;
+		}
+
+		String message = String.format("%s type [%s] is not implemented", this, type);
+		logger.info(message);
+		errors.add(message);
 		status = RunStatus.ERROR;
+
 		return false;
 	}
 
