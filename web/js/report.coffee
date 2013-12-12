@@ -56,9 +56,7 @@ Report
         records = @_genRandReports()
         @model.set 'records', records
 
-      unless records?.length
-        @_disableTab el
-      else @once 'tab:' + el, =>
+      _render = =>
         accumulative = @accumulative.checked
         index = {}
         datum = []
@@ -78,13 +76,20 @@ Report
                 idx.push {ts, count}
         # console.log 'parsed records', datum
         @renderChart '#stacked', 'area', datum, chart: @_stacked, callback: (chart) => @_stacked = chart
+        return
+
+      unless records?.length
+        @_disableTab el
+      else if $(el).is ':visible'
+        _render()
+      else @once 'tab:' + el, _render
+
       return
     _renderSubmissions: ->
       el = '#report_submissions'
       sections = @model.get 'sections'
-      unless sections?.length
-        @_disableTab el
-      else @once 'tab:' + el, =>
+
+      _render = =>
         submissions = @model.get 'submissions'
         unless submissions?.length
           $table = '<div class="text-center"><em class="muted">No submission yet</em></div>'
@@ -128,7 +133,14 @@ Report
             $row.append $('<td>', text: new Date(submission.created_at).toLocaleString())
             $table.append $row
         @$el.find(el).empty().append($table)
-      #.append "<pre><code>#{JSON.stringify submissions, null, 4}</code></pre>" # test
+        return
+
+      unless sections?.length
+        @_disableTab el
+      else if $(el).is ':visible'
+        _render()
+      else @once 'tab:' + el, _render
+
       return
     reset: ->
       #@accumulative.checked = true
@@ -189,7 +201,7 @@ Report
     _genRandReports: -> # for test
       records = []
       fields = Object.keys @_record_map
-      ts = new Date('2013-1-1').getTime()
+      ts = Date.now()
       _c = {}
       _inc =
         likes_count: 10
@@ -201,7 +213,7 @@ Report
       c = 100 + (Math.random() * 1000) | 0
       while --c
         record =
-          created_at: new Date(ts).toISOString()
+          created_at: ts
         ts += 3600000 # 1h
         for field in fields
           r = if Math.random() > 0.7 then 0 else 1 + (Math.random() * _inc[field]) | 0
