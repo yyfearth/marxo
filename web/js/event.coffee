@@ -397,7 +397,9 @@ Event
         buf.push "(#{DurationConvertor.stringify duration})"
       else
         buf.push '(Skip manully or until project ends)'
-      @el.textContent = buf.join ' '
+      buf = buf.join ' '
+      @el.title = @el.textContent = buf
+      @el.dataset.container = '#event_manager table'
       @
     _getDate: (name) ->
       datetime = @model.get name
@@ -414,7 +416,7 @@ Event
 
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
-      @_hide 'skip' unless /^IDLE$|^STARTED$/i.test @model.get 'status'
+      @_hide 'skip' unless /^(?:IDLE$|STARTED|MONITORING|PAUSED)$/i.test @model.get 'status'
       super
 
   class EventManagemerView extends ManagerView
@@ -448,6 +450,7 @@ Event
       @on 'skip remove_selected', @skip.bind @
       @
     skip: (event) ->
+      # TODO: use action status api instead
       console.log 'skip', event
       if confirm """Are you sure to skip event "#{event.get 'name'}"?\n
       Skip means event and its related action will be end in a short time and it will be marked as FINISHED after engine processed it.
@@ -479,8 +482,8 @@ Event
           alert 'Event is failed to update'
       @
     reload: ->
-      super
       @projectFilter.clear()
+      super
     render: ->
       super
       @projectFilter.render()
