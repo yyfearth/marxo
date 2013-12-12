@@ -521,8 +521,8 @@ require [
         html = tpl 'page',
           title: model.escape('name')
           desc: model.get('desc')
-          body: unless sections?.length then '' else sections.join '\n'
-        html = @html = if hasInput then html.replace('form-actions hide', 'form-actions') else html
+          sections: unless sections?.length then '' else sections.join '\n'
+        html = @html = unless hasInput then html.replace('form-actions', 'form-actions hide') else html
       $el = @$el.html(html)
       setTimeout -> # defer
         $el.find('.rich-editor').attr('contenteditable', 'true').each ->
