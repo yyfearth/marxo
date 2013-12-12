@@ -524,6 +524,24 @@ define 'models', ['module', 'lib/common'], (module) ->
     url: Project::urlRoot
     _expires: 60000 # 1 min
 
+  findProjectOrWorkflow = (options) ->
+    unless options.workflowId and typeof options.callback is 'function'
+      throw new Error 'workflowId and callback must be given'
+    _callback = options.callback
+    _tried = false
+    options.callback = (ret) -> if _callback
+      if ret.workflow or Object.keys(ret).length
+        # console.log 'find project or workflow got', ret, _tried
+        _callback ret
+        _callback = null
+      else if _tried
+        _callback ret
+      _tried = true
+      return
+    Projects.find options
+    Workflows.find options
+    return
+
   ## Home
 
   class Notification extends Entity
@@ -605,4 +623,5 @@ define 'models', ['module', 'lib/common'], (module) ->
   Report
   Reports
   Service
+  findProjectOrWorkflow
   }
