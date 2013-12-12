@@ -4,31 +4,38 @@
     ul.nav.nav-tabs
       li
         h3 Report Details
-      li
-        a(target='#report_overview', data-toggle='tab') Overview
       li.active
-        a(target='#report_charts', data-toggle='tab') Evaluated Charts
+        a(target='#report_overview', data-toggle='tab') Overview
       li
         a(target='#report_feedback', data-toggle='tab') Feedbacks
       li
+        a(target='#report_analysis', data-toggle='tab') Analysis
+      li
         a(target='#report_submissions', data-toggle='tab') Submissions
   .modal-body.tab-content
-    #report_overview.tab-pane
-      h4 Report Overview
-    #report_charts.tab-pane.active
-      //- stacked area chart must be in top for tooltip position
-      div.chart.with-3d-shadow.with-transitions#stacked
-        h4 Stacked Area Chart
-        svg
-      div.span5.chart#pie
-        h4 Pie Chart
-        svg
-      div.span6.chart#bar
-        h4 Bar Chart
+    #report_overview.tab-pane.active
+      div.chart#overview_chart
+        h4.title Not Availble
         svg
     #report_feedback.tab-pane
-      h4 Feedbacks
+      //- stacked area chart must be in top for tooltip position
+      #stacked.chart.with-3d-shadow.with-transitions
+        svg
+      #stacked_options
+        .btn-group(data-toggle='buttons-radio')
+          button.btn.active#option_accumulative(type='button') Accumulative
+          button.btn(type='button') Discrete
+        .btn-group(data-toggle='buttons-radio')
+          button.btn.active#option_daily(type='button') Daily
+          button.btn(type='button') Hourly
+    #report_analysis.tab-pane
+      #t_section.tpl
+        legend {{name}}
+        div.span5.chart(id='pie_{{i}}')
+          svg
+        div.span6.chart(id='bar_{{i}}')
+          svg
     #report_submissions.tab-pane
-      h4 Submissions
+      h4 Not Availble
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close

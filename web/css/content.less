@@ -118,3 +118,38 @@
   }
 
 }
+
+#report_viewer {
+  min-width: 700px;
+  .modal-header {
+    border-bottom: none;
+    > .nav {
+      margin-bottom: 0;
+      h3 {
+        margin: 0 10px 0 0;
+      }
+    }
+  }
+  #stacked_options {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+  .chart {
+    svg {
+      min-width: 400px;
+      min-height: 300px;
+      height: auto;
+    }
+    .title {
+      position: absolute;
+      text-align: center;
+      top: 0;
+      left: 0;
+      right: 0;
+      margin: 0;
+    }
+  }
+}
