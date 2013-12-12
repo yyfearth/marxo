@@ -89,6 +89,47 @@ define 'models', ['module', 'lib/common'], (module) ->
       @syncValidation method, model, options
       super method, model, options
 
+  class StatusEntity extends Entity
+    status: (val, options = {}) ->
+      callback = if typeof options is 'function' then options else options.callback
+      remotely = callback? or (options.remote ? val?) # use remote mode by default when set
+      # get url for remote mode
+      if remotely
+        url = @url?() or @url
+        throw new Error 'cannot get status of a entity remotely without url' unless url
+        url += '/' unless url[-1..] isnt '/'
+        url += 'status'
+
+      unless val? # get
+        val = (@get('status') or '').toUpperCase()
+        if remotely
+          $.get url, (status) =>
+            @set 'status', status if status isnt val
+            callback? status
+          .fail -> callback? val
+        val
+      else # set
+        val = val.toUpperCase()
+        if remotely
+          unless /^(?:FINISHED|STARTED|STOPPED|PAUSED)$/.test val
+            throw new Error 'this status cannot be set remotely', val
+          console.log 'update status', val, url
+          $.ajax
+            url: url
+            type: 'PUT'
+            data: val
+            dataType: 'text'
+            mimeType: 'text/plain'
+            success: (val) =>
+              @set 'status', val
+              callback? val
+            error: (xhr) ->
+              console.error 'update status failed', url, val, xhr.responseText
+              callback? null, xhr.responseText
+        else
+          @set 'status', val
+        @
+
   ## Tenant / User
 
   class Tenant extends Entity
@@ -126,7 +167,7 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   ## Workflow
 
-  class Workflow extends Entity
+  class Workflow extends StatusEntity
     _name: 'workflow'
     urlRoot: ROOT + '/workflows'
     constructor: (model, options) ->
@@ -459,7 +500,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         callback {}
       @
 
-  class ChangeObserableEntity extends Entity
+  class ChangeObserableEntity extends StatusEntity
     constructor: (model, options) ->
       super model, options
       @setChangeFlag = @setChangeFlag.bind @
@@ -497,7 +538,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     model: Link
     url: Link::urlRoot
 
-  class Action extends Entity
+  class Action extends StatusEntity
     name: -> @get('name') or @get('type')?.replace(/_/, ' ').capitalize() or '(No Name)'
   # idAttribute: 'index'
 
