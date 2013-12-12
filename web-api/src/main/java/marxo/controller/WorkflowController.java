@@ -77,8 +77,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 			throw new EntityNotFoundException(entityClass, objectId);
 		}
 
-		if (!oldWorkflow.status.equals(workflow.status)) {
-			switch (workflow.status) {
+		if (!oldWorkflow.getStatus().equals(workflow.getStatus())) {
+			switch (workflow.getStatus()) {
 				case STARTED:
 					Task task = new Task(workflow.id);
 					task.save();
@@ -86,17 +86,17 @@ public class WorkflowController extends TenantChildController<Workflow> {
 				case PAUSED:
 				case STOPPED:
 					mongoTemplate.remove(Query.query(Criteria.where("workflowId").is(workflow.id)), Task.class);
-					logger.debug(String.format("%s is %s. Remove all associated tasks", workflow, workflow.status));
+					logger.debug(String.format("%s is %s. Remove all associated tasks", workflow, workflow.getStatus()));
 					break;
 				case IDLE:
 					for (Node node : workflow.getNodes()) {
 						for (Action action : node.getActions()) {
-							action.status = RunStatus.IDLE;
+							action.setStatus(RunStatus.IDLE);
 						}
-						node.status = RunStatus.IDLE;
+						node.setStatus(RunStatus.IDLE);
 					}
 					for (Link link : workflow.getLinks()) {
-						link.status = RunStatus.IDLE;
+						link.setStatus(RunStatus.IDLE);
 					}
 					break;
 				case FINISHED:
@@ -104,7 +104,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 				case WAITING:
 				case MONITORING:
 				default:
-					throw new IllegalArgumentException(String.format("You cannot change a project's status to %s", workflow.status));
+					throw new IllegalArgumentException(String.format("You cannot change a project's status to %s", workflow.getStatus()));
 			}
 
 			try {

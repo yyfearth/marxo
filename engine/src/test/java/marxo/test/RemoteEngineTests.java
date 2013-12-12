@@ -90,7 +90,7 @@ public class RemoteEngineTests extends BasicDataTests {
 		Workflow workflow = new Workflow();
 		workflow.setName("Test");
 		workflow.isProject = true;
-		workflow.status = RunStatus.STARTED;
+		workflow.setStatus(RunStatus.STARTED);
 		workflow.save();
 
 		Task task = new Task(workflow.id);
@@ -103,7 +103,7 @@ public class RemoteEngineTests extends BasicDataTests {
 		workflow.setTenant(reusedTenant);
 		workflow.setName("Test Workflow for Engine");
 		workflow.isProject = true;
-		workflow.status = RunStatus.STARTED;
+		workflow.setStatus(RunStatus.STARTED);
 
 		Node node = new Node();
 		node.setName("Test Node for Engine");
@@ -138,7 +138,7 @@ public class RemoteEngineTests extends BasicDataTests {
 		workflow.setTenant(reusedTenant);
 		workflow.setName("Test Workflow for Engine");
 		workflow.isProject = true;
-		workflow.status = RunStatus.STARTED;
+		workflow.setStatus(RunStatus.STARTED);
 
 		Node node = new Node();
 		node.setName("Test Node for Engine");
@@ -168,7 +168,7 @@ public class RemoteEngineTests extends BasicDataTests {
 		entities.add(workflow);
 		workflow.setTenant(reusedTenant);
 		workflow.isProject = true;
-//		workflow.status = RunStatus.STARTED;
+//		workflow.setStatus(RunStatus.STARTED);
 
 		Node node = new Node();
 		entities.add(node);
@@ -266,18 +266,18 @@ public class RemoteEngineTests extends BasicDataTests {
 		Assert.assertEquals(Task.count(), 0);
 
 		workflow = Workflow.get(workflow.id);
-		Assert.assertEquals(workflow.status, RunStatus.MONITORING);
+		Assert.assertEquals(workflow.getStatus(), RunStatus.MONITORING);
 		Assert.assertEquals(workflow.tracedActionIds.size(), 1);
 
 		node1 = Node.get(node1.id);
-		Assert.assertEquals(node1.status, RunStatus.FINISHED);
+		Assert.assertEquals(node1.getStatus(), RunStatus.FINISHED);
 
 		action = Action.get(action.id);
 		postIdsToRemove.add(action.getContent().getPostId());
-		Assert.assertEquals(action.status, RunStatus.MONITORING);
+		Assert.assertEquals(action.getStatus(), RunStatus.MONITORING);
 
 		link = Link.get(link.id);
-		Assert.assertEquals(link.status, RunStatus.FINISHED);
+		Assert.assertEquals(link.getStatus(), RunStatus.FINISHED);
 
 		node2 = Node.get(node2.id);
 	}

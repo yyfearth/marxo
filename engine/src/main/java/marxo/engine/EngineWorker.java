@@ -113,7 +113,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 
 					if (workflow.startNodeId == null) {
 						logger.info(String.format("%s has no start node", this));
-						workflow.status = RunStatus.ERROR;
+						workflow.setStatus(RunStatus.ERROR);
 						workflow.save();
 						continue;
 					}
@@ -135,7 +135,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						node.setWorkflow(workflow);
 						logger.info(String.format("%s is processing %s", this, node));
 
-						switch (node.status) {
+						switch (node.getStatus()) {
 							case STARTED:
 							case IDLE:
 								break;
@@ -146,7 +146,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 							case ERROR:
 							case WAITING:
 							case MONITORING:
-								String message = String.format("%s shouldn't have %s status", node, node.status);
+								String message = String.format("%s shouldn't have %s status", node, node.getStatus());
 								logger.error(message);
 								throw new IllegalStateException(message);
 						}
@@ -163,7 +163,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						}
 
 						if (action == null) {// if all actions have been run
-							node.status = RunStatus.FINISHED;
+							node.setStatus(RunStatus.FINISHED);
 
 							Notification notification = new Notification(Notification.Level.NORMAL, String.format("Node %s finished", node.getName()));
 							notification.setNode(node);
@@ -177,7 +177,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 							logger.info(String.format("%s is processing %s", this, link));
 
 							if (link.determine()) {
-								link.status = RunStatus.FINISHED;
+								link.setStatus(RunStatus.FINISHED);
 								link.save();
 
 								Notification notification = new Notification(Notification.Level.NORMAL, String.format("Link %s finished", link.getName()));
@@ -197,13 +197,13 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					workflow = Workflow.get(workflow.id);
 					if (pendingNodeIds.isEmpty()) {
 						if (workflow.tracedActionIds.isEmpty()) {
-							workflow.status = RunStatus.FINISHED;
+							workflow.setStatus(RunStatus.FINISHED);
 
 							Notification notification = new Notification(Notification.Level.NORMAL, String.format("Workflow %s finished", workflow.getName()));
 							notification.setWorkflow(workflow);
 							notification.save();
 						} else {
-							workflow.status = RunStatus.MONITORING;
+							workflow.setStatus(RunStatus.MONITORING);
 						}
 					} else {
 						workflow.currentNodeIds = pendingNodeIds;

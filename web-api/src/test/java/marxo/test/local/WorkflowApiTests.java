@@ -222,6 +222,6 @@ public class WorkflowApiTests extends BasicApiTests {
 		}
 
 		Workflow workflow1 = mongoTemplate.findOne(Query.query(Criteria.where("_id").is(workflow.id)), Workflow.class);
-		Assert.assertEquals(workflow1.status, RunStatus.STARTED);
+		Assert.assertEquals(workflow1.getStatus(), RunStatus.STARTED);
 	}
 }

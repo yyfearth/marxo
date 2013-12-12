@@ -29,9 +29,13 @@ public class ControllerExceptionHandler implements Loggable {
 	// Spring built-in
 	@ExceptionHandler({BindException.class, HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, MissingServletRequestParameterException.class, MissingServletRequestPartException.class, TypeMismatchException.class})
 	public ResponseEntity<ErrorJson> handleBadRequest(Exception e) {
-		logger.debug(e.getMessage());
+		if (logger.isDebugEnabled()) {
+			logger.debug(e.getMessage());
+			logger.debug(StringTool.exceptionToString(e));
 
-		return new ResponseEntity<>(new ErrorJson(String.format("The request body is not acceptable [%s]", e.getClass().getSimpleName())), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(new ErrorJson(String.format("The request body is not acceptable [%s] %s", e.getClass().getSimpleName(), StringTool.exceptionToString(e))), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(new ErrorJson("The request body is not acceptable"), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler({ConversionNotSupportedException.class, HttpMessageNotWritableException.class})

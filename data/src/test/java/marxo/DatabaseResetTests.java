@@ -314,12 +314,12 @@ public class DatabaseResetTests extends BasicDataTests {
 		reusedWorkflow.addNode(node1);
 
 		Action postFacebookAction1 = new Action(Action.Type.PAGE);
-		postFacebookAction1.status = RunStatus.STARTED;
+		postFacebookAction1.setStatus(RunStatus.STARTED);
 		postFacebookAction1.setName("Post to Facebook 1");
 		node1.addAction(postFacebookAction1);
 
 		Content facebookContent1 = new Content(Content.Type.PAGE);
-		facebookContent1.status = RunStatus.STARTED;
+		facebookContent1.setStatus(RunStatus.STARTED);
 		facebookContent1.setName("Contnet " + ++contentCount);
 		facebookContent1.description = String.format("Hello world for %s [%s]", getClass(), reusedWorkflow);
 		postFacebookAction1.setContent(facebookContent1);
@@ -358,8 +358,8 @@ public class DatabaseResetTests extends BasicDataTests {
 	public void startAllProjects() throws Exception {
 		List<Workflow> workflows = mongoTemplate.find(Query.query(Criteria.where("isProject").is(true)), Workflow.class);
 		for (Workflow workflow : workflows) {
-			if (workflow.status.equals(RunStatus.IDLE)) {
-				workflow.status = RunStatus.STARTED;
+			if (workflow.getStatus().equals(RunStatus.IDLE)) {
+				workflow.setStatus(RunStatus.STARTED);
 				workflow.save();
 
 				Task task = new Task(workflow.id);

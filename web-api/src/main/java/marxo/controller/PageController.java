@@ -61,7 +61,7 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 
 		Action action = content.getAction();
 
-		if (action != null && !action.status.equals(RunStatus.FINISHED)) {
+		if (action != null && !action.getStatus().equals(RunStatus.FINISHED)) {
 			filter(content);
 		}
 

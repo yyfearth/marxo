@@ -2,13 +2,22 @@ package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import marxo.entity.node.NodeChildEntity;
+import marxo.entity.workflow.RunStatus;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
 
 public abstract class ActionChildEntity extends NodeChildEntity {
-	/*
-	Action
-	 */
+	@Override
+	public RunStatus getStatus() {
+		if (getAction() == null) {
+			return null;
+		}
+		return getAction().getStatus();
+	}
+
+	@Override
+	public void setStatus(RunStatus status) {
+	}
 
 	public ObjectId actionId;
 
