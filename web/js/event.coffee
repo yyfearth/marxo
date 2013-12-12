@@ -159,6 +159,9 @@ Event
       data
     reset: ->
       @$info.empty()
+      @form.starts.readOnly = false
+      @form.ends.readOnly = false
+      @form.duration.readOnly = false
       @btnView.href = ''
       super
     popup: (data, callback) ->
@@ -167,6 +170,21 @@ Event
       @btnView.href = "#event/calendar/#{data.id}"
       @$form.off q...
       @fill data
+      form = @form
+      status = (data.status or '').toUpperCase()
+      switch status
+        when 'FINISHED', 'ERROR', 'STOPPED'
+          form.starts.readOnly = true
+          form.ends.readOnly = true
+          form.duration.readOnly = true
+        when 'STARTED', 'MONITORING', 'PAUSED'
+          form.starts.readOnly = true
+          form.ends.readOnly = false
+          form.duration.readOnly = false
+        else
+          form.starts.readOnly = false
+          form.ends.readOnly = false
+          form.duration.readOnly = false
       @$form.on q...
       @
     save: ->
@@ -232,7 +250,7 @@ Event
           # default color
             _evt.editable = true
             _evt.color = '#006dcc' if _evt.allDay
-          when 'STARTED'
+          when 'STARTED', 'MONITORING'
             _evt.color = if _evt.end? then '#468847' else '#faa732'
             _evt.startEditable = false
             _evt.durationEditable = true
