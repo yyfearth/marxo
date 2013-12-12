@@ -11,27 +11,8 @@ NavListView
 ManagerCollection
 Projects
 Workflows
+findProjectOrWorkflow
 }) ->
-
-  # Util
-
-  findProjectOrWorkflow = (options) ->
-    unless options.workflowId and typeof options.callback is 'function'
-      throw new Error 'workflowId and callback must be given'
-    _callback = options.callback
-    _tried = false
-    options.callback = (ret) -> if _callback
-      if ret.workflow or Object.keys(ret).length
-        # console.log 'find project or workflow got', ret, _tried
-        _callback ret
-        _callback = null
-      else if _tried
-        _callback ret
-      _tried = true
-      return
-    Projects.find options
-    Workflows.find options
-    return
 
   ## Cells
 
@@ -123,11 +104,14 @@ Workflows
         console.warn 'workflow cell cannot get worklfow id', @model
       else findProjectOrWorkflow workflowId: id, callback: ({workflow}) =>
         if workflow
-          name = _.escape workflow.get 'name'
-          @$el.addClass('workflow-link-cell').append $('<a>',
+          name = workflow.get 'name'
+          @$el.addClass('workflow-link-cell').attr
+            title: name
+            'data-container': 'body'
+          .append $('<a>',
             tabIndex: -1
             href: "##{workflow._name}/#{id}"
-          ).attr('title', name).text name
+          ).text name
         else
           console.warn 'workflow/project not found', id
           @$el.text '(Unknown)'
@@ -147,14 +131,15 @@ Workflows
         callback: ({workflow, node, action}) =>
           if workflow and node and action
             url = "##{workflow._name}/#{workflow.id}/node/#{node.id}/action/#{action.id}"
-            node_name = _.escape node.get 'name'
-            action_name = _.escape action.name()
-            tooltip = "#{node_name}: #{action_name}"
-            html = "<span class='node-title'>#{node_name}</span>: #{action_name}"
-            @$el.addClass('action-link-cell').append $('<a>',
+            tooltip = "#{node.get 'name'}: #{action.name()}"
+            html = "<span class='node-title'>#{node.escape 'name'}</span>: #{_.escape action.name()}"
+            @$el.addClass('action-link-cell').attr
+              title: tooltip
+              'data-container': 'body'
+            .append $('<a>',
               tabIndex: -1
               href: url
-            ).attr(title: tooltip).html html
+            ).html(html)
             @delegateEvents()
           else
             console.warn 'failed to get node action', @model.attributes
@@ -539,7 +524,7 @@ Workflows
       @collection.load =>
         @collection.getFirstPage silent: true
         @filter.clear()
-      , throttle: 500
+      , expires: 500
       @
     getSelected: ->
       @grid.getSelectedModels().filter (r) -> r?
@@ -584,5 +569,4 @@ Workflows
   ManagerView
   NavFilterView
   ProjectFilterView
-  findProjectOrWorkflow
   }
