@@ -507,12 +507,7 @@ Projects
 
   class ProjectStatusView extends View
     _prefix: 'prj_status_lst'
-    _cls:
-      started: 'label-success'
-      paused: 'label-warning'
-      stopped: 'label-inverse'
-      finished: 'label-info'
-      error: 'label-important'
+    _cls: Backgrid.LabelCell::status_cls # in manager.coffee
     _refCls:
       content: 'icon-page'
       event: 'icon-calendar'
