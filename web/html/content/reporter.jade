@@ -4,22 +4,19 @@
     ul.nav.nav-tabs
       li
         h3 Report Details
-      li
-        a(target='#report_overview', data-toggle='tab') Overview
       li.active
+        a(target='#report_overview', data-toggle='tab') Overview
+      li
         a(target='#report_charts', data-toggle='tab') Evaluated Charts
       li
         a(target='#report_feedback', data-toggle='tab') Feedbacks
       li
         a(target='#report_submissions', data-toggle='tab') Submissions
   .modal-body.tab-content
-    #report_overview.tab-pane
+    #report_overview.tab-pane.active
       h4 Report Overview
-    #report_charts.tab-pane.active
+    #report_charts.tab-pane
       //- stacked area chart must be in top for tooltip position
-      div.chart.with-3d-shadow.with-transitions#stacked
-        h4 Stacked Area Chart
-        svg
       div.span5.chart#pie
         h4 Pie Chart
         svg
@@ -27,7 +24,11 @@
         h4 Bar Chart
         svg
     #report_feedback.tab-pane
-      h4 Feedbacks
+      label.checkbox.accumulative
+        small Accumulative
+        input#accumulative(type='checkbox', checked)
+      #stacked.chart.with-3d-shadow.with-transitions
+        svg
     #report_submissions.tab-pane
       h4 Submissions
   .modal-footer
