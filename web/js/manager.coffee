@@ -537,7 +537,7 @@ Workflows
       @collection.load =>
         @collection.getFirstPage silent: true
         @filter.clear()
-      , throttle: 500
+      , expires: 500
       @
     getSelected: ->
       @grid.getSelectedModels().filter (r) -> r?

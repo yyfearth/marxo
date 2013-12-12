@@ -8,6 +8,7 @@ define 'models', ['module', 'lib/common'], (module) ->
   ROOT = ROOT[...-1] if ROOT[-1..] is '/'
 
   class Entity extends Backbone.Model
+    _expires: 1000
     syncValidation: (method, model, options = {}) ->
       options.dataType ?= 'json'
       options.headers ?= {}
@@ -34,33 +35,9 @@ define 'models', ['module', 'lib/common'], (module) ->
     sync: (method, model, options = {}) ->
       @syncValidation method, model, options
       super method, model, options
-
-  # just a alias, otherwise PageableCollection will not extends Collection
-  Collection = Backbone.Collection
-
-  class SimpleCollection extends Collection
-    syncValidation: Entity::syncValidation
-    constructor: (models, options) ->
-      @url = options.url if options?.url
-      super models, options
-    sync: (method, model, options = {}) ->
-      @syncValidation method, model, options
-      super method, model, options
-
-  class ManagerCollection extends Backbone.PageableCollection
-    mode: 'client'
-    defaultState:
-      pageSize: 255
-    _throttle: 1000 # 1s
-    constructor: (options...) ->
-      @state ?= {}
-      for key, value of @defaultState
-        @state[key] = value
-      @on 'add remove', => @_last_load = Date.now() - @_throttle + 100
-      super options...
-    load: (callback, {throttle} = {}) ->
-      throttle ?= @_throttle
-      if not @length or not @_last_load or throttle < 1 or (Date.now() - @_last_load) > throttle
+    load: (callback, {expires} = {}) ->
+      expires ?= @_expires
+      if not @length or not @_last_load or expires < 1 or (Date.now() - @_last_load) > expires
         queue = @_loading_cb_queue
         if queue?
           queue.push callback if typeof callback is 'function'
@@ -81,6 +58,32 @@ define 'models', ['module', 'lib/common'], (module) ->
       else
         callback? @, 'skipped'
       @
+
+  # just a alias, otherwise PageableCollection will not extends Collection
+  Collection = Backbone.Collection
+  Collection::_expires = Entity::_expires
+  Collection::load = Entity::load
+
+  class SimpleCollection extends Collection
+    syncValidation: Entity::syncValidation
+    constructor: (models, options) ->
+      @url = options.url if options?.url
+      @on 'add remove', -> @_last_load = Date.now() - @_expires + 100
+      super models, options
+    sync: (method, model, options = {}) ->
+      @syncValidation method, model, options
+      super method, model, options
+
+  class ManagerCollection extends Backbone.PageableCollection
+    mode: 'client'
+    defaultState:
+      pageSize: 255
+    constructor: (options...) ->
+      @state ?= {}
+      for key, value of @defaultState
+        @state[key] = value
+      @on 'add remove', -> @_last_load = Date.now() - @_expires + 100
+      super options...
     syncValidation: Entity::syncValidation
     sync: (method, model, options = {}) ->
       @syncValidation method, model, options
@@ -426,7 +429,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       wfs
     model: Workflow
     url: Workflow::urlRoot
-    _throttle: 600000 # 10 min
+    _expires: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, fetch}) ->
       throw new Error 'workflowId is required' unless workflowId
       throw new Error 'async callback is required' unless typeof callback is 'function'
@@ -519,7 +522,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       wfs
     model: Project
     url: Project::urlRoot
-    _throttle: 60000 # 1 min
+    _expires: 60000 # 1 min
 
   ## Home
 
