@@ -100,7 +100,6 @@ Event
             console.warn 'starts <= ends', starts, ends
           else unless duration # starts and ends but duration
             duration = ends - starts
-            form.duration.value = DurationConvertor.stringify duration
         else if duration # starts and duration but ends
           ends = new Date starts + duration
           form.ends.value = @_dateToString ends
@@ -113,6 +112,7 @@ Event
         cls = 'error'
       else
         console.log 'starts, ends, duration:', starts, ends, duration
+        form.duration.value = DurationConvertor.stringify duration if duration
         cls = ''
         msg = []
         if starts
