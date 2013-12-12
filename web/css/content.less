@@ -121,6 +121,15 @@
 
 #report_viewer {
   min-width: 700px;
+  .modal-header {
+    border-bottom: none;
+    > .nav {
+      margin-bottom: 0;
+      h3 {
+        margin: 0 10px 0 0;
+      }
+    }
+  }
   .checkbox.accumulative {
     position: absolute;
     top: 19px;
@@ -130,6 +139,21 @@
       top: 0;
       left: 5px;
       margin-left: 0;
+    }
+  }
+  .chart {
+    svg {
+      min-width: 400px;
+      min-height: 300px;
+      height: auto;
+    }
+    .title {
+      position: absolute;
+      text-align: center;
+      top: 0;
+      left: 0;
+      right: 0;
+      margin: 0;
     }
   }
 }

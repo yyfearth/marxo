@@ -31,8 +31,14 @@ Report
       super model, callback
       @model = model
       console.log model
+
+      unless records?.length # gen test data
+        records = @_genRandReports()
+        @model.set 'records', records
+
       @once
         shown: ->
+          @_renderOverview()
           @_renderRecords()
           @_renderSubmissions()
           return
@@ -48,14 +54,25 @@ Report
       comments_count: 'Facebook Comments'
       shares_count: 'Facebook Shares'
       visit_count: 'Page Visit'
+      submissions_count: 'Submission'
+    _renderOverview: ->
+      records = @model.get 'records'
+      if records?.length
+        last = records.slice(-1)[0]
+        console.log 'last', last
+        to = new Date last.created_at
+        from = new Date records[0].created_at
+        @$el.find('#overview_chart .title').text "#{from.toLocaleString()} - #{to.toLocaleString()}"
+        values = []
+        for own field, name of @_record_map
+          values.push name: name, value: last[field] if last[field]
+        @renderChart '#overview_chart', 'bar', [values: values],
+          chart: @_overview_chart
+          callback: (chart) => @_overview_chart = chart
+      return
     _renderRecords: ->
       el = '#report_feedback'
       records = @model.get 'records'
-
-      unless records?.length # gen test data
-        records = @_genRandReports()
-        @model.set 'records', records
-
       _render = =>
         accumulative = @accumulative.checked
         index = {}
@@ -75,7 +92,9 @@ Report
               else
                 idx.push {ts, count}
         # console.log 'parsed records', datum
-        @renderChart '#stacked', 'area', datum, chart: @_stacked, callback: (chart) => @_stacked = chart
+        @renderChart '#stacked', 'area', datum,
+          chart: @_records_chart
+          callback: (chart) => @_records_chart = chart
         return
 
       unless records?.length
@@ -111,7 +130,7 @@ Report
               unless val?
                 $cell.html '<td class="muted">-</td>'
                 continue
-              console.log 'type', type
+              #console.log 'type', type
               switch type.toLowerCase()
                 when 'file'
                   $cell.append $ '<a>', class: 'icon-download', href: "#{ROOT}/#{val}/download", text: 'Download'
@@ -155,8 +174,8 @@ Report
       @reset()
       super
     renderChart: (el, type, data, options) ->
-      console.log 'render chart', el, type
       if _initChart = @_initChart
+        console.log 'render chart', el, type
         {nv, d3} = _initChart
         func = _initChart[type]
         unless _initChart.hasOwnProperty(type) and typeof func is 'function'
@@ -184,9 +203,9 @@ Report
             .color(d3.scale.category10().range()).labelType(options?.labelType or 'percent')
             chart
           bar: (options) ->
-            chart = nv.models.pieChart()
+            chart = nv.models.discreteBarChart()
             .x((d) -> d.name).y((d) -> d.value)
-            .color(d3.scale.category10().range()).labelType(options?.labelType)
+            .staggerLabels(true).showValues(true)
             chart
           area: (options) ->
             chart = nv.models.stackedAreaChart().useInteractiveGuideline(true)
@@ -202,12 +221,14 @@ Report
       records = []
       fields = Object.keys @_record_map
       ts = Date.now()
+      ts = ts - ts % 36000000 # trim to hour
       _c = {}
       _inc =
         likes_count: 10
         comments_count: 5
-        shares_count: 3
-        visit_count: 1
+        shares_count: 5
+        visit_count: 3
+        submissions_count: 1
       for field in fields
         _c[field] = 0
       c = 100 + (Math.random() * 1000) | 0
@@ -216,7 +237,8 @@ Report
           created_at: ts
         ts += 3600000 # 1h
         for field in fields
-          r = if Math.random() > 0.7 then 0 else 1 + (Math.random() * _inc[field]) | 0
+          inc = _inc[field]
+          r = if Math.random() > Math.min(inc / 10, 0.9) then 0 else 1 + (Math.random() * inc) | 0
           record[field] = _c[field] += r
         records.push record
       records

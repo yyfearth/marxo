@@ -14,7 +14,9 @@
         a(target='#report_submissions', data-toggle='tab') Submissions
   .modal-body.tab-content
     #report_overview.tab-pane.active
-      h4 Report Overview
+      div.chart#overview_chart
+        h4.title Current
+        svg
     #report_charts.tab-pane
       //- stacked area chart must be in top for tooltip position
       div.span5.chart#pie
