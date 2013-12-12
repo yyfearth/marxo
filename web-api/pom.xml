@@ -26,14 +26,8 @@
         <!-- Modules -->
         <dependency>
             <groupId>com.marxo</groupId>
-            <artifactId>data</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.marxo</groupId>
             <artifactId>engine</artifactId>
-            <version>LATEST</version>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
@@ -41,13 +35,13 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>RELEASE</version>
+            <version>7.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>RELEASE</version>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -99,45 +93,22 @@
         <dependency>
             <groupId>com.marxo</groupId>
             <artifactId>data</artifactId>
-            <version>LATEST</version>
+            <version>1.0-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>RELEASE</version>
+            <version>6.8.7</version>
             <scope>test</scope>
         </dependency>
         <!-- For some fucking reasons, Spring starts to complain about that it doesn't find a validation provider when runs TestNG. Current solution is to feed it a hibernate validator. -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>RELEASE</version>
+            <version>5.0.1.Final</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <finalName>marxo</finalName>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <includes>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-war-plugin</artifactId>-->
-            <!--<version>2.4</version>-->
-            <!--<configuration>-->
-            <!--<webXml>src/main/webapp/WEB-INF/web.xml</webXml>-->
-            <!--<packagingExcludes>**/*.less,**/*.coffee,**/*.map</packagingExcludes>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
-        </plugins>
-    </build>
 </project>

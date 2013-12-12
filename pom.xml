@@ -15,9 +15,9 @@
     </properties>
 
     <modules>
+        <module>utility</module>
         <module>data</module>
         <module>web-api</module>
         <module>engine</module>
-        <module>utility</module>
     </modules>
 </project>

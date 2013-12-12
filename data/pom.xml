@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.marxo</groupId>
             <artifactId>utility</artifactId>
-            <version>LATEST</version>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 
@@ -81,29 +81,15 @@
         <dependency>
             <groupId>com.marxo</groupId>
             <artifactId>utility</artifactId>
-            <version>LATEST</version>
+            <version>1.0-SNAPSHOT</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>RELEASE</version>
+            <version>6.8.7</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <finalName>marxo</finalName>
-        <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <includes>
-                        <include>**/*Tests.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
