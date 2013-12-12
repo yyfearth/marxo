@@ -156,7 +156,7 @@ public class ApiTester implements Closeable {
 		}
 		response = client.execute(request);
 		httpEntity = response.getEntity();
-		if (httpEntity == null) {
+		if (httpEntity == null || httpEntity.getContentType() == null) {
 			content = "";
 		} else {
 			mediaType = MediaType.parse(httpEntity.getContentType().getValue());
@@ -194,6 +194,9 @@ public class ApiTester implements Closeable {
 	}
 
 	public ApiTester matchContentType(MediaType mediaType) {
+		if (this.mediaType == mediaType) {
+			return this;
+		}
 		Assert.assertEquals(this.mediaType.type(), mediaType.type());
 		Assert.assertEquals(this.mediaType.subtype(), mediaType.subtype());
 		return this;

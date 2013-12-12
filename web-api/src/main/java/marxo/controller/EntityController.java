@@ -1,12 +1,10 @@
 package marxo.controller;
 
+import com.mongodb.WriteResult;
 import marxo.entity.BasicEntity;
 import marxo.entity.MongoDbAware;
 import marxo.entity.user.User;
-import marxo.exception.EntityInvalidException;
-import marxo.exception.EntityNotFoundException;
-import marxo.exception.InvalidObjectIdException;
-import marxo.exception.ValidationException;
+import marxo.exception.*;
 import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -61,8 +59,23 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		criteria = new Criteria();
 	}
 
+	protected Query getDefaultQuery() {
+		return Query.query(criteria).with(defaultSort);
+	}
+
 	protected Query getDefaultQuery(Criteria criteria) {
 		return Query.query(criteria).with(defaultSort);
+	}
+
+	protected Criteria getIdCriteria(ObjectId objectId) {
+		return Criteria.where("_id").is(objectId);
+	}
+
+	protected void throwIfError(WriteResult writeResult) {
+		if (writeResult.getError() != null) {
+			logger.debug(String.format("Database error: %s", writeResult.getError()));
+			throw new DatabaseException(writeResult.getError());
+		}
 	}
 
 	@RequestMapping(method = RequestMethod.POST)

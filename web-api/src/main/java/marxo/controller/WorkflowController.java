@@ -3,6 +3,7 @@ package marxo.controller;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.mongodb.WriteResult;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.link.Link;
@@ -20,6 +21,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -34,6 +36,7 @@ import java.util.regex.Pattern;
 @Controller
 @RequestMapping("workflow{:s?}")
 public class WorkflowController extends TenantChildController<Workflow> {
+
 	@Autowired
 	NodeController nodeController;
 	@Autowired
@@ -123,6 +126,26 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	/*
+	Update
+	 */
+
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}/status", method = RequestMethod.PUT)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public void updateStatus(@PathVariable String idString, @RequestBody RunStatus status) throws Exception {
+		ObjectId objectId = stringToObjectId(idString);
+
+		Query query = getDefaultQuery().addCriteria(getIdCriteria(objectId));
+		Update update = Update.update("status", status);
+		WriteResult result = mongoTemplate.updateFirst(query, update, Workflow.class);
+		throwIfError(result);
+
+		if (result.getN() == 0) {
+			throw new EntityNotFoundException(Workflow.class, objectId);
+		}
+	}
+
+	/*
 	Sub-resources
 	 */
 
@@ -133,7 +156,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	/*
-    Node
+	Node
 	 */
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -227,7 +250,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	/*
-    Link
+	Link
 	 */
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.GET)

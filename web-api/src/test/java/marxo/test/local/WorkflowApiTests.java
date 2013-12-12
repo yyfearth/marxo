@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
+import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.ApiTester;
@@ -208,5 +209,19 @@ public class WorkflowApiTests extends BasicApiTests {
 			}
 			Assert.assertTrue(doesContainSharedWorkflow);
 		}
+	}
+
+	@Test(dependsOnMethods = {"createWorkflow"})
+	public void updateStatus() throws Exception {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
+			apiTester
+					.httpPut("workflow/" + workflow.id + "/status", RunStatus.STARTED)
+					.send();
+			apiTester
+					.isOk();
+		}
+
+		Workflow workflow1 = mongoTemplate.findOne(Query.query(Criteria.where("_id").is(workflow.id)), Workflow.class);
+		Assert.assertEquals(workflow1.status, RunStatus.STARTED);
 	}
 }
