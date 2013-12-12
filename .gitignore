@@ -19,3 +19,6 @@ Icon
 ########## Java ##########
 # Project output
 target
+
+########## Logging ##########
+logs
