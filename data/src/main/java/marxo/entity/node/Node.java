@@ -18,8 +18,8 @@ import java.util.List;
 
 @Document
 public class Node extends WorkflowChildEntity {
-	/*
-	From/to nodes
+    /*
+    From/to nodes
 	 */
 
 	protected List<ObjectId> toNodeIds = new ArrayList<>();
@@ -58,7 +58,7 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	/*
-	Actions
+    Actions
 	 */
 
 	public List<ObjectId> actionIds = new ArrayList<>();
@@ -98,7 +98,7 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	/*
-	Current action
+    Current action
 	 */
 
 	protected ObjectId currentActionId;
@@ -217,8 +217,7 @@ public class Node extends WorkflowChildEntity {
 	@Override
 	public void remove() {
 		for (Action action : getActions()) {
-			action.getContent().remove();
-			action.getEvent().remove();
+			action.remove();
 		}
 		super.remove();
 	}

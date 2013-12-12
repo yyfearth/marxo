@@ -85,7 +85,7 @@ public class Workflow extends RunnableEntity {
 	}
 
 	/*
-	Nodes
+    Nodes
 	 */
 
 	public List<ObjectId> nodeIds = new ArrayList<>();
@@ -396,15 +396,11 @@ public class Workflow extends RunnableEntity {
 
 	@Override
 	public void remove() {
-		if (getNodes() != null) {
-			for (Node node : getNodes()) {
-				node.remove();
-			}
+		for (Node node : getNodes()) {
+			node.remove();
 		}
-		if (getLinks() != null) {
-			for (Link link : getLinks()) {
-				link.remove();
-			}
+		for (Link link : getLinks()) {
+			link.remove();
 		}
 
 		// Remove all related tasks.

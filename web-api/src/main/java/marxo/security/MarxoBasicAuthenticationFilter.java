@@ -104,8 +104,7 @@ public class MarxoBasicAuthenticationFilter extends BasicAuthenticationFilter {
 	/**
 	 * Decodes the header into a username and password.
 	 *
-	 * @throws org.springframework.security.authentication.BadCredentialsException
-	 *          if the Basic header is not present or is not valid Base64
+	 * @throws org.springframework.security.authentication.BadCredentialsException if the Basic header is not present or is not valid Base64
 	 */
 	private String[] extractAndDecodeHeader(String header, HttpServletRequest request) throws IOException {
 

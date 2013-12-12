@@ -4,8 +4,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import marxo.entity.Task;
+import marxo.entity.action.Action;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
+import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.entity.workflow.WorkflowChildEntity;
 import marxo.entity.workflow.WorkflowPredicate;
@@ -84,10 +86,21 @@ public class WorkflowController extends TenantChildController<Workflow> {
 					logger.debug(String.format("%s is %s. Remove all associated tasks", workflow, workflow.status));
 					break;
 				case IDLE:
+					for (Node node : workflow.getNodes()) {
+						for (Action action : node.getActions()) {
+							action.status = RunStatus.IDLE;
+						}
+						node.status = RunStatus.IDLE;
+					}
+					for (Link link : workflow.getLinks()) {
+						link.status = RunStatus.IDLE;
+					}
+					break;
 				case FINISHED:
 				case ERROR:
 				case WAITING:
 				case MONITORING:
+				default:
 					throw new IllegalArgumentException(String.format("You cannot change a project's status to %s", workflow.status));
 			}
 
@@ -120,7 +133,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	/*
-	Node
+    Node
 	 */
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -214,7 +227,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	/*
-	Link
+    Link
 	 */
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.GET)
