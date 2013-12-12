@@ -10,6 +10,7 @@ find
 findAll
 tpl
 tplAll
+fill
 View
 BoxView
 FrameView
@@ -225,19 +226,18 @@ ProjectFilterView
 
   class PageDesigner extends ModalDialogView
     @acts_as ContentEditorMixin
-    _preview_html_tpl: tpl('#preview_html_tpl').replace(/_tpl_?(?=[^<]*>)/g, '')
-    _preview_submit_tpl: tpl('#preview_submit_tpl')
+    _preview_tpl: tplAll('#preview_tpl')
     events:
       'click #new_section': -> @addSection()
       'click .btn-save': 'save'
       'click .btn-preview': 'togglePreview'
     initialize: (options) ->
       super options
-      @iframe = find 'iframe', @el
+      @previewEl = find '.container.preview', @el
       @btnSave = find '.btn-save', @el
       @btnPreview = find '.btn-preview', @el
       @pageDesc = new PageDescView el: find '#page_desc', @el
-      #@submitOptions = new SubmitOptionsEditor el: find '#submit_options', @el
+      @submitOptions = null # new SubmitOptionsEditor el: find '#submit_options', @el
       @sections = []
       @sectionsEl = find '#sections', @el
       $(@sectionsEl).sortable
@@ -249,32 +249,49 @@ ProjectFilterView
       #  count = (findAll '.section', @sectionsEl).length
       #  @submitOptions.$el[if count then 'show' else 'hide']()
       @
-    popup: (data, action, callback) ->
-      super data, callback
-      @model = data
+    popup: (model, action, callback) ->
+      super model, callback
+      @model = model
       #console.log 'content form', data.attributes
-      page_desc =
-        name: data.get 'name'
-        desc: data.get 'desc'
-      @url = "content/#{data.id}"
-      @pageDesc.fill page_desc
-      #@submitOptions.fill data.get 'options' if data.has 'options'
-      posted = @readonly = 'IDLE' isnt data.get('status').toUpperCase()
-      sections = data.get('sections') or []
-      if data.has 'sections'
-        @addSection section for section in sections
+      data =
+        name: model.get('name')
+        desc: model.get('desc')
+        sections: model.get('sections') or []
+        options: model.get('options') or {}
+      @url = "content/#{model.id}"
+      @pageDesc.fill data
+      @submitOptions?.fill data.options
+      posted = @readonly = 'IDLE' isnt model.get('status').toUpperCase()
+      if model.has 'sections' # need @readonly
+        @addSection section for section in data.sections
       else # add an empty section if sections have never been defined
-        @addSection()
+        @addSection() # need @readonly
       @pageDesc.readOnlyHtml posted
       @$el.find('form :input').prop 'readOnly', posted
       @$el.find('#new_section, form select, form input[type=checkbox]').prop 'disabled', posted
       @btnSave.disabled = posted
       if action is 'preview'
-        @showPreview {page_desc, sections}
+        @showPreview data
         @btnSave.disabled = true
       @
+    reset: -> # called after close
+      super
+      for view in @sections
+        try view?.remove()
+      @sections = []
+      @sectionsEl.innerHTML = ''
+      @pageDesc.reset()
+      @submitOptions?.reset()
+      @previewEl.classList.remove 'active'
+      @btnPreview.classList.remove 'active'
+      @btnSave.disabled = false
+      @url = ''
+      @readonly = false
+      @
     read: (callback) ->
-      read = (formView) ->
+      throw new Error 'content editor read is async, callback is needed' unless typeof callback is 'function'
+
+      _read = (formView) ->
         deferred = $.Deferred()
         if formView instanceof BoxFormView
           _t = setTimeout ->
@@ -290,42 +307,30 @@ ProjectFilterView
           deferred.reject formView
         deferred.promise()
 
-      throw new Error 'content editor read is async, callback is needed' unless typeof callback is 'function'
-
-      defered = [read @pageDesc]
+      defered = [_read @pageDesc]
       for el in findAll '.box.section', @el
         _idx = el.dataset.idx
-        data = read @sections[_idx]
+        data = _read @sections[_idx]
         defered.push data
       #defered.push read @submitOptions
 
       $.when.apply(@, defered).fail(-> callback null).done (page_desc, sections...) -> # , submit_options
         #console.log 'save content editor', page_desc, sections, submit_options
-        callback {page_desc, sections} # , submit_options
+        callback
+          name: page_desc.name
+          desc: page_desc.desc
+          sections: sections
+          #options: submit_options
       @
     save: ->
-      @togglePreview() if @iframe.classList.contains 'active'
+      @togglePreview() if @previewEl.classList.contains 'active'
       @read (data) =>
         if data
           console.log 'save content', data
-          @data.set 'name', data.page_desc.name
-          @data.set 'desc', data.page_desc.desc
+          @data.set data
           # TODO: deal with invalid settings
-          @data.set 'sections', data.sections
-          @data.set 'options', data.submit_options
           @callback 'save'
           @hide true
-    reset: -> # called after close
-      super
-      @sectionsEl.innerHTML = ''
-      @pageDesc.reset()
-      #@submitOptions.reset()
-      @iframe.classList.remove 'active'
-      @btnPreview.classList.remove 'active'
-      @btnSave.disabled = false
-      @url = ''
-      @readonly = false
-      @
     addSection: (data) ->
       view = new SectionEditor idx: @sections.length, readonly: @readonly, parent: @
       view.render()
@@ -345,21 +350,12 @@ ProjectFilterView
       #console.log 'read', data
       throw new Error 'data is empty for gen preview' unless data
       console.log 'show preview', data
-      cls = @iframe.classList
-      btnCls = @btnPreview.classList
-      iframe = @iframe
-      html = @_genPreview data
-      if html isnt iframe.getAttribute 'srcdoc'
-        iframe.setAttribute 'srcdoc', html
-        unless 'srcdoc' of iframe
-          url = 'javascript: window.frameElement.getAttribute("srcdoc");'
-          iframe.src = url
-          iframe.contentWindow?.location = url
-      cls.add 'active'
-      btnCls.add 'active'
+      @previewEl.innerHTML = @_genPreview data
+      @previewEl.classList.add 'active'
+      @btnPreview.classList.add 'active'
       @
     togglePreview: ->
-      cls = @iframe.classList
+      cls = @previewEl.classList
       btnCls = @btnPreview.classList
       if cls.contains 'active'
         # hide
@@ -386,15 +382,17 @@ ProjectFilterView
             @btnPreview.disabled = false
       @
 
-    _genPreview: ({page_desc, sections}) ->
-      #console.log 'gen preview page', page_desc, sections
-      content = ["<h1>#{page_desc.name}</h1>\n<p>#{page_desc.desc or ''}</p>"]
-      for data, i in sections
+    _genPreview: (data) ->
+      console.log 'gen preview page', data
+      sections = data.sections?.map (section, i) ->
         view = new SectionEditor idx: i
-        content.push view.genPreview data
-      content = content.join '\n'
-      content += @_preview_submit_tpl if sections?.length
-      @_preview_html_tpl.replace '{{content}}', content
+        view.genPreview section
+      content = fill @_preview_tpl.page,
+        title: data.name
+        desc: data.desc
+        sections: sections.join('\n')
+      content = content.replace 'form-actions', 'form-actions hide' unless sections?.length
+      content
 
     render: ->
       @pageDesc.render()
@@ -468,6 +466,7 @@ ProjectFilterView
     tagName: 'section'
     className: 'box section'
     tpl: tpl('#section_tpl')
+    _preview_tpl: PageDesigner::_preview_tpl
     events:
       'change select[name=type]': (e) -> unless @readonly
         $el = $ e.currentTarget
@@ -567,10 +566,6 @@ ProjectFilterView
       super
       @_changeType 'none'
       @
-    _preview_tpl: do ->
-      tpls = tplAll '#preview_tpl'
-      throw new Error 'cannot find preview tpl with name section' unless tpls.section
-      tpls
     genPreview: (data) ->
       #console.log 'gen preview', @id, data
       tpl = @_preview_tpl
@@ -703,8 +698,8 @@ ProjectFilterView
     render: ->
       super
       model = @model
-      type = model.get('type').toUpperCase()
-      status = model.get('status').toUpperCase()
+      type = model.get('type')?.toUpperCase()
+      status = model.get('status')?.toUpperCase()
 
       # view
       view_btn = @_find 'view', 'a'
