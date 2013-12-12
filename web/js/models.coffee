@@ -562,6 +562,30 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class Event extends Entity
     urlRoot: ROOT + '/events'
+    findAction: (callback) ->
+      throw new Error 'callback should be a function' if callback and typeof callback isnt 'function'
+      if @action?
+        callback @action
+        @action
+      else
+        _set = (action) =>
+          @action = action
+          callback? action
+          return
+        actionId = @get 'action_id'
+        workflowId = @get 'workflow_id'
+        unless actionId?
+          throw new Error 'cannot find action without action_id'
+        else unless workflowId?
+          if callback then new Action(id: actionId).fetch
+          success: _set
+          error: -> _set null
+        else findProjectOrWorkflow
+          actionId: actionId
+          workflowId: workflowId
+          nodeId: @get('node_id')
+          callback: ({action}) -> _set action
+        actionId
 
   class Events extends ManagerCollection
     model: Event
