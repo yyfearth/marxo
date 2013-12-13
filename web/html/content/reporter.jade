@@ -7,31 +7,29 @@
       li.active
         a(target='#report_overview', data-toggle='tab') Overview
       li
-        a(target='#report_charts', data-toggle='tab') Evaluated Charts
-      li
         a(target='#report_feedback', data-toggle='tab') Feedbacks
+      li
+        a(target='#report_analysis', data-toggle='tab') Analysis
       li
         a(target='#report_submissions', data-toggle='tab') Submissions
   .modal-body.tab-content
     #report_overview.tab-pane.active
       div.chart#overview_chart
-        h4.title Current
-        svg
-    #report_charts.tab-pane
-      //- stacked area chart must be in top for tooltip position
-      div.span5.chart#pie
-        h4 Pie Chart
-        svg
-      div.span6.chart#bar
-        h4 Bar Chart
+        h4.title Not Availble
         svg
     #report_feedback.tab-pane
+      //- stacked area chart must be in top for tooltip position
+      #stacked.chart.with-3d-shadow.with-transitions
+        svg
       label.checkbox.accumulative
         small Accumulative
         input#accumulative(type='checkbox', checked)
-      #stacked.chart.with-3d-shadow.with-transitions
+    #report_analysis.tab-pane
+      div.span5.chart#pie
+        svg
+      div.span6.chart#bar
         svg
     #report_submissions.tab-pane
-      h4 Submissions
+      h4 Not Availble
   .modal-footer
     button.btn(data-dismiss='modal', aria-hidden='true') Close

@@ -42,8 +42,9 @@ Report
           @_renderRecords()
           @_renderSubmissions()
           return
-        hide: ->
-          @renderChart '#stacked', 'area', [], chart: @_stacked if @_stacked
+        hide: -> # clear charts
+          @renderChart '#stacked', 'area', [], chart: @_records_chart if @_records_chart
+          @renderChart '#overview_chart', 'bar', [], chart: @_overview_chart if @_overview_chart
           return
       @
     _disableTab: (el) ->
@@ -57,6 +58,7 @@ Report
       submissions_count: 'Submission'
     _renderOverview: ->
       records = @model.get 'records'
+      $title = @$el.find('#overview_chart .title')
       if records?.length
         last = records.slice(-1)[0]
         console.log 'last', last
@@ -69,97 +71,107 @@ Report
         @renderChart '#overview_chart', 'bar', [values: values],
           chart: @_overview_chart
           callback: (chart) => @_overview_chart = chart
+      else
+        $title.text 'No Records Yet'
       return
-    _renderRecords: ->
-      el = '#report_feedback'
-      records = @model.get 'records'
-      _render = =>
-        accumulative = @accumulative.checked
-        index = {}
-        datum = []
-        for own field, key of @_record_map
-          datum.push key: key, values: index[field] = []
-        for record in records
-          ts = new Date(record.created_at).getTime()
-          if isNaN ts
-            console.error 'invalide date in record', record
-          else for own field, count of record
-            idx = index[field]
-            if idx?
-              unless accumulative
-                _count = unless idx.length then 0 else idx[idx.length - 1]._count
-                idx.push ts: ts, count: count - _count, _count: count
-              else
-                idx.push {ts, count}
-        # console.log 'parsed records', datum
-        @renderChart '#stacked', 'area', datum,
-          chart: @_records_chart
-          callback: (chart) => @_records_chart = chart
-        return
-
-      unless records?.length
+    _renderTab: (el, field, renderer) ->
+      values = @model.get field
+      unless values?.length
         @_disableTab el
       else if $(el).is ':visible'
-        _render()
-      else @once 'tab:' + el, _render
-
+        renderer values, el
+      else @once 'tab:' + el, -> renderer values, el
       return
-    _renderSubmissions: ->
-      el = '#report_submissions'
-      sections = @model.get 'sections'
-
-      _render = =>
-        submissions = @model.get 'submissions'
-        unless submissions?.length
-          $table = '<div class="text-center"><em class="muted">No submission yet</em></div>'
-        else
-          col = []
-          $thead = $('<tr>').append '<th>#</th>'
-          for section, i in sections
-            if section.type and 'none' isnt section.type.toLowerCase()
-              $thead.append $('<th>', text: section.name)
-              section.index = i
-              col.push section
-          $thead.append '<th>Submitted By</th><th>Submitted At</th>'
-          $table = $('<table>', class: 'table table-hover').append $thead
-          for submission, i in submissions then if submission.sections?.length
-            $row = $('<tr>').append $('<td>', text: i + 1)
-            for {index, type, options} in col
-              $row.append $cell = $('<td>')
-              val = submission.sections[index]
-              unless val?
-                $cell.html '<td class="muted">-</td>'
-                continue
-              #console.log 'type', type
-              switch type.toLowerCase()
-                when 'file'
-                  $cell.append $ '<a>', class: 'icon-download', href: "#{ROOT}/#{val}/download", text: 'Download'
-                  $cell.append ' '
-                  $cell.append $ '<a>',
-                    class: 'icon-link-ext'
-                    href: "#{ROOT}/#{val}", target: '_blank'
-                when 'radio'
-                  if options.manual_options?.length
-                    $cell.text options.manual_options[val]
-                  else
-                    # TODO: auto gen list
-                    console.log 'TODO: auto gen list'
-                when 'html'
-                  $cell.text $('<div>').html(val).text()
+    _renderRecords: -> @_renderTab '#report_feedback', 'records', (records) =>
+      accumulative = @accumulative.checked
+      index = {}
+      datum = []
+      for own field, key of @_record_map
+        datum.push key: key, values: index[field] = []
+      for record in records
+        ts = new Date(record.created_at).getTime()
+        if isNaN ts
+          console.error 'invalide date in record', record
+        else for own field, count of record
+          idx = index[field]
+          if idx?
+            unless accumulative
+              _count = unless idx.length then 0 else idx[idx.length - 1]._count
+              idx.push ts: ts, count: count - _count, _count: count
+            else
+              idx.push {ts, count}
+      # console.log 'parsed records', datum
+      @renderChart '#stacked', 'area', datum,
+        chart: @_records_chart
+        callback: (chart) => @_records_chart = chart
+      return
+    _renderAnalysis: -> @_renderTab '#report_analysis', 'sections', (sections) =>
+      accumulative = @accumulative.checked
+      index = {}
+      datum = []
+      for own field, key of @_record_map
+        datum.push key: key, values: index[field] = []
+      for record in sections
+        ts = new Date(record.created_at).getTime()
+        if isNaN ts
+          console.error 'invalide date in record', record
+        else for own field, count of record
+          idx = index[field]
+          if idx?
+            unless accumulative
+              _count = unless idx.length then 0 else idx[idx.length - 1]._count
+              idx.push ts: ts, count: count - _count, _count: count
+            else
+              idx.push {ts, count}
+      # console.log 'parsed records', datum
+      @renderChart '#stacked', 'area', datum,
+        chart: @_records_chart
+        callback: (chart) => @_records_chart = chart
+      return
+    _renderSubmissions: -> @_renderTab '#report_submissions', 'sections', (sections, el) =>
+      submissions = @model.get 'submissions'
+      unless submissions?.length
+        $table = '<div class="text-center"><em class="muted">No submission yet</em></div>'
+      else
+        col = []
+        $thead = $('<tr>').append '<th>#</th>'
+        for section, i in sections
+          if section.type and 'none' isnt section.type.toLowerCase()
+            $thead.append $('<th>', text: section.name)
+            section.index = i
+            col.push section
+        $thead.append '<th>Submitted By</th><th>Submitted At</th>'
+        $table = $('<table>', class: 'table table-hover').append $thead
+        for submission, i in submissions then if submission.sections?.length
+          $row = $('<tr>').append $('<td>', text: i + 1)
+          for {index, type, options} in col
+            $row.append $cell = $('<td>')
+            val = submission.sections[index]
+            unless val?
+              $cell.html '<td class="muted">-</td>'
+              continue
+            #console.log 'type', type
+            switch type.toLowerCase()
+              when 'file'
+                $cell.append $ '<a>', class: 'icon-download', href: "#{ROOT}/#{val}/download", text: 'Download'
+                $cell.append ' '
+                $cell.append $ '<a>',
+                  class: 'icon-link-ext'
+                  href: "#{ROOT}/#{val}", target: '_blank'
+              when 'radio'
+                if options.manual_options?.length
+                  $cell.text options.manual_options[val]
                 else
-                  $cell.text val
-            $row.append $('<td>', text: "#{submission.name} <#{submission.key}>")
-            $row.append $('<td>', text: new Date(submission.created_at).toLocaleString())
-            $table.append $row
-        @$el.find(el).empty().append($table)
-        return
-
-      unless sections?.length
-        @_disableTab el
-      else if $(el).is ':visible'
-        _render()
-      else @once 'tab:' + el, _render
-
+                  # TODO: auto gen list
+                  console.log 'TODO: auto gen list'
+              when 'html'
+                $cell.text $('<div>').html(val).text()
+              else
+                $cell.text val
+          $row.append $('<td>', text: "#{submission.name} <#{submission.key}>")
+          $row.append $('<td>', text: new Date(submission.created_at).toLocaleString())
+          $table.append $row
+      @$el.find(el).empty().append($table)
       return
     reset: ->
       #@accumulative.checked = true
