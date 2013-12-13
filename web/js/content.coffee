@@ -698,8 +698,8 @@ ProjectFilterView
     render: ->
       super
       model = @model
-      type = model.get('type').toUpperCase()
-      status = model.get('status').toUpperCase()
+      type = model.get('type')?.toUpperCase()
+      status = model.get('status')?.toUpperCase()
 
       # view
       view_btn = @_find 'view', 'a'
