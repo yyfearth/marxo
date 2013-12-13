@@ -10,6 +10,8 @@ import marxo.entity.FacebookData;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
+import marxo.entity.action.FacebookAction;
+import marxo.entity.action.WaitAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -130,9 +132,9 @@ public class EngineTests extends BasicDataTests {
 		node.setName("Test Node for Engine");
 		workflow.addNode(node);
 
-		Action postFacebookAction = new Action();
+		FacebookAction postFacebookAction = new FacebookAction();
 		postFacebookAction.setName("Test Action for Engine");
-		postFacebookAction.isTracked = false;
+		postFacebookAction.isMonitored = false;
 		node.addAction(postFacebookAction);
 
 		Content facebookContent = new Content(Content.Type.FACEBOOK);
@@ -181,7 +183,7 @@ public class EngineTests extends BasicDataTests {
 		node.setName("Test Node for Engine");
 		workflow.addNode(node);
 
-		Action action = new Action();
+		Action action = new WaitAction();
 		node.addAction(action);
 
 		Event event = new Event();
@@ -207,9 +209,9 @@ public class EngineTests extends BasicDataTests {
 		Node node = new Node();
 		workflow.addNode(node);
 
-		Action action = new Action();
+		FacebookAction action = new FacebookAction();
 		action.setName("Test Action for Engine");
-		action.isTracked = false;
+		action.isMonitored = false;
 		node.addAction(action);
 
 		Content facebookContent = new Content(Content.Type.FACEBOOK);
@@ -258,7 +260,7 @@ public class EngineTests extends BasicDataTests {
 		node1.setName("Test Node " + nodeCount++);
 		workflow.addNode(node1);
 
-		Action action = new Action();
+		FacebookAction action = new FacebookAction();
 		action.setName("Test Post to Facebook 1");
 		action.monitorPeriod = Period.seconds(5);
 		node1.addAction(action);
@@ -309,7 +311,7 @@ public class EngineTests extends BasicDataTests {
 		node1 = Node.get(node1.id);
 		Assert.assertEquals(node1.getStatus(), RunStatus.FINISHED);
 
-		action = Action.get(action.id);
+		action = (FacebookAction) Action.get(action.id);
 		postIdsToRemove.add(action.getContent().getPostId());
 		Assert.assertEquals(action.getStatus(), RunStatus.MONITORING);
 

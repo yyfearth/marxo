@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.net.MediaType;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
+import marxo.entity.action.TriggerAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
@@ -66,7 +67,7 @@ public class GeneralApiTests extends BasicApiTests {
 		entitiesToRemove.add(node1);
 		workflow.addNode(node1);
 
-		Action action = new Action();
+		Action action = new TriggerAction();
 		node1.addAction(action);
 		entitiesToRemove.add(action);
 

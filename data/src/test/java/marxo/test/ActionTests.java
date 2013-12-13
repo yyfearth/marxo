@@ -1,6 +1,7 @@
 package marxo.test;
 
 import marxo.entity.action.Action;
+import marxo.entity.action.TriggerAction;
 import org.bson.types.ObjectId;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -10,7 +11,7 @@ public class ActionTests extends BasicDataTests {
 
 	@Test
 	public void getAction() throws Exception {
-		Action postFacebookAction = new Action();
+		Action postFacebookAction = new TriggerAction();
 
 		insertEntities(postFacebookAction);
 
@@ -26,7 +27,7 @@ public class ActionTests extends BasicDataTests {
 
 	@Test
 	public void saveAction() throws Exception {
-		Action postFacebookAction = new Action();
+		Action postFacebookAction = new TriggerAction();
 
 		postFacebookAction.setName("Hello world");
 

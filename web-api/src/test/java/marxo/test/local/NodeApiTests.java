@@ -3,6 +3,7 @@ package marxo.test.local;
 import com.google.common.net.MediaType;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
+import marxo.entity.action.FacebookAction;
 import marxo.entity.node.Node;
 import marxo.serialization.MarxoObjectMapper;
 import marxo.test.ApiTestConfiguration;
@@ -27,7 +28,7 @@ public class NodeApiTests extends BasicApiTests {
 
 		List<Action> postFacebookActions = new ArrayList<>();
 		for (int i = 0; i < 3; i++) {
-			Action postFacebookAction = new Action();
+			FacebookAction postFacebookAction = new FacebookAction();
 			postFacebookAction.setName("Test");
 			postFacebookActions.add(postFacebookAction);
 			reusedNode.addAction(postFacebookAction);
@@ -94,7 +95,7 @@ public class NodeApiTests extends BasicApiTests {
 	public void updateNodeWithActionAndContent() throws Exception {
 		reusedNode.setName("Updated");
 
-		reusedAction = new Action(Action.Type.FACEBOOK);
+		reusedAction = new FacebookAction();
 		reusedNode.addAction(reusedAction);
 		reusedAction.id = null;
 		reusedAction.nodeId = null;

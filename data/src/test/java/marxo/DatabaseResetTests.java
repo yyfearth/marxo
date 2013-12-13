@@ -8,6 +8,8 @@ import marxo.entity.FacebookData;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
+import marxo.entity.action.FacebookAction;
+import marxo.entity.action.PageAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -140,7 +142,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node1);
 
-		Action postFacebookAction1 = new Action(Action.Type.FACEBOOK);
+		Action postFacebookAction1 = new FacebookAction();
 		postFacebookAction1.setName("Post to Facebook 1");
 		node1.addAction(postFacebookAction1);
 
@@ -153,7 +155,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node2.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node2);
 
-		Action postFacebookAction2 = new Action(Action.Type.FACEBOOK);
+		Action postFacebookAction2 = new FacebookAction();
 		postFacebookAction2.setName("Post to Facebook 2");
 		node2.addAction(postFacebookAction2);
 
@@ -313,7 +315,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node1);
 
-		Action postFacebookAction1 = new Action(Action.Type.PAGE);
+		Action postFacebookAction1 = new PageAction();
 		postFacebookAction1.setStatus(RunStatus.STARTED);
 		postFacebookAction1.setName("Post to Facebook 1");
 		node1.addAction(postFacebookAction1);

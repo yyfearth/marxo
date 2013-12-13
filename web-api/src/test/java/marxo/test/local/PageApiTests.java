@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.net.MediaType;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
+import marxo.entity.action.PageAction;
 import marxo.entity.action.Submission;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Workflow;
@@ -37,7 +38,7 @@ public class PageApiTests extends BasicApiTests {
 		reusedNode = new Node();
 		reusedWorkflow.addNode(reusedNode);
 
-		reusedAction = new Action(Action.Type.PAGE);
+		reusedAction = new PageAction();
 		reusedNode.addAction(reusedAction);
 
 		reusedContent = new Content(Content.Type.PAGE);

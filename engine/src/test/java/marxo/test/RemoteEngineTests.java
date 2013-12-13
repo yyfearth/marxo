@@ -8,6 +8,7 @@ import marxo.entity.BasicEntity;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
+import marxo.entity.action.FacebookAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -109,9 +110,9 @@ public class RemoteEngineTests extends BasicDataTests {
 		node.setName("Test Node for Engine");
 		workflow.addNode(node);
 
-		Action action = new Action(Action.Type.FACEBOOK);
+		FacebookAction action = new FacebookAction();
 		action.setName("Test Action for Engine");
-		action.isTracked = false;
+		action.isMonitored = false;
 		node.addAction(action);
 
 		Content content = new Content(Content.Type.FACEBOOK);
@@ -144,7 +145,7 @@ public class RemoteEngineTests extends BasicDataTests {
 		node.setName("Test Node for Engine");
 		workflow.addNode(node);
 
-		Action action = new Action();
+		FacebookAction action = new FacebookAction();
 		node.addAction(action);
 
 		Event event = new Event();
@@ -174,10 +175,10 @@ public class RemoteEngineTests extends BasicDataTests {
 		entities.add(node);
 		workflow.addNode(node);
 
-		Action action1 = new Action(Action.Type.FACEBOOK);
+		FacebookAction action1 = new FacebookAction();
 		entities.add(action1);
 		action1.setName("Test Action for Engine");
-		action1.isTracked = false;
+		action1.isMonitored = false;
 		node.addAction(action1);
 
 		Content facebookContent1 = new Content(Content.Type.FACEBOOK);
@@ -185,10 +186,10 @@ public class RemoteEngineTests extends BasicDataTests {
 		facebookContent1.message = String.format("First!! %s", facebookContent1.id);
 		action1.setContent(facebookContent1);
 
-		Action action2 = new Action(Action.Type.FACEBOOK);
+		FacebookAction action2 = new FacebookAction();
 		entities.add(action2);
 		action2.setName("Test Action for Engine");
-		action2.isTracked = false;
+		action2.isMonitored = false;
 		node.addAction(action2);
 
 		Content facebookContent2 = new Content(Content.Type.FACEBOOK);
@@ -221,7 +222,7 @@ public class RemoteEngineTests extends BasicDataTests {
 		node1.setName("Test Node " + nodeCount++);
 		workflow.addNode(node1);
 
-		Action action = new Action();
+		FacebookAction action = new FacebookAction();
 		action.setName("Test Post to Facebook 1");
 		action.monitorPeriod = Period.seconds(5);
 		node1.addAction(action);
@@ -272,7 +273,7 @@ public class RemoteEngineTests extends BasicDataTests {
 		node1 = Node.get(node1.id);
 		Assert.assertEquals(node1.getStatus(), RunStatus.FINISHED);
 
-		action = Action.get(action.id);
+		action = (FacebookAction) Action.get(action.id);
 		postIdsToRemove.add(action.getContent().getPostId());
 		Assert.assertEquals(action.getStatus(), RunStatus.MONITORING);
 
