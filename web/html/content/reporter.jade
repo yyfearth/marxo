@@ -21,9 +21,13 @@
       //- stacked area chart must be in top for tooltip position
       #stacked.chart.with-3d-shadow.with-transitions
         svg
-      label.checkbox.accumulative
-        small Accumulative
-        input#accumulative(type='checkbox', checked)
+      #stacked_options
+        .btn-group(data-toggle='buttons-radio')
+          button.btn.active#option_accumulative(type='button') Accumulative
+          button.btn(type='button') Discrete
+        .btn-group(data-toggle='buttons-radio')
+          button.btn.active#option_daily(type='button') Daily
+          button.btn(type='button') Hourly
     #report_analysis.tab-pane
       #t_section.tpl
         legend {{name}}

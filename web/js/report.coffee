@@ -22,10 +22,23 @@ Report
       'click .nav-tabs li.disabled': (e) ->
         e.stopImmediatePropagation()
         false
-      'change #accumulative': '_renderRecords'
+      'click #stacked_options .btn': ->
+        setTimeout =>
+          accumulative = @$accumulative.hasClass 'active'
+          daily = @$daily.hasClass 'active'
+          @_records_chart = null if daily isnt @_daily
+          if accumulative isnt @_accumulative or not @_records_chart?
+            @_accumulative = accumulative
+            @_daily = daily
+            @_renderRecords()
+          return
+        , 100
+        return
     initialize: (options) ->
       super options
-      @accumulative = find '#accumulative', @el
+      @$accumulative = $ find '#option_accumulative', @el
+      @$daily = $ find '#option_daily', @el
+      @_renderRecords = _.debounce @_renderRecords.bind(@), 300
       @$el.find('a[data-toggle=tab]').on 'shown', (e) =>
         @trigger 'tab:' + e.target.target
         $(window).resize() # for chart width
@@ -33,7 +46,7 @@ Report
     popup: (model, callback) ->
       super model, callback
       @model = model
-      console.log model
+      #console.log model
 
       unless records?.length # gen test data
         records = @_genRandReports()
@@ -73,9 +86,9 @@ Report
         values = []
         for own field, name of @_record_map
           values.push name: name, value: last[field] if last[field]
-        @renderChart '#overview_chart', 'bar', [values: values],
-          chart: @_overview_chart
-          callback: (chart) => @_overview_chart = chart
+        @renderChart '#overview_chart', 'bar', [
+          values: values
+        ], chart: @_overview_chart, callback: (chart) => @_overview_chart = chart
       else
         $title.text 'No Records Yet'
       return
@@ -88,26 +101,48 @@ Report
       else @once 'tab:' + el, -> renderer values, el
       return
     _renderRecords: -> @_renderTab '#report_feedback', 'records', (records) =>
-      accumulative = @accumulative.checked
+      accumulative = @$accumulative.hasClass 'active'
+      daily = @$daily.hasClass 'active'
       index = {}
       datum = []
       for own field, key of @_record_map
         datum.push key: key, values: index[field] = []
-      for record in records
+      if daily
+        for record in records
+          ts = new Date(record.created_at)
+          date = ts.toLocaleDateString()
+          if isNaN ts.getTime()
+            console.error 'invalide date in record', record
+          else for own field, count of record
+            key = field + '-' + date
+            field = index[field]
+            continue unless field?
+            value = index[key]
+            unless value?
+              field.push index[key] =
+                ts: new Date(date).getTime(), count: count
+            else if count > value.count
+              value.count = count
+        unless accumulative
+          for {values} in datum
+            for day, i in values by -1
+              day.count -= values[i - 1].count if i
+      else for record in records
         ts = new Date(record.created_at).getTime()
         if isNaN ts
           console.error 'invalide date in record', record
         else for own field, count of record
-          idx = index[field]
-          if idx?
-            unless accumulative
-              _count = unless idx.length then 0 else idx[idx.length - 1]._count
-              idx.push ts: ts, count: count - _count, _count: count
-            else
-              idx.push {ts, count}
-      # console.log 'parsed records', datum
+          field = index[field]
+          continue unless field?
+          unless accumulative
+            _count = unless field.length then 0 else field[field.length - 1]._count
+            field.push ts: ts, count: count - _count, _count: count
+          else
+            field.push {ts, count}
+      #console.log 'parsed records', datum
       @renderChart '#stacked', 'area', datum,
         chart: @_records_chart
+        daily: daily
         callback: (chart) => @_records_chart = chart
       return
     _renderAnalysis: -> @_renderTab '#report_analysis', 'sections', (sections, el) =>
@@ -126,7 +161,7 @@ Report
               i: i
         for submission in submissions
           for q in questions
-            console.log submission
+            #console.log submission
             value = submission.sections[q.i] ? ''
             q.index[value] ?= 0
             q.index[value]++
@@ -137,7 +172,9 @@ Report
           values = q.options.map (name, i) ->
             name: name, value: q.index[i]
           @renderChart "#pie_#{q.i}", 'pie', values
-          @renderChart "#bar_#{q.i}", 'bar', [values: values]
+          @renderChart "#bar_#{q.i}", 'bar', [
+            values: values
+          ]
           $sections.append $section
       @$el.find(el).empty().append($sections)
       return
@@ -187,7 +224,6 @@ Report
       @$el.find(el).empty().append($table)
       return
     reset: ->
-      #@accumulative.checked = true
       @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
         ($thumb = $ @).attr('href', $thumb.attr 'target').parent('li').removeClass 'disabled'
         return
@@ -197,7 +233,7 @@ Report
       super
     renderChart: (el, type, data, options) ->
       if _initChart = @_initChart
-        console.log 'render chart', el, type
+        #console.log 'render chart', el, type
         {nv, d3} = _initChart
         func = _initChart[type]
         unless _initChart.hasOwnProperty(type) and typeof func is 'function'
@@ -217,8 +253,6 @@ Report
           chart
       else require ['lib/d3v3', 'lib/nvd3'], (d3, nv) =>
         intFormat = d3.format(',d')
-        formater = d3.time.format if options?.daily then '%x' else '%x %-I:00%p'
-        dateFormat = (d) -> formater new Date d
         @_initChart =
           d3: d3
           nv: nv
@@ -232,13 +266,15 @@ Report
             chart = nv.models.discreteBarChart()
             .x((d) -> d.name).y((d) -> d.value)
             .staggerLabels(true).showValues(true)
-            chart.valueFormat(intFormat).yAxis.tickFormat(intFormat).tickSubdivide(0)
+            chart.valueFormat(intFormat).yAxis.tickFormat(intFormat).tickSize(1)
             chart
           area: (options) ->
             chart = nv.models.stackedAreaChart().useInteractiveGuideline(true)
             .x((d) -> d.ts).y((d) -> d.count)
-            chart.xAxis.tickFormat dateFormat
-            chart.yAxis.tickFormat intFormat
+            formater = d3.time.format if options?.daily then '%x' else '%x %-I:00%p'
+            chart.xAxis.tickFormat((d) -> formater new Date d)
+            #.tickSize(if options?.daily then 86400000 else 3600000)
+            chart.yAxis.tickFormat(intFormat)
             chart
         @renderChart el, type, data, options
       @
@@ -258,6 +294,7 @@ Report
       for field in fields
         _c[field] = 0
       c = 100 + (Math.random() * 1000) | 0
+      c = c - c % 24
       while --c
         record =
           created_at: ts
@@ -265,7 +302,7 @@ Report
         for field in fields
           inc = _inc[field]
           r = if Math.random() > Math.min(inc / 10, 0.9) then 0 else 1 + (Math.random() * inc) | 0
-          record[field] = _c[field] += r
+          record[field] = (_c[field] += r)
         records.push record
       records
 
