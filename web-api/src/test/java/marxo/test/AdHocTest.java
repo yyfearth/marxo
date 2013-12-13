@@ -1,11 +1,14 @@
 package marxo.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import marxo.entity.action.Action;
+import marxo.entity.action.MonitorableAction;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
 import marxo.serialization.MarxoObjectMapper;
 import marxo.tool.Loggable;
+import marxo.tool.Reflections;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -73,5 +76,17 @@ public class AdHocTest implements Loggable {
 		String projectsJson = "";
 		List<Workflow> projects = marxoObjectMapper.readValue(usersJson, new TypeReference<List<Workflow>>() {
 		});
+	}
+
+	@Test
+	public void useJsonTypeInfo() throws Exception {
+		MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
+		MonitorableAction monitorableAction = new MonitorableAction();
+//		monitorableAction.setType(Action.Type.FACEBOOK);
+		String json = marxoObjectMapper.writeValueAsString(monitorableAction);
+		Action action = marxoObjectMapper.readValue(json, Action.class);
+		Assert.assertTrue(action instanceof MonitorableAction);
+
+		logger.info(Reflections.getObjectDump(action));;
 	}
 }

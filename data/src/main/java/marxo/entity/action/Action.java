@@ -2,6 +2,8 @@ package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
@@ -25,6 +27,21 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
+@JsonTypeInfo(
+		use = JsonTypeInfo.Id.NAME,
+		include = JsonTypeInfo.As.PROPERTY,
+//		defaultImpl = MonitorableAction.class,
+		property = "type",
+		visible = true
+)
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = FacebookAction.class, name = "FACEBOOK"),
+		@JsonSubTypes.Type(value = TwitterAction.class, name = "TWITTER"),
+		@JsonSubTypes.Type(value = EmailAction.class, name = "EMAIL"),
+		@JsonSubTypes.Type(value = PageAction.class, name = "PAGE"),
+		@JsonSubTypes.Type(value = WaitAction.class, name = "WAIT"),
+		@JsonSubTypes.Type(value = TriggerAction.class, name = "TRIGGER"),
+})
 @Document(collection = "action")
 public class Action extends NodeChildEntity {
 
@@ -53,7 +70,7 @@ public class Action extends NodeChildEntity {
 	protected Type type = Type.DEFAULT;
 
 	public Type getType() {
-		return type;
+		return Type.DEFAULT;
 	}
 
 	@Override
