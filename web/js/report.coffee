@@ -4,6 +4,8 @@ define 'report', ['base', 'models'],
 ({
 find
 #findAll
+tpl
+fill
 #View
 #InnerFrameView
 ModalDialogView
@@ -26,6 +28,7 @@ Report
       @accumulative = find '#accumulative', @el
       @$el.find('a[data-toggle=tab]').on 'shown', (e) =>
         @trigger 'tab:' + e.target.target
+        $(window).resize() # for chart width
       @
     popup: (model, callback) ->
       super model, callback
@@ -40,6 +43,7 @@ Report
         shown: ->
           @_renderOverview()
           @_renderRecords()
+          @_renderAnalysis()
           @_renderSubmissions()
           return
         hide: -> # clear charts
@@ -56,12 +60,13 @@ Report
       shares_count: 'Facebook Shares'
       visit_count: 'Page Visit'
       submissions_count: 'Submission'
+    _section_tpl: tpl('#t_section')
     _renderOverview: ->
       records = @model.get 'records'
       $title = @$el.find('#overview_chart .title')
       if records?.length
         last = records.slice(-1)[0]
-        console.log 'last', last
+        # console.log 'last', last
         to = new Date last.created_at
         from = new Date records[0].created_at
         @$el.find('#overview_chart .title').text "#{from.toLocaleString()} - #{to.toLocaleString()}"
@@ -105,28 +110,36 @@ Report
         chart: @_records_chart
         callback: (chart) => @_records_chart = chart
       return
-    _renderAnalysis: -> @_renderTab '#report_analysis', 'sections', (sections) =>
-      accumulative = @accumulative.checked
-      index = {}
-      datum = []
-      for own field, key of @_record_map
-        datum.push key: key, values: index[field] = []
-      for record in sections
-        ts = new Date(record.created_at).getTime()
-        if isNaN ts
-          console.error 'invalide date in record', record
-        else for own field, count of record
-          idx = index[field]
-          if idx?
-            unless accumulative
-              _count = unless idx.length then 0 else idx[idx.length - 1]._count
-              idx.push ts: ts, count: count - _count, _count: count
-            else
-              idx.push {ts, count}
-      # console.log 'parsed records', datum
-      @renderChart '#stacked', 'area', datum,
-        chart: @_records_chart
-        callback: (chart) => @_records_chart = chart
+    _renderAnalysis: -> @_renderTab '#report_analysis', 'sections', (sections, el) =>
+      submissions = @model.get 'submissions'
+      unless submissions?.length
+        $sections = '<div class="text-center"><em class="muted">No submission yet</em></div>'
+      else
+        questions = []
+        for section, i in sections
+          # TODO: support auto options
+          if section.options?.manual_options?.length and /^radio$/i.test section.type
+            questions.push
+              name: section.name
+              options: section.options.manual_options
+              index: {}
+              i: i
+        for submission in submissions
+          for q in questions
+            console.log submission
+            value = submission.sections[q.i] ? ''
+            q.index[value] ?= 0
+            q.index[value]++
+        $sections = $('<div>')
+        tpl = @_section_tpl
+        for q in questions
+          $section = $ fill tpl, i: q.i, name: q.name
+          values = q.options.map (name, i) ->
+            name: name, value: q.index[i]
+          @renderChart "#pie_#{q.i}", 'pie', values
+          @renderChart "#bar_#{q.i}", 'bar', [values: values]
+          $sections.append $section
+      @$el.find(el).empty().append($sections)
       return
     _renderSubmissions: -> @_renderTab '#report_submissions', 'sections', (sections, el) =>
       submissions = @model.get 'submissions'
@@ -148,7 +161,7 @@ Report
             $row.append $cell = $('<td>')
             val = submission.sections[index]
             unless val?
-              $cell.html '<td class="muted">-</td>'
+              $cell.addClass('muted').text '-'
               continue
             #console.log 'type', type
             switch type.toLowerCase()
@@ -178,9 +191,6 @@ Report
       @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
         ($thumb = $ @).attr('href', $thumb.attr 'target').parent('li').removeClass 'disabled'
         return
-      #@$el.find('.tab-content > .tab-pane').empty()
-      # test only
-      @$el.find('.nav-tabs a[data-toggle=tab]:eq(0)').tab 'show' # test
       @
     render: ->
       @reset()
@@ -206,6 +216,9 @@ Report
           options?.callback? chart
           chart
       else require ['lib/d3v3', 'lib/nvd3'], (d3, nv) =>
+        intFormat = d3.format(',d')
+        formater = d3.time.format if options?.daily then '%x' else '%x %-I:00%p'
+        dateFormat = (d) -> formater new Date d
         @_initChart =
           d3: d3
           nv: nv
@@ -213,18 +226,19 @@ Report
             chart = nv.models.pieChart()
             .x((d) -> d.name).y((d) -> d.value)
             .color(d3.scale.category10().range()).labelType(options?.labelType or 'percent')
+            chart.valueFormat(intFormat)
             chart
           bar: (options) ->
             chart = nv.models.discreteBarChart()
             .x((d) -> d.name).y((d) -> d.value)
             .staggerLabels(true).showValues(true)
+            chart.valueFormat(intFormat).yAxis.tickFormat(intFormat).tickSubdivide(0)
             chart
           area: (options) ->
             chart = nv.models.stackedAreaChart().useInteractiveGuideline(true)
             .x((d) -> d.ts).y((d) -> d.count)
-            formater = d3.time.format if options?.daily then '%x' else '%x %-I:00%p'
-            chart.xAxis.tickFormat (d) -> formater new Date d
-            chart.yAxis.tickFormat d3.format(',d')
+            chart.xAxis.tickFormat dateFormat
+            chart.yAxis.tickFormat intFormat
             chart
         @renderChart el, type, data, options
       @

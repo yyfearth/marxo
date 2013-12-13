@@ -25,10 +25,12 @@
         small Accumulative
         input#accumulative(type='checkbox', checked)
     #report_analysis.tab-pane
-      div.span5.chart#pie
-        svg
-      div.span6.chart#bar
-        svg
+      #t_section.tpl
+        legend {{name}}
+        div.span5.chart(id='pie_{{i}}')
+          svg
+        div.span6.chart(id='bar_{{i}}')
+          svg
     #report_submissions.tab-pane
       h4 Not Availble
   .modal-footer
