@@ -1,7 +1,7 @@
 "use strict"
 
 define 'base', ['utils', 'models', 'lib/common'],
-({find,  findAll,  tpl,  tplAll,  fill}, {Collection, Tenant, User}) ->
+({find,  findAll,  tpl,  tplAll,  fill}, {Collection, Tenant, User, ROOT}) ->
 
   ## Common Views
 
@@ -417,4 +417,5 @@ define 'base', ['utils', 'models', 'lib/common'],
   FormView
   Tenant
   User
+  ROOT
   }
