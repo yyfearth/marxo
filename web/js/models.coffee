@@ -543,15 +543,7 @@ define 'models', ['module', 'lib/common'], (module) ->
   # idAttribute: 'index'
 
   class Actions extends SimpleCollection
-    @actions: new Actions
-    @find: (id, callback) -> @actions.find id, callback
     model: Action
-    find: (id, callback) ->
-      unless @length
-        @load (actions) -> actions.find id, callback
-      else
-        callback? @get id
-      @
   # url: -> @node.url() + '/actions'
 
   ## Project
