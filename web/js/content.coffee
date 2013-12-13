@@ -60,7 +60,7 @@ ProjectFilterView
         return @
       else unless data instanceof Content
         data = new Content data
-      type = data.get('type')?.toUpperCase()
+      type = data.type()
       if action is 'report'
         @reporter.popup data, callback
       else
@@ -166,14 +166,14 @@ ProjectFilterView
       super data, callback
       @field = @form.message
       @fill data
-      posted = 'IDLE' isnt data.get('status').toUpperCase()
+      posted = 'IDLE' isnt data.status()
       @field.readOnly = posted
       @btnSave.disabled = posted
       @
     fill: (data) ->
-      type = data.get 'type'
+      type = data.type()
       field = @field
-      @$el.find('small.media').text "(#{type.toLowerCase()})"
+      @$el.find('small.media').text "(#{type})"
       @form.name.value = data.get 'name'
       field.value = data.get 'message'
       switch type
@@ -261,7 +261,7 @@ ProjectFilterView
       @url = "content/#{model.id}"
       @pageDesc.fill data
       @submitOptions?.fill data.options
-      posted = @readonly = 'IDLE' isnt model.get('status').toUpperCase()
+      posted = @readonly = 'IDLE' isnt model.status()
       if model.has 'sections' # need @readonly
         @addSection section for section in data.sections
       else # add an empty section if sections have never been defined
@@ -698,8 +698,8 @@ ProjectFilterView
     render: ->
       super
       model = @model
-      type = model.get('type')?.toUpperCase()
-      status = model.get('status')?.toUpperCase()
+      type = model.type()
+      status = model.status()
 
       # view
       view_btn = @_find 'view', 'a'

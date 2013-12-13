@@ -29,13 +29,13 @@ Notifications
   class NotificationActionCell extends Backgrid.ActionsCell
     render: ->
       super
-      model = @model
-      btn = @_find 'process', 'a'
-      status = model.get 'status'
-      if status is 'ACTIVE' and model.has 'target_url'
-        btn?.href = model.get 'target_url'
-      else
-        @_hide btn
+      # TODO: gen target url
+      #model = @model
+      #btn = @_find 'process', 'a'
+      #if model.has 'target_url'
+      #  btn?.href = model.get 'target_url'
+      #else
+      @_hide btn
       @
 
   class NotificationCenterView extends ManagerView
@@ -161,23 +161,23 @@ Notifications
       p = document.createElement 'p'
       p.innerHTML = model.escape 'desc'
       div.appendChild p
-      unless /finished|stopped|expired/i.test model.get 'status'
+      unless /FINISHED|STOPPED|EXPIRED/.test model.status()
         if model.has 'expires_at'
           small = document.createElement 'small'
           expires_at = new Date(model.get 'expires_at').toLocaleString()
           small.innerHTML = "Expected expires at #{expires_at}"
           div.appendChild small
-        if model.has 'target_url' # TODO: gen url by ids
-          type = model.get 'type'
-          btn = document.createElement 'a'
-          btn.href = model.get 'target_url'
-          btn.className = 'btn btn-small'
-          if type is 'ROUTINE'
-            btn.innerHTML = 'View &raquo;'
-          else
-            btn.className += ' btn-primary icon-right-open'
-            btn.innerHTML = 'Process'
-          div.appendChild btn
+        #if model.has 'target_url' # TODO: gen url by ids
+        #  type = model.get 'type'
+        #  btn = document.createElement 'a'
+        #  btn.href = model.get 'target_url'
+        #  btn.className = 'btn btn-small'
+        #  if type is 'ROUTINE'
+        #    btn.innerHTML = 'View &raquo;'
+        #  else
+        #    btn.className += ' btn-primary icon-right-open'
+        #    btn.innerHTML = 'Process'
+        #  div.appendChild btn
       div
     _render: (models = @collection) ->
       models = models.fullCollection if models.fullCollection
@@ -186,23 +186,24 @@ Notifications
       col = models.filter (model) ->
         model._date = new Date(model.get('updated_at') or model.get('created_at')).getTime()
         model._before = Date.now() - model._date
-        switch model.get 'status'
+        switch model.status()
           when 'EXPIRED'
             false
           when 'FINISHED'
             model._before < 86400000 # 1d
           else
             model._before < 2592000000 # 30d
-      _.sortBy(col, (model) ->
-        t = model._before
-        switch model.get 'type'
-          when 'EMERGENT'
-            t
-          when 'REQUISITE'
-            10000000000 + t
-          else
-            20000000000 + t
-      ).forEach (model) => fragments.appendChild @_renderItem model
+      #_.sortBy(col, (model) ->
+      #  t = model._before
+      #  switch model.get 'level'
+      #    when 'EMERGENT'
+      #      t
+      #    when 'REQUISITE'
+      #      10000000000 + t
+      #    else
+      #      20000000000 + t
+      #)
+      col.forEach (model) => fragments.appendChild @_renderItem model
       @el.appendChild fragments
     _levelCls:
       minor: 'muted'

@@ -176,7 +176,7 @@ Event
           form.starts.readOnly = true
           form.ends.readOnly = true
           form.duration.readOnly = true
-        when 'STARTED', 'MONITORING', 'PAUSED'
+        when 'STARTED', 'TRACKED', 'PAUSED'
           form.starts.readOnly = true
           form.ends.readOnly = false
           form.duration.readOnly = false
@@ -241,7 +241,7 @@ Event
         _evt.start = new Date evt.get 'starts' if evt.has 'starts'
         _evt.end = new Date evt.get 'ends' if evt.has 'ends'
         _evt.allDay = _evt.start? and not _evt.end? # if no ends, by default it is allday
-        switch status = evt.get('status').toUpperCase()
+        switch status = evt.status()
           when 'FINISHED'
             _evt.color = '#ccc'
             _evt.editable = false
@@ -249,7 +249,7 @@ Event
           # default color
             _evt.editable = true
             _evt.color = '#006dcc' if _evt.allDay
-          when 'STARTED', 'MONITORING'
+          when 'STARTED', 'TRACKED'
             _evt.color = if _evt.end? then '#468847' else '#faa732'
             _evt.startEditable = false
             _evt.durationEditable = true
@@ -433,7 +433,7 @@ Event
 
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
-      @_hide 'skip' unless /^(?:IDLE$|STARTED|MONITORING|PAUSED)$/i.test @model.get 'status'
+      @_hide 'skip' unless /^(?:IDLE|STARTED|TRACKED|PAUSED)$/.test @model.status()
       super
 
   class EventManagemerView extends ManagerView

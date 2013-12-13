@@ -7,6 +7,7 @@ findAll
 tpl
 InnerFrameView
 NavListView
+STATUS_CLS
 }, {
 ManagerCollection
 Projects
@@ -147,13 +148,6 @@ findProjectOrWorkflow
 
   # single label tag
   class Backgrid.LabelCell extends Backgrid.StringCell
-    status_cls:
-      started: 'label-success'
-      monitoring: 'label-success'
-      paused: 'label-warning'
-      stopped: 'label-inverse'
-      finished: 'label-info'
-      error: 'label-important'
     className: 'label-cell'
     formatter:
       fromRaw: (raw) -> if raw? then raw.toLowerCase() else ''
@@ -418,7 +412,7 @@ findProjectOrWorkflow
         name: 'status'
         label: 'Status'
         cell: 'label'
-        cls: Backgrid.LabelCell::status_cls
+        cls: STATUS_CLS
         editable: false
       created_at:
         name: 'created_at'

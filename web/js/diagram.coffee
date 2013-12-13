@@ -49,7 +49,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
           if node is wf.startNode
             txt = '[Start] ' + txt
             cls.push 'start-node'
-          if status = node.get 'status'
+          if status = node.get('status') or ''
             txt += " (#{status.toUpperCase()})" unless /^IDLE$|^NONE$/i.test status
             cls.push 'status-' + status.toLowerCase()
           x: x
@@ -63,7 +63,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
         links: wf.links.map (link, i) ->
           src = link.prevNode._idx
           tar = link.nextNode._idx
-          if status = link.get 'status'
+          if status = link.get('status') or ''
             cls = 'status-' + status.toLowerCase()
             status = if /^IDLE$|^NONE$/i.test(status) then '' else " (#{status.toUpperCase()})"
 

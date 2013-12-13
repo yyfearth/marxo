@@ -54,7 +54,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           model: model
           parent: @, container: @actionsEl
           projectMode: @projectMode
-          readOnly: @projectMode and model.get('status')?.toUpperCase() isnt 'IDLE'
+          readOnly: @projectMode and model.status() isnt 'IDLE'
         @listenTo actionView, 'remove', @removeAction.bind @
         actionView.render()
         actionView.el.scrollIntoViewIfNeeded() if options?.scrollIntoView

@@ -3,6 +3,16 @@
 define 'base', ['utils', 'models', 'lib/common'],
 ({find,  findAll,  tpl,  tplAll,  fill, DurationConvertor}, {Collection, Tenant, User, ROOT}) ->
 
+  ## Shared Constant
+
+  STATUS_CLS =
+    started: 'label-success'
+    tracked: 'label-success'
+    paused: 'label-warning'
+    stopped: 'label-inverse'
+    finished: 'label-info'
+    error: 'label-important'
+
   ## Common Views
 
   class View extends Backbone.View
@@ -419,4 +429,5 @@ define 'base', ['utils', 'models', 'lib/common'],
   User
   DurationConvertor
   ROOT
+  STATUS_CLS
   }

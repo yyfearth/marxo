@@ -575,7 +575,7 @@ require [
       @model.fetch
         reset: true
         success: (model) =>
-          if 'PAGE' is model.get('type').toUpperCase()
+          if 'PAGE' is model.get('type')?.toUpperCase()
             @_render model
           else
             @renderNotFound()

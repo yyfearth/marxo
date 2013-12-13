@@ -10,6 +10,7 @@ InnerFrameView
 NavListView
 FormView
 FormDialogView
+STATUS_CLS
 }, {
 ManagerView
 WorkflowFilterView
@@ -435,27 +436,19 @@ Projects
       @statusView.load project
       return
     _updateStatus: ->
-      status = (@model.get('status') or 'NONE').toUpperCase()
-      cls = ''
+      status = @model.status()
       show_btns = switch status
-        when 'NONE'
-          'delete' # no actions
         when 'IDLE'
           'start, delete'
-        when 'STARTED'
-          cls = 'label-success'
+        when 'STARTED', 'TRACKED'
           'pause'
         when 'PAUSED'
-          cls = 'label-warning'
           'start, stop'
         when 'STOPPED'
-          cls = 'label-inverse'
           'start, delete'
         when 'FINISHED'
-          cls = 'label-info'
           ''
         when 'ERROR'
-          cls = 'label-important'
           'start, delete'
         else
           console.error 'unknow status', status
@@ -465,7 +458,8 @@ Projects
       $btns.find('.btn[name=start]').text if status is 'PAUSED' then 'Resume' else 'Start'
       $btns.find(show_btns.replace(/(\w+)/g, '.btn[name="$1"]')).show()
       @$status.text(status).parent()
-      .removeClass('label-success label-warning label-inverse label-info').addClass cls
+      .removeClass('label-success label-warning label-inverse label-info')
+      .addClass STATUS_CLS[status.toLowerCase()] or ''
       return
     destroy: ->
       if confirm 'Are you sure to delete this project?\n\nThis step cannot be undone!'
@@ -482,8 +476,11 @@ Projects
         @_updateStatus()
       else
         status = status.toUpperCase()
-        if status isnt @model.get('status').toUpperCase()
-          @model.save {status}, success: @_updateStatus
+        if status isnt @model.status()
+          @model.status status, remote: true, callback: (status) =>
+            @_updateStatus()
+            alert 'Failed to chanage status!' unless status
+            return
         else console.log 'status not changed', status
       @
     select: (opt = {}) ->
@@ -507,7 +504,7 @@ Projects
 
   class ProjectStatusView extends View
     _prefix: 'prj_status_lst'
-    _cls: Backgrid.LabelCell::status_cls # in manager.coffee
+    _cls: STATUS_CLS
     _refCls:
       content: 'icon-page'
       event: 'icon-calendar'
@@ -564,8 +561,7 @@ Projects
       _label = @_renderLabel
       a.appendChild name
       a.appendChild _label '(Start Node)', 'label-info start-node' if model is wf.startNode
-      if status = model.get 'status'
-        status = status.toLowerCase()
+      if status = model.status(lowercase: true)
         a.className = "status-#{status}"
         a.appendChild _label status.toUpperCase(), 'pull-right ' + @_cls[status] or ''
       li.appendChild a
@@ -612,8 +608,7 @@ Projects
         name = document.createElement 'strong'
         name.textContent = action.name()
         a.appendChild name
-        if status = action.get 'status'
-          status = status.toLowerCase()
+        if status = action.status(lowercase: true)
           a.className = "status-#{status}"
           a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status] or ''
         for own name, cls of _refs
@@ -638,8 +633,7 @@ Projects
       a = document.createElement 'a'
       a.textContent = 'Condition'
       #console.log 'render link', model.attributes
-      if status = model.get 'status'
-        status = status.toLowerCase()
+      if status = model.status(lowercase: true)
         a.className = "status-#{status}"
         a.appendChild @_renderLabel status.toUpperCase(), 'pull-right ' + @_cls[status] or ''
       li.appendChild a
@@ -696,7 +690,7 @@ Projects
   class ProjectActionCell extends Backgrid.ActionsCell
     render: ->
       super
-      @_hide 'remove' if /^STARTED$|^PAUSED$/i.test @model.get 'status'
+      @_hide 'remove' if /^STARTED$|^PAUSED$/.test @model.status()
       @
 
   class ProjectManagemerView extends ManagerView
@@ -741,7 +735,7 @@ Projects
       @
     remove: (models) ->
       models = [models] unless Array.isArray models
-      models = models.filter (model) -> not /^STARTED$|^PAUSED$/i.test model.get 'status'
+      models = models.filter (model) -> not /^STARTED$|^PAUSED$/.test model.status()
       unless models.length
         alert '''None of selected project can be removed.
         Projects already STARTED or PAUSED cannot be removed.
