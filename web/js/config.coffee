@@ -139,7 +139,7 @@ Service
         cls = 'connected'
         text += ' Connected'
         text += ' as ' + field if field
-      else if @model? and /DISCONNECTED/i.test @model.get 'status'
+      else if @model? and 'DISCONNECTED' is @model.status()
         cls = 'disconnected'
         text += ' Disconnected'
         text += ' from ' + field if field

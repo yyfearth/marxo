@@ -58,6 +58,12 @@ define 'models', ['module', 'lib/common'], (module) ->
       else
         callback? @, 'skipped'
       @
+    status: (options) ->
+      val = @get('status') or ''
+      if options?.lowercase then val.toLowerCase() else val.toUpperCase()
+    type: (options) ->
+      val = @get('type') or ''
+      if options?.lowercase then val.toLowerCase() else val.toUpperCase()
 
   # just a alias, otherwise PageableCollection will not extends Collection
   Collection = Backbone.Collection
@@ -91,6 +97,9 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class StatusEntity extends Entity
     status: (val, options = {}) ->
+      if val?.lowercase?
+        options = val
+        val = null
       callback = if typeof options is 'function' then options else options.callback
       remotely = callback? or (options.remote ? val?) # use remote mode by default when set
       # get url for remote mode
@@ -107,7 +116,7 @@ define 'models', ['module', 'lib/common'], (module) ->
             @set 'status', status if status isnt val
             callback? status
           .fail -> callback? val
-        val
+        if options.lowercase then val.toLowerCase() else val
       else # set
         val = val.toUpperCase()
         if remotely
@@ -617,21 +626,13 @@ define 'models', ['module', 'lib/common'], (module) ->
     model: Content
     url: Content::urlRoot
 
-  ## Report
-
-  class Report extends Entity
-
-  class Reports extends ManagerCollection
-    model: Report
-    url: ROOT + '/reports'
-
   ## Service
 
   class Service extends Entity
     idAttribute: 'service'
     urlRoot: ROOT + '/services'
     connected: ->
-      /CONNECTED/i.test @get 'status'
+      /^CONNECTED$/i.test @get 'status'
 
   { # exports
   ROOT
@@ -661,8 +662,6 @@ define 'models', ['module', 'lib/common'], (module) ->
   Events
   Content
   Contents
-  Report
-  Reports
   Service
   findProjectOrWorkflow
   }

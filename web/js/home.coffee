@@ -9,6 +9,7 @@ fill
 View
 FrameView
 NavListView
+STATUS_CLS
 }, {
 Project
 Projects
@@ -80,6 +81,8 @@ NotificationListView
       for key, value of obj
         @_find(key)?.textContent = value
       find('a.btn-view', @el)?.href = '#project/' + project.id
+      cls = STATUS_CLS[project.status lowercase: true]
+      find('.label[name=status]', @el)?.classList.add cls if cls
       @diagram.draw project
       return
     remove: ->

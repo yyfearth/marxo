@@ -242,7 +242,7 @@ Event
         _evt.start = new Date evt.get 'starts' if evt.has 'starts'
         _evt.end = new Date evt.get 'ends' if evt.has 'ends'
         _evt.allDay = _evt.start? and not _evt.end? # if no ends, by default it is allday
-        switch status = evt.get('status').toUpperCase()
+        switch status = evt.status()
           when 'FINISHED'
             _evt.color = '#ccc'
             _evt.editable = false
@@ -434,7 +434,7 @@ Event
 
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
-      @_hide 'skip' unless /^(?:IDLE$|STARTED|MONITORING|PAUSED)$/i.test @model.get 'status'
+      @_hide 'skip' unless /^(?:IDLE|STARTED|MONITORING|PAUSED)$/.test @model.status()
       super
 
   class EventManagemerView extends ManagerView
