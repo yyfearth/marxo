@@ -1,19 +1,6 @@
 'use strict'
 
-define 'report', ['base', 'models'],
-({
-find
-#findAll
-tpl
-fill
-#View
-#InnerFrameView
-ModalDialogView
-}, {
-# Tenant
-ROOT
-Report
-}) ->
+define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'

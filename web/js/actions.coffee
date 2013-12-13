@@ -1,7 +1,7 @@
 "use strict"
 
 define 'actions', ['base', 'models', 'lib/jquery-ui'],
-({find, findAll, tplAll, BoxView}, {Action, Actions}) ->
+({find, findAll, tplAll, BoxView, DurationConvertor}, {Action, Actions}) ->
 
   class ActionsMixin
     initActions: (options) ->
