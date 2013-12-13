@@ -106,16 +106,15 @@ define 'models', ['module', 'lib/common'], (module) ->
       if remotely
         url = @url?() or @url
         throw new Error 'cannot get status of a entity remotely without url' unless url
-        url += '/' unless url[-1..] isnt '/'
+        url += '/' if url[-1..] isnt '/'
         url += 'status'
 
       unless val? # get
         val = (@get('status') or '').toUpperCase()
         if remotely
-          $.get url, (status) =>
-            @set 'status', status if status isnt val
-            callback? status
-          .fail -> callback? val
+          @fetch reset: true, success: =>
+            callback? @status options
+            return
         if options.lowercase then val.toLowerCase() else val
       else # set
         val = val.toUpperCase()
@@ -126,9 +125,12 @@ define 'models', ['module', 'lib/common'], (module) ->
           $.ajax
             url: url
             type: 'PUT'
-            data: val
-            dataType: 'text'
-            mimeType: 'text/plain'
+            data: JSON.stringify(val)
+            processData: false
+            dataType: 'json'
+            contentType: 'application/json'
+            headers:
+              Authorization: User.current?.get('credential') or ''
             success: (val) =>
               @set 'status', val
               callback? val

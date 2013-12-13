@@ -483,8 +483,11 @@ Projects
         @_updateStatus()
       else
         status = status.toUpperCase()
-        if status isnt @model.get('status').toUpperCase()
-          @model.save {status}, success: @_updateStatus
+        if status isnt @model.status()
+          @model.status status, remote: true, callback: (status) =>
+            @_updateStatus()
+            alert 'Failed to chanage status!' unless status
+            return
         else console.log 'status not changed', status
       @
     select: (opt = {}) ->
