@@ -8,15 +8,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 public abstract class TenantChildController<Entity extends TenantChildEntity> extends EntityController<Entity> {
-	/**
-	 * The user object will be set before each controller method is called.
-	 */
+
 	@Override
-	public void preHandle() {
-		super.preHandle();
+	protected Criteria newDefaultCriteria() {
+		Criteria criteria = super.newDefaultCriteria();
+
 		Criteria criteria1 = Criteria.where("tenantId").is(user.tenantId);
 		Criteria criteria2 = Criteria.where("tenantId").exists(false);
 		criteria.orOperator(criteria1, criteria2);
+
+		return criteria;
 	}
 
 	@Override

@@ -180,6 +180,6 @@ public class UserController extends TenantChildController<User> {
 		Criteria criteria1 = Criteria.where("tenantId").is(user.tenantId);
 		Criteria criteria2 = Criteria.where("tenantId").exists(false);
 		Criteria criteria = new Criteria().orOperator(criteria1, criteria2);
-		return mongoTemplate.find(Query.query(criteria).with(defaultSort), User.class);
+		return mongoTemplate.find(Query.query(criteria).with(getDefaultSort()), User.class);
 	}
 }

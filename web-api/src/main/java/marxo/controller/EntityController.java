@@ -28,10 +28,8 @@ import java.util.List;
 
 @SuppressWarnings("unchecked")
 public abstract class EntityController<Entity extends BasicEntity> extends BasicController implements MongoDbAware, InterceptorPreHandlable {
-	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime")).and(new Sort(new Sort.Order(Sort.Direction.DESC, "createTime")));
 	protected Class<Entity> entityClass;
 	// review: not sure storing a query is a better idea.
-	protected Criteria criteria;
 	/**
 	 * The user who is using the controller.
 	 */
@@ -56,15 +54,6 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		MarxoAuthentication marxoAuthentication = (MarxoAuthentication) SecurityContextHolder.getContext().getAuthentication();
 		Assert.notNull(marxoAuthentication);
 		user = marxoAuthentication.getUser();
-		criteria = new Criteria();
-	}
-
-	protected Query getDefaultQuery() {
-		return Query.query(criteria).with(defaultSort);
-	}
-
-	protected Query getDefaultQuery(Criteria criteria) {
-		return Query.query(criteria).with(defaultSort);
 	}
 
 	protected Criteria getIdCriteria(ObjectId objectId) {
@@ -76,6 +65,22 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 			logger.debug(String.format("Database error: %s", writeResult.getError()));
 			throw new DatabaseException(writeResult.getError());
 		}
+	}
+
+	protected Sort getDefaultSort() {
+		return new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime")).and(new Sort(new Sort.Order(Sort.Direction.DESC, "createTime")));
+	}
+
+	protected Criteria newDefaultCriteria() {
+		return new Criteria();
+	}
+
+	protected Criteria newDefaultCriteria(ObjectId id) {
+		return Criteria.where("_id").is(id);
+	}
+
+	protected Query newDefaultQuery(ObjectId id) {
+		return Query.query(newDefaultCriteria(id));
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
@@ -97,8 +102,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	public Entity read(@PathVariable String idString) throws Exception {
 		ObjectId objectId = stringToObjectId(idString);
 
-		criteria.and("_id").is(objectId);
-		Entity entity = mongoTemplate.findOne(getDefaultQuery(criteria), entityClass);
+		Entity entity = mongoTemplate.findOne(newDefaultQuery(objectId), entityClass);
 
 		if (entity == null) {
 			throw new EntityNotFoundException(entityClass, objectId);
@@ -113,7 +117,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	public Entity update(@Valid @PathVariable String idString, @Valid @RequestBody Entity entity) throws Exception {
 		ObjectId objectId = stringToObjectId(idString);
 
-		Entity oldEntity = mongoTemplate.findById(objectId, entityClass);
+		Entity oldEntity = mongoTemplate.findOne(newDefaultQuery(objectId), entityClass);
 
 		if (oldEntity == null) {
 			throw new EntityNotFoundException(entityClass, objectId);
@@ -143,9 +147,8 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 		throwIfInvalidObjectId(idString);
 
 		ObjectId objectId = new ObjectId(idString);
-		criteria.and("_id").is(objectId);
 
-		Entity entity = mongoTemplate.findOne(Query.query(criteria), entityClass);
+		Entity entity = mongoTemplate.findOne(newDefaultQuery(objectId), entityClass);
 		if (entity == null) {
 			throw new EntityNotFoundException(entityClass, objectId);
 		}
@@ -158,7 +161,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public List<Entity> search() {
-		return mongoTemplate.find(getDefaultQuery(criteria), entityClass);
+		return mongoTemplate.find(new Query().with(getDefaultSort()), entityClass);
 	}
 
 	protected void throwIfInvalidObjectId(String idString) {

@@ -1,8 +1,6 @@
 package marxo.controller;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.mongodb.WriteResult;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
@@ -10,8 +8,6 @@ import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
-import marxo.entity.workflow.WorkflowChildEntity;
-import marxo.entity.workflow.WorkflowPredicate;
 import marxo.exception.EntityInvalidException;
 import marxo.exception.EntityNotFoundException;
 import marxo.exception.ValidationException;
@@ -24,10 +20,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -45,7 +39,6 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@Override
 	public void preHandle() {
 		super.preHandle();
-		criteria.and("isProject").is(isProject());
 	}
 
 	protected boolean isProject() {
@@ -53,17 +46,26 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	}
 
 	@Override
+	protected Criteria newDefaultCriteria() {
+		Criteria criteria = super.newDefaultCriteria();
+		return criteria.and("isProject").is(isProject());
+	}
+
+	@Override
+	protected Criteria newDefaultCriteria(ObjectId id) {
+		Criteria criteria = super.newDefaultCriteria(id);
+		return criteria.and("isProject").is(isProject());
+	}
+
+	/*
+	CRUD
+	 */
+
+	@Override
 	public Workflow read(@PathVariable String idString) throws Exception {
 		Workflow workflow = super.read(idString);
-
-		Criteria subCriteria = Criteria.where("workflowId").is(workflow.id).and("tenantId").is(user.tenantId);
-		List<Node> nodes = mongoTemplate.find(Query.query(subCriteria), Node.class);
-		List<Link> links = mongoTemplate.find(Query.query(subCriteria), Link.class);
-		WorkflowPredicate<WorkflowChildEntity> workflowPredicate = new WorkflowPredicate<>(workflow.id);
-		Iterable<Node> workflowNodes = Iterables.filter(nodes, workflowPredicate);
-		workflow.setNodes(Lists.newArrayList(workflowNodes));
-		Iterable<Link> workflowLinks = Iterables.filter(links, workflowPredicate);
-		workflow.setLinks(Lists.newArrayList(workflowLinks));
+		workflow.getNodes();
+		workflow.getLinks();
 
 		return workflow;
 	}
@@ -132,17 +134,40 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}/status", method = RequestMethod.PUT)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	public void updateStatus(@PathVariable String idString, @RequestBody RunStatus status) throws Exception {
+	public RunStatus updateStatus(@PathVariable String idString, @RequestBody RunStatus status) throws Exception {
 		ObjectId objectId = stringToObjectId(idString);
 
-		Query query = getDefaultQuery().addCriteria(getIdCriteria(objectId));
 		Update update = Update.update("status", status);
-		WriteResult result = mongoTemplate.updateFirst(query, update, Workflow.class);
+		WriteResult result = mongoTemplate.updateFirst(newDefaultQuery(objectId), update, Workflow.class);
 		throwIfError(result);
 
 		if (result.getN() == 0) {
 			throw new EntityNotFoundException(Workflow.class, objectId);
 		}
+
+		return status;
+	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	// todo: implemented created and modified search APIs
+	public List<Workflow> search() {
+		String name = request.getParameter("name");
+		boolean hasName = !Strings.isNullOrEmpty(name);
+
+		List<Workflow> workflows;
+
+		Criteria criteria = newDefaultCriteria();
+		if (hasName) {
+			String escapedName = StringTool.escapePatternCharacters(name);
+			Pattern pattern = Pattern.compile(".*" + escapedName + ".*", Pattern.CASE_INSENSITIVE);
+			criteria.and("name").regex(pattern);
+		}
+
+		workflows = mongoTemplate.find(new Query(criteria).with(getDefaultSort()), entityClass);
+
+		return workflows;
 	}
 
 	/*
@@ -159,95 +184,71 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	Node
 	 */
 
-	@RequestMapping(method = RequestMethod.GET)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
-	// todo: implemented created and modified search APIs
-	public List<Workflow> search() {
-		String name = request.getParameter("name");
-		boolean hasName = !Strings.isNullOrEmpty(name);
-
-		List<Workflow> workflows;
-
-		if (hasName) {
-			String escapedName = StringTool.escapePatternCharacters(name);
-			Pattern pattern = Pattern.compile(".*" + escapedName + ".*", Pattern.CASE_INSENSITIVE);
-			criteria.and("name").regex(pattern);
-		}
-
-		workflows = mongoTemplate.find(getDefaultQuery(criteria).with(defaultSort), entityClass);
-
-		return workflows;
-	}
-
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<Node> readAllNodes(@PathVariable String workflowIdString) throws Exception {
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		nodeController.criteria = criteria;
-
-		return nodeController.search();
+		Workflow workflow = super.read(workflowIdString);
+		return workflow.getNodes();
 	}
 
-	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.POST)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.CREATED)
-	public Node createNode(@PathVariable String workflowIdString, @Valid @RequestBody Node node, HttpServletResponse response) throws Exception {
-		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
-
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		nodeController.criteria = criteria;
-
-		return nodeController.create(node, response);
-	}
+//	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}", method = RequestMethod.POST)
+//	@ResponseBody
+//	@ResponseStatus(HttpStatus.CREATED)
+//	public Node createNode(@PathVariable String workflowIdString, @Valid @RequestBody Node node, HttpServletResponse response) throws Exception {
+//		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+//
+//		ObjectId workflowId = new ObjectId(workflowIdString);
+//
+//		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+//		setSubResourceCriteria(criteria);
+//		nodeController.criteria = criteria;
+//
+//		return nodeController.create(node, response);
+//	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Node readNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
-		ObjectId workflowId = new ObjectId(workflowIdString);
+		ObjectId workflowId = stringToObjectId(workflowIdString);
+		ObjectId nodeId = stringToObjectId(nodeIdString);
 
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		nodeController.criteria = criteria;
+		Node node = mongoTemplate.findOne(new Query(Criteria.where("_id").is(nodeId).and("workflowId").is(workflowId)), Node.class);
+		if (node == null) {
+			throw new EntityNotFoundException(Node.class, nodeId);
+		}
 
-		return nodeController.read(nodeIdString);
+		return node;
 	}
 
-	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
-	public Node updateNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString, @Valid @RequestBody Node node) throws Exception {
-		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+//	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
+//	@ResponseBody
+//	@ResponseStatus(HttpStatus.OK)
+//	public Node updateNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString, @Valid @RequestBody Node node) throws Exception {
+//		Assert.isTrue(node.workflowId.equals(new ObjectId(workflowIdString)));
+//
+//		ObjectId workflowId = new ObjectId(workflowIdString);
+//
+//		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+//		setSubResourceCriteria(criteria);
+//		nodeController.criteria = criteria;
+//
+//		return nodeController.update(nodeIdString, node);
+//	}
 
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		nodeController.criteria = criteria;
-
-		return nodeController.update(nodeIdString, node);
-	}
-
-	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
-	public Node deleteNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		nodeController.criteria = criteria;
-
-		return nodeController.delete(nodeIdString);
-	}
+//	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/node{:s?}/{nodeIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
+//	@ResponseBody
+//	@ResponseStatus(HttpStatus.OK)
+//	public Node deleteNode(@PathVariable String workflowIdString, @PathVariable String nodeIdString) throws Exception {
+//		ObjectId workflowId = new ObjectId(workflowIdString);
+//
+//		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+//		setSubResourceCriteria(criteria);
+//		nodeController.criteria = criteria;
+//
+//		return nodeController.delete(nodeIdString);
+//	}
 
 	/*
 	Link
@@ -257,69 +258,66 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<Link> readAllLinks(@PathVariable String workflowIdString) throws Exception {
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		linkController.criteria = criteria;
-
-		return linkController.search();
+		Workflow workflow = super.read(workflowIdString);
+		return workflow.getLinks();
 	}
 
-	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.POST)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.CREATED)
-	public Link createLink(@PathVariable String workflowIdString, @Valid @RequestBody Link link, HttpServletResponse response) throws Exception {
-		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
-
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		linkController.criteria = criteria;
-		link = linkController.create(link, response);
-
-		return link;
-	}
+//	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}", method = RequestMethod.POST)
+//	@ResponseBody
+//	@ResponseStatus(HttpStatus.CREATED)
+//	public Link createLink(@PathVariable String workflowIdString, @Valid @RequestBody Link link, HttpServletResponse response) throws Exception {
+//		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
+//
+//		ObjectId workflowId = new ObjectId(workflowIdString);
+//
+//		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+//		setSubResourceCriteria(criteria);
+//		linkController.criteria = criteria;
+//		link = linkController.create(link, response);
+//
+//		return link;
+//	}
 
 	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Link readLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
-		ObjectId workflowId = new ObjectId(workflowIdString);
+		ObjectId workflowId = stringToObjectId(workflowIdString);
+		ObjectId linkId = stringToObjectId(linkIdString);
 
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		linkController.criteria = criteria;
+		Link link = mongoTemplate.findOne(new Query(Criteria.where("_id").is(linkId).and("workflowId").is(workflowId)), Link.class);
+		if (link == null) {
+			throw new EntityNotFoundException(Link.class, linkId);
+		}
 
-		return linkController.read(linkIdString);
+		return link;
 	}
 
-	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
-	public Link updateLink(@PathVariable String workflowIdString, @PathVariable String linkIdString, @Valid @RequestBody Link link) throws Exception {
-		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
-
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		linkController.criteria = criteria;
-
-		return linkController.update(linkIdString, link);
-	}
-
-	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
-	@ResponseBody
-	@ResponseStatus(HttpStatus.OK)
-	public Link deleteLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
-		ObjectId workflowId = new ObjectId(workflowIdString);
-
-		Criteria criteria = Criteria.where("workflowId").is(workflowId);
-		setSubResourceCriteria(criteria);
-		linkController.criteria = criteria;
-
-		return linkController.delete(linkIdString);
-	}
+//	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.PUT)
+//	@ResponseBody
+//	@ResponseStatus(HttpStatus.OK)
+//	public Link updateLink(@PathVariable String workflowIdString, @PathVariable String linkIdString, @Valid @RequestBody Link link) throws Exception {
+//		Assert.isTrue(link.workflowId.equals(new ObjectId(workflowIdString)));
+//
+//		ObjectId workflowId = new ObjectId(workflowIdString);
+//
+//		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+//		setSubResourceCriteria(criteria);
+//		linkController.criteria = criteria;
+//
+//		return linkController.update(linkIdString, link);
+//	}
+//
+//	@RequestMapping(value = "/{workflowIdString:[\\da-fA-F]{24}}/link{:s?}/{linkIdString:[\\da-fA-F]{24}}", method = RequestMethod.DELETE)
+//	@ResponseBody
+//	@ResponseStatus(HttpStatus.OK)
+//	public Link deleteLink(@PathVariable String workflowIdString, @PathVariable String linkIdString) throws Exception {
+//		ObjectId workflowId = new ObjectId(workflowIdString);
+//
+//		Criteria criteria = Criteria.where("workflowId").is(workflowId);
+//		setSubResourceCriteria(criteria);
+//		linkController.criteria = criteria;
+//
+//		return linkController.delete(linkIdString);
+//	}
 }
