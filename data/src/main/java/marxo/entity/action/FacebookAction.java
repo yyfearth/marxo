@@ -11,7 +11,7 @@ import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
 import org.joda.time.DateTime;
 
-public class FacebookAction extends MonitorableAction {
+public class FacebookAction extends TrackableAction {
 
 	public FacebookAction() {
 		type = Type.FACEBOOK;
@@ -41,13 +41,13 @@ public class FacebookAction extends MonitorableAction {
 				logger.info(String.format("Submit Facebook post [%s]", content.messageResponse));
 
 				getEvent();
-				if (isMonitored && event != null) {
-					status = RunStatus.MONITORING;
+				if (isTracked && event != null) {
+					status = RunStatus.TRACKED;
 
 					getWorkflow().addTracableAction(this);
 					getWorkflow().save();
 
-					Notification notification = new Notification(Notification.Level.NORMAL, "Start monitoring");
+					Notification notification = new Notification(Notification.Level.NORMAL, "Start tracking");
 					notification.setAction(this);
 					notification.save();
 
@@ -61,7 +61,7 @@ public class FacebookAction extends MonitorableAction {
 					status = RunStatus.FINISHED;
 				}
 			} else {
-				if (!isMonitored || getEvent() == null) {
+				if (!isTracked || getEvent() == null) {
 					status = RunStatus.FINISHED;
 					return true;
 				}

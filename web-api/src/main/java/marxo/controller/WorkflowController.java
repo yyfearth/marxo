@@ -104,7 +104,7 @@ public class WorkflowController extends TenantChildController<Workflow> {
 				case FINISHED:
 				case ERROR:
 				case WAITING:
-				case MONITORING:
+				case TRACKED:
 				default:
 					throw new IllegalArgumentException(String.format("You cannot change a project's status to %s", workflow.getStatus()));
 			}
@@ -151,7 +151,6 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
-	// todo: implemented created and modified search APIs
 	public List<Workflow> search() {
 		String name = request.getParameter("name");
 		boolean hasName = !Strings.isNullOrEmpty(name);

@@ -6,7 +6,7 @@ import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
 import org.joda.time.DateTime;
 
-public class PageAction extends MonitorableAction {
+public class PageAction extends TrackableAction {
 
 	public PageAction() {
 		type = Type.PAGE;

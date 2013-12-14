@@ -60,13 +60,13 @@ public class EngineTests extends BasicDataTests {
 
 		facebookClient = new DefaultFacebookClient(reusedTenant.facebookData.accessToken);
 
-//		EngineWorker.startAsync();
+		EngineWorker.startAsync();
 	}
 
 	@AfterClass
 	@Override
 	public void afterClass() throws Exception {
-		EngineWorker.stop();
+		EngineWorker.stopAsync();
 
 		super.afterClass();
 
@@ -134,7 +134,7 @@ public class EngineTests extends BasicDataTests {
 
 		FacebookAction postFacebookAction = new FacebookAction();
 		postFacebookAction.setName("Test Action for Engine");
-		postFacebookAction.isMonitored = false;
+		postFacebookAction.isTracked = false;
 		node.addAction(postFacebookAction);
 
 		Content facebookContent = new Content(Content.Type.FACEBOOK);
@@ -211,7 +211,7 @@ public class EngineTests extends BasicDataTests {
 
 		FacebookAction action = new FacebookAction();
 		action.setName("Test Action for Engine");
-		action.isMonitored = false;
+		action.isTracked = false;
 		node.addAction(action);
 
 		Content facebookContent = new Content(Content.Type.FACEBOOK);
@@ -247,7 +247,7 @@ public class EngineTests extends BasicDataTests {
 	}
 
 	@Test
-	public void monitorPost() throws Exception {
+	public void trackingPost() throws Exception {
 		Workflow workflow = new Workflow();
 		workflow.setTenant(reusedTenant);
 		workflow.createTime = workflow.updateTime = DateTime.now();
@@ -262,7 +262,7 @@ public class EngineTests extends BasicDataTests {
 
 		FacebookAction action = new FacebookAction();
 		action.setName("Test Post to Facebook 1");
-		action.monitorPeriod = Period.seconds(5);
+		action.trackPeriod = Period.seconds(5);
 		node1.addAction(action);
 
 		Event event = new Event();
@@ -272,7 +272,7 @@ public class EngineTests extends BasicDataTests {
 
 		Content facebookContent1 = new Content(Content.Type.FACEBOOK);
 		facebookContent1.setName("Test Contnet " + contentCount);
-		facebookContent1.message = String.format("Marxo Engine is monitoring this message\n\n%s", facebookContent1);
+		facebookContent1.message = String.format("Marxo Engine is tracking this message\n\n%s", facebookContent1);
 		action.setContent(facebookContent1);
 
 		Node node2 = new Node();
@@ -305,15 +305,15 @@ public class EngineTests extends BasicDataTests {
 		Assert.assertEquals(Task.count(), 0);
 
 		workflow = Workflow.get(workflow.id);
-		Assert.assertEquals(workflow.getStatus(), RunStatus.MONITORING);
-		Assert.assertEquals(workflow.tracedActionIds.size(), 1);
+		Assert.assertEquals(workflow.getStatus(), RunStatus.TRACKED);
+		Assert.assertEquals(workflow.trackedActionIds.size(), 1);
 
 		node1 = Node.get(node1.id);
 		Assert.assertEquals(node1.getStatus(), RunStatus.FINISHED);
 
 		action = (FacebookAction) Action.get(action.id);
 		postIdsToRemove.add(action.getContent().getPostId());
-		Assert.assertEquals(action.getStatus(), RunStatus.MONITORING);
+		Assert.assertEquals(action.getStatus(), RunStatus.TRACKED);
 
 		link = Link.get(link.id);
 		Assert.assertEquals(link.getStatus(), RunStatus.FINISHED);
@@ -328,6 +328,11 @@ public class EngineTests extends BasicDataTests {
 
 	@Test
 	public void resumeProject() throws Exception {
+		Assert.fail();
+	}
+
+	@Test
+	public void withInvalidAccessToken() throws Exception {
 		Assert.fail();
 	}
 }

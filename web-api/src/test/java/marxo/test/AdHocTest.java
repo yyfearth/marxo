@@ -3,7 +3,7 @@ package marxo.test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import marxo.entity.action.Action;
 import marxo.entity.action.FacebookAction;
-import marxo.entity.action.MonitorableAction;
+import marxo.entity.action.TrackableAction;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
@@ -82,10 +82,10 @@ public class AdHocTest implements Loggable {
 	@Test
 	public void useJsonTypeInfo() throws Exception {
 		MarxoObjectMapper marxoObjectMapper = new MarxoObjectMapper();
-		MonitorableAction monitorableAction = new FacebookAction();
-		String json = marxoObjectMapper.writeValueAsString(monitorableAction);
+		TrackableAction trackableAction = new FacebookAction();
+		String json = marxoObjectMapper.writeValueAsString(trackableAction);
 		Action action = marxoObjectMapper.readValue(json, Action.class);
-		Assert.assertTrue(action instanceof MonitorableAction);
+		Assert.assertTrue(action instanceof TrackableAction);
 
 		logger.info(Reflections.getObjectDump(action));
 		;

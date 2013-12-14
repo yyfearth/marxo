@@ -3,19 +3,23 @@ package marxo.engine;
 import marxo.entity.MongoDbAware;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
+import marxo.entity.action.TrackableAction;
 import marxo.entity.link.Link;
+import marxo.entity.node.Event;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.tool.StringTool;
-import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Seconds;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.UUID;
 
 public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 
@@ -72,7 +76,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 	Worker
 	 */
 
-	final Duration idleDuration = Seconds.seconds(10).toStandardDuration();
+	final Duration idleDuration = Seconds.seconds(1).toStandardDuration();
 	final Duration normalDuration = Seconds.seconds(1).toStandardDuration();
 	Duration duration = idleDuration;
 
@@ -112,7 +116,10 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					logger.info(String.format("%s is processing %s", this, workflow));
 
 					if (workflow.startNodeId == null) {
-						logger.info(String.format("%s has no start node", this));
+						logger.warn(String.format("%s has no start node", this));
+
+						Notification.saveNew(Notification.Level.ERROR, workflow, "Workflow has no start node");
+
 						workflow.setStatus(RunStatus.ERROR);
 						workflow.save();
 						continue;
@@ -124,11 +131,11 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 							continue;
 						}
 						workflow.addCurrentNode(workflow.getStartNode());
+						workflow.save();
 					}
 
 					Queue<Node> nodeQueue = new LinkedList<>(workflow.getCurrentNodes());
-					List<ObjectId> pendingNodeIds = new ArrayList<>();
-					boolean isScheduled = false;
+					boolean hasError = false;
 
 					while (!nodeQueue.isEmpty()) {
 						Node node = nodeQueue.poll();
@@ -136,77 +143,129 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						logger.info(String.format("%s is processing %s", this, node));
 
 						switch (node.getStatus()) {
-							case STARTED:
 							case IDLE:
+								node.setStatus(RunStatus.STARTED);
+								node.save();
+
+								Notification.saveNew(Notification.Level.NORMAL, node, "Node started");
+							case STARTED:
 								break;
 							case FINISHED:
-								continue;
 							case PAUSED:
 							case STOPPED:
 							case ERROR:
 							case WAITING:
-							case MONITORING:
-								String message = String.format("%s shouldn't have %s status", node, node.getStatus());
-								logger.error(message);
-								throw new IllegalStateException(message);
+							case TRACKED:
+								continue;
 						}
 
-						Action action = node.getCurrentAction();
-						for (; action != null; action = action.getNextAction()) {
-							logger.info(String.format("%s is processing %s", this, action));
+						List<Action> actions = node.getActions();
+						boolean shouldStop = false;
+						RunStatus lastStatus = null;
+						for (Action action : actions) {
+							switch (lastStatus = action.getStatus()) {
+								case IDLE:
+								case STARTED:
+								case WAITING:
+								case TRACKED:
+								case FINISHED:
+									break;
+								case PAUSED:
+								case STOPPED:
+								case ERROR:
+									shouldStop = true;
+									break;
+							}
 
-							boolean shouldContinue = action.act();
+							if (shouldStop) {
+								break;
+							}
 
-							if (!shouldContinue) {
+							Event event = action.getEvent();
+							if (event == null) {
+								event = new Event();
+								event.setStartTime(DateTime.now());
+
+
+								action.setEvent(event);
+								action.save();
+							} else if (event.getStartTime() == null) {
+								event.setStartTime(DateTime.now());
+								event.save();
+							}
+
+							if (event.getStartTime().isAfterNow()) {
+								Task.reschedule(workflow.id, event.getStartTime());
+							}
+
+							Notification.saveNew(Notification.Level.NORMAL, action, "Action started");
+
+							action.act();
+
+							switch (lastStatus = action.getStatus()) {
+								case FINISHED:
+									Notification.saveNew(Notification.Level.NORMAL, action, "Action finished");
+								case TRACKED:
+									Notification.saveNew(Notification.Level.NORMAL, action, "Action tracked");
+									workflow.addTracableAction((TrackableAction) action);
+									workflow.save();
+									break;
+								case ERROR:
+								case IDLE:
+								case STARTED:
+								case WAITING:
+								case PAUSED:
+								case STOPPED:
+									shouldStop = true;
+									break;
+							}
+
+							if (shouldStop) {
 								break;
 							}
 						}
 
-						if (action == null) {// if all actions have been run
-							node.setStatus(RunStatus.FINISHED);
-
-							Notification notification = new Notification(Notification.Level.NORMAL, String.format("Node %s finished", node.getName()));
-							notification.setNode(node);
-							notification.save();
-						}
-
+						node.setStatus(lastStatus);
 						node.save();
 
-						// Check links
+						if (node.getStatus().equals(RunStatus.FINISHED) || node.getStatus().equals(RunStatus.TRACKED)) {
+							Notification.saveNew(Notification.Level.NORMAL, node, "Node finished");
+						} else {
+							if (node.getStatus().equals(RunStatus.ERROR)) {
+								hasError = true;
+							}
+							continue;
+						}
+
+						// Run links
 						for (Link link : node.getToLinks()) {
 							logger.info(String.format("%s is processing %s", this, link));
+							Notification.saveNew(Notification.Level.NORMAL, link, "Link started");
 
 							if (link.determine()) {
 								link.setStatus(RunStatus.FINISHED);
 								link.save();
 
-								Notification notification = new Notification(Notification.Level.NORMAL, String.format("Link %s finished", link.getName()));
-								notification.setLink(link);
-								notification.save();
+								Notification.saveNew(Notification.Level.NORMAL, link, "Link finished");
 
 								if (link.getNextNode() != null) {
 									nodeQueue.add(link.getNextNode());
+									workflow.addCurrentNode(node);
+									workflow.save();
 								}
 							} else {
 								Task.reschedule(workflow.id, DateTime.now());
-								isScheduled = true;
 							}
 						}
 					}
 
-					workflow = Workflow.get(workflow.id);
-					if (pendingNodeIds.isEmpty()) {
-						if (workflow.tracedActionIds.isEmpty()) {
-							workflow.setStatus(RunStatus.FINISHED);
-
-							Notification notification = new Notification(Notification.Level.NORMAL, String.format("Workflow %s finished", workflow.getName()));
-							notification.setWorkflow(workflow);
-							notification.save();
-						} else {
-							workflow.setStatus(RunStatus.MONITORING);
-						}
+					if (hasError) {
+						workflow.setStatus(RunStatus.ERROR);
+					} else if (workflow.trackedActionIds.isEmpty()) {
+						workflow.setStatus(RunStatus.FINISHED);
+						Notification.saveNew(Notification.Level.NORMAL, workflow, String.format("Workflow %s finished", workflow.getName()));
 					} else {
-						workflow.currentNodeIds = pendingNodeIds;
+						workflow.setStatus(RunStatus.TRACKED);
 					}
 				} catch (Exception e) {
 					logger.error(String.format("%s has error:", this));
@@ -214,7 +273,6 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 				} finally {
 					if (workflow != null) {
 						workflow.save();
-						workflow = null;
 					}
 				}
 			}

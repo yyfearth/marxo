@@ -1,6 +1,6 @@
 package marxo.entity.action;
 
-public class TwitterAction extends MonitorableAction {
+public class TwitterAction extends TrackableAction {
 
 	public TwitterAction() {
 		type = Type.TWITTER;

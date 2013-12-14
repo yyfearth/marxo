@@ -1,8 +1,11 @@
 package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import marxo.entity.BasicEntity;
+import marxo.entity.action.Action;
 import marxo.entity.action.ActionChildEntity;
 import marxo.entity.link.Link;
+import marxo.entity.node.Node;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Weeks;
@@ -39,67 +42,6 @@ public class Notification extends ActionChildEntity {
 		return mongoTemplate.findById(linkId, Link.class);
 	}
 
-	//	public Notification(Type type, Class<? extends BasicEntity> targetClass, DateTime expireTime) {
-//		this.type = type;
-//		this.targetClass = targetClass;
-//		this.expireTime = expireTime;
-//	}
-//
-//	public Notification(Type type, Class<? extends BasicEntity> targetClass) {
-//		DateTime defaultTime;
-//		switch (type) {
-//			case NEED_ATTENTION:
-//				defaultTime = DateTime.now().plus(Weeks.ONE);
-//				break;
-//			default:
-//				defaultTime = DateTime.now().plus(Weeks.ONE);
-//				break;
-//		}
-//
-//		this.type = type;
-//		this.targetClass = targetClass;
-//		this.expireTime = defaultTime;
-//	}
-
-//	@Override
-//	public String getName() {
-//		StringBuilder stringBuilder = new StringBuilder();
-//
-//		if (targetClass.equals(Action.class)) {
-//			stringBuilder.append("Action");
-//		} else if (targetClass.equals(Node.class)) {
-//			stringBuilder.append("Node");
-//		} else if (targetClass.equals(Workflow.class)) {
-//			stringBuilder.append("Project");
-//		} else {
-//			throw new NotImplementedException();
-//		}
-//
-//		switch (type) {
-//			case STARTED:
-//				stringBuilder.append(" started");
-//				break;
-//			case FINISHED:
-//				stringBuilder.append(" finished");
-//				break;
-//			case NEED_ATTENTION:
-//				stringBuilder.append(" requires user action");
-//				break;
-//			default:
-//				throw new NotImplementedException();
-//		}
-//
-//		return stringBuilder.toString();
-//	}
-
-//	public static enum Type {
-//		STARTED,
-//		FINISHED,
-//		NEED_ATTENTION,
-//	}
-//
-//	public Type type;
-
 	//	public Class<? extends BasicEntity> targetClass;
 	public static enum Level {
 		MINOR,
@@ -124,6 +66,25 @@ public class Notification extends ActionChildEntity {
 	/*
 	DAO
 	 */
+
+	public static Notification saveNew(Level level, BasicEntity entity, String message) {
+		Notification notification = new Notification(level, message);
+
+		Class<? extends BasicEntity> aClass = entity.getClass();
+		if (entity instanceof Workflow) {
+			notification.setWorkflow((Workflow) entity);
+		} else if (entity instanceof Node) {
+			notification.setNode((Node) entity);
+		} else if (entity instanceof Action) {
+			notification.setAction((Action) entity);
+		} else if (entity instanceof Link) {
+			notification.setLink((Link) entity);
+		}
+
+		notification.save();
+
+		return notification;
+	}
 
 	public static Notification get(ObjectId id) {
 		return mongoTemplate.findById(id, Notification.class);

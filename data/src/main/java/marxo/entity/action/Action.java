@@ -17,7 +17,7 @@ import java.util.List;
 @JsonTypeInfo(
 		use = JsonTypeInfo.Id.NAME,
 		include = JsonTypeInfo.As.PROPERTY,
-//		defaultImpl = MonitorableAction.class,
+//		defaultImpl = TrackableAction.class,
 		property = "type",
 		visible = true
 )

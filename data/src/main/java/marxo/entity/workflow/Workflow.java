@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
+import marxo.entity.action.TrackableAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.user.RunnableEntity;
@@ -29,7 +30,7 @@ public class Workflow extends RunnableEntity {
 	Tracable actions
 	 */
 
-	public List<ObjectId> tracedActionIds = new ArrayList<>();
+	public List<ObjectId> trackedActionIds = new ArrayList<>();
 
 	@Transient
 	@JsonIgnore
@@ -43,12 +44,12 @@ public class Workflow extends RunnableEntity {
 	@JsonIgnore
 	public void setTracedActions(List<Action> tracedActions) {
 		this.tracedActions = tracedActions;
-		this.tracedActionIds = new ArrayList<>(Lists.transform(tracedActions, SelectIdFunction.getInstance()));
+		this.trackedActionIds = new ArrayList<>(Lists.transform(tracedActions, SelectIdFunction.getInstance()));
 	}
 
-	public void addTracableAction(Action monitorableAction) {
-		tracedActions.add(monitorableAction);
-		tracedActionIds.add(monitorableAction.id);
+	public void addTracableAction(TrackableAction trackableAction) {
+		tracedActions.add(trackableAction);
+		trackedActionIds.add(trackableAction.id);
 	}
 
 	/*
