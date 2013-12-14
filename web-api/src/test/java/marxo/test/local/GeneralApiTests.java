@@ -175,7 +175,7 @@ public class GeneralApiTests extends BasicApiTests {
 	 */
 
 	@Test
-	public void getLinks() throws Exception {
+	public void getLinksAsSubResources() throws Exception {
 		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpGet(baseUrl + "workflow/" + reusedWorkflow.id + "/links/")

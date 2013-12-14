@@ -58,7 +58,7 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	/*
-    Actions
+	Actions
 	 */
 
 	public List<ObjectId> actionIds = new ArrayList<>();
@@ -98,7 +98,7 @@ public class Node extends WorkflowChildEntity {
 	}
 
 	/*
-    Current action
+	Current action
 	 */
 
 	protected ObjectId currentActionId;
@@ -202,6 +202,10 @@ public class Node extends WorkflowChildEntity {
 			node.wire();
 		}
 		return node;
+	}
+
+	public static boolean remove(ObjectId id) {
+		return mongoTemplate.findAndRemove(Query.query(Criteria.where("_id").is(id)), Node.class) != null;
 	}
 
 	@Override

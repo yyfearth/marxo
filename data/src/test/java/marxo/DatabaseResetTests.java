@@ -9,7 +9,6 @@ import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
 import marxo.entity.action.FacebookAction;
-import marxo.entity.action.PageAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -315,7 +314,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node1);
 
-		Action postFacebookAction1 = new PageAction();
+		FacebookAction postFacebookAction1 = new FacebookAction();
 		postFacebookAction1.setStatus(RunStatus.STARTED);
 		postFacebookAction1.setName("Post to Facebook 1");
 		node1.addAction(postFacebookAction1);

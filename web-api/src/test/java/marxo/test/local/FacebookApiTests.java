@@ -53,7 +53,7 @@ public class FacebookApiTests extends BasicApiTests {
 		reusedTenant.facebookData = facebookData;
 		reusedTenant.save();
 
-		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpPut(facebookData)
 					.send();
@@ -72,7 +72,7 @@ public class FacebookApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = {"saveData"})
 	public void readData() throws Exception {
-		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpGet()
 					.send();
@@ -87,7 +87,7 @@ public class FacebookApiTests extends BasicApiTests {
 
 	@Test(dependsOnMethods = {"readData"})
 	public void removeData() throws Exception {
-		try (ApiTester apiTester = new ApiTester().baseUrl(baseUrl).basicAuth(email, password)) {
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
 			apiTester
 					.httpDelete()
 					.send();
