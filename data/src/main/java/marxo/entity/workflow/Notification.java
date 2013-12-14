@@ -10,7 +10,7 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Weeks;
 
-public class Notification extends ActionChildEntity {
+public class Notification extends ActionChildEntity implements Comparable<Notification> {
 
 	public Notification(Level level, String messsage) {
 		this.level = level;
@@ -42,16 +42,28 @@ public class Notification extends ActionChildEntity {
 		return mongoTemplate.findById(linkId, Link.class);
 	}
 
+	@Override
+	public int compareTo(Notification notification) {
+
+		return -Integer.compare(this.level.value, notification.level.value);
+	}
+
 	//	public Class<? extends BasicEntity> targetClass;
 	public static enum Level {
-		MINOR,
-		NORMAL,
-		MAJOR,
-		TRIVIAL,
-		WARNING,
-		CRITICAL,
-		FATAL,
-		ERROR,
+		MINOR(1),
+		NORMAL(2),
+		MAJOR(3),
+		TRIVIAL(4),
+		WARNING(5),
+		CRITICAL(6),
+		FATAL(7),
+		ERROR(8),;
+
+		int value;
+
+		Level(int value) {
+			this.value = value;
+		}
 	}
 
 	public Level level = Level.NORMAL;
@@ -60,7 +72,7 @@ public class Notification extends ActionChildEntity {
 	public DateTime expireTime = DateTime.now().plus(Weeks.ONE);
 
 	public boolean isExpired() {
-		return expireTime.isAfterNow();
+		return expireTime.isBeforeNow();
 	}
 
 	/*
@@ -89,4 +101,6 @@ public class Notification extends ActionChildEntity {
 	public static Notification get(ObjectId id) {
 		return mongoTemplate.findById(id, Notification.class);
 	}
+
+
 }
