@@ -55,4 +55,10 @@ public class User extends TenantChildEntity implements Serializable {
 	public static User getByEmail(String email) {
 		return mongoTemplate.findOne(Query.query(Criteria.where("email").is(email.toLowerCase())), User.class);
 	}
+
+	@Override
+	public void save() {
+		email = email.toLowerCase();
+		super.save();
+	}
 }
