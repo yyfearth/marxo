@@ -10,6 +10,14 @@ public abstract class TrackableAction extends Action {
 		return trackEvent != null;
 	}
 
-	@JsonProperty("trackingEvent")
+	@JsonProperty("tracking")
 	public Event trackEvent;
+
+	@Override
+	public void save() {
+		if (trackEvent != null) {
+			trackEvent.save();
+		}
+		super.save();
+	}
 }
