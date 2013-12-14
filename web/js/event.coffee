@@ -409,11 +409,9 @@ Event
         else
           buf.push 'Project ends'
       if duration
-        if duration isnt ends.getTime() - starts.getTime()
+        if ends? and starts and duration isnt ends.getTime() - starts.getTime()
           console.error 'duration and starts/ends not matched', duration, starts, ends
         buf.push "(#{DurationConvertor.stringify duration})"
-      else
-        buf.push '(Skip manully or until project ends)'
       buf = buf.join ' '
       @el.title = @el.textContent = buf
       @el.dataset.container = '#event_manager table'
