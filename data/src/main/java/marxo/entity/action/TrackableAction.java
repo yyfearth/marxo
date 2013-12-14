@@ -1,14 +1,15 @@
 package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.joda.time.Duration;
-import org.joda.time.Period;
+import marxo.entity.node.Event;
 
 public abstract class TrackableAction extends Action {
 
 	@JsonProperty("tracked")
-	public Boolean isTracked = true;
+	public boolean isTracked() {
+		return trackEvent != null;
+	}
 
-	public Duration trackDuration;
-	public Period trackPeriod;
+	@JsonProperty("trackingEvent")
+	public Event trackEvent;
 }

@@ -15,6 +15,23 @@ public class Event extends ActionChildEntity {
 	protected DateTime endTime;
 	protected Duration duration;
 
+	public Event() {
+	}
+
+	public Event(DateTime startTime, Duration duration) {
+		setStartTime(startTime);
+		setDuration(duration);
+	}
+
+	public Event(DateTime startTime, DateTime endTime) {
+		setStartTime(startTime);
+		setEndTime(endTime);
+	}
+
+	public Event(Duration duration) {
+		setDuration(duration);
+	}
+
 	public DateTime getStartTime() {
 		return startTime;
 	}

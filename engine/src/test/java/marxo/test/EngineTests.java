@@ -20,8 +20,8 @@ import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.Minutes;
-import org.joda.time.Period;
 import org.springframework.data.mongodb.core.query.Query;
 import org.testng.Assert;
 import org.testng.SkipException;
@@ -134,7 +134,6 @@ public class EngineTests extends BasicDataTests {
 
 		FacebookAction postFacebookAction = new FacebookAction();
 		postFacebookAction.setName("Test Action for Engine");
-		postFacebookAction.isTracked = false;
 		node.addAction(postFacebookAction);
 
 		Content facebookContent = new Content(Content.Type.FACEBOOK);
@@ -211,7 +210,6 @@ public class EngineTests extends BasicDataTests {
 
 		FacebookAction action = new FacebookAction();
 		action.setName("Test Action for Engine");
-		action.isTracked = false;
 		node.addAction(action);
 
 		Content facebookContent = new Content(Content.Type.FACEBOOK);
@@ -262,7 +260,7 @@ public class EngineTests extends BasicDataTests {
 
 		FacebookAction action = new FacebookAction();
 		action.setName("Test Post to Facebook 1");
-		action.trackPeriod = Period.seconds(5);
+		action.trackEvent = new Event(DateTime.now(), Days.ONE.toStandardDuration());
 		node1.addAction(action);
 
 		Event event = new Event();

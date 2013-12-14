@@ -41,7 +41,7 @@ public class FacebookAction extends TrackableAction {
 				logger.info(String.format("Submit Facebook post [%s]", content.messageResponse));
 
 				getEvent();
-				if (isTracked && event != null) {
+				if (isTracked() && event != null) {
 					status = RunStatus.TRACKED;
 
 					getWorkflow().addTracableAction(this);
@@ -61,7 +61,7 @@ public class FacebookAction extends TrackableAction {
 					status = RunStatus.FINISHED;
 				}
 			} else {
-				if (!isTracked || getEvent() == null) {
+				if (!isTracked() || getEvent() == null) {
 					status = RunStatus.FINISHED;
 					return true;
 				}
