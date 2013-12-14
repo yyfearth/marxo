@@ -88,6 +88,16 @@
             <artifactId>commons-fileupload</artifactId>
             <version>1.3</version>
         </dependency>
+        <dependency>
+            <groupId>net.sf.uadetector</groupId>
+            <artifactId>uadetector-core</artifactId>
+            <version>0.9.11</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.uadetector</groupId>
+            <artifactId>uadetector-resources</artifactId>
+            <version>2013.11</version>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
@@ -111,4 +121,8 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <finalName>marxo</finalName>
+    </build>
 </project>
