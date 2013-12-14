@@ -161,7 +161,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public List<Entity> search() {
-		return mongoTemplate.find(new Query().with(getDefaultSort()), entityClass);
+		return mongoTemplate.find(new Query(newDefaultCriteria()).with(getDefaultSort()), entityClass);
 	}
 
 	protected void throwIfInvalidObjectId(String idString) {
