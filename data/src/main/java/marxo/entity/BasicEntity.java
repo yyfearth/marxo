@@ -68,9 +68,9 @@ public abstract class BasicEntity implements MongoDbAware, Loggable {
 	@JsonProperty("modified_by")
 	public ObjectId updateUserId;
 	@JsonProperty("desc")
-	public String description = "";
+	public String description;
 	@Field(order = 3)
-	protected String name = "";
+	protected String name;
 
 	public String getName() {
 		return name;
