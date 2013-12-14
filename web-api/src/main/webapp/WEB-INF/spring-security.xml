@@ -20,7 +20,7 @@
         <intercept-url pattern="/api/.*" requires-channel="any" access="isAuthenticated()"/>
         <session-management>
             <!-- review: decide the value. -->
-            <concurrency-control max-sessions="4"/>
+            <concurrency-control max-sessions="16"/>
         </session-management>
         <custom-filter ref="basicAuthenticationFilter" position="BASIC_AUTH_FILTER"/>
     </http>
