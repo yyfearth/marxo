@@ -42,10 +42,9 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           @$el.one 'shown', -> el.scrollIntoViewIfNeeded()
         else if hidden is 'false'
           el.scrollIntoViewIfNeeded()
-        else
-          setTimeout ->
-            el.scrollIntoViewIfNeeded()
-          , 600
+        else setTimeout ->
+          el.scrollIntoViewIfNeeded()
+        , 600
       el
     addAction: (model, options) ->
       try
@@ -72,6 +71,24 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
   class ActionView extends BoxView
     className: 'box action'
     _tpl: tplAll('#actions_tpl')
+    events: # for duration inputs
+      'change .event-inputs input[type=checkbox]': (e) ->
+        checkbox = e.currentTarget
+        $input = $(checkbox).parents('.event-inputs').find('input[name$=duration]')
+        $input.prop 'disabled', not checkbox.checked
+        $input[0].focus() if checkbox.checked
+        return
+      'change .event-inputs input[name$=duration]': (e) ->
+        val = DurationConvertor.parse e.currentTarget.value.trim()
+        e.currentTarget.value = unless val then '' else DurationConvertor.stringify val
+        return
+      'blur .event-inputs input[name$=duration]': _.debounce (e) ->
+        $el = $ e.target
+        unless $el.val().trim()
+          $el.parents('.event-inputs').find('input[type=checkbox]')
+          .prop('checked', false).change()
+        return
+      , 150
     initialize: (options) ->
       super options
       unless options.model
@@ -101,7 +118,9 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         @remove()
       else
         model = @model
-        data = model.toJSON()
+        data = model.toJSON() # IT IS NOT DEEP COPY
+        data.event = $.extend {}, data.event if data.event?
+        data.tracking = $.extend {}, data.tracking if data.tracking?
         @el.innerHTML = _tpl
         @el.id = 'action_' + model.id or model.cid
         @_name = @$el.find('.box-header h4').text()
@@ -125,14 +144,26 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           $form.find('input, textarea').prop 'readOnly', true
           $form.find('select, input[type=checkbox], input[type=radio]').prop 'disabled', true
         # for event button
-        $eventBtn = $ find '.btn-event', @el
-        if $eventBtn.length and (model.isNew() or not data.event?.id?)
-          $eventBtn.parent().removeClass 'input-append'
-          $eventBtn.remove()
+        @$el.find('.btn-event').each ->
+          $btn = $(@)
+          $parent = $btn.parents('.event-inputs')
+          name = null
+          if model.isNew() or
+          (name = $btn.siblings('input[name$=duration]').attr 'name') and not (id = data[name = name[0...-9]]?.id)?
+            $btn.parent().removeClass 'input-append'
+            $btn.remove()
+          else
+            $btn.prop 'href', "#event/#{id}"
+          # for event input enable
+          unless model.isNew()
+            event = data[name]
+            checked = event? and (Number(event.duration) or event.ends)
+            $parent.find('input[type=checkbox]').prop 'checked', checked
+            $parent.find('input[name$=duration]').prop 'disabled', not checked
         # for page buttons
         if @type is 'page' and contentId = model.get('content')?.id
           url = "#content/#{contentId}"
-          console.warn @type, url
+          #console.log @type, url
           btnDesgin = find 'a.btn-design', @el
           btnDesgin.removeAttribute 'disabled'
           btnDesgin.href = url
@@ -148,6 +179,8 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       return unless data and @form
       data.name = @_name unless data.name
       data.key = data.type unless data.key
+      data.event?.duration = DurationConvertor.stringify data.event.duration
+      data.tracking?.duration = DurationConvertor.stringify data.tracking.duration
       form = @form
       namespace = ''
       do _travel = (namespace, data) ->
@@ -179,7 +212,24 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
             name = names.pop()
             _data = _data[key] ?= {} for key in names
             _data[name] = val
-      for n in ['content', 'event']
+      # data.event.duration must exist, 0 for no wait
+      data.event ?= {}
+      if data.event.duration
+        data.event.duration = DurationConvertor.parse data.event.duration if typeof data.event.duration is 'string'
+      else if data.event.ends?
+        delete data.event.duration
+      else
+        data.event.duration = 0
+      # data.tracking must not exist if not tracking (duration is 0)
+      if data.tracking?
+        duration = data.tracking.duration
+        duration = data.tracking.duration = DurationConvertor.parse duration if duration and typeof duration is 'string'
+        if duration or data.tracking.ends?
+          data.tracking.name or= data.name + ' (Tracking)'
+        else
+          delete data.tracking
+      # auto fill ids to these sub entities
+      for n in ['content', 'event', 'tracking']
         if data[n]?
           _data = data[n]
           _data.action_id = data.id if data.id?

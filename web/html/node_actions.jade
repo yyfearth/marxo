@@ -24,17 +24,25 @@ mixin action_template_select
   select(disabled)
     option (Select from Template)
 
-mixin track_checkbox
-  label.checkbox.inline(title='Enable track will generate report automatically', data-placement='right')
-    input(type='checkbox', name='tracked', checked)
-    | Track
+mixin wait_event
+  .event-inputs
+    label.checkbox.inline(title='Enable wait will prevent next action starts before duration ends')
+      input(type='checkbox')
+      | Wait
+    label.inline
+      .input-append(title='Wait before next action starts (e.g. 2 days)')
+        input.input-small(type='text', name='event.duration', disabled, required, placeholder='e.g. 2 days')
+        a.btn.btn-event.icon-calendar
 
-mixin event_schedule(msg)
-  label.inline
-    | #{msg}
-    .input-append(title='Duration (e.g. 10 days)\nLeft blank for available until project ends', data-placement='right')
-      input.input-small(type='text', name='event.duration', placeholder='e.g. 30 days')
-      a.btn.btn-event.icon-calendar
+mixin track_event
+  .event-inputs
+    label.checkbox.inline(title='Enable track will generate report automatically')
+      input(type='checkbox', checked)
+      | Tracking
+    label.inline
+      .input-append(title='Duration before stop tracking (e.g. 30 days')
+        input.input-small(type='text', name='tracking.duration', value='30 days', required, placeholder='e.g. 30 days')
+        a.btn.btn-event.icon-calendar
 
 mixin page_ref
   label.inline Inset URL for
@@ -68,7 +76,7 @@ mixin actions_thumb
     a.action-thumb(href='#action:wait',
     title='Create an event in calendar and wait')
       | Wait
-  li
+  //- li
     a.action-thumb(href='#action:trigger',
     title='Pause until user trigger')
       | Pause
@@ -100,9 +108,9 @@ mixin actions_thumb
         li
           a.btn.btn-info.btn-preview(disabled) Preview
         li
-          +track_checkbox
+          +track_event
         li
-          +event_schedule
+          +wait_event
       .info.tmp (Page Info)
       .help-block
         | Information Page is a web page to display information.
@@ -123,9 +131,9 @@ mixin actions_thumb
         li
           +action_template_select
         li
-          +track_checkbox
+          +track_event
         li
-          +event_schedule
+          +wait_event
       +content('Twitter', 140, 2)
       +page_ref
 
@@ -139,9 +147,9 @@ mixin actions_thumb
         li
           +action_template_select
         li
-          +track_checkbox
+          +track_event
         li
-          +event_schedule
+          +wait_event
       +content('Facebook', 63206, 3)
       +page_ref
 
@@ -157,7 +165,6 @@ mixin actions_thumb
         input.span11(name="email_to", title='Send To', type='text',
         placeholder='email_1@example.com; email_2@example.com')
       +action_template_select
-      +track_checkbox
       input#page_title.input-block-level(type='text', name='title',
       placeholder='Title of Email', maxlength='255', required)
       textarea.input-block-level(name='email_content', placeholder='Email Content...',
@@ -169,22 +176,18 @@ mixin actions_thumb
       +box_icons
     form.box-content
       +action_name_key
-      ul.action-bar
-        li
-          +event_schedule('Duration')
+      label.inline
+        .input-append(title='Duration before stop tracking (e.g. 10 days')
+          input.input-small(type='text', name='#{name}', value='10 days', required, placeholder='e.g. 10 days')
+          a.btn.btn-event.icon-calendar
       .help-block
         | It will create an event in the Calendar, and notifications will be sent before its starts or ends.
-        br
-        | Leave Druation blank or 0 to make it ends manually or schedule it later.
 
-  .tpl(name='trigger')
+  //- .tpl(name='trigger')
     .box-header.well
       h4 Pause
       +box_icons
     form.box-content
       +action_name_key
-      input(type='hidden', name='duration', value='')
       .help-block
-        | It will pause until user trigger to continue.
-        br
-        | It will not create an event in the Calendar.
+        | It will pause until user trigger to continue. It will not create an event in the Calendar.
