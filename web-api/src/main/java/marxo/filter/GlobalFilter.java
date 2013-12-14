@@ -1,5 +1,6 @@
 package marxo.filter;
 
+import com.google.common.base.Strings;
 import marxo.tool.Loggable;
 import net.sf.uadetector.ReadableUserAgent;
 import net.sf.uadetector.UserAgentStringParser;
@@ -25,7 +26,7 @@ public class GlobalFilter extends OncePerRequestFilter implements Loggable {
 
 			String userAgent = request.getHeader("User-Agent");
 			String clientString;
-			if (userAgent == null) {
+			if (Strings.isNullOrEmpty(userAgent.trim())) {
 				clientString = "N/A";
 			} else {
 				ReadableUserAgent agent = userAgentStringParser.parse(userAgent);
