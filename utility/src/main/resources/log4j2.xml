@@ -24,7 +24,7 @@
         </RollingFile>
     </appenders>
     <loggers>
-        <logger name="marxo" level="trace"/>
+        <logger name="marxo" level="debug"/>
         <root level="off">
             <appender-ref ref="console"/>
             <appender-ref ref="rollingFile"/>
