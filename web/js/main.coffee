@@ -32,9 +32,9 @@ requirejs.config
       FB_SCOPES: 'publish_actions, email, read_stream, '
 
 define 'main', ['console'], ({findAll, ConsoleView, SignInView, Router}) -> # EP
-  cls = document.body.classList
 
   if localStorage.no_transition
+    cls = document.body.classList
     cls.remove 'fade'
     cls.add 'no-transition'
     el.classList.remove 'fade' for el in findAll '.fade'
@@ -46,7 +46,7 @@ define 'main', ['console'], ({findAll, ConsoleView, SignInView, Router}) -> # EP
 
   Backbone.history.start()
 
-  cls.add 'in'
   document.title = document.title.replace /^.*?(?=MARXO)/i, ''
+  document.body.style.opacity = 1
 
   return
