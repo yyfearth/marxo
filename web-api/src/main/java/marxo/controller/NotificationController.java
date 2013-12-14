@@ -1,8 +1,8 @@
 package marxo.controller;
 
-import com.google.common.base.Strings;
 import marxo.entity.workflow.Notification;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -23,7 +23,8 @@ public class NotificationController extends TenantChildController<Notification> 
 	@Override
 	protected Criteria newDefaultCriteria() {
 		Criteria criteria = Criteria
-				.where("tenantId").is(user.tenantId);
+				.where("tenantId").is(user.tenantId)
+				.and("expireTime").gt(DateTime.now());
 
 		return criteria;
 	}
@@ -37,12 +38,6 @@ public class NotificationController extends TenantChildController<Notification> 
 	public List<Notification> search() {
 
 		Criteria criteria = newDefaultCriteria();
-
-		String isExpiredString = request.getParameter("isExpired");
-		if (!Strings.isNullOrEmpty(isExpiredString)) {
-			boolean isExpired = Boolean.parseBoolean(isExpiredString);
-			criteria.and("isExpired").is(isExpired);
-		}
 
 		List<Notification> notifications = mongoTemplate.find(new Query(criteria).with(getDefaultSort()), entityClass);
 		Collections.sort(notifications);    // Sort with level.
