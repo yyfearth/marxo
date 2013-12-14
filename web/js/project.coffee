@@ -437,26 +437,18 @@ Projects
       return
     _updateStatus: ->
       status = @model.status()
-      cls = ''
       show_btns = switch status
-        when 'NONE'
-          'delete' # no actions
         when 'IDLE'
           'start, delete'
-        when 'STARTED'
-          cls = 'label-success'
+        when 'STARTED', 'MONITORING'
           'pause'
         when 'PAUSED'
-          cls = 'label-warning'
           'start, stop'
         when 'STOPPED'
-          cls = 'label-inverse'
           'start, delete'
         when 'FINISHED'
-          cls = 'label-info'
           ''
         when 'ERROR'
-          cls = 'label-important'
           'start, delete'
         else
           console.error 'unknow status', status
@@ -466,7 +458,8 @@ Projects
       $btns.find('.btn[name=start]').text if status is 'PAUSED' then 'Resume' else 'Start'
       $btns.find(show_btns.replace(/(\w+)/g, '.btn[name="$1"]')).show()
       @$status.text(status).parent()
-      .removeClass('label-success label-warning label-inverse label-info').addClass cls
+      .removeClass('label-success label-warning label-inverse label-info')
+      .addClass STATUS_CLS[status.toLowerCase()] or ''
       return
     destroy: ->
       if confirm 'Are you sure to delete this project?\n\nThis step cannot be undone!'
