@@ -78,7 +78,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         throw new Error 'need action model'
         console.dir options
       @projectMode = options.projectMode or options.readOnly
-      @readOnly = options.readOnly
+      @readonly = options.readOnly
       @containerEl = options.container
       @model = options.model
       @model.view = @
@@ -122,7 +122,9 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         $form = $ @form
         @form.key.readOnly = @projectMode
         $(@btn_close).remove() if @projectMode
-        $form.find(':input').prop 'readOnly', true if @readOnly
+        if @readonly
+          $form.find('input, textarea').prop 'readOnly', true
+          $form.find('select, input[type=checkbox], input[type=radio]').prop 'disabled', true
         # for event button
         $eventBtn = $ find '.btn-event', @el
         if $eventBtn.length and (model.isNew() or not data.event?.id?)
