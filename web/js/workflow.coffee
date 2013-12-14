@@ -755,7 +755,7 @@ Action
       # add node to url
       hash = "#{@hash}/node/#{node.id}"
       if location.hash.indexOf(hash) is -1
-        @nodeEditor.$el.one 'shown', => @router.navigate hash
+        @nodeEditor.once 'shown', => @router.navigate hash
       @
     removeNode: (node) ->
       return @ unless node?.id
@@ -800,7 +800,7 @@ Action
       # add link to url
       hash = "#{@hash}/link/#{link.id}"
       if location.hash.indexOf(hash) is -1
-        @linkEditor.$el.one 'shown', => @router.navigate hash
+        @linkEditor.once 'shown', => @router.navigate hash
       @
     removeLink: (link) ->
       return @ unless link?.id
