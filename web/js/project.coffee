@@ -29,6 +29,7 @@ Projects
       @manager = new ProjectManagemerView el: '#project_manager', parent: @
       @listenTo @manager, 'create', (id) => @editor.create id
       @
+    _url_pattern: /(#project\/\w+(?:\/(?:node|link|action)\/\w+)*).*/
     open: (name, sub) ->
       switch name
         when 'new'
@@ -49,6 +50,7 @@ Projects
               @switchTo @viewer
               @viewer.load workflow
               @viewer.select sub
+              @viewer.btnEdit.href = location.hash.replace @_url_pattern, '$1/edit'
             return
       @
 
@@ -118,7 +120,7 @@ Projects
     create: (wf) ->
       wf = wf?.id or wf
       wf = null unless typeof wf is 'string'
-      @popup new Project(template_id: wf), (action) => if action is 'save'
+      @popup new Project(template_id: wf), null, (action) => if action is 'save'
         console.log 'wf created', action, @model
         @projects.create @model, wait: true
         @trigger 'create', @model, @
@@ -127,13 +129,13 @@ Projects
       {link, node, action} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
       throw new Error 'node and link cannot be open together' if link and node
-      console.log 'popup node/link editor', {link, node, action}
-      @popup project, (action, data) => if action is 'save'
+      console.log 'popup node/link editor', opt
+      @popup project, opt, (action, data) => if action is 'save'
         console.log 'project saved', action, data
         @model.save()
         @trigger 'edit', @model, @
       @
-    popup: (model, callback) ->
+    popup: (model, {link, node, action} = {}, callback) ->
       data = model.toJSON()
       @model = model
       super data, callback
@@ -151,6 +153,11 @@ Projects
         isUpdate = select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
         if isUpdate
           @_renderProject model
+          if node
+            @navTo model.nodes.get node
+            @dataEditor.viewAction action if action
+          else if link
+            @navTo model.links.get link
         else
           @_selectWorkflow()
       @
