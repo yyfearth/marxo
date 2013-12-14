@@ -9,6 +9,7 @@ import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
 import marxo.entity.action.FacebookAction;
+import marxo.entity.action.PageAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -314,23 +315,23 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node1);
 
-		FacebookAction postFacebookAction1 = new FacebookAction();
-		postFacebookAction1.setStatus(RunStatus.STARTED);
-		postFacebookAction1.setName("Post to Facebook 1");
-		node1.addAction(postFacebookAction1);
+		PageAction pageAction = new PageAction();
+		pageAction.setStatus(RunStatus.STARTED);
+		pageAction.setName("Requirement Page");
+		node1.addAction(pageAction);
 
 		Content facebookContent1 = new Content(Content.Type.PAGE);
 		facebookContent1.setStatus(RunStatus.STARTED);
 		facebookContent1.setName("Contnet " + ++contentCount);
 		facebookContent1.description = String.format("Hello world for %s [%s]", getClass(), reusedWorkflow);
-		postFacebookAction1.setContent(facebookContent1);
+		pageAction.setContent(facebookContent1);
 
 		reusedWorkflow.wire();
 
 		mongoTemplate.insertAll(Lists.newArrayList(
 				reusedWorkflow,
 				node1,
-				postFacebookAction1,
+				pageAction,
 				facebookContent1
 		));
 	}
