@@ -244,7 +244,7 @@ ProjectFilterView
         axis: 'y'
         delay: 150
         distance: 15
-        cancel: '.box-content'
+        cancel: '.box-content,.readonly'
       #@on 'sections_update', =>
       #  count = (findAll '.section', @sectionsEl).length
       #  @submitOptions.$el[if count then 'show' else 'hide']()
@@ -262,9 +262,10 @@ ProjectFilterView
       @pageDesc.fill data
       @submitOptions?.fill data.options
       posted = @readonly = 'IDLE' isnt model.status()
+      @sectionsEl.classList.add 'readonly' if posted
       if model.has 'sections' # need @readonly
         @addSection section for section in data.sections
-      else # add an empty section if sections have never been defined
+      else unless @readonly # add an empty section if sections have never been defined except readonly mode
         @addSection() # need @readonly
       @pageDesc.readOnlyHtml posted
       @$el.find('form :input').prop 'readOnly', posted
@@ -284,6 +285,7 @@ ProjectFilterView
       @submitOptions?.reset()
       @previewEl.classList.remove 'active'
       @btnPreview.classList.remove 'active'
+      @sectionsEl.classList.remove 'readonly'
       @btnSave.disabled = false
       @url = ''
       @readonly = false
@@ -561,6 +563,7 @@ ProjectFilterView
         @el.innerHTML = @tpl.replace /section_#/g, @id
         @_bind()
         super # ready fill
+        $(@btn_close).remove() if @readonly # must after super
       @
     reset: ->
       super
