@@ -1,12 +1,11 @@
 "use strict"
 
-define 'event', ['base', 'utils', 'manager', 'models', 'lib/jquery-ui', 'lib/fullcalendar'], ({
+define 'event', ['base', 'manager', 'models', 'lib/jquery-ui', 'lib/fullcalendar'], ({
 find
 View
 FrameView
 InnerFrameView
 FormDialogView
-}, {
 DurationConvertor
 }, {
 ManagerView

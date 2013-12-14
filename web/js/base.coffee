@@ -1,7 +1,7 @@
 "use strict"
 
 define 'base', ['utils', 'models', 'lib/common'],
-({find,  findAll,  tpl,  tplAll,  fill}, {Collection, Tenant, User, ROOT}) ->
+({find,  findAll,  tpl,  tplAll,  fill, DurationConvertor}, {Collection, Tenant, User, ROOT}) ->
 
   ## Shared Constant
 
@@ -427,6 +427,7 @@ define 'base', ['utils', 'models', 'lib/common'],
   FormView
   Tenant
   User
+  DurationConvertor
   ROOT
   STATUS_CLS
   }
