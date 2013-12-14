@@ -6,12 +6,12 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
   class ActionsMixin
     initActions: (options) ->
       @actionsEl = options?.actionEl or find '.node-actions', @el
-      @projectMode = Boolean options?.projectMode
-      $(@actionsEl).sortable
-        axis: 'y'
-        delay: 150
-        distance: 15
-        cancel: '.box-content'
+      unless @projectMode = Boolean options?.projectMode
+        $(@actionsEl).sortable
+          axis: 'y'
+          delay: 150
+          distance: 15
+          cancel: '.box-content'
       @
     fillActions: (actions) ->
       if actions
@@ -54,7 +54,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           model: model
           parent: @, container: @actionsEl
           projectMode: @projectMode
-          readOnly: @projectMode and model.status() isnt 'IDLE'
+          readonly: @projectMode and model.status() isnt 'IDLE'
         @listenTo actionView, 'remove', @removeAction.bind @
         actionView.render()
         actionView.el.scrollIntoViewIfNeeded() if options?.scrollIntoView
@@ -77,8 +77,8 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       unless options.model
         throw new Error 'need action model'
         console.dir options
-      @projectMode = options.projectMode or options.readOnly
-      @readonly = options.readOnly
+      @projectMode = options.projectMode or options.readonly
+      @readonly = options.readonly
       @containerEl = options.container
       @model = options.model
       @model.view = @
@@ -89,8 +89,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         console.warn 'unknown action type', options
       @
     remove: ->
-      # remove only once
-      @remove = -> @
+      @remove = -> @ # remove only once
       super
     render: ->
       _tpl = @_tpl[@type]
