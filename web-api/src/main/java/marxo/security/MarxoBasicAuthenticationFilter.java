@@ -71,10 +71,6 @@ public class MarxoBasicAuthenticationFilter extends BasicAuthenticationFilter {
 				authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
 				Authentication authResult = authenticationManager.authenticate(authRequest);
 
-				if (debug) {
-					logger.debug("Authentication success: " + username + ":" + password);
-				}
-
 				SecurityContextHolder.getContext().setAuthentication(authResult);
 
 				rememberMeServices.loginSuccess(request, response, authResult);

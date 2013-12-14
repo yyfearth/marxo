@@ -53,6 +53,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 				if (user == null) {
 					throw new UsernameNotFoundException(String.format("Cannot find anyone with the Facebook account %s(%s)", fbUser.getUsername(), fbUser.getId()));
 				} else {
+					logger.debug(String.format("Authentication success with Facebook token [%s]", fbUser.getUsername()));
 					return new MarxoAuthentication(user, Lists.newArrayList(new SimpleGrantedAuthority(user.type.toString())));
 				}
 			} catch (FacebookOAuthException e) {
@@ -74,6 +75,7 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 		String encryptedPassword = passwordEncryptor.encrypt(plainPassword);
 
 		if (user.getPassword() != null && encryptedPassword.toLowerCase().equals(user.getPassword().toLowerCase())) {
+			logger.debug(String.format("Authentication success [%s:%s]", email, plainPassword));
 			return new MarxoAuthentication(user, Lists.newArrayList(new SimpleGrantedAuthority("user")));
 		}
 
