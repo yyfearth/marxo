@@ -273,6 +273,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 				} finally {
 					if (workflow != null) {
 						workflow.save();
+						workflow = null;
 					}
 				}
 			}
