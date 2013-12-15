@@ -450,7 +450,7 @@ Projects
       show_btns = switch status
         when 'IDLE'
           'start, delete'
-        when 'STARTED', 'MONITORING'
+        when 'STARTED', 'TRACKED'
           'pause'
         when 'PAUSED'
           'start, stop'

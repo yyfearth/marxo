@@ -7,7 +7,7 @@ define 'base', ['utils', 'models', 'lib/common'],
 
   STATUS_CLS =
     started: 'label-success'
-    monitoring: 'label-success'
+    tracked: 'label-success'
     paused: 'label-warning'
     stopped: 'label-inverse'
     finished: 'label-info'

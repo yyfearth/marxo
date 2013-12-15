@@ -199,6 +199,21 @@
   }
 }
 
+ul.status-list > li > a {
+  &.status-started, &.status-tracked {
+    background-color: @status-started-bkg-color;
+  }
+  &.status-error {
+    background-color: @status-error-bkg-color;
+  }
+  &.status-paused {
+    background-color: @status-paused-bkg-color;
+  }
+  &.status-finished {
+    background-color: @status-finished-bkg-color;
+  }
+}
+
 // Project Frame
 
 #project_editor {
@@ -322,18 +337,6 @@
       border: 1px solid @status-default-color;
       border-radius: 3px;
     }
-    &.status-started {
-      background-color: @status-started-bkg-color;
-    }
-    &.status-error {
-      background-color: @status-error-bkg-color;
-    }
-    &.status-paused {
-      background-color: @status-paused-bkg-color;
-    }
-    &.status-finished {
-      background-color: @status-finished-bkg-color;
-    }
   }
   li.active > a {
     color: #fff;
@@ -342,7 +345,7 @@
       color: #fff;
       border: 1px solid #fff;
     }
-    &.status-started {
+    &.status-started, &.status-tracked {
       background-color: @status-started-color;
     }
     &.status-error {
@@ -355,14 +358,6 @@
       background-color: @status-finished-color;
     }
   }
-}
-
-#home_view .wf-diagram {
-  display: inline-block;
-  height: 150px;
-  width: 50%;
-  max-width: 450px;
-  margin: 0 5px 5px 0;
 }
 
 .wf-diagram {
@@ -413,7 +408,7 @@
         stroke-width: 3px;
         stroke-dasharray: 7, 2;
       }
-      &.status-started {
+      &.status-started, &.status-tracked {
         fill: @status-started-bkg-color;
       }
       &.status-error {
@@ -431,7 +426,7 @@
     .active .node {
       stroke-width: 4px;
       fill: @status-default-color;
-      &.status-started {
+      &.status-started, &.status-tracked {
         fill: @status-started-color;
       }
       &.status-error {
