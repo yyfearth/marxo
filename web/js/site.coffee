@@ -428,7 +428,7 @@ require [
       else
         _tpl[name].replace /{{\s*\w+\s*}}/g, (name) ->
           name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
-          attrs[name] or ''
+          attrs[name] ? ''
     events:
       'click .form-mask': (e) ->
         e.preventDefault()
@@ -516,7 +516,7 @@ require [
           hasInput = true if section.type
           tpl 'section',
             title: _.escape(section.name)
-            desc: section.desc + if section.options?.required then '' else ' <em>(Optional)</em>'
+            desc: (section.desc or '') + if section.options?.required then '' else ' <em>(Optional)</em>'
             body: _renderInput(section, i)
         html = tpl 'page',
           title: model.escape('name')
@@ -615,11 +615,10 @@ require [
             $input.siblings('.rich-editor').focus()
           alert 'This field is required!'
           return false
-      try
-        for input in [].slice.call @$el.find 'form :invalid'
-          input.focus()
-          alert 'This field is invalid!'
-          return false
+      try for input in [].slice.call @$el.find 'form :invalid'
+        input.focus()
+        alert 'This field is invalid!'
+        return false
       true
     submit: ->
       return @ unless @validate()
