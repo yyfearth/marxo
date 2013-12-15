@@ -479,6 +479,9 @@ ProjectFilterView
         title = find '.box-title', @el
         title.textContent = unless value then 'New Section' else 'Section: ' + value
         return
+      'change input, textarea, select': (e) ->
+        @trigger 'change', e.target, @data if @rendered and not @readonly
+        return
     initialize: (options) ->
       super options
       @idx = options.idx
@@ -511,13 +514,11 @@ ProjectFilterView
           cls.add 'radio-option'
           manual_option_label.select()
         true
-      @autoIncOptionList = new AutoIncOptionList el: manual_options
+      @autoIncOptionList = new AutoIncOptionList
+        el: manual_options, readonly: @readonly
       # bind change event
-      unless @readonly
-        @listenTo @autoIncOptionList, 'change', (el) =>
-          @trigger 'change', el, @data
-        $(@form).on 'change', 'input, textarea, select', (e) =>
-          @trigger 'change', e.target, @data
+      @listenTo @autoIncOptionList, 'change', (el) =>
+        @trigger 'change', el, @data
       # bind update preview on any changes
       @previewEl = find '.preview', @el
       @updatePreview = _.debounce @updatePreview.bind(@), 100
@@ -625,16 +626,18 @@ ProjectFilterView
         true
       'click .close': (e) ->
         e.preventDefault()
-        $el = $(e.target).parents('.manual_option')
-        val = $el.find('input.manual_option_text').val()
-        $el.remove()
-        @trigger 'change change:remove', $el[0], val
-        @validate()
+        unless @readonly
+          $el = $(e.target).parents('.manual_option')
+          val = $el.find('input.manual_option_text').val()
+          $el.remove()
+          @trigger 'change change:remove', $el[0], val
+          @validate()
         false
       'blur input.manual_option_text': ->
         @validate false
     initialize: (options) ->
       super options
+      @readonly = options.readonly
       tpl = find '.manual_option', @el
       throw new Error 'cannot find manual option tpl' unless tpl
       @_tpl = tpl.cloneNode true
@@ -642,7 +645,7 @@ ProjectFilterView
       delete dataset.optionRequired
       @_container = find '.controls', @el
       # make options sortable
-      $(@_container).sortable
+      unless @readonly then $(@_container).sortable
         axis: 'y'
         delay: 150
         distance: 5
