@@ -108,20 +108,20 @@ public class WorkflowController extends TenantChildController<Workflow> {
 				default:
 					throw new IllegalArgumentException(String.format("You cannot change a project's status to %s", workflow.getStatus()));
 			}
+		}
 
-			try {
-				workflow.id = oldWorkflow.id;
-				workflow.createUserId = oldWorkflow.createUserId;
-				workflow.createTime = oldWorkflow.createTime;
-				workflow.updateUserId = user.id;
-				workflow.updateTime = DateTime.now();
-				workflow.save();
-			} catch (ValidationException ex) {
-				for (int i = 0; i < ex.reasons.size(); i++) {
-					logger.error(ex.reasons.get(i));
-				}
-				throw new EntityInvalidException(objectId, ex.reasons);
+		try {
+			workflow.id = oldWorkflow.id;
+			workflow.createUserId = oldWorkflow.createUserId;
+			workflow.createTime = oldWorkflow.createTime;
+			workflow.updateUserId = user.id;
+			workflow.updateTime = DateTime.now();
+			workflow.save();
+		} catch (ValidationException ex) {
+			for (int i = 0; i < ex.reasons.size(); i++) {
+				logger.error(ex.reasons.get(i));
 			}
+			throw new EntityInvalidException(objectId, ex.reasons);
 		}
 
 		return workflow;
