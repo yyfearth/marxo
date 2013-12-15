@@ -586,8 +586,6 @@ require [
     upload: (file, auth) ->
       unless file.files?.length
         null
-      else if info = file.info or $.data file, 'info'
-        info
       else
         data = new FormData
         data.append 'file', file.files[0]
@@ -600,8 +598,6 @@ require [
           headers:
             Authorization: auth
           success: (info) ->
-            file.info = info
-            $(file).data id: info.id, info: info
             console.log 'upload success', info
           error: (info) ->
             console.error 'upload failed', info
