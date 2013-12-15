@@ -487,8 +487,9 @@ ProjectFilterView
       @idx = options.idx
       @id ?= options.id or @idx
       @id = 'section_' + @id if typeof @id is 'number'
-      @readonly = options.readonly
       throw new Error 'id must be given for a section' unless @id
+      @readonly = options.readonly
+      @updatePreview = _.debounce @updatePreview.bind(@), 100
       @
     _changeType: (type) ->
       @changeType type
@@ -498,8 +499,8 @@ ProjectFilterView
     _bind: ->
       @$typeEl = $ @_find 'type'
       # bind radio type change
-      auto_gen = @_find 'gen_from_list'
-      auto_gen_key = @_find 'gen_list_key'
+      auto_gen = @_find 'auto_gen'
+      auto_gen_key = @_find 'gen_from_submission'
       manual_options = @_find 'manual_options'
       manual_option_label = find 'input[type=text]', manual_options
       auto_gen.onchange = ->
@@ -521,7 +522,6 @@ ProjectFilterView
         @trigger 'change', el, @data
       # bind update preview on any changes
       @previewEl = find '.preview', @el
-      @updatePreview = _.debounce @updatePreview.bind(@), 100
       unless @readonly
         @on 'change fill reset', => @updatePreview @data
       @
@@ -532,9 +532,9 @@ ProjectFilterView
       data = unless data? then {} else $.extend {}, data, data.options
       data.type = if data.type then data.type.toLowerCase() else 'none'
       super data
-      if /^radio$/i.test(data.type) and not data.gen_from_list and data.manual_options
-        # manual options
-        @autoIncOptionList.fill data.manual_options
+      if /^radio$/i.test(data.type) and not data.gen_from_submission and data.manual_options
+        @_find('auto_gen').checked = data.gen_from_submission
+        @autoIncOptionList.fill data.manual_options # manual options
       @_changeType data.type if @readonly
       @updatePreview data
       @
@@ -542,8 +542,13 @@ ProjectFilterView
       data = super()
       return {} unless data
       # manual options
-      if /^radio$/i.test(data?.type) and not data.gen_from_list
-        data.manual_options = @autoIncOptionList.read()
+      if /^radio$/i.test(data?.type)
+        if @_find('auto_gen').checked
+          delete data.manual_options
+          #console.log 'gen_from_submission', data.gen_from_submission
+        else
+          delete data.gen_from_submission
+          data.manual_options = @autoIncOptionList.read()
 
       # convert to data and data.options
       type = (data.type or 'none').toUpperCase()
@@ -584,11 +589,11 @@ ProjectFilterView
           body = tpl.html
         when 'radio'
           el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
-          list = unless options.gen_from_list
+          list = unless options.gen_from_submission
             options.manual_options or []
           else [
-            'List item 1 (Auto Genearted)'
-            'List item 2 (Auto Genearted)'
+            'Submission 1 (Auto Genearted)'
+            'Submission 2 (Auto Genearted)'
             '... (Auto Genearted)'
           ]
           body = list.map((item) -> el.replace '{{text}}', item).join '\n'
