@@ -201,6 +201,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 							Notification.saveNew(Notification.Level.NORMAL, action, "Action started");
 
 							action.act();
+							action.save();
 
 							switch (lastStatus = action.getStatus()) {
 								case FINISHED:
