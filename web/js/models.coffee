@@ -250,7 +250,6 @@ define 'models', ['module', 'lib/common'], (module) ->
         model.trigger 'loaded', model
         _success? model, response, options
       super options
-      @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
     sort: (options = {}) ->
