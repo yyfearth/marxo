@@ -173,7 +173,7 @@ Workflow, Workflows
         key: 'desgin'
         desc: 'Post requirement and collect desgins.'
         offset:
-          x: 40, y: 112
+          x: 40, y: 110
         actions: [
           type: 'PAGE'
           name: 'Post Reqirement'
@@ -186,6 +186,10 @@ Workflow, Workflows
               name: 'Design Name'
               type: 'TEXT'
             ]
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Requirement to Facebook'
@@ -194,21 +198,31 @@ Workflow, Workflows
             type: 'FACEBOOK'
             message: '''Attention! Conference Check-in Mobile App start to receive submission.
             See requirements and submit your desgin in '''
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Design Submit'
           key: 'wait_for_design'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Vote App Design'
         key: 'vote'
         desc: 'Public vote submitted designs.'
         offset:
-          x: 62, y: 240
+          x: 62, y: 235
         actions: [
           type: 'PAGE'
           name: 'Post Design Vote Form'
           key: 'post_design_vote_form'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Vote to Facebook'
@@ -216,44 +230,66 @@ Workflow, Workflows
           content:
             type: 'FACEBOOK'
             message: 'Vote your favorite desgin for our Conference Check-in Mobile App.'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Design Vote'
           key: 'wait_for_desgin_vote'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Evaluate App Design'
         key: 'evaluate'
         desc: 'Evaluator judge the designs and votes.'
         offset:
-          x: 50, y: 368
+          x: 50, y: 362
         actions: [
           type: 'PAGE'
           name: 'Post Evaluate Form'
           key: 'eval_form'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'EMAIL'
           name: 'Send Email to Evaluator'
           key: 'email_eval'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Evaluate'
           key: 'wait_for_eval'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'App Implemetation'
         key: 'implemetation'
         desc: 'Post final design and wait for implemetation submission.'
         offset:
-          x: 57, y: 500
+          x: 56, y: 490
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Process Final Desgin'
           key: 'proc_design'
+          event:
+            duration: 864000000 # 10 days
         ,
           type: 'PAGE'
           name: 'Post Final Desgin and Implement Submit Form'
           key: 'post_design_submit_impl'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Design to Facebook'
@@ -262,44 +298,66 @@ Workflow, Workflows
             type: 'FACEBOOK'
             message: '''The final desgin of Conference Check-in Mobile App is ready!
             Please submit your code in '''
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Implementation'
           key: 'wait_for_impl'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Review'
         key: 'review'
         desc: 'Evaluator review submitted app implemetations.'
         offset:
-          x: 78, y: 623
+          x: 79, y: 615
         actions: [
           type: 'PAGE'
           name: 'Post Review Form'
           key: 'review_page'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'EMAIL'
           name: 'Send Review Request Email'
           key: 'review_email'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Review'
           key: 'wait_for_review'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Testing'
         key: 'testing'
         desc: 'Post selected implementaion and open beta testing, collect feedbacks.'
         offset:
-          x: 78, y: 756
+          x: 79, y: 742
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Process Review and Implementation'
           key: 'proc_impl'
+          event:
+            duration: 864000000 # 10 days
         ,
           type: 'PAGE'
           name: 'Post Selected Implementation and Test Request'
           key: 'post_impl_test'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Implementation to Facebook'
@@ -308,33 +366,48 @@ Workflow, Workflows
             type: 'FACEBOOK'
             message: '''Our committee have the final result of the winner of implemetation of our app.
             Welcome to feedback any bugs or leave comments in '''
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Testing'
           key: 'wait_for_test'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Demo'
         key: 'demo'
         desc: 'Post final result to the public.'
         offset:
-          x: 78, y: 883
+          x: 79, y: 866
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Final Result'
           key: 'wait_for_result'
+          event:
+            duration: 864000000 # 10 days
         ,
           type: 'PAGE'
           name: 'Post Final Result and Demo'
           key: 'post_result'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Final Result to Facebook'
           key: 'result_fb'
           content:
             type: 'FACEBOOK'
-            message: '''The Conference Check-in Mobile App is ready!
-            See our demo here '''
+            message: 'The Conference Check-in Mobile App is ready!\nSee our demo here '
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ]
       ]
       links: [
