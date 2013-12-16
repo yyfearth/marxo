@@ -136,19 +136,17 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
       submissions = @model.get 'submissions'
       unless submissions?.length
         $sections = '<div class="text-center"><em class="muted">No submission yet</em></div>'
-      else
+      else @_loadRefSubmissions sections, =>
         questions = []
         for section, i in sections
-          # TODO: support auto options
-          if section.options?.manual_options?.length and /^radio$/i.test section.type
+          if 'radio$' is section.type.toLowerCase()
             questions.push
               name: section.name
-              options: section.options.manual_options
+              options: section.submission_options or section.options.manual_options
               index: {}
               i: i
         for submission in submissions
           for q in questions
-            #console.log submission
             value = submission.sections[q.i] ? ''
             q.index[value] ?= 0
             q.index[value]++
@@ -156,8 +154,12 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
         tpl = @_section_tpl
         for q in questions
           $section = $ fill tpl, i: q.i, name: q.name
-          values = q.options.map (name, i) ->
-            name: name, value: q.index[i]
+          values = q.options.map (option, i) ->
+            if option.id # submission option
+              # TODO: submission better name
+              name: option.desc or option.sections[0], value: q.index[option.id]
+            else # manual option
+              name: option, value: q.index[i]
           @renderChart "#pie_#{q.i}", 'pie', values
           @renderChart "#bar_#{q.i}", 'bar', [
             values: values
@@ -168,7 +170,9 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
     _loadRefSubmissions: (sections, callback) ->
       requests = []
       for section in sections
-        if 'radio' is section.type.toLowerCase() and ref = section.options?.gen_from_submission
+        if 'radio' is section.type.toLowerCase() and
+        ref = section.options?.gen_from_submission and
+        not section.submission_options?
           requests.push new Content(id: ref).fetch success: (content) ->
             if submissions = content.get 'submissions'
               index = {}
