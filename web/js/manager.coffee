@@ -106,10 +106,13 @@ findProjectOrWorkflow
       else findProjectOrWorkflow workflowId: id, callback: ({workflow}) =>
         if workflow
           name = workflow.get 'name'
+          unless is_project = workflow.get 'is_project'
+            name += ' (Workflow)'
           @$el.addClass('workflow-link-cell').attr
             title: name
             'data-container': 'body'
           .append $('<a>',
+            class: if is_project then '' else 'muted'
             tabIndex: -1
             href: "##{workflow._name}/#{id}"
           ).text name
