@@ -697,7 +697,9 @@ require [
     _submit: (data) ->
       # prepare data
       sections = []
-      for {name, value} in @$el.find('form').serializeArray().concat data or []
+      $form = @$el.find 'form'
+      for kv in $form.serializeArray().concat data or []
+        {name, value} = kv
         if value and /^section_\d+$/i.test name
           name = Number name[8..]
           sections[name] = value
@@ -714,7 +716,8 @@ require [
       }, success: (submission) =>
         console.log 'submit success', submission
         alert "Submit successful."
-        # TODO: show result page
+        # TODO: show result page?
+        $form[0].reset()
         @_disableSubmit false
       , error: (err) =>
         console.error 'submit failed', err
