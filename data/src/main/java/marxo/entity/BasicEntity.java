@@ -132,6 +132,24 @@ public abstract class BasicEntity implements MongoDbAware, Loggable {
 	}
 
 	/*
+	Object override
+	 */
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof BasicEntity)) {
+			return false;
+		}
+		BasicEntity entity = (BasicEntity) obj;
+		return id.equals(entity.id);
+	}
+
+	/*
 	DAO
 	 */
 
