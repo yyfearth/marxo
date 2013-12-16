@@ -626,6 +626,10 @@ define 'test_data', ['models'], (models) ->
       key: 'demo_prj'
       desc: 'Demo Project from Demo Workflow'
       status: 'STARTED'
+      current_node_ids: [
+        '50447afb4728cc2036cf9cb3'
+        '50447afb4728cc2036cf9cb6'
+      ]
       nodes: [
         id: '50447afb4728cc2036cf9cb0'
         template_id: '50447afb4728cb2036cf9cb0'
@@ -1209,30 +1213,6 @@ define 'test_data', ['models'], (models) ->
       workflow_id: '50447afb4728cc2036cf9ca1'
       node_id: '507f81413d070321728ffe10'
       action_id: '50447afb4728cc2036cfaca0' # TODO: should be changed
-    ]
-
-    reports: [
-      id: 'e57bf4f6aad752f9fc51fef0'
-      name: 'Demo Project Initialization Report'
-      desc: 'Demo Project Initialization Report'
-      workflow_id: '50447afb4728cc2036cf9ca0'
-      node_id: '50447afb4728cc2036cf9cb0'
-      action_id: '50447afb4728cc2036cf9f02'
-      status: 'COLLECTED'
-      created_at: new Date(1373284304000)
-      updated_at: new Date(1373284304000)
-      ended_at: new Date(1373457155000)
-    ,
-      id: 'e57bf4f6aad752f9fc51fef1'
-      name: 'Demo Project Post Requirements Report'
-      desc: 'Demo Project Post Requirements Report'
-      workflow_id: '50447afb4728cc2036cf9ca0'
-      node_id: '50447afb4728cc2036cf9cb1'
-      action_id: '50447afb4728cc2036cf9f05'
-      status: 'COLLECTING'
-      created_at: new Date(1373284304000)
-      updated_at: new Date(1373284304000)
-      ended_at: new Date(1373457155000)
     ]
 
     notifications: [
