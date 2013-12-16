@@ -165,23 +165,39 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
           $sections.append $section
       @$el.find(el).empty().append($sections)
       return
+    _loadRefSubmissions: (sections, callback) ->
+      requests = []
+      for section in sections
+        if 'radio' is section.type.toLowerCase() and ref = section.options?.gen_from_submission
+          requests.push new Content(id: ref).fetch success: (content) ->
+            if submissions = content.get 'submissions'
+              index = {}
+              index[sub.id] = sub for sub in submissions
+              section.submission_options = submissions
+              section.submission_index = index
+            return
+          , error: ->
+            console.error 'failed to get submissions from', ref, section
+      $.when.apply($, requests).then callback, callback
+      return
     _renderSubmissions: -> @_renderTab '#report_submissions', 'sections', (sections, el) =>
       submissions = @model.get 'submissions'
       unless submissions?.length
         $table = '<div class="text-center"><em class="muted">No submission yet</em></div>'
-      else
-        col = []
+      else @_loadRefSubmissions sections, =>
+        cols = []
         $thead = $('<tr>').append '<th>#</th>'
         for section, i in sections
           if section.type and 'none' isnt section.type.toLowerCase()
             $thead.append $('<th>', text: section.name)
             section.index = i
-            col.push section
+            cols.push section
         $thead.append '<th>Submitted By</th><th>Submitted At</th>'
         $table = $('<table>', class: 'table table-hover').append $thead
         for submission, i in submissions then if submission.sections?.length
           $row = $('<tr>').append $('<td>', text: i + 1)
-          for {index, type, options} in col
+          for section in cols
+            {index, type, options} = section
             $row.append $cell = $('<td>')
             val = submission.sections[index]
             unless val?
@@ -196,15 +212,17 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
                   class: 'icon-link-ext'
                   href: "#{ROOT}/#{val}", target: '_blank'
               when 'radio'
-                if options.manual_options?.length
+                if options.gen_from_submission
+                  if val = section.submission_index?[val]
+                    $cell.text 'Submission: ' + (val.desc or val.sections[0]) # TODO: show details
+                  else
+                    $cell.text '(error)'
+                else if options.manual_options?.length
                   $cell.text options.manual_options[val]
-                else
-                  # TODO: auto gen list
-                  console.log 'TODO: auto gen list'
               when 'html'
                 $cell.text $('<div>').html(val).text()
               else
-                $cell.text val
+                $cell.text _.escape val
           $row.append $('<td>', text: "#{submission.name} <#{submission.key}>")
           $row.append $('<td>', text: new Date(submission.created_at).toLocaleString())
           $table.append $row
