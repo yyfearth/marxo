@@ -19,7 +19,7 @@ public class NodeTests extends BasicDataTests {
 
 		Assert.assertEquals(node.getActions().size(), 2);
 
-		Assert.assertEquals(node.getCurrentActionId(), action1.id);
+		Assert.assertEquals(node.getCurrentAction().id, action1.id);
 		Assert.assertEquals(node.getCurrentAction().getNextAction().id, action2.id);
 	}
 

@@ -79,6 +79,8 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 	final Duration idleDuration = Seconds.seconds(1).toStandardDuration();
 	final Duration normalDuration = Seconds.seconds(1).toStandardDuration();
 	Duration duration = idleDuration;
+	Duration spinDuration = Seconds.seconds(1).toStandardDuration();
+	DateTime nextCheckTime = DateTime.now();
 
 	public void setDuration(Duration duration) {
 		if (!this.duration.equals(duration)) {
@@ -95,7 +97,17 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		Workflow workflow = null;
 
 		try {
-			for (; !isStopped; Thread.sleep(duration.getMillis())) {
+			doWorkflow:
+			while (true) {
+				if (isStopped) {
+					break;
+				}
+
+				if (nextCheckTime.isAfterNow()) {
+					Thread.sleep(spinDuration.getMillis());
+					continue;
+				}
+
 				try {
 					task = Task.next();
 
@@ -135,8 +147,9 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					}
 
 					Queue<Node> nodeQueue = new LinkedList<>(workflow.getCurrentNodes());
-					boolean hasError = false;
+					boolean workflowHasError = false;
 
+					doNode:
 					while (!nodeQueue.isEmpty()) {
 						Node node = nodeQueue.poll();
 						node.setWorkflow(workflow);
@@ -156,36 +169,36 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 							case ERROR:
 							case WAITING:
 							case TRACKED:
-								continue;
+								continue doNode;
 						}
 
 						List<Action> actions = node.getActions();
-						boolean shouldStop = false;
-						RunStatus lastStatus = null;
+						boolean nodeHasError = false;
+						boolean nodeIsTracking = false;
+
+						doAction:
 						for (Action action : actions) {
-							switch (lastStatus = action.getStatus()) {
+							switch (action.getStatus()) {
 								case IDLE:
 								case STARTED:
-								case WAITING:
-								case TRACKED:
-								case FINISHED:
 									break;
+								case WAITING:
+								case FINISHED:
+									break doAction;
+								case TRACKED:
+									nodeIsTracking = true;
+									break;
+								case ERROR:
+									nodeHasError = true;
 								case PAUSED:
 								case STOPPED:
-								case ERROR:
-									shouldStop = true;
-									break;
-							}
-
-							if (shouldStop) {
-								break;
+									break doAction;
 							}
 
 							Event event = action.getEvent();
 							if (event == null) {
 								event = new Event();
 								event.setStartTime(DateTime.now());
-
 
 								action.setEvent(event);
 								action.save();
@@ -203,37 +216,42 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 							action.act();
 							action.save();
 
-							switch (lastStatus = action.getStatus()) {
+							switch (action.getStatus()) {
 								case FINISHED:
 									Notification.saveNew(Notification.Level.NORMAL, action, "Action finished");
+									break;
 								case TRACKED:
+									nodeIsTracking = true;
 									Notification.saveNew(Notification.Level.NORMAL, action, "Action tracked");
 									workflow.addTracableAction((TrackableAction) action);
 									workflow.save();
 									break;
 								case ERROR:
+									nodeHasError = true;
 								case IDLE:
 								case STARTED:
 								case WAITING:
 								case PAUSED:
 								case STOPPED:
-									shouldStop = true;
-									break;
-							}
-
-							if (shouldStop) {
-								break;
+									break doAction;
 							}
 						}
 
-						node.setStatus(lastStatus);
+						if (nodeHasError) {
+							node.setStatus(RunStatus.ERROR);
+						} else if (nodeIsTracking) {
+							node.setStatus(RunStatus.TRACKED);
+						} else {
+							node.setStatus(RunStatus.FINISHED);
+//							workflow.getCurrentNodes().remove()
+						}
 						node.save();
 
 						if (node.getStatus().equals(RunStatus.FINISHED) || node.getStatus().equals(RunStatus.TRACKED)) {
 							Notification.saveNew(Notification.Level.NORMAL, node, "Node finished");
 						} else {
 							if (node.getStatus().equals(RunStatus.ERROR)) {
-								hasError = true;
+								workflowHasError = true;
 							}
 							continue;
 						}
@@ -260,7 +278,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						}
 					}
 
-					if (hasError) {
+					if (workflowHasError) {
 						workflow.setStatus(RunStatus.ERROR);
 					} else if (workflow.trackedActionIds.isEmpty()) {
 						workflow.setStatus(RunStatus.FINISHED);
@@ -283,6 +301,10 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		}
 
 		logger.info(String.format("%s ends", this));
+	}
+
+	protected void update() {
+
 	}
 
 	@Override

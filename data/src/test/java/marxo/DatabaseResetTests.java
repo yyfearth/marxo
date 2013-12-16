@@ -316,7 +316,6 @@ public class DatabaseResetTests extends BasicDataTests {
 		reusedWorkflow.addNode(node1);
 
 		PageAction pageAction = new PageAction();
-		pageAction.setStatus(RunStatus.STARTED);
 		pageAction.setName("Requirement Page");
 		node1.addAction(pageAction);
 

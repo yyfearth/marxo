@@ -9,6 +9,7 @@ import marxo.entity.workflow.WorkflowChildEntity;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -88,7 +89,6 @@ public class Node extends WorkflowChildEntity {
 		}
 		actionIds.add(action.id);
 		if (actions.isEmpty()) {
-			currentActionId = action.id;
 			currentAction = action;
 		} else {
 			actions.get(actions.size() - 1).setNextAction(action);
@@ -101,27 +101,16 @@ public class Node extends WorkflowChildEntity {
 	Current action
 	 */
 
-	protected ObjectId currentActionId;
 
-	public ObjectId getCurrentActionId() {
-		if (currentActionId == null) {
-			if (actionIds.isEmpty()) {
-				return null;
-			}
-			return currentActionId = actionIds.get(0);
-		}
-		return currentActionId;
-	}
-
-	@Transient
+	@DBRef
 	protected Action currentAction;
 
-	@JsonIgnore
 	public Action getCurrentAction() {
-		if (getCurrentActionId() == null) {
-			return null;
-		}
-		return (currentAction == null) ? (currentAction = Action.get(getCurrentActionId())) : currentAction;
+		return currentAction;
+	}
+
+	public void setCurrentAction(Action currentAction) {
+		this.currentAction = currentAction;
 	}
 
 	/*
