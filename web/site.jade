@@ -121,7 +121,7 @@ html(lang='en-US')
         mixin rich_editor('{{name}}')
       .tpl(name='radio')
         label.radio
-          input(type='radio', name='{{name}}', value='{{i}}', required)
+          input(type='radio', name='{{name}}', value='{{value}}', required)
           | {{text}}
       .tpl(name='image')
         .fileupload.fileupload-new(data-provides='fileupload')

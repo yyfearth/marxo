@@ -524,7 +524,10 @@ require [
           sections: unless sections?.length then '' else sections.join '\n'
         html = @html = unless hasInput then html.replace('form-actions', 'form-actions hide') else html
       $el = @$el.html(html)
+      _renderSubmissions = @_renderSubmissions.bind @
       setTimeout -> # defer
+        $el.find('.submissions[data-ref]').each (i, el) ->
+          _renderSubmissions el.getAttribute('data-ref'), (html) -> el.innerHTML = html
         $el.find('.rich-editor').attr('contenteditable', 'true').each ->
           $("##{@id}.rich-editor").wysiwyg()
         $el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit').tooltip container: $el
@@ -537,7 +540,8 @@ require [
     _renderInput: (data, i) ->
       type = (data.type or '').toLowerCase()
       options = data.options or {}
-      tpl = @tpl()
+      _tpl = @tpl
+      tpl = _tpl()
       switch type
         when '', 'none'
           body = ''
@@ -547,12 +551,14 @@ require [
           body = tpl.html.replace '{{fonts}}', @_renderFonts()
           body = body.replace '<textarea ', '<textarea data-required="required" ' if options.required
         when 'radio'
-          list = unless options.gen_from_list then options.manual_options else [
-            'List item 1 (Auto Genearted)'
-            'List item 2 (Auto Genearted)'
-            '... (Auto Genearted)'
-          ]
-          body = list?.map((item, i) -> tpl.radio.replace('{{i}}', i).replace '{{text}}', item).join '\n'
+          if options.gen_from_submission
+            body = "<div class=\"submissions\" data-ref=\"#{options.gen_from_submission}\">Loading...</div>"
+          else if options.manual_options?.length
+            body = options.manual_options.map (item, i) ->
+              _tpl 'radio', name: item, value: i
+            .join '\n'
+          else
+            body = '(Error Section Question: No options)'
         when 'file'
           accept = options.file_accept
           if accept is 'image/*'
@@ -564,6 +570,53 @@ require [
           throw new Error 'unknown section type ' + type
       body = body.replace /\s*required(?:="\w*")?/ig, '' unless options.required
       body.replace /{{name}}/g, 'section_' + i
+    _renderSubmissions: (ref, callback) ->
+      console.log 'load submission from page', ref
+      _tpl = @tpl
+      _renderSubmission = (sections, submission) ->
+        html = []
+        for val, i in submission.sections
+          def = sections[i]
+          span = switch def.type.toUpperCase()
+            when 'text'
+              _.escape val or ''
+            when 'html'
+              val or ''
+            when 'radio'
+              if def.options.gen_from_submission
+                '' # TODO: how to show the auto options
+              else
+                def.options.manual_options?[val] or ''
+            when 'file'
+              url = "#{ROOT}/#{val}"
+              if def.options.accept is 'image/*'
+                "<a href='#{url}' target='_blank'><img src='#{url}' alt=''/></a>"
+              else
+                "<a href='#{url}/download'>Download</a><a class='icon-link-ext' href='#{url}'></a>"
+            else
+              ''
+          html.push "<span class='section-value'>#{span}</span>" if span
+        html.join ' '
+      _render = (page) ->
+        console.log 'got page', page
+        submissions = page.get 'submissions'
+        sections = page.get 'sections'
+        unless submissions?
+          html = 'Cannot load submissions, seems they are not ready yet!'
+        else unless submissions.length
+          html = 'No submissions yet!'
+        else
+          console.log 'got page submissions', submissions
+          html = for sub in submissions
+            _tpl 'radio', value: sub.id, text: _renderSubmission sections, sub
+          html = html.join '\n'
+        callback? html
+        return
+      page = Pages.pages.get ref
+      if page.get('submissions')?.length
+        _render page
+      else page.fetch success: _render, error: -> callback? 'Failed to load submissions!'
+      return
     render: ->
       if @rendered or @model.has 'name'
         @_render()
