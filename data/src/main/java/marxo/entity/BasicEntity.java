@@ -13,6 +13,7 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -49,6 +50,7 @@ import java.util.Set;
 		"eventId",
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Document
 public abstract class BasicEntity implements MongoDbAware, Loggable {
 	@Id
 	@JsonProperty("id")

@@ -1,6 +1,7 @@
 package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import marxo.entity.node.Event;
@@ -8,6 +9,7 @@ import marxo.entity.node.NodeChildEntity;
 import marxo.exception.Errors;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -89,46 +91,37 @@ public abstract class Action extends NodeChildEntity {
 	Event
 	 */
 
-	public ObjectId eventId;
-
-	@Transient
+	@DBRef
+	@JsonProperty("event")  // For some reason, this must be declared in order to be parsed by ObjectMapper.
 	protected Event event;
 
-	@JsonIgnore
 	public Event getEvent() {
-		if (eventId == null) {
-			return null;
-		}
-		return (event == null) ? (event = Event.get(eventId)) : event;
+		return event;
 	}
 
-	@JsonIgnore
 	public void setEvent(Event event) {
 		this.event = event;
-		this.eventId = event.id;
-		event.setAction(this);
+		if (event != null) {
+			event.setAction(this);
+		}
 	}
 
 	/*
 	Content
 	 */
 
-	public ObjectId contentId;
-	@Transient
+	@DBRef
 	protected Content content;
-	public String contentType;
 
 	public Content getContent() {
-		if (contentId == null) {
-			return null;
-		}
-		return (content == null) ? (content = Content.get(contentId)) : content;
+		return content;
 	}
 
 	public void setContent(Content content) {
 		this.content = content;
-		this.contentId = content.id;
-		content.setAction(this);
+		if (content != null) {
+			content.setAction(this);
+		}
 	}
 
 	/*
@@ -168,12 +161,11 @@ public abstract class Action extends NodeChildEntity {
 
 	@Override
 	public void remove() {
-		if (contentId != null) {
-			Content.remove(contentId);
+		if (content != null) {
+			content.remove();
 		}
-
-		if (eventId != null) {
-			Event.remove(eventId);
+		if (event != null) {
+			event.remove();
 		}
 
 		super.remove();

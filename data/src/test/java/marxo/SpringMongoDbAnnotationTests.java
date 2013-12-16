@@ -1,5 +1,6 @@
 package marxo;
 
+import junit.framework.Assert;
 import marxo.entity.MongoDbAware;
 import marxo.test.BasicDataTests;
 import org.bson.types.ObjectId;
@@ -97,16 +98,29 @@ public class SpringMongoDbAnnotationTests extends BasicDataTests {
 			this.name = name;
 		}
 
+		@DBRef
+		Person teacher;
 
 		@DBRef
 		List<Person> lovers = new ArrayList<>();
 	}
 
 	@Test
-	public void useDbRef() throws Exception {
+	public void empty() throws Exception {
+		Person person1 = new Person("James");
+		person1.lovers = null;
+
+		PersonRepository personRepository = new PersonRepository();
+		personRepository.save(person1);
+
+		Person person = personRepository.findOne(person1.id);
+		Assert.assertNull(person.lovers);
+	}
+
+	@Test
+	public void normal() throws Exception {
 		Person person1 = new Person("James");
 		Person person2 = new Person("Jane");
-		person1.lovers.add(person2);
 		person1.lovers.add(person2);
 
 		PersonRepository personRepository = new PersonRepository();
@@ -114,6 +128,18 @@ public class SpringMongoDbAnnotationTests extends BasicDataTests {
 		personRepository.save(person2);
 
 		Person person = personRepository.findOne(person1.id);
-		logger.info(person.toString());
+		Assert.assertEquals(person.lovers.size(), 1);
+		Assert.assertEquals(person.lovers.get(0).name, person2.name);
+	}
+
+	@Test
+	public void noTeacher() throws Exception {
+		Person person1 = new Person("James");
+
+		PersonRepository personRepository = new PersonRepository();
+		personRepository.save(person1);
+
+		Person person = personRepository.findOne(person1.id);
+		Assert.assertNull(person.teacher);
 	}
 }

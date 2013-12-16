@@ -5,9 +5,11 @@ import marxo.entity.action.ActionChildEntity;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+@Document
 public class Event extends ActionChildEntity {
 	@JsonProperty("starts")
 	protected DateTime startTime;

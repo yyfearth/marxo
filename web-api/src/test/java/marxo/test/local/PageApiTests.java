@@ -7,6 +7,7 @@ import marxo.entity.action.Content;
 import marxo.entity.action.PageAction;
 import marxo.entity.action.Submission;
 import marxo.entity.node.Node;
+import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.test.ApiTestConfiguration;
 import marxo.test.ApiTester;
@@ -39,6 +40,7 @@ public class PageApiTests extends BasicApiTests {
 		reusedWorkflow.addNode(reusedNode);
 
 		reusedAction = new PageAction();
+		reusedAction.setStatus(RunStatus.STARTED);
 		reusedNode.addAction(reusedAction);
 
 		reusedContent = new Content(Content.Type.PAGE);
@@ -80,7 +82,7 @@ public class PageApiTests extends BasicApiTests {
 					.matchContentType(MediaType.JSON_UTF_8);
 			List<Content> contents = apiTester.getContent(new TypeReference<List<Content>>() {
 			});
-			Assert.assertEquals(contents.size(), 0);
+			Assert.assertEquals(contents.size(), 1);
 		}
 	}
 

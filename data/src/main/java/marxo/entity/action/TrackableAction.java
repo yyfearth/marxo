@@ -2,6 +2,7 @@ package marxo.entity.action;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import marxo.entity.node.Event;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 public abstract class TrackableAction extends Action {
 
@@ -11,6 +12,7 @@ public abstract class TrackableAction extends Action {
 	}
 
 	@JsonProperty("tracking")
+	@DBRef
 	public Event trackEvent;
 
 	@Override
@@ -19,5 +21,13 @@ public abstract class TrackableAction extends Action {
 			trackEvent.save();
 		}
 		super.save();
+	}
+
+	@Override
+	public void remove() {
+		super.remove();
+		if (trackEvent != null) {
+			trackEvent.remove();
+		}
 	}
 }

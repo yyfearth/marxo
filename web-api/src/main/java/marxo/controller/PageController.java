@@ -1,5 +1,7 @@
 package marxo.controller;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import marxo.entity.MongoDbAware;
 import marxo.entity.action.Action;
 import marxo.entity.action.Content;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @Controller
@@ -68,11 +71,16 @@ public class PageController extends BasicController implements MongoDbAware, Int
 		return content;
 	}
 
+	/**
+	 * Should search only those contents which are Page type and under a started action
+	 */
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<Content> search(@RequestParam(value = "tenant_id", required = false) ObjectId tenantId, @RequestParam(value = "project_id", required = false) ObjectId projectId) {
-		Criteria criteria = newDefaultCriteria().and("status").is(RunStatus.STARTED);
+		Criteria criteria = Criteria
+				.where("status").is(RunStatus.STARTED)
+				.and("content").exists(true);
 
 		if (tenantId != null) {
 			criteria.and("tenantId").is(tenantId);
@@ -84,7 +92,15 @@ public class PageController extends BasicController implements MongoDbAware, Int
 		}
 
 		Query query = Query.query(criteria).with(defaultSort);
-		List<Content> contents = mongoTemplate.find(query, Content.class);
+		List<Action> actions = mongoTemplate.find(query, Action.class);
+
+		List<Content> contents = Lists.transform(actions, new Function<Action, Content>() {
+			@Nullable
+			@Override
+			public Content apply(@Nullable Action input) {
+				return (input == null) ? null : input.getContent();
+			}
+		});
 
 		for (Content content : contents) {
 			filter(content);
