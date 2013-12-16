@@ -479,7 +479,6 @@ Projects
           @load model
         else
           @router.back()
-      # TODO: do some clean
       @
     setStatus: (status) ->
       unless status
@@ -752,11 +751,8 @@ Projects
         If you really want to remove them, STOP them first.'''
         return @
       names = models.map (model) -> model.get 'name'
-      # TODO: project life cycle (engine)
-      # TODO: started projects cannot be deleted
       if confirm "Are you sure to remove these projects? \n#{names.join '\n'}\n\nThis action cannot be undone!"
         models.forEach (model) -> model.destroy()
-      # TODO: remove related data?
       @
     render: ->
       @list.fetch()

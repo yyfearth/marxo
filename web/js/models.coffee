@@ -156,9 +156,6 @@ define 'models', ['module', 'lib/common'], (module) ->
       else
         @get('first_name') or @get('last_name') or null
 
-# TODO: service: by default, publisher can get the list of members
-# and cannot get list of participant, but can get participant by id
-
 #  class Participant extends User
 
   class Publisher extends User

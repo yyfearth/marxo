@@ -139,7 +139,6 @@ Action
     remove: (models) ->
       models = [models] unless Array.isArray models
       if confirm 'Make sure these selected workflows is not in use!\nDo you realy want to remove selected workflows?'
-        # TODO: check usage, if used cannot remove directly
         model?.destroy() for model in models
         @reload() if models.length >= @pageSize / 2
       #console.log 'delete', model, @
