@@ -88,6 +88,5 @@ public class AdHocTest implements Loggable {
 		Assert.assertTrue(action instanceof TrackableAction);
 
 		logger.info(Reflections.getObjectDump(action));
-		;
 	}
 }

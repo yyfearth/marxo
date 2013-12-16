@@ -25,11 +25,10 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value = "page{:s?}")
-public class PageController implements MongoDbAware, InterceptorPreHandlable {
+public class PageController extends BasicController implements MongoDbAware, InterceptorPreHandlable {
 	protected static Sort defaultSort = new Sort(new Sort.Order(Sort.Direction.DESC, "updateTime")).and(new Sort(new Sort.Order(Sort.Direction.DESC, "createTime")));
 
 	protected User user;
-	protected Criteria criteria;
 
 	@Override
 	public void preHandle() {
@@ -41,18 +40,19 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 		} else {
 			user = null;
 		}
+	}
 
-		criteria = Criteria.where("type").is(Content.Type.PAGE);
+	protected Criteria newDefaultCriteria() {
+		return Criteria.where("type").is(Content.Type.PAGE);
 	}
 
 	@RequestMapping(value = "/{pageIdString:[\\da-fA-F]{24}}", method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Content read(@PathVariable String pageIdString) {
-		Assert.isTrue(ObjectId.isValid(pageIdString));
-		ObjectId pageId = new ObjectId(pageIdString);
+		ObjectId pageId = stringToObjectId(pageIdString);
 
-		Query query = Query.query(criteria.and("_id").is(pageId));
+		Query query = Query.query(newDefaultCriteria().and("_id").is(pageId));
 		Content content = mongoTemplate.findOne(query, Content.class);
 
 		if (content == null) {
@@ -72,7 +72,7 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<Content> search(@RequestParam(value = "tenant_id", required = false) ObjectId tenantId, @RequestParam(value = "project_id", required = false) ObjectId projectId) {
-		criteria.and("status").is(RunStatus.STARTED);
+		Criteria criteria = newDefaultCriteria().and("status").is(RunStatus.STARTED);
 
 		if (tenantId != null) {
 			criteria.and("tenantId").is(tenantId);
@@ -105,7 +105,7 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 		submission.createUserId = submission.updateUserId = user.id;
 		submission.createTime = submission.updateTime = DateTime.now();
 
-		criteria.and("_id").is(pageId);
+		Criteria criteria = newDefaultCriteria().and("_id").is(pageId);
 		Query query = Query.query(criteria);
 
 		Update update = new Update().addToSet("submissions", submission);
@@ -123,7 +123,7 @@ public class PageController implements MongoDbAware, InterceptorPreHandlable {
 		Assert.isTrue(ObjectId.isValid(pageIdString));
 		ObjectId pageId = new ObjectId(pageIdString);
 
-		criteria.and("_id").is(pageId).and("submissions").elemMatch(
+		Criteria criteria = newDefaultCriteria().and("_id").is(pageId).and("submissions").elemMatch(
 				Criteria.where("createUserId").is(user.id)
 		);
 		Query query = Query.query(criteria);

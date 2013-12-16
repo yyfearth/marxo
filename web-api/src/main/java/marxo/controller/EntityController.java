@@ -144,9 +144,7 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public Entity delete(@PathVariable String idString) throws Exception {
-		throwIfInvalidObjectId(idString);
-
-		ObjectId objectId = new ObjectId(idString);
+		ObjectId objectId = stringToObjectId(idString);
 
 		Entity entity = mongoTemplate.findOne(newDefaultQuery(objectId), entityClass);
 		if (entity == null) {
@@ -162,16 +160,5 @@ public abstract class EntityController<Entity extends BasicEntity> extends Basic
 	@ResponseBody
 	public List<Entity> search() {
 		return mongoTemplate.find(new Query(newDefaultCriteria()).with(getDefaultSort()), entityClass);
-	}
-
-	protected void throwIfInvalidObjectId(String idString) {
-		if (!ObjectId.isValid(idString)) {
-			throw new InvalidObjectIdException(idString);
-		}
-	}
-
-	protected ObjectId stringToObjectId(String idString) {
-		throwIfInvalidObjectId(idString);
-		return new ObjectId(idString);
 	}
 }
