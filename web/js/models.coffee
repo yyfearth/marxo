@@ -307,12 +307,22 @@ define 'models', ['module', 'lib/common'], (module) ->
       links = []
       node_index = {}
       silent = silent: true
+      _clean = (data) -> if data?
+        delete data.id
+        delete data.workflow_id
+        delete data.node_id
+        delete data.action_id
+        return
       workflow.nodes.forEach (node) ->
         cloned_node = node.clone().unset('id', silent)
         .unset('workflow_id', silent).set template_id: node.id
         if node.has 'actions' # remove id in action
           cloned_node.set 'actions', node.get('actions').map (action) ->
-            new Action(action).unset('id', silent).toJSON()
+            _clean action
+            _clean action.content
+            _clean action.event
+            _clean action.tracking
+            action
         nodes[node.idx] = cloned_node
         cloned_node.idx = node.idx
         node_index[node.id] = cloned_node
@@ -392,25 +402,30 @@ define 'models', ['module', 'lib/common'], (module) ->
             updated = true
           unless updated # not changed
             _success? wf, resp, opt
-          else
+          else $.when.apply($, requests).then =>
+            # console.log 'new links created', @links
             # update workflow for refs
-            requests.push @_save # directly save
+            @unset 'nodes', silent: true
+            @unset 'links', silent: true
+            @_save # directly save
               node_ids: @nodes.map (m) -> m.id
               link_ids: @links.map (m) -> m.id
-            , save_opt
-            $.when.apply($, requests).then =>
-              # console.log 'new links created', @links
+            , wait: true, reset: true, success: (wf) ->
               # finally done
-              console.log 'saved', @_name, attributes, @
+              console.log 'saved', wf._name, attributes, wf
               _success? wf, resp, opt
-            , =>
-              console.error 'fail to save links for wf', @
+            , error: ->
+              console.error 'fail to update ref for save wf', wf
               _err? wf, null, options
               return
+          , ->
+            console.error 'fail to save links for wf', wf
+            _err? wf, null, options
+            return
           console.log 'saving wf', @
           return
-        , =>
-          console.error 'fail to save nodes for wf', @
+        , ->
+          console.error 'fail to save nodes for wf', wf
           _err? wf, null, options
           return
         # delete unused nodes/links (no wait)
