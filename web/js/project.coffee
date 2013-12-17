@@ -514,10 +514,6 @@ Projects
   class ProjectStatusView extends View
     _prefix: 'prj_status_lst'
     _cls: STATUS_CLS
-    _refCls:
-      content: 'icon-page'
-      event: 'icon-calendar'
-      report: 'icon-report'
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
       @$detail = $ find '.node-link-detail', @el
@@ -604,7 +600,7 @@ Projects
       _label = @_renderLabel
       _href = model._href
       _cls = @_cls
-      _refs = @_refCls
+      _renderRef = @_renderRefLink
       frag = document.createDocumentFragment()
       frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
       model.actions().forEach (action, i) ->
@@ -620,18 +616,28 @@ Projects
         if status = action.status(lowercase: true)
           a.className = "status-#{status}"
           a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status] or ''
-        for own name, cls of _refs
-          name = name.toLowerCase()
-          if id = action.get(name + '_id')?.toString()
-            btn = document.createElement 'a'
-            btn.className = 'ref-link pull-right ' + cls or ''
-            btn.textContent = name.capitalize()
-            btn.href = "##{name}/#{id}"
-            a.appendChild btn
+        if action.content?.hasReport()
+          _renderRef a, action, 'content', 'Report', 'icon-report', '#content/{{id}}/report'
+        _renderRef a, action, 'content', 'Content', 'icon-page', '#content/{{id}}'
+        _renderRef a, action, 'event', 'Event', 'icon-calendar', '#event/{{id}}'
+        _renderRef a, action, 'tracking', 'Tracking', 'icon-calendar', '#event/{{id}}'
+        span = document.createElement 'span'
+        span.className = 'clearfix'
+        a.appendChild span
         li.appendChild a
         frag.appendChild li
         return
       @$detail.removeClass('link-condition').addClass('node-actions').append frag
+      return
+    _renderRefLink: (el, action, name, title, cls, url) ->
+      name = name.toLowerCase()
+      id = action.get(name)?.id ? action.get(name + '_id')?.toString()
+      if id?
+        btn = document.createElement 'a'
+        btn.className = 'ref-link pull-right ' + cls or ''
+        btn.textContent = title
+        btn.href = url.replace '{{id}}', id
+        el.appendChild btn
       return
     _renderLink: (model) ->
       @$detail.empty()
