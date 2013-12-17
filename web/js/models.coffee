@@ -305,13 +305,14 @@ define 'models', ['module', 'lib/common'], (module) ->
       silent = silent: true
       _clean = (data) -> if data?
         delete data.id
+        delete data.status
         delete data.workflow_id
         delete data.node_id
         delete data.action_id
         return
       workflow.nodes.forEach (node) ->
         cloned_node = node.clone().unset('id', silent)
-        .unset('workflow_id', silent).set template_id: node.id
+        .unset('workflow_id', silent).set template_id: node.id, status: 'IDLE'
         if node.has 'actions' # remove id in action
           cloned_node.set 'actions', node.get('actions').map (action) ->
             _clean action
@@ -328,7 +329,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         nextNode = node_index[link.get 'next_node_id']
         # remove linked nodes id then ref nodes
         cloned_link = link.clone().unset('id', silent).unset('workflow_id', silent).set
-          template_id: link.id, prev_node_id: prevNode.idx, next_node_id: nextNode.idx
+          template_id: link.id, prev_node_id: prevNode.idx, next_node_id: nextNode.idx, status: 'IDLE'
         cloned_link.prevNode = prevNode
         cloned_link.nextNode = nextNode
         links[link.idx] = cloned_link
@@ -345,6 +346,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         template_id: workflow.id
         nodes: nodes
         links: links
+        status: 'IDLE'
       @_wire()
       @
     _save: Entity::save
