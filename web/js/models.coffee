@@ -666,7 +666,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         _actions = []
         _index = {}
         wfs.fullCollection.forEach (wf) -> if wf.loaded()
-          # TODO: assume workflow api will return actions
+          # TODO: assume projects api will return actions
           wf.nodes.forEach (node) ->
             node.actions().forEach (action) ->
               id = action.id ? action.cid
@@ -680,13 +680,16 @@ define 'models', ['module', 'lib/common'], (module) ->
         actions.reset _actions
         actions.trigger 'loaded', actions
       , 10
-      actions.listenTo Projects.projects, 'loaded', _load
+      actions.listenTo Projects.projects, 'loaded', (wfs) ->
+        _load wfs if wfs.fullCollection? # otherwise it will got workflow/project loaded event
+        return
       actions.load = (callback) -> Projects.projects.load (wfs, ret) ->
         if actions.length is 0
           actions.once 'loaded', callback
           _load wfs
         else
           callback actions, ret
+        return
       actions
     model: Action
     url: Action::urlRoot
