@@ -222,10 +222,11 @@ define 'models', ['module', 'lib/common'], (module) ->
 
       # start node
       if nodes.length
-        start_node_id = attr.start_node_id
-        if start_node_id?
-          unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
-            console.error 'cannot find node specified by start_node_id', start_node_id, @toJSON()
+        start_node_id = attr.start_node?.id or attr.start_node_id
+        unless start_node_id?
+          @startNode = null
+        else unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+          console.error 'cannot find node specified by start_node_id', start_node_id, @toJSON()
         if not @startNode and nodes.length
           starts = nodes.filter (n) -> not n.inLinks.length
           if starts.length is 1
@@ -250,7 +251,9 @@ define 'models', ['module', 'lib/common'], (module) ->
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
     sort: (options = {}) ->
-      if options.force or not @_sorted
+      unless @startNode?
+        console.error 'cannot sort without start node'
+      else if options.force or not @_sorted
         cindex = {}
         nodes_count = 0
         links_count = 0
