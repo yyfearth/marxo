@@ -144,7 +144,7 @@ Event
           msg.push "It will be ended at #{@_dateToLocale ends}."
         else
           cls = 'warning'
-          msg.push 'It will be ended only after trigger "skip" manually.'
+          msg.push 'It will be ended only after trigger "finish" manually.'
         msg.push "Duration between starts and ends is #{form.duration.value}." if duration
         msg.push '<small>4 Notifications will be sent before and after event starts and ends.</small>'
         msg = msg.join '<br/>'
@@ -436,7 +436,7 @@ Event
         buf.push "(#{DurationConvertor.stringify duration})"
       buf = buf.join ' '
       @el.title = @el.textContent = buf
-      @el.dataset.container = '#event_manager table'
+      @el.dataset.container = '#event_manager'
       @
     _getDate: (name) ->
       datetime = @model.get name
@@ -453,8 +453,11 @@ Event
 
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
-      @_hide 'skip' unless /^(?:IDLE|STARTED|TRACKED|PAUSED)$/.test @model.status()
-      super
+      super # must before hide
+      duration = @model.get 'duration'
+      @_hide 'view' unless @model.get 'duration'
+      @_hide 'finish' unless duration and /^(?:STARTED|TRACKED|PAUSED)$/.test @model.status()
+      @
 
   class EventManagemerView extends ManagerView
     columns: [
@@ -484,14 +487,15 @@ Event
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
         collection: collection
-      @on 'skip remove_selected', @skip.bind @
+      @on 'finish', @finish.bind @
       @
-    skip: (event) ->
+    finish: (event) ->
       # TODO: use action status api instead
-      console.log 'skip', event
-      if confirm """Are you sure to skip event "#{event.get 'name'}"?\n
-      Skip means event and its related action will be end in a short time and it will be marked as FINISHED after engine processed it.
-      In the meanwhile, for page action, it will be close to submission, and tracked action will be stop tracking too."""
+      console.log 'finish', event
+      if confirm """Are you sure to finish event "#{event.get 'name'}"?\n
+      Finish means event and its related action will be end in a short time and it will be marked as FINISHED after engine processed it.
+      But finish will not skip the execution of this event and related action.
+      In the meanwhile, for tracking event, it will cause close to submission and stop tracking."""
         if starts = event.get 'starts'
           starts = new Date(starts).getTime()
           ends = new Date(event.get 'ends').getTime() or 0
