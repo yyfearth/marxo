@@ -210,16 +210,21 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
             _data = _data[key] ?= {} for key in names
             _data[name] = val
       # data.event.duration must exist, 0 for no wait
-      if data.event?.duration
+      data.event ?= {}
+      if data.event.duration
         data.event.duration = DurationConvertor.parse data.event.duration
+      else if data.event.ends?
+        delete data.event.duration
       else
-        data.event ?= {}
         data.event.duration = 0
-      # data.tracking must be null if not tracking (duration is 0)
+      # data.tracking must not exist if not tracking (duration is 0)
       if data.tracking?
         duration = data.tracking.duration
         duration = data.tracking.duration = DurationConvertor.parse duration if duration
-        data.tracking = null unless duration
+        if duration or data.tracking.ends?
+          data.tracking.name or= data.name + ' (Tracking)'
+        else
+          delete data.tracking
       # auto fill ids to these sub entities
       for n in ['content', 'event', 'tracking']
         if data[n]?
