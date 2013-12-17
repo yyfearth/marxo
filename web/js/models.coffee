@@ -557,6 +557,45 @@ define 'models', ['module', 'lib/common'], (module) ->
         callback {}
       @
 
+  ## Project
+
+  class Project extends Workflow
+    _name: 'project'
+    urlRoot: ROOT + '/projects'
+
+  class Projects extends Workflows
+    @projects: new Projects
+    @find: (options) ->
+      wfs = @projects
+      unless wfs.length
+        wfs.load (wfs) -> wfs.find options
+      else
+        wfs.find options
+      wfs
+    model: Project
+    url: Project::urlRoot
+    _expires: 60000 # 1 min
+
+  findProjectOrWorkflow = (options) ->
+    unless options.workflowId and typeof options.callback is 'function'
+      throw new Error 'workflowId and callback must be given'
+    _callback = options.callback
+    _tried = false
+    options.callback = (ret) -> if _callback
+      if ret.workflow or Object.keys(ret).length
+        # console.log 'find project or workflow got', ret, _tried
+        _callback ret
+        _callback = null
+      else if _tried
+        _callback ret
+      _tried = true
+      return
+    Projects.find options
+    Workflows.find options
+    return
+
+  # Workflow/Project Sub-entities
+
   class ChangeObserableEntity extends StatusEntity
     constructor: (model, options) ->
       super model, options
@@ -621,45 +660,36 @@ define 'models', ['module', 'lib/common'], (module) ->
     urlRoot: ROOT + '/actions'
 
   class Actions extends SimpleCollection
-    @actions = new Actions
+    @actions: do ->
+      actions = new Actions
+      _load = _.debounce (wfs) ->
+        _actions = []
+        _index = {}
+        wfs.fullCollection.forEach (wf) -> if wf.loaded()
+          # TODO: assume workflow api will return actions
+          wf.nodes.forEach (node) ->
+            node.actions().forEach (action) ->
+              id = action.id ? action.cid
+              unless _index[id]?
+                _actions.push _index[id] = action
+              else if _index[id].cid isnt action.cid
+                console.warn 'action id duplicate (ignore)', _index[id], action
+              return
+            return
+          return
+        actions.reset _actions
+        actions.trigger 'loaded', actions
+      , 10
+      actions.listenTo Projects.projects, 'loaded', _load
+      actions.load = (callback) -> Projects.projects.load (wfs, ret) ->
+        if actions.length is 0
+          actions.once 'loaded', callback
+          _load wfs
+        else
+          callback actions, ret
+      actions
     model: Action
-
-  ## Project
-
-  class Project extends Workflow
-    _name: 'project'
-    urlRoot: ROOT + '/projects'
-
-  class Projects extends Workflows
-    @projects: new Projects
-    @find: (options) ->
-      wfs = @projects
-      unless wfs.length
-        wfs.load (wfs) -> wfs.find options
-      else
-        wfs.find options
-      wfs
-    model: Project
-    url: Project::urlRoot
-    _expires: 60000 # 1 min
-
-  findProjectOrWorkflow = (options) ->
-    unless options.workflowId and typeof options.callback is 'function'
-      throw new Error 'workflowId and callback must be given'
-    _callback = options.callback
-    _tried = false
-    options.callback = (ret) -> if _callback
-      if ret.workflow or Object.keys(ret).length
-        # console.log 'find project or workflow got', ret, _tried
-        _callback ret
-        _callback = null
-      else if _tried
-        _callback ret
-      _tried = true
-      return
-    Projects.find options
-    Workflows.find options
-    return
+    url: Action::urlRoot
 
   ## Home
 
