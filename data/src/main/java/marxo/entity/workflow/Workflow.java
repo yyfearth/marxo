@@ -2,6 +2,7 @@ package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
@@ -14,6 +15,7 @@ import marxo.entity.user.RunnableEntity;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -27,7 +29,7 @@ public class Workflow extends RunnableEntity {
 	public boolean isProject = false;
 
 	/*
-	Tracable actions
+	Trackable actions
 	 */
 
 	public List<ObjectId> trackedActionIds = new ArrayList<>();
@@ -69,10 +71,14 @@ public class Workflow extends RunnableEntity {
 	}
 
 	public void setLinks(List<Link> links) {
-		this.links = links;
-		this.linkIds = new ArrayList<>(Lists.transform(links, SelectIdFunction.getInstance()));
-		for (Link link : links) {
-			link.setWorkflow(this);
+		if (links == null) {
+			this.links = new ArrayList<>();
+		} else {
+			this.links = links;
+			this.linkIds = new ArrayList<>(Lists.transform(links, SelectIdFunction.getInstance()));
+			for (Link link : links) {
+				link.setWorkflow(this);
+			}
 		}
 	}
 
@@ -125,25 +131,16 @@ public class Workflow extends RunnableEntity {
 	Start node
 	 */
 
-	public ObjectId startNodeId;
-
-	@Transient
+	@DBRef
 	protected Node startNode;
 
-	@JsonIgnore
 	public Node getStartNode() {
-		if (startNodeId == null) {
-			if (nodeIds.isEmpty()) {
-				return null;
-			}
-		}
-		return (startNode == null) ? (startNode = mongoTemplate.findById(startNodeId, Node.class)) : startNode;
+		return startNode;
 	}
 
 	@JsonIgnore
 	public void setStartNode(Node startNode) {
 		this.startNode = startNode;
-		this.startNodeId = (startNode == null) ? null : startNode.id;
 	}
 
 	/*
@@ -246,32 +243,44 @@ public class Workflow extends RunnableEntity {
 	Current nodes
 	 */
 
-	public List<ObjectId> currentNodeIds = new ArrayList<>();
+	@JsonProperty("current_node_ids")
+	public List<ObjectId> getCurrentNodeIds() {
+		return Lists.transform(currentNodes, SelectIdFunction.getInstance());
+	}
 
-	@Transient
-	protected List<Node> currentNodes;
+	@DBRef
+	@JsonIgnore
+	protected List<Node> currentNodes = new ArrayList<>();
 
 	@JsonIgnore
 	public List<Node> getCurrentNodes() {
-		if (currentNodes == null) {
-			if (currentNodeIds.isEmpty()) {
-				return currentNodes = new ArrayList<>();
-			}
-
-			Criteria criteria = Criteria.where("id").in(currentNodeIds);
-			currentNodes = mongoTemplate.find(Query.query(criteria), Node.class);
-			wire();
-		}
 		return currentNodes;
 	}
 
-	public void addCurrentNode(Node node) {
+	@JsonIgnore
+	public void setCurrentNodes(List<Node> currentNodes) {
 		if (currentNodes == null) {
-			getCurrentNodes();
+			currentNodes = new ArrayList<>();
 		}
+		this.currentNodes = currentNodes;
+	}
+
+	public void addCurrentNode(Node node) {
 		currentNodes.add(node);
-		currentNodeIds.add(node.id);
 		node.setWorkflow(this);
+
+		if (currentNodes.size() == 1) {
+			startNode = node;
+		} else {
+			wire();
+		}
+	}
+
+	public void removeCurrentNode(Node node) {
+		currentNodes.remove(node);
+		if (currentNodes.size() == 0) {
+			startNode = null;
+		}
 	}
 
 	/*
@@ -290,7 +299,7 @@ public class Workflow extends RunnableEntity {
 
 		// Set start node and next nodes.
 		if (nodes.isEmpty()) {
-			startNodeId = null;
+			startNode = null;
 		} else {
 			for (Link link : links) {
 				Node fromNode = nodeMap.get(link.previousNodeId);
@@ -304,20 +313,20 @@ public class Workflow extends RunnableEntity {
 				link.setNextNode(toNode);
 			}
 
-			startNodeId = null;
+			// Identify the start node. Validate as error if more than one potential start node is found.
+			startNode = null;
 			for (Node node : nodes) {
 				node.wire();
 
-				if (node.getFromNodeIds().isEmpty() && !node.id.equals(startNodeId)) {
-					if (startNodeId == null) {
-						startNodeId = node.id;
+				if (node.getFromNodeIds().isEmpty()) {
+					if (startNode == null) {
+						startNode = node;
 					} else {
 						logger.debug(String.format("Workflow [%s] validation error: node [%s] is also a potential start node", id, node.id));
 						isOkay = false;
 					}
 				}
 			}
-			setStartNode(nodeMap.get(startNodeId));
 		}
 
 		this.isValidated = isOkay;
@@ -339,7 +348,7 @@ public class Workflow extends RunnableEntity {
 
 		// Set start node and next nodes.
 		if (nodes.isEmpty()) {
-			startNodeId = null;
+			startNode = null;
 		} else {
 			for (Link link : links) {
 				Node fromNode = nodeMap.get(link.previousNodeId);
@@ -353,20 +362,20 @@ public class Workflow extends RunnableEntity {
 				link.setNextNode(toNode);
 			}
 
-			startNodeId = null;
+			// Identify the start node. Validate as error if more than one potential start node is found.
+			startNode = null;
 			for (Node node : nodes) {
 				node.wire();
 
-				if (node.getFromNodeIds().isEmpty() && !node.id.equals(startNodeId)) {
-					if (startNodeId == null) {
-						startNodeId = node.id;
+				if (node.getFromNodeIds().isEmpty()) {
+					if (startNode == null) {
+						startNode = node;
 					} else {
 						logger.debug(String.format("Workflow [%s] validation error: node [%s] is also a potential start node", id, node.id));
 						isOkay = false;
 					}
 				}
 			}
-			setStartNode(nodeMap.get(startNodeId));
 		}
 
 		this.isValidated = isOkay;
