@@ -13,7 +13,18 @@ public abstract class TrackableAction extends Action {
 
 	@JsonProperty("tracking")
 	@DBRef
-	public Event trackEvent;
+	protected Event trackEvent;
+
+	public Event getTrackEvent() {
+		return trackEvent;
+	}
+
+	public void setTrackEvent(Event trackEvent) {
+		this.trackEvent = trackEvent;
+		if (trackEvent != null) {
+			trackEvent.setAction(this);
+		}
+	}
 
 	@Override
 	public void save() {
