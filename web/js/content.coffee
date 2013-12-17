@@ -487,8 +487,9 @@ ProjectFilterView
       @idx = options.idx
       @id ?= options.id or @idx
       @id = 'section_' + @id if typeof @id is 'number'
-      @readonly = options.readonly
       throw new Error 'id must be given for a section' unless @id
+      @readonly = options.readonly
+      @updatePreview = _.debounce @updatePreview.bind(@), 100
       @
     _changeType: (type) ->
       @changeType type
@@ -521,7 +522,6 @@ ProjectFilterView
         @trigger 'change', el, @data
       # bind update preview on any changes
       @previewEl = find '.preview', @el
-      @updatePreview = _.debounce @updatePreview.bind(@), 100
       unless @readonly
         @on 'change fill reset', => @updatePreview @data
       @
