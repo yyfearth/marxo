@@ -711,15 +711,46 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class Event extends Entity
     urlRoot: ROOT + '/events'
+    constructor: (model, options) ->
+      super @_proc(model), options
+    pause: (attr) -> @_proc attr
+    _proc: (attr = @attributes) ->
+      if attr.duration?
+        duration = Number attr.duration
+        attr.duration = unless duration then 0 else duration
+      for n in ['starts', 'ends'] then if attr[n]?
+        date = new Date attr[n]
+        if isNaN date.getTime()
+          console.error 'invalid date', attr[n]
+          delete attr[n]
+        else
+          attr[n] = date
+      if attr.ends? and Date.now() > attr.ends.getTime()
+        attr.status = 'FINISHED'
+      else if attr.starts? and Date.now() > attr.starts.getTime()
+        attr.status = 'STARTED'
+      else
+        attr.status = 'IDLE'
+      attr
+    isEmpty: ->
+      attr = @attributes
+      Boolean attr.duration or attr.starts or attr.ends
 
   class Events extends ManagerCollection
     model: Event
-    url: Event::urlRoot
+    #url: Event::urlRoot # no longer allow fetch directly
 
   ## Content
 
   class Content extends Entity
     urlRoot: ROOT + '/contents'
+    constructor: (model, options) ->
+      super @_proc(model), options
+    pause: (attr) -> @_proc attr
+    _proc: (attr = @attributes) ->
+      posted = attr.posted_at or attr.records?.length or attr.submissions?.length
+      attr.status = if posted then 'STARTED' else 'IDLE'
+      attr
     hasReport: ->
       Boolean(@get('records')?.length or @get('submissions')?.length)
 
