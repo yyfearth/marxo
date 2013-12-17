@@ -24,7 +24,7 @@ import marxo.tool.PasswordEncryptor;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
-import org.joda.time.Minutes;
+import org.joda.time.Seconds;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.domain.Sort;
@@ -142,33 +142,35 @@ public class DatabaseResetTests extends BasicDataTests {
 		node1.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node1);
 
-		Action postFacebookAction1 = new FacebookAction();
-		postFacebookAction1.setName("Post to Facebook 1");
-		node1.addAction(postFacebookAction1);
+		FacebookAction facebookAction1 = new FacebookAction();
+		facebookAction1.setName("Post to Facebook 1");
+		node1.addAction(facebookAction1);
+
+		Event event = new Event();
+		event.setDuration(Seconds.seconds(10).toStandardDuration());
+		facebookAction1.setEvent(event);
 
 		Content facebookContent1 = new Content(Content.Type.FACEBOOK);
 		facebookContent1.setName("Contnet " + ++contentCount);
 		facebookContent1.message = String.format("Marxo Engine Automation [%s]\nThat's one small step for the engine, a giant leap for the project", facebookContent1.id);
-		postFacebookAction1.setContent(facebookContent1);
+		facebookAction1.setContent(facebookContent1);
 
 		Node node2 = new Node();
 		node2.setName("Node " + ++nodeCount);
 		reusedWorkflow.addNode(node2);
 
-		Action postFacebookAction2 = new FacebookAction();
-		postFacebookAction2.setName("Post to Facebook 2");
-		node2.addAction(postFacebookAction2);
+		FacebookAction facebookAction2 = new FacebookAction();
+		facebookAction2.setName("Post to Facebook 2");
+		node2.addAction(facebookAction2);
 
-		Event event = new Event();
-		event.setName("5 minutes later");
-		event.setStartTime(DateTime.now().plus(Minutes.minutes(5)));
-		event.setDuration(Days.days(1).toStandardDuration());
-		postFacebookAction2.setEvent(event);
+		Event trackedEvent = new Event();
+		trackedEvent.setDuration(Days.days(1).toStandardDuration());
+		facebookAction2.setTrackEvent(trackedEvent);
 
 		Content facebookContent2 = new Content(Content.Type.FACEBOOK);
 		facebookContent2.setName("Contnet " + ++contentCount);
 		facebookContent2.message = String.format("Follow up post [%s]", facebookContent2.id);
-		postFacebookAction2.setContent(facebookContent2);
+		facebookAction2.setContent(facebookContent2);
 
 		Link link = new Link();
 		link.setName("Just a link");
@@ -181,12 +183,13 @@ public class DatabaseResetTests extends BasicDataTests {
 		mongoTemplate.insertAll(Lists.newArrayList(
 				reusedWorkflow,
 				node1,
-				postFacebookAction1,
+				facebookAction1,
+				event,
 				facebookContent1,
 				node2,
-				postFacebookAction2,
+				facebookAction2,
 				facebookContent2,
-				event,
+				trackedEvent,
 				link
 		));
 
@@ -200,6 +203,7 @@ public class DatabaseResetTests extends BasicDataTests {
 		node2 = Node.get(node2.id);
 		link = Link.get(link.id);
 		Assert.assertEquals(node1.getToLinkIds().get(0), link.id);
+		Assert.assertEquals(node2.getFromLinkIds().get(0), link.id);
 	}
 
 	@Test(dependsOnMethods = {"addWorkflow"})
@@ -317,6 +321,10 @@ public class DatabaseResetTests extends BasicDataTests {
 		pageAction.setName("Requirement Page");
 		node1.addAction(pageAction);
 
+		Event trackEvent = new Event();
+		trackEvent.setDuration(Days.ONE.toStandardDuration());
+		pageAction.setTrackEvent(trackEvent);
+
 		Content facebookContent1 = new Content(Content.Type.PAGE);
 		facebookContent1.setStatus(RunStatus.STARTED);
 		facebookContent1.setName("Contnet " + ++contentCount);
@@ -329,6 +337,7 @@ public class DatabaseResetTests extends BasicDataTests {
 				reusedWorkflow,
 				node1,
 				pageAction,
+				trackEvent,
 				facebookContent1
 		));
 	}
