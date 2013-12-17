@@ -666,6 +666,8 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class Content extends Entity
     urlRoot: ROOT + '/contents'
+    hasReport: ->
+      Boolean(@get('records')?.length or @get('submissions')?.length)
 
   class Contents extends ManagerCollection
     model: Content
