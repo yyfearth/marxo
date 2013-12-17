@@ -1,5 +1,8 @@
 package marxo.entity.action;
 
+import marxo.entity.node.Node;
+import marxo.entity.workflow.Workflow;
+
 public class TwitterAction extends TrackableAction {
 
 	public TwitterAction() {
@@ -7,7 +10,7 @@ public class TwitterAction extends TrackableAction {
 	}
 
 	@Override
-	public boolean act() {
+	public boolean act(Workflow workflow, Node node) {
 		return true;
 	}
 }

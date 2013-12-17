@@ -217,7 +217,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 							Notification.saveNew(Notification.Level.NORMAL, action, "Action started");
 
 							try {
-								action.act();
+								action.act(workflow, node);
 							} finally {
 								// review: check if save on workflow already.
 								action.save();
@@ -291,8 +291,13 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					if (workflowHasError) {
 						workflow.setStatus(RunStatus.ERROR);
 					} else if (workflow.trackedActionIds.isEmpty()) {
-						workflow.setStatus(RunStatus.FINISHED);
-						Notification.saveNew(Notification.Level.NORMAL, workflow, String.format("Workflow %s finished", workflow.getName()));
+						if (workflow.getCurrentNodes().size() == 0) {
+							workflow.setStatus(RunStatus.FINISHED);
+							Notification.saveNew(Notification.Level.NORMAL, workflow, "Workflow finished");
+						} else {
+							workflow.setStatus(RunStatus.ERROR);
+							Notification.saveNew(Notification.Level.ERROR, workflow, "Workflow has error");
+						}
 					} else {
 						workflow.setStatus(RunStatus.TRACKED);
 					}

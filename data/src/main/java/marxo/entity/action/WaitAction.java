@@ -1,5 +1,9 @@
 package marxo.entity.action;
 
+import marxo.entity.node.Node;
+import marxo.entity.workflow.RunStatus;
+import marxo.entity.workflow.Workflow;
+
 public class WaitAction extends Action {
 
 	public WaitAction() {
@@ -7,7 +11,8 @@ public class WaitAction extends Action {
 	}
 
 	@Override
-	public boolean act() {
+	public boolean act(Workflow workflow, Node node) {
+		setStatus(RunStatus.FINISHED);
 		return true;
 	}
 }

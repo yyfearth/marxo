@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import marxo.entity.node.Event;
+import marxo.entity.node.Node;
 import marxo.entity.node.NodeChildEntity;
+import marxo.entity.workflow.Workflow;
 import marxo.exception.Errors;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Transient;
@@ -133,7 +135,7 @@ public abstract class Action extends NodeChildEntity {
 	/**
 	 * @return whether it should continue.
 	 */
-	public abstract boolean act();
+	public abstract boolean act(Workflow workflow, Node node);
 
 	@Override
 	public boolean validate(Errors errors) {

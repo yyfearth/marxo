@@ -6,6 +6,7 @@ import marxo.entity.action.Action;
 import marxo.entity.action.ActionChildEntity;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
+import marxo.entity.user.Tenant;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Weeks;
@@ -83,7 +84,9 @@ public class Notification extends ActionChildEntity implements Comparable<Notifi
 		Notification notification = new Notification(level, message);
 
 		Class<? extends BasicEntity> aClass = entity.getClass();
-		if (entity instanceof Workflow) {
+		if (entity instanceof Tenant) {
+			notification.setTenant((Tenant) entity);
+		} else if (entity instanceof Workflow) {
 			notification.setWorkflow((Workflow) entity);
 		} else if (entity instanceof Node) {
 			notification.setNode((Node) entity);

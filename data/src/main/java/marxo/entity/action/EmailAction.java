@@ -1,5 +1,8 @@
 package marxo.entity.action;
 
+import marxo.entity.node.Node;
+import marxo.entity.workflow.Workflow;
+
 public class EmailAction extends Action {
 
 	public EmailAction() {
@@ -7,7 +10,7 @@ public class EmailAction extends Action {
 	}
 
 	@Override
-	public boolean act() {
+	public boolean act(Workflow workflow, Node node) {
 		return true;
 	}
 }

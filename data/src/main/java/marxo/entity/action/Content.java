@@ -2,9 +2,8 @@ package marxo.entity.action;
 
 import com.restfb.types.Comment;
 import com.restfb.types.FacebookType;
-import com.restfb.types.Post;
+import marxo.entity.report.Record;
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -76,22 +75,7 @@ public class Content extends ActionChildEntity {
 		return messageResponse.getId();
 	}
 
-	public static class FacebookRecord {
-		public DateTime time;
-		public long likesCount;
-		public long commentsCount;
-		public long sharesCount;
-
-		public static FacebookRecord fromPost(Post post) {
-			FacebookRecord facebookRecord = new FacebookRecord();
-			facebookRecord.likesCount = (post.getLikesCount() == null) ? 0 : post.getLikesCount();
-			facebookRecord.sharesCount = (post.getSharesCount() == null) ? 0 : post.getSharesCount();
-			facebookRecord.commentsCount = (post.getComments() == null || post.getComments().getCount() == null) ? 0 : post.getComments().getCount();
-			return facebookRecord;
-		}
-	}
-
-	public List<FacebookRecord> records;
+	public List<Record> records;
 	public List<Comment> comments;
 
 	/*
@@ -101,6 +85,24 @@ public class Content extends ActionChildEntity {
 	public String parsedMessage;
 	public List<Submission> submissions;
 	public List<Section> sections;
+
+	/*
+	View count.
+	 */
+
+	protected int viewCount = 0;
+
+	public int getViewCount() {
+		return viewCount;
+	}
+
+	public void setViewCount(int viewCount) {
+		this.viewCount = viewCount;
+	}
+
+	public void increaseViewCount() {
+		viewCount++;
+	}
 
 	/*
 	DAO

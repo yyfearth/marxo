@@ -1,9 +1,11 @@
 package marxo.entity.action;
 
 import marxo.entity.Task;
-import marxo.entity.node.Event;
+import marxo.entity.node.Node;
+import marxo.entity.report.PageRecord;
 import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
+import marxo.entity.workflow.Workflow;
 import org.joda.time.DateTime;
 
 public class PageAction extends TrackableAction {
@@ -13,43 +15,64 @@ public class PageAction extends TrackableAction {
 	}
 
 	@Override
-	public boolean act() {
-		getEvent();
-
-		if (event == null) {
-			Event event1 = new Event();
-			setEvent(event1);
+	public boolean act(Workflow workflow, Node node) {
+		if (getStatus().equals(RunStatus.IDLE)) {
+			setStatus(RunStatus.STARTED);
 		}
 
-		if (event.getStartTime() == null) {
-			event.setStartTime(DateTime.now());
-			event.save();
+		if (getStatus().equals(RunStatus.STARTED)) {
+			if (!isTracked()) {
+				logger.warn(String.format("%s should be tracking instead of finishing directly", this));
+				setStatus(RunStatus.FINISHED);
+				return true;
+			}
+
+			if (trackEvent.getStartTime() == null) {
+				trackEvent.setStartTime(DateTime.now());
+			}
+
+			if (!trackEvent.getEndTime().isAfterNow()) {
+				setStatus(RunStatus.FINISHED);
+				return true;
+			}
+
+			if (!trackEvent.getStartTime().isAfterNow()) {
+				setStatus(RunStatus.TRACKED);
+				workflow.addTracableAction(this);
+
+				Notification.saveNew(Notification.Level.NORMAL, this, "Page is tracked");
+
+				nextTrackTime = trackEvent.getStartTime();
+				Task.reschedule(workflowId, nextTrackTime);
+				return true;
+			}
 		}
 
-		if (event.getStartTime().isBeforeNow()) {
-			status = RunStatus.STARTED;
+		if (getStatus().equals(RunStatus.TRACKED)) {
+			if (!trackEvent.getEndTime().isAfterNow()) {
+				setStatus(RunStatus.FINISHED);
+				return true;
+			}
 
-			Notification notification = new Notification(Notification.Level.NORMAL, "Page is posted");
-			notification.setAction(this);
-			notification.save();
+			if (nextTrackTime.isAfterNow()) {
+				Task.reschedule(workflowId, nextTrackTime);
+				return true;
+			}
 
-			getWorkflow().addTracableAction(this);
-			workflow.save();
+			Content content1 = getContent();
+			content1.records.add(PageRecord.getInstance(content1));
+
+			nextTrackTime = nextTrackTime.plus(trackPeriod);
+			Task.reschedule(workflowId, nextTrackTime);
 
 			return true;
 		}
 
-		if (event.getEndTime().isBeforeNow()) {
-			status = RunStatus.FINISHED;
-
-			Notification notification = new Notification(Notification.Level.NORMAL, "Page is finished");
-			notification.setAction(this);
-			notification.save();
-
+		if (getStatus().equals(RunStatus.FINISHED)) {
 			return true;
 		}
 
-		Task.reschedule(workflowId, event.getStartTime());
+		logger.warn(String.format("%s has unexpected status [%s]", this, getStatus()));
 
 		return false;
 	}

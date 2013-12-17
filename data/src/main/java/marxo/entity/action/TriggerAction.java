@@ -1,5 +1,10 @@
 package marxo.entity.action;
 
+import marxo.entity.node.Node;
+import marxo.entity.workflow.Notification;
+import marxo.entity.workflow.RunStatus;
+import marxo.entity.workflow.Workflow;
+
 public class TriggerAction extends Action {
 
 	public TriggerAction() {
@@ -7,7 +12,9 @@ public class TriggerAction extends Action {
 	}
 
 	@Override
-	public boolean act() {
+	public boolean act(Workflow workflow, Node node) {
+		Notification.saveNew(Notification.Level.MAJOR, this, "Action waits for user action");
+		setStatus(RunStatus.STARTED);
 		return false;
 	}
 }
