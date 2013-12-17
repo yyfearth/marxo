@@ -514,6 +514,9 @@ Projects
   class ProjectStatusView extends View
     _prefix: 'prj_status_lst'
     _cls: STATUS_CLS
+    events:
+      'dblclick li > a[href]': (e) ->
+        @router.navigate e.currentTarget.href.replace(/^.*?#(project.*)/, '$1/edit'), trigger: true
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
       @$detail = $ find '.node-link-detail', @el
@@ -602,7 +605,7 @@ Projects
       return unless model
       _prefix = @_prefix
       _label = @_renderLabel
-      _href = model._href
+      _href = model._href ?= "#project/#{model.workflow.id}/node/#{model.id}"
       _cls = @_cls
       _renderRef = @_renderRefLink
       frag = document.createDocumentFragment()
@@ -612,7 +615,7 @@ Projects
         li.id = "#{_prefix}_action_#{action.id}"
         li.className = 'action'
         a = document.createElement 'a'
-        a.href = "#{_href}/action/#{action.id}" if _href
+        a.href = "#{_href}/action/#{action.id}"
         a.textContent = "Action #{i + 1}: "
         name = document.createElement 'strong'
         name.textContent = action.name()
