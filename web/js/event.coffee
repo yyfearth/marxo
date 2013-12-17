@@ -254,7 +254,7 @@ Event
       events = []
       unsched = []
       col.forEach (evt) ->
-        return unless Number(evt.get 'duration') or evt.get('ends') # filter empty events w/o duration or ends
+        return unless evt.get('duration') or evt.get('ends') # filter empty events w/o duration or ends
         _evt =
           id: evt.id
           url: "#event/#{evt.id}"
@@ -454,9 +454,10 @@ Event
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
       super # must before hide
-      duration = @model.get 'duration'
-      @_hide 'view' unless @model.get 'duration'
-      @_hide 'finish' unless duration and /^(?:STARTED|TRACKED|PAUSED)$/.test @model.status()
+      model = @model
+      duration = model.get 'duration'
+      @_hide 'view' unless model.get('duration') and model.get('starts')
+      @_hide 'finish' unless duration and /^(?:STARTED|TRACKED|PAUSED)$/.test model.status()
       @
 
   class EventManagemerView extends ManagerView
