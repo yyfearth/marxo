@@ -2,13 +2,11 @@ package marxo.controller;
 
 import marxo.entity.FacebookData;
 import marxo.entity.FacebookStatus;
+import marxo.entity.MongoDbAware;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.exception.EntityNotFoundException;
 import marxo.security.MarxoAuthentication;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -22,9 +20,7 @@ import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/service{:s?}/facebook")
-public class FacebookController implements InterceptorPreHandlable {
-	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
+public class FacebookController implements MongoDbAware, InterceptorPreHandlable {
 	Criteria criteria;
 	User user;
 

@@ -2,6 +2,7 @@ package marxo.dev;
 
 import com.google.common.collect.Maps;
 import com.rits.cloning.Cloner;
+import marxo.entity.MongoDbAware;
 import marxo.entity.action.Action;
 import marxo.entity.action.TriggerAction;
 import marxo.entity.link.Condition;
@@ -29,11 +30,8 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("unchecked")
-public class AdvancedGenerator extends BasicGenerator implements Loggable {
+public class AdvancedGenerator extends BasicGenerator implements MongoDbAware, Loggable {
 	public static void main(String[] args) {
-		ApplicationContext dataContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-		MongoTemplate mongoTemplate = dataContext.getBean(MongoTemplate.class);
-
 		ApplicationContext securityContext = new ClassPathXmlApplicationContext("classpath*:security.xml");
 		byte[] salt = DatatypeConverter.parseHexBinary((String) securityContext.getBean("passwordSaltHexString"));
 		SecretKeyFactory secretKeyFactory = (SecretKeyFactory) securityContext.getBean("secretKeyFactory");
