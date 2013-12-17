@@ -233,7 +233,7 @@ Event
       events = []
       unsched = []
       col.forEach (evt) ->
-        return unless evt.get('duration') or evt.get('ends') # filter empty events w/o duration or ends
+        return unless Number(evt.get 'duration') or evt.get('ends') # filter empty events w/o duration or ends
         _evt =
           id: evt.id
           url: "#event/#{evt.id}"
