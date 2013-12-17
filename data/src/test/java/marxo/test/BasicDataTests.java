@@ -47,6 +47,9 @@ public abstract class BasicDataTests implements MongoDbAware, Loggable {
 	public void afterClass() throws Exception {
 		Criteria criteria = Criteria.where("_id").in(Collections2.transform(entitiesToRemove, SelectIdFunction.getInstance()));
 		for (String collectionName : mongoTemplate.getCollectionNames()) {
+			if (collectionName.contains("system")) {
+				continue;
+			}
 			mongoTemplate.remove(Query.query(criteria), collectionName);
 		}
 	}
