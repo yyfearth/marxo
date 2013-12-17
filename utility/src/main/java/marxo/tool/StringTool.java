@@ -123,4 +123,8 @@ public class StringTool {
 		e.printStackTrace(printStream);
 		return byteArrayOutputStream.toString();
 	}
+
+	public static String valueOfEmpty(String s) {
+		return (s == null) ? "" : s;
+	}
 }

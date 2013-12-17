@@ -7,6 +7,7 @@ import marxo.serialization.DurationReadConverter;
 import marxo.serialization.DurationWriteConverter;
 import marxo.serialization.PeriodReadConverter;
 import marxo.serialization.PeriodWriteConverter;
+import marxo.tool.NumberTool;
 import marxo.tool.Systems;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,8 @@ import java.net.UnknownHostException;
 @Configuration
 public class MongoConfiguration {
 	static final boolean isDebug = System.getProperty("debug") != null;
+	static final String mongoHost = System.getProperty("mongoHost");
+	static final int mongoPort = NumberTool.valueOrDefault(NumberTool.parse(System.getProperty("mongoPort")), 27017);
 
 	MongoDbFactory mongoDbFactory;
 	MongoClient mongoClient;
@@ -45,10 +48,14 @@ public class MongoConfiguration {
 	@Bean
 	public Mongo mongo() throws UnknownHostException {
 		if (mongoClient == null) {
-			if (Systems.isWindows()) {
-				mongoClient = new MongoClient("localhost", 27017);
+			if (mongoHost != null) {
+				mongoClient = new MongoClient(mongoHost, mongoPort);
 			} else {
-				mongoClient = new MongoClient("masonwan.com", 27017);
+				if (Systems.isWindows()) {
+					mongoClient = new MongoClient("localhost", 27017);
+				} else {
+					mongoClient = new MongoClient("masonwan.com", 27017);
+				}
 			}
 		}
 
