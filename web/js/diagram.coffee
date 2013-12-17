@@ -9,7 +9,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       @t = options.timeout ? 100
       @max_t = options.maxTimeout
       @_tick = @_tick.bind @
-      @_draw = @_draw.bind @
+      @_draw = _.debounce @_draw.bind(@), 100
       @_click = @_click.bind @
       @_mouseover = @_mouseover.bind @
       @_mouseleave = @_mouseleave.bind @
@@ -26,7 +26,7 @@ define 'diagram', ['base', 'lib/d3v3'], ({View}, d3) ->
       offset_x = @$el.innerWidth() or r
       offset_y = @$el.innerHeight() or r
       fixed = true
-      @_invalid = not wf.startNode? or not wf.sort()._sorted
+      @_invalid = not (wf.startNode? and wf.sort()._sorted) # always sort
 
       @data =
         nodes: wf.nodes.map (node, i) ->
