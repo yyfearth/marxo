@@ -2,6 +2,7 @@ package marxo.test;
 
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
+import marxo.entity.user.UserType;
 import marxo.tool.PasswordEncryptor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -61,6 +62,7 @@ public abstract class BasicApiTests extends BasicDataTests {
 		reusedUser.setTenant(reusedTenant);
 		reusedUser.setName("Test user");
 		reusedUser.setEmail(email);
+		reusedUser.type = UserType.PUBLISHER;
 		reusedUser.setPassword(passwordEncryptor.encrypt(password));
 
 		insertEntities(
