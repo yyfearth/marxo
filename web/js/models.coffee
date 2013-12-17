@@ -180,6 +180,8 @@ define 'models', ['module', 'lib/common'], (module) ->
     urlRoot: ROOT + '/workflows'
     constructor: (model, options) ->
       super model, options
+      @_createNodeRef = @_createNodeRef.bind @
+      @_createLinkRef = @_createLinkRef.bind @
       @_wire()
     _wire: ->
       attr = @attributes
@@ -195,9 +197,8 @@ define 'models', ['module', 'lib/common'], (module) ->
       _deleted = @_deleted = []
 
       # auto wire nodes
-      _createNodeRef = @_createNodeRef.bind @
-      nodes.forEach _createNodeRef
-      @listenTo nodes, add: _createNodeRef, remove: (node) =>
+      nodes.forEach @_createNodeRef
+      @listenTo nodes, add: @_createNodeRef, remove: (node) =>
         @_removeNodeRef node
         _deleted.push node unless node.isNew()
         return
@@ -208,9 +209,8 @@ define 'models', ['module', 'lib/common'], (module) ->
         @set 'node_ids', ids
 
       # auto wire links
-      _createLinkRef = @_createLinkRef.bind @
-      links.forEach _createLinkRef
-      @listenTo links, add: _createLinkRef, remove: (link) =>
+      links.forEach @_createLinkRef
+      @listenTo links, add: @_createLinkRef, remove: (link) =>
         @_removeLinkRef link
         _deleted.push link unless link.isNew()
         return
@@ -472,6 +472,10 @@ define 'models', ['module', 'lib/common'], (module) ->
       node.workflow = @
       node.inLinks = []
       node.outLinks = []
+      node.actions().forEach (action) ->
+        action.workflow = node.workflow
+        action.node = node
+        return
       return
     _removeNodeRef: (node) ->
       # remove all connected links
@@ -604,16 +608,17 @@ define 'models', ['module', 'lib/common'], (module) ->
       if @has 'content'
         @content = new Content @get 'content'
         @content.action = @
+      else
+        @content = null
       for name in ['event', 'tracking']
-        if evt = @get name
-          evt.duration = Number evt.duration if evt.duration
-          evt.duration = 0 if isNaN evt.duration
-          evt = @[name] = new Event evt
+        if @has name
+          evt = @[name] = new Event @get name
           evt.action = @
         else
           @[name] = null
       @
     name: -> @get('name') or @get('type')?.replace(/_/, ' ').capitalize() or '(No Name)'
+    urlRoot: ROOT + '/actions'
 
   class Actions extends SimpleCollection
     @actions = new Actions
