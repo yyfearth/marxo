@@ -101,7 +101,6 @@ public class Node extends WorkflowChildEntity {
 	Current action
 	 */
 
-
 	@DBRef
 	protected Action currentAction;
 

@@ -1,8 +1,9 @@
 package marxo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import marxo.config.MongoConfiguration;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
@@ -11,7 +12,8 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 public interface MongoDbAware {
 	@JsonIgnore
 	@Transient
-	ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
+	ApplicationContext applicationContext = new AnnotationConfigApplicationContext(MongoConfiguration.class);
+
 	@JsonIgnore
 	@Transient
 	MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
