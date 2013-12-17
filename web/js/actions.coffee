@@ -53,7 +53,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
           model: model
           parent: @, container: @actionsEl
           projectMode: @projectMode
-          readonly: @projectMode and model.status() isnt 'IDLE'
+          readonly: @readonly and model.status() isnt 'IDLE'
         @listenTo actionView, 'remove', @removeAction.bind @
         actionView.render()
         actionView.el.scrollIntoViewIfNeeded() if options?.scrollIntoView
@@ -94,7 +94,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       unless options.model
         throw new Error 'need action model'
         console.dir options
-      @projectMode = options.projectMode or options.readonly
+      @projectMode = options.projectMode
       @readonly = options.readonly
       @containerEl = options.container
       @model = options.model
@@ -138,8 +138,8 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         # deal with form
         @form = find 'form', @el
         $form = $ @form
-        @form.key.readOnly = @projectMode
-        $(@btn_close).remove() if @projectMode
+        $(@btn_close).remove() if readonly = @projectMode or @readonly
+        @form.key.readOnly = readonly
         if @readonly
           $form.find('input, textarea').prop 'readOnly', true
           $form.find('select, input[type=checkbox], input[type=radio]').prop 'disabled', true

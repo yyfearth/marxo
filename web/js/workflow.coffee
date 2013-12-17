@@ -381,9 +381,13 @@ Action
     popup: (data, callback) ->
       throw new Error 'data must be an model entity' unless data instanceof Entity
       super data, callback
+      @readonly = not @model.has 'tenant_id'
       @fill data.attributes
       @btnSave.textContent = if data.isNew() then 'OK' else 'Save'
-      @on 'shown', => @form.name.select()
+      @on 'shown', =>
+        $(@form).find(':input').prop 'readOnly', @readonly
+        @btnSave.disabled = @readonly
+        @form.name.select()
       @
     save: ->
       @data.set @read()
