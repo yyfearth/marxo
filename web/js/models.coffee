@@ -593,12 +593,26 @@ define 'models', ['module', 'lib/common'], (module) ->
     url: Link::urlRoot
 
   class Action extends StatusEntity
+    constructor: (model, options) ->
+      super model, options
+      @_wire()
+      @on 'reset sync', @_wire.bind @
+    _wire: ->
+      if @has 'content'
+        @content = new Content @get 'content'
+        @content.action = @
+      if @has 'event'
+        @event = new Event @get 'event'
+        @event.action = @
+      if @has 'tracking'
+        @tracking = new Event @get 'tracking'
+        @tracking.action = @
+      @
     name: -> @get('name') or @get('type')?.replace(/_/, ' ').capitalize() or '(No Name)'
-  # idAttribute: 'index'
 
   class Actions extends SimpleCollection
+    @actions = new Actions
     model: Action
-  # url: -> @node.url() + '/actions'
 
   ## Project
 
