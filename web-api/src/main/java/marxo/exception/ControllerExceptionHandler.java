@@ -139,6 +139,13 @@ public class ControllerExceptionHandler implements Loggable {
 
 	@ExceptionHandler({Exception.class})
 	public ResponseEntity<ErrorJson> handleOtherException(Exception e) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(e.getMessage());
+			logger.debug(StringTool.exceptionToString(e));
+
+			return new ResponseEntity<>(new ErrorJson(String.format("Exception is not captured [%s] %s", e.getClass().getSimpleName(), StringTool.exceptionToString(e))), HttpStatus.NOT_FOUND);
+		}
+
 		String message = String.format("Exception is not captured [%s] %s", e.getClass(), e.getMessage());
 		logger.error(message);
 		return new ResponseEntity<>(new ErrorJson(message), HttpStatus.INTERNAL_SERVER_ERROR);
