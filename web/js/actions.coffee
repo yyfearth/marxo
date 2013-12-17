@@ -118,7 +118,9 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
         @remove()
       else
         model = @model
-        data = model.toJSON()
+        data = model.toJSON() # IT IS NOT DEEP COPY
+        data.event = $.extend {}, data.event if data.event?
+        data.tracking = $.extend {}, data.tracking if data.tracking?
         @el.innerHTML = _tpl
         @el.id = 'action_' + model.id or model.cid
         @_name = @$el.find('.box-header h4').text()
@@ -154,13 +156,14 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
             $btn.prop 'href', "#event/#{id}"
           # for event input enable
           unless model.isNew()
-            checked = data[name]?
+            event = data[name]
+            checked = event? and (Number(event.duration) or event.ends)
             $parent.find('input[type=checkbox]').prop 'checked', checked
             $parent.find('input[name$=duration]').prop 'disabled', not checked
         # for page buttons
         if @type is 'page' and contentId = model.get('content')?.id
           url = "#content/#{contentId}"
-          console.warn @type, url
+          #console.log @type, url
           btnDesgin = find 'a.btn-design', @el
           btnDesgin.removeAttribute 'disabled'
           btnDesgin.href = url
