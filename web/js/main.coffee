@@ -29,7 +29,9 @@ requirejs.config
       BASE_URL: localStorage.ROOT ? 'http://masonwan.com/marxo/api' # '../api'
     config:
       FB_APP_ID: '213527892138380'
-      FB_SCOPES: 'publish_actions, email, read_stream, '
+      FB_SCOPES: 'publish_actions, email, read_stream'
+    content:
+      SITE_BASE_URL: './#'
 
 define 'main', ['console'], ({findAll, ConsoleView, SignInView, Router}) -> # EP
 

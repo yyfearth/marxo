@@ -1,11 +1,11 @@
 "use strict"
 
 define 'content', [
-  'base', 'models', 'manager', 'report'
+  'module', 'base', 'models', 'manager', 'report'
   'lib/jquery-ui'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
-], ({
+], (module, {
 find
 findAll
 tpl
@@ -715,7 +715,7 @@ ProjectFilterView
       # view
       view_btn = @_find 'view', 'a'
       if type is 'PAGE' and status isnt 'IDLE'
-        view_btn.href = 'site.html#' + model.id
+        view_btn.href = (module.config().SITE_BASE_URL or './#') + model.id
         view_btn.title = 'View page in new window'
       else if model.has('post_id') and type is 'FACEBOOK'
         view_btn.href = 'https://www.facebook.com/' + model.get 'post_id'
