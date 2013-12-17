@@ -204,7 +204,7 @@ Event
       @listenTo @collection, 'reset add remove change', =>
         @update() if @$el.is ':visible'
       @listenTo @calView, 'modify', @_modify.bind @
-      @update = _.throttle @update.bind(@), 500
+      @update = _.throttle @update.bind(@), 500, trailing: false
       #@on 'activate', update # use show instead
       @
     _modify: (event) -> # (event, revertFunc)
@@ -356,7 +356,7 @@ Event
             parent.scrollTop = 0
             false
         return
-      , 350
+      , 350, trailing: false
       @
     _view_map:
       month: 'month', week: 'agendaWeek', day: 'agendaDay'
