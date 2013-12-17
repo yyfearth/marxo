@@ -601,12 +601,14 @@ define 'models', ['module', 'lib/common'], (module) ->
       if @has 'content'
         @content = new Content @get 'content'
         @content.action = @
-      if @has 'event'
-        @event = new Event @get 'event'
-        @event.action = @
-      if @has 'tracking'
-        @tracking = new Event @get 'tracking'
-        @tracking.action = @
+      for name in ['event', 'tracking']
+        if evt = @get name
+          evt.duration = Number evt.duration if evt.duration
+          evt.duration = 0 if isNaN evt.duration
+          evt = @[name] = new Event evt
+          evt.action = @
+        else
+          @[name] = null
       @
     name: -> @get('name') or @get('type')?.replace(/_/, ' ').capitalize() or '(No Name)'
 
