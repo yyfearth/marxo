@@ -587,10 +587,14 @@ Projects
       frag = document.createDocumentFragment()
       if wf.nodes.length
         frag.appendChild _header 'Nodes'
-        wf.nodes.forEach (node) -> frag.appendChild _item node
+        wf.nodes.forEach (node, i) ->
+          node.idx ?= i
+          frag.appendChild _item node
       if wf.links.length
         frag.appendChild _header 'Links'
-        wf.links.forEach (link) -> frag.appendChild _item link
+        wf.links.forEach (link, i) ->
+          link.idx ?= i
+          frag.appendChild _item link
       @$list.append frag
       return
     _renderNode: (model) ->
