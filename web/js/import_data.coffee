@@ -1,11 +1,11 @@
 "use strict"
 
 define 'import_data', ['models'], ({
-Workflow, Workflows
+Workflow, Project
 }) ->
 
   data =
-    workflows: [
+    app_dev:
       name: 'Conference Check-in Mobile App'
       key: 'conf_app_dev'
       desc: 'Based on project requirements, use crowds sourcing to complete the development steps from ' +
@@ -423,10 +423,17 @@ Workflow, Workflows
         prev_node_id: 4
         next_node_id: 5
       ]
-    ]
 
   console.log 'data start importing...'
 
-  (new Workflows data.workflows).forEach (wf) -> wf.save()
+  #(new Workflows data.workflows).forEach (wf) -> wf.save()
+  for node in data.app_dev.nodes
+    for action in node.actions
+      if action.tracking?
+        tracking = action.tracking
+        action.tracking.name or= action.name + ' (Tracking)'
+      for n in ['content', 'event', 'tracking']
+        action[n]?.name or= action.name
+  new Project(data.app_dev).save()
 
   return
