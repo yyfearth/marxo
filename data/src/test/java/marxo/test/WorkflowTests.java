@@ -64,7 +64,7 @@ public class WorkflowTests extends BasicDataTests {
 		}
 	}
 
-	@Test
+//	@Test
 	public void deepWireWorkflow() throws Exception {
 		List<BasicEntity> entitiesToSave = new ArrayList<>();
 

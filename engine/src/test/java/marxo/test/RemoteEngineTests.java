@@ -221,7 +221,7 @@ public class RemoteEngineTests extends BasicDataTests {
 
 		FacebookAction action = new FacebookAction();
 		action.setName("Test Post to Facebook 1");
-		action.trackEvent = new Event(DateTime.now(), Seconds.seconds(5).toStandardDuration());
+		action.setTrackEvent(new Event(DateTime.now(), Seconds.seconds(5).toStandardDuration()));
 		node1.addAction(action);
 
 		Event event = new Event();

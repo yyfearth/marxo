@@ -225,8 +225,6 @@ public class DatabaseResetTests extends BasicDataTests {
 			nodeMap.put(objectId, new ObjectId());
 		}
 
-		workflow.startNodeId = nodeMap.get(workflow.startNodeId);
-
 		for (Node node : workflow.getNodes()) {
 			node.id = nodeMap.get(node.id);
 			node.setWorkflow(workflow);

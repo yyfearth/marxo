@@ -13,7 +13,6 @@ import marxo.test.BasicApiTests;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @ApiTestConfiguration(value = "http://localhost:8080/api/services/facebook")
@@ -32,12 +31,6 @@ public class FacebookApiTests extends BasicApiTests {
 		appToken = (String) applicationContext.getBean("appToken");
 		userToken = "CAADCM9YpGYwBAGANsWfvdO3aEPcqWE8NM2AqeKZBjrjv3MquGBWMTDHBy8LKwd8klnZCigONqGubLv7ZAmX3dl5b2kmnx8b86ZAtK6XL63yb7BnxXd0OcYvZCjt6ZCINSd4wbdcwMzT3FHQfo91rAdWrKfSZBL47YDthTbmv1ZAbdZAZBdYaEkw6FG34gOL8P4qkkZD";
 		facebookClient = new DefaultFacebookClient(userToken);
-	}
-
-	@BeforeClass
-	@Override
-	public void beforeClass() throws Exception {
-		super.beforeClass();
 	}
 
 	@Test
