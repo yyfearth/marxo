@@ -4,6 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
+import marxo.entity.action.Action;
+import marxo.entity.action.Content;
+import marxo.entity.action.FacebookAction;
+import marxo.entity.link.Link;
+import marxo.entity.node.Event;
+import marxo.entity.node.Node;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.test.ApiTestConfiguration;
@@ -12,6 +18,8 @@ import marxo.test.BasicApiTests;
 import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Minutes;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -223,5 +231,68 @@ public class WorkflowApiTests extends BasicApiTests {
 
 		Workflow workflow1 = mongoTemplate.findOne(Query.query(Criteria.where("_id").is(workflow.id)), Workflow.class);
 		Assert.assertEquals(workflow1.getStatus(), RunStatus.STARTED);
+	}
+
+	@Test
+	public void deleteWorkflow() throws Exception {
+		Workflow workflow1 = new Workflow();
+		workflow1.setTenant(reusedTenant);
+
+		Node node1 = new Node();
+		workflow1.addNode(node1);
+
+		FacebookAction facebookAction = new FacebookAction();
+		node1.addAction(facebookAction);
+
+		Content content = new Content(Content.Type.FACEBOOK);
+		facebookAction.setContent(content);
+
+		Event event = new Event();
+		event.setStartTime(DateTime.now().plus(Minutes.minutes(5)));
+		event.setDuration(Days.days(1).toStandardDuration());
+		facebookAction.setEvent(event);
+
+		Event event1 = new Event();
+		event1.setStartTime(DateTime.now().plus(Minutes.minutes(5)));
+		event1.setDuration(Days.days(1).toStandardDuration());
+		facebookAction.setTrackEvent(event1);
+
+		Node node2 = new Node();
+		workflow1.addNode(node2);
+
+		Link link = new Link();
+		link.setPreviousNode(node1);
+		link.setNextNode(node2);
+		workflow1.addLink(link);
+
+		workflow1.wire();
+
+		mongoTemplate.insertAll(Lists.newArrayList(
+				workflow1,
+				node1,
+				facebookAction,
+				content,
+				event,
+				event1,
+				node2,
+				link
+		));
+
+		try (ApiTester apiTester = apiTesterBuilder.build()) {
+			apiTester
+					.httpDelete(String.format("workflow/%s", workflow1.id))
+					.send();
+			apiTester
+					.isOk();
+		}
+
+		Assert.assertNull(Workflow.get(workflow1.id));
+		Assert.assertNull(Node.get(node1.id));
+		Assert.assertNull(Action.get(facebookAction.id));
+		Assert.assertNull(Content.get(content.id));
+		Assert.assertNull(Event.get(event.id));
+		Assert.assertNull(Event.get(event1.id));
+		Assert.assertNull(Node.get(node2.id));
+		Assert.assertNull(Link.get(link.id));
 	}
 }
