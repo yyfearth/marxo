@@ -4,13 +4,13 @@ import com.google.common.collect.Lists;
 import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.exception.FacebookOAuthException;
+import marxo.entity.MongoDbAware;
 import marxo.entity.user.User;
 import marxo.tool.Loggable;
 import marxo.tool.PasswordEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,7 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MarxoAuthenticationProvider implements AuthenticationProvider, Loggable {
+public class MarxoAuthenticationProvider implements MongoDbAware, AuthenticationProvider, Loggable {
 	static final String appId;
 	static final String appSecret;
 	static final String appToken;
@@ -35,8 +35,6 @@ public class MarxoAuthenticationProvider implements AuthenticationProvider, Logg
 		appToken = (String) applicationContext.getBean("appToken");
 	}
 
-	protected static final ApplicationContext applicationContext = new ClassPathXmlApplicationContext("mongo-configuration.xml");
-	protected static final MongoTemplate mongoTemplate = applicationContext.getBean(MongoTemplate.class);
 	@Autowired
 	PasswordEncryptor passwordEncryptor;
 
