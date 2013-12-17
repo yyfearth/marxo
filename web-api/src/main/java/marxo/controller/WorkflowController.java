@@ -145,6 +145,11 @@ public class WorkflowController extends TenantChildController<Workflow> {
 			throw new EntityNotFoundException(Workflow.class, objectId);
 		}
 
+		if (status.equals(RunStatus.STARTED)) {
+			Task task = new Task(objectId);
+			task.save();
+		}
+
 		return status;
 	}
 
