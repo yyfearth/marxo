@@ -260,7 +260,7 @@ public class EngineTests extends BasicDataTests {
 
 		FacebookAction action = new FacebookAction();
 		action.setName("Test Post to Facebook 1");
-		action.trackEvent = new Event(DateTime.now(), Days.ONE.toStandardDuration());
+		action.setTrackEvent(new Event(DateTime.now(), Days.ONE.toStandardDuration()));
 		node1.addAction(action);
 
 		Event event = new Event();
