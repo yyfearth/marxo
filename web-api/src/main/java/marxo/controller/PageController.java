@@ -109,6 +109,24 @@ public class PageController extends BasicController implements MongoDbAware, Int
 		return contents;
 	}
 
+	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}/view", method = RequestMethod.PUT)
+	public int updateViewCount(@PathVariable String idString) {
+		ObjectId contentId = stringToObjectId(idString);
+
+		Criteria criteria = newDefaultCriteria()
+				.and("_id").is(contentId);
+		Content content = mongoTemplate.findOne(Query.query(criteria), Content.class);
+
+		if (content == null) {
+			throw new EntityNotFoundException(Content.class, contentId);
+		}
+
+		content.increaseViewCount();
+		content.save();
+
+		return content.getViewCount();
+	}
+
 	@RequestMapping(value = "/{pageIdString:[\\da-fA-F]{24}}/submission{:s?}", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
