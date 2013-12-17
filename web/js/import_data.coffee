@@ -6,163 +6,6 @@ Workflow, Workflows
 
   data =
     workflows: [
-#      name: 'Demo Workflow'
-#      key: 'demo_workflow'
-#      desc: 'Demo Workflow for App Dev and Logo Desgin'
-#      start_node_id: 0
-#      nodes: [
-#        name: 'Post Idea'
-#        key: 'post_idea'
-#        desc: 'Post project idea'
-#        offset:
-#          x: 26, y: 43
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Post Requirements'
-#        key: 'post_requirements'
-#        desc: 'Post requirements'
-#        offset:
-#          x: 334, y: 44
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Cancel Notification'
-#        key: 'cancel_notification'
-#        desc: 'Cancel project for less response than expected'
-#        offset:
-#          x: 334, y: 204
-#        actions: [
-#          type: 'FACEBOOK'
-#        ]
-#      ,
-#        name: 'Retrieve App Submissions'
-#        key: 'retrieve_app_submissions'
-#        desc: 'Retrieve app submissions'
-#        offset:
-#          x: 613, y: 44
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Retrieve Logo Design'
-#        key: 'retrieve_logo_design'
-#        desc: 'Retrieve logo design'
-#        offset:
-#          x: 629, y: 282
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Email to Evaluators'
-#        key: 'email_to_evaluators'
-#        desc: 'Email to evaluators'
-#        offset:
-#          x: 1018, y: 44
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'EMAIL'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Post and Vote'
-#        key: 'post_and_vote'
-#        desc: 'Post and vote'
-#        offset:
-#          x: 1043, y: 282
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Post Final Result and Reward'
-#        key: 'post_final_result_and_reward'
-#        desc: 'Post final result and reward'
-#        offset:
-#          x: 1420, y: 183
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'EMAIL'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ]
-#      links: [
-#        key: '10_days_likes_gte_300'
-#        prev_node_id: 0
-#        next_node_id: 1
-#        name: '10 Days & Likes >= 300'
-#      ,
-#        key: '10_days_likes_lt_300'
-#        prev_node_id: 0
-#        next_node_id: 2
-#        name: '10 Days & Likes < 300'
-#      ,
-#        key: 'post_req_to_retrieve_app'
-#        prev_node_id: 1
-#        next_node_id: 3
-#      ,
-#        key: 'post_req_to_retrieve_logo'
-#        prev_node_id: 1
-#        next_node_id: 4
-#      ,
-#        key: 'retrieve_app_to_evaluate'
-#        prev_node_id: 3
-#        next_node_id: 5
-#        name: '15 Days & > 80% Response'
-#      ,
-#        key: 'retrieve_logo_to_post_and_vote'
-#        prev_node_id: 4
-#        next_node_id: 6
-#        name: '10 Days & Submissions >= 3'
-#      ,
-#        name: '(fallback)'
-#        key: 'faild_to_evaluate'
-#        desc: 'Manual trigger back if failed to evaluate'
-#        prev_node_id: 5
-#        next_node_id: 3
-#      ,
-#        name: '(fallback)'
-#        key: 'failed_to_vote'
-#        desc: 'Manual trigger back if failed to vote'
-#        prev_node_id: 6
-#        next_node_id: 4
-#      ,
-#        key: 'evaluate_to_post_final'
-#        prev_node_id: 5
-#        next_node_id: 7
-#      ,
-#        key: 'post_and_vote_to_post_final'
-#        prev_node_id: 6
-#        next_node_id: 7
-#      ]
-#    ,
       name: 'Conference Check-in Mobile App'
       key: 'conf_app_dev'
       desc: 'Based on project requirements, use crowds sourcing to complete the development steps from ' +
@@ -173,7 +16,7 @@ Workflow, Workflows
         key: 'desgin'
         desc: 'Post requirement and collect desgins.'
         offset:
-          x: 40, y: 110
+          x: 120, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Reqirement'
@@ -242,7 +85,7 @@ Workflow, Workflows
           content:
             type: 'FACEBOOK'
             message: '''Attention! Conference Check-in Mobile App start to receive submission.
-            See requirements and submit your desgin in '''
+            See requirements and submit your desgin in http://marxosys.ml/#id'''
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -259,7 +102,7 @@ Workflow, Workflows
         key: 'vote'
         desc: 'Public vote submitted designs.'
         offset:
-          x: 62, y: 235
+          x: 340, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Design Vote Form'
@@ -293,7 +136,7 @@ Workflow, Workflows
           key: 'design_vote_fb'
           content:
             type: 'FACEBOOK'
-            message: 'Vote your favorite desgin for our Conference Check-in Mobile App.'
+            message: 'Vote your favorite desgin for our Conference Check-in Mobile App.\nhttp://marxosys.ml/#id'
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -306,66 +149,16 @@ Workflow, Workflows
             duration: 864000000 # 10 days
         ]
       ,
-        name: 'Evaluate App Design'
-        key: 'evaluate'
-        desc: 'Evaluator judge the designs and votes.'
-        offset:
-          x: 50, y: 362
-        actions: [
-          type: 'PAGE'
-          name: 'Post Evaluate Form'
-          key: 'eval_form'
-          content:
-            type: 'PAGE'
-            name: 'Conference Check-in Mobile App Choose the Best Design'
-            desc: ''
-            sections: [
-              name: 'Choose Design'
-              desc: 'Choose the best design you think.'
-              type: 'RADIO'
-              options:
-                required: true
-                gen_from_submission: 'post_req'
-            ,
-              name: 'Comments'
-              desc: 'Leave your comments about the design you chose.'
-              type: 'TEXT'
-              options:
-                required: true
-                text_multiline: true
-            ]
-          tracking:
-            duration: 2592000000 # 30 days
-          event:
-            duration: 0
-        ,
-          type: 'EMAIL'
-          name: 'Send Email to Evaluator'
-          key: 'email_eval'
-          content:
-            type: 'EMAIL'
-            message: 'Choose the best desgin you think for our Conference Check-in Mobile App.'
-          tracking:
-            duration: 2592000000 # 30 days
-          event:
-            duration: 0
-        ,
-          type: 'WAIT'
-          name: 'Wait for Evaluate'
-          key: 'wait_for_eval'
-          event:
-            duration: 864000000 # 10 days
-        ]
-      ,
         name: 'App Implemetation'
         key: 'implemetation'
         desc: 'Post final design and wait for implemetation submission.'
         offset:
-          x: 56, y: 490
+          x: 510, y: 30
         actions: [
           type: 'WAIT'
-          name: 'Wait Owner Process Final Desgin'
-          desc: 'The project owner should process the chosen desgin, prepare to post it on to the page.'
+          name: 'Wait Owner Evaluate and Choose Final Desgin'
+          desc: '''The project owner should select the final design.
+          And process the chosen desgin, prepare to post it on to the page.'''
           key: 'proc_design'
           event:
             duration: 864000000 # 10 days
@@ -376,7 +169,7 @@ Workflow, Workflows
           content:
             type: 'PAGE'
             name: 'Conference Check-in Mobile App Final Desgin and Implementation Submission'
-            desc: ''
+            desc: '(The final desgin post in here)'
             sections: [
               name: 'Implementation Name'
               desc: 'Give a name to your app implementation.'
@@ -440,7 +233,7 @@ Workflow, Workflows
           content:
             type: 'FACEBOOK'
             message: '''The final desgin of Conference Check-in Mobile App is ready!
-            Please submit your code in '''
+            Please submit your code in http://marxosys.ml/#id'''
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -457,7 +250,7 @@ Workflow, Workflows
         key: 'review'
         desc: 'Evaluator review submitted app implemetations.'
         offset:
-          x: 79, y: 615
+          x: 700, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Review Form'
@@ -484,23 +277,6 @@ Workflow, Workflows
           tracking:
             duration: 2592000000 # 30 days
           event:
-            duration: 0
-        ,
-          type: 'EMAIL'
-          name: 'Send Review Request Email'
-          key: 'review_email'
-          content:
-            type: 'EMAIL'
-            message: 'Choose the best implementaion you think for our Conference Check-in Mobile App.'
-          tracking:
-            duration: 2592000000 # 30 days
-          event:
-            duration: 0
-        ,
-          type: 'WAIT'
-          name: 'Wait for Review'
-          key: 'wait_for_review'
-          event:
             duration: 864000000 # 10 days
         ]
       ,
@@ -508,7 +284,7 @@ Workflow, Workflows
         key: 'testing'
         desc: 'Post selected implementaion and open beta testing, collect feedbacks.'
         offset:
-          x: 79, y: 742
+          x: 840, y: 30
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Process Review and Implementation'
@@ -519,6 +295,38 @@ Workflow, Workflows
           type: 'PAGE'
           name: 'Post Selected Implementation and Test Request'
           key: 'post_impl_test'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Implementation and Test Request'
+            desc: '''<p>(Post selected implementation description here)</p>
+            <p>Please fire any bug you find here to help us to improve the quality.</p>'''
+            sections: [
+              name: 'Bug Name'
+              desc: 'Give a name to the bug as a short description.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Bug Description'
+              desc: 'Give a more detailed bug description.'
+              type: 'HTML'
+              options:
+                required: true
+            ,
+              name: 'Upload Screenshot'
+              desc: 'Upload a screenshot for the bug. You can combine multiple screenshots into one image to upload.'
+              type: 'FILE'
+              options:
+                required: false
+                file_accept: 'image/*'
+            ,
+              name: 'Upload Attachment'
+              desc: 'Any attachment if you want to provide. If you have multiple attachments, you can compress them into a ZIP/RAR/7Z package to upload.'
+              type: 'FILE'
+              options:
+                required: false
+            ]
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -530,7 +338,7 @@ Workflow, Workflows
           content:
             type: 'FACEBOOK'
             message: '''Our committee have the final result of the winner of implemetation of our app.
-            Welcome to feedback any bugs or leave comments in '''
+            Welcome to feedback any bugs or leave comments in http://marxosys.ml/#id'''
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -547,7 +355,7 @@ Workflow, Workflows
         key: 'demo'
         desc: 'Post final result to the public.'
         offset:
-          x: 79, y: 866
+          x: 980, y: 30
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Final Result'
@@ -558,6 +366,25 @@ Workflow, Workflows
           type: 'PAGE'
           name: 'Post Final Result and Demo'
           key: 'post_result'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Demo'
+            desc: ''
+            sections: [
+              name: 'Rating'
+              desc: 'Rating the app demo.'
+              type: 'RADIO'
+              options:
+                required: true
+                manual_options: ['1 ★', '2 ★★', '3 ★★★', '4 ★★★★', '5 ★★★★★']
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments about the demo of the app.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -568,7 +395,7 @@ Workflow, Workflows
           key: 'result_fb'
           content:
             type: 'FACEBOOK'
-            message: 'The Conference Check-in Mobile App is ready!\nSee our demo here '
+            message: 'The Conference Check-in Mobile App is ready!\nSee our demo here http://marxosys.ml/#id'
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -580,42 +407,21 @@ Workflow, Workflows
         prev_node_id: 0
         next_node_id: 1
       ,
-        #name: 'Vote >= 200'
-        key: 'vote_to_evaluate'
+        key: 'vote_to_implemetation'
         prev_node_id: 1
         next_node_id: 2
-      #,
-      #  name: 'Failed to Pass'
-      #  key: 'evaluate_to_desgin'
-      #  prev_node_id: 2
-      #  next_node_id: 0
-      #,
-      #  name: 'Votes < 200'
-      #  key: 'vote_to_vote'
-      #  prev_node_id: 1
-      #  next_node_id: 1
       ,
-        #name: 'Passed'
-        key: 'evaluate_to_implemetation'
+        key: 'implemetation_to_review'
         prev_node_id: 2
         next_node_id: 3
       ,
-        key: 'implemetation_to_review'
+        key: 'review_to_testing'
         prev_node_id: 3
         next_node_id: 4
-      #,
-      #  name: 'Not satisfied'
-      #  key: 'review_to_implemetation'
-      #  prev_node_id: 4
-      #  next_node_id: 3
-      ,
-        key: 'review_to_testing'
-        prev_node_id: 4
-        next_node_id: 5
       ,
         key: 'testing_to_demo'
-        prev_node_id: 5
-        next_node_id: 6
+        prev_node_id: 4
+        next_node_id: 5
       ]
     ]
 
