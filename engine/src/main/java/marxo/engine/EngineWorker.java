@@ -127,13 +127,14 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 
 					logger.info(String.format("%s is processing %s", this, workflow));
 
-					if (workflow.startNodeId == null) {
+					if (workflow.getStartNode() == null) {
 						logger.warn(String.format("%s has no start node", this));
 
 						Notification.saveNew(Notification.Level.ERROR, workflow, "Workflow has no start node");
 
 						workflow.setStatus(RunStatus.ERROR);
 						workflow.save();
+
 						continue;
 					}
 
@@ -176,8 +177,10 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						boolean nodeHasError = false;
 						boolean nodeIsTracking = false;
 
+						Action lastAction = null;
 						doAction:
 						for (Action action : actions) {
+							lastAction = action;
 							switch (action.getStatus()) {
 								case IDLE:
 								case STARTED:
@@ -213,8 +216,12 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 
 							Notification.saveNew(Notification.Level.NORMAL, action, "Action started");
 
-							action.act();
-							action.save();
+							try {
+								action.act();
+							} finally {
+								// review: check if save on workflow already.
+								action.save();
+							}
 
 							switch (action.getStatus()) {
 								case FINISHED:
@@ -233,22 +240,25 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 								case WAITING:
 								case PAUSED:
 								case STOPPED:
+									node.setCurrentAction(action);
 									break doAction;
 							}
 						}
 
-						if (nodeHasError) {
-							node.setStatus(RunStatus.ERROR);
-						} else if (nodeIsTracking) {
-							node.setStatus(RunStatus.TRACKED);
-						} else {
+						if (lastAction == null) {
 							node.setStatus(RunStatus.FINISHED);
-//							workflow.getCurrentNodes().remove()
+						} else {
+							node.setStatus(lastAction.getStatus());
 						}
+
+						// review: check if save on workflow already.
 						node.save();
 
-						if (node.getStatus().equals(RunStatus.FINISHED) || node.getStatus().equals(RunStatus.TRACKED)) {
+						if (node.isFinished()) {
 							Notification.saveNew(Notification.Level.NORMAL, node, "Node finished");
+							workflow.removeCurrentNode(node);
+						} else if (node.isTracked()) {
+							Notification.saveNew(Notification.Level.NORMAL, node, "Node processed");
 						} else {
 							if (node.getStatus().equals(RunStatus.ERROR)) {
 								workflowHasError = true;
