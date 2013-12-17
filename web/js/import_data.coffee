@@ -184,7 +184,52 @@ Workflow, Workflows
             desc: ''
             sections: [
               name: 'Design Name'
+              desc: 'The name of your app.'
               type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Group Name'
+              desc: 'The name of your development team or yourself.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Team Members'
+              desc: '''Your team members. One person per line with "First-name Last-name &lt;email&gt;" format.
+              You can leave it blank if you are individual developer.'''
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ,
+              name: 'Design Introduction'
+              desc: 'Give a brief introduction of your design.'
+              type: 'HTML'
+              options:
+                required: true
+            ,
+              name: 'Upload Image'
+              desc: 'Upload the image of your design. The image should be about 400x300px, not too big, not too small.'
+              type: 'FILE'
+              options:
+                required: true
+                file_accept: 'image/*'
+            ,
+              name: 'Upload Design Package'
+              desc: 'Upload your design package, you should including ALL YOUR FILES in a ZIP/RAR/7Z format package.'
+              type: 'FILE'
+              options:
+                required: true
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments if you want.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
             ]
           tracking:
             duration: 2592000000 # 30 days
@@ -219,6 +264,25 @@ Workflow, Workflows
           type: 'PAGE'
           name: 'Post Design Vote Form'
           key: 'post_design_vote_form'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Vote Your Favorite Design'
+            desc: ''
+            sections: [
+              name: 'Vote Design'
+              desc: 'Vote your favorite design.'
+              type: 'RADIO'
+              options:
+                required: true
+                gen_from_submission: 'post_req'
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments about the design you select and for all designs if you want.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -251,6 +315,25 @@ Workflow, Workflows
           type: 'PAGE'
           name: 'Post Evaluate Form'
           key: 'eval_form'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Choose the Best Design'
+            desc: ''
+            sections: [
+              name: 'Choose Design'
+              desc: 'Choose the best design you think.'
+              type: 'RADIO'
+              options:
+                required: true
+                gen_from_submission: 'post_req'
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments about the design you chose.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: true
+            ]
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -259,6 +342,9 @@ Workflow, Workflows
           type: 'EMAIL'
           name: 'Send Email to Evaluator'
           key: 'email_eval'
+          content:
+            type: 'EMAIL'
+            message: 'Choose the best desgin you think for our Conference Check-in Mobile App.'
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -279,6 +365,7 @@ Workflow, Workflows
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Process Final Desgin'
+          desc: 'The project owner should process the chosen desgin, prepare to post it on to the page.'
           key: 'proc_design'
           event:
             duration: 864000000 # 10 days
@@ -286,6 +373,62 @@ Workflow, Workflows
           type: 'PAGE'
           name: 'Post Final Desgin and Implement Submit Form'
           key: 'post_design_submit_impl'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Final Desgin and Implementation Submission'
+            desc: ''
+            sections: [
+              name: 'Implementation Name'
+              desc: 'Give a name to your app implementation.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Group Name'
+              desc: 'The name of your development team or yourself.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Team Members'
+              desc: '''Your team members. One person per line with "First-name Last-name &lt;email&gt;" format.
+              You can leave it blank if you are individual developer.'''
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ,
+              name: 'Implemetation Description'
+              desc: 'Give a detailed description for your implemetation.'
+              type: 'HTML'
+              options:
+                required: true
+            ,
+              name: 'Upload Screenshot'
+              desc: '''Upload the screenshot of your app to demonstrate your implementation.
+              You can combine multiple screenshots into one image if you like.
+              The image should be about 600x400px, not too big, not too small.'''
+              type: 'FILE'
+              options:
+                required: true
+                file_accept: 'image/*'
+            ,
+              name: 'Upload Implementation Package with Source Code'
+              desc: '''Upload your implemetation package,
+              you should including ALL YOUR FILES including scource code and necessary binaries in a ZIP/RAR/7Z format package.'''
+              type: 'FILE'
+              options:
+                required: true
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments if you want.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -319,6 +462,25 @@ Workflow, Workflows
           type: 'PAGE'
           name: 'Post Review Form'
           key: 'review_page'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Implemetation Review'
+            desc: ''
+            sections: [
+              name: 'Choose Design'
+              desc: 'Choose the best implemetation you think.'
+              type: 'RADIO'
+              options:
+                required: true
+                gen_from_submission: 'post_design_submit_impl'
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments about the design you chose.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: true
+            ]
           tracking:
             duration: 2592000000 # 30 days
           event:
@@ -327,6 +489,9 @@ Workflow, Workflows
           type: 'EMAIL'
           name: 'Send Review Request Email'
           key: 'review_email'
+          content:
+            type: 'EMAIL'
+            message: 'Choose the best implementaion you think for our Conference Check-in Mobile App.'
           tracking:
             duration: 2592000000 # 30 days
           event:
