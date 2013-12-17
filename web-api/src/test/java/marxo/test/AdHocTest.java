@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,5 +89,13 @@ public class AdHocTest implements Loggable {
 		Assert.assertTrue(action instanceof TrackableAction);
 
 		logger.info(Reflections.getObjectDump(action));
+	}
+
+	@Test
+	public void printAllProperties() throws Exception {
+		Properties properties = System.getProperties();
+		for (Object o : properties.keySet()) {
+			logger.info(String.format("[%s] : %s", o, properties.get(o)));
+		}
 	}
 }
