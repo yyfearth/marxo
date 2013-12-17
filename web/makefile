@@ -59,13 +59,13 @@ clean_res:
 	rm -rf "$(dist)/font"
 	rm -f "$(dist)/favicon.ico" "$(dist)/robots.txt"
 clean_html:
-	rm -f "$(dist)/index.html" "$(dist)/test.html"
+	rm -f $(dist)/*.html
 
 lib: $(dist)/js/lib/require.js $(dist)/js/lib/jquery-ui.js $(dist)/js/lib/preview.js
 modules: $(DIST_MODULES)
 js: lib modules
 css: $(dist)/css/console.css $(dist)/css/site.css
-html: $(dist)/index.html $(dist)/test.html
+html: $(dist)/index.html $(dist)/console.html $(dist)/console-local.html
 res: $(dist)/font $(dist)/favicon.ico $(dist)/robots.txt
 
 $(dist)/favicon.ico: favicon.ico

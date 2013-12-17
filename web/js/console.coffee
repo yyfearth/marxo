@@ -116,11 +116,8 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       sessionStorage.clear()
       @user = User.current = null
       @router.clear()
-      # TODO: reset all frames and views!
-      #SignInView.get().show()
       @hide()
       @trigger 'signout'
-      # before done reset all views, use this instead
       location.hash = 'signin'
       location.reload()
       @
