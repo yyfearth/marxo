@@ -12,9 +12,9 @@ public class FacebookRecord extends Record {
 
 	public static FacebookRecord getInstance(Post post) {
 		FacebookRecord facebookRecord = new FacebookRecord();
-		facebookRecord.likesCount = (post.getLikesCount() == null) ? 0 : post.getLikesCount();
+		facebookRecord.likesCount = (post.getLikes() == null) ? 0 : post.getLikes().getData().size();
 		facebookRecord.sharesCount = (post.getSharesCount() == null) ? 0 : post.getSharesCount();
-		facebookRecord.commentsCount = (post.getComments() == null || post.getComments().getCount() == null) ? 0 : post.getComments().getCount();
+		facebookRecord.commentsCount = (post.getComments() == null || post.getComments().getData() == null) ? 0 : post.getComments().getData().size();
 		return facebookRecord;
 	}
 }
