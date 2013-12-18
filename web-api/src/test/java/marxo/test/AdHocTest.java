@@ -1,9 +1,13 @@
 package marxo.test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import marxo.entity.MongoDbAware;
 import marxo.entity.action.Action;
+import marxo.entity.action.Content;
 import marxo.entity.action.FacebookAction;
 import marxo.entity.action.TrackableAction;
+import marxo.entity.node.Event;
+import marxo.entity.node.Node;
 import marxo.entity.user.Tenant;
 import marxo.entity.user.User;
 import marxo.entity.workflow.Workflow;
@@ -24,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Test
-public class AdHocTest implements Loggable {
+public class AdHocTest implements MongoDbAware, Loggable {
 	@Test
 	public void regex() throws Exception {
 		String text = "startNodeId";
@@ -96,6 +100,47 @@ public class AdHocTest implements Loggable {
 		Properties properties = System.getProperties();
 		for (Object o : properties.keySet()) {
 			logger.info(String.format("[%s] : %s", o, properties.get(o)));
+		}
+	}
+
+	@Test
+	public void checkDataConsistency() throws Exception {
+
+		List<Workflow> workflows = mongoTemplate.findAll(Workflow.class);
+
+		for (Workflow workflow : workflows) {
+			for (Node node : workflow.getNodes()) {
+				Assert.assertEquals(node.workflowId, workflow.id);
+				for (Action action : node.getActions()) {
+					Assert.assertEquals(action.workflowId, workflow.id);
+					Assert.assertEquals(action.getNode().workflowId, workflow.id);
+
+					Event event = action.getEvent();
+					if (event != null) {
+						Assert.assertEquals(event.workflowId, workflow.id);
+						Assert.assertEquals(event.getNode().workflowId, workflow.id);
+						Assert.assertEquals(event.getAction().getNode().workflowId, workflow.id);
+					}
+
+					if (action instanceof TrackableAction) {
+						TrackableAction trackableAction = (TrackableAction) action;
+
+						Event trackEvent = trackableAction.getEvent();
+						if (trackEvent != null) {
+							Assert.assertEquals(trackEvent.workflowId, workflow.id);
+							Assert.assertEquals(trackEvent.getNode().workflowId, workflow.id);
+							Assert.assertEquals(trackEvent.getAction().getNode().workflowId, workflow.id);
+						}
+
+						Content content = trackableAction.getContent();
+						if (content != null) {
+							Assert.assertEquals(content.workflowId, workflow.id);
+							Assert.assertEquals(content.getNode().workflowId, workflow.id);
+							Assert.assertEquals(content.getAction().getNode().workflowId, workflow.id);
+						}
+					}
+				}
+			}
 		}
 	}
 }
