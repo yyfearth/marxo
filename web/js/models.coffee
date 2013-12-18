@@ -683,13 +683,16 @@ define 'models', ['module', 'lib/common'], (module) ->
       actions.listenTo Projects.projects, 'loaded', (wfs) ->
         _load wfs if wfs.fullCollection? # otherwise it will got workflow/project loaded event
         return
-      actions.load = (callback) -> Projects.projects.load (wfs, ret) ->
-        if actions.length is 0
-          actions.once 'loaded', callback
-          _load wfs
-        else
-          callback actions, ret
-        return
+      actions.load = (callback, options) ->
+        Projects.projects.load (wfs, ret) ->
+          if actions.length is 0
+            actions.once 'loaded', callback
+            _load wfs
+          else
+            callback actions, ret
+          return
+        , options
+        actions
       actions
     model: Action
     url: Action::urlRoot
