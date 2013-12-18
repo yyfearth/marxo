@@ -381,7 +381,7 @@ Action
     popup: (data, callback) ->
       throw new Error 'data must be an model entity' unless data instanceof Entity
       super data, callback
-      @readonly = not @model.has 'tenant_id'
+      @readonly = not data.has 'tenant_id'
       @fill data.attributes
       @btnSave.textContent = if data.isNew() then 'OK' else 'Save'
       @on 'shown', =>
