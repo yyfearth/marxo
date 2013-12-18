@@ -50,9 +50,16 @@ public class Node extends WorkflowChildEntity {
 	@Override
 	public void wire() {
 		if (actions != null) {
+			Action lastAction = null;
 			for (Action action : actions) {
 				action.setNode(this);
 				action.wire();
+
+				if (lastAction != null) {
+					lastAction.setNextAction(action);
+				}
+
+				lastAction = action;
 			}
 		}
 		super.wire();
