@@ -1,12 +1,12 @@
 package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 import marxo.entity.BasicEntity;
 import marxo.entity.action.Action;
 import marxo.entity.action.ActionChildEntity;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
-import marxo.entity.user.Tenant;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Weeks;
@@ -80,13 +80,19 @@ public class Notification extends ActionChildEntity implements Comparable<Notifi
 	DAO
 	 */
 
-	public static Notification saveNew(Level level, BasicEntity entity, String message) {
-		Notification notification = new Notification(level, message);
+	public static enum Type {
+		STARTED,
+		TRACKED,
+		FINISHED,
+		FACEBOOK_TOKEN,
+		WAIT_FOR_USER,
+		ERROR,
+	}
 
-		Class<? extends BasicEntity> aClass = entity.getClass();
-		if (entity instanceof Tenant) {
-			notification.setTenant((Tenant) entity);
-		} else if (entity instanceof Workflow) {
+	public static Notification saveNew(Level level, BasicEntity entity, Type type) {
+		Notification notification = new Notification(level);
+
+		if (entity instanceof Workflow) {
 			notification.setWorkflow((Workflow) entity);
 		} else if (entity instanceof Node) {
 			notification.setNode((Node) entity);
@@ -94,8 +100,37 @@ public class Notification extends ActionChildEntity implements Comparable<Notifi
 			notification.setAction((Action) entity);
 		} else if (entity instanceof Link) {
 			notification.setLink((Link) entity);
+		} else {
+			logger.error(String.format("No notification for such entity (%s)", entity));
+			return null;
 		}
 
+		String formatString = "";
+
+		switch (type) {
+			case STARTED:
+				formatString = "%s is started";
+				break;
+			case TRACKED:
+				formatString = "%s is tracked";
+				break;
+			case FINISHED:
+				formatString = "%s is finished";
+				break;
+			case FACEBOOK_TOKEN:
+				formatString = "%s requires your Facebook permission";
+				break;
+			case WAIT_FOR_USER:
+				formatString = "%s requires user action";
+				break;
+			case ERROR:
+				formatString = "%s has error";
+				break;
+		}
+
+		Class<? extends BasicEntity> aClass = entity.getClass();
+		String entityApperance = aClass.getSimpleName() + Objects.firstNonNull(entity.getName(), "");
+		notification.setName(String.format(formatString, entityApperance));
 		notification.save();
 
 		return notification;
