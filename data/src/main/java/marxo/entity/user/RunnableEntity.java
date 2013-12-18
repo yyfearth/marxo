@@ -45,6 +45,18 @@ public abstract class RunnableEntity extends TenantChildEntity {
 		return status.equals(RunStatus.TRACKED);
 	}
 
+	@JsonIgnore
+	@Transient
+	public boolean isRunning() {
+		switch (status) {
+			case STARTED:
+			case TRACKED:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	/*
 	Validation
 	 */
