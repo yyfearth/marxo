@@ -31,7 +31,7 @@ Event
         collection: collection
       @editor = new EventEditorView el: '#event_editor', parent: @
       # rewrite event fetch using actions
-      collection.load = (callback) ->
+      collection.load = (callback, options) ->
         Actions.actions.load (actions, ret) =>
           events = []
           actions.forEach (action) ->
@@ -41,11 +41,13 @@ Event
           @fullCollection.reset events
           @trigger 'loaded', @
           callback? @, ret
+        , options
         @
       collection.fetch = (options) ->
         @load (ignored, ret) ->
           options[if ret is 'error' then 'error' else 'success']?.call @, @, null, options
           return
+        , expires: 1000
         return
       @
     open: (name, sub) ->
