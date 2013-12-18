@@ -56,30 +56,32 @@ public class ActionController extends EntityController<Action> {
 
 			if (action instanceof TrackableAction) {
 				workflow.removeTracableAction((TrackableAction) action);
-			}
 
-			Node node = action.getNode();
-			boolean isFinished = true;
-			for (Action action1 : action.getNode().getActions()) {
-				if (action1.isNot(RunStatus.FINISHED)) {
-					isFinished = false;
-					break;
+				Node node = action.getNode();
+				boolean isFinished = true;
+				for (Action action1 : action.getNode().getActions()) {
+					if (action1.isNot(RunStatus.FINISHED)) {
+						isFinished = false;
+						break;
+					}
 				}
-			}
-			if (isFinished) {
-				logger.info(String.format("%s finishes tracking", node));
-				node.setStatus(RunStatus.FINISHED);
-				node.save();
-				workflow.removeCurrentNode(node);
+				if (isFinished) {
+					logger.info(String.format("%s finishes tracking", node));
+					node.setStatus(RunStatus.FINISHED);
+					node.save();
+					Notification.saveNew(Notification.Level.NORMAL, node, Notification.Type.FINISHED);
+					workflow.removeCurrentNode(node);
 
-				if (workflow.getCurrentNodes().size() == 0) {
-					logger.info(String.format("%s finishes tracking", workflow));
-					workflow.setStatus(RunStatus.FINISHED);
-					Notification.saveNew(Notification.Level.NORMAL, workflow, Notification.Type.FINISHED);
+					if (workflow.getTrackedActions().isEmpty()) {
+						logger.info(String.format("%s finishes tracking", workflow));
+						workflow.setStatus(RunStatus.FINISHED);
+						Notification.saveNew(Notification.Level.NORMAL, workflow, Notification.Type.FINISHED);
+					}
 				}
-			}
 
-			Task.schedule(action.workflowId, DateTime.now());
+				workflow.save();
+				Task.schedule(action.workflowId, DateTime.now());
+			}
 		}
 
 		return status;
