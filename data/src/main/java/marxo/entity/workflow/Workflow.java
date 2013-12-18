@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
@@ -448,7 +449,27 @@ public class Workflow extends RunnableEntity {
 
 	@Override
 	public String toString() {
-		return String.format("%s:%s(%s)", isProject ? "Project" : "Workflow", name, id);
+		return String.format("%s:%s(%s)", isProject ? "Project" : "Workflow", Strings.nullToEmpty(name), id);
+	}
+
+	/*
+	Shortcuts
+	 */
+
+	public boolean isDone() {
+		if (!trackedActions.isEmpty()) {
+			return false;
+		}
+
+		if (!currentNodes.isEmpty()) {
+			return false;
+		}
+
+		if (!currentLinks.isEmpty()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/*

@@ -8,6 +8,7 @@ import marxo.entity.action.Content;
 import marxo.entity.action.Submission;
 import marxo.entity.user.User;
 import marxo.entity.workflow.RunStatus;
+import marxo.exception.DataInconsistentException;
 import marxo.exception.EntityNotFoundException;
 import marxo.exception.RequestParameterException;
 import marxo.security.MarxoAuthentication;
@@ -149,7 +150,9 @@ public class PageController extends BasicController implements MongoDbAware, Int
 
 		Content content = mongoTemplate.findOne(query, Content.class);
 
-		if (!content.isRunning()) {
+		if (content.getAction() == null) {
+			throw new DataInconsistentException(String.format("%s should have action", content));
+		} else if (!content.getAction().isRunning()) {
 			throw new RequestParameterException(String.format("This page [%s] is closed", content));
 		}
 

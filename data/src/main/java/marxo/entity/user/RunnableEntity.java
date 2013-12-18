@@ -35,6 +35,18 @@ public abstract class RunnableEntity extends TenantChildEntity {
 
 	@JsonIgnore
 	@Transient
+	public boolean is(RunStatus status) {
+		return this.status.equals(status);
+	}
+
+	@JsonIgnore
+	@Transient
+	public boolean isNot(RunStatus status) {
+		return !this.status.equals(status);
+	}
+
+	@JsonIgnore
+	@Transient
 	public boolean isFinished() {
 		return status.equals(RunStatus.FINISHED);
 	}
@@ -63,7 +75,7 @@ public abstract class RunnableEntity extends TenantChildEntity {
 
 	protected boolean isValidated = false;
 
-	public Boolean getValidated() {
+	public Boolean isValidated() {
 		return isValidated;
 	}
 }

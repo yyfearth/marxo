@@ -46,7 +46,7 @@ public class FacebookAction extends TrackableAction {
 
 				getContent().messageResponse = facebookClient.publish("me/feed", FacebookType.class, Parameter.with("message", postedMessage));
 				getContent().setPostedTime(DateTime.now());
-				logger.info(String.format("Submit Facebook post [%s]", content.messageResponse));
+				logger.debug(String.format("Submit Facebook post [%s]", content.messageResponse));
 
 				setStatus(RunStatus.STARTED);
 			}

@@ -1,7 +1,6 @@
 package marxo.entity.workflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
 import marxo.entity.BasicEntity;
 import marxo.entity.action.Action;
 import marxo.entity.action.ActionChildEntity;
@@ -129,7 +128,7 @@ public class Notification extends ActionChildEntity implements Comparable<Notifi
 		}
 
 		Class<? extends BasicEntity> aClass = entity.getClass();
-		String entityApperance = aClass.getSimpleName() + Objects.firstNonNull(entity.getName(), "");
+		String entityApperance = aClass.getSimpleName() + ((entity.getName() == null) ? "" : " " + entity.getName());
 		notification.setName(String.format(formatString, entityApperance));
 		notification.save();
 

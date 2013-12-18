@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import marxo.exception.Errors;
@@ -166,7 +165,7 @@ public abstract class BasicEntity implements MongoDbAware, Loggable {
 
 	@Override
 	public String toString() {
-		return String.format("%s:%s(%s)", getClass().getSimpleName(), Objects.firstNonNull(name, ""), id);
+		return String.format("%s:%s(%s)", getClass().getSimpleName(), Strings.nullToEmpty(name), id);
 	}
 
 	public static long count(Class<? extends BasicEntity> aClass) {
