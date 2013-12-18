@@ -215,7 +215,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       # data.event.duration must exist, 0 for no wait
       data.event ?= {}
       if data.event.duration
-        data.event.duration = DurationConvertor.parse data.event.duration
+        data.event.duration = DurationConvertor.parse data.event.duration if typeof data.event.duration is 'string'
       else if data.event.ends?
         delete data.event.duration
       else
@@ -223,7 +223,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       # data.tracking must not exist if not tracking (duration is 0)
       if data.tracking?
         duration = data.tracking.duration
-        duration = data.tracking.duration = DurationConvertor.parse duration if duration
+        duration = data.tracking.duration = DurationConvertor.parse duration if duration and typeof duration is 'string'
         if duration or data.tracking.ends?
           data.tracking.name or= data.name + ' (Tracking)'
         else
