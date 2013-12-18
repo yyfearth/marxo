@@ -8,6 +8,7 @@ import marxo.entity.link.Link;
 import marxo.entity.node.Node;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
+import marxo.exception.DataInconsistentException;
 import marxo.exception.EntityInvalidException;
 import marxo.exception.EntityNotFoundException;
 import marxo.exception.ValidationException;
@@ -135,21 +136,55 @@ public class WorkflowController extends TenantChildController<Workflow> {
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public RunStatus updateStatus(@PathVariable String idString, @RequestBody RunStatus status) throws Exception {
-		ObjectId objectId = stringToObjectId(idString);
+		ObjectId workflowId = stringToObjectId(idString);
 
 		Update update = Update.update("status", status);
-		WriteResult result = mongoTemplate.updateFirst(newDefaultQuery(objectId), update, Workflow.class);
+		WriteResult result = mongoTemplate.updateFirst(newDefaultQuery(workflowId), update, Workflow.class);
 		throwIfError(result);
 
 		if (result.getN() == 0) {
-			throw new EntityNotFoundException(Workflow.class, objectId);
+			throw new EntityNotFoundException(Workflow.class, workflowId);
 		}
 
-		if (status.equals(RunStatus.STARTED)) {
-			Task task = new Task(objectId);
-			task.save();
-		} else if (status.equals(RunStatus.STOPPED) || status.equals(RunStatus.PAUSED)) {
-			mongoTemplate.remove(Query.query(Criteria.where("workflowId").is(objectId)), Task.class);
+		Workflow workflow = Workflow.get(workflowId);
+
+		if (workflow.is(RunStatus.STARTED)) {
+			Task.schedule(workflowId, DateTime.now());
+
+			if (workflow.getNodes().isEmpty()) {
+				throw new DataInconsistentException(String.format("%s has no node", workflow));
+			}
+			if (workflow.getStartNode() == null) {
+				workflow.getNodes();
+				workflow.getLinks();
+				workflow.wire();
+
+				if (!workflow.isValidated()) {
+					throw new DataInconsistentException(String.format("%s is not valid", workflow));
+				}
+			}
+			workflow.addCurrentNode(workflow.getStartNode());
+			workflow.save();
+		} else if (workflow.is(RunStatus.STOPPED)) {
+			mongoTemplate.remove(Query.query(Criteria.where("workflowId").is(workflowId)), Task.class);
+
+			workflow.getCurrentNodes().clear();
+			workflow.getCurrentLinks().clear();
+			for (Node node : workflow.getNodes()) {
+				node.setStatus(RunStatus.IDLE);
+
+				for (Action action : node.getActions()) {
+					action.setStatus(RunStatus.IDLE);
+					if (action.getContent() != null && action.getContent().records != null) {
+						action.getContent().records.clear();
+					}
+				}
+			}
+			for (Link link : workflow.getLinks()) {
+				link.setStatus(RunStatus.IDLE);
+			}
+		} else if (workflow.is(RunStatus.PAUSED)) {
+			mongoTemplate.remove(Query.query(Criteria.where("workflowId").is(workflowId)), Task.class);
 		}
 
 		return status;
