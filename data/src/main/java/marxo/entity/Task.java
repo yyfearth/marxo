@@ -37,9 +37,9 @@ public class Task extends BasicEntity {
 		return mongoTemplate.findAndRemove(query, Task.class);
 	}
 
-	public static Task reschedule(ObjectId workdflowId, DateTime time) {
+	public static Task schedule(ObjectId workdflowId, DateTime time) {
 		Criteria workflowIdCriteria = Criteria.where("workflowId").is(workdflowId);
-		Update update = Update.update("time", time).set("workflowId", workdflowId);
+		Update update = Update.update("time", time);
 		Task task;
 
 		if (mongoTemplate.exists(Query.query(workflowIdCriteria), Task.class)) {
@@ -50,13 +50,15 @@ public class Task extends BasicEntity {
 			task.save();
 		}
 
-		if (task == null) {
-			logger.info("Skips reschedule due to earlier task is found");
-		} else {
-			logger.info(String.format("Reschedule [%s] at %s", task, time));
-		}
-
 		return task;
+	}
+
+	public static Task schedule(ObjectId workdflowId) {
+		return schedule(workdflowId, DateTime.now());
+	}
+
+	public static boolean workflowExists(ObjectId workdflowId) {
+		return mongoTemplate.exists(Query.query(Criteria.where("workflowId").is(workdflowId)), Task.class);
 	}
 
 	public static long count() {
@@ -66,6 +68,5 @@ public class Task extends BasicEntity {
 	@Override
 	public void save() {
 		super.save();
-		logger.debug(String.format("%s is created", this));
 	}
 }
