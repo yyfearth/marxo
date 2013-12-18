@@ -109,7 +109,7 @@ findProjectOrWorkflow
           unless is_project = workflow.get 'is_project'
             name += ' (Workflow)'
           else # add status
-            status = @model.status()
+            status = workflow.status()
             cls = "label pull-right #{STATUS_CLS[status.toLowerCase()] or ''}"
             @$el.append $('<span>', class: cls).text status
           @$el.addClass('workflow-link-cell').attr
@@ -139,7 +139,7 @@ findProjectOrWorkflow
         callback: ({workflow, node, action}) =>
           if workflow and node and action
             # add status
-            status = @model.status()
+            status = action.status()
             if status isnt 'IDLE'
               cls = "label pull-right #{STATUS_CLS[status.toLowerCase()] or ''}"
               @$el.append $('<span>', class: cls).text status
