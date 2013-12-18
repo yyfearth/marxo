@@ -101,6 +101,14 @@ require [
         @dialog.popup()
       'click #view_profile': ->
         @dialog.popup User.current
+      'click #go_console': ->
+        user = User.current?.toJSON()
+        if /^PUBLISHER$/i.test user?.type
+          user = User.current.toJSON()
+          user.credential = User.current.auth
+          sessionStorage.user = JSON.stringify user
+          localStorage.marxo_sign_in_remember = true
+        return
     initialize: (options) ->
       @$form = @$el.find('form')
       @dialog = new UserDialogView
@@ -171,7 +179,7 @@ require [
         Authorization: user.auth
       $el.trigger 'signedin', [user]
       $go_console = $el.find('#go_console')
-      if user.has 'tenant_id'
+      if /^PUBLISHER$/i.test user.get 'type'
         $go_console.prop 'href', './console.html'
       else
         $go_console.parent('li').remove()
