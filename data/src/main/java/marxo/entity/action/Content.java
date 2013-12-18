@@ -1,9 +1,11 @@
 package marxo.entity.action;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.restfb.types.Comment;
 import com.restfb.types.FacebookType;
 import marxo.entity.report.Record;
 import org.bson.types.ObjectId;
+import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -81,6 +83,17 @@ public class Content extends ActionChildEntity {
 	/*
 	Page
 	 */
+
+	@JsonProperty("posted_at")
+	protected DateTime postedTime;
+
+	public DateTime getPostedTime() {
+		return postedTime;
+	}
+
+	public void setPostedTime(DateTime postedTime) {
+		this.postedTime = postedTime;
+	}
 
 	public String parsedMessage;
 	public List<Submission> submissions;

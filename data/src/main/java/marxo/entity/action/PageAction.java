@@ -18,6 +18,7 @@ public class PageAction extends TrackableAction {
 	public boolean act(Workflow workflow, Node node) {
 		if (getStatus().equals(RunStatus.IDLE)) {
 			setStatus(RunStatus.STARTED);
+			getContent().setPostedTime(DateTime.now());
 		}
 
 		if (getStatus().equals(RunStatus.STARTED)) {
