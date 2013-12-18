@@ -12,7 +12,7 @@ public class WaitAction extends Action {
 
 	@Override
 	public boolean act(Workflow workflow, Node node) {
-		setStatus(RunStatus.FINISHED);
+		setStatus(RunStatus.STARTED);
 		return true;
 	}
 }
