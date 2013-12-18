@@ -4,7 +4,6 @@ import com.mongodb.WriteResult;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
 import marxo.entity.workflow.RunStatus;
-import marxo.entity.workflow.Workflow;
 import marxo.exception.EntityNotFoundException;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -39,16 +38,16 @@ public class ActionController extends EntityController<Action> {
 		ObjectId objectId = stringToObjectId(idString);
 
 		Update update = Update.update("status", status);
-		WriteResult result = mongoTemplate.updateFirst(newDefaultQuery(objectId), update, Workflow.class);
+		WriteResult result = mongoTemplate.updateFirst(newDefaultQuery(objectId), update, Action.class);
 		throwIfError(result);
 
 		if (result.getN() == 0) {
-			throw new EntityNotFoundException(Workflow.class, objectId);
+			throw new EntityNotFoundException(Action.class, objectId);
 		}
 
 		if (status.equals(RunStatus.FINISHED)) {
 			Action action = Action.get(objectId);
-			Task.reschedule(action.workflowId, DateTime.now());
+			Task.schedule(action.workflowId, DateTime.now());
 		}
 
 		return status;
