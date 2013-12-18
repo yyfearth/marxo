@@ -443,7 +443,7 @@ Projects
       $selected = $list.find("li:has(a[data-id='#{project.id}'])").addClass 'active'
       $list.find('li.active').not($selected).removeClass 'active'
       @wfDiagram.draw project
-      @statusView.load project
+      @statusView.load project, true
       return
     _updateStatus: ->
       status = @model.status()
