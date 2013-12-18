@@ -6,10 +6,7 @@ import com.rits.cloning.Cloner;
 import marxo.entity.BasicEntity;
 import marxo.entity.FacebookData;
 import marxo.entity.Task;
-import marxo.entity.action.Action;
-import marxo.entity.action.Content;
-import marxo.entity.action.FacebookAction;
-import marxo.entity.action.PageAction;
+import marxo.entity.action.*;
 import marxo.entity.link.Link;
 import marxo.entity.node.Event;
 import marxo.entity.node.Node;
@@ -21,6 +18,7 @@ import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.test.BasicDataTests;
 import marxo.tool.PasswordEncryptor;
+import marxo.validation.SelectIdFunction;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -261,8 +259,18 @@ public class DatabaseResetTests extends BasicDataTests {
 				Event event = action.getEvent();
 				if (event != null) {
 					event.id = new ObjectId();
-					event.setNode(node);
+					event.setAction(action);
 					entities.add(event);
+				}
+
+				if (action instanceof TrackableAction) {
+					TrackableAction trackableAction = (TrackableAction) action;
+					Event event1 = trackableAction.getTrackEvent();
+					if (event1 != null) {
+						event1.id = new ObjectId();
+						event1.setAction(action);
+						entities.add(event1);
+					}
 				}
 
 				Content content = action.getContent();
@@ -272,6 +280,7 @@ public class DatabaseResetTests extends BasicDataTests {
 					entities.add(content);
 				}
 			}
+			node.actionIds = Lists.transform(node.getActions(), SelectIdFunction.getInstance());
 		}
 		workflow.setNodes(workflow.getNodes());
 		for (Link link : workflow.getLinks()) {
@@ -281,20 +290,21 @@ public class DatabaseResetTests extends BasicDataTests {
 			link.nextNodeId = nodeMap.get(link.nextNodeId);
 		}
 		workflow.setLinks(workflow.getLinks());
-
-		workflow.wire();
-		reusedWorkflow = workflow;
-
-		entities.addAll(workflow.getNodes());
-		entities.addAll(workflow.getLinks());
-		entities.add(workflow);
-		mongoTemplate.insertAll(entities);
+//
+//		workflow.wire();
+//
+//		entities.addAll(workflow.getNodes());
+//		entities.addAll(workflow.getLinks());
+//		entities.add(workflow);
+//		mongoTemplate.insertAll(entities);
+		workflow.save();
 
 		Criteria criteria = Criteria.where("workflowId").is(workflow.id);
 		Query query = Query.query(criteria);
 		Assert.assertEquals(mongoTemplate.count(query, Node.class), 2);
 		Assert.assertEquals(mongoTemplate.count(query, Link.class), 1);
 		Assert.assertEquals(mongoTemplate.count(query, Action.class), 2);
+		Assert.assertEquals(mongoTemplate.count(query, Event.class), 2);
 		Assert.assertEquals(mongoTemplate.count(query, Content.class), 2);
 	}
 
@@ -325,11 +335,11 @@ public class DatabaseResetTests extends BasicDataTests {
 		trackEvent.setDuration(Days.ONE.toStandardDuration());
 		pageAction.setTrackEvent(trackEvent);
 
-		Content facebookContent1 = new Content(Content.Type.PAGE);
-		facebookContent1.setStatus(RunStatus.STARTED);
-		facebookContent1.setName("Contnet " + ++contentCount);
-		facebookContent1.description = String.format("Hello world for %s [%s]", getClass(), reusedWorkflow);
-		pageAction.setContent(facebookContent1);
+		Content content = new Content(Content.Type.PAGE);
+		content.setStatus(RunStatus.STARTED);
+		content.setName("Contnet " + ++contentCount);
+		content.description = String.format("Hello world for %s [%s]", getClass(), reusedWorkflow);
+		pageAction.setContent(content);
 
 		reusedWorkflow.wire();
 
@@ -338,8 +348,16 @@ public class DatabaseResetTests extends BasicDataTests {
 				node1,
 				pageAction,
 				trackEvent,
-				facebookContent1
+				content
 		));
+
+		Criteria criteria = Criteria.where("workflowId").is(reusedWorkflow.id);
+		Query query = Query.query(criteria);
+		Assert.assertEquals(mongoTemplate.count(query, Node.class), 1);
+		Assert.assertEquals(mongoTemplate.count(query, Link.class), 0);
+		Assert.assertEquals(mongoTemplate.count(query, Action.class), 1);
+		Assert.assertEquals(mongoTemplate.count(query, Event.class), 1);
+		Assert.assertEquals(mongoTemplate.count(query, Content.class), 1);
 	}
 
 	@Test(dependsOnMethods = {"addProject"})
@@ -370,8 +388,7 @@ public class DatabaseResetTests extends BasicDataTests {
 				workflow.setStatus(RunStatus.STARTED);
 				workflow.save();
 
-				Task task = new Task(workflow.id);
-				task.save();
+				Task.schedule(workflow.id, DateTime.now());
 			}
 		}
 	}
