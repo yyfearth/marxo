@@ -148,6 +148,8 @@ public class WorkflowController extends TenantChildController<Workflow> {
 		if (status.equals(RunStatus.STARTED)) {
 			Task task = new Task(objectId);
 			task.save();
+		} else if (status.equals(RunStatus.STOPPED) || status.equals(RunStatus.PAUSED)) {
+			mongoTemplate.remove(Query.query(Criteria.where("workflowId").is(objectId)), Task.class);
 		}
 
 		return status;
