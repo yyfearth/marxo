@@ -158,9 +158,9 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
           values = q.options.map (option, i) ->
             if option.id # submission option
               # TODO: submission better name
-              name: option.desc or option.sections[0], value: q.index[option.id]
+              name: option.sections[0] or option.desc, value: q.index[option.id] or 0
             else # manual option
-              name: option, value: q.index[i]
+              name: option, value: q.index[i] or 0
           @renderChart "#pie_#{q.i}", 'pie', values
           @renderChart "#bar_#{q.i}", 'bar', [
             values: values
