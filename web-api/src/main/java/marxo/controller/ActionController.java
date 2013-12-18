@@ -12,10 +12,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("action{:s?}")
 public class ActionController extends EntityController<Action> {
 	@Override
@@ -35,7 +34,6 @@ public class ActionController extends EntityController<Action> {
 	}
 
 	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}/status", method = RequestMethod.PUT)
-	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public RunStatus updateStatus(@PathVariable String idString, @RequestBody RunStatus status) throws Exception {
 		ObjectId objectId = stringToObjectId(idString);
