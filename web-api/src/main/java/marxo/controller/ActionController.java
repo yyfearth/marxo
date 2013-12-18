@@ -3,7 +3,11 @@ package marxo.controller;
 import com.mongodb.WriteResult;
 import marxo.entity.Task;
 import marxo.entity.action.Action;
+import marxo.entity.action.TrackableAction;
+import marxo.entity.node.Node;
+import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
+import marxo.entity.workflow.Workflow;
 import marxo.exception.EntityNotFoundException;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -45,8 +49,36 @@ public class ActionController extends EntityController<Action> {
 			throw new EntityNotFoundException(Action.class, objectId);
 		}
 
-		if (status.equals(RunStatus.FINISHED)) {
-			Action action = Action.get(objectId);
+		Action action = Action.get(objectId);
+
+		if (action.isFinished()) {
+			Workflow workflow = action.getWorkflow();
+
+			if (action instanceof TrackableAction) {
+				workflow.removeTracableAction((TrackableAction) action);
+			}
+
+			Node node = action.getNode();
+			boolean isFinished = true;
+			for (Action action1 : action.getNode().getActions()) {
+				if (action1.isNot(RunStatus.FINISHED)) {
+					isFinished = false;
+					break;
+				}
+			}
+			if (isFinished) {
+				logger.info(String.format("%s finishes tracking", node));
+				node.setStatus(RunStatus.FINISHED);
+				node.save();
+				workflow.removeCurrentNode(node);
+
+				if (workflow.getCurrentNodes().size() == 0) {
+					logger.info(String.format("%s finishes tracking", workflow));
+					workflow.setStatus(RunStatus.FINISHED);
+					Notification.saveNew(Notification.Level.NORMAL, workflow, Notification.Type.FINISHED);
+				}
+			}
+
 			Task.schedule(action.workflowId, DateTime.now());
 		}
 
