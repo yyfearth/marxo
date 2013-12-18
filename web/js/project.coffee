@@ -517,6 +517,18 @@ Projects
     events:
       'dblclick li > a[href]': (e) ->
         @router.navigate e.currentTarget.href.replace(/^.*?#(project.*)/, '$1/edit'), trigger: true
+      'click button[name=finish]': (e) ->
+        return unless confirm 'Are you sure to force finish this action?\n\nIt will cause close submission and stop tracking.'
+        action = $.data e.currentTarget, 'model'
+        action?.status? 'FINISHED', (status) =>
+          if 'FINISHED' isnt status
+            alert 'Failed to force finish this action!'
+          else @model.load =>
+            setTimeout =>
+              @select @_cur_selected or {}
+            , 100
+          return
+        return
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
       @$detail = $ find '.node-link-detail', @el
@@ -526,11 +538,14 @@ Projects
         @model = wf
         @_renderList()
       @
-    reset: -> @load null, true
+    reset: ->
+      @_cur_selected = null
+      @load null, true
     select: ({link, node, action} = {}) ->
       unless @model?
         console.error 'model not given yet'
         return @
+      @_cur_selected = {link, node, action}
       _prefix = @_prefix
       if node
         id = "##{_prefix}_node_#{node}"
@@ -622,6 +637,15 @@ Projects
         a.appendChild name
         if status = action.status(lowercase: true)
           a.className = "status-#{status}"
+          if /^(?:started|tracked|paused)$/i.test status
+            btn = document.createElement 'button'
+            btn.className = 'btn btn-round btn-warning icon-ok pull-right'
+            btn.name = 'finish'
+            btn.title = 'Force Finish'
+            btn.dataset.id = action.id
+            btn.dataset.placement = 'left'
+            $.data btn, 'model', action
+            a.appendChild btn
           a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status] or ''
         if action.content?.hasReport()
           _renderRef a, action, 'content', 'Report', 'icon-report', '#content/{{id}}/report'
