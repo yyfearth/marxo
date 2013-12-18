@@ -41,10 +41,10 @@ public class PageAction extends TrackableAction {
 				setStatus(RunStatus.TRACKED);
 				workflow.addTracableAction(this);
 
-				Notification.saveNew(Notification.Level.NORMAL, this, "Page is tracked");
+				Notification.saveNew(Notification.Level.NORMAL, this, Notification.Type.TRACKED);
 
-				nextTrackTime = trackEvent.getStartTime();
-				Task.reschedule(workflowId, nextTrackTime);
+				nextTrackTime = trackEvent.getStartTime().plus(trackPeriod);
+				Task.schedule(workflowId, nextTrackTime);
 				return true;
 			}
 		}
@@ -56,7 +56,7 @@ public class PageAction extends TrackableAction {
 			}
 
 			if (nextTrackTime.isAfterNow()) {
-				Task.reschedule(workflowId, nextTrackTime);
+				Task.schedule(workflowId, nextTrackTime);
 				return true;
 			}
 
@@ -64,7 +64,7 @@ public class PageAction extends TrackableAction {
 			content1.records.add(PageRecord.getInstance(content1));
 
 			nextTrackTime = nextTrackTime.plus(trackPeriod);
-			Task.reschedule(workflowId, nextTrackTime);
+			Task.schedule(workflowId, nextTrackTime);
 
 			return true;
 		}

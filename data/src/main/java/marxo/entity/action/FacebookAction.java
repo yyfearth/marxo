@@ -12,6 +12,7 @@ import marxo.entity.report.FacebookRecord;
 import marxo.entity.workflow.Notification;
 import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
+import marxo.exception.DataInconsistentException;
 import org.joda.time.DateTime;
 
 public class FacebookAction extends TrackableAction {
@@ -23,11 +24,15 @@ public class FacebookAction extends TrackableAction {
 	@Override
 	public boolean act(Workflow workflow, Node node) {
 
+		if (!workflow.id.equals(workflowId)) {
+			throw new DataInconsistentException(String.format("Workflow IDs [%s] and [%s] are not same", workflow.id, workflowId));
+		}
+
 		// Make sure the existence of access token.
 		if (getTenant().facebookData == null || getTenant().facebookData.accessToken == null) {
 			logger.info(String.format("%s doesn't have Facebook to continue", this));
 
-			Notification.saveNew(Notification.Level.CRITICAL, tenant, "Please update the Facebook permission");
+			Notification.saveNew(Notification.Level.CRITICAL, this, Notification.Type.FACEBOOK_TOKEN);
 			setStatus(RunStatus.ERROR);
 
 			return false;
@@ -65,10 +70,10 @@ public class FacebookAction extends TrackableAction {
 					setStatus(RunStatus.TRACKED);
 					workflow.addTracableAction(this);
 
-					Notification.saveNew(Notification.Level.NORMAL, this, "Facebook post is tracked");
+					Notification.saveNew(Notification.Level.NORMAL, this, Notification.Type.TRACKED);
 
-					nextTrackTime = trackEvent.getStartTime();
-					Task.reschedule(workflowId, nextTrackTime);
+					nextTrackTime = trackEvent.getStartTime().plus(trackPeriod);
+					Task.schedule(workflowId, nextTrackTime);
 					return true;
 				}
 			}
@@ -80,7 +85,7 @@ public class FacebookAction extends TrackableAction {
 				}
 
 				if (nextTrackTime.isAfterNow()) {
-					Task.reschedule(workflowId, nextTrackTime);
+					Task.schedule(workflowId, nextTrackTime);
 					return true;
 				}
 
@@ -90,14 +95,14 @@ public class FacebookAction extends TrackableAction {
 				logger.debug(String.format("Fetch Facebook post [%s]", post.getId()));
 
 				nextTrackTime = nextTrackTime.plus(trackPeriod);
-				Task.reschedule(workflowId, nextTrackTime);
+				Task.schedule(workflowId, nextTrackTime);
 
 				return true;
 			}
 		} catch (FacebookException e) {
-			logger.info(String.format("%s [%s] %s", this, e.getClass().getSimpleName(), e.getMessage()));
+			logger.warn(String.format("%s [%s] %s", this, e.getClass().getSimpleName(), e.getMessage()));
 
-			Notification.saveNew(Notification.Level.CRITICAL, tenant, "Please update the Facebook permission");
+			Notification.saveNew(Notification.Level.CRITICAL, this, Notification.Type.FACEBOOK_TOKEN);
 			setStatus(RunStatus.ERROR);
 
 			return false;

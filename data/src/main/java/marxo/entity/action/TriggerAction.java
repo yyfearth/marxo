@@ -13,7 +13,7 @@ public class TriggerAction extends Action {
 
 	@Override
 	public boolean act(Workflow workflow, Node node) {
-		Notification.saveNew(Notification.Level.MAJOR, this, "Action waits for user action");
+		Notification.saveNew(Notification.Level.MAJOR, this, Notification.Type.WAIT_FOR_USER);
 		setStatus(RunStatus.STARTED);
 		return false;
 	}
