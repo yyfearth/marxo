@@ -27,7 +27,7 @@
         <logger name="marxo" level="debug"/>
         <root level="off">
             <appender-ref ref="console"/>
-            <appender-ref ref="rollingFile"/>
+            <!--<appender-ref ref="rollingFile"/>-->
         </root>
     </loggers>
 </configuration>
