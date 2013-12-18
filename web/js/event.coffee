@@ -30,6 +30,12 @@ Event
         parent: @
         collection: collection
       @editor = new EventEditorView el: '#event_editor', parent: @
+
+      @listenTo @editor, 'finish', (id) =>
+        @manager.finish collection.fullCollection.get(id), (success) =>
+          @editor.cancel() if success
+          return
+        return
       # rewrite event fetch using actions
       collection.load = (callback, options) ->
         Actions.actions.load (actions, ret) =>
@@ -85,10 +91,13 @@ Event
 
   class EventEditorView extends FormDialogView
     goBackOnHidden: 'event/mgr'
+    events:
+      'click .btn-finish': -> @trigger 'finish', @data.id, @data if @data?.id
     initialize: (options) ->
       super options
       @$info = $ find '.info', @form
       @$form = $ @form
+      @$btnFinish = $ find '.btn-finish', @el
       @btnView = find '.btn-view', @el
       @_dateToLocale = (date) -> if date then new Date(date).toLocaleString() else ''
       if @form.starts.type is 'text'
@@ -139,20 +148,19 @@ Event
         msg = []
         if starts
           msg.push "It will be started at #{@_dateToLocale starts}."
-          msg.push '<small>A notication will be sent if associated action has not been executed yet.</small>'
+          #msg.push '<small>A notication will be sent if associated action has not been executed yet.</small>'
         else
           msg.push 'It will be started automatically when associated action been executed.'
         if ends
           msg.push "It will be ended at #{@_dateToLocale ends}."
         else
           cls = 'warning'
-          msg.push 'It will be ended only after trigger "finish" manually.'
+          msg.push 'It will be ended as soon as associated action finish execution.'
         msg.push "Duration between starts and ends is #{form.duration.value}." if duration
-        msg.push '<small>4 Notifications will be sent before and after event starts and ends.</small>'
+        #msg.push '<small>Notifications will be sent before and after event starts and ends.</small>'
         msg = msg.join '<br/>'
 
-      @$info.html(msg).parents('.control-group')
-      .removeClass('success error').addClass cls
+      @$info.html(msg).parents('.control-group').removeClass('success error').addClass cls
       @
 
     fill: (data) ->
@@ -174,10 +182,12 @@ Event
       @
     read: ->
       data = super
-      data.starts = unless data.starts?.length then null else new Date data.starts
-      data.ends = if data.ends?.length then null else new Date data.ends
+      data.starts = new Date data.starts if data.starts
+      delete data.starts unless data.starts
+      data.ends = new Date data.ends if data.ends
+      delete data.ends unless data.ends
       data.duration = DurationConvertor.parse data.duration
-      data.duration = null unless data.duration
+      delete data.duration unless data.duration
       data
     reset: ->
       @$info.empty()
@@ -185,6 +195,7 @@ Event
       @form.ends.readOnly = false
       @form.duration.readOnly = false
       @btnView.href = ''
+      @$btnFinish.hide()
       super
     popup: (data, callback) ->
       super data, callback
@@ -194,6 +205,7 @@ Event
       @fill data
       form = @form
       status = (data.status or '').toUpperCase()
+      @$btnFinish.hide()
       switch status
         when 'FINISHED', 'ERROR', 'STOPPED'
           form.starts.readOnly = true
@@ -203,6 +215,7 @@ Event
           form.starts.readOnly = true
           form.ends.readOnly = false
           form.duration.readOnly = false
+          @$btnFinish.show() if data.duration
         else
           form.starts.readOnly = false
           form.ends.readOnly = false
@@ -490,12 +503,14 @@ Event
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
         collection: collection
-      @on 'finish', @finish.bind @
+      @reload = _.debounce @reload.bind(@), 100
+      @finish = @finish.bind @
+      @on 'finish', @_finish.bind @
       @
-    finish: (event) ->
-      # TODO: use action status api instead
+    _finish: (event) -> @finish event, @reload
+    finish: (event, callback) ->
       console.log 'finish', event
-      if confirm """Are you sure to finish event "#{event.get 'name'}"?\n
+      if confirm """Are you sure to finish event "#{event.get('name') or '(No Name)'}"?\n
       Finish means event and its related action will be end in a short time and it will be marked as FINISHED after engine processed it.
       But finish will not skip the execution of this event and related action.
       In the meanwhile, for tracking event, it will cause close to submission and stop tracking."""
@@ -519,11 +534,11 @@ Event
           duration: 1
         , wait: true
         xhr.then =>
-          @reload()
           alert 'Selected event has been updated, \nbut the status may not changed until engine processed.\nPress Reload to see the changes.'
+          callback? true
         , =>
-          @reload()
           alert 'Event is failed to update'
+          callback? false
       @
     reload: ->
       @projectFilter.clear()
