@@ -265,7 +265,7 @@ public class RemoteEngineTests extends BasicDataTests {
 
 		workflow = Workflow.get(workflow.id);
 		Assert.assertEquals(workflow.getStatus(), RunStatus.TRACKED);
-		Assert.assertEquals(workflow.trackedActionIds.size(), 1);
+		Assert.assertEquals(workflow.getTrackedActions().size(), 1);
 
 		node1 = Node.get(node1.id);
 		Assert.assertEquals(node1.getStatus(), RunStatus.FINISHED);

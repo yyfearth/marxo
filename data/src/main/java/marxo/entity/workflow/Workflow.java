@@ -3,11 +3,11 @@ package marxo.entity.workflow;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import marxo.entity.BasicEntity;
 import marxo.entity.Task;
-import marxo.entity.action.Action;
 import marxo.entity.action.TrackableAction;
 import marxo.entity.link.Link;
 import marxo.entity.node.Node;
@@ -32,26 +32,29 @@ public class Workflow extends RunnableEntity {
 	Trackable actions
 	 */
 
-	public List<ObjectId> trackedActionIds = new ArrayList<>();
-
-	@Transient
-	@JsonIgnore
-	protected List<Action> tracedActions = new ArrayList<>();
+	@DBRef
+	protected List<TrackableAction> trackedActions = new ArrayList<>();
 
 	@JsonIgnore
-	public List<Action> getTracedActions() {
-		return tracedActions;
+	public List<TrackableAction> getTrackedActions() {
+		return trackedActions;
 	}
 
 	@JsonIgnore
-	public void setTracedActions(List<Action> tracedActions) {
-		this.tracedActions = tracedActions;
-		this.trackedActionIds = new ArrayList<>(Lists.transform(tracedActions, SelectIdFunction.getInstance()));
+	public void setTrackedActions(List<TrackableAction> trackedActions) {
+		this.trackedActions = trackedActions;
 	}
 
 	public void addTracableAction(TrackableAction trackableAction) {
-		tracedActions.add(trackableAction);
-		trackedActionIds.add(trackableAction.id);
+		trackedActions.add(trackableAction);
+	}
+
+	public void removeTracableAction(TrackableAction trackableAction) {
+		trackedActions.remove(trackableAction);
+	}
+
+	public List<ObjectId> getTrackedActionIds() {
+		return Lists.transform(trackedActions, SelectIdFunction.getInstance());
 	}
 
 	/*
@@ -141,6 +144,11 @@ public class Workflow extends RunnableEntity {
 	@JsonIgnore
 	public void setStartNode(Node startNode) {
 		this.startNode = startNode;
+	}
+
+	@JsonProperty
+	public ObjectId getStartNodeId() {
+		return (startNode == null) ? null : startNode.id;
 	}
 
 	/*
@@ -259,10 +267,7 @@ public class Workflow extends RunnableEntity {
 
 	@JsonIgnore
 	public void setCurrentNodes(List<Node> currentNodes) {
-		if (currentNodes == null) {
-			currentNodes = new ArrayList<>();
-		}
-		this.currentNodes = currentNodes;
+		this.currentNodes = Objects.firstNonNull(currentNodes, new ArrayList<Node>());
 	}
 
 	public void addCurrentNode(Node node) {
@@ -284,6 +289,45 @@ public class Workflow extends RunnableEntity {
 	}
 
 	/*
+	Current links
+	 */
+
+	@JsonProperty("current_link_ids")
+	public List<ObjectId> getCurrentLinkIds() {
+		return Lists.transform(currentLinks, SelectIdFunction.getInstance());
+	}
+
+	@DBRef
+	@JsonIgnore
+	protected List<Link> currentLinks = new ArrayList<>();
+
+	@JsonIgnore
+	public List<Link> getCurrentLinks() {
+		return currentLinks;
+	}
+
+	@JsonIgnore
+	public void setCurrentLinks(List<Link> currentLinks) {
+		this.currentLinks = Objects.firstNonNull(currentLinks, new ArrayList<Link>());
+	}
+
+	public void addCurrentLinks(List<Link> links) {
+		currentLinks.addAll(links);
+		for (Link link : links) {
+			link.setWorkflow(this);
+		}
+	}
+
+	public void addCurrentLink(Link link) {
+		currentLinks.add(link);
+		link.setWorkflow(this);
+	}
+
+	public void removeCurrentLink(Link link) {
+		currentLinks.remove(link);
+	}
+
+	/*
 	Validation/wire
 	 */
 
@@ -301,6 +345,13 @@ public class Workflow extends RunnableEntity {
 		if (nodes.isEmpty()) {
 			startNode = null;
 		} else {
+			for (Node node : nodes) {
+				node.setFromLinkIds(new ArrayList<ObjectId>());
+				node.setToLinkIds(new ArrayList<ObjectId>());
+				node.setFromNodeIds(new ArrayList<ObjectId>());
+				node.setToNodeIds(new ArrayList<ObjectId>());
+			}
+
 			for (Link link : links) {
 				Node fromNode = nodeMap.get(link.previousNodeId);
 				Node toNode = nodeMap.get(link.nextNodeId);
@@ -403,6 +454,23 @@ public class Workflow extends RunnableEntity {
 	/*
 	DAO
 	 */
+
+	@Override
+	public void save() {
+		super.save();
+
+		if (nodes != null) {
+			for (Node node : nodes) {
+				node.save();
+			}
+		}
+
+		if (links != null) {
+			for (Link link : links) {
+				link.save();
+			}
+		}
+	}
 
 	@Override
 	public void remove() {
