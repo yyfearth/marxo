@@ -482,7 +482,115 @@ Workflows, Projects
         next_node_id: 5
       ]
     ]
-  projects: []
+
+    projects: [
+      name: 'Dev App'
+      key: 'app_dev'
+      desc: ''
+      start_node_id: 0
+      nodes: [
+        name: 'Requirement and Desgin'
+        key: 'desgin'
+        desc: 'Post requirement and collect desgins.'
+        offset:
+          x: 120, y: 30
+        actions: [
+          type: 'PAGE'
+          name: 'Post Reqirement'
+          key: 'post_req'
+          content:
+            type: 'PAGE'
+            name: 'Design'
+            desc: ''
+            sections: [
+              name: 'Design Name'
+              desc: ''
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Upload Image'
+              desc: ''
+              type: 'FILE'
+              options:
+                required: false
+                file_accept: 'image/*'
+            ]
+          tracking:
+            duration: 60000
+          event:
+            duration: 0
+        ,
+          type: 'FACEBOOK'
+          name: 'Post Requirement to Facebook'
+          key: 'post_req_fb'
+          content:
+            type: 'FACEBOOK'
+            message: '''http://marxosys.ml/#home'''
+          tracking:
+            duration: 30000
+          event:
+            duration: 0
+        ,
+          type: 'WAIT'
+          name: 'Wait for Design Submit'
+          key: 'wait_for_design'
+          event:
+            duration: 15000
+        ]
+      ,
+        name: 'Vote App Design'
+        key: 'vote'
+        desc: 'Public vote submitted designs.'
+        offset:
+          x: 340, y: 30
+        actions: [
+          type: 'PAGE'
+          name: 'Post Design Vote Form'
+          key: 'post_design_vote_form'
+          content:
+            type: 'PAGE'
+            name: 'Vote'
+            desc: ''
+            sections: [
+              name: 'Vote Design'
+              desc: ''
+              type: 'RADIO'
+              options:
+                required: true
+                gen_from_submission: 'post_req'
+            ,
+              name: 'Comments'
+              desc: ''
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
+          tracking:
+            duration: 100000
+          event:
+            duration: 0
+        ,
+          type: 'FACEBOOK'
+          name: 'Post Vote to Facebook'
+          key: 'design_vote_fb'
+          content:
+            type: 'FACEBOOK'
+            message: 'http://marxosys.ml/#list'
+          tracking:
+            duration: 15000
+          event:
+            duration: 15000
+        ]
+      ]
+      links: [
+        key: 'desgin_to_vote'
+        prev_node_id: 0
+        next_node_id: 1
+      ]
+    ]
 
   console.log 'data start importing...'
 
