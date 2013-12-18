@@ -757,11 +757,8 @@ define 'models', ['module', 'lib/common'], (module) ->
       posted = attr.posted_at or attr.records?.length or attr.submissions?.length
       attr.status = if posted then 'POSTED' else 'IDLE'
       attr
-    posted: ->
-      attr = @attributes # TODO: remove action status looking after posted_at available
-      attr.posted_at or (@action? and @action.status() isnt 'IDLE') or attr.records?.length or attr.submissions?.length
-    hasReport: ->
-      Boolean(@get('records')?.length or @get('submissions')?.length)
+    posted: -> @attributes.posted_at
+    hasReport: -> Boolean(@get('records')?.length or @get('submissions')?.length)
 
   class Contents extends ManagerCollection
     model: Content
