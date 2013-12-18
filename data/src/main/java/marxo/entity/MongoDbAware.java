@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 public interface MongoDbAware {
 	@JsonIgnore
 	@Transient
-	ApplicationContext applicationContext = new AnnotationConfigApplicationContext(MongoConfiguration.class);
+	final static ApplicationContext applicationContext = new AnnotationConfigApplicationContext(MongoConfiguration.class);
 
 	@JsonIgnore
 	@Transient
