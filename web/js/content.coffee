@@ -166,7 +166,7 @@ ProjectFilterView
       super data, callback
       @field = @form.message
       @fill data
-      posted = 'IDLE' isnt data.status()
+      posted = data.posted()
       @field.readOnly = posted
       @btnSave.disabled = posted
       @
@@ -198,7 +198,7 @@ ProjectFilterView
     popup: (data, ignored, callback) ->
       super data, callback
       @fill data
-      posted = 'IDLE' isnt data.get('status').toUpperCase()
+      posted = data.posted()
       @readOnlyHtml posted
       @$el.find('form :input').prop 'readOnly', posted
       @btnSave.disabled = posted
@@ -261,7 +261,7 @@ ProjectFilterView
       @url = "content/#{model.id}"
       @pageDesc.fill data
       @submitOptions?.fill data.options
-      posted = @readonly = 'IDLE' isnt model.status()
+      posted = @readonly = model.posted()
       @sectionsEl.classList.add 'readonly' if posted
       if model.has 'sections' # need @readonly
         @addSection section for section in data.sections
@@ -762,7 +762,14 @@ ProjectFilterView
     ,
       'workflow'
       'node_action'
-      'status'
+      #'status'
+    ,
+      name: 'status'
+      label: 'Status'
+      cell: 'label'
+      cls:
+        'posted': 'label-info'
+      editable: false
     ,
       name: 'posted_at'
       label: 'Date Posted'

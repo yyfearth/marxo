@@ -752,8 +752,11 @@ define 'models', ['module', 'lib/common'], (module) ->
     pause: (attr) -> @_proc attr
     _proc: (attr = @attributes) ->
       posted = attr.posted_at or attr.records?.length or attr.submissions?.length
-      attr.status = if posted then 'STARTED' else 'IDLE'
+      attr.status = if posted then 'POSTED' else 'IDLE'
       attr
+    posted: ->
+      attr = @attributes # TODO: remove action status looking after posted_at available
+      attr.posted_at or (@action? and @action.status() isnt 'IDLE') or attr.records?.length or attr.submissions?.length
     hasReport: ->
       Boolean(@get('records')?.length or @get('submissions')?.length)
 
@@ -766,8 +769,7 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Service extends Entity
     idAttribute: 'service'
     urlRoot: ROOT + '/services'
-    connected: ->
-      /^CONNECTED$/i.test @get 'status'
+    connected: -> /^CONNECTED$/i.test @get 'status'
 
   { # exports
   ROOT
