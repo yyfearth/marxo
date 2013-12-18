@@ -12,13 +12,12 @@ import marxo.entity.workflow.RunStatus;
 import marxo.entity.workflow.Workflow;
 import marxo.tool.Loggable;
 import marxo.tool.StringTool;
+import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.Duration;
 import org.joda.time.Seconds;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.UUID;
 
 public class EngineWorker implements Runnable, MongoDbAware, Loggable {
@@ -76,19 +75,24 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 	Worker
 	 */
 
-	final Duration idleDuration = Seconds.seconds(1).toStandardDuration();
+	final Duration idleDuration = Seconds.seconds(3).toStandardDuration();
 	final Duration normalDuration = Seconds.seconds(1).toStandardDuration();
+	/**
+	 * The duration since last time getting a task.
+	 */
 	Duration duration = idleDuration;
+	/**
+	 * The time to get a task.
+	 */
+	DateTime nextRunTime = DateTime.now();
+	/**
+	 * The duration between thread stopping check.
+	 */
 	Duration spinDuration = Seconds.seconds(1).toStandardDuration();
-	DateTime nextCheckTime = DateTime.now();
 
-	public void setDuration(Duration duration) {
-		if (!this.duration.equals(duration)) {
-			this.duration = duration;
-		}
-	}
-
-	// todo: make the method thread-safe, ready for multi-thread.
+	/**
+	 * If you do not fully understand the application, or not pointed by a gun to do this, you probably don't want to touch this method. <b>IT DOESN'T BELONG TO HUMAN WORLD!</b>
+	 */
 	@Override
 	public void run() {
 		logger.info(String.format("%s starts", this));
@@ -97,229 +101,292 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		Workflow workflow = null;
 
 		try {
-			doWorkflow:
-			while (true) {
-				if (isStopped) {
-					break;
-				}
+			while (!isStopped) {
 
-				if (nextCheckTime.isAfterNow()) {
+				if (nextRunTime.isAfterNow()) {
 					Thread.sleep(spinDuration.getMillis());
 					continue;
 				}
 
+				task = Task.next();
+
+				if (task == null) {
+					nextRunTime = DateTime.now().plus(idleDuration);
+					continue;
+				}
+
+				workflow = Workflow.get(task.workflowId);
+
+				if (workflow == null) {
+					logger.warn(String.format("%s Cannot find workflow %s", task, task.workflowId));
+					continue;
+				}
+
 				try {
-					task = Task.next();
 
-					if (task == null) {
-						setDuration(idleDuration);
-						continue;
-					} else {
-						setDuration(normalDuration);
+					if (workflow.isTracked()) {
+						processTrackableActions(workflow);
 					}
 
-					workflow = Workflow.get(task.workflowId);
+//					if (!makeSureCurrentNode(workflow)) {
+//						continue;
+//					}
 
-					if (workflow == null) {
-						logger.warn(String.format("%s Cannot find workflow %s", task, task.workflowId));
-						continue;
-					}
+					boolean isOkay;
+					while (true) {
+						isOkay = processNodes(workflow);
 
-					logger.info(String.format("%s is processing %s", this, workflow));
-
-					if (workflow.getStartNode() == null) {
-						logger.warn(String.format("%s has no start node", this));
-
-						Notification.saveNew(Notification.Level.ERROR, workflow, "Workflow has no start node");
-
-						workflow.setStatus(RunStatus.ERROR);
-						workflow.save();
-
-						continue;
-					}
-
-					if (workflow.getCurrentNodes().isEmpty()) {
-						if (workflow.nodeIds.isEmpty()) {
-							logger.warn(String.format("%s has no node", workflow));
-							continue;
-						}
-						workflow.addCurrentNode(workflow.getStartNode());
-						workflow.save();
-					}
-
-					Queue<Node> nodeQueue = new LinkedList<>(workflow.getCurrentNodes());
-					boolean workflowHasError = false;
-
-					doNode:
-					while (!nodeQueue.isEmpty()) {
-						Node node = nodeQueue.poll();
-						node.setWorkflow(workflow);
-						logger.info(String.format("%s is processing %s", this, node));
-
-						switch (node.getStatus()) {
-							case IDLE:
-								node.setStatus(RunStatus.STARTED);
-								node.save();
-
-								Notification.saveNew(Notification.Level.NORMAL, node, "Node started");
-							case STARTED:
-								break;
-							case FINISHED:
-							case PAUSED:
-							case STOPPED:
-							case ERROR:
-							case WAITING:
-							case TRACKED:
-								continue doNode;
+						if (linksAreUpdated) {
+							processLinks(workflow);
 						}
 
-						List<Action> actions = node.getActions();
-						boolean nodeHasError = false;
-						boolean nodeIsTracking = false;
-
-						Action lastAction = null;
-						doAction:
-						for (Action action : actions) {
-							lastAction = action;
-							switch (action.getStatus()) {
-								case IDLE:
-								case STARTED:
-									break;
-								case WAITING:
-								case FINISHED:
-									break doAction;
-								case TRACKED:
-									nodeIsTracking = true;
-									break;
-								case ERROR:
-									nodeHasError = true;
-								case PAUSED:
-								case STOPPED:
-									break doAction;
-							}
-
-							Event event = action.getEvent();
-							if (event == null) {
-								event = new Event();
-								event.setStartTime(DateTime.now());
-
-								action.setEvent(event);
-								action.save();
-							} else if (event.getStartTime() == null) {
-								event.setStartTime(DateTime.now());
-								event.save();
-							}
-
-							if (event.getStartTime().isAfterNow()) {
-								Task.reschedule(workflow.id, event.getStartTime());
-							}
-
-							Notification.saveNew(Notification.Level.NORMAL, action, "Action started");
-
-							try {
-								action.act(workflow, node);
-							} finally {
-								// review: check if save on workflow already.
-								action.save();
-							}
-
-							switch (action.getStatus()) {
-								case FINISHED:
-									Notification.saveNew(Notification.Level.NORMAL, action, "Action finished");
-									break;
-								case TRACKED:
-									nodeIsTracking = true;
-									Notification.saveNew(Notification.Level.NORMAL, action, "Action tracked");
-									workflow.addTracableAction((TrackableAction) action);
-									workflow.save();
-									break;
-								case ERROR:
-									nodeHasError = true;
-								case IDLE:
-								case STARTED:
-								case WAITING:
-								case PAUSED:
-								case STOPPED:
-									node.setCurrentAction(action);
-									break doAction;
-							}
-						}
-
-						if (lastAction == null) {
-							node.setStatus(RunStatus.FINISHED);
-						} else {
-							node.setStatus(lastAction.getStatus());
-						}
-
-						// review: check if save on workflow already.
-						node.save();
-
-						if (node.isFinished()) {
-							Notification.saveNew(Notification.Level.NORMAL, node, "Node finished");
-							workflow.removeCurrentNode(node);
-						} else if (node.isTracked()) {
-							Notification.saveNew(Notification.Level.NORMAL, node, "Node processed");
-						} else {
-							if (node.getStatus().equals(RunStatus.ERROR)) {
-								workflowHasError = true;
-							}
+						if (nodesAreUpdated) {
 							continue;
 						}
 
-						// Run links
-						for (Link link : node.getToLinks()) {
-							logger.info(String.format("%s is processing %s", this, link));
-							Notification.saveNew(Notification.Level.NORMAL, link, "Link started");
-
-							if (link.determine()) {
-								link.setStatus(RunStatus.FINISHED);
-								link.save();
-
-								Notification.saveNew(Notification.Level.NORMAL, link, "Link finished");
-
-								if (link.getNextNode() != null) {
-									nodeQueue.add(link.getNextNode());
-									workflow.addCurrentNode(node);
-									workflow.save();
-								}
-							} else {
-								Task.reschedule(workflow.id, DateTime.now());
-							}
-						}
+						break;
 					}
 
-					if (workflowHasError) {
+					if (!isOkay) {
+						logger.info(String.format("%s has error", workflow));
 						workflow.setStatus(RunStatus.ERROR);
-					} else if (workflow.trackedActionIds.isEmpty()) {
-						if (workflow.getCurrentNodes().size() == 0) {
-							workflow.setStatus(RunStatus.FINISHED);
-							Notification.saveNew(Notification.Level.NORMAL, workflow, "Workflow finished");
-						} else {
-							workflow.setStatus(RunStatus.ERROR);
-							Notification.saveNew(Notification.Level.ERROR, workflow, "Workflow has error");
-						}
+					} else if (workflow.isDone()) {
+						logger.info(String.format("%s finishes", workflow));
+						workflow.setStatus(RunStatus.FINISHED);
+						Notification.saveNew(Notification.Level.NORMAL, workflow, Notification.Type.FINISHED);
 					} else {
+						logger.info(String.format("%s tracks", workflow));
 						workflow.setStatus(RunStatus.TRACKED);
 					}
 				} catch (Exception e) {
 					logger.error(String.format("%s has error:", this));
 					logger.error(StringTool.exceptionToString(e));
+					workflow.setStatus(RunStatus.ERROR);
 				} finally {
-					if (workflow != null) {
-						workflow.save();
-						workflow = null;
-					}
+					workflow.save();
+					// Schedule the task in the end of the whole process to prevent more than one worker takes the same workflow.
+					scheduleTask(workflow.id);
+					nextRunTime = DateTime.now().plus(normalDuration);
 				}
 			}
-		} catch (InterruptedException e) {
-			logger.info(String.format("%s is interruppted [%s]", this, e.getClass().getSimpleName()));
-		}
 
-		logger.info(String.format("%s ends", this));
+			logger.info(String.format("%s ends", this));
+		} catch (InterruptedException ignored) {
+		}
 	}
 
-	protected void update() {
+	boolean nodesAreUpdated = false;
 
+	private void processLinks(Workflow workflow) {
+		nodesAreUpdated = false;
+
+		for (int i = 0; i < workflow.getCurrentLinks().size(); i++) {
+			Link link = workflow.getCurrentLinks().get(i);
+			logger.info(String.format("%s starts", link));
+			Notification.saveNew(Notification.Level.NORMAL, link, Notification.Type.STARTED);
+
+			if (link.determine()) {
+				logger.info(String.format("%s finishes", link));
+				workflow.removeCurrentLink(link);
+				i--;
+				link.setStatus(RunStatus.FINISHED);
+				link.save();
+
+				Notification.saveNew(Notification.Level.NORMAL, link, Notification.Type.FINISHED);
+
+				if (link.getNextNode() != null) {
+					workflow.addCurrentNode(link.getNextNode());
+					nodesAreUpdated = true;
+				}
+			} else {
+				updateSchedule(DateTime.now().plus(Days.ONE.toStandardDuration()));
+			}
+		}
+	}
+
+	boolean linksAreUpdated = false;
+
+	private boolean processNodes(Workflow workflow) {
+		linksAreUpdated = false;
+		boolean hasError = false;
+
+		for (int i = 0; i < workflow.getCurrentNodes().size(); i++) {
+			Node node = workflow.getCurrentNodes().get(i);
+
+			if (node.getStatus().equals(RunStatus.IDLE)) {
+				logger.info(String.format("%s starts", node));
+				node.setStatus(RunStatus.STARTED);
+				Notification.saveNew(Notification.Level.NORMAL, node, Notification.Type.STARTED);
+			} else if (node.isNot(RunStatus.FINISHED) && node.isNot(RunStatus.STARTED)) {
+				continue;
+			}
+
+			Action lastAction = null;
+			for (Action action : node.getActions()) {
+				lastAction = action;
+
+				Event event = action.getEvent();
+				if (event == null) {
+					event = new Event();
+					event.setStartTime(DateTime.now());
+					event.setEndTime(DateTime.now());
+					action.setEvent(event);
+				} else if (event.getStartTime() == null) {
+					event.setStartTime(DateTime.now());
+				}
+
+				if (action.getStatus().equals(RunStatus.IDLE)) {
+					if (event.getStartTime().isAfterNow()) {
+						updateSchedule(event.getStartTime());
+						node.setCurrentAction(action);
+						break;
+					} else {
+						Notification.saveNew(Notification.Level.NORMAL, action, Notification.Type.STARTED);
+
+						action.act(workflow, node);
+						action.save();
+						logger.info(String.format("%s acts, after-status: [%s]", action, action.getStatus()));
+					}
+				}
+
+				if (action.getStatus().equals(RunStatus.STARTED)) {
+					if (event.getEndTime().isAfterNow()) {
+						updateSchedule(event.getEndTime());
+						node.setCurrentAction(action);
+						break;
+					} else {
+						logger.info(String.format("%s finishes", action));
+						action.setStatus(RunStatus.FINISHED);
+						Notification.saveNew(Notification.Level.NORMAL, action, Notification.Type.FINISHED);
+						continue;
+					}
+				}
+
+				if (action.isTracked() || action.isFinished()) {
+					continue;
+				}
+
+				break;
+			}
+
+			if (lastAction == null) {
+				logger.info(String.format("%s finishes", node));
+				node.setStatus(RunStatus.FINISHED);
+			} else {
+				logger.info(String.format("%s %s", node, lastAction.getStatus().toString().toLowerCase()));
+				node.setStatus(lastAction.getStatus());
+			}
+
+			node.save();    // Must save this because current workflow has no node information.
+
+			if (node.isFinished()) {
+				Notification.saveNew(Notification.Level.NORMAL, node, Notification.Type.FINISHED);
+				workflow.removeCurrentNode(node);
+				i--;
+				workflow.addCurrentLinks(node.getToLinks());
+				linksAreUpdated = true;
+			} else if (node.isTracked()) {
+				Notification.saveNew(Notification.Level.NORMAL, node, Notification.Type.TRACKED);
+				workflow.removeCurrentNode(node);
+				i--;
+				workflow.addCurrentLinks(node.getToLinks());
+				linksAreUpdated = true;
+			} else {
+				if (node.getStatus().equals(RunStatus.ERROR)) {
+					hasError = true;
+				}
+			}
+		}
+
+		return !hasError;
+	}
+
+	private boolean makeSureCurrentNode(Workflow workflow) {
+		if (workflow.getCurrentNodes().isEmpty()) {
+
+			if (workflow.getStartNode() == null) {
+				workflow.getNodes();
+
+				if (workflow.getNodes().isEmpty()) {
+					logger.warn(String.format("%s has no node", workflow));
+					Notification.saveNew(Notification.Level.ERROR, workflow, Notification.Type.ERROR);
+					workflow.setStatus(RunStatus.ERROR);
+					return false;
+				}
+
+				workflow.getLinks();
+				workflow.wire();
+			}
+
+			workflow.addCurrentNode(workflow.getStartNode());
+		}
+		return true;
+	}
+
+	DateTime scheduleTime = null;
+
+	void updateSchedule(DateTime time) {
+		if (scheduleTime == null) {
+			scheduleTime = time;
+			return;
+		}
+
+		if (scheduleTime.isBefore(time)) {
+			return;
+		}
+
+		scheduleTime = time;
+	}
+
+	void scheduleTask(ObjectId workflowId) {
+		if (scheduleTime == null) {
+			return;
+		}
+
+		Task.schedule(workflowId, scheduleTime);
+		scheduleTime = null;
+	}
+
+	void processTrackableActions(Workflow workflow) {
+		for (int i = 0; i < workflow.getTrackedActions().size(); i++) {
+			TrackableAction trackableAction = workflow.getTrackedActions().get(i);
+
+			try {
+				Node node = trackableAction.getNode();
+				trackableAction.act(workflow, node);
+				trackableAction.save();
+
+				if (trackableAction.isFinished()) {
+					workflow.removeTracableAction(trackableAction);
+					i--;
+
+					boolean isFinished = true;
+					for (Action action : node.getActions()) {
+						if (action.isNot(RunStatus.FINISHED)) {
+							isFinished = false;
+							break;
+						}
+					}
+					if (isFinished) {
+						logger.info(String.format("%s finishes tracking", node));
+						node.setStatus(RunStatus.FINISHED);
+						node.save();
+						workflow.removeCurrentNode(node);
+
+						if (workflow.getCurrentNodes().size() == 0) {
+							logger.info(String.format("%s finishes tracking", workflow));
+							workflow.setStatus(RunStatus.FINISHED);
+							Notification.saveNew(Notification.Level.NORMAL, workflow, Notification.Type.FINISHED);
+						}
+					}
+				}
+			} catch (Exception e) {
+				logger.error(String.format("%s has error when tracking [%s]", this, e));
+				trackableAction.getNode().setStatus(RunStatus.ERROR);
+				trackableAction.setStatus(RunStatus.ERROR);
+				throw e;
+			}
+		}
 	}
 
 	@Override
