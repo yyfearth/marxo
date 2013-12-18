@@ -9,6 +9,7 @@ import marxo.entity.action.Submission;
 import marxo.entity.user.User;
 import marxo.entity.workflow.RunStatus;
 import marxo.exception.EntityNotFoundException;
+import marxo.exception.RequestParameterException;
 import marxo.security.MarxoAuthentication;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
@@ -62,6 +63,8 @@ public class PageController extends BasicController implements MongoDbAware, Int
 			throw new EntityNotFoundException(Content.class, pageIdString);
 		}
 
+		content.increaseViewCount();
+		content.save();
 		Action action = content.getAction();
 
 		if (action != null && !action.getStatus().equals(RunStatus.FINISHED)) {
@@ -78,7 +81,7 @@ public class PageController extends BasicController implements MongoDbAware, Int
 	@ResponseBody
 	@ResponseStatus(HttpStatus.OK)
 	public List<Content> search(@RequestParam(value = "tenant_id", required = false) ObjectId tenantId, @RequestParam(value = "project_id", required = false) ObjectId projectId) {
-		Criteria criteria = Criteria
+		Criteria criteria = newDefaultCriteria()
 				.where("status").is(RunStatus.STARTED)
 				.and("content").exists(true);
 
@@ -109,30 +112,30 @@ public class PageController extends BasicController implements MongoDbAware, Int
 		return contents;
 	}
 
-	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}/view", method = RequestMethod.PUT)
-	public int updateViewCount(@PathVariable String idString) {
-		ObjectId contentId = stringToObjectId(idString);
-
-		Criteria criteria = newDefaultCriteria()
-				.and("_id").is(contentId);
-		Content content = mongoTemplate.findOne(Query.query(criteria), Content.class);
-
-		if (content == null) {
-			throw new EntityNotFoundException(Content.class, contentId);
-		}
-
-		content.increaseViewCount();
-		content.save();
-
-		return content.getViewCount();
-	}
+//	@RequestMapping(value = "/{idString:[\\da-fA-F]{24}}/view", method = RequestMethod.POST)
+//	@ResponseStatus(HttpStatus.NO_CONTENT)
+//	public int updateViewCount(@PathVariable String idString) {
+//		ObjectId contentId = stringToObjectId(idString);
+//
+//		Criteria criteria = newDefaultCriteria()
+//				.and("_id").is(contentId);
+//		Content content = mongoTemplate.findOne(Query.query(criteria), Content.class);
+//
+//		if (content == null) {
+//			throw new EntityNotFoundException(Content.class, contentId);
+//		}
+//
+//		content.increaseViewCount();
+//		content.save();
+//
+//		return content.getViewCount();
+//	}
 
 	@RequestMapping(value = "/{pageIdString:[\\da-fA-F]{24}}/submission{:s?}", method = RequestMethod.POST)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.CREATED)
 	public Submission addSubmission(@PathVariable String pageIdString, @RequestBody Submission submission) throws Exception {
-		Assert.isTrue(ObjectId.isValid(pageIdString));
-		ObjectId pageId = new ObjectId(pageIdString);
+		ObjectId pageId = stringToObjectId(pageIdString);
 
 		Assert.notNull(submission);
 
@@ -144,7 +147,14 @@ public class PageController extends BasicController implements MongoDbAware, Int
 
 		Update update = new Update().addToSet("submissions", submission);
 
-		Content content = mongoTemplate.findAndModify(query, update, Content.class);
+		Content content = mongoTemplate.findOne(query, Content.class);
+
+		if (!content.isRunning()) {
+			throw new RequestParameterException(String.format("This page [%s] is closed", content));
+		}
+
+		content = mongoTemplate.findAndModify(query, update, Content.class);
+
 		filter(content);
 
 		return submission;
