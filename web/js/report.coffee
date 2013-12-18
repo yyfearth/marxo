@@ -1,6 +1,6 @@
 'use strict'
 
-define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
+define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, {Content}) ->
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'
@@ -134,12 +134,13 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
       return
     _renderAnalysis: -> @_renderTab '#report_analysis', 'sections', (sections, el) =>
       submissions = @model.get 'submissions'
+      $el = @$el.find(el)
       unless submissions?.length
-        $sections = '<div class="text-center"><em class="muted">No submission yet</em></div>'
+        $el.html '<div class="text-center"><em class="muted">No submission yet</em></div>'
       else @_loadRefSubmissions sections, =>
         questions = []
         for section, i in sections
-          if 'radio$' is section.type.toLowerCase()
+          if 'radio' is section.type.toLowerCase()
             questions.push
               name: section.name
               options: section.submission_options or section.options.manual_options
@@ -165,13 +166,13 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
             values: values
           ]
           $sections.append $section
-      @$el.find(el).empty().append($sections)
+        $el.empty().append $sections
       return
     _loadRefSubmissions: (sections, callback) ->
       requests = []
-      for section in sections
+      sections.forEach (section) -> # must use function to avoid closure var issue
         if 'radio' is section.type.toLowerCase() and
-        ref = section.options?.gen_from_submission and
+        (ref = section.options?.gen_from_submission) and
         not section.submission_options?
           requests.push new Content(id: ref).fetch success: (content) ->
             if submissions = content.get 'submissions'
@@ -186,8 +187,10 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
       return
     _renderSubmissions: -> @_renderTab '#report_submissions', 'sections', (sections, el) =>
       submissions = @model.get 'submissions'
+      $el = @$el.find(el)
+      console.warn $el[0]
       unless submissions?.length
-        $table = '<div class="text-center"><em class="muted">No submission yet</em></div>'
+        $el.html '<div class="text-center"><em class="muted">No submission yet</em></div>'
       else @_loadRefSubmissions sections, =>
         cols = []
         $thead = $('<tr>').append '<th>#</th>'
@@ -218,7 +221,7 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
               when 'radio'
                 if options.gen_from_submission
                   if val = section.submission_index?[val]
-                    $cell.text 'Submission: ' + (val.desc or val.sections[0]) # TODO: show details
+                    $cell.html "Submission: #{_.escape val.sections[0] or ''} #{val.desc}" # TODO: show details
                   else
                     $cell.text '(error)'
                 else if options.manual_options?.length
@@ -230,7 +233,7 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
           $row.append $('<td>', text: "#{submission.name} <#{submission.key}>")
           $row.append $('<td>', text: new Date(submission.created_at).toLocaleString())
           $table.append $row
-      @$el.find(el).empty().append($table)
+        $el.empty().append $table
       return
     reset: ->
       @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
