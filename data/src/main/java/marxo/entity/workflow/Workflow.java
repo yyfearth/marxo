@@ -274,19 +274,10 @@ public class Workflow extends RunnableEntity {
 	public void addCurrentNode(Node node) {
 		currentNodes.add(node);
 		node.setWorkflow(this);
-
-		if (currentNodes.size() == 1) {
-			startNode = node;
-		} else {
-			wire();
-		}
 	}
 
 	public void removeCurrentNode(Node node) {
 		currentNodes.remove(node);
-		if (currentNodes.size() == 0) {
-			startNode = null;
-		}
 	}
 
 	/*
@@ -337,6 +328,8 @@ public class Workflow extends RunnableEntity {
 		if (nodes == null || links == null) {
 			return;
 		}
+//		getNodes();
+//		getLinks();
 
 		Map<ObjectId, Node> nodeMap = Maps.uniqueIndex(nodes, SelectIdFunction.getInstance());
 
