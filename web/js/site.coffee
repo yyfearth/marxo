@@ -535,7 +535,7 @@ require [
       _renderSubmissions = @_renderSubmissions.bind @
       setTimeout -> # defer
         $el.find('.submissions[data-ref]').each (i, el) ->
-          _renderSubmissions el.getAttribute('data-ref'), (html) -> el.innerHTML = html
+          _renderSubmissions el.getAttribute('data-ref'), el.getAttribute('data-name'), (html) -> el.innerHTML = html
         $el.find('.rich-editor').attr('contenteditable', 'true').each ->
           $("##{@id}.rich-editor").wysiwyg()
         $el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit').tooltip container: $el
@@ -550,6 +550,7 @@ require [
       options = data.options or {}
       _tpl = @tpl
       tpl = _tpl()
+      _name = 'section_' + i
       switch type
         when '', 'none'
           body = ''
@@ -560,10 +561,10 @@ require [
           body = body.replace '<textarea ', '<textarea data-required="required" ' if options.required
         when 'radio'
           if options.gen_from_submission
-            body = "<div class=\"submissions\" data-ref=\"#{options.gen_from_submission}\">Loading...</div>"
+            body = "<div class=\"submissions\" data-name=\"#{_name}\" data-ref=\"#{options.gen_from_submission}\">Loading...</div>"
           else if options.manual_options?.length
             body = options.manual_options.map (item, i) ->
-              _tpl 'radio', name: item, value: i
+              _tpl 'radio', name: _name, value: i, text: item
             .join '\n'
           else
             body = '(Error Section Question: No options)'
@@ -577,15 +578,16 @@ require [
         else
           throw new Error 'unknown section type ' + type
       body = body.replace /\s*required(?:="\w*")?/ig, '' unless options.required
-      body.replace /{{name}}/g, 'section_' + i
-    _renderSubmissions: (ref, callback) ->
+      body.replace /{{name}}/g, _name
+    _renderSubmissions: (ref, name, callback) ->
       console.log 'load submission from page', ref
       _tpl = @tpl
       _renderSubmission = (sections, submission) ->
         html = []
+        # console.log submission.sections
         for val, i in submission.sections
           def = sections[i]
-          span = switch def.type.toUpperCase()
+          span = switch def.type.toLowerCase()
             when 'text'
               _.escape val or ''
             when 'html'
@@ -597,13 +599,15 @@ require [
                 def.options.manual_options?[val] or ''
             when 'file'
               url = "#{ROOT}/#{val}"
-              if def.options.accept is 'image/*'
-                "<a href='#{url}' target='_blank'><img src='#{url}' alt=''/></a>"
+              console.log def
+              if def.options.file_accept is 'image/*'
+                "<a href='#{url}' target='_blank'><img src='#{url}' alt='' style='max-width: 100px; max-height: 100px;'/></a>"
               else
                 "<a href='#{url}/download'>Download</a><a class='icon-link-ext' href='#{url}'></a>"
             else
               ''
           html.push "<span class='section-value'>#{span}</span>" if span
+        html.push submission.desc
         html.join ' '
       _render = (page) ->
         console.log 'got page', page
@@ -616,13 +620,12 @@ require [
         else
           console.log 'got page submissions', submissions
           html = for sub in submissions
-            _tpl 'radio', value: sub.id, text: _renderSubmission sections, sub
+            _tpl 'radio', name: name, value: sub.id, text: _renderSubmission sections, sub
           html = html.join '\n'
         callback? html
         return
-      page = Pages.pages.get ref
-      if page.get('submissions')?.length
-        _render page
+      page = Pages.pages.get(ref) or new Page id: ref
+      if page.get('submissions')?.length then _render page
       else page.fetch success: _render, error: -> callback? 'Failed to load submissions!'
       return
     render: ->
@@ -687,6 +690,12 @@ require [
       # upload files
       files = [].slice.call @$el.find 'form input[type=file][name^=section_]'
       requests = for file in files then @upload file, User.current.auth
+      #console.log 'req', requests
+      unless requests.length
+        @_submit []
+        return @
+      else if requests.length is 1
+        requests.push null # to fix results
       $.when.apply($, requests).then (results...) =>
         data = []
         console.log 'infos', results
