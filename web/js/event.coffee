@@ -30,12 +30,6 @@ Event
         parent: @
         collection: collection
       @editor = new EventEditorView el: '#event_editor', parent: @
-
-      @listenTo @editor, 'finish', (id) =>
-        @manager.finish collection.fullCollection.get(id), (success) =>
-          @editor.cancel() if success
-          return
-        return
       # rewrite event fetch using actions
       collection.load = (callback, options) ->
         Actions.actions.load (actions, ret) =>
@@ -91,13 +85,10 @@ Event
 
   class EventEditorView extends FormDialogView
     goBackOnHidden: 'event/mgr'
-    events:
-      'click .btn-finish': -> @trigger 'finish', @data.id, @data if @data?.id
     initialize: (options) ->
       super options
       @$info = $ find '.info', @form
       @$form = $ @form
-      @$btnFinish = $ find '.btn-finish', @el
       @btnView = find '.btn-view', @el
       @_dateToLocale = (date) -> if date then new Date(date).toLocaleString() else ''
       if @form.starts.type is 'text'
@@ -195,7 +186,6 @@ Event
       @form.ends.readOnly = false
       @form.duration.readOnly = false
       @btnView.href = ''
-      @$btnFinish.hide()
       super
     popup: (data, callback) ->
       super data, callback
@@ -205,7 +195,6 @@ Event
       @fill data
       form = @form
       status = (data.status or '').toUpperCase()
-      @$btnFinish.hide()
       switch status
         when 'FINISHED', 'ERROR', 'STOPPED'
           form.starts.readOnly = true
@@ -215,7 +204,6 @@ Event
           form.starts.readOnly = true
           form.ends.readOnly = false
           form.duration.readOnly = false
-          @$btnFinish.show() if data.duration
         else
           form.starts.readOnly = false
           form.ends.readOnly = false
@@ -472,7 +460,6 @@ Event
       model = @model
       duration = model.get 'duration'
       @_hide 'view' unless model.get('duration') and model.get('starts')
-      @_hide 'finish' unless duration and /^(?:STARTED|TRACKED|PAUSED)$/.test model.status()
       @
 
   class EventManagemerView extends ManagerView
@@ -504,41 +491,6 @@ Event
         el: find('ul.project-list', @el)
         collection: collection
       @reload = _.debounce @reload.bind(@), 100
-      @finish = @finish.bind @
-      @on 'finish', @_finish.bind @
-      @
-    _finish: (event) -> @finish event, @reload
-    finish: (event, callback) ->
-      console.log 'finish', event
-      if confirm """Are you sure to finish event "#{event.get('name') or '(No Name)'}"?\n
-      Finish means event and its related action will be end in a short time and it will be marked as FINISHED after engine processed it.
-      But finish will not skip the execution of this event and related action.
-      In the meanwhile, for tracking event, it will cause close to submission and stop tracking."""
-        if starts = event.get 'starts'
-          starts = new Date(starts).getTime()
-          ends = new Date(event.get 'ends').getTime() or 0
-          now = Date.now()
-          if starts <= now
-            if ends and ends <= now
-              console.error 'ends is before now', event.get('ends'), '<', new Date
-              alert '''This event should be marked as FINISHED since it readly passed its ends.
-              It may caused by the engine have not processed it yet, or it is caused by an engine error!'''
-              return @
-            xhr = event.save
-              ends: new Date now
-              duration: now - starts
-            , wait: true
-        xhr ?= event.save
-          starts: new Date now
-          ends: new Date now + 1
-          duration: 1
-        , wait: true
-        xhr.then =>
-          alert 'Selected event has been updated, \nbut the status may not changed until engine processed.\nPress Reload to see the changes.'
-          callback? true
-        , =>
-          alert 'Event is failed to update'
-          callback? false
       @
     reload: ->
       @projectFilter.clear()
