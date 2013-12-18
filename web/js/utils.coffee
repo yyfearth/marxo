@@ -37,7 +37,7 @@ define 'utils', ['lib/html5-dataset'], ->
   fill = (html, model) ->
     html.replace /{{\s*\w+\s*}}/g, (name) ->
       name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
-      model[name] or model.escape?(name) or ''
+      model[name]?.toString() or model.escape?(name) or ''
 
   # Polyfill
   Date::now ?= -> +new Date
