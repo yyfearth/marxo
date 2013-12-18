@@ -213,15 +213,16 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 		for (int i = 0; i < workflow.getCurrentNodes().size(); i++) {
 			Node node = workflow.getCurrentNodes().get(i);
 
-			if (node.getStatus().equals(RunStatus.IDLE)) {
+			if (node.is(RunStatus.IDLE)) {
 				logger.info(String.format("%s starts", node));
 				node.setStatus(RunStatus.STARTED);
 				Notification.saveNew(Notification.Level.NORMAL, node, Notification.Type.STARTED);
-			} else if (node.isNot(RunStatus.FINISHED) && node.isNot(RunStatus.STARTED)) {
+			} else if (node.is(RunStatus.PAUSED) || node.is(RunStatus.STOPPED)) {
 				continue;
 			}
 
 			Action lastAction = null;
+			boolean hasTrackingAction = false;
 			for (Action action : node.getActions()) {
 				lastAction = action;
 
@@ -235,7 +236,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					event.setStartTime(DateTime.now());
 				}
 
-				if (action.getStatus().equals(RunStatus.IDLE)) {
+				if (action.is(RunStatus.IDLE)) {
 					if (event.getStartTime().isAfterNow()) {
 						updateSchedule(event.getStartTime());
 						node.setCurrentAction(action);
@@ -249,7 +250,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					}
 				}
 
-				if (action.getStatus().equals(RunStatus.STARTED)) {
+				if (action.is(RunStatus.STARTED)) {
 					if (event.getEndTime().isAfterNow()) {
 						updateSchedule(event.getEndTime());
 						node.setCurrentAction(action);
@@ -262,7 +263,12 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					}
 				}
 
-				if (action.isTracked() || action.isFinished()) {
+				if (action.isTracked()) {
+					hasTrackingAction = true;
+					continue;
+				}
+
+				if (action.isFinished()) {
 					continue;
 				}
 
@@ -272,8 +278,16 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 			if (lastAction == null) {
 				logger.info(String.format("%s finishes", node));
 				node.setStatus(RunStatus.FINISHED);
+			} else if (lastAction.isFinished()) {
+				if (hasTrackingAction) {
+					logger.info(String.format("%s tracks", node));
+					node.setStatus(RunStatus.TRACKED);
+				} else {
+					logger.info(String.format("%s finishes", node));
+					node.setStatus(RunStatus.FINISHED);
+				}
 			} else {
-				logger.info(String.format("%s %s", node, lastAction.getStatus().toString().toLowerCase()));
+				logger.info(String.format("%s set to [%s]", node, lastAction.getStatus().toString().toLowerCase()));
 				node.setStatus(lastAction.getStatus());
 			}
 
