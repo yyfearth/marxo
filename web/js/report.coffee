@@ -35,9 +35,10 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
       @model = model
       #console.log model
 
-      unless records?.length # gen test data
+      records = model.get 'records'
+      unless records?.length > 2 # gen test data
         records = @_genRandReports()
-        @model.set 'records', records
+        model.set 'records', records
 
       @once
         shown: ->
@@ -58,7 +59,7 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
       likes_count: 'Facebook Likes'
       comments_count: 'Facebook Comments'
       shares_count: 'Facebook Shares'
-      visit_count: 'Page Visit'
+      view_count: 'Page View'
       submissions_count: 'Submission'
     _section_tpl: tpl('#t_section')
     _renderOverview: ->
@@ -66,6 +67,7 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
       $title = @$el.find('#overview_chart .title')
       if records?.length
         last = records.slice(-1)[0]
+        console.warn 'overview', last, records
         # console.log 'last', last
         to = new Date last.created_at
         from = new Date records[0].created_at
@@ -92,6 +94,7 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
       daily = @$daily.hasClass 'active'
       index = {}
       datum = []
+      #console.warn records
       for own field, key of @_record_map
         datum.push key: key, values: index[field] = []
       if daily
@@ -126,7 +129,7 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
             field.push ts: ts, count: count - _count, _count: count
           else
             field.push {ts, count}
-      #console.log 'parsed records', datum
+      console.log 'parsed records', datum
       @renderChart '#stacked', 'area', datum,
         chart: @_records_chart
         daily: daily
@@ -236,9 +239,10 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
         $el.empty().append $table
       return
     reset: ->
-      @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
+      $tabs = @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
         ($thumb = $ @).attr('href', $thumb.attr 'target').parent('li').removeClass 'disabled'
         return
+      $tabs.eq(0).tab 'show'
       @
     render: ->
       @reset()
@@ -270,19 +274,19 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
           nv: nv
           pie: (options) ->
             chart = nv.models.pieChart()
-            .x((d) -> d.name).y((d) -> d.value)
+            .x((d) -> d.name).y((d) -> d.value or 0)
             .color(d3.scale.category10().range()).labelType(options?.labelType or 'percent')
             chart.valueFormat(intFormat)
             chart
           bar: (options) ->
             chart = nv.models.discreteBarChart()
-            .x((d) -> d.name).y((d) -> d.value)
+            .x((d) -> d.name).y((d) -> d.value or 0)
             .staggerLabels(true).showValues(true)
             chart.valueFormat(intFormat).yAxis.tickFormat(intFormat).tickSize(1)
             chart
           area: (options) ->
             chart = nv.models.stackedAreaChart().useInteractiveGuideline(true)
-            .x((d) -> d.ts).y((d) -> d.count)
+            .x((d) -> d.ts).y((d) -> d.count or 0)
             formater = d3.time.format if options?.daily then '%x' else '%x %-I:00%p'
             chart.xAxis.tickFormat((d) -> formater new Date d)
             #.tickSize(if options?.daily then 86400000 else 3600000)
@@ -301,7 +305,7 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
         likes_count: 10
         comments_count: 5
         shares_count: 5
-        visit_count: 3
+        view_count: 3
         submissions_count: 1
       for field in fields
         _c[field] = 0
