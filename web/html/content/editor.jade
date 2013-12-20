@@ -114,10 +114,9 @@ include rich_editor
             .control-group.hide.option-field.radio-option
               label.control-label(for='section_#_gen_from_list') Auto Generate Rows
               .controls
-                input(id='section_#_gen_from_list', name='gen_from_list',
-                type='checkbox', title='Generate rows from a list', checked)
+                input(id='section_#_auto_gen', type='checkbox', title='Generate rows from submissions', checked)
                 | &nbsp;
-                input(id='section_#_gen_list_key', name='gen_list_key', type='text',
+                input(id='section_#_gen_from_submission', name='gen_from_submission', type='text',
                 title='Context Key for the List', placeholder='Context Key for the List', data-option-required)
             .control-group.hide.option-field(id='section_#_manual_options')
               label.control-label Manual Set Options

@@ -623,6 +623,15 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class Content extends Entity
     urlRoot: ROOT + '/contents'
+    constructor: (model, options) ->
+      super @_proc(model), options
+    pause: (attr) -> @_proc attr
+    _proc: (attr = @attributes) ->
+      posted = attr.posted_at or attr.records?.length or attr.submissions?.length
+      attr.status = if posted then 'POSTED' else 'IDLE'
+      attr
+    posted: -> @attributes.posted_at
+    hasReport: -> Boolean(@get('records')?.length or @get('submissions')?.length)
 
   class Contents extends ManagerCollection
     model: Content
@@ -633,8 +642,7 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Service extends Entity
     idAttribute: 'service'
     urlRoot: ROOT + '/services'
-    connected: ->
-      /^CONNECTED$/i.test @get 'status'
+    connected: -> /^CONNECTED$/i.test @get 'status'
 
   { # exports
   ROOT

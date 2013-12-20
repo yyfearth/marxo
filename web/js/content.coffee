@@ -1,11 +1,11 @@
 "use strict"
 
 define 'content', [
-  'base', 'models', 'manager', 'report'
+  'module', 'base', 'models', 'manager', 'report'
   'lib/jquery-ui'
   'lib/bootstrap-fileupload'
   'lib/bootstrap-wysiwyg'
-], ({
+], (module, {
 find
 findAll
 tpl
@@ -166,7 +166,7 @@ ProjectFilterView
       super data, callback
       @field = @form.message
       @fill data
-      posted = 'IDLE' isnt data.status()
+      posted = data.posted()
       @field.readOnly = posted
       @btnSave.disabled = posted
       @
@@ -198,7 +198,7 @@ ProjectFilterView
     popup: (data, ignored, callback) ->
       super data, callback
       @fill data
-      posted = 'IDLE' isnt data.get('status').toUpperCase()
+      posted = data.posted()
       @readOnlyHtml posted
       @$el.find('form :input').prop 'readOnly', posted
       @btnSave.disabled = posted
@@ -261,7 +261,7 @@ ProjectFilterView
       @url = "content/#{model.id}"
       @pageDesc.fill data
       @submitOptions?.fill data.options
-      posted = @readonly = 'IDLE' isnt model.status()
+      posted = @readonly = model.posted()
       @sectionsEl.classList.add 'readonly' if posted
       if model.has 'sections' # need @readonly
         @addSection section for section in data.sections
@@ -499,8 +499,8 @@ ProjectFilterView
     _bind: ->
       @$typeEl = $ @_find 'type'
       # bind radio type change
-      auto_gen = @_find 'gen_from_list'
-      auto_gen_key = @_find 'gen_list_key'
+      auto_gen = @_find 'auto_gen'
+      auto_gen_key = @_find 'gen_from_submission'
       manual_options = @_find 'manual_options'
       manual_option_label = find 'input[type=text]', manual_options
       auto_gen.onchange = ->
@@ -532,9 +532,9 @@ ProjectFilterView
       data = unless data? then {} else $.extend {}, data, data.options
       data.type = if data.type then data.type.toLowerCase() else 'none'
       super data
-      if /^radio$/i.test(data.type) and not data.gen_from_list and data.manual_options
-        # manual options
-        @autoIncOptionList.fill data.manual_options
+      if /^radio$/i.test(data.type) and not data.gen_from_submission and data.manual_options
+        @_find('auto_gen').checked = data.gen_from_submission
+        @autoIncOptionList.fill data.manual_options # manual options
       @_changeType data.type if @readonly
       @updatePreview data
       @
@@ -542,8 +542,13 @@ ProjectFilterView
       data = super()
       return {} unless data
       # manual options
-      if /^radio$/i.test(data?.type) and not data.gen_from_list
-        data.manual_options = @autoIncOptionList.read()
+      if /^radio$/i.test(data?.type)
+        if @_find('auto_gen').checked
+          delete data.manual_options
+          #console.log 'gen_from_submission', data.gen_from_submission
+        else
+          delete data.gen_from_submission
+          data.manual_options = @autoIncOptionList.read()
 
       # convert to data and data.options
       type = (data.type or 'none').toUpperCase()
@@ -584,11 +589,11 @@ ProjectFilterView
           body = tpl.html
         when 'radio'
           el = tpl.radio.replace '{{name}}', "#{@id}_preview_radio"
-          list = unless options.gen_from_list
+          list = unless options.gen_from_submission
             options.manual_options or []
           else [
-            'List item 1 (Auto Genearted)'
-            'List item 2 (Auto Genearted)'
+            'Submission 1 (Auto Genearted)'
+            'Submission 2 (Auto Genearted)'
             '... (Auto Genearted)'
           ]
           body = list.map((item) -> el.replace '{{text}}', item).join '\n'
@@ -710,7 +715,7 @@ ProjectFilterView
       # view
       view_btn = @_find 'view', 'a'
       if type is 'PAGE' and status isnt 'IDLE'
-        view_btn.href = 'site.html#' + model.id
+        view_btn.href = (module.config().SITE_BASE_URL or './#') + model.id
         view_btn.title = 'View page in new window'
       else if model.has('post_id') and type is 'FACEBOOK'
         view_btn.href = 'https://www.facebook.com/' + model.get 'post_id'
@@ -757,7 +762,14 @@ ProjectFilterView
     ,
       'workflow'
       'node_action'
-      'status'
+      #'status'
+    ,
+      name: 'status'
+      label: 'Status'
+      cell: 'label'
+      cls:
+        'posted': 'label-info'
+      editable: false
     ,
       name: 'posted_at'
       label: 'Date Posted'
