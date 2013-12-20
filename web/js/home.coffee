@@ -83,6 +83,30 @@ NotificationListView
       find('a.btn-view', @el)?.href = '#project/' + project.id
       cls = STATUS_CLS[project.status lowercase: true]
       find('.label[name=status]', @el)?.classList.add cls if cls
+      # cur nodes
+      el = @_find 'cur-nodes'
+      curNodeIds = _.uniq project.get('current_node_ids') or []
+      unless len = curNodeIds.length
+        el.innerHTML = '<li class="nav-header">No Current Node</li>'
+      else
+        el.innerHTML = "<li class=\"nav-header\">Current Nodes (#{len})</li>"
+        frag = document.createDocumentFragment()
+        for nodeId in curNodeIds
+          node = project.nodes.get nodeId
+          name = node.get('name') or '(No Name)'
+          status = node.status lowercase: true
+          li = document.createElement 'li'
+          a = document.createElement 'a'
+          a.href = "#project/#{project.id}/node/#{node.id}"
+          a.className = 'status-' + status
+          a.textContent = name
+          span = document.createElement 'span'
+          span.className = 'label pull-right ' + STATUS_CLS[status] or ''
+          span.textContent = status.toUpperCase()
+          a.appendChild span
+          li.appendChild a
+          frag.appendChild li
+        el.appendChild frag
       @diagram.draw project
       return
     remove: ->
