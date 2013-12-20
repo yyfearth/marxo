@@ -11,6 +11,7 @@ DurationConvertor
 ManagerView
 ProjectFilterView
 }, {
+Actions
 Events
 Event
 }) ->
@@ -19,16 +20,35 @@ Event
     collection: new Events
     initialize: (options) ->
       super options
+      collection = @collection
       @calendar = new EventCalendarView
         el: '#event_calendar'
         parent: @
-        collection: @collection.fullCollection
+        collection: collection.fullCollection
       @manager = new EventManagemerView
         el: '#event_manager'
         parent: @
-        collection: @collection
+        collection: collection
       @editor = new EventEditorView el: '#event_editor', parent: @
-      @collection.fetch reset: true
+      # rewrite event fetch using actions
+      collection.load = (callback, options) ->
+        Actions.actions.load (actions, ret) =>
+          events = []
+          actions.forEach (action) ->
+            events.push action.event if action.event?
+            events.push action.tracking if action.tracking?
+            return
+          @fullCollection.reset events
+          @trigger 'loaded', @
+          callback? @, ret
+        , options
+        @
+      collection.fetch = (options) ->
+        @load (ignored, ret) ->
+          options[if ret is 'error' then 'error' else 'success']?.call @, @, null, options
+          return
+        , expires: 1000
+        return
       @
     open: (name, sub) ->
       switch name
@@ -57,6 +77,9 @@ Event
             err = "Cannot find event with id #{id} or net work problem"
             console.error err
             alert err
+    render: ->
+      @collection.load()
+      super
 
   # Event Editor
 
