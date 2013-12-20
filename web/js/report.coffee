@@ -1,6 +1,6 @@
 'use strict'
 
-define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
+define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, {Content}) ->
 
   class ReportView extends ModalDialogView
     el: '#report_viewer'
@@ -35,9 +35,10 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
       @model = model
       #console.log model
 
-      unless records?.length # gen test data
+      records = model.get 'records'
+      unless records?.length > 2 # gen test data
         records = @_genRandReports()
-        @model.set 'records', records
+        model.set 'records', records
 
       @once
         shown: ->
@@ -58,7 +59,7 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
       likes_count: 'Facebook Likes'
       comments_count: 'Facebook Comments'
       shares_count: 'Facebook Shares'
-      visit_count: 'Page Visit'
+      view_count: 'Page View'
       submissions_count: 'Submission'
     _section_tpl: tpl('#t_section')
     _renderOverview: ->
@@ -126,7 +127,7 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
             field.push ts: ts, count: count - _count, _count: count
           else
             field.push {ts, count}
-      #console.log 'parsed records', datum
+      console.log 'parsed records', datum
       @renderChart '#stacked', 'area', datum,
         chart: @_records_chart
         daily: daily
@@ -134,21 +135,20 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
       return
     _renderAnalysis: -> @_renderTab '#report_analysis', 'sections', (sections, el) =>
       submissions = @model.get 'submissions'
+      $el = @$el.find(el)
       unless submissions?.length
-        $sections = '<div class="text-center"><em class="muted">No submission yet</em></div>'
-      else
+        $el.html '<div class="text-center"><em class="muted">No submission yet</em></div>'
+      else @_loadRefSubmissions sections, =>
         questions = []
         for section, i in sections
-          # TODO: support auto options
-          if section.options?.manual_options?.length and /^radio$/i.test section.type
+          if 'radio' is section.type.toLowerCase()
             questions.push
               name: section.name
-              options: section.options.manual_options
+              options: section.submission_options or section.options.manual_options
               index: {}
               i: i
         for submission in submissions
           for q in questions
-            #console.log submission
             value = submission.sections[q.i] ? ''
             q.index[value] ?= 0
             q.index[value]++
@@ -156,32 +156,56 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
         tpl = @_section_tpl
         for q in questions
           $section = $ fill tpl, i: q.i, name: q.name
-          values = q.options.map (name, i) ->
-            name: name, value: q.index[i]
+          values = q.options.map (option, i) ->
+            if option.id # submission option
+              # TODO: submission better name
+              name: option.sections[0] or option.desc, value: q.index[option.id] or 0
+            else # manual option
+              name: option, value: q.index[i] or 0
           @renderChart "#pie_#{q.i}", 'pie', values
           @renderChart "#bar_#{q.i}", 'bar', [
             values: values
           ]
           $sections.append $section
-      @$el.find(el).empty().append($sections)
+        $el.empty().append $sections
+      return
+    _loadRefSubmissions: (sections, callback) ->
+      requests = []
+      sections.forEach (section) -> # must use function to avoid closure var issue
+        if 'radio' is section.type.toLowerCase() and
+        (ref = section.options?.gen_from_submission) and
+        not section.submission_options?
+          requests.push new Content(id: ref).fetch success: (content) ->
+            if submissions = content.get 'submissions'
+              index = {}
+              index[sub.id] = sub for sub in submissions
+              section.submission_options = submissions
+              section.submission_index = index
+            return
+          , error: ->
+            console.error 'failed to get submissions from', ref, section
+      $.when.apply($, requests).then callback, callback
       return
     _renderSubmissions: -> @_renderTab '#report_submissions', 'sections', (sections, el) =>
       submissions = @model.get 'submissions'
+      $el = @$el.find(el)
+      console.warn $el[0]
       unless submissions?.length
-        $table = '<div class="text-center"><em class="muted">No submission yet</em></div>'
-      else
-        col = []
+        $el.html '<div class="text-center"><em class="muted">No submission yet</em></div>'
+      else @_loadRefSubmissions sections, =>
+        cols = []
         $thead = $('<tr>').append '<th>#</th>'
         for section, i in sections
           if section.type and 'none' isnt section.type.toLowerCase()
             $thead.append $('<th>', text: section.name)
             section.index = i
-            col.push section
+            cols.push section
         $thead.append '<th>Submitted By</th><th>Submitted At</th>'
         $table = $('<table>', class: 'table table-hover').append $thead
         for submission, i in submissions then if submission.sections?.length
           $row = $('<tr>').append $('<td>', text: i + 1)
-          for {index, type, options} in col
+          for section in cols
+            {index, type, options} = section
             $row.append $cell = $('<td>')
             val = submission.sections[index]
             unless val?
@@ -196,24 +220,27 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
                   class: 'icon-link-ext'
                   href: "#{ROOT}/#{val}", target: '_blank'
               when 'radio'
-                if options.manual_options?.length
+                if options.gen_from_submission
+                  if val = section.submission_index?[val]
+                    $cell.html "Submission: #{_.escape val.sections[0] or ''} #{val.desc}" # TODO: show details
+                  else
+                    $cell.text '(error)'
+                else if options.manual_options?.length
                   $cell.text options.manual_options[val]
-                else
-                  # TODO: auto gen list
-                  console.log 'TODO: auto gen list'
               when 'html'
                 $cell.text $('<div>').html(val).text()
               else
-                $cell.text val
+                $cell.text _.escape val
           $row.append $('<td>', text: "#{submission.name} <#{submission.key}>")
           $row.append $('<td>', text: new Date(submission.created_at).toLocaleString())
           $table.append $row
-      @$el.find(el).empty().append($table)
+        $el.empty().append $table
       return
     reset: ->
-      @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
+      $tabs = @$el.find('.modal-header .nav-tabs a[data-toggle=tab]').each ->
         ($thumb = $ @).attr('href', $thumb.attr 'target').parent('li').removeClass 'disabled'
         return
+      $tabs.eq(0).tab 'show'
       @
     render: ->
       @reset()
@@ -245,19 +272,19 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
           nv: nv
           pie: (options) ->
             chart = nv.models.pieChart()
-            .x((d) -> d.name).y((d) -> d.value)
+            .x((d) -> d.name).y((d) -> d.value or 0)
             .color(d3.scale.category10().range()).labelType(options?.labelType or 'percent')
             chart.valueFormat(intFormat)
             chart
           bar: (options) ->
             chart = nv.models.discreteBarChart()
-            .x((d) -> d.name).y((d) -> d.value)
+            .x((d) -> d.name).y((d) -> d.value or 0)
             .staggerLabels(true).showValues(true)
             chart.valueFormat(intFormat).yAxis.tickFormat(intFormat).tickSize(1)
             chart
           area: (options) ->
             chart = nv.models.stackedAreaChart().useInteractiveGuideline(true)
-            .x((d) -> d.ts).y((d) -> d.count)
+            .x((d) -> d.ts).y((d) -> d.count or 0)
             formater = d3.time.format if options?.daily then '%x' else '%x %-I:00%p'
             chart.xAxis.tickFormat((d) -> formater new Date d)
             #.tickSize(if options?.daily then 86400000 else 3600000)
@@ -276,7 +303,7 @@ define 'report', ['base'], ({ROOT, find, tpl, fill, ModalDialogView}) ->
         likes_count: 10
         comments_count: 5
         shares_count: 5
-        visit_count: 3
+        view_count: 3
         submissions_count: 1
       for field in fields
         _c[field] = 0
