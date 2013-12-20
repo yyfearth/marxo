@@ -183,6 +183,8 @@ define 'models', ['module', 'lib/common'], (module) ->
     urlRoot: ROOT + '/workflows'
     constructor: (model, options) ->
       super model, options
+      @_createNodeRef = @_createNodeRef.bind @
+      @_createLinkRef = @_createLinkRef.bind @
       @_wire()
     _wire: ->
       attr = @attributes
@@ -197,26 +199,37 @@ define 'models', ['module', 'lib/common'], (module) ->
 
       _deleted = @_deleted = []
 
-      _createNodeRef = @_createNodeRef.bind @
-      nodes.forEach _createNodeRef
-      @listenTo nodes, add: _createNodeRef, remove: (node) =>
+      # auto wire nodes
+      nodes.forEach @_createNodeRef
+      @listenTo nodes, add: @_createNodeRef, remove: (node) =>
         @_removeNodeRef node
         _deleted.push node unless node.isNew()
         return
+      # auto sync node ids
+      @listenTo nodes, 'add remove', =>
+        ids = []
+        nodes.forEach (m) -> ids.push m.id unless m?.isNew()
+        @set 'node_ids', ids
 
-      _createLinkRef = @_createLinkRef.bind @
-      links.forEach _createLinkRef
-      @listenTo links, add: _createLinkRef, remove: (link) =>
+      # auto wire links
+      links.forEach @_createLinkRef
+      @listenTo links, add: @_createLinkRef, remove: (link) =>
         @_removeLinkRef link
         _deleted.push link unless link.isNew()
         return
+      # auto sync link ids
+      @listenTo links, 'add remove', =>
+        ids = []
+        links.forEach (m) -> ids.push m.id unless m?.isNew()
+        @set 'link_ids', ids
 
       # start node
       if nodes.length
-        start_node_id = attr.start_node_id
-        if start_node_id?
-          unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
-            console.error 'cannot find node specified by start_node_id', start_node_id, @toJSON()
+        start_node_id = attr.start_node?.id or attr.start_node_id
+        unless start_node_id?
+          @startNode = null
+        else unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
+          console.error 'cannot find node specified by start_node_id', start_node_id, @toJSON()
         if not @startNode and nodes.length
           starts = nodes.filter (n) -> not n.inLinks.length
           if starts.length is 1
@@ -238,11 +251,12 @@ define 'models', ['module', 'lib/common'], (module) ->
         model.trigger 'loaded', model
         _success? model, response, options
       super options
-      @
     loaded: ->
       Boolean @nodes?._loaded and @links?._loaded
     sort: (options = {}) ->
-      if options.force or not @_sorted
+      unless @startNode?
+        console.error 'cannot sort without start node'
+      else if options.force or not @_sorted
         cindex = {}
         nodes_count = 0
         links_count = 0
@@ -295,12 +309,23 @@ define 'models', ['module', 'lib/common'], (module) ->
       links = []
       node_index = {}
       silent = silent: true
+      _clean = (data) -> if data?
+        delete data.id
+        delete data.status
+        delete data.workflow_id
+        delete data.node_id
+        delete data.action_id
+        return
       workflow.nodes.forEach (node) ->
         cloned_node = node.clone().unset('id', silent)
-        .unset('workflow_id', silent).set template_id: node.id
+        .unset('workflow_id', silent).set template_id: node.id, status: 'IDLE'
         if node.has 'actions' # remove id in action
           cloned_node.set 'actions', node.get('actions').map (action) ->
-            new Action(action).unset('id', silent).toJSON()
+            _clean action
+            _clean action.content
+            _clean action.event
+            _clean action.tracking
+            action
         nodes[node.idx] = cloned_node
         cloned_node.idx = node.idx
         node_index[node.id] = cloned_node
@@ -310,7 +335,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         nextNode = node_index[link.get 'next_node_id']
         # remove linked nodes id then ref nodes
         cloned_link = link.clone().unset('id', silent).unset('workflow_id', silent).set
-          template_id: link.id, prev_node_id: prevNode.idx, next_node_id: nextNode.idx
+          template_id: link.id, prev_node_id: prevNode.idx, next_node_id: nextNode.idx, status: 'IDLE'
         cloned_link.prevNode = prevNode
         cloned_link.nextNode = nextNode
         links[link.idx] = cloned_link
@@ -327,8 +352,10 @@ define 'models', ['module', 'lib/common'], (module) ->
         template_id: workflow.id
         nodes: nodes
         links: links
+        status: 'IDLE'
       @_wire()
       @
+    _save: Entity::save
     save: (attributes = {}, options = {}) ->
       throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
       console.log 'saving', @_name, attributes, @
@@ -341,13 +368,16 @@ define 'models', ['module', 'lib/common'], (module) ->
         workflow_id = wf.id
         console.log 'workflow_id', workflow_id
         save_opt = wait: true, reset: true
+        updated = false
         requests = []
         @nodes?.forEach (node) =>
           if node.isNew()
             # console.log 'create node', workflow_id
             requests.push node.save {workflow_id}, save_opt
+            updated = true
           else if node._changed
             node.resetChangeFlag().save()
+            updated = true
           return
         $.when.apply($, requests).then =>
           # console.log 'new nodes created', @nodes
@@ -365,30 +395,45 @@ define 'models', ['module', 'lib/common'], (module) ->
                 next_node_id: link.nextNode.id
               # console.log 'create link', attr
               requests.push link.save attr, save_opt
+              updated = true
             else if link._changed
               link.resetChangeFlag().save()
+              updated = true
             return
-          # update workflow for start node
+          # set start node id
           if @startNode and @get('start_node_id') isnt @startNode.id
-            requests.push @save start_node_id: @startNode.id
-          if (typeof _success is 'function') or (typeof _err is 'function')
-            $.when.apply($, requests).then =>
-              # console.log 'new links created', @links
+            @set start_node_id: @startNode.id
+            updated = true
+          unless updated # not changed
+            _success? wf, resp, opt
+          else $.when.apply($, requests).then =>
+            # console.log 'new links created', @links
+            # update workflow for refs
+            @unset 'nodes', silent: true
+            @unset 'links', silent: true
+            @_save # directly save
+              node_ids: @nodes.map (m) -> m.id
+              link_ids: @links.map (m) -> m.id
+            , wait: true, reset: true, success: (wf) ->
               # finally done
-              console.log 'saved', @_name, attributes, @
-              _success wf, resp, opt
-            , =>
-              console.error 'fail to save links for wf', @
-              _err wf, null, options
+              console.log 'saved', wf._name, attributes, wf
+              _success? wf, resp, opt
+            , error: ->
+              console.error 'fail to update ref for save wf', wf
+              _err? wf, null, options
               return
+          , ->
+            console.error 'fail to save links for wf', wf
+            _err? wf, null, options
+            return
           console.log 'saving wf', @
           return
-        , =>
-          console.error 'fail to save nodes for wf', @
+        , ->
+          console.error 'fail to save nodes for wf', wf
           _err? wf, null, options
           return
         # delete unused nodes/links (no wait)
-        @_deleted?.forEach (model) -> model.destroy()
+        @_deleted?.forEach (model) -> try model.destroy()
         return
       # save workflow
       @unset 'start_node_id', silent: true if typeof @get 'start_node_id' is 'number'
@@ -420,9 +465,9 @@ define 'models', ['module', 'lib/common'], (module) ->
       else
         @fetch reset: true, success: _cb
       @
-    createNode: (data) ->
+    createNode: (data, callback) ->
       data.workflow_id ?= @id
-      @nodes.create data, wait: true
+      @nodes.create data, wait: true, success: callback
       @
     _createNodeRef: (node) ->
       throw new Error 'it must be a Node object' unless node instanceof Node
@@ -430,14 +475,18 @@ define 'models', ['module', 'lib/common'], (module) ->
       node.workflow = @
       node.inLinks = []
       node.outLinks = []
+      node.actions().forEach (action) ->
+        action.workflow = node.workflow
+        action.node = node
+        return
       return
     _removeNodeRef: (node) ->
       # remove all connected links
       node.inLinks.concat(node.outLinks).forEach (link) -> link.destroy()
       return
-    createLink: (data) ->
+    createLink: (data, callback) ->
       data.workflow_id ?= @id
-      @links.create data, wait: true
+      @links.create data, wait: true, success: callback
       @
     _createLinkRef: (link) ->
       throw new Error 'it must be a Link object' unless link instanceof Link
@@ -528,6 +577,10 @@ define 'models', ['module', 'lib/common'], (module) ->
       else if not @_changed and @hasChanged() and not @isNew()
         @_changed = true
         @off 'change', @setChangeFlag
+      @
+    destroy: (options) ->
+      super options
+      @destroy = -> @ # call once
       @
 
   class Node extends ChangeObserableEntity

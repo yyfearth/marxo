@@ -139,7 +139,6 @@ Action
     remove: (models) ->
       models = [models] unless Array.isArray models
       if confirm 'Make sure these selected workflows is not in use!\nDo you realy want to remove selected workflows?'
-        # TODO: check usage, if used cannot remove directly
         model?.destroy() for model in models
         @reload() if models.length >= @pageSize / 2
       #console.log 'delete', model, @
@@ -430,10 +429,8 @@ Action
       @
     save: ->
       @data.set 'actions', @readActions()
-      console.log 'save node', @data
       # save the node
       super
-      @data.save() unless @data.isNew() # auto save
       @
     reset: ->
       @clearActions()
@@ -684,6 +681,8 @@ Action
         startNodes = @model.nodes.filter (node) -> not node.inLinks.length
         node = startNodes[0] or @model.nodes.at 0
         node = node?.id
+      else if node.id?
+        node = node.id
       console.log 'set start node', node
       if node?
         if node isnt @model.get 'start_node_id'
@@ -741,8 +740,11 @@ Action
       @nodeEditor.popup node, (action, node) =>
         if action is 'save'
           # prevent create if callback return false
-          @model.createNode node if false isnt callback? node
-          @model.trigger 'changed', 'create_node', node
+          if false isnt callback? node
+            #@model.trigger 'changed', 'create_node', node
+            @model.createNode node, =>
+              @setStartNode node if @model.nodes.length is 1
+              @model.save()
         else # canceled
           console.log 'canceled or ignored create node', action
       @
@@ -751,7 +753,10 @@ Action
       @nodeEditor.popup node, (action, node) =>
         if action is 'save'
           node.view.update node
-          @model.trigger 'changed', 'edit_node', node
+          unless node.isNew() # auto save
+            node.save()
+          else
+            @model.trigger 'changed', 'edit_node', node
         else
           console.log 'canceled or ignored edit node', action
         # restore url to workflow only
@@ -759,16 +764,22 @@ Action
       # add node to url
       hash = "#{@hash}/node/#{node.id}"
       if location.hash.indexOf(hash) is -1
-        @nodeEditor.$el.one 'shown', => @router.navigate hash
+        @nodeEditor.once 'shown', => @router.navigate hash
       @
     removeNode: (node) ->
-      return @ unless node?.id
+      return @ if node?.isNew()
+      entities = [].concat node.inLinks, node.outLinks
       # use confirm since no support for undo
-      if confirm "Delete the node: #{node.get 'name'}?"
-        @model.nodes.remove node
+      if confirm "Delete the node: #{node.get 'name'} with all #{entities.length} links connected?"
+        {nodes, links} = @model
+        nodes.remove node
         @setStartNode() if node.id is @model.get 'start_node_id'
-        node.destroy()
-        @model.trigger 'changed', 'remove_node', node
+        links.remove entities
+        nodes.remove node
+        @model.save()
+        entities.push node
+        entity.destroy() for entity in entities
+        #@model.trigger 'changed', 'remove_node', node
       @
     createLink: (from, to, callback) ->
       from = @model.nodes.get from unless from.id? and from.has 'name'
@@ -796,7 +807,10 @@ Action
       @linkEditor.popup link, (action, link) =>
         if action is 'save'
           link.view.update link
-          @model.trigger 'changed', 'edit_link', link
+          unless link.isNew() # auto save
+            link.save()
+          else
+            @model.trigger 'changed', 'edit_link', link
         else # canceled
           console.log 'canceled or ignored edit link', action
         # restore url to workflow only
@@ -804,14 +818,16 @@ Action
       # add link to url
       hash = "#{@hash}/link/#{link.id}"
       if location.hash.indexOf(hash) is -1
-        @linkEditor.$el.one 'shown', => @router.navigate hash
+        @linkEditor.once 'shown', => @router.navigate hash
       @
     removeLink: (link) ->
-      return @ unless link?.id
+      return @ if link?.isNew()
       # use confirm since no support for undo
       if confirm "Delete the link: #{link.get('name') or '(No Name)'}?"
+        @model.links.remove link
+        @model.save()
         link.destroy()
-        @model.trigger 'changed', 'remove_link', link
+        #@model.trigger 'changed', 'remove_link', link
       @
     render: ->
       @_bind()
