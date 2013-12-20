@@ -29,6 +29,7 @@ Projects
       @manager = new ProjectManagemerView el: '#project_manager', parent: @
       @listenTo @manager, 'create', (id) => @editor.create id
       @
+    _url_pattern: /(#project\/\w+(?:\/(?:node|link|action)\/\w+)*).*/
     open: (name, sub) ->
       switch name
         when 'new'
@@ -49,6 +50,7 @@ Projects
               @switchTo @viewer
               @viewer.load workflow
               @viewer.select sub
+              @viewer.btnEdit.href = location.hash.replace @_url_pattern, '$1/edit'
             return
       @
 
@@ -118,7 +120,7 @@ Projects
     create: (wf) ->
       wf = wf?.id or wf
       wf = null unless typeof wf is 'string'
-      @popup new Project(template_id: wf), (action) => if action is 'save'
+      @popup new Project(template_id: wf), null, (action) => if action is 'save'
         console.log 'wf created', action, @model
         @projects.create @model, wait: true
         @trigger 'create', @model, @
@@ -127,13 +129,13 @@ Projects
       {link, node, action} = opt
       throw new Error 'cannot open a action without given a node' if action and not node
       throw new Error 'node and link cannot be open together' if link and node
-      console.log 'popup node/link editor', {link, node, action}
-      @popup project, (action, data) => if action is 'save'
+      console.log 'popup node/link editor', opt
+      @popup project, opt, (action, data) => if action is 'save'
         console.log 'project saved', action, data
         @model.save()
         @trigger 'edit', @model, @
       @
-    popup: (model, callback) ->
+    popup: (model, {link, node, action} = {}, callback) ->
       data = model.toJSON()
       @model = model
       super data, callback
@@ -151,6 +153,11 @@ Projects
         isUpdate = select.disabled = not model.isNew() or model.has('node_ids') or model.nodes?.length
         if isUpdate
           @_renderProject model
+          if node
+            @navTo model.nodes.get node
+            @dataEditor.viewAction action if action
+          else if link
+            @navTo model.links.get link
         else
           @_selectWorkflow()
       @
@@ -436,7 +443,7 @@ Projects
       $selected = $list.find("li:has(a[data-id='#{project.id}'])").addClass 'active'
       $list.find('li.active').not($selected).removeClass 'active'
       @wfDiagram.draw project
-      @statusView.load project
+      @statusView.load project, true
       return
     _updateStatus: ->
       status = @model.status()
@@ -472,7 +479,6 @@ Projects
           @load model
         else
           @router.back()
-      # TODO: do some clean
       @
     setStatus: (status) ->
       unless status
@@ -508,10 +514,21 @@ Projects
   class ProjectStatusView extends View
     _prefix: 'prj_status_lst'
     _cls: STATUS_CLS
-    _refCls:
-      content: 'icon-page'
-      event: 'icon-calendar'
-      report: 'icon-report'
+    events:
+      'dblclick li > a[href]': (e) ->
+        @router.navigate e.currentTarget.href.replace(/^.*?#(project.*)/, '$1/edit'), trigger: true
+      'click button[name=finish]': (e) ->
+        return unless confirm 'Are you sure to force finish this action?\n\nIt will cause close submission and stop tracking.'
+        action = $.data e.currentTarget, 'model'
+        action?.status? 'FINISHED', (status) =>
+          if 'FINISHED' isnt status
+            alert 'Failed to force finish this action!'
+          else @model.load =>
+            setTimeout =>
+              @select @_cur_selected or {}
+            , 100
+          return
+        return
     initialize: (options) ->
       @$list = $ find '.nodes-links-list', @el
       @$detail = $ find '.node-link-detail', @el
@@ -521,11 +538,14 @@ Projects
         @model = wf
         @_renderList()
       @
-    reset: -> @load null, true
+    reset: ->
+      @_cur_selected = null
+      @load null, true
     select: ({link, node, action} = {}) ->
       unless @model?
         console.error 'model not given yet'
         return @
+      @_cur_selected = {link, node, action}
       _prefix = @_prefix
       if node
         id = "##{_prefix}_node_#{node}"
@@ -585,10 +605,14 @@ Projects
       frag = document.createDocumentFragment()
       if wf.nodes.length
         frag.appendChild _header 'Nodes'
-        wf.nodes.forEach (node) -> frag.appendChild _item node
+        wf.nodes.forEach (node, i) ->
+          node.idx ?= i
+          frag.appendChild _item node
       if wf.links.length
         frag.appendChild _header 'Links'
-        wf.links.forEach (link) -> frag.appendChild _item link
+        wf.links.forEach (link, i) ->
+          link.idx ?= i
+          frag.appendChild _item link
       @$list.append frag
       return
     _renderNode: (model) ->
@@ -596,9 +620,9 @@ Projects
       return unless model
       _prefix = @_prefix
       _label = @_renderLabel
-      _href = model._href
+      _href = model._href ?= "#project/#{model.workflow.id}/node/#{model.id}"
       _cls = @_cls
-      _refs = @_refCls
+      _renderRef = @_renderRefLink
       frag = document.createDocumentFragment()
       frag.appendChild @_renderHeaderItem "#{model._name} #{model.idx + 1}: #{model.get 'name'}"
       model.actions().forEach (action, i) ->
@@ -606,26 +630,45 @@ Projects
         li.id = "#{_prefix}_action_#{action.id}"
         li.className = 'action'
         a = document.createElement 'a'
-        a.href = "#{_href}/action/#{action.id}" if _href
+        a.href = "#{_href}/action/#{action.id}"
         a.textContent = "Action #{i + 1}: "
         name = document.createElement 'strong'
         name.textContent = action.name()
         a.appendChild name
         if status = action.status(lowercase: true)
           a.className = "status-#{status}"
-          a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status] or ''
-        for own name, cls of _refs
-          name = name.toLowerCase()
-          if id = action.get(name + '_id')?.toString()
-            btn = document.createElement 'a'
-            btn.className = 'ref-link pull-right ' + cls or ''
-            btn.textContent = name.capitalize()
-            btn.href = "##{name}/#{id}"
+          if /^(?:started|tracked|paused)$/i.test status
+            btn = document.createElement 'button'
+            btn.className = 'btn btn-round btn-warning icon-ok pull-right'
+            btn.name = 'finish'
+            btn.title = 'Force Finish'
+            btn.dataset.id = action.id
+            btn.dataset.placement = 'left'
+            $.data btn, 'model', action
             a.appendChild btn
+          a.appendChild _label status.toUpperCase(), 'pull-right ' + _cls[status] or ''
+        if action.content?.hasReport()
+          _renderRef a, action, 'content', 'Report', 'icon-report', '#content/{{id}}/report'
+        _renderRef a, action, 'content', 'Content', 'icon-page', '#content/{{id}}'
+        _renderRef a, action, 'event', 'Event', 'icon-calendar', '#event/{{id}}'
+        _renderRef a, action, 'tracking', 'Tracking', 'icon-calendar', '#event/{{id}}'
+        span = document.createElement 'span'
+        span.className = 'clearfix'
+        a.appendChild span
         li.appendChild a
         frag.appendChild li
         return
       @$detail.removeClass('link-condition').addClass('node-actions').append frag
+      return
+    _renderRefLink: (el, action, name, title, cls, url) ->
+      name = name.toLowerCase()
+      id = action.get(name)?.id ? action.get(name + '_id')?.toString()
+      if id?
+        btn = document.createElement 'a'
+        btn.className = 'ref-link pull-right ' + cls or ''
+        btn.textContent = title
+        btn.href = url.replace '{{id}}', id
+        el.appendChild btn
       return
     _renderLink: (model) ->
       @$detail.empty()
@@ -745,11 +788,8 @@ Projects
         If you really want to remove them, STOP them first.'''
         return @
       names = models.map (model) -> model.get 'name'
-      # TODO: project life cycle (engine)
-      # TODO: started projects cannot be deleted
       if confirm "Are you sure to remove these projects? \n#{names.join '\n'}\n\nThis action cannot be undone!"
         models.forEach (model) -> model.destroy()
-      # TODO: remove related data?
       @
     render: ->
       @list.fetch()
