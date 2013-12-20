@@ -139,20 +139,19 @@ Event
         msg = []
         if starts
           msg.push "It will be started at #{@_dateToLocale starts}."
-          msg.push '<small>A notication will be sent if associated action has not been executed yet.</small>'
+          #msg.push '<small>A notication will be sent if associated action has not been executed yet.</small>'
         else
           msg.push 'It will be started automatically when associated action been executed.'
         if ends
           msg.push "It will be ended at #{@_dateToLocale ends}."
         else
           cls = 'warning'
-          msg.push 'It will be ended only after trigger "skip" manually.'
+          msg.push 'It will be ended as soon as associated action finish execution.'
         msg.push "Duration between starts and ends is #{form.duration.value}." if duration
-        msg.push '<small>4 Notifications will be sent before and after event starts and ends.</small>'
+        #msg.push '<small>Notifications will be sent before and after event starts and ends.</small>'
         msg = msg.join '<br/>'
 
-      @$info.html(msg).parents('.control-group')
-      .removeClass('success error').addClass cls
+      @$info.html(msg).parents('.control-group').removeClass('success error').addClass cls
       @
 
     fill: (data) ->
@@ -174,10 +173,12 @@ Event
       @
     read: ->
       data = super
-      data.starts = unless data.starts?.length then null else new Date data.starts
-      data.ends = if data.ends?.length then null else new Date data.ends
+      data.starts = new Date data.starts if data.starts
+      delete data.starts unless data.starts
+      data.ends = new Date data.ends if data.ends
+      delete data.ends unless data.ends
       data.duration = DurationConvertor.parse data.duration
-      data.duration = null unless data.duration
+      delete data.duration unless data.duration
       data
     reset: ->
       @$info.empty()
@@ -256,6 +257,7 @@ Event
       events = []
       unsched = []
       col.forEach (evt) ->
+        return unless evt.get('duration') or evt.get('ends') # filter empty events w/o duration or ends
         _evt =
           id: evt.id
           url: "#event/#{evt.id}"
@@ -432,14 +434,12 @@ Event
         else
           buf.push 'Project ends'
       if duration
-        if duration isnt ends.getTime() - starts.getTime()
+        if ends? and starts and duration isnt ends.getTime() - starts.getTime()
           console.error 'duration and starts/ends not matched', duration, starts, ends
         buf.push "(#{DurationConvertor.stringify duration})"
-      else
-        buf.push '(Skip manully or until project ends)'
       buf = buf.join ' '
       @el.title = @el.textContent = buf
-      @el.dataset.container = '#event_manager table'
+      @el.dataset.container = '#event_manager'
       @
     _getDate: (name) ->
       datetime = @model.get name
@@ -456,7 +456,11 @@ Event
 
   class EventActionCell extends Backgrid.ActionsCell
     render: ->
-      super
+      super # must before hide
+      model = @model
+      duration = model.get 'duration'
+      @_hide 'view' unless model.get('duration') and model.get('starts')
+      @
 
   class EventManagemerView extends ManagerView
     columns: [
