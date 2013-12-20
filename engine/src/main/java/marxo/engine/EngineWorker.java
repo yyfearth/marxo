@@ -128,19 +128,17 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 						processTrackableActions(workflow);
 					}
 
-//					if (!makeSureCurrentNode(workflow)) {
-//						continue;
-//					}
-
 					boolean isOkay;
 					while (true) {
 						isOkay = processNodes(workflow);
 
 						if (linksAreUpdated) {
 							processLinks(workflow);
+							linksAreUpdated = false;
 						}
 
 						if (nodesAreUpdated) {
+							nodesAreUpdated = false;
 							continue;
 						}
 
@@ -178,8 +176,6 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 	boolean nodesAreUpdated = false;
 
 	private void processLinks(Workflow workflow) {
-		nodesAreUpdated = false;
-
 		for (int i = 0; i < workflow.getCurrentLinks().size(); i++) {
 			Link link = workflow.getCurrentLinks().get(i);
 			logger.info(String.format("%s starts", link));
@@ -207,7 +203,6 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 	boolean linksAreUpdated = false;
 
 	private boolean processNodes(Workflow workflow) {
-		linksAreUpdated = false;
 		boolean hasError = false;
 
 		for (int i = 0; i < workflow.getCurrentNodes().size(); i++) {
@@ -252,6 +247,7 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 
 				if (action.is(RunStatus.STARTED)) {
 					if (event.getEndTime().isAfterNow()) {
+						logger.info(String.format("%s waits until %s", action, event.getEndTime()));
 						updateSchedule(event.getEndTime());
 						node.setCurrentAction(action);
 						break;
@@ -383,11 +379,12 @@ public class EngineWorker implements Runnable, MongoDbAware, Loggable {
 					}
 					if (isFinished) {
 						logger.info(String.format("%s finishes tracking", node));
+						Notification.saveNew(Notification.Level.NORMAL, node, Notification.Type.FINISHED);
 						node.setStatus(RunStatus.FINISHED);
 						node.save();
 						workflow.removeCurrentNode(node);
 
-						if (workflow.getCurrentNodes().size() == 0) {
+						if (workflow.getTrackedActions().isEmpty()) {
 							logger.info(String.format("%s finishes tracking", workflow));
 							workflow.setStatus(RunStatus.FINISHED);
 							Notification.saveNew(Notification.Level.NORMAL, workflow, Notification.Type.FINISHED);
