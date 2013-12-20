@@ -4,8 +4,8 @@ import marxo.entity.action.Content;
 import marxo.tool.Loggable;
 
 public class PageRecord extends Record implements Loggable {
-	int submissionCount = 0;
-	int viewCount = 0;
+	public int submissionsCount = 0;
+	public int viewCount = 0;
 
 	public static PageRecord getInstance(Content content) {
 		assert content.getType().equals(Content.Type.PAGE);
@@ -13,7 +13,7 @@ public class PageRecord extends Record implements Loggable {
 		PageRecord pageRecord = new PageRecord();
 
 		pageRecord.viewCount = content.getViewCount();
-		pageRecord.submissionCount = content.submissions.size();
+		pageRecord.submissionsCount = content.submissions.size();
 
 		logger.debug(String.format("%s records %s", content, pageRecord));
 
