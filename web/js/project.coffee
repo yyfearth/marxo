@@ -170,7 +170,7 @@ Projects
           @$projectForm.show()
           model = null
         else
-          $section.show()
+          $section.show().find('input, textarea').prop 'readOnly', 'IDLE' isnt model.status()
           if type is 'node'
             @$wfPreview.show()
             @$actions.show()
@@ -237,7 +237,9 @@ Projects
     _renderProject: (project) ->
       @sidebar.classList.add 'active'
       @$wfbtns.hide()
-      @btnSave.disabled = false
+      readonly = 'IDLE' isnt project.status()
+      @btnSave.disabled = readonly
+      @$projectForm.find('input, textarea').prop 'readOnly', readonly
       # update sidebar
       project.sort()
       nodes = project.nodes
@@ -268,6 +270,7 @@ Projects
       el
     reset: ->
       @$wfbtns.hide()
+      @$projectForm.find('input, textarea').prop 'readOnly', false
       @$el.find('.control-group:has(#project_created_at)').hide()
       $(@sidebar).find('li.node-item, li.link-item').remove()
       @navTo null

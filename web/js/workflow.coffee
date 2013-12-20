@@ -292,7 +292,7 @@ Action
       @view.load wf, sub
       @nodeList.setNodes wf.nodes
       # TODO: show warning in workflow editor view
-      @readonly = not @model.has 'tenant_id'
+      @readonly = not @model.isNew() and not @model.has 'tenant_id'
       @listenTo wf, 'changed', (action, entity) ->
         @_enableBtns true
         console.log 'workflow changed', action, entity
@@ -382,9 +382,13 @@ Action
     popup: (data, callback) ->
       throw new Error 'data must be an model entity' unless data instanceof Entity
       super data, callback
+      @readonly = not data.isNew() and not data.has 'tenant_id'
       @fill data.attributes
       @btnSave.textContent = if data.isNew() then 'OK' else 'Save'
-      @on 'shown', => @form.name.select()
+      @on 'shown', =>
+        $(@form).find(':input').prop 'readOnly', @readonly
+        @btnSave.disabled = @readonly
+        @form.name.select()
       @
     save: ->
       @data.set @read()
