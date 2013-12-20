@@ -156,9 +156,6 @@ define 'models', ['module', 'lib/common'], (module) ->
       else
         @get('first_name') or @get('last_name') or null
 
-# TODO: service: by default, publisher can get the list of members
-# and cannot get list of participant, but can get participant by id
-
 #  class Participant extends User
 
   class Publisher extends User
@@ -560,6 +557,45 @@ define 'models', ['module', 'lib/common'], (module) ->
         callback {}
       @
 
+  ## Project
+
+  class Project extends Workflow
+    _name: 'project'
+    urlRoot: ROOT + '/projects'
+
+  class Projects extends Workflows
+    @projects: new Projects
+    @find: (options) ->
+      wfs = @projects
+      unless wfs.length
+        wfs.load (wfs) -> wfs.find options
+      else
+        wfs.find options
+      wfs
+    model: Project
+    url: Project::urlRoot
+    _expires: 60000 # 1 min
+
+  findProjectOrWorkflow = (options) ->
+    unless options.workflowId and typeof options.callback is 'function'
+      throw new Error 'workflowId and callback must be given'
+    _callback = options.callback
+    _tried = false
+    options.callback = (ret) -> if _callback
+      if ret.workflow or Object.keys(ret).length
+        # console.log 'find project or workflow got', ret, _tried
+        _callback ret
+        _callback = null
+      else if _tried
+        _callback ret
+      _tried = true
+      return
+    Projects.find options
+    Workflows.find options
+    return
+
+  # Workflow/Project Sub-entities
+
   class ChangeObserableEntity extends StatusEntity
     constructor: (model, options) ->
       super model, options
@@ -603,49 +639,29 @@ define 'models', ['module', 'lib/common'], (module) ->
     url: Link::urlRoot
 
   class Action extends StatusEntity
+    constructor: (model, options) ->
+      super model, options
+      @_wire()
+      @on 'reset sync', @_wire.bind @
+    _wire: ->
+      if @has 'content'
+        @content = new Content @get 'content'
+        @content.action = @
+      else
+        @content = null
+      for name in ['event', 'tracking']
+        if @has name
+          evt = @[name] = new Event @get name
+          evt.action = @
+        else
+          @[name] = null
+      @
     name: -> @get('name') or @get('type')?.replace(/_/, ' ').capitalize() or '(No Name)'
-  # idAttribute: 'index'
+    urlRoot: ROOT + '/actions'
 
   class Actions extends SimpleCollection
     model: Action
-  # url: -> @node.url() + '/actions'
-
-  ## Project
-
-  class Project extends Workflow
-    _name: 'project'
-    urlRoot: ROOT + '/projects'
-
-  class Projects extends Workflows
-    @projects: new Projects
-    @find: (options) ->
-      wfs = @projects
-      unless wfs.length
-        wfs.load (wfs) -> wfs.find options
-      else
-        wfs.find options
-      wfs
-    model: Project
-    url: Project::urlRoot
-    _expires: 60000 # 1 min
-
-  findProjectOrWorkflow = (options) ->
-    unless options.workflowId and typeof options.callback is 'function'
-      throw new Error 'workflowId and callback must be given'
-    _callback = options.callback
-    _tried = false
-    options.callback = (ret) -> if _callback
-      if ret.workflow or Object.keys(ret).length
-        # console.log 'find project or workflow got', ret, _tried
-        _callback ret
-        _callback = null
-      else if _tried
-        _callback ret
-      _tried = true
-      return
-    Projects.find options
-    Workflows.find options
-    return
+    url: Action::urlRoot
 
   ## Home
 
