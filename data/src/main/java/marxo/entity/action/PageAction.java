@@ -62,6 +62,7 @@ public class PageAction extends TrackableAction {
 
 			Content content1 = getContent();
 			content1.records.add(PageRecord.getInstance(content1));
+			content1.save();
 
 			nextTrackTime = nextTrackTime.plus(trackPeriod);
 			Task.schedule(workflowId, nextTrackTime);
