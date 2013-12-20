@@ -101,6 +101,14 @@ require [
         @dialog.popup()
       'click #view_profile': ->
         @dialog.popup User.current
+      'click #go_console': ->
+        user = User.current?.toJSON()
+        if /^PUBLISHER$/i.test user?.type
+          user = User.current.toJSON()
+          user.credential = User.current.auth
+          sessionStorage.user = JSON.stringify user
+          localStorage.marxo_sign_in_remember = true
+        return
     initialize: (options) ->
       @$form = @$el.find('form')
       @dialog = new UserDialogView
@@ -171,7 +179,7 @@ require [
         Authorization: user.auth
       $el.trigger 'signedin', [user]
       $go_console = $el.find('#go_console')
-      if user.has 'tenant_id'
+      if /^PUBLISHER$/i.test user.get 'type'
         $go_console.prop 'href', './console.html'
       else
         $go_console.parent('li').remove()
@@ -428,7 +436,7 @@ require [
       else
         _tpl[name].replace /{{\s*\w+\s*}}/g, (name) ->
           name = name.match(/^{{\s*(\w+)\s*}}$/)[1]
-          attrs[name] or ''
+          attrs[name] ? ''
     events:
       'click .form-mask': (e) ->
         e.preventDefault()
@@ -516,7 +524,7 @@ require [
           hasInput = true if section.type
           tpl 'section',
             title: _.escape(section.name)
-            desc: section.desc + if section.options?.required then '' else ' <em>(Optional)</em>'
+            desc: (section.desc or '') + if section.options?.required then '' else ' <em>(Optional)</em>'
             body: _renderInput(section, i)
         html = tpl 'page',
           title: model.escape('name')
@@ -524,7 +532,10 @@ require [
           sections: unless sections?.length then '' else sections.join '\n'
         html = @html = unless hasInput then html.replace('form-actions', 'form-actions hide') else html
       $el = @$el.html(html)
+      _renderSubmissions = @_renderSubmissions.bind @
       setTimeout -> # defer
+        $el.find('.submissions[data-ref]').each (i, el) ->
+          _renderSubmissions el.getAttribute('data-ref'), el.getAttribute('data-name'), (html) -> el.innerHTML = html
         $el.find('.rich-editor').attr('contenteditable', 'true').each ->
           $("##{@id}.rich-editor").wysiwyg()
         $el.find('.btn-toolbar').find('[data-edit],.btn.dropdown-toggle,.btn-edit').tooltip container: $el
@@ -537,7 +548,9 @@ require [
     _renderInput: (data, i) ->
       type = (data.type or '').toLowerCase()
       options = data.options or {}
-      tpl = @tpl()
+      _tpl = @tpl
+      tpl = _tpl()
+      _name = 'section_' + i
       switch type
         when '', 'none'
           body = ''
@@ -547,12 +560,14 @@ require [
           body = tpl.html.replace '{{fonts}}', @_renderFonts()
           body = body.replace '<textarea ', '<textarea data-required="required" ' if options.required
         when 'radio'
-          list = unless options.gen_from_list then options.manual_options else [
-            'List item 1 (Auto Genearted)'
-            'List item 2 (Auto Genearted)'
-            '... (Auto Genearted)'
-          ]
-          body = list?.map((item, i) -> tpl.radio.replace('{{i}}', i).replace '{{text}}', item).join '\n'
+          if options.gen_from_submission
+            body = "<div class=\"submissions\" data-name=\"#{_name}\" data-ref=\"#{options.gen_from_submission}\">Loading...</div>"
+          else if options.manual_options?.length
+            body = options.manual_options.map (item, i) ->
+              _tpl 'radio', name: _name, value: i, text: item
+            .join '\n'
+          else
+            body = '(Error Section Question: No options)'
         when 'file'
           accept = options.file_accept
           if accept is 'image/*'
@@ -563,7 +578,56 @@ require [
         else
           throw new Error 'unknown section type ' + type
       body = body.replace /\s*required(?:="\w*")?/ig, '' unless options.required
-      body.replace /{{name}}/g, 'section_' + i
+      body.replace /{{name}}/g, _name
+    _renderSubmissions: (ref, name, callback) ->
+      console.log 'load submission from page', ref
+      _tpl = @tpl
+      _renderSubmission = (sections, submission) ->
+        html = []
+        # console.log submission.sections
+        for val, i in submission.sections
+          def = sections[i]
+          span = switch def.type.toLowerCase()
+            when 'text'
+              _.escape val or ''
+            when 'html'
+              val or ''
+            when 'radio'
+              if def.options.gen_from_submission
+                '' # TODO: how to show the auto options
+              else
+                def.options.manual_options?[val] or ''
+            when 'file'
+              url = "#{ROOT}/#{val}"
+              console.log def
+              if def.options.file_accept is 'image/*'
+                "<a href='#{url}' target='_blank'><img src='#{url}' alt='' style='max-width: 100px; max-height: 100px;'/></a>"
+              else
+                "<a href='#{url}/download'>Download</a><a class='icon-link-ext' href='#{url}'></a>"
+            else
+              ''
+          html.push "<span class='section-value'>#{span}</span>" if span
+        html.push submission.desc
+        html.join ' '
+      _render = (page) ->
+        console.log 'got page', page
+        submissions = page.get 'submissions'
+        sections = page.get 'sections'
+        unless submissions?
+          html = 'Cannot load submissions, seems they are not ready yet!'
+        else unless submissions.length
+          html = 'No submissions yet!'
+        else
+          console.log 'got page submissions', submissions
+          html = for sub in submissions
+            _tpl 'radio', name: name, value: sub.id, text: _renderSubmission sections, sub
+          html = html.join '\n'
+        callback? html
+        return
+      page = Pages.pages.get(ref) or new Page id: ref
+      if page.get('submissions')?.length then _render page
+      else page.fetch success: _render, error: -> callback? 'Failed to load submissions!'
+      return
     render: ->
       if @rendered or @model.has 'name'
         @_render()
@@ -586,8 +650,6 @@ require [
     upload: (file, auth) ->
       unless file.files?.length
         null
-      else if info = file.info or $.data file, 'info'
-        info
       else
         data = new FormData
         data.append 'file', file.files[0]
@@ -600,8 +662,6 @@ require [
           headers:
             Authorization: auth
           success: (info) ->
-            file.info = info
-            $(file).data id: info.id, info: info
             console.log 'upload success', info
           error: (info) ->
             console.error 'upload failed', info
@@ -619,11 +679,10 @@ require [
             $input.siblings('.rich-editor').focus()
           alert 'This field is required!'
           return false
-      try
-        for input in [].slice.call @$el.find 'form :invalid'
-          input.focus()
-          alert 'This field is invalid!'
-          return false
+      try for input in [].slice.call @$el.find 'form :invalid'
+        input.focus()
+        alert 'This field is invalid!'
+        return false
       true
     submit: ->
       return @ unless @validate()
@@ -631,6 +690,12 @@ require [
       # upload files
       files = [].slice.call @$el.find 'form input[type=file][name^=section_]'
       requests = for file in files then @upload file, User.current.auth
+      #console.log 'req', requests
+      unless requests.length
+        @_submit []
+        return @
+      else if requests.length is 1
+        requests.push null # to fix results
       $.when.apply($, requests).then (results...) =>
         data = []
         console.log 'infos', results
@@ -649,7 +714,9 @@ require [
     _submit: (data) ->
       # prepare data
       sections = []
-      for {name, value} in @$el.find('form').serializeArray().concat data or []
+      $form = @$el.find 'form'
+      for kv in $form.serializeArray().concat data or []
+        {name, value} = kv
         if value and /^section_\d+$/i.test name
           name = Number name[8..]
           sections[name] = value
@@ -666,7 +733,8 @@ require [
       }, success: (submission) =>
         console.log 'submit success', submission
         alert "Submit successful."
-        # TODO: show result page
+        # TODO: show result page?
+        $form[0].reset()
         @_disableSubmit false
       , error: (err) =>
         console.error 'submit failed', err
