@@ -1,168 +1,11 @@
 "use strict"
 
 define 'import_data', ['models'], ({
-Workflow, Workflows
+Workflows, Projects
 }) ->
 
   data =
     workflows: [
-#      name: 'Demo Workflow'
-#      key: 'demo_workflow'
-#      desc: 'Demo Workflow for App Dev and Logo Desgin'
-#      start_node_id: 0
-#      nodes: [
-#        name: 'Post Idea'
-#        key: 'post_idea'
-#        desc: 'Post project idea'
-#        offset:
-#          x: 26, y: 43
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Post Requirements'
-#        key: 'post_requirements'
-#        desc: 'Post requirements'
-#        offset:
-#          x: 334, y: 44
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Cancel Notification'
-#        key: 'cancel_notification'
-#        desc: 'Cancel project for less response than expected'
-#        offset:
-#          x: 334, y: 204
-#        actions: [
-#          type: 'FACEBOOK'
-#        ]
-#      ,
-#        name: 'Retrieve App Submissions'
-#        key: 'retrieve_app_submissions'
-#        desc: 'Retrieve app submissions'
-#        offset:
-#          x: 613, y: 44
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Retrieve Logo Design'
-#        key: 'retrieve_logo_design'
-#        desc: 'Retrieve logo design'
-#        offset:
-#          x: 629, y: 282
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Email to Evaluators'
-#        key: 'email_to_evaluators'
-#        desc: 'Email to evaluators'
-#        offset:
-#          x: 1018, y: 44
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'EMAIL'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Post and Vote'
-#        key: 'post_and_vote'
-#        desc: 'Post and vote'
-#        offset:
-#          x: 1043, y: 282
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ,
-#        name: 'Post Final Result and Reward'
-#        key: 'post_final_result_and_reward'
-#        desc: 'Post final result and reward'
-#        offset:
-#          x: 1420, y: 183
-#        actions: [
-#          type: 'PAGE'
-#        ,
-#          type: 'FACEBOOK'
-#        ,
-#          type: 'EMAIL'
-#        ,
-#          type: 'WAIT'
-#        ]
-#      ]
-#      links: [
-#        key: '10_days_likes_gte_300'
-#        prev_node_id: 0
-#        next_node_id: 1
-#        name: '10 Days & Likes >= 300'
-#      ,
-#        key: '10_days_likes_lt_300'
-#        prev_node_id: 0
-#        next_node_id: 2
-#        name: '10 Days & Likes < 300'
-#      ,
-#        key: 'post_req_to_retrieve_app'
-#        prev_node_id: 1
-#        next_node_id: 3
-#      ,
-#        key: 'post_req_to_retrieve_logo'
-#        prev_node_id: 1
-#        next_node_id: 4
-#      ,
-#        key: 'retrieve_app_to_evaluate'
-#        prev_node_id: 3
-#        next_node_id: 5
-#        name: '15 Days & > 80% Response'
-#      ,
-#        key: 'retrieve_logo_to_post_and_vote'
-#        prev_node_id: 4
-#        next_node_id: 6
-#        name: '10 Days & Submissions >= 3'
-#      ,
-#        name: '(fallback)'
-#        key: 'faild_to_evaluate'
-#        desc: 'Manual trigger back if failed to evaluate'
-#        prev_node_id: 5
-#        next_node_id: 3
-#      ,
-#        name: '(fallback)'
-#        key: 'failed_to_vote'
-#        desc: 'Manual trigger back if failed to vote'
-#        prev_node_id: 6
-#        next_node_id: 4
-#      ,
-#        key: 'evaluate_to_post_final'
-#        prev_node_id: 5
-#        next_node_id: 7
-#      ,
-#        key: 'post_and_vote_to_post_final'
-#        prev_node_id: 6
-#        next_node_id: 7
-#      ]
-#    ,
       name: 'Conference Check-in Mobile App'
       key: 'conf_app_dev'
       desc: 'Based on project requirements, use crowds sourcing to complete the development steps from ' +
@@ -173,19 +16,85 @@ Workflow, Workflows
         key: 'desgin'
         desc: 'Post requirement and collect desgins.'
         offset:
-          x: 40, y: 112
+          x: 120, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Reqirement'
           key: 'post_req'
           content:
             type: 'PAGE'
-            name: 'Conference Check-in Mobile App Reqirements and Design Submission'
-            desc: ''
+            name: 'Conference Check-in Mobile App Design Submission'
+            desc: '''<p><img src="http://media.peugeot.com/images/backgrounds/design/concept-peugeot-design-lab.jpg"
+            alt="design"/></p><p><strong>Hello Dear Followers!!!</strong></p>
+            <p>We are launching a new project of building a web-based check-in mobile application,
+            and this application will be using in future IEEE conference.
+            Please follow our requirements to design this application, and submit your result.
+            A voting competition for all submissions will be announced after it.</p>
+            <h3>Description</h3><p>This web-based conference application is designed for users to check-in and
+            track their current status and other information for IEEE conference.
+            The data of application (user information) should get from back-end database,
+            which generated by other registration system.</p>
+            <h4>Functional Requirements</h4><ul><li>User sign-in/sign-out function</li>
+            <li>User QR code image and personal information display function</li>
+            <li>User check-in status/schedule display and change function</li>
+            <li>Conference schedule display function</li><li>User personal schedule display function</li></ul>
+            <h4>Submission Requirements<span style="font-weight: normal;">&nbsp;(Application design document)</span></h4>
+            <ul><li>Description</li><li>UI design (screenshots)</li><li>Application navigation design</li>
+            <li>Structure design</li><li>Technology</li><li>Expect development schedule</li></ul>
+            <p>We encourage any extra idea to enlarge this application and make it better. Thank you for your participation.</p>'''
             sections: [
               name: 'Design Name'
+              desc: 'The name of your app.'
               type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Team Name'
+              desc: 'The name of your development team or yourself.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Team Members'
+              desc: '''Your team members. One person per line with "First-name Last-name &lt;email&gt;" format.
+              You can leave it blank if you are individual developer.'''
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ,
+              name: 'Design Introduction'
+              desc: 'Give a brief introduction of your design.'
+              type: 'HTML'
+              options:
+                required: true
+            ,
+              name: 'Upload Image'
+              desc: 'Upload the image of your design. The image should be about 400x300px, not too big, not too small.'
+              type: 'FILE'
+              options:
+                required: true
+                file_accept: 'image/*'
+            ,
+              name: 'Upload Design Package'
+              desc: 'Upload your design package, you should including ALL YOUR FILES in a ZIP/RAR/7Z format package.'
+              type: 'FILE'
+              options:
+                required: true
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments if you want.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
             ]
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Requirement to Facebook'
@@ -193,67 +102,166 @@ Workflow, Workflows
           content:
             type: 'FACEBOOK'
             message: '''Attention! Conference Check-in Mobile App start to receive submission.
-            See requirements and submit your desgin in '''
+            See requirements and submit your desgin in http://marxosys.ml/#id'''
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Design Submit'
           key: 'wait_for_design'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Vote App Design'
         key: 'vote'
         desc: 'Public vote submitted designs.'
         offset:
-          x: 62, y: 240
+          x: 340, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Design Vote Form'
           key: 'post_design_vote_form'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Favorite Design Vote'
+            desc: '''<p><img src="http://yourvoiceintheassembly.co.uk/wp-content/uploads/2012/06/VOTE.jpg" alt="vote"/></p>
+            <p><strong>Hello Dear Followers!!!</strong></p>
+            <p>After we have received plenty of great designs, now it’s time to vote for your favorite.
+            Each user can vote three different design, and we’ll count the total votes for each design after 2 weeks’ duration.
+            Please enjoy this voting and share this event with your friends.</p>
+            <p>Especially for the designers, to make your design has better voting results,
+            please share the link of this page and make others can see your achievement.</p>
+            <p>Thank you for your participation.</p>'''
+            sections: [
+              name: 'Vote Design'
+              desc: 'Vote your favorite design.'
+              type: 'RADIO'
+              options:
+                required: true
+                gen_from_submission: 'post_req'
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments about the design you select and for all designs if you want.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
+          tracking:
+            duration: 1209600000 # 2 weeks
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Vote to Facebook'
           key: 'design_vote_fb'
           content:
             type: 'FACEBOOK'
-            message: 'Vote your favorite desgin for our Conference Check-in Mobile App.'
+            message: 'Vote your favorite desgin for our Conference Check-in Mobile App.\nhttp://marxosys.ml/#id'
+          tracking:
+            duration: 1209600000 # 2 weeks
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Design Vote'
           key: 'wait_for_desgin_vote'
-        ]
-      ,
-        name: 'Evaluate App Design'
-        key: 'evaluate'
-        desc: 'Evaluator judge the designs and votes.'
-        offset:
-          x: 50, y: 368
-        actions: [
-          type: 'PAGE'
-          name: 'Post Evaluate Form'
-          key: 'eval_form'
-        ,
-          type: 'EMAIL'
-          name: 'Send Email to Evaluator'
-          key: 'email_eval'
-        ,
-          type: 'WAIT'
-          name: 'Wait for Evaluate'
-          key: 'wait_for_eval'
+          event:
+            duration: 1209600000 # 2 weeks
         ]
       ,
         name: 'App Implemetation'
         key: 'implemetation'
         desc: 'Post final design and wait for implemetation submission.'
         offset:
-          x: 57, y: 500
+          x: 510, y: 30
         actions: [
           type: 'WAIT'
-          name: 'Wait Owner Process Final Desgin'
+          name: 'Wait Owner Evaluate and Choose Final Desgin'
+          desc: '''The project owner should select the final design.
+          And process the chosen desgin, prepare to post it on to the page.'''
           key: 'proc_design'
+          event:
+            duration: 864000000 # 10 days
         ,
           type: 'PAGE'
           name: 'Post Final Desgin and Implement Submit Form'
           key: 'post_design_submit_impl'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Implementation Submission'
+            desc: '''<p><img src="http://yourhomeconstruction.com/sites/5356/construction408661.jpg"
+            alt="implementation"/></p><p><strong>Congratulation Dear Follower!!!</strong></p>
+            <p>You have voted the best design of this conference check-in mobile application for us.</p>
+            <p><em>(The final design post in here)</em></p>
+            <p>At this step, we’re going to need you to implement this awesome idea.
+            Please follow the great design we have, and provide your implementation.
+            Your submission has to be no later than the deadline,
+            and the detail of submission requirement is described below.</p>
+            <h3>Submission Requirements</h3><ul><li>Implementation documentation</li>
+            <li>Source code and binraries package (Compressed file for your implementation)</li>
+            <li>Extra resource of attachment</li></ul>
+            <p>We’re looking forward to your masterpiece, please hand it in on time.
+            Thank you for your participation.</p>'''
+            sections: [
+              name: 'Implementation Name'
+              desc: 'Give a name to your app implementation.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Group Name'
+              desc: 'The name of your development team or yourself.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Team Members'
+              desc: '''Your team members. One person per line with "First-name Last-name &lt;email&gt;" format.
+              You can leave it blank if you are individual developer.'''
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ,
+              name: 'Implemetation Description'
+              desc: 'Give a detailed description for your implemetation.'
+              type: 'HTML'
+              options:
+                required: true
+            ,
+              name: 'Upload Screenshot'
+              desc: '''Upload the screenshot of your app to demonstrate your implementation.
+              You can combine multiple screenshots into one image if you like.
+              The image should be about 600x400px, not too big, not too small.'''
+              type: 'FILE'
+              options:
+                required: true
+                file_accept: 'image/*'
+            ,
+              name: 'Upload Implementation Package with Source Code'
+              desc: '''Upload your implemetation package,
+              you should including ALL YOUR FILES including scource code and necessary binaries in a ZIP/RAR/7Z format package.'''
+              type: 'FILE'
+              options:
+                required: true
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments if you want.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Design to Facebook'
@@ -261,45 +269,121 @@ Workflow, Workflows
           content:
             type: 'FACEBOOK'
             message: '''The final desgin of Conference Check-in Mobile App is ready!
-            Please submit your code in '''
+            Please submit your code in http://marxosys.ml/#id'''
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Implementation'
           key: 'wait_for_impl'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Review'
         key: 'review'
         desc: 'Evaluator review submitted app implemetations.'
         offset:
-          x: 78, y: 623
+          x: 700, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Review Form'
           key: 'review_page'
-        ,
-          type: 'EMAIL'
-          name: 'Send Review Request Email'
-          key: 'review_email'
-        ,
-          type: 'WAIT'
-          name: 'Wait for Review'
-          key: 'wait_for_review'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Evaluation for Implementations (Evaluator Only)'
+            desc: '''<img src="http://cdn2.business2community.com/wp-content/uploads/2012/09/hires.jpg" alt="evaluate"/>
+            <p><strong>Hello Dear Evaluators!!!</strong></p>
+            <p>For these great implementations, we need your opinion to help us to find the good piece from them.
+            Based on your knowledge and experience, please provide us your evaluation report and the best result of overall.
+            And here are some information you should know before your submission.</p>
+            <h3>Submission requirements:</h3><ul><li>Evaluation report of overall</li><li>Name of best result</li>
+            <li>Reason of your selection (advantages/disadvantages)</li></ul>
+            <p>Please make sure your submission has covered all the information above.
+            Thank you for your participation.</p>'''
+            sections: [
+              name: 'Choose Design'
+              desc: 'Choose the best implemetation you think.'
+              type: 'RADIO'
+              options:
+                required: true
+                gen_from_submission: 'post_design_submit_impl'
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments about the design you chose.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: true
+            ]
+          tracking:
+            duration: 864000000 # 10 days
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Testing'
         key: 'testing'
         desc: 'Post selected implementaion and open beta testing, collect feedbacks.'
         offset:
-          x: 78, y: 756
+          x: 840, y: 30
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Process Review and Implementation'
           key: 'proc_impl'
+          event:
+            duration: 864000000 # 10 days
         ,
           type: 'PAGE'
           name: 'Post Selected Implementation and Test Request'
           key: 'post_impl_test'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Testing Request'
+            desc: '''<p><img src="http://donan.com/wp-content/uploads/2012/03/3887-DONAN_2048x1200_product-testing1.jpg" alt="testing"/></p>
+            <p><strong>Ho-he Dear Followers!!!</strong></p>
+            <p>We’re almost there!! We now have the implementation of the conference check-in mobile application,
+            however, we still need you to play with it.
+            Please download our project deployment package and run any testing you like to test it.
+            We would love to know if you find any bug or mistakes from it.
+            Let us know your result or report by following 30 days.</p>
+            <p><em>(Post selected implementation description here)</em></p>
+            <h3>Test report submission</h3><ul><li>Test/bug description</li>
+            <li>Screenshots (if available)</li><li>Report documentation (if needed)</li></ul>
+            <p>Don’t worry if you found too many bugs. Thanks for your participation.</p>'''
+            sections: [
+              name: 'Bug Name'
+              desc: 'Give a name to the bug as a short description.'
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Bug Description'
+              desc: 'Give a more detailed bug description.'
+              type: 'HTML'
+              options:
+                required: true
+            ,
+              name: 'Upload Screenshot'
+              desc: 'Upload a screenshot for the bug. You can combine multiple screenshots into one image to upload.'
+              type: 'FILE'
+              options:
+                required: false
+                file_accept: 'image/*'
+            ,
+              name: 'Upload Attachment'
+              desc: 'Any attachment if you want to provide. If you have multiple attachments, you can compress them into a ZIP/RAR/7Z package to upload.'
+              type: 'FILE'
+              options:
+                required: false
+            ]
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Implementation to Facebook'
@@ -307,34 +391,73 @@ Workflow, Workflows
           content:
             type: 'FACEBOOK'
             message: '''Our committee have the final result of the winner of implemetation of our app.
-            Welcome to feedback any bugs or leave comments in '''
+            Welcome to feedback any bugs or leave comments in http://marxosys.ml/#id'''
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'WAIT'
           name: 'Wait for Testing'
           key: 'wait_for_test'
+          event:
+            duration: 864000000 # 10 days
         ]
       ,
         name: 'Demo'
         key: 'demo'
         desc: 'Post final result to the public.'
         offset:
-          x: 78, y: 883
+          x: 980, y: 30
         actions: [
           type: 'WAIT'
           name: 'Wait Owner Final Result'
           key: 'wait_for_result'
+          event:
+            duration: 864000000 # 10 days
         ,
           type: 'PAGE'
           name: 'Post Final Result and Demo'
           key: 'post_result'
+          content:
+            type: 'PAGE'
+            name: 'Conference Check-in Mobile App Demonstration'
+            desc: '''<p><img src="http://blogdramedy.files.wordpress.com/2013/04/fireworks.jpg" alt="demo"/></p>
+            <h2>Well done!!!!</h2><p>We finally complete the development of this conference check-in mobile application.
+            Please visit the website and take a look of your awesome participation.</p>
+            <p><em>(Post demo screenshots and videos here)</em></p>
+            <p>Thank you so much for your work, and please enjoy your achievement.
+            We’ll launch our new project soon, and please keep your eye on us. ☺</p>'''
+            sections: [
+              name: 'Rating'
+              desc: 'Rating the app demo.'
+              type: 'RADIO'
+              options:
+                required: true
+                manual_options: ['1 ★', '2 ★★', '3 ★★★', '4 ★★★★', '5 ★★★★★']
+            ,
+              name: 'Comments'
+              desc: 'Leave your comments about the demo of the app.'
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ,
           type: 'FACEBOOK'
           name: 'Post Final Result to Facebook'
           key: 'result_fb'
           content:
             type: 'FACEBOOK'
-            message: '''The Conference Check-in Mobile App is ready!
-            See our demo here '''
+            message: 'The Conference Check-in Mobile App is ready!\nSee our demo here http://marxosys.ml/#id'
+          tracking:
+            duration: 2592000000 # 30 days
+          event:
+            duration: 0
         ]
       ]
       links: [
@@ -342,47 +465,146 @@ Workflow, Workflows
         prev_node_id: 0
         next_node_id: 1
       ,
-        #name: 'Vote >= 200'
-        key: 'vote_to_evaluate'
+        key: 'vote_to_implemetation'
         prev_node_id: 1
         next_node_id: 2
-      #,
-      #  name: 'Failed to Pass'
-      #  key: 'evaluate_to_desgin'
-      #  prev_node_id: 2
-      #  next_node_id: 0
-      #,
-      #  name: 'Votes < 200'
-      #  key: 'vote_to_vote'
-      #  prev_node_id: 1
-      #  next_node_id: 1
       ,
-        #name: 'Passed'
-        key: 'evaluate_to_implemetation'
+        key: 'implemetation_to_review'
         prev_node_id: 2
         next_node_id: 3
       ,
-        key: 'implemetation_to_review'
+        key: 'review_to_testing'
         prev_node_id: 3
         next_node_id: 4
-      #,
-      #  name: 'Not satisfied'
-      #  key: 'review_to_implemetation'
-      #  prev_node_id: 4
-      #  next_node_id: 3
-      ,
-        key: 'review_to_testing'
-        prev_node_id: 4
-        next_node_id: 5
       ,
         key: 'testing_to_demo'
-        prev_node_id: 5
-        next_node_id: 6
+        prev_node_id: 4
+        next_node_id: 5
+      ]
+    ]
+
+    projects: [
+      name: 'Dev App'
+      key: 'app_dev'
+      desc: ''
+      start_node_id: 0
+      nodes: [
+        name: 'Requirement and Desgin'
+        key: 'desgin'
+        desc: 'Post requirement and collect desgins.'
+        offset:
+          x: 120, y: 30
+        actions: [
+          type: 'PAGE'
+          name: 'Post Reqirement'
+          key: 'post_req'
+          content:
+            type: 'PAGE'
+            name: 'Design'
+            desc: ''
+            sections: [
+              name: 'Design Name'
+              desc: ''
+              type: 'TEXT'
+              options:
+                required: true
+                text_multiline: false
+            ,
+              name: 'Upload Image'
+              desc: ''
+              type: 'FILE'
+              options:
+                required: false
+                file_accept: 'image/*'
+            ]
+          tracking:
+            duration: 60000
+          event:
+            duration: 0
+        ,
+          type: 'FACEBOOK'
+          name: 'Post Requirement to Facebook'
+          key: 'post_req_fb'
+          content:
+            type: 'FACEBOOK'
+            message: '''http://marxosys.ml/#home'''
+          tracking:
+            duration: 30000
+          event:
+            duration: 0
+        ,
+          type: 'WAIT'
+          name: 'Wait for Design Submit'
+          key: 'wait_for_design'
+          event:
+            duration: 15000
+        ]
+      ,
+        name: 'Vote App Design'
+        key: 'vote'
+        desc: 'Public vote submitted designs.'
+        offset:
+          x: 340, y: 30
+        actions: [
+          type: 'PAGE'
+          name: 'Post Design Vote Form'
+          key: 'post_design_vote_form'
+          content:
+            type: 'PAGE'
+            name: 'Vote'
+            desc: ''
+            sections: [
+              name: 'Vote Design'
+              desc: ''
+              type: 'RADIO'
+              options:
+                required: true
+                gen_from_submission: 'post_req'
+            ,
+              name: 'Comments'
+              desc: ''
+              type: 'TEXT'
+              options:
+                required: false
+                text_multiline: true
+            ]
+          tracking:
+            duration: 100000
+          event:
+            duration: 0
+        ,
+          type: 'FACEBOOK'
+          name: 'Post Vote to Facebook'
+          key: 'design_vote_fb'
+          content:
+            type: 'FACEBOOK'
+            message: 'http://marxosys.ml/#list'
+          tracking:
+            duration: 15000
+          event:
+            duration: 15000
+        ]
+      ]
+      links: [
+        key: 'desgin_to_vote'
+        prev_node_id: 0
+        next_node_id: 1
       ]
     ]
 
   console.log 'data start importing...'
 
+  # auto naming
+  for wf in [].concat data.workflows, data.projects
+    if wf?.nodes then for node in wf.nodes
+      for action in node.actions
+        if action.tracking?
+          tracking = action.tracking
+          action.tracking.name or= action.name + ' (Tracking)'
+        for n in ['content', 'event', 'tracking']
+          action[n]?.name or= action.name
+
   (new Workflows data.workflows).forEach (wf) -> wf.save()
+  (new Projects data.projects).forEach (wf) -> wf.save()
 
   return
