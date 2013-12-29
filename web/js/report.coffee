@@ -35,7 +35,7 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
       @model = model
       #console.log model
 
-      records = model.get 'records'
+      #records = model.get 'records'
       unless records?.length > 2 # gen test data
         records = @_genRandReports()
         model.set 'records', records
@@ -299,7 +299,9 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
       records = []
       fields = Object.keys @_record_map
       ts = Date.now()
-      ts = ts - ts % 36000000 # trim to hour
+      d = 86400000 # 1d
+      # d = 36000000 # 1h
+      ts = ts - ts % d # trim
       _c = {}
       _inc =
         likes_count: 10
@@ -309,16 +311,17 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
         submissions_count: 1
       for field in fields
         _c[field] = 0
-      c = 100 + (Math.random() * 1000) | 0
-      c = c - c % 24
+      c = 30 #100 + (Math.random() * 1000) | 0
+      #c = c - c % 24
       while --c
         record =
           created_at: ts
-        ts += 3600000 # 1h
+        ts += d
         for field in fields
-          inc = _inc[field]
+          inc = _inc[field] * 9
           r = if Math.random() > Math.min(inc / 10, 0.9) then 0 else 1 + (Math.random() * inc) | 0
           record[field] = (_c[field] += r)
+        record.view_count += record.submissions_count
         records.push record
       records
 
