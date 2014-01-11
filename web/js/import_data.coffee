@@ -5,6 +5,22 @@ Workflows, Projects
 }) ->
 
   data =
+    tenants: [
+      id: 1
+      name: 'Marxo'
+      desc: 'Marxo dev group'
+      contact: 'Wilson Young'
+      email: 'wilson@marxosys.ml'
+      tel: '(408) 888-8888'
+      fax: '(408) 888-8888'
+      addr: 'One Washington Square, San Jose, CA 95112'
+    ]
+    publishers: [
+      email: 'test@example.com'
+      password: 'B4driGpKjDrtdKaAoA8nUmm+D2Pl3kxoF5POX0sGSk4' # test
+      name: 'Test User'
+      tenant_id: 1
+    ]
     workflows: [
       name: 'Conference Check-in Mobile App'
       key: 'conf_app_dev'
@@ -593,16 +609,6 @@ Workflows, Projects
     ]
 
   console.log 'data start importing...'
-
-  # auto naming
-  for wf in [].concat data.workflows, data.projects
-    if wf?.nodes then for node in wf.nodes
-      for action in node.actions
-        if action.tracking?
-          tracking = action.tracking
-          action.tracking.name or= action.name + ' (Tracking)'
-        for n in ['content', 'event', 'tracking']
-          action[n]?.name or= action.name
 
   (new Workflows data.workflows).forEach (wf) -> wf.save()
   (new Projects data.projects).forEach (wf) -> wf.save()
