@@ -1,6 +1,6 @@
 "use strict"
 
-define 'config', ['base', 'manager', 'models', 'module'],
+define 'config', ['base', 'manager', 'models'],
 ({
 find
 findAll
@@ -19,18 +19,16 @@ User
 Publisher
 Publishers
 Service
-}, module) ->
-
-  CFG = module.config()
+}) ->
 
   class ConfigFrameView extends FrameView
     initialize: (options) ->
       super options
       @profile = new TenantProfileView el: '#tenant_profile', parent: @
       @manager = new UserManagemerView el: '#user_manager', parent: @, list: @list
-      @connector = new ServiceConnectorView el: '#service_connector', parent: @
+      @connector = new InnerFrameView el: '#service_connector', parent: @
       @
-    open: (name, sub) ->
+    open: (name) ->
       switch name
         when 'users'
           @switchTo @manager
@@ -39,168 +37,8 @@ Service
           @switchTo @profile
         when 'service'
           @switchTo @connector
-          @connector.open sub if sub
         else
           throw new Error 'empty or unknown sub action for config frame ' + name
-      @
-
-  # Services
-
-  class ServiceConnectorView extends InnerFrameView
-    initialize: (options) ->
-      super options
-      @facebookView = new FacebookStatusView el: find '.btn-facebook', @el
-      # for test only
-      @twitterView = new ServiceStatusView service: 'twitter' #, el: find '.btn-twitter', @el
-      @emailView = new ServiceStatusView service: 'email' #, el: find '.btn-email', @el
-    open: (service) ->
-      switch service
-        when 'facebook'
-          @facebookView.click false
-        when 'twitter', 'email'
-          console.log 'connect service details', service
-        else
-          throw new Error 'unknown service'
-    render: ->
-      @facebookView.render()
-      @twitterView.render()
-      @emailView.render()
-      super
-
-  class ServiceStatusView extends View
-    initialize: (options) ->
-      @service = options.service or @service or ''
-      @model = new Service service: @service
-      @events ?= {}
-      @events.click ?= 'click'
-      @_render = @_render.bind @
-      @click = @click.bind @
-      @changed = @changed.bind @
-      @_default_text = @$el.text()
-      @popup ?= new ModalDialogView el: find "##{@service}_status"
-      super options
-    click: (auto_connect) ->
-      if @model.connected?()
-        @showStatus()
-      else if auto_connect is false
-        @el.focus()
-      else
-        @connect()
-      @
-    disconnect: (callback = @changed) -> # waiting for override
-      callback null
-      @
-    changed: (auth) ->
-      @model.clear().set service: @service
-      if auth
-        @_loading 'connecting'
-        @model.save auth, wait: true, success: @render, error: ->
-          @_render()
-          alert 'Failed to connect this account.'
-      else
-        @_loading 'disconnecting'
-        @model.destroy wait: true, success: @render, error: ->
-          @_render()
-          alert 'Failed to disconnect this account.'
-      @
-    render: (model = @model) ->
-      @_loading 'loading'
-      model?.fetch success: @_render, error: @_render
-      super
-    showStatus: ->
-      # fill form
-      data = @model.toJSON()
-      data.title = @$el.text()
-      data.expires_at = new Date data.expires_at
-      dlg = @popup.el
-      for name, value of data
-        el = find "[name='#{name}']", dlg
-        $(el).text value
-        el.href = value if el?.href
-
-      @popup.popup data, (action, data) =>
-        switch action
-          when 'disconnect'
-            @disconnect()
-          when 'save'
-            @changed data
-          else
-            console.log @service, 'status popup', action
-      @
-    _loading: (status) -> unless @el.disabled
-      @el.disabled = true
-      @el.textContent = "#{status.capitalize()} to #{@service.capitalize()}..."
-      return
-    _render: (@model) ->
-      text = @service.capitalize()
-      field = @text_field and @model?.get @text_field
-      @$el.prop('disabled', false).removeClass 'connected disconnected'
-      if @model?.connected()
-        cls = 'connected'
-        text += ' Connected'
-        text += ' as ' + field if field
-      else if @model? and 'DISCONNECTED' is @model.status()
-        cls = 'disconnected'
-        text += ' Disconnected'
-        text += ' from ' + field if field
-      else
-        cls = ''
-        text = @_default_text
-      @$el.addClass cls if cls
-      @$el.text text
-      @
-
-  class FacebookStatusPopup extends ModalDialogView
-    el: '#facebook_status'
-    goBackOnHidden: 'config/service'
-    events:
-      'click .btn-disconnect': 'disconnect'
-    disconnect: ->
-      if confirm 'Are you sure to disconnect your Facebook account?\n\nIt will cause Marxo Facebook Service unable to send and track messages!'
-        @callback 'disconnect'
-        @hide()
-      @
-
-  class FacebookStatusView extends ServiceStatusView
-    service: 'facebook'
-    text_field: 'fullname'
-    cfg:
-      appId: CFG.FB_APP_ID
-      scopes: CFG.FB_SCOPES
-      status: false # check login status
-      cookie: false # enable cookies to allow the server to access the session
-      xfbml: false
-    popup: new FacebookStatusPopup
-    FB: (callback) ->  # lazy init
-      if @_FB?
-        callback.call @, @_FB
-      else require ['lib/facebook'], (@_FB) =>
-        @_FB.init @cfg
-        callback.call @, @_FB
-      @
-    connect: (callback = @changed) -> @FB (FB) ->
-      FB.login (response) ->
-        response = response.authResponse
-        if response?.accessToken and response.expiresIn > 0
-          auth =
-            user_id: response.userID
-            access_token: response.accessToken
-            expires_at: new Date Date.now() + 1000 * response.expiresIn
-            service: 'facebook'
-            status: 'CONNECTED'
-          FB.api '/me', (response) ->
-            auth.username = response.username
-            auth.link = response.link
-            auth.locale = response.locale
-            auth.fullname = response.name
-            console.log 'facebook connected', auth
-            callback auth
-        else
-          console.warn 'User cancelled login or did not fully authorize.', response
-          callback null
-          alert 'You cancelled login or did not fully authorize.'
-        return
-      , scope: @cfg.scopes
       @
 
   # Tenant Profile

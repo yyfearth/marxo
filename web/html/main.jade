@@ -52,7 +52,4 @@ html(lang='en-US')
           .active.row-fluid.inner-frame
             include profile
 
-    - if (!test)
-      script(data-main='js/main', src='js/lib/require.js', async)
-    - else
-      script(data-main='js/test', src='js/lib/require.js', async)
+    script(data-main='js/main', src='js/lib/require.js', async)

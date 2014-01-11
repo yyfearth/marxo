@@ -9,29 +9,7 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   class Entity extends Backbone.Model
     _expires: 1000
-    syncValidation: (method, model, options = {}) ->
-      options.dataType ?= 'json'
-      options.headers ?= {}
-      options.headers.Authorization ?= User.current?.get('credential') or ''
-      throw new Error 'no auth, need user login' unless options.headers.Authorization
-      if method isnt 'read'
-        cur_tenant_id = User.current?.get 'tenant_id'
-        throw new Error 'cannot create or update or delete without login user' unless cur_tenant_id?
-        switch method
-          when 'create', 'update'
-            unless model.has 'tenant_id'
-              model.set 'tenant_id', cur_tenant_id
-            else if cur_tenant_id isnt model.get 'tenant_id'
-              console.log cur_tenant_id, model.get 'tenant_id'
-              throw new Error 'cannot replace existing tenant_id'
-          when 'delete'
-            if cur_tenant_id isnt model.get 'tenant_id'
-              throw new Error 'cannot delete item not belong to your tenant'
-          when 'read'
-            break
-          else
-            throw new Error 'unsupported method ' + method
-      return
+    syncValidation: -> return # local
     sync: (method, model, options = {}) ->
       @syncValidation method, model, options
       super method, model, options
@@ -147,6 +125,7 @@ define 'models', ['module', 'lib/common'], (module) ->
     urlRoot: ROOT + '/tenants'
 
   class User extends Entity
+    idAttribute: 'email' # local
     urlRoot: ROOT + '/users'
     name: ->
       if @has 'name'
@@ -353,89 +332,24 @@ define 'models', ['module', 'lib/common'], (module) ->
       @_wire()
       @
     _save: Entity::save
-    save: (attributes = {}, options = {}) ->
-      throw new Error 'cannot save workflow by given nodes or links directly' if attributes.nodes or attributes.links
-      console.log 'saving', @_name, attributes, @
-      # replace original callbacks
-      _success = options.success
-      _err = options.error
-      options.success = (wf, resp, opt) =>
-        # console.log 'saved wf', wf
-        # save nodes
-        workflow_id = wf.id
-        console.log 'workflow_id', workflow_id
-        save_opt = wait: true, reset: true
-        updated = false
-        requests = []
-        @nodes?.forEach (node) =>
-          if node.isNew()
-            # console.log 'create node', workflow_id
-            requests.push node.save {workflow_id}, save_opt
-            updated = true
-          else if node._changed
-            node.resetChangeFlag().save()
-            updated = true
-          return
-        $.when.apply($, requests).then =>
-          # console.log 'new nodes created', @nodes
-          # then save links
-          requests = []
-          @links?.forEach (link) =>
-            if link.isNew()
-              if not link.prevNode? and 'number' is typeof idx = link.get 'prev_node_id'
-                link.prevNode = @nodes.at idx
-              if not link.nextNode? and 'number' is typeof idx = link.get 'next_node_id'
-                link.nextNode = @nodes.at idx
-              attr =
-                workflow_id: workflow_id
-                prev_node_id: link.prevNode.id
-                next_node_id: link.nextNode.id
-              # console.log 'create link', attr
-              requests.push link.save attr, save_opt
-              updated = true
-            else if link._changed
-              link.resetChangeFlag().save()
-              updated = true
-            return
-          # set start node id
-          if @startNode and @get('start_node_id') isnt @startNode.id
-            @set start_node_id: @startNode.id
-            updated = true
-          unless updated # not changed
-            _success? wf, resp, opt
-          else $.when.apply($, requests).then =>
-            # console.log 'new links created', @links
-            # update workflow for refs
-            @unset 'nodes', silent: true
-            @unset 'links', silent: true
-            @_save # directly save
-              node_ids: @nodes.map (m) -> m.id
-              link_ids: @links.map (m) -> m.id
-            , wait: true, reset: true, success: (wf) ->
-              # finally done
-              console.log 'saved', wf._name, attributes, wf
-              _success? wf, resp, opt
-            , error: ->
-              console.error 'fail to update ref for save wf', wf
-              _err? wf, null, options
-              return
-          , ->
-            console.error 'fail to save links for wf', wf
-            _err? wf, null, options
-            return
-          console.log 'saving wf', @
-          return
-        , ->
-          console.error 'fail to save nodes for wf', wf
-          _err? wf, null, options
-          return
-        # delete unused nodes/links (no wait)
-        @_deleted?.forEach (model) -> try model.destroy()
-        return
-      # save workflow
-      @unset 'start_node_id', silent: true if typeof @get 'start_node_id' is 'number'
-      @unset 'nodes', silent: true
-      @unset 'links', silent: true
+    save: (attributes = {}, options = {}) -> # local
+      _getAttr = (r, i) ->
+        attr = r.attributes
+        attr.id ?= i
+        if Array.isArray attr.actions
+          action.id ?= i for action, i in attr.actions
+        attr
+      if @nodes? then attributes.nodes = @nodes.map _getAttr
+      if @links? then attributes.links = @links.map _getAttr
+      # auto naming
+      if @nodes?.length then for node in @nodes
+        for action in node.actions
+          if action.tracking?
+            tracking = action.tracking
+            action.tracking.name or= action.name + ' (Tracking)'
+          for n in ['content', 'event', 'tracking']
+            action[n]?.name or= action.name
+      console.log 'save local', @_name, attributes
       super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
       _cb = (wf) =>

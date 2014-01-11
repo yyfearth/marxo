@@ -14,26 +14,25 @@ do -> # browser test
     fail 'Your browser is out-of-date!'
   return
 
-console.log 'ver', 'console', 4
+console.log 'ver', 'console', 5
 
 requirejs.config
   shim:
     'lib/jquery-ui':
       deps: ['lib/common']
-    'lib/facebook':
-      exports: 'FB'
-  paths:
-    'lib/facebook': '//connect.facebook.net/en_US/all'
   config:
-    models: # for testsing
-      BASE_URL: localStorage.ROOT ? 'http://masonwan.com/marxo/api' # '../api'
-    config:
-      FB_APP_ID: '213527892138380'
-      FB_SCOPES: 'publish_actions, email, read_stream'
-    content:
-      SITE_BASE_URL: './#'
+    models:
+      BASE_URL: '/api'
 
-define 'main', ['console'], ({findAll, ConsoleView, SignInView, Router}) -> # EP
+define 'main', ['lib/backbone.localstorage', 'console'],
+(ignored, {findAll, ConsoleView, SignInView, Router}) -> # EP
+
+  test_data_ver = 20
+
+  # auto load test data
+  window.load_test_data = -> require ['test_data'], -> localStorage._test_data_loaded = test_data_ver
+  cur_ver = Number localStorage._test_data_loaded or 0
+  load_test_data() if cur_ver < test_data_ver
 
   if localStorage.no_transition
     cls = document.body.classList
