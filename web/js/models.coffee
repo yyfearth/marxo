@@ -338,24 +338,43 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     _save: Entity::save
     save: (attributes = {}, options = {}) -> # local
+      contents = []
       _getAttr = (r, i) ->
         attr = r.attributes
-        attr.id ?= i
-        if Array.isArray attr.actions
-          action.id ?= i for action, i in attr.actions
+        attr.id ?= i.toString()
+        if attr.actions?.length then for action, i in attr.actions
+          action_id = action.id ?= i.toString()
+          action.tracking?.name or= action.name + ' (Tracking)'
+          for n in ['content', 'event', 'tracking']
+            o = action[n]
+            if o?
+              o.id ?= Entity.oid()
+              o.name or= action.name
+          c = action.content
+          if c?
+            c.node_id = attr.id
+            c.action_id = action_id
+            contents.push c
+            action.content_id = c.id
+            delete action.content
         attr
       if @nodes? then attributes.nodes = @nodes.map _getAttr
       if @links? then attributes.links = @links.map _getAttr
-      # auto naming
-      if @nodes?.length then for node in @nodes
-        for action in node.actions
-          if action.tracking?
-            tracking = action.tracking
-            action.tracking.name or= action.name + ' (Tracking)'
-          for n in ['content', 'event', 'tracking']
-            action[n]?.name or= action.name
       console.log 'save local', @_name, attributes
-      super attributes, options
+      ret = super attributes, options
+      setTimeout =>
+        wf_id = @id
+        new Contents(contents).forEach (c) -> c.save workflow_id: wf_id
+      , 10
+      ret
+    destroy: (options) ->
+      @nodes.forEach (node) ->
+        actions = node.attributes.actions
+        if actions?.length then for action in actions
+          content_id = action.content_id ? action.content?.id
+          new Content(id: content_id).destroy() if content_id?
+        return
+      super options
     find: ({nodeId, linkId, actionId, callback}) ->
       _cb = (wf) =>
         if linkId?
