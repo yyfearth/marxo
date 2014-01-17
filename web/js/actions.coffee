@@ -103,7 +103,7 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
       type = @type = (@model.get?('type') or options.model.type or options.type or '').toLowerCase()
       unless @_tpl.hasOwnProperty type
         @type = 'unknown'
-        console.warn 'unknown action type', options
+        console.warn 'unknown action type', type, options
       @
     remove: ->
       @remove = -> @ # remove only once
