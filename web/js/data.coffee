@@ -695,3 +695,16 @@ define 'import_data', ['models'], (models) ->
         next_node_id: 1
       ]
     ]
+    notifications: [
+      tenant_id: 1
+      name: 'Test Notification'
+      desc: 'Notification Content'
+      level: 'NORMAL'
+      status: 'FINISHED'
+    ,
+      tenant_id: 1
+      name: 'Facebook login'
+      desc: 'The Facebook account has been logged out, please login again from Facebook Connector!'
+      level: 'CRITICAL'
+      status: 'EXPIRED'
+    ]
