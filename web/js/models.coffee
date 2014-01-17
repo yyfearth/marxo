@@ -358,13 +358,13 @@ define 'models', ['module', 'lib/common'], (module) ->
       super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
       _cb = (wf) =>
-        if linkId
+        if linkId?
           link = wf.links.get linkId
-        else if nodeId
+        else if nodeId?
           node = wf.nodes.get nodeId
           action = node.actions().get actionId if node and actionId
-        else if actionId # only action id
-          throw new Error 'only action id without node id is not allowed'
+        else if actionId? # only action id
+          console.error 'only action id without node id is not allowed', nodeId, actionId
         callback? {node, link, action}
       if @loaded()
         _cb @
@@ -438,11 +438,11 @@ define 'models', ['module', 'lib/common'], (module) ->
     url: Workflow::urlRoot
     _expires: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, fetch}) ->
-      throw new Error 'workflowId is required' unless workflowId
+      throw new Error 'workflowId is required' unless workflowId?
       throw new Error 'async callback is required' unless typeof callback is 'function'
 
       _find = (workflow) ->
-        if nodeId or linkId or actionId
+        if nodeId? or linkId? or actionId?
           workflow.find {
             nodeId, linkId, actionId
             callback: (results) ->
