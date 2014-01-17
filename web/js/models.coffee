@@ -77,6 +77,8 @@ define 'models', ['module', 'lib/common'], (module) ->
       super method, model, options
 
   class StatusEntity extends Entity
+    defaults:
+      status: 'IDLE'
     status: (val, options = {}) ->
       if val?.lowercase?
         options = val
