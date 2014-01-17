@@ -1,8 +1,6 @@
 "use strict"
 
-define 'import_data', ['models'], ({
-Workflows, Projects
-}) ->
+define 'import_data', ['models'], (models) ->
 
   data =
     tenants: [
@@ -497,6 +495,96 @@ Workflows, Projects
         prev_node_id: 4
         next_node_id: 5
       ]
+    ,
+      name: 'Conference Check-in Mobile App (Complex)'
+      key: 'conf_app_dev_old'
+      desc: 'The complex version of Conference Check-in Mobile App workflow, with additional nodes and links.'
+      start_node_id: 0
+      nodes: [
+        name: 'Requirement and Desgin'
+        key: 'desgin'
+        desc: 'Post requirement and collect desgins.'
+        offset:
+          x: 176, y: 73
+      ,
+        name: 'Vote App Design'
+        key: 'vote'
+        desc: 'Public vote submitted designs.'
+        offset:
+          x: 393, y: 200
+      ,
+        name: 'Evaluate App Design'
+        key: 'evaluate'
+        desc: 'Evaluator judge the designs and votes.'
+        offset:
+          x: 117, y: 309
+      ,
+        name: 'App Implemetation'
+        key: 'implemetation'
+        desc: 'Post final design and wait for implemetation submission.'
+        offset:
+          x: 123, y: 486
+      ,
+        name: 'Review'
+        key: 'review'
+        desc: 'Evaluator review submitted app implemetations.'
+        offset:
+          x: 180, y: 638
+      ,
+        name: 'Testing'
+        key: 'testing'
+        desc: 'Post selected implementaion and open beta testing, collect feedbacks.'
+        offset:
+          x: 180, y: 798
+      ,
+        name: 'Demo'
+        key: 'demo'
+        desc: 'Post final result to the public.'
+        offset:
+          x: 180, y: 944
+      ]
+      links: [
+        key: 'desgin_to_vote'
+        prev_node_id: 0
+        next_node_id: 1
+      ,
+        name: 'Vote >= 200'
+        key: 'vote_to_evaluate'
+        prev_node_id: 1
+        next_node_id: 2
+      ,
+        name: 'Failed to Pass'
+        key: 'evaluate_to_desgin'
+        prev_node_id: 2
+        next_node_id: 0
+      ,
+        name: 'Votes < 200'
+        key: 'vote_to_vote'
+        prev_node_id: 1
+        next_node_id: 1
+      ,
+        name: 'Passed'
+        key: 'vote_to_implemetation'
+        prev_node_id: 2
+        next_node_id: 3
+      ,
+        key: 'implemetation_to_review'
+        prev_node_id: 3
+        next_node_id: 4
+      ,
+        name: 'Not satisfied'
+        key: 'review_to_implemetation'
+        prev_node_id: 4
+        next_node_id: 3
+      ,
+        key: 'review_to_testing'
+        prev_node_id: 4
+        next_node_id: 5
+      ,
+        key: 'testing_to_demo'
+        prev_node_id: 5
+        next_node_id: 6
+      ]
     ]
 
     projects: [
@@ -607,10 +695,3 @@ Workflows, Projects
         next_node_id: 1
       ]
     ]
-
-  console.log 'data start importing...'
-
-  (new Workflows data.workflows).forEach (wf) -> wf.save()
-  (new Projects data.projects).forEach (wf) -> wf.save()
-
-  return
