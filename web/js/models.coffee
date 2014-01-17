@@ -476,6 +476,8 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Project extends Workflow
     _name: 'project'
     urlRoot: ROOT + '/projects'
+    defaults:
+      is_project: true
 
   class Projects extends Workflows
     @projects: new Projects
