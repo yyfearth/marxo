@@ -359,17 +359,7 @@ define 'models', ['module', 'lib/common'], (module) ->
           node = wf.nodes.get nodeId
           action = node.actions().get actionId if node and actionId
         else if actionId # only action id
-          unless idx = @_action_index
-            idx = @_action_index = {}
-            wf.nodes.forEach (node) ->
-              node.actions().forEach (action) -> if action.id?
-                action.node = node
-                console.warn 'duplicated action id', action.id, action, node if idx[action.id]
-                idx[action.id] = action
-                return
-              return
-          action = idx[actionId]
-          node = action?.node
+          throw new Error 'only action id without node id is not allowed'
         callback? {node, link, action}
       if @loaded()
         _cb @
@@ -582,10 +572,9 @@ define 'models', ['module', 'lib/common'], (module) ->
         _actions = []
         _index = {}
         wfs.fullCollection.forEach (wf) -> if wf.loaded()
-          # TODO: assume projects api will return actions
           wf.nodes.forEach (node) ->
             node.actions().forEach (action) ->
-              id = action.id ? action.cid
+              id = node.id + '-' + action.id ? action.cid
               unless _index[id]?
                 _actions.push _index[id] = action
               else if _index[id].cid isnt action.cid
