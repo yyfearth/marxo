@@ -105,21 +105,9 @@ define 'models', ['module', 'lib/common'], (module) ->
           unless /^(?:FINISHED|STARTED|STOPPED|PAUSED)$/.test val
             throw new Error 'this status cannot be set remotely', val
           console.log 'update status', val, url
-          $.ajax
-            url: url
-            type: 'PUT'
-            data: JSON.stringify(val)
-            processData: false
-            dataType: 'json'
-            contentType: 'application/json'
-            headers:
-              Authorization: User.current?.get('credential') or ''
-            success: (val) =>
-              @set 'status', val
-              callback? val
-            error: (xhr) ->
-              console.error 'update status failed', url, val, xhr.responseText
-              callback? null, xhr.responseText
+          @save {status: val},
+            success: -> callback? val
+            error: -> callback? null
         else
           @set 'status', val
         @
