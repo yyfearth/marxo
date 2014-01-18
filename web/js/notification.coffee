@@ -97,10 +97,9 @@ Notifications
     initialize: (options) ->
       super options
       collection = @collection.fullCollection
-      # TODO: need update or replaced by level
-      @statusFilter = new NavFilterView
-        el: find('.status-filter', @el)
-        field: 'status'
+      @levelFilter = new NavFilterView
+        el: find('.level-filter', @el)
+        field: 'level'
         collection: collection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
@@ -202,20 +201,12 @@ Notifications
       col.forEach (model) => fragments.appendChild @_renderItem model
       @el.appendChild fragments
     _levelWeight:
-      minor: 0
-      trivial: 0
       normal: 0
-      major: 1
-      critical: 2
-      fatal: 2
-      error: 3
+      critical: 1
+      error: 2
     _levelCls:
-      minor: 'muted'
-      trivial: ''
       normal: 'text-info'
-      major: 'text-warning'
-      critical: 'text-error'
-      fatal: 'text-error'
+      critical: 'text-warning'
       error: 'text-error'
     _renderItem: (model = @defaultItem) ->
       #console.log 'render item', model

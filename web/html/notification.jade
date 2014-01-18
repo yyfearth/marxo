@@ -13,15 +13,15 @@
   #notification_view.notification-view
     ul.action-bar
       li.pull-left
-        ul.status-filter.nav.nav-pills
+        ul.level-filter.nav.nav-pills
           li.active
-            a(href='#status:all') All
+            a(href='#level:all') All
           li
-            a(href='#status:active') Active
+            a(href='#level:normal') Normal
           li
-            a(href='#status:processed') Processed
+            a(href='#level:critical') Critical
           li
-            a(href='#status:expired') Expired
+            a(href='#level:error') Error
       li.action-buttons.pull-right
         button.btn(name='reload', title='Reload Table') Reload
       li.grid-filter
