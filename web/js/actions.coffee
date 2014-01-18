@@ -92,8 +92,8 @@ define 'actions', ['base', 'models', 'lib/jquery-ui'],
     initialize: (options) ->
       super options
       unless options.model
-        throw new Error 'need action model'
         console.dir options
+        throw new Error 'need action model'
       @projectMode = options.projectMode
       @readonly = options.readonly
       @containerEl = options.container
