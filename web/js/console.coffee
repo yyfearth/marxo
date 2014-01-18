@@ -1,6 +1,6 @@
 "use strict"
 
-define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
+define 'console', ['base'], ({find, findAll, View, FrameView, ModalDialogView, Tenant, User}) ->
 
   class ConsoleView extends View
     el: '#main'
@@ -209,6 +209,9 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
           email_md5: md5Email email
         console.log 'login with', email, hash
         @_validateUser user
+        setTimeout -> # demo only
+          $('#demo').modal 'show' if User.current?
+        , 500
         return
       return
     _validateUser: (user) ->
@@ -269,6 +272,10 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       , @delay
       @
 
+  class DemoDialog extends ModalDialogView
+    el: '#demo'
+    goBackOnHidden: 'home'
+
   ## Router
 
   class Router extends Backbone.Router
@@ -286,6 +293,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
         @show 'config', name, sub
       'event/calendar(/:id)': (id) ->
         @show 'event', 'calendar', id
+      'demo': -> (@_demo ?= new DemoDialog).popup {}
       'signout': 'signout'
     constructor: (options) ->
       super options
