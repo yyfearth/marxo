@@ -1,6 +1,6 @@
 "use strict"
 
-define 'import_data', ['models'], (models) ->
+define 'data', ['models'], (models) ->
 
   data =
     tenants: [
@@ -22,6 +22,7 @@ define 'import_data', ['models'], (models) ->
     workflows: [
       name: 'Conference Check-in Mobile App'
       key: 'conf_app_dev'
+      tenant_id: 1
       desc: 'Based on project requirements, use crowds sourcing to complete the development steps from ' +
       'design, implementation, testing, until the final result of this app. '
       start_node_id: 0
@@ -499,6 +500,7 @@ define 'import_data', ['models'], (models) ->
       name: 'Conference Check-in Mobile App (Complex)'
       key: 'conf_app_dev_old'
       desc: 'The complex version of Conference Check-in Mobile App workflow, with additional nodes and links.'
+      tenant_id: 1
       start_node_id: 0
       nodes: [
         name: 'Requirement and Desgin'
@@ -585,23 +587,707 @@ define 'import_data', ['models'], (models) ->
         prev_node_id: 5
         next_node_id: 6
       ]
+    ,
+      id: '655a3dd88b20999dd786d38b'
+      name: 'Waterfall Development'
+      key: 'waterfall_dev'
+      desc: 'Workflow for Waterfall Development'
+      start_node_id: 'ec21b6896dd7a39b2e4ae470'
+      nodes: [
+        id: 'ec21b6896dd7a39b2e4ae470'
+        name: 'Requirement'
+        key: 'requirement'
+        offset:
+          x: 24, y: 41.5
+        actions: [
+          id: 'ec21b6896dd7a39b2e4ae471'
+          type: 'PAGE'
+          name: 'Post Page or Form'
+          key: 'create_page'
+        ,
+          type: 'FACEBOOK'
+          name: 'Post to Facebook'
+          key: 'post_facebook'
+        ,
+          type: 'WAIT'
+          name: 'Make Schedule'
+          key: 'make_schedule'
+        ]
+      ,
+        id: 'c4ebf77d7d3564cc60d322e7'
+        name: 'Design'
+        key: 'design'
+        offset:
+          x: 192, y: 41
+        actions: [
+          type: 'PAGE'
+          name: 'Post Page or Form'
+          key: 'create_page'
+        ,
+          type: 'FACEBOOK'
+          name: 'Post to Facebook'
+          key: 'post_facebook'
+        ,
+          type: 'EMAIL'
+          name: 'Send Email'
+          key: 'send_email'
+        ,
+          type: 'WAIT'
+          name: 'Make Schedule'
+          key: 'make_schedule'
+        ]
+      ,
+        id: '6842887a4153d55ed1c5b228'
+        name: 'Implementation'
+        key: 'implementation'
+        offset:
+          x: 338.21875, y: 41.5
+        actions: [
+          type: 'PAGE'
+          name: 'Post Page or Form'
+          key: 'create_page'
+        ,
+          type: 'FACEBOOK'
+          name: 'Post to Facebook'
+          key: 'post_facebook'
+        ,
+          type: 'EMAIL'
+          name: 'Send Email'
+          key: 'send_email'
+        ,
+          type: 'WAIT'
+          name: 'Make Schedule'
+          key: 'make_schedule'
+        ]
+      ,
+        id: '142720933a58ebd2d70110c5'
+        name: 'Testing'
+        key: 'testing'
+        offset:
+          x: 669, y: 41
+        actions: [
+          type: 'PAGE'
+          name: 'Post Page or Form'
+          key: 'create_page'
+        ,
+          type: 'FACEBOOK'
+          name: 'Post to Facebook'
+          key: 'post_facebook'
+        ,
+          type: 'EMAIL'
+          name: 'Send Email'
+          key: 'send_email'
+        ,
+          type: 'WAIT'
+          name: 'Make Schedule'
+          key: 'make_schedule'
+        ]
+      ,
+        id: '4387684971cf7d8ae0e5111c'
+        name: 'Demo'
+        key: 'demo'
+        offset:
+          x: 814.21875, y: 41.5
+        actions: [
+          type: 'PAGE'
+          name: 'Post Page or Form'
+          key: 'create_page'
+        ,
+          type: 'FACEBOOK'
+          name: 'Post to Facebook'
+          key: 'post_facebook'
+        ,
+          type: 'EMAIL'
+          name: 'Send Email'
+          key: 'send_email'
+        ]
+      ,
+        id: '9ddf5927f60bed963c753283'
+        name: 'Integration'
+        key: 'integration'
+        offset:
+          x: 517.5625, y: 41.5
+        workflow_id: '655a3dd88b20999dd786d38b'
+        actions: [
+          type: 'FACEBOOK'
+          name: 'Post to Facebook'
+          key: 'post_facebook'
+        ,
+          type: 'EMAIL'
+          name: 'Send Email'
+          key: 'send_email'
+        ,
+          type: 'WAIT'
+          name: 'Make Schedule'
+          key: 'make_schedule'
+        ]
+      ]
+      links: [
+        id: '6d1378ca0858b307cc1145d2'
+        key: 'requirement_to_design'
+        prev_node_id: 'ec21b6896dd7a39b2e4ae470'
+        next_node_id: 'c4ebf77d7d3564cc60d322e7'
+      ,
+        id: 'e89620d9fa1a49315e7af9b9'
+        key: 'design_to_implementation'
+        prev_node_id: 'c4ebf77d7d3564cc60d322e7'
+        next_node_id: '6842887a4153d55ed1c5b228'
+      ,
+        id: '59623f83efccd3d9c190a521'
+        key: 'testing_to_demo'
+        prev_node_id: '142720933a58ebd2d70110c5'
+        next_node_id: '4387684971cf7d8ae0e5111c'
+      ,
+        id: '0c97f0018cbdbd3f465d6f30'
+        workflow_id: '655a3dd88b20999dd786d38b'
+        key: 'implementation_to_integration'
+        prev_node_id: '6842887a4153d55ed1c5b228'
+        next_node_id: '9ddf5927f60bed963c753283'
+      ,
+        id: '6eac0542472d22acd92dc757'
+        workflow_id: '655a3dd88b20999dd786d38b'
+        key: 'integration_to_testing'
+        prev_node_id: '9ddf5927f60bed963c753283'
+        next_node_id: '142720933a58ebd2d70110c5'
+      ]
+    ,
+      id: '50447afb4728cb2036cf9ca0'
+      name: 'Demo Workflow'
+      key: 'demo_workflow'
+      desc: 'Demo Workflow for App Dev and Logo Desgin'
+      start_node_id: '50447afb4728cb2036cf9cb0'
+      nodes: [
+        id: '50447afb4728cb2036cf9cb0'
+        name: 'Post Idea'
+        key: 'post_idea'
+        desc: 'Post project idea'
+        offset:
+          x: 26, y: 43
+        actions: [
+          id: '50447afb4728cb2036cf9f00'
+          type: 'PAGE'
+        ,
+          id: '50447afb4728cb2036cf9f01'
+          type: 'FACEBOOK'
+        ,
+          id: '50447afb4728cb2036cf9f02'
+          type: 'WAIT'
+        ]
+      ,
+        id: '50447afb4728cb2036cf9cb1'
+        name: 'Post Requirements'
+        key: 'post_requirements'
+        desc: 'Post requirements'
+        offset:
+          x: 334, y: 44
+        actions: [
+          id: '50447afb4728cb2036cf9f03'
+          type: 'PAGE'
+        ,
+          id: '50447afb4728cb2036cf9ce4'
+          type: 'FACEBOOK'
+        ,
+          id: '50447afb4728cb2036cf9f05'
+          type: 'WAIT'
+        ]
+      ,
+        id: '50447afb4728cb2036cf9cb2'
+        name: 'Cancel Notification'
+        key: 'cancel_notification'
+        desc: 'Cancel project for less response than expected'
+        offset:
+          x: 334, y: 204
+        actions: [
+          id: '50447afb4728cb2036cf9f06'
+          type: 'FACEBOOK'
+        ]
+      ,
+        id: '50447afb4728cb2036cf9cb3'
+        name: 'Retrieve App Submissions'
+        key: 'retrieve_app_submissions'
+        desc: 'Retrieve app submissions'
+        offset:
+          x: 613, y: 44
+        actions: [
+          id: '50447afb4728cb2036cf9f07'
+          type: 'PAGE'
+        ,
+          id: '50447afb4728cb2036cf9f08'
+          type: 'FACEBOOK'
+        ,
+          id: '50447afb4728cb2036cf9f09'
+          type: 'WAIT'
+        ]
+      ,
+        id: '50447afb4728cb2036cf9cb4'
+        name: 'Retrieve Logo Design'
+        key: 'retrieve_logo_design'
+        desc: 'Retrieve logo design'
+        offset:
+          x: 629, y: 282
+        actions: [
+          id: '50447afb4728cb2036cf9f0a'
+          type: 'PAGE'
+        ,
+          id: '50447afb4728cb2036cf9f0b'
+          type: 'FACEBOOK'
+        ,
+          id: '50447afb4728cb2036cf9f0c'
+          type: 'WAIT'
+        ]
+      ,
+        id: '50447afb4728cb2036cf9cb5'
+        name: 'Email to Evaluators'
+        key: 'email_to_evaluators'
+        desc: 'Email to evaluators'
+        offset:
+          x: 1018, y: 44
+        actions: [
+          id: '50447afb4728cb2036cf9f0d'
+          type: 'PAGE'
+        ,
+          id: '50447afb4728cb2036cf9f0e'
+          type: 'EMAIL'
+        ,
+          id: '50447afb4728cb2036cf9f0f'
+          type: 'WAIT'
+        ]
+      ,
+        id: '50447afb4728cb2036cf9cb6'
+        name: 'Post and Vote'
+        key: 'post_and_vote'
+        desc: 'Post and vote'
+        offset:
+          x: 1043, y: 282
+        actions: [
+          id: '50447afb4728cb2036cf9f10'
+          type: 'PAGE'
+        ,
+          id: '50447afb4728cb2036cf9f11'
+          type: 'FACEBOOK'
+        ,
+          id: '50447afb4728cb2036cf9f12'
+          type: 'WAIT'
+        ]
+      ,
+        id: '50447afb4728cb2036cf9cb7'
+        name: 'Post Final Result and Reward'
+        key: 'post_final_result_and_reward'
+        desc: 'Post final result and reward'
+        offset:
+          x: 1420, y: 183
+        actions: [
+          id: '50447afb4728cb2036cf9f13'
+          type: 'PAGE'
+        ,
+          id: '50447afb4728cb2036cf9f14'
+          type: 'FACEBOOK'
+        ,
+          id: '50447afb4728cb2036cf9f15'
+          type: 'EMAIL'
+        ,
+          id: '50447afb4728cb2036cf9f16'
+          type: 'WAIT'
+        ]
+      ]
+      links: [
+        id: '50447afb4728cb2036cf9cc0'
+        key: '10_days_likes_gte_300'
+        prev_node_id: '50447afb4728cb2036cf9cb0'
+        next_node_id: '50447afb4728cb2036cf9cb1'
+        name: '10 Days & Likes >= 300'
+      ,
+        id: '50447afb4728cb2036cf9cc1'
+        key: '10_days_likes_lt_300'
+        prev_node_id: '50447afb4728cb2036cf9cb0'
+        next_node_id: '50447afb4728cb2036cf9cb2'
+        name: '10 Days & Likes < 300'
+      ,
+        id: '50447afb4728cb2036cf9cc2'
+        key: 'post_req_to_retrieve_app'
+        prev_node_id: '50447afb4728cb2036cf9cb1'
+        next_node_id: '50447afb4728cb2036cf9cb3'
+      ,
+        id: '50447afb4728cb2036cf9cc3'
+        key: 'post_req_to_retrieve_logo'
+        prev_node_id: '50447afb4728cb2036cf9cb1'
+        next_node_id: '50447afb4728cb2036cf9cb4'
+      ,
+        id: '50447afb4728cb2036cf9cc4'
+        key: 'retrieve_app_to_evaluate'
+        prev_node_id: '50447afb4728cb2036cf9cb3'
+        next_node_id: '50447afb4728cb2036cf9cb5'
+        name: '15 Days & > 80% Response'
+      ,
+        id: '50447afb4728cb2036cf9cc5'
+        key: 'retrieve_logo_to_post_and_vote'
+        prev_node_id: '50447afb4728cb2036cf9cb4'
+        next_node_id: '50447afb4728cb2036cf9cb6'
+        name: '10 Days & Submissions >= 3'
+      ,
+        id: '50447afb4728cb2036cf9cc6'
+        name: '(fallback)'
+        key: 'faild_to_evaluate'
+        desc: 'Manual trigger back if failed to evaluate'
+        prev_node_id: '50447afb4728cb2036cf9cb5'
+        next_node_id: '50447afb4728cb2036cf9cb3'
+      ,
+        id: '50447afb4728cb2036cf9cc7'
+        name: '(fallback)'
+        key: 'failed_to_vote'
+        desc: 'Manual trigger back if failed to vote'
+        prev_node_id: '50447afb4728cb2036cf9cb6'
+        next_node_id: '50447afb4728cb2036cf9cb4'
+      ,
+        id: '50447afb4728cb2036cf9cc8'
+        key: 'evaluate_to_post_final'
+        prev_node_id: '50447afb4728cb2036cf9cb5'
+        next_node_id: '50447afb4728cb2036cf9cb7'
+      ,
+        id: '50447afb4728cb2036cf9cc9'
+        key: 'post_and_vote_to_post_final'
+        prev_node_id: '50447afb4728cb2036cf9cb6'
+        next_node_id: '50447afb4728cb2036cf9cb7'
+      ]
     ]
 
     projects: [
+      tenant_id: 1
+      template_id: '50447afb4728cb2036cf9ca0'
+      name: 'Demo Project'
+      key: 'demo_prj'
+      desc: 'Demo Project from Demo Workflow'
+      status: 'STARTED'
+      current_node_ids: [
+        '50447afb4728cc2036cf9cb3'
+        '50447afb4728cc2036cf9cb6'
+      ]
+      nodes: [
+        id: '50447afb4728cc2036cf9cb0'
+        template_id: '50447afb4728cb2036cf9cb0'
+        name: 'Post Idea'
+        key: 'post_idea'
+        desc: 'Post project idea'
+        status: 'FINISHED'
+        offset:
+          x: 26, y: 43
+        actions: [
+          id: '50447afb4728cc2036cf9f00'
+          name: 'Create page'
+          type: 'PAGE'
+          status: 'FINISHED'
+          content:
+            name: 'Demo Project Initialization'
+            message: 'Demo Project Initialization Page'
+            type: 'PAGE'
+            status: 'FINISHED'
+            posted_at: new Date
+        ,
+          id: '50447afb4728cc2036cf9f01'
+          name: 'Post to facebook'
+          type: 'FACEBOOK'
+          status: 'FINISHED'
+          content:
+            name: 'Demo Project Initialization'
+            message: 'Demo Project Initialization Facebook Post'
+            type: 'FACEBOOK'
+            status: 'FINISHED'
+            posted_at: new Date
+        ,
+          id: '50447afb4728cc2036cf9f02'
+          name: 'Post to facebook'
+          type: 'TWITTER'
+          status: 'FINISHED'
+          content:
+            name: 'Demo Project Initialization'
+            message: 'Demo Project Initialization Twitter Post'
+            type: 'TWITTER'
+            status: 'FINISHED'
+            posted_at: new Date
+        ,
+          id: '50447afb4728cc2036cf9f02'
+          name: 'Generate report'
+          type: 'WAIT'
+          status: 'FINISHED'
+        ]
+      ,
+        id: '50447afb4728cc2036cf9cb1'
+        template_id: '50447afb4728cb2036cf9cb1'
+        name: 'Post Requirements'
+        key: 'post_requirements'
+        desc: 'Post requirements'
+        status: 'FINISHED'
+        offset:
+          x: 334, y: 44
+        actions: [
+          id: '50447afb4728cc2036cf9f03'
+          name: 'Create page'
+          type: 'PAGE'
+          status: 'FINISHED'
+          content:
+            name: 'Demo Project Post Requirements'
+            message: 'Demo Project Post Requirements Page'
+            type: 'PAGE'
+            status: 'STARTED'
+        ,
+          id: '50447afb4728cc2036cf9ce4'
+          name: 'Post to facebook'
+          type: 'FACEBOOK'
+          status: 'FINISHED'
+          content:
+            name: 'Demo Project Post Requirements'
+            message: 'Demo Project Post Requirements Facebook Post'
+            type: 'FACEBOOK'
+            status: 'STARTED'
+        ,
+          id: '50447afb4728cc2036cf9f05'
+          name: 'Generate report'
+          type: 'WAIT'
+          status: 'FINISHED'
+        ]
+      ,
+        id: '50447afb4728cc2036cf9cb2'
+        template_id: '50447afb4728cb2036cf9cb2'
+        name: 'Cancel Notification'
+        key: 'cancel_notification'
+        status: 'IDLE'
+        desc: 'Cancel project for less response than expected'
+        offset:
+          x: 334, y: 204
+        actions: [
+          id: '50447afb4728cc2036cf9f06'
+          name: 'Post to facebook'
+          type: 'FACEBOOK'
+          status: 'IDLE'
+        ]
+      ,
+        id: '50447afb4728cc2036cf9cb3'
+        template_id: '50447afb4728cb2036cf9cb3'
+        name: 'Retrieve App Submissions'
+        key: 'retrieve_app_submissions'
+        desc: 'Retrieve app submissions'
+        status: 'STARTED'
+        offset:
+          x: 613, y: 44
+        actions: [
+          id: '50447afb4728cc2036cf9f07'
+          name: 'Create page'
+          type: 'PAGE'
+          status: 'FINISHED'
+        ,
+          id: '50447afb4728cc2036cf9f08'
+          name: 'Post to facebook'
+          type: 'FACEBOOK'
+          status: 'FINISHED'
+        ,
+          id: '50447afb4728cc2036cf9f09'
+          name: 'Generate report'
+          type: 'WAIT'
+          status: 'STARTED'
+        ]
+      ,
+        id: '50447afb4728cc2036cf9cb4'
+        template_id: '50447afb4728cb2036cf9cb4'
+        name: 'Retrieve Logo Design'
+        key: 'retrieve_logo_design'
+        desc: 'Retrieve logo design'
+        status: 'FINISHED'
+        offset:
+          x: 629, y: 282
+        actions: [
+          id: '50447afb4728cc2036cf9f0a'
+          name: 'Create page'
+          type: 'PAGE'
+          status: 'FINISHED'
+        ,
+          id: '50447afb4728cc2036cf9f0b'
+          name: 'Post to facebook'
+          type: 'FACEBOOK'
+          status: 'FINISHED'
+        ,
+          id: '50447afb4728cc2036cf9f0c'
+          name: 'Generate report'
+          type: 'WAIT'
+          status: 'FINISHED'
+        ]
+      ,
+        id: '50447afb4728cc2036cf9cb5'
+        template_id: '50447afb4728cb2036cf9cb5'
+        name: 'Email to Evaluators'
+        key: 'email_to_evaluators'
+        desc: 'Email to evaluators'
+        status: 'IDLE'
+        offset:
+          x: 1018, y: 44
+        actions: [
+          id: '50447afb4728cc2036cf9f0d'
+          name: 'Create page'
+          type: 'PAGE'
+          status: 'IDLE'
+        ,
+          id: '50447afb4728cc2036cf9f0e'
+          name: 'Send email'
+          type: 'EMAIL'
+          status: 'IDLE'
+        ,
+          id: '50447afb4728cc2036cf9f0f'
+          name: 'Generate report'
+          type: 'WAIT'
+          status: 'IDLE'
+        ]
+      ,
+        id: '50447afb4728cc2036cf9cb6'
+        template_id: '50447afb4728cb2036cf9cb6'
+        name: 'Post and Vote'
+        key: 'post_and_vote'
+        desc: 'Post and vote'
+        status: 'STARTED'
+        offset:
+          x: 1043, y: 282
+        actions: [
+          id: '50447afb4728cc2036cf9f10'
+          name: 'Create page'
+          type: 'PAGE'
+          status: 'FINISHED'
+        ,
+          id: '50447afb4728cc2036cf9f11'
+          name: 'Post to facebook'
+          type: 'FACEBOOK'
+          status: 'FINISHED'
+        ,
+          id: '50447afb4728cc2036cf9f12'
+          name: 'Generate report'
+          type: 'WAIT'
+          status: 'STARTED'
+        ]
+      ,
+        id: '50447afb4728cc2036cf9cb7'
+        template_id: '50447afb4728cb2036cf9cb7'
+        name: 'Post Final Result and Reward'
+        key: 'post_final_result_and_reward'
+        desc: 'Post final result and reward'
+        status: 'IDLE'
+        offset:
+          x: 1420, y: 183
+        actions: [
+          id: '50447afb4728cc2036cf9f13'
+          name: 'Create page'
+          type: 'PAGE'
+          status: 'IDLE'
+        ,
+          id: '50447afb4728cc2036cf9f14'
+          name: 'Post to facebook'
+          type: 'FACEBOOK'
+          status: 'IDLE'
+        ,
+          id: '50447afb4728cc2036cf9f15'
+          name: 'Send email'
+          type: 'EMAIL'
+          status: 'IDLE'
+        ,
+          id: '50447afb4728cc2036cf9f16'
+          name: 'Generate report'
+          type: 'WAIT'
+          status: 'IDLE'
+        ]
+      ]
+      links: [
+        id: '50447afb4728cc2036cf9cc0'
+        template_id: '50447afb4728cb2036cf9cc0'
+        key: '10_days_likes_gte_300'
+        prev_node_id: '50447afb4728cc2036cf9cb0'
+        next_node_id: '50447afb4728cc2036cf9cb1'
+        name: '10 Days & Likes >= 300'
+        status: 'PASSED'
+      ,
+        id: '50447afb4728cc2036cf9cc1'
+        template_id: '50447afb4728cb2036cf9cc1'
+        key: '10_days_likes_lt_300'
+        prev_node_id: '50447afb4728cc2036cf9cb0'
+        next_node_id: '50447afb4728cc2036cf9cb2'
+        name: '10 Days & Likes < 300'
+        status: 'FAILED'
+      ,
+        id: '50447afb4728cc2036cf9cc2'
+        template_id: '50447afb4728cb2036cf9cc2'
+        key: 'post_req_to_retrieve_app'
+        prev_node_id: '50447afb4728cc2036cf9cb1'
+        next_node_id: '50447afb4728cc2036cf9cb3'
+        status: 'PASSED'
+      ,
+        id: '50447afb4728cc2036cf9cc3'
+        template_id: '50447afb4728cb2036cf9cc3'
+        key: 'post_req_to_retrieve_logo'
+        prev_node_id: '50447afb4728cc2036cf9cb1'
+        next_node_id: '50447afb4728cc2036cf9cb4'
+        status: 'PASSED'
+      ,
+        id: '50447afb4728cc2036cf9cc4'
+        template_id: '50447afb4728cb2036cf9cc4'
+        key: 'retrieve_app_to_evaluate'
+        prev_node_id: '50447afb4728cc2036cf9cb3'
+        next_node_id: '50447afb4728cc2036cf9cb5'
+        name: '15 Days & > 80% Response'
+        status: 'IDLE'
+      ,
+        id: '50447afb4728cc2036cf9cc5'
+        template_id: '50447afb4728cb2036cf9cc5'
+        key: 'retrieve_logo_to_post_and_vote'
+        prev_node_id: '50447afb4728cc2036cf9cb4'
+        next_node_id: '50447afb4728cc2036cf9cb6'
+        name: '10 Days & Submissions >= 3'
+        status: 'PASSED'
+      ,
+        id: '50447afb4728cc2036cf9cc6'
+        template_id: '50447afb4728cb2036cf9cc6'
+        name: '(fallback)'
+        key: 'faild_to_evaluate'
+        desc: 'Manual trigger back if failed to evaluate'
+        prev_node_id: '50447afb4728cc2036cf9cb5'
+        next_node_id: '50447afb4728cc2036cf9cb3'
+        status: 'IDLE'
+      ,
+        id: '50447afb4728cc2036cf9cc7'
+        template_id: '50447afb4728cb2036cf9cc7'
+        name: '(fallback)'
+        key: 'failed_to_vote'
+        desc: 'Manual trigger back if failed to vote'
+        prev_node_id: '50447afb4728cc2036cf9cb6'
+        next_node_id: '50447afb4728cc2036cf9cb4'
+        status: 'IDLE'
+      ,
+        id: '50447afb4728cc2036cf9cc8'
+        template_id: '50447afb4728cb2036cf9cc8'
+        key: 'evaluate_to_post_final'
+        prev_node_id: '50447afb4728cc2036cf9cb5'
+        next_node_id: '50447afb4728cc2036cf9cb7'
+        status: 'IDLE'
+      ,
+        id: '50447afb4728cc2036cf9cc9'
+        template_id: '50447afb4728cb2036cf9cc9'
+        key: 'post_and_vote_to_post_final'
+        prev_node_id: '50447afb4728cc2036cf9cb6'
+        next_node_id: '50447afb4728cc2036cf9cb7'
+        status: 'IDLE'
+      ]
+    ,
       name: 'Dev App'
       key: 'app_dev'
-      desc: ''
+      desc: 'A demo project'
+      status: 'FINISHED'
       start_node_id: 0
       nodes: [
         name: 'Requirement and Desgin'
         key: 'desgin'
         desc: 'Post requirement and collect desgins.'
+        status: 'FINISHED'
         offset:
           x: 120, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Reqirement'
           key: 'post_req'
+          status: 'FINISHED'
           content:
             type: 'PAGE'
             name: 'Design'
@@ -629,6 +1315,7 @@ define 'import_data', ['models'], (models) ->
           type: 'FACEBOOK'
           name: 'Post Requirement to Facebook'
           key: 'post_req_fb'
+          status: 'FINISHED'
           content:
             type: 'FACEBOOK'
             message: '''http://marxosys.ml/#home'''
@@ -640,6 +1327,7 @@ define 'import_data', ['models'], (models) ->
           type: 'WAIT'
           name: 'Wait for Design Submit'
           key: 'wait_for_design'
+          status: 'FINISHED'
           event:
             duration: 15000
         ]
@@ -647,12 +1335,14 @@ define 'import_data', ['models'], (models) ->
         name: 'Vote App Design'
         key: 'vote'
         desc: 'Public vote submitted designs.'
+        status: 'FINISHED'
         offset:
           x: 340, y: 30
         actions: [
           type: 'PAGE'
           name: 'Post Design Vote Form'
           key: 'post_design_vote_form'
+          status: 'FINISHED'
           content:
             type: 'PAGE'
             name: 'Vote'
@@ -680,6 +1370,7 @@ define 'import_data', ['models'], (models) ->
           type: 'FACEBOOK'
           name: 'Post Vote to Facebook'
           key: 'design_vote_fb'
+          status: 'FINISHED'
           content:
             type: 'FACEBOOK'
             message: 'http://marxosys.ml/#list'
@@ -693,6 +1384,7 @@ define 'import_data', ['models'], (models) ->
         key: 'desgin_to_vote'
         prev_node_id: 0
         next_node_id: 1
+        status: 'FINISHED'
       ]
     ]
     notifications: [
@@ -708,3 +1400,22 @@ define 'import_data', ['models'], (models) ->
       level: 'CRITICAL'
       status: 'EXPIRED'
     ]
+  exports = {}
+  for name, list of data
+    name = name.toLowerCase()
+    cap = name.charAt(0).toUpperCase() + name[1..]
+    Collection = models[cap]
+    if Collection
+      col = new Collection
+      col.create r for r in list
+      exports[name] = col
+    else
+      Model = models[cap[...-1]]
+      unless Model
+        console.dir models
+        throw new Error "unknown test data name #{name} (#{cap})" unless models[cap]
+      else for r in list
+        model = new Model r
+        model.save()
+  console.log 'demo data loaded'
+  exports
