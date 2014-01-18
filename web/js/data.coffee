@@ -981,6 +981,7 @@ define 'data', ['models'], (models) ->
             message: 'Demo Project Initialization Page'
             type: 'PAGE'
             status: 'FINISHED'
+            records: [0]
             posted_at: new Date
         ,
           id: '50447afb4728cc2036cf9f01'
@@ -1029,6 +1030,7 @@ define 'data', ['models'], (models) ->
             message: 'Demo Project Post Requirements Page'
             type: 'PAGE'
             status: 'STARTED'
+            posted_at: new Date
         ,
           id: '50447afb4728cc2036cf9ce4'
           name: 'Post to facebook'
@@ -1039,6 +1041,7 @@ define 'data', ['models'], (models) ->
             message: 'Demo Project Post Requirements Facebook Post'
             type: 'FACEBOOK'
             status: 'STARTED'
+            posted_at: new Date
         ,
           id: '50447afb4728cc2036cf9f05'
           name: 'Generate report'
@@ -1307,6 +1310,8 @@ define 'data', ['models'], (models) ->
                 required: false
                 file_accept: 'image/*'
             ]
+            records: [0]
+            posted_at: new Date
           tracking:
             duration: 60000
           event:
@@ -1318,7 +1323,8 @@ define 'data', ['models'], (models) ->
           status: 'FINISHED'
           content:
             type: 'FACEBOOK'
-            message: '''http://marxosys.ml/#home'''
+            message: 'http://marxosys.ml/#home'
+            posted_at: new Date
           tracking:
             duration: 30000
           event:
@@ -1347,6 +1353,7 @@ define 'data', ['models'], (models) ->
             type: 'PAGE'
             name: 'Vote'
             desc: ''
+            posted_at: new Date
             sections: [
               name: 'Vote Design'
               desc: ''
@@ -1374,6 +1381,7 @@ define 'data', ['models'], (models) ->
           content:
             type: 'FACEBOOK'
             message: 'http://marxosys.ml/#list'
+            posted_at: new Date
           tracking:
             duration: 15000
           event:
