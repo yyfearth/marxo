@@ -86,6 +86,12 @@ Action
       @_super_render()
       @
 
+  class WorkflowActionCell extends Backgrid.ActionsCell
+    render: ->
+      super
+      @_hide 'remove' unless @model.get 'tenant_id'
+      @
+
   class WorkflowManagerView extends ManagerView
     columns: [
       'checkbox'
@@ -96,7 +102,12 @@ Action
       'sharing'
       'created_at'
       'updated_at'
-      'actions:workflow'
+    ,
+      name: 'workflow'
+      label: ''
+      editable: false
+      sortable: false
+      cell: WorkflowActionCell
     ]
     collection: new Workflows
     defaultFilterField: 'name'
