@@ -959,6 +959,7 @@ define 'data', ['models'], (models) ->
       key: 'demo_prj'
       desc: 'Demo Project from Demo Workflow'
       status: 'STARTED'
+      start_node_id: '50447afb4728cc2036cf9cb0'
       current_node_ids: [
         '50447afb4728cc2036cf9cb3'
         '50447afb4728cc2036cf9cb6'
