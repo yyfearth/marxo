@@ -194,7 +194,7 @@ define 'models', ['module', 'lib/common'], (module) ->
 
       # start node
       if nodes.length
-        start_node_id = attr.start_node?.id or attr.start_node_id
+        start_node_id = attr.start_node?.id ? attr.start_node_id
         unless start_node_id?
           @startNode = null
         else unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
@@ -212,7 +212,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       @set {}
 
       return
-    fetch: (options = {}) -> # override for warp
+    fetch: (options = {}) -> # override for wire
       _success = options.success?.bind @
       options.success = (model, response, options) ->
         model._wire()
@@ -326,35 +326,40 @@ define 'models', ['module', 'lib/common'], (module) ->
       @
     _save: Entity::save
     save: (attributes = {}, options = {}) -> # local
+      wf_id = attributes.id = Entity.oid() if @isNew()
+      t_id = attributes.tenant_id ? @get 'tenant_id'
       contents = []
       _getAttr = (r, i) ->
         attr = r.attributes
         attr.id ?= i.toString()
+        attr.tenant_id ?= t_id if t_id?
         if attr.actions?.length then for action, i in attr.actions
           action_id = action.id ?= i.toString()
-          action.tracking?.name or= action.name + ' (Tracking)'
+          attr.tenant_id ?= t_id if t_id?
+          if action.tracking?
+            action.tracking.is_tracking = true
+            action.tracking.name or= action.name + ' (Tracking)'
           for n in ['content', 'event', 'tracking']
             o = action[n]
             if o?
               o.id ?= Entity.oid()
               o.name or= action.name
+              o.action_id ?= action_id
+              o.node_id ?= attr.id
+              o.workflow_id ?= wf_id
+              o.tenant_id ?= t_id if t_id?
           c = action.content
           if c?
-            c.node_id = attr.id
-            c.action_id = action_id
             contents.push c
             action.content_id = c.id
             delete action.content
+            # TODO: read and save content from action
+            new Content(c).save()
         attr
       if @nodes? then attributes.nodes = @nodes.map _getAttr
       if @links? then attributes.links = @links.map _getAttr
       console.log 'save local', @_name, attributes
-      ret = super attributes, options
-      setTimeout =>
-        wf_id = @id
-        new Contents(contents).forEach (c) -> c.save workflow_id: wf_id
-      , 10
-      ret
+      super attributes, options
     destroy: (options) ->
       @nodes.forEach (node) ->
         actions = node.attributes.actions
@@ -514,7 +519,7 @@ define 'models', ['module', 'lib/common'], (module) ->
 
   # Workflow/Project Sub-entities
 
-  class ChangeObserableEntity extends StatusEntity
+  class WorkflowChildEntity extends StatusEntity
     constructor: (model, options) ->
       super model, options
       @setChangeFlag = @setChangeFlag.bind @
@@ -536,23 +541,37 @@ define 'models', ['module', 'lib/common'], (module) ->
       super options
       @destroy = -> @ # call once
       @
+    save: (attributes = {}, options = {}) -> # local
+      if @workflow
+        @set attributes, options
+        @workflow.save()
+      else
+        super attributes, options
 
-  class Node extends ChangeObserableEntity
+  class Node extends WorkflowChildEntity
     _name: 'node'
     urlRoot: ROOT + '/nodes'
     name: -> @get 'name'
-    actions: -> @_actions ?= new Actions @get 'actions'
+    actions: ->
+      actions = @_actions ?= new Actions @get 'actions'
+      action.node = @ for action in actions.models
+      actions
 
-  class Nodes extends SimpleCollection
+  class WorkflowChildCollection extends SimpleCollection
+    create: (attributes = {}, options) ->
+      attributes.id ?= Entity.oid()
+      @set attributes, options
+
+  class Nodes extends WorkflowChildCollection
     model: Node
     url: Node::urlRoot
 
-  class Link extends ChangeObserableEntity
+  class Link extends WorkflowChildEntity
     _name: 'link'
     urlRoot: ROOT + '/links'
     name: -> @get('name') or @get('desc') or @get('key')
 
-  class Links extends SimpleCollection
+  class Links extends WorkflowChildCollection
     model: Link
     url: Link::urlRoot
 
@@ -658,6 +677,18 @@ define 'models', ['module', 'lib/common'], (module) ->
     isEmpty: ->
       attr = @attributes
       Boolean attr.duration or attr.starts or attr.ends
+    save: (attributes = {}, options = {}) -> # local
+      action = @action
+      if action?.node?
+        console.warn @attributes, attributes, options
+        @set attributes, options
+        console.warn @attributes
+        name = if @get 'is_tracking' then 'tracking' else 'event'
+        action.set name, @toJSON()
+        action.node.save()
+      else
+        throw new Exception 'this event is not wired to action'
+        #super attributes, options
 
   class Events extends ManagerCollection
     model: Event
