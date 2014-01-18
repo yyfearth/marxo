@@ -122,7 +122,7 @@ Action
       @listenTo @collection, 'add', (model) =>
         Workflows.workflows.add model
         @refresh()
-      @listenTo @collection, 'remove', (model) =>
+      @listenTo @collection, 'remove', (model) ->
         Workflows.workflows.remove model
       @
     create: (template_id) ->

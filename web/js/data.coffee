@@ -390,7 +390,8 @@ define 'data', ['models'], (models) ->
                 file_accept: 'image/*'
             ,
               name: 'Upload Attachment'
-              desc: 'Any attachment if you want to provide. If you have multiple attachments, you can compress them into a ZIP/RAR/7Z package to upload.'
+              desc: '''Any attachment if you want to provide.
+              If you have multiple attachments, you can compress them into a ZIP/RAR/7Z package before upload.'''
               type: 'FILE'
               options:
                 required: false

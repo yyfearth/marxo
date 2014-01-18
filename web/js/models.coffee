@@ -376,7 +376,7 @@ define 'models', ['module', 'lib/common'], (module) ->
         return
       super options
     find: ({nodeId, linkId, actionId, callback}) ->
-      _cb = (wf) =>
+      _cb = (wf) ->
         if linkId?
           link = wf.links.get linkId
         else if nodeId?

@@ -292,7 +292,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, Tenant, User}) ->
       @route '', 'home', =>
         @navigate 'home', replace: true
         @show 'home'
-      @route 'signin', 'signin', => return
+      @route 'signin', 'signin', -> return
 
       @frames = {}
       for frameMenu in findAll '[data-frame]', find '#navbar'
