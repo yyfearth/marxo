@@ -27,27 +27,35 @@ requirejs.config
 define 'main', ['lib/backbone.localstorage', 'console'],
 (ignored, {findAll, ConsoleView, SignInView, Router}) -> # EP
 
-  test_data_ver = 20
+  EP = ->
+    if localStorage.no_transition
+      cls = document.body.classList
+      cls.remove 'fade'
+      cls.add 'no-transition'
+      el.classList.remove 'fade' for el in findAll '.fade'
+
+    window.app =
+      console: ConsoleView.get()
+      signin: SignInView.get()
+      router: Router.get()
+
+    Backbone.history.start()
+
+    document.title = document.title.replace /^.*?(?=MARXO)/i, ''
+    document.body.style.opacity = 1
+    return
+
+  # DEMO DATA VERSION
+  demo_data_ver = 1
 
   # auto load test data
-  window.load_test_data = -> require ['data'], -> localStorage._test_data_loaded = test_data_ver
-  cur_ver = Number localStorage._test_data_loaded or 0
-  load_test_data() if cur_ver < test_data_ver
-
-  if localStorage.no_transition
-    cls = document.body.classList
-    cls.remove 'fade'
-    cls.add 'no-transition'
-    el.classList.remove 'fade' for el in findAll '.fade'
-
-  window.app =
-    console: ConsoleView.get()
-    signin: SignInView.get()
-    router: Router.get()
-
-  Backbone.history.start()
-
-  document.title = document.title.replace /^.*?(?=MARXO)/i, ''
-  document.body.style.opacity = 1
+  load_demo_data = window.load_demo_data = (callback) ->
+    localStorage.clear()
+    require ['data'], ->
+      localStorage._demo_data_loaded = demo_data_ver
+      callback?()
+    return
+  cur_ver = Number localStorage._demo_data_loaded or 0
+  if demo_data_ver <= cur_ver then EP() else load_demo_data EP
 
   return
