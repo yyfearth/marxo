@@ -11,13 +11,13 @@
 define('lib/backbone.localstorage', ['lib/common'], function () {
 
 // Generate four random hex digits.
-	function S4() {
+	function s4() {
 		return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
 	}
 
 // Generate a pseudo-object-id by concatenating random hexadecimal.
 	function oid() {
-		return S4() + S4() + S4() + S4() + S4() + S4();
+		return s4() + s4() + s4() + s4() + s4() + s4();
 	}
 
 // Our Store is represented by a single JS object in *localStorage*. Create it
@@ -31,7 +31,7 @@ define('lib/backbone.localstorage', ['lib/common'], function () {
 		this.records = (store && store.split(',')) || [];
 	};
 
-	var separator = '/'
+	var separator = '/';
 
 	_.extend(Backbone.LocalStorage.prototype, {
 
@@ -47,8 +47,7 @@ define('lib/backbone.localstorage', ['lib/common'], function () {
 				model.id = oid();
 				model.set(model.idAttribute, model.id);
 			}
-			model.set({created_at: new Date(), updated_at: new Date()});
-			this.localStorage().setItem(this.name + separator + model.id, JSON.stringify(model));
+			this.localStorage().setItem(this.name + separator + model.id, JSON.stringify(model.toJSON()));
 			this.records.push(model.id.toString());
 			this.save();
 			return this.find(model);
@@ -56,10 +55,9 @@ define('lib/backbone.localstorage', ['lib/common'], function () {
 
 		// Update a model by replacing its copy in `this.data`.
 		update: function (model) {
-			this.localStorage().setItem(this.name + separator + model.id, JSON.stringify(model));
+			this.localStorage().setItem(this.name + separator + model.id, JSON.stringify(model.toJSON()));
 			if (!_.include(this.records, model.id.toString()))
 				this.records.push(model.id.toString());
-			model.set('updated_at', new Date());
 			this.save();
 			return this.find(model);
 		},
