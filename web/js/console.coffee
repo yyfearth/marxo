@@ -161,7 +161,7 @@ define 'console', ['base'], ({find, findAll, View, FrameView, ModalDialogView, T
     initialize: (options) ->
       super options
       @form = find 'form', @el
-      remember = @form.remember.checked = localStorage.marxo_sign_in_remember is 'true'
+      remember = @form.remember.checked or= localStorage.marxo_sign_in_remember is 'true'
       @form.email.value = localStorage.marxo_sign_in_email if remember
       # auto sign in
       console = ConsoleView.get()
