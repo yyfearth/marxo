@@ -63,7 +63,7 @@ Event
       @
     load: (id) ->
       _load = (event) =>
-        @editor.popup event.toJSON(), (action, data) =>
+        @editor.popup event.toJSON(), (action, data) ->
           event.save data if action is 'save'
 
       if id instanceof Event

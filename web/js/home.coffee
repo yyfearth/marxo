@@ -38,7 +38,7 @@ NotificationListView
       @on 'activate', =>
         @render()
         _auto_update true
-      @on 'deactivate', =>
+      @on 'deactivate', ->
         _auto_update false
       return
     _render: ->

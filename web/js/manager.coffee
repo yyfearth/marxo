@@ -171,7 +171,7 @@ findProjectOrWorkflow
       formattedValue = @formatter.fromRaw rawValue
       # console.log rawValue, formattedValue
       if val = rawValue or formattedValue
-        val = val.toLowerCase()
+        val = val.toLowerCase() if val.toLowerCase?
         labelCls = 'label capitalized '
         if val isnt 'none' and @column.has 'cls'
           cls = @column.get 'cls'

@@ -775,7 +775,7 @@ Projects
         @collection.add model
         @refresh()
         return
-      @listenTo @collection, 'remove', (model) =>
+      @listenTo @collection, 'remove', (model) ->
         projects.remove model
         return
       @

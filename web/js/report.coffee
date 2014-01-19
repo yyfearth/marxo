@@ -192,7 +192,7 @@ define 'report', ['base', 'models'], ({ROOT, find, tpl, fill, ModalDialogView}, 
       console.warn $el[0]
       unless submissions?.length
         $el.html '<div class="text-center"><em class="muted">No submission yet</em></div>'
-      else @_loadRefSubmissions sections, =>
+      else @_loadRefSubmissions sections, ->
         cols = []
         $thead = $('<tr>').append '<th>#</th>'
         for section, i in sections
