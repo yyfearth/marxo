@@ -96,6 +96,8 @@ define 'models', ['module', 'lib/common'], (module) ->
       super method, model, options
 
   class StatusEntity extends Entity
+    defaults:
+      status: 'IDLE'
     status: (val, options = {}) ->
       if val?.lowercase?
         options = val
@@ -222,7 +224,7 @@ define 'models', ['module', 'lib/common'], (module) ->
 
       # start node
       if nodes.length
-        start_node_id = attr.start_node?.id or attr.start_node_id
+        start_node_id = attr.start_node?.id ? attr.start_node_id
         unless start_node_id?
           @startNode = null
         else unless @startNode = nodes[if typeof start_node_id is 'number' then 'at' else 'get'] start_node_id
@@ -240,7 +242,7 @@ define 'models', ['module', 'lib/common'], (module) ->
       @set {}
 
       return
-    fetch: (options = {}) -> # override for warp
+    fetch: (options = {}) -> # override for wire
       _success = options.success?.bind @
       options.success = (model, response, options) ->
         model._wire()
@@ -438,10 +440,10 @@ define 'models', ['module', 'lib/common'], (module) ->
       @unset 'links', silent: true
       super attributes, options
     find: ({nodeId, linkId, actionId, callback}) ->
-      _cb = (wf) =>
-        if linkId
+      _cb = (wf) ->
+        if linkId?
           link = wf.links.get linkId
-        else if nodeId
+        else if nodeId?
           node = wf.nodes.get nodeId
           action = node.actions().get actionId if node and actionId
         else if actionId # only action id
@@ -529,11 +531,11 @@ define 'models', ['module', 'lib/common'], (module) ->
     url: Workflow::urlRoot
     _expires: 600000 # 10 min
     find: ({workflowId, nodeId, linkId, actionId, callback, fetch}) ->
-      throw new Error 'workflowId is required' unless workflowId
+      throw new Error 'workflowId is required' unless workflowId?
       throw new Error 'async callback is required' unless typeof callback is 'function'
 
       _find = (workflow) ->
-        if nodeId or linkId or actionId
+        if nodeId? or linkId? or actionId?
           workflow.find {
             nodeId, linkId, actionId
             callback: (results) ->
@@ -562,6 +564,8 @@ define 'models', ['module', 'lib/common'], (module) ->
   class Project extends Workflow
     _name: 'project'
     urlRoot: ROOT + '/projects'
+    defaults:
+      is_project: true
 
   class Projects extends Workflows
     @projects: new Projects
@@ -623,7 +627,10 @@ define 'models', ['module', 'lib/common'], (module) ->
     _name: 'node'
     urlRoot: ROOT + '/nodes'
     name: -> @get 'name'
-    actions: -> @_actions ?= new Actions @get 'actions'
+    actions: ->
+      actions = @_actions ?= new Actions @get 'actions'
+      action.node = @ for action in actions.models
+      actions
 
   class Nodes extends SimpleCollection
     model: Node
