@@ -29,13 +29,13 @@ Notifications
   class NotificationActionCell extends Backgrid.ActionsCell
     render: ->
       super
-      # TODO: gen target url
-      #model = @model
-      #btn = @_find 'process', 'a'
-      #if model.has 'target_url'
-      #  btn?.href = model.get 'target_url'
-      #else
-      @_hide btn
+      # model = @model
+      # btn = @_find 'process', 'a'
+      # if model.has 'target_url'
+      #   btn?.href = model.get 'target_url'
+      # else
+      # @_hide btn
+      @_hide 'process'
       @
 
   class NotificationCenterView extends ManagerView
@@ -97,10 +97,9 @@ Notifications
     initialize: (options) ->
       super options
       collection = @collection.fullCollection
-      # TODO: need update or replaced by level
-      @statusFilter = new NavFilterView
-        el: find('.status-filter', @el)
-        field: 'status'
+      @levelFilter = new NavFilterView
+        el: find('.level-filter', @el)
+        field: 'level'
         collection: collection
       @projectFilter = new ProjectFilterView
         el: find('ul.project-list', @el)
@@ -193,16 +192,6 @@ Notifications
             model._before < 86400000 # 1d
           else
             model._before < 2592000000 # 30d
-      #_.sortBy(col, (model) ->
-      #  t = model._before
-      #  switch model.get 'level'
-      #    when 'EMERGENT'
-      #      t
-      #    when 'REQUISITE'
-      #      10000000000 + t
-      #    else
-      #      20000000000 + t
-      #)
       col.forEach (model) => fragments.appendChild @_renderItem model
       @el.appendChild fragments
     _levelCls:
